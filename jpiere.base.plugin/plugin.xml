@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="jpiere.base.plugin.factory.JPiereBasePluginTaxProviderFactory"
+         point="org.adempiere.model.ITaxProvider">
+   </extension>
+
+</plugin>

@@ -1,4 +1,4 @@
-package jpiere.base.plugin.Factory;
+package jpiere.base.plugin.factory;
 
 import java.util.logging.Level;
 

@@ -14,4 +14,5 @@ Bundle-Activator: org.adempiere.plugin.utils.AdempiereActivator
 Bundle-Vendor: OSS ERP Solutions
 Import-Package: org.compiere.apps.form,
  org.compiere.minigrid
-Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml
+Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml,
+ OSGI-INF/JPiereBasePluginTaxProviderFactory.xml
