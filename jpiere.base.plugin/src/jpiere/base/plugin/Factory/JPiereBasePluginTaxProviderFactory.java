@@ -35,7 +35,7 @@ public class JPiereBasePluginTaxProviderFactory implements ITaxProviderFactory {
 	@Override
 	public ITaxProvider newTaxProviderInstance(String className) {
 
-		if(className.equals("jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider")){
+		if(className.startsWith("jpiere.base.plugin")){
 
 
 			ITaxProvider myCalculator = EquinoxExtensionLocator.instance().locate(ITaxProvider.class, className, null).getExtension();

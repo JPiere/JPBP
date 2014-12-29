@@ -14,7 +14,7 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 	@Override
 	public ADForm newFormInstance(String formName) {
 		Object form = null;
-	     if (formName.startsWith("jpiere.base.plugin.webui.apps.form")) {
+	     if (formName.startsWith("jpiere.base.plugin")) {
 	           ClassLoader cl = getClass().getClassLoader();
 	           Class<?> clazz = null;
 
