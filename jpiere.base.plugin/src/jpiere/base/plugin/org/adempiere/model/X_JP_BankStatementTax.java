@@ -32,7 +32,7 @@ public class X_JP_BankStatementTax extends PO implements I_JP_BankStatementTax, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20141229L;
+	private static final long serialVersionUID = 20141230L;
 
     /** Standard Constructor */
     public X_JP_BankStatementTax (Properties ctx, int JP_BankStatementTax_ID, String trxName)

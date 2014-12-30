@@ -5,5 +5,12 @@
          id="jpiere.base.plugin.factory.JPiereBasePluginTaxProviderFactory"
          point="org.adempiere.model.ITaxProvider">
    </extension>
+   <extension
+         id="jpiere.base.plugin.org.adempiere.process.DunsNoCopyInfoWindow"
+         point="org.adempiere.base.Process">
+         <process
+			class="jpiere.base.plugin.org.adempiere.process.DunsNoCopyInfoWindow">
+		</process>
+   </extension>
 
 </plugin>
