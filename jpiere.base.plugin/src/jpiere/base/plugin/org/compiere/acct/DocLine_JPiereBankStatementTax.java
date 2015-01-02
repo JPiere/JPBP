@@ -1,7 +1,16 @@
 /******************************************************************************
- * Product: JPiere Plugin Bank Statement Tax
- * Copyright (C) 2014 Hideaki Hagiwara(OSS ERP Solutions)
+ * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
+ * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
+ * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
+ * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
+ * いかなる保証もしていません。                                               *
+ * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
+ * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
+ * 提供しています。サポートをご希望の際には、                                 *
+ * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
+ * http://www.oss-erp.co.jp/                                                  *
  *****************************************************************************/
+
 package jpiere.base.plugin.org.compiere.acct;
 
 import java.math.BigDecimal;
@@ -14,8 +23,10 @@ import org.compiere.util.Env;
 
 /**
  *  Bank Statement Line
- *
- *  @author Hideaki Hagiwara
+ *  このプログラムはDocLine.javaをもとに作成しています。
+ *  @author Jorg Janke
+ *  @author Armen Rizal, Goodwill Consulting
+ *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: Doc_JPiereBankStatementTax.java,v 1.0 2014/08/20
  */
 public class DocLine_JPiereBankStatementTax extends DocLine

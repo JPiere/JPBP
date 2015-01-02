@@ -1,15 +1,14 @@
 /******************************************************************************
- * Copyright (C) 2013 Elaine Tan                                              *
- * Copyright (C) 2013 Trek Global
- * This program is free software; you can redistribute it and/or modify it    *
- * under the terms version 2 of the GNU General Public License as published   *
- * by the Free Software Foundation. This program is distributed in the hope   *
- * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
- * See the GNU General Public License for more details.                       *
- * You should have received a copy of the GNU General Public License along    *
- * with this program; if not, write to the Free Software Foundation, Inc.,    *
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
+ * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
+ * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
+ * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
+ * いかなる保証もしていません。                                               *
+ * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
+ * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
+ * 提供しています。サポートをご希望の際には、                                 *
+ * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
+ * http://www.oss-erp.co.jp/                                                  *
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.model;
 
@@ -48,7 +47,7 @@ import org.compiere.util.Msg;
 /**
  * JPiere Tax Provider
  *
- *  @author Hideaki Hagiwara
+ *  @author  Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: JPiereTaxProvider.java,v 1.0 2014/08/20
  *
  */

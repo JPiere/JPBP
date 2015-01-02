@@ -1,6 +1,14 @@
 /******************************************************************************
- * Product: JPiere Plugin Bank Statement Tax
- * Copyright (C) 2014 Hideaki Hagiwara(OSS ERP Solutions)
+ * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
+ * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
+ * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
+ * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
+ * いかなる保証もしていません。                                               *
+ * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
+ * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
+ * 提供しています。サポートをご希望の際には、                                 *
+ * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
+ * http://www.oss-erp.co.jp/                                                  *
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
@@ -21,7 +29,7 @@ import org.compiere.util.Env;
 /**
  *  JPiere Bank Statement Tax Model Validator
  *
- *  @author Hideaki Hagiwara
+ *  @author  Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: JPiereBankStatementTaxModelValidator.java,v 1.0 2014/08/20
  *
  */
