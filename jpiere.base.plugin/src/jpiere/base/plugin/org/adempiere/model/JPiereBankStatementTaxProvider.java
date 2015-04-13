@@ -237,11 +237,11 @@ public class JPiereBankStatementTaxProvider {
 				s_cache.put (key, bp);
 
 			if(isSOTrx){
-				Object SO_TaxRounding = bp.get_Value("SO_TaxRounding");
+				Object SO_TaxRounding = bp.get_Value("JP_SOTaxRounding");
 				if(SO_TaxRounding != null)
 					roundingMode = RoundingMode.valueOf(new Integer(SO_TaxRounding.toString()).intValue());
 			}else{
-				Object PO_TaxRounding = bp.get_Value("PO_TaxRounding");
+				Object PO_TaxRounding = bp.get_Value("JP_POTaxRounding");
 				if(PO_TaxRounding != null)
 					roundingMode = RoundingMode.valueOf(new Integer(PO_TaxRounding.toString()).intValue());
 			}
