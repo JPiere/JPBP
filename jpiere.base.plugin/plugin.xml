@@ -33,5 +33,12 @@
 			class="jpiere.base.plugin.org.adempiere.process.WFActivityUserBulkUpdate">
 		</process>
    </extension>
+   <extension
+         id="jpiere.base.plugin.org.adempiere.process.InvoiceCorpSummary"
+         point="org.adempiere.base.Process">
+        <process
+			class="jpiere.base.plugin.org.adempiere.process.InvoiceCorpSummary">
+		</process>
+   </extension>
 
 </plugin>
