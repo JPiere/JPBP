@@ -83,7 +83,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 		String className = null;
 
 		if(AD_Table_ID == MBankStatement.Table_ID){//392
-			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPiereBankStatementTax";
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_BankStatementJP";
 		}else {
 			return null;
 		}

@@ -29,14 +29,14 @@ import org.compiere.util.Env;
  *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: Doc_JPiereBankStatementTax.java,v 1.0 2014/08/20
  */
-public class DocLine_JPiereBankStatementTax extends DocLine
+public class DocLine_BankStatementJP extends DocLine
 {
 	/**
 	 *  Constructor
 	 *  @param line statement line
 	 *  @param doc header
 	 */
-	public DocLine_JPiereBankStatementTax (MBankStatementLine line, Doc_JPiereBankStatementTax doc)
+	public DocLine_BankStatementJP (MBankStatementLine line, Doc_BankStatementJP doc)
 	{
 		super (line, doc);
 		m_C_Payment_ID = line.getC_Payment_ID();

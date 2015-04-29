@@ -46,7 +46,7 @@ import org.compiere.util.Env;
  *
  *
  */
-public class Doc_JPiereBankStatementTax extends Doc
+public class Doc_BankStatementJP extends Doc
 {
 	/**
 	 *  Constructor
@@ -54,7 +54,7 @@ public class Doc_JPiereBankStatementTax extends Doc
 	 * 	@param rs record
 	 * 	@param trxName trx
 	 */
-	public Doc_JPiereBankStatementTax (MAcctSchema as, ResultSet rs, String trxName)
+	public Doc_BankStatementJP (MAcctSchema as, ResultSet rs, String trxName)
 	{
 		super (as, MBankStatement.class, rs, DOCTYPE_BankStatement, trxName);
 	}	//	Doc_Bank
@@ -103,17 +103,17 @@ public class Doc_JPiereBankStatementTax extends Doc
 	 */
 	private DocLine[] loadLines(MBankStatement bs)
 	{
-		ArrayList<DocLine_JPiereBankStatementTax> list = new ArrayList<DocLine_JPiereBankStatementTax>();
+		ArrayList<DocLine_BankStatementJP> list = new ArrayList<DocLine_BankStatementJP>();
 		MBankStatementLine[] lines = bs.getLines(false);
 		for (int i = 0; i < lines.length; i++)
 		{
 			MBankStatementLine line = lines[i];
-			DocLine_JPiereBankStatementTax docLine = new DocLine_JPiereBankStatementTax(line, this);
+			DocLine_BankStatementJP docLine = new DocLine_BankStatementJP(line, this);
 			list.add(docLine);
 		}
 
 		//	Return Array
-		DocLine_JPiereBankStatementTax[] dls = new DocLine_JPiereBankStatementTax[list.size()];
+		DocLine_BankStatementJP[] dls = new DocLine_BankStatementJP[list.size()];
 		list.toArray(dls);
 		return dls;
 	}	//	loadLines
@@ -151,7 +151,7 @@ public class Doc_JPiereBankStatementTax extends Doc
 				list.add(docTax);
 
 				for(int i = 0; i < p_lines.length; i++){
-					DocLine_JPiereBankStatementTax docLine = (DocLine_JPiereBankStatementTax)p_lines[i];
+					DocLine_BankStatementJP docLine = (DocLine_BankStatementJP)p_lines[i];
 					if(docLine.get_ID() == C_BankStatementLine_ID){
 						docLine.setDocTax(docTax);
 						docLine.setTaxBaseAmt(taxBaseAmt);
@@ -192,7 +192,7 @@ public class Doc_JPiereBankStatementTax extends Doc
 		//  - Lines
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			BigDecimal lineBalance = ((DocLine_JPiereBankStatementTax)p_lines[i]).getStmtAmt();
+			BigDecimal lineBalance = ((DocLine_BankStatementJP)p_lines[i]).getStmtAmt();
 			retValue = retValue.subtract(lineBalance);
 			sb.append("-").append(lineBalance);
 		}
@@ -225,7 +225,7 @@ public class Doc_JPiereBankStatementTax extends Doc
 		//  Lines
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			DocLine_JPiereBankStatementTax line = (DocLine_JPiereBankStatementTax)p_lines[i];
+			DocLine_BankStatementJP line = (DocLine_BankStatementJP)p_lines[i];
 			int C_BPartner_ID = line.getC_BPartner_ID();
 
 			// Avoid usage of clearing accounts
