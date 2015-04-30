@@ -12,10 +12,12 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  org.zkoss.zk.library;bundle-version="6.0.0"
 Bundle-Activator: org.adempiere.plugin.utils.AdempiereActivator
 Bundle-Vendor: OSS ERP Solutions
-Import-Package: org.compiere.apps.form,
+Import-Package: org.compiere.apps,
+ org.compiere.apps.form,
+ org.compiere.grid,
  org.compiere.minigrid
-Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml,OSGI-INF/JPiereBasePluginTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginModelValidatorFactory.xml,OSGI-INF/JPiereBasePluginDocFactory.xml,OSGI-INF/JPiereBasePluginModelFactory.xml,OSGI-INF/JPiereBasePluginEditorFactory.xml,
- OSGI-INF/JPiereBasePluginDisplayTypeFactory.xml
+Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml,OSGI-INF/JPiereBasePluginTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginModelValidatorFactory.xml,OSGI-INF/JPiereBasePluginDocFactory.xml,OSGI-INF/JPiereBasePluginModelFactory.xml,OSGI-INF/JPiereBasePluginEditorFactory.xml,OSGI-INF/JPiereBasePluginDisplayTypeFactory.xml,
+ OSGI-INF/JPiereBasePluginCreateFromFactory.xml
 Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
  jpiere.base.plugin.org.adempiere.model,
