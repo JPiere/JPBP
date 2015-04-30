@@ -10,7 +10,9 @@
  * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
  * http://www.oss-erp.co.jp/                                                  *
  *****************************************************************************/
-package jpiere.base.plugin.webui.apps.form;
+package jpiere.base.plugin.factory;
+
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromStatementUI;
 
 import org.compiere.grid.ICreateFrom;
 import org.compiere.grid.ICreateFromFactory;
@@ -23,7 +25,7 @@ import org.compiere.model.I_C_BankStatement;
  * @author Hideaki Hagiwara
  *
  */
-public class JPiereCreateFromFactory implements ICreateFromFactory
+public class JPiereBasePluginCreateFromFactory implements ICreateFromFactory
 {
 
 	@Override

@@ -12,6 +12,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import org.compiere.model.MBankAccount;
 import org.compiere.model.MClient;
 import org.compiere.model.MPayment;
 import org.compiere.model.ModelValidationEngine;
@@ -40,7 +41,7 @@ public class JPierePaymentModelValidator implements ModelValidator {
 	public void initialize(ModelValidationEngine engine, MClient client) {
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
-//		engine.addModelChange(MPayment.Table_Name, this);
+		engine.addModelChange(MPayment.Table_Name, this);
 		engine.addDocValidate(MPayment.Table_Name, this);
 
 	}
@@ -62,6 +63,24 @@ public class JPierePaymentModelValidator implements ModelValidator {
 
 	@Override
 	public String modelChange(PO po, int type) throws Exception {
+
+		//JPIERE-0087
+		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
+		{
+
+			MPayment payment = (MPayment)po;
+			MBankAccount ba = MBankAccount.get(payment.getCtx(), payment.getC_BankAccount_ID());
+			if(payment.getAD_Org_ID() != ba.getAD_Org_ID())
+			{
+				return "アカウントに設定されている組織と伝票の組織が異なります。";//TODO 多言語化
+			}
+
+			if(payment.getC_Currency_ID() != ba.getC_Currency_ID())
+			{
+				return "アカウントに設定されている通貨と伝票の通貨が異なります。";//TODO 多言語化
+			}
+
+		}
 
 		return null;
 	}

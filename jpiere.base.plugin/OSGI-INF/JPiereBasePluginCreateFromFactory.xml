@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="jpiere.base.plugin.CreateFrom.Factory">
-   <implementation class="jpiere.base.plugin.webui.apps.form.JPiereCreateFromFactory"/>
+   <implementation class="jpiere.base.plugin.factory.JPiereBasePluginCreateFromFactory"/>
    <property name="service.ranking" type="Integer" value="1"/>
    <service>
       <provide interface="org.compiere.grid.ICreateFromFactory"/>
