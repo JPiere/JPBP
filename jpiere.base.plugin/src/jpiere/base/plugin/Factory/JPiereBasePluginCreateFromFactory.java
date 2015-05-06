@@ -20,8 +20,6 @@ import org.compiere.model.GridTab;
 import org.compiere.model.I_C_BankStatement;
 
 /**
- *
- * @author Elaine
  * @author Hideaki Hagiwara
  *
  */
