@@ -118,4 +118,12 @@ public class MCorporation extends X_JP_Corporation {
 		return super.beforeSave(newRecord);
 	}
 
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success) {
+		// TODO 自動生成されたメソッド・スタブ
+		return super.afterSave(newRecord, success);
+	}
+
+
+
 }
