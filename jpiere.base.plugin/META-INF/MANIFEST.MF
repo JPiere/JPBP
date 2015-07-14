@@ -22,5 +22,6 @@ Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
  jpiere.base.plugin.org.adempiere.model,
  jpiere.base.plugin.org.adempiere.process,
+ jpiere.base.plugin.org.adempiere.webui.editor,
  jpiere.base.plugin.org.compiere.acct,
  jpiere.base.plugin.webui.apps.form
