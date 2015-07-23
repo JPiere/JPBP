@@ -1,0 +1,39 @@
+CREATE TABLE adempiere.JP_BillLine
+(
+  JP_BillLine_ID numeric(10,0) NOT NULL,
+  JP_BillLine_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  JP_Bill_ID numeric(10,0) NOT NULL,
+  AD_OrgTrx_ID numeric(10,0),
+  Line numeric(10,0) NOT NULL,
+  C_Invoice_ID numeric(10,0) NOT NULL,
+  Description character varying(255),
+
+  C_DocType_ID numeric(10,0) ,
+  DateInvoiced timestamp without time zone ,
+  DateAcct timestamp without time zone,
+  C_BPartner_ID  numeric(10,0) ,
+  C_BPartner_Location_ID numeric(10,0) ,
+  AD_User_ID numeric(10,0),
+  M_PriceList_ID  numeric(10,0) ,
+  SalesRep_ID numeric(10,0),
+  PaymentRule character(1),
+  C_PaymentTerm_ID numeric(10,0),
+  C_Currency_ID numeric(10,0),
+
+  TotalLines numeric NOT NULL DEFAULT 0,
+  GrandTotal numeric NOT NULL DEFAULT 0,
+  TaxBaseAmt numeric NOT NULL DEFAULT 0,
+  TaxAmt numeric NOT NULL DEFAULT 0,
+  PayAmt numeric NOT NULL DEFAULT 0,
+  OverUnderAmt numeric NOT NULL DEFAULT 0,
+
+  CONSTRAINT JP_BillLine_pkey PRIMARY KEY (JP_BillLine_ID)
+)

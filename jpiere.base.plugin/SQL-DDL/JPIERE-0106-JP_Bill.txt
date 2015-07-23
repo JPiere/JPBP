@@ -1,0 +1,54 @@
+CREATE TABLE adempiere.JP_Bill
+(
+  JP_Bill_ID numeric(10,0) NOT NULL,
+  JP_Bill_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  DocumentNo character varying(30) NOT NULL,
+  DocStatus character(2) NOT NULL,
+  DocAction character(2) NOT NULL,
+  Processing character(1),
+  Processed character(1) NOT NULL DEFAULT 'N'::bpchar,
+  Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+  IsApproved character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  ProcessedOn numeric,
+
+  AD_OrgTrx_ID numeric(10,0),
+  C_DocType_ID numeric(10,0) NOT NULL,
+  JPDateBilled timestamp without time zone NOT NULL,
+  SalesRep_ID numeric(10,0),
+  C_BPartner_ID  numeric(10,0) NOT NULL,
+  C_BPartner_Location_ID numeric(10,0) NOT NULL,
+  AD_User_ID numeric(10,0),
+  PaymentRule character(1) NOT NULL,
+  C_PaymentTerm_ID numeric(10,0) NOT NULL,
+  C_Currency_ID numeric(10,0) NOT NULL,
+  Description character varying(255),
+
+  JP_LastBill_ID numeric(10,0),
+  JPLastBillAmt numeric NOT NULL DEFAULT 0,
+  C_Payment_ID numeric(10,0),
+  JPLastPayAmt numeric NOT NULL DEFAULT 0,
+  JPCarriedForwardAmt numeric NOT NULL DEFAULT 0,
+
+  TotalLines numeric NOT NULL DEFAULT 0,
+  GrandTotal numeric NOT NULL DEFAULT 0,
+  TaxBaseAmt numeric NOT NULL DEFAULT 0,
+  TaxAmt numeric NOT NULL DEFAULT 0,
+  PayAmt numeric NOT NULL DEFAULT 0,
+  OverUnderAmt numeric NOT NULL DEFAULT 0,
+  JPBillAmt numeric NOT NULL DEFAULT 0,
+
+  JPDateSent timestamp without time zone,
+  JP_User_ID numeric(10,0),
+
+  IsSOTrx character(1) NOT NULL DEFAULT 'Y'::bpchar,
+
+  CONSTRAINT JP_Bill_pkey PRIMARY KEY (JP_Bill_ID)
+)
