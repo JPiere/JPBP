@@ -1,14 +1,15 @@
 /******************************************************************************
- * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
- * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
- * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
- * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
- * いかなる保証もしていません。                                               *
- * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
- * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
- * 提供しています。サポートをご希望の際には、                                 *
- * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
- * http://www.oss-erp.co.jp/                                                  *
+ * Product: JPiere(Japan + iDempiere)                                         *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere supported by OSS ERP Solutions Co., Ltd.                            *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 
 package jpiere.base.plugin.org.adempiere.model;
@@ -24,6 +25,14 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+/**
+ *	MBillLine
+ *
+ *	JPIERE-0106:JPBP:Bill
+ *
+ *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
+ */
+
 public class MBillLine extends X_JP_BillLine {
 
 	public MBillLine(Properties ctx, int JP_BillLine_ID, String trxName) {
@@ -34,6 +43,8 @@ public class MBillLine extends X_JP_BillLine {
 		super(ctx, rs, trxName);
 	}
 
+	private MInvoice invoice = null;
+
 	@Override
 	protected boolean beforeSave(boolean newRecord) {
 
@@ -41,32 +52,39 @@ public class MBillLine extends X_JP_BillLine {
 		{
 			if(getC_Invoice_ID()== 0)
 			{
-				log.saveError("Error", Msg.getMsg(getCtx(), "JPiere"));//TODO:多言語化
+				log.saveError("FillMandatory", Msg.getElement(getCtx(), "C_Invoice_ID"));
 				return false;
 			}
 
-			MInvoice inv = MInvoice.get(getCtx(), getC_Invoice_ID());
+			invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+
+			if(invoice.getC_Currency_ID() != getParent().getC_Currency_ID())
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_DifferentCurrency"));
+				return false;
+			}
+
 			if(getDescription()==null || getDescription().isEmpty())
-				setDescription(inv.getDescription());
+				setDescription(invoice.getDescription());
 
-			setC_DocType_ID(inv.getC_DocType_ID());
-			setDateInvoiced(inv.getDateInvoiced());
-			setDateAcct(inv.getDateAcct());
-			setC_BPartner_ID(inv.getC_BPartner_ID());
-			setC_BPartner_Location_ID(inv.getC_BPartner_Location_ID());
-			setAD_User_ID(inv.getAD_User_ID());
-			setM_PriceList_ID(inv.getM_PriceList_ID());
-			setSalesRep_ID(inv.getSalesRep_ID());
-			setPaymentRule(inv.getPaymentRule());
-			setC_PaymentTerm_ID(inv.getC_PaymentTerm_ID());
-			setC_Currency_ID(inv.getC_Currency_ID());
+			setC_DocType_ID(invoice.getC_DocType_ID());
+			setDateInvoiced(invoice.getDateInvoiced());
+			setDateAcct(invoice.getDateAcct());
+			setC_BPartner_ID(invoice.getC_BPartner_ID());
+			setC_BPartner_Location_ID(invoice.getC_BPartner_Location_ID());
+			setAD_User_ID(invoice.getAD_User_ID());
+			setM_PriceList_ID(invoice.getM_PriceList_ID());
+			setSalesRep_ID(invoice.getSalesRep_ID());
+			setPaymentRule(invoice.getPaymentRule());
+			setC_PaymentTerm_ID(invoice.getC_PaymentTerm_ID());
+			setC_Currency_ID(invoice.getC_Currency_ID());
 
-			setTotalLines(inv.getTotalLines());
-			setGrandTotal(inv.getGrandTotal());
+			setTotalLines(invoice.getTotalLines());
+			setGrandTotal(invoice.getGrandTotal());
 
 			BigDecimal TaxBaseAmt = Env.ZERO;
 			BigDecimal TaxAmt = Env.ZERO;
-			MInvoiceTax[] invTaxes = inv.getTaxes(false);
+			MInvoiceTax[] invTaxes = invoice.getTaxes(false);
 			for(int i = 0; i < invTaxes.length; i++)
 			{
 				TaxBaseAmt = TaxBaseAmt.add(invTaxes[i].getTaxBaseAmt());
@@ -74,16 +92,16 @@ public class MBillLine extends X_JP_BillLine {
 			}
 			setTaxBaseAmt(TaxBaseAmt);
 			setTaxAmt(TaxAmt);
-			setPayAmt(inv.getGrandTotal().subtract(inv.getOpenAmt()));
-			setOverUnderAmt(inv.getOpenAmt());
+			setPayAmt(invoice.getGrandTotal().subtract(invoice.getOpenAmt()));
+			setOverUnderAmt(invoice.getOpenAmt());
 
-			if(inv.getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo))
+			if(invoice.getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo))
 			{
 				setTotalLines(getTotalLines().negate());
 				setGrandTotal(getGrandTotal().negate());
 				setTaxBaseAmt(getTaxBaseAmt().negate());
 				setTaxAmt(getTaxAmt().negate());
-				setPayAmt(inv.getGrandTotal().add(inv.getOpenAmt()));
+				setPayAmt(invoice.getGrandTotal().add(invoice.getOpenAmt()));
 //				setOverUnderAmt(getOverUnderAmt().negate());
 			}
 
@@ -96,46 +114,67 @@ public class MBillLine extends X_JP_BillLine {
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
 
-//		String sql = "UPDATE JP_Bill b"
-//				+ " SET TotalLines = (SELECT COALESCE(SUM(TotalLines),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//					+ ",GrandTotal = (SELECT COALESCE(SUM(GrandTotal),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//					+ ",TaxBaseAmt = (SELECT COALESCE(SUM(TaxBaseAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//					+ ",TaxAmt = (SELECT COALESCE(SUM(TaxAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//					+ ",PayAmt     = (SELECT COALESCE(SUM(PayAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//					+ ",OverUnderAmt     = (SELECT COALESCE(SUM(OverUnderAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//				+ "WHERE JP_Bill_ID=" + getJP_Bill_ID();
-
-		String sql = "UPDATE JP_Bill b"
-				+ " SET (TotalLines"
-					+ " ,GrandTotal"
-					+ " ,TaxBaseAmt"
-					+ " ,TaxAmt"
-					+ " ,PayAmt"
-					+ " ,OverUnderAmt )"
-				+ " = (SELECT COALESCE(SUM(TotalLines),0)"
-						+ "  ,COALESCE(SUM(GrandTotal),0)"
-						+ "  ,COALESCE(SUM(TaxBaseAmt),0)"
-						+ "  ,COALESCE(SUM(TaxAmt),0)"
-						+ "  ,COALESCE(SUM(PayAmt),0)"
-						+ "  ,COALESCE(SUM(OverUnderAmt),0)"
-				+ " FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-				+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
-
-		int no = DB.executeUpdate(sql, get_TrxName());
-		if (no != 1)
+		if(newRecord || is_ValueChanged("C_Invoice_ID"))
 		{
-			log.warning("(1) #" + no);
-			return false;
-		}
 
-		sql = "UPDATE JP_Bill b"
-				+" SET JPBillAmt =(SELECT COALESCE(OverUnderAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
-				+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
-		no = DB.executeUpdate(sql, get_TrxName());
-		if (no != 1)
-		{
-			log.warning("(1) #" + no);
-			return false;
+//			String sql = "UPDATE JP_Bill b"
+//					+ " SET TotalLines = (SELECT COALESCE(SUM(TotalLines),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
+//						+ ",GrandTotal = (SELECT COALESCE(SUM(GrandTotal),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
+//						+ ",TaxBaseAmt = (SELECT COALESCE(SUM(TaxBaseAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
+//						+ ",TaxAmt = (SELECT COALESCE(SUM(TaxAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
+//						+ ",PayAmt     = (SELECT COALESCE(SUM(PayAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
+//						+ ",OverUnderAmt     = (SELECT COALESCE(SUM(OverUnderAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
+//					+ "WHERE JP_Bill_ID=" + getJP_Bill_ID();
+
+			String sql = "UPDATE JP_Bill b"
+					+ " SET (TotalLines"
+						+ " ,GrandTotal"
+						+ " ,TaxBaseAmt"
+						+ " ,TaxAmt"
+						+ " ,PayAmt"
+						+ " ,OverUnderAmt )"
+					+ " = (SELECT COALESCE(SUM(TotalLines),0)"
+							+ "  ,COALESCE(SUM(GrandTotal),0)"
+							+ "  ,COALESCE(SUM(TaxBaseAmt),0)"
+							+ "  ,COALESCE(SUM(TaxAmt),0)"
+							+ "  ,COALESCE(SUM(PayAmt),0)"
+							+ "  ,COALESCE(SUM(OverUnderAmt),0)"
+					+ " FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
+					+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
+
+			int no = DB.executeUpdate(sql, get_TrxName());
+			if (no != 1)
+			{
+				log.warning("(1) #" + no);
+				return false;
+			}
+
+			sql = "UPDATE JP_Bill b"
+					+" SET JPBillAmt =(SELECT COALESCE(OverUnderAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
+					+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
+			no = DB.executeUpdate(sql, get_TrxName());
+			if (no != 1)
+			{
+				log.warning("(1) #" + no);
+				return false;
+			}
+
+
+			if(invoice == null)
+				invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+
+			if(newRecord)
+			{
+				;
+			}else{
+				MInvoice invoice_old =new MInvoice(getCtx(),get_ValueOldAsInt("C_Invoice_ID"),get_TrxName());
+				invoice_old.set_ValueNoCheck("JP_Bill_ID", null);
+				invoice_old.save(get_TrxName());
+			}
+
+			invoice.set_ValueNoCheck("JP_Bill_ID", getJP_Bill_ID());
+			invoice.save(get_TrxName());
+
 		}
 
 		return true;
@@ -176,9 +215,22 @@ public class MBillLine extends X_JP_BillLine {
 			return false;
 		}
 
+		if(invoice == null)
+			invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+		invoice.set_ValueNoCheck("JP_Bill_ID", null);
+		invoice.save(get_TrxName());
+
 		return true;
 	}
 
+	private MBill m_parent = null;
 
+	public MBill getParent()
+	{
+		if(m_parent == null)
+			m_parent = new MBill(getCtx(), getJP_Bill_ID(),get_TrxName());
+
+		return m_parent;
+	}
 
 }

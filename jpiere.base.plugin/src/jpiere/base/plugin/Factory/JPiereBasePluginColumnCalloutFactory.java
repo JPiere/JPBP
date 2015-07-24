@@ -1,14 +1,15 @@
 /******************************************************************************
- * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
- * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
- * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
- * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
- * いかなる保証もしていません。                                               *
- * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
- * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
- * 提供しています。サポートをご希望の際には、                                 *
- * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
- * http://www.oss-erp.co.jp/                                                  *
+ * Product: JPiere(Japan + iDempiere)                                         *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere supported by OSS ERP Solutions Co., Ltd.                            *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 package jpiere.base.plugin.factory;
 
@@ -16,8 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
+import jpiere.base.plugin.org.adempiere.model.MBill;
 
 import org.adempiere.base.IColumnCallout;
 import org.adempiere.base.IColumnCalloutFactory;
@@ -25,7 +28,11 @@ import org.compiere.model.MLocation;
 import org.compiere.model.MPayment;
 
 /**
- * @author Hideaki Hagiwara
+ *  JPiere Base Plugin Callout Factory
+ *
+ *  JPIERE-0106:JPBP:Bill
+ *
+ *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
  */
 public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFactory {
@@ -42,6 +49,8 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			list.add(new JPiereRegionCallout());
 		}else if(tableName.equals(MLocation.Table_Name) && columnName.equals(MLocation.COLUMNNAME_C_City_ID)){
 			list.add(new JPiereCityCallout());
+		}else if(tableName.equals(MBill.Table_Name) && columnName.equals(MBill.COLUMNNAME_C_BPartner_ID)){
+			list.add(new JPiereBillBPartnerCallout());
 		}
 
 		return list != null ? list.toArray(new IColumnCallout[0]) : new IColumnCallout[0];

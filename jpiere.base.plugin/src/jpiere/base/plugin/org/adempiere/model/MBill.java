@@ -1,15 +1,17 @@
 /******************************************************************************
- * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
- * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
- * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
- * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
- * いかなる保証もしていません。                                               *
- * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
- * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
- * 提供しています。サポートをご希望の際には、                                 *
- * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
- * http://www.oss-erp.co.jp/                                                  *
+ * Product: JPiere(Japan + iDempiere)                                         *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere supported by OSS ERP Solutions Co., Ltd.                            *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
+
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
@@ -26,17 +28,19 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
+import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
- *	Template for DocAction
+ *	MBill
  *
- *  Instead of modifying DocumentEngine, you could simply extend DocOptions interface and use customizeValidActions
- *  @author Jorg Janke
- *  @version $Id: DocActionTemplate.java,v 1.3 2006/07/30 00:54:44 jjanke Exp $
+ *	JPIERE-0106:JPBP:Bill
+ *
+ *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  */
-public class MBill extends X_JP_Bill implements DocAction
+public class MBill extends X_JP_Bill implements DocAction,DocOptions
 {
 	/**
 	 *
@@ -326,25 +330,11 @@ public class MBill extends X_JP_Bill implements DocAction
 	public String getSummary()
 	{
 		StringBuilder sb = new StringBuilder();
-	//	sb.append(getDocumentNo());
-		//	: Total Lines = 123.00 (#1)
-	//	sb.append(": ")
-	//		.append(Msg.translate(getCtx(),"TotalLines")).append("=").append(getTotalLines())
-	//		.append(" (#").append(getLines(false).length).append(")");
-		//	 - Description
-	//	if (getDescription() != null && getDescription().length() > 0)
-	//		sb.append(" - ").append(getDescription());
+		sb.append(getDocumentNo());
+
 		return sb.toString();
 	}	//	getSummary
 
-	/**
-	 * 	Get Document no
-	 *	@return Document No
-	 */
-	public String getDocumentNo()
-	{
-		return "-";
-	}	//	getDocumentNo
 
 	/**
 	 * 	Get Process Message
@@ -374,20 +364,21 @@ public class MBill extends X_JP_Bill implements DocAction
 	}	//	getApprovalAmt
 
 
+	@Override
+	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx, int AD_Table_ID,
+			String[] docAction, String[] options, int index) {
 
+		if(docStatus.equals(DocAction.STATUS_Drafted))
+		{
+			return index;
+		}else if(docStatus.equals(DocAction.STATUS_Completed)){
+			options[index++] = DocAction.ACTION_Void;
 
+			return index;
+		}
 
-	/**
-	 * 	Get Document Currency
-	 *	@return C_Currency_ID
-	 */
-	public int getC_Currency_ID()
-	{
-		return getC_Currency_ID();
-	}	//	getC_Currency_ID
-
-
-
+		return index;
+	}
 
 
 	@Override
@@ -405,7 +396,7 @@ public class MBill extends X_JP_Bill implements DocAction
 				{
 					setJPLastBillAmt(lastbill.getJPBillAmt());
 				}else{
-					log.saveError("Error", "JPIERE");//TODO 多言語化(伝票ステータスが正しくない)
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus"));
 					return false;
 				}
 
@@ -424,7 +415,7 @@ public class MBill extends X_JP_Bill implements DocAction
 				{
 					setJPLastPayAmt(lastPayment.getPayAmt());
 				}else{
-					log.saveError("Error", "JPIERE");//TODO 多言語化(伝票ステータスが正しくない)
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus"));
 					return false;
 				}
 
@@ -482,5 +473,6 @@ public class MBill extends X_JP_Bill implements DocAction
 	{
 		return getLines(false);
 	}	//	getLines
+
 
 }	//	DocActionTemplate

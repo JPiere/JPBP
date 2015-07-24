@@ -1,14 +1,15 @@
 /******************************************************************************
- * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
- * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
- * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
- * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
- * いかなる保証もしていません。                                               *
- * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
- * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
- * 提供しています。サポートをご希望の際には、                                 *
- * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
- * http://www.oss-erp.co.jp/                                                  *
+ * Product: JPiere(Japan + iDempiere)                                         *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere supported by OSS ERP Solutions Co., Ltd.                            *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 package jpiere.base.plugin.org.compiere.acct;
 
@@ -29,15 +30,19 @@ import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
 /**
- * Post Order Documents.
+ * Post Bill Documents.
+ *
+ *
+ * JPIERE-0106:JPBP:Bill
  *
  * <pre>
- *   Table:              M_Requisition
- *   Document Types:     POR (Requisition)
+ *   Table:              JP_Bill
+ *   Document Types:     JPB
  * </pre>
  *
  * @author Jorg Janke
- * @version $Id: Doc_Requisition.java,v 1.3 2006/07/30 00:53:33 jjanke Exp $
+ * @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
+ * @version α
  */
 public class Doc_JPBill extends Doc
 {
@@ -50,7 +55,7 @@ public class Doc_JPBill extends Doc
 	public Doc_JPBill (MAcctSchema as, ResultSet rs, String trxName)
 	{
 		super (as, MBill.class, rs, DOCTYPE_PurchaseRequisition, trxName);
-	}	//	Doc_Requisition
+	}
 
 	/**
 	 *	Load Specific Document Details
@@ -155,4 +160,4 @@ public class Doc_JPBill extends Doc
 
 		return facts;
 	} // createFact
-} // Doc_Requisition
+} //

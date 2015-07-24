@@ -73,7 +73,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     {
     	this(false, gridField);
     }
-   
+
     /**
      *
      * @param gridField
@@ -133,7 +133,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 //	        	getComponent().getDecimalbox().setCols(0);
 		}
 
-		if (DisplayType.isID(displayType)) 
+		if (DisplayType.isID(displayType))
 			displayType = DisplayType.Integer;
 		else if (!DisplayType.isNumeric(displayType))
 			displayType = DisplayType.Number;
@@ -146,11 +146,11 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 			getComponent().getDecimalbox().setFormat(format.toPattern());
 		getComponent().getDecimalbox().setLocale(lang.getLocale());
 		getComponent().setFormat(format);
-		
+
 		popupMenu = new WEditorPopupMenu(false, false, isShowPreference());
     	addChangeLogMenu(popupMenu);
     }
-	
+
 	/**
 	 * Event handler
 	 * @param event
@@ -163,7 +163,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	        if (oldValue == null && newValue == null) {
 	        	return;
 	        }
-	        
+
 	        if (displayType == DisplayType.Integer) {
 		        if (newValue != null && newValue instanceof BigDecimal) {
 		        	newValue = new Integer(((BigDecimal)newValue).intValue());
@@ -172,12 +172,12 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		        	oldValue = new Integer(((BigDecimal)oldValue).intValue());
 		        }
 	        }
-	        
-	        if (oldValue != null && newValue != null && oldValue.equals(newValue)) 
+
+	        if (oldValue != null && newValue != null && oldValue.equals(newValue))
 	        {
 	    	    return;
 	    	}
-	        
+
 	        ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), oldValue, newValue);
 	        super.fireValueChange(changeEvent);
 	        oldValue = getComponent().getValue(); // IDEMPIERE-963 - check again the value could be changed by callout
@@ -210,7 +210,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     {
         return getComponent().getValue();
     }
-    
+
     @Override
     public void setValue(Object value)
     {
@@ -225,8 +225,8 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 				List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
 				for(IDisplayTypeFactory factory : factoryList){
 					format = factory.getNumberFormat(displayType, null, gridField.getFormatPattern());
-				} 		
-	    		
+				}
+
 	    		format.setMinimumFractionDigits(MCurrency.getStdPrecision(Env.getCtx(), getC_Currency_ID()));
 	    		getComponent().getDecimalbox().setFormat(format.toPattern());
 	    		getComponent().setFormat(format);
@@ -269,15 +269,15 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		super.setTableEditor(b);
 		getComponent().setTableEditorMode(b);
 	}
-      
+
 	/**
 	* 通貨の小数点以下の表示桁数を取得するために、画面で使用されているC_Currency_IDを取得します。
 	* JPIERE-3 Add WNumberEditor#getC_Currency_ID()
-	* 
+	*
 	* @author Hideaki Hagiwara
 	*/
 	public int getC_Currency_ID() {
-				
+
 		return Env.getContextAsInt(Env.getCtx(), getGridField().getWindowNo(), "C_Currency_ID");
 	}
 
