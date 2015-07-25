@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
@@ -272,7 +273,62 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("voidIt - " + toString());
-		return closeIt();
+
+		if (DOCSTATUS_Closed.equals(getDocStatus())
+				|| DOCSTATUS_Reversed.equals(getDocStatus())
+				|| DOCSTATUS_Voided.equals(getDocStatus()))
+		{
+			m_processMsg = "Document Closed: " + getDocStatus();
+			setDocAction(DOCACTION_None);
+			return false;
+		}
+
+
+		//	Not Processed
+		if (DOCSTATUS_Drafted.equals(getDocStatus())
+			|| DOCSTATUS_Invalid.equals(getDocStatus())
+			|| DOCSTATUS_InProgress.equals(getDocStatus())
+			|| DOCSTATUS_Approved.equals(getDocStatus())
+			|| DOCSTATUS_NotApproved.equals(getDocStatus())
+			|| DOCSTATUS_Completed.equals(getDocStatus()))
+		{
+			// Before Void
+			m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
+			if (m_processMsg != null)
+				return false;
+
+			//	Set lines to 0
+			MBillLine[] lines = getLines(false);
+			MInvoice invoice = null;
+			for (int i = 0; i < lines.length; i++)
+			{
+				MBillLine line = lines[i];
+
+				invoice = new MInvoice(getCtx(),line.getC_Invoice_ID(), get_TrxName());
+
+				Integer JP_Bill_ID = (Integer)invoice.get_Value("JP_Bill_ID");
+				if(JP_Bill_ID != null && JP_Bill_ID.intValue()== getJP_Bill_ID())
+				{
+					invoice.set_ValueNoCheck("JP_Bill_ID", null);
+					invoice.save(get_TrxName());
+				}
+			}//for
+			addDescription(Msg.getMsg(getCtx(), "Voided"));
+		}
+		else
+		{
+			return false;
+		}
+
+		// After Void
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
+		if (m_processMsg != null)
+			return false;
+
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+		return true;
+
 	}	//	voidIt
 
 	/**
@@ -284,8 +340,8 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 	{
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
 
-		//	Close Not delivered Qty
-	//	setDocAction(DOCACTION_None);
+		setDocAction(DOCACTION_None);
+
 		return true;
 	}	//	closeIt
 
@@ -473,6 +529,21 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 	{
 		return getLines(false);
 	}	//	getLines
+
+	/**
+	 * 	Add to Description
+	 *	@param description text
+	 */
+	public void addDescription (String description)
+	{
+		String desc = getDescription();
+		if (desc == null)
+			setDescription(description);
+		else{
+			StringBuilder msgd = new StringBuilder(desc).append(" | ").append(description);
+			setDescription(msgd.toString());
+		}
+	}	//	addDescription
 
 
 }	//	DocActionTemplate

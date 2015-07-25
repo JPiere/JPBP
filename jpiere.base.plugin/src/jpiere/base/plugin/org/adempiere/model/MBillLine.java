@@ -145,7 +145,7 @@ public class MBillLine extends X_JP_BillLine {
 			int no = DB.executeUpdate(sql, get_TrxName());
 			if (no != 1)
 			{
-				log.warning("(1) #" + no);
+				log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
 				return false;
 			}
 
@@ -155,7 +155,7 @@ public class MBillLine extends X_JP_BillLine {
 			no = DB.executeUpdate(sql, get_TrxName());
 			if (no != 1)
 			{
-				log.warning("(1) #" + no);
+				log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
 				return false;
 			}
 
@@ -167,13 +167,22 @@ public class MBillLine extends X_JP_BillLine {
 			{
 				;
 			}else{
+
 				MInvoice invoice_old =new MInvoice(getCtx(),get_ValueOldAsInt("C_Invoice_ID"),get_TrxName());
-				invoice_old.set_ValueNoCheck("JP_Bill_ID", null);
-				invoice_old.save(get_TrxName());
+				Integer JP_Bill_ID = (Integer)invoice_old.get_Value("JP_Bill_ID");
+				if(JP_Bill_ID != null && JP_Bill_ID.intValue()== getJP_Bill_ID())
+				{
+					invoice_old.set_ValueNoCheck("JP_Bill_ID", null);
+					invoice_old.save(get_TrxName());
+				}
 			}
 
-			invoice.set_ValueNoCheck("JP_Bill_ID", getJP_Bill_ID());
-			invoice.save(get_TrxName());
+			Integer JP_Bill_ID = (Integer)invoice.get_Value("JP_Bill_ID");
+			if(JP_Bill_ID == null || JP_Bill_ID.intValue()==0)
+			{
+				invoice.set_ValueNoCheck("JP_Bill_ID", getJP_Bill_ID());
+				invoice.save(get_TrxName());
+			}
 
 		}
 
@@ -202,23 +211,29 @@ public class MBillLine extends X_JP_BillLine {
 		int no = DB.executeUpdate(sql, get_TrxName());
 		if (no != 1)
 		{
-			log.warning("(1) #" + no);
+			log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
 			return false;
 		}
 
 		sql = "UPDATE JP_Bill b"
-				+" SET JPBillAmt =(SELECT COALESCE(OverUnderAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )";
+				+" SET JPBillAmt =(SELECT COALESCE(OverUnderAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
+				+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
 		no = DB.executeUpdate(sql, get_TrxName());
 		if (no != 1)
 		{
-			log.warning("(1) #" + no);
+			log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
 			return false;
 		}
 
 		if(invoice == null)
 			invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
-		invoice.set_ValueNoCheck("JP_Bill_ID", null);
-		invoice.save(get_TrxName());
+
+		Integer JP_Bill_ID = (Integer)invoice.get_Value("JP_Bill_ID");
+		if(JP_Bill_ID != null && JP_Bill_ID.intValue()== getJP_Bill_ID())
+		{
+			invoice.set_ValueNoCheck("JP_Bill_ID", null);
+			invoice.save(get_TrxName());
+		}
 
 		return true;
 	}
