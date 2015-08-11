@@ -21,6 +21,7 @@ import jpiere.base.plugin.org.adempiere.model.MBillLine;
 import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
+import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
 
 import org.adempiere.base.IModelFactory;
 import org.compiere.model.PO;
@@ -49,6 +50,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			return MBill.class;
 		}else if(tableName.equals(MBillLine.Table_Name)){
 			return MBillLine.class;
+		}else if(tableName.equals(MReferenceTest.Table_Name)){
+			return MReferenceTest.class;
 		}
 
 		return null;
@@ -66,6 +69,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			return  new MBill(Env.getCtx(), Record_ID, trxName);
 		}else if(tableName.equals(MBillLine.Table_Name)){
 			return  new MBillLine(Env.getCtx(), Record_ID, trxName);
+		}else if(tableName.equals(MReferenceTest.Table_Name)){
+			return  new MReferenceTest(Env.getCtx(), Record_ID, trxName);
 		}
 
 		return null;
@@ -83,6 +88,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			return  new MBill(Env.getCtx(), rs, trxName);
 		}else if(tableName.equals(MBillLine.Table_Name)){
 			return  new MBillLine(Env.getCtx(), rs, trxName);
+		}else if(tableName.equals(MReferenceTest.Table_Name)){
+			return  new MReferenceTest(Env.getCtx(), rs, trxName);
 		}
 
 		return null;
