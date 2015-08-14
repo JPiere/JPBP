@@ -320,6 +320,19 @@ public interface I_JP_BillLine
 
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException;
 
+    /** Column name OpenAmt */
+    public static final String COLUMNNAME_OpenAmt = "OpenAmt";
+
+	/** Set Open Amount.
+	  * Open item amount
+	  */
+	public void setOpenAmt (BigDecimal OpenAmt);
+
+	/** Get Open Amount.
+	  * Open item amount
+	  */
+	public BigDecimal getOpenAmt();
+
     /** Column name OverUnderAmt */
     public static final String COLUMNNAME_OverUnderAmt = "OverUnderAmt";
 

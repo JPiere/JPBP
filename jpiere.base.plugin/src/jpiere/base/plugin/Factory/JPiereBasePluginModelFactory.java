@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MBillLine;
+import jpiere.base.plugin.org.adempiere.model.MBillSchema;
 import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
@@ -52,6 +53,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			return MBillLine.class;
 		}else if(tableName.equals(MReferenceTest.Table_Name)){
 			return MReferenceTest.class;
+		}else if(tableName.equals(MBillSchema.Table_Name)){
+			return MBillSchema.class;
 		}
 
 		return null;
@@ -71,7 +74,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			return  new MBillLine(Env.getCtx(), Record_ID, trxName);
 		}else if(tableName.equals(MReferenceTest.Table_Name)){
 			return  new MReferenceTest(Env.getCtx(), Record_ID, trxName);
+		}else if(tableName.equals(MBillSchema.Table_Name)){
+			return  new MBillSchema(Env.getCtx(), Record_ID, trxName);
 		}
+
 
 		return null;
 	}
@@ -90,6 +96,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			return  new MBillLine(Env.getCtx(), rs, trxName);
 		}else if(tableName.equals(MReferenceTest.Table_Name)){
 			return  new MReferenceTest(Env.getCtx(), rs, trxName);
+		}else if(tableName.equals(MBillSchema.Table_Name)){
+			return  new MBillSchema(Env.getCtx(), rs, trxName);
 		}
 
 		return null;

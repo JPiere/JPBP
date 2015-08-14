@@ -93,7 +93,7 @@ public class MBillLine extends X_JP_BillLine {
 			setTaxBaseAmt(TaxBaseAmt);
 			setTaxAmt(TaxAmt);
 			setPayAmt(invoice.getGrandTotal().subtract(invoice.getOpenAmt()));
-			setOverUnderAmt(invoice.getOpenAmt());
+			setOpenAmt(invoice.getOpenAmt());
 
 			if(invoice.getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo))
 			{
@@ -132,12 +132,14 @@ public class MBillLine extends X_JP_BillLine {
 						+ " ,TaxBaseAmt"
 						+ " ,TaxAmt"
 						+ " ,PayAmt"
+						+ " ,OpenAmt"
 						+ " ,OverUnderAmt )"
 					+ " = (SELECT COALESCE(SUM(TotalLines),0)"
 							+ "  ,COALESCE(SUM(GrandTotal),0)"
 							+ "  ,COALESCE(SUM(TaxBaseAmt),0)"
 							+ "  ,COALESCE(SUM(TaxAmt),0)"
 							+ "  ,COALESCE(SUM(PayAmt),0)"
+							+ "  ,COALESCE(SUM(OpenAmt),0)"
 							+ "  ,COALESCE(SUM(OverUnderAmt),0)"
 					+ " FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
 					+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
@@ -150,7 +152,7 @@ public class MBillLine extends X_JP_BillLine {
 			}
 
 			sql = "UPDATE JP_Bill b"
-					+" SET JPBillAmt =(SELECT COALESCE(OverUnderAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
+					+" SET JPBillAmt =(SELECT COALESCE(OpenAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
 					+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
 			no = DB.executeUpdate(sql, get_TrxName());
 			if (no != 1)
@@ -198,12 +200,14 @@ public class MBillLine extends X_JP_BillLine {
 					+ " ,TaxBaseAmt"
 					+ " ,TaxAmt"
 					+ " ,PayAmt"
+					+ " ,OpenAmt"
 					+ " ,OverUnderAmt )"
 				+ " = (SELECT COALESCE(SUM(TotalLines),0)"
 						+ "  ,COALESCE(SUM(GrandTotal),0)"
 						+ "  ,COALESCE(SUM(TaxBaseAmt),0)"
 						+ "  ,COALESCE(SUM(TaxAmt),0)"
 						+ "  ,COALESCE(SUM(PayAmt),0)"
+						+ "  ,COALESCE(SUM(OpenAmt),0)"
 						+ "  ,COALESCE(SUM(OverUnderAmt),0)"
 				+ " FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
 				+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
@@ -216,7 +220,7 @@ public class MBillLine extends X_JP_BillLine {
 		}
 
 		sql = "UPDATE JP_Bill b"
-				+" SET JPBillAmt =(SELECT COALESCE(OverUnderAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
+				+" SET JPBillAmt =(SELECT COALESCE(OpenAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
 				+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
 		no = DB.executeUpdate(sql, get_TrxName());
 		if (no != 1)

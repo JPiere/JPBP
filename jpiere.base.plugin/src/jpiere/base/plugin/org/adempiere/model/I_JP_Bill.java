@@ -396,6 +396,19 @@ public interface I_JP_Bill
 
 	public org.compiere.model.I_AD_User getJP_User() throws RuntimeException;
 
+    /** Column name OpenAmt */
+    public static final String COLUMNNAME_OpenAmt = "OpenAmt";
+
+	/** Set Open Amount.
+	  * Open item amount
+	  */
+	public void setOpenAmt (BigDecimal OpenAmt);
+
+	/** Get Open Amount.
+	  * Open item amount
+	  */
+	public BigDecimal getOpenAmt();
+
     /** Column name OverUnderAmt */
     public static final String COLUMNNAME_OverUnderAmt = "OverUnderAmt";
 

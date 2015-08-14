@@ -33,6 +33,7 @@ CREATE TABLE adempiere.JP_BillLine
   TaxBaseAmt numeric NOT NULL DEFAULT 0,
   TaxAmt numeric NOT NULL DEFAULT 0,
   PayAmt numeric NOT NULL DEFAULT 0,
+  OpenAmt numeric NOT NULL DEFAULT 0,
   OverUnderAmt numeric NOT NULL DEFAULT 0,
 
   CONSTRAINT JP_BillLine_pkey PRIMARY KEY (JP_BillLine_ID)

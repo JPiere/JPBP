@@ -42,6 +42,7 @@ CREATE TABLE adempiere.JP_Bill
   TaxBaseAmt numeric NOT NULL DEFAULT 0,
   TaxAmt numeric NOT NULL DEFAULT 0,
   PayAmt numeric NOT NULL DEFAULT 0,
+  OpenAmt numeric NOT NULL DEFAULT 0,
   OverUnderAmt numeric NOT NULL DEFAULT 0,
   JPBillAmt numeric NOT NULL DEFAULT 0,
 

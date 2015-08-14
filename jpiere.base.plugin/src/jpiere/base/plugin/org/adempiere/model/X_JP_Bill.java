@@ -33,7 +33,7 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150723L;
+	private static final long serialVersionUID = 20150814L;
 
     /** Standard Constructor */
     public X_JP_Bill (Properties ctx, int JP_Bill_ID, String trxName)
@@ -68,6 +68,8 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 			setJPLastPayAmt (Env.ZERO);
 // 0
 			setJP_Bill_ID (0);
+			setOpenAmt (Env.ZERO);
+// 0
 			setOverUnderAmt (Env.ZERO);
 // 0
 			setPayAmt (Env.ZERO);
@@ -705,6 +707,26 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Open Amount.
+		@param OpenAmt 
+		Open item amount
+	  */
+	public void setOpenAmt (BigDecimal OpenAmt)
+	{
+		set_Value (COLUMNNAME_OpenAmt, OpenAmt);
+	}
+
+	/** Get Open Amount.
+		@return Open item amount
+	  */
+	public BigDecimal getOpenAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_OpenAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Over/Under Payment.

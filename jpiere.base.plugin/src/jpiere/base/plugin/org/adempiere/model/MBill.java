@@ -481,7 +481,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		if(newRecord || is_ValueChanged("JP_LastBill_ID") || is_ValueChanged("C_Payment_ID"))
 		{
 			setJPCarriedForwardAmt(getJPLastBillAmt().add(getJPLastPayAmt()));
-			setJPBillAmt(getJPCarriedForwardAmt().add(getOverUnderAmt()));
+			setJPBillAmt(getJPCarriedForwardAmt().add(getOpenAmt()));
 		}
 
 
