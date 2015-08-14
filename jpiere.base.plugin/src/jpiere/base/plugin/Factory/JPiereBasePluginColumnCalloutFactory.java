@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
@@ -51,6 +52,11 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			list.add(new JPiereCityCallout());
 		}else if(tableName.equals(MBill.Table_Name) && columnName.equals(MBill.COLUMNNAME_C_BPartner_ID)){
 			list.add(new JPiereBillBPartnerCallout());
+		}else if(tableName.equals(MBill.Table_Name) && (columnName.equals(MBill.COLUMNNAME_JP_LastBill_ID)
+														|| columnName.equals(MBill.COLUMNNAME_JPLastBillAmt)
+														|| columnName.equals(MBill.COLUMNNAME_C_Payment_ID)
+														|| columnName.equals(MBill.COLUMNNAME_JPLastPayAmt))){
+			list.add(new JPiereBillAmountCallout());
 		}
 
 		return list != null ? list.toArray(new IColumnCallout[0]) : new IColumnCallout[0];

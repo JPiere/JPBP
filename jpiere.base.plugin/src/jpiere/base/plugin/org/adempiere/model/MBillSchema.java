@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 import org.compiere.model.I_C_DocType;
+import org.compiere.util.Msg;
 
 
 /**
@@ -44,7 +45,7 @@ public class MBillSchema extends X_JP_BillSchema {
 			I_C_DocType docType = getC_DocType();
 			if(!docType.getDocBaseType().equals("JPB"))
 			{
-				log.saveError("Error", "伝票タイプが正しくありません。");//
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_DocTypeIncorrect"));
 				return false;
 			}
 		}

@@ -450,7 +450,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 				if(lastbill.getDocStatus().equals(DocAction.STATUS_Completed)
 						|| lastbill.getDocStatus().equals(DocAction.STATUS_Closed))
 				{
-					setJPLastBillAmt(lastbill.getJPBillAmt());
+//					setJPLastBillAmt(lastbill.getJPBillAmt());
 				}else{
 					log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus"));
 					return false;
@@ -469,7 +469,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 				if(lastPayment.getDocStatus().equals(DocAction.STATUS_Completed)
 						|| lastPayment.getDocStatus().equals(DocAction.STATUS_Closed))
 				{
-					setJPLastPayAmt(lastPayment.getPayAmt());
+//					setJPLastPayAmt(lastPayment.getPayAmt());
 				}else{
 					log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus"));
 					return false;
@@ -478,14 +478,10 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 			}
 		}
 
-		if(newRecord || is_ValueChanged("JP_LastBill_ID") || is_ValueChanged("C_Payment_ID"))
-		{
-			setJPCarriedForwardAmt(getJPLastBillAmt().add(getJPLastPayAmt()));
-			setJPBillAmt(getJPCarriedForwardAmt().add(getOpenAmt()));
-		}
+		setJPCarriedForwardAmt(getJPLastBillAmt().subtract(getJPLastPayAmt()));
+		setJPBillAmt(getJPCarriedForwardAmt().add(getOpenAmt()));
 
-
-		return super.beforeSave(newRecord);
+		return true;
 	}
 
 	/**

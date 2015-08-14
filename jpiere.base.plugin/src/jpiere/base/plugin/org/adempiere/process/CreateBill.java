@@ -31,6 +31,8 @@ import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 
 
@@ -157,7 +159,7 @@ public class CreateBill extends SvrProcess {
 
 		}
 
-		return "取引先件数:" + bpartners.length +"  請求書作成枚数:" + billCounter;
+		return Msg.getElement(getCtx(), "C_BPartner_ID")+" : " + bpartners.length +"   "+ Msg.getElement(getCtx(), "JP_Bill_ID") +" : " +  billCounter;
 	}	//	doIt
 
 
@@ -345,6 +347,7 @@ public class CreateBill extends SvrProcess {
 		}
 		bill.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
 		bill.setJPDateBilled(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		bill.setSalesRep_ID(Env.getAD_User_ID(getCtx()));
 		bill.setC_DocType_ID(billSchema.getC_DocType_ID());
 		bill.setC_BPartner_ID(invoice.getC_BPartner_ID());
 		bill.setC_BPartner_Location_ID(invoice.getC_BPartner_Location_ID());
