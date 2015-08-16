@@ -30,7 +30,7 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150814L;
+	private static final long serialVersionUID = 20150816L;
 
     /** Standard Constructor */
     public X_JP_BillSchema (Properties ctx, int JP_BillSchema_ID, String trxName)

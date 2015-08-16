@@ -33,7 +33,7 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150814L;
+	private static final long serialVersionUID = 20150816L;
 
     /** Standard Constructor */
     public X_JP_Bill (Properties ctx, int JP_Bill_ID, String trxName)
@@ -61,6 +61,8 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 // 0
 			setJPCarriedForwardAmt (Env.ZERO);
 // 0
+			setJPCutOffDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
 			setJPDateBilled (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setJPLastBillAmt (Env.ZERO);
@@ -561,6 +563,20 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Cut Off Date.
+		@param JPCutOffDate Cut Off Date	  */
+	public void setJPCutOffDate (Timestamp JPCutOffDate)
+	{
+		set_Value (COLUMNNAME_JPCutOffDate, JPCutOffDate);
+	}
+
+	/** Get Cut Off Date.
+		@return Cut Off Date	  */
+	public Timestamp getJPCutOffDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JPCutOffDate);
 	}
 
 	/** Set JPDateBilled.

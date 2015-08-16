@@ -320,6 +320,15 @@ public interface I_JP_Bill
 	/** Get Carried Forward Amt	  */
 	public BigDecimal getJPCarriedForwardAmt();
 
+    /** Column name JPCutOffDate */
+    public static final String COLUMNNAME_JPCutOffDate = "JPCutOffDate";
+
+	/** Set Cut Off Date	  */
+	public void setJPCutOffDate (Timestamp JPCutOffDate);
+
+	/** Get Cut Off Date	  */
+	public Timestamp getJPCutOffDate();
+
     /** Column name JPDateBilled */
     public static final String COLUMNNAME_JPDateBilled = "JPDateBilled";
 

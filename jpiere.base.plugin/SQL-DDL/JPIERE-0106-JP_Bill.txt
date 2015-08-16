@@ -22,6 +22,7 @@ CREATE TABLE adempiere.JP_Bill
   AD_OrgTrx_ID numeric(10,0),
   C_DocType_ID numeric(10,0) NOT NULL,
   JPDateBilled timestamp without time zone NOT NULL,
+  JPCutOffDate timestamp without time zone NOT NULL,
   SalesRep_ID numeric(10,0),
   C_BPartner_ID  numeric(10,0) NOT NULL,
   C_BPartner_Location_ID numeric(10,0) NOT NULL,

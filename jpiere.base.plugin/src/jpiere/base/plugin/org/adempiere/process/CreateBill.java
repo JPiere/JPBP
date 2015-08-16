@@ -57,6 +57,8 @@ public class CreateBill extends SvrProcess {
 	private Timestamp	p_DateInvoiced_From = null;
 	private Timestamp	p_DateInvoiced_To = null;
 
+	private Timestamp	p_JPCutOffDate=null;
+
 	/**Payment Term*/
 	private int			p_C_PaymentTerm_ID = 0;
 
@@ -90,6 +92,8 @@ public class CreateBill extends SvrProcess {
 					cal.add(Calendar.DAY_OF_MONTH, 1);
 					p_DateInvoiced_To = new Timestamp(cal.getTimeInMillis());
 				}
+			}else if (name.equals("JPCutOffDate")){
+				p_JPCutOffDate = (Timestamp)para[i].getParameter();
 			}else if (name.equals("C_PaymentTerm_ID")){
 				p_C_PaymentTerm_ID = para[i].getParameterAsInt();
 			}else if (name.equals("DocAction")){
@@ -347,6 +351,7 @@ public class CreateBill extends SvrProcess {
 		}
 		bill.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
 		bill.setJPDateBilled(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		bill.setJPCutOffDate(p_JPCutOffDate);
 		bill.setSalesRep_ID(Env.getAD_User_ID(getCtx()));
 		bill.setC_DocType_ID(billSchema.getC_DocType_ID());
 		bill.setC_BPartner_ID(invoice.getC_BPartner_ID());

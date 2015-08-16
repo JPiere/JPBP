@@ -33,7 +33,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150814L;
+	private static final long serialVersionUID = 20150816L;
 
     /** Standard Constructor */
     public X_JP_BillLine (Properties ctx, int JP_BillLine_ID, String trxName)
