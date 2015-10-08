@@ -1,71 +1,33 @@
 /******************************************************************************
- * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
- * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
- * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
- * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
- * いかなる保証もしていません。                                               *
- * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
- * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
- * 提供しています。サポートをご希望の際には、                                 *
- * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
- * http://www.oss-erp.co.jp/                                                  *
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 
 package jpiere.base.plugin.factory;
 
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_ACCOUNT;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_AMOUNT;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_ASSIGNMENT;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_BINARY;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_BUTTON;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_COLOR;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_COSTPRICE;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_DATE;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_DATETIME;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_FILENAME;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_FILEPATH;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_ID;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_IMAGE;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_INTEGER;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_LIST;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_LOCATION;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_LOCATOR;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MEMO;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_NUMBER;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_PAYMENT;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_PRINTNAME;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_PRODUCTATTRIBUTE;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_QUANTITY;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_ROWID;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_SEARCH;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_STRING;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TABLE;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TABLEDIR;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TEXT;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TEXTLONG;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TIME;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_URL;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_YES_NO;
-import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_CHART;
+import static org.compiere.model.SystemIDs.*;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
 import org.adempiere.base.IDisplayTypeFactory;
-import org.adempiere.base.Service;
-
-import org.compiere.model.MCurrency;
 import org.compiere.util.CLogger;
-import org.compiere.util.Env;
 import org.compiere.util.Language;
 
 public class JPiereBasePluginDisplayTypeFactory implements IDisplayTypeFactory {
-	
+
 	/** Display Type 10	String	*/
 	public static final int String     = REFERENCE_DATATYPE_STRING;
 	/** Display Type 11	Integer	*/
@@ -133,7 +95,7 @@ public class JPiereBasePluginDisplayTypeFactory implements IDisplayTypeFactory {
 	//	Candidates:
 	/** Display Type 200012	Payment	*/
 	public static final int Payment  = REFERENCE_DATATYPE_PAYMENT;
-	
+
 	public static final int Chart = REFERENCE_DATATYPE_CHART;
 
 	/**
@@ -152,7 +114,7 @@ public class JPiereBasePluginDisplayTypeFactory implements IDisplayTypeFactory {
 	 */
 
 	//  See DBA_DisplayType.sql ----------------------------------------------
-	
+
 	/** Maximum number of digits    */
 	private static final int    MAX_DIGITS = 28;        //  Oracle Standard Limitation 38 digits
 	/** Digits of an Integer        */
@@ -161,52 +123,52 @@ public class JPiereBasePluginDisplayTypeFactory implements IDisplayTypeFactory {
 	private static final int    MAX_FRACTION = 12;
 	/** Default Amount Precision    */
 	private static final int    AMOUNT_FRACTION = 2;
-	
+
 	public static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 	public static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
 	/**	Logger	*/
 	private static CLogger s_log = CLogger.getCLogger (JPiereBasePluginDisplayTypeFactory.class);
-	
+
 	@Override
 	public boolean isID(int displayType) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isNumeric(int displayType) {
 		return false;
 	}
-	
+
 	@Override
 	public Integer getDefaultPrecision(int displayType) {
 		return null;
 	}
-	
+
 	@Override
 	public boolean isText(int displayType) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isDate(int displayType) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isLookup(int displayType) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isLOB(int displayType) {
 		return false;
 	}
-	
+
 	@Override
 	public DecimalFormat getNumberFormat(int displayType, Language language, String pattern) {
-		
+
 		Language myLanguage = language;
 		if (myLanguage == null)
 			myLanguage = Language.getLoginLanguage();
@@ -251,7 +213,7 @@ public class JPiereBasePluginDisplayTypeFactory implements IDisplayTypeFactory {
 			format.setMaximumFractionDigits(MAX_FRACTION);
 //			format.setMinimumFractionDigits(MCurrency.getStdPrecision(Env.getCtx(), getC_Currency_ID()));
 //			format.setMinimumFractionDigits(MCurrency.getCostingPrecision(Env.getCtx(), C_Currency_ID));
-			
+
 		}
 		else //if (displayType == Number)
 		{
@@ -262,32 +224,32 @@ public class JPiereBasePluginDisplayTypeFactory implements IDisplayTypeFactory {
 //					return osgiFormat;
 //				}
 //			}
-			
+
 			format.setMaximumIntegerDigits(MAX_DIGITS);
 			format.setMaximumFractionDigits(MAX_FRACTION);
 			format.setMinimumFractionDigits(1);
 		}
 		return format;
 	}//getDecimalFormat
-	
+
 	@Override
 	public SimpleDateFormat getDateFormat(int displayType, Language language, String pattern) {
 		return null;
 	}
-	
+
 	@Override
 	public Class<?> getClass(int displayType, boolean yesNoAsBoolean) {
 		return null;
 	}
-	
+
 	@Override
 	public String getSQLDataType(int displayType, String columnName, int fieldLength) {
 		return null;
 	}
-	
+
 	@Override
 	public String getDescription(int displayType) {
 		return null;
 	}
-	
+
 }

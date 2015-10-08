@@ -1,14 +1,15 @@
 /******************************************************************************
- * Product: JPiere(ジェイピエール) - JPiere Base Plugin                       *
- * Copyright (C) Hideaki Hagiwara All Rights Reserved.                        *
- * このプログラムはGNU Gneral Public Licens Version2のもと公開しています。    *
- * このプログラムは自由に活用してもらう事を期待して公開していますが、         *
- * いかなる保証もしていません。                                               *
- * 著作権は萩原秀明(h.hagiwara@oss-erp.co.jp)が保持し、サポートサービスは     *
- * 株式会社オープンソース・イーアールピー・ソリューションズで                 *
- * 提供しています。サポートをご希望の際には、                                 *
- * 株式会社オープンソース・イーアールピー・ソリューションズまでご連絡下さい。 *
- * http://www.oss-erp.co.jp/                                                  *
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
@@ -161,7 +162,7 @@ public class WFActivityUserBulkUpdate extends SvrProcess
 		IProcessUI processMonitor = Env.getProcessUI(getCtx());
 		int success = 0;
 		int failure = 0;
-		
+
 		for(int i = 0; i < activities.length; i++)
 		{
 			MProcess process = MProcess.get(getCtx(), PROCESS_Manage_Activity);
@@ -181,10 +182,10 @@ public class WFActivityUserBulkUpdate extends SvrProcess
 				failure++;
 				continue;
 			}
-			
+
 			String msg =Msg.getElement(getCtx(), "AD_WF_Process_ID")+" "+Msg.getElement(getCtx(), "TextMsg")+" => "+ activities[i].getAD_WF_Process().getTextMsg();
 			addBufferLog(0, null, null, msg, I_AD_WF_Activity.Table_ID, activities[i].get_ID());
-			
+
 			if (processMonitor != null)
 			{
 				processMonitor.statusUpdate(msg);
