@@ -99,11 +99,21 @@ public class JPiereBankStatementModelValidator implements ModelValidator {
 					if(!payment.isReceipt())
 						payAmt = payAmt.negate();
 
-					if(bsls[i].getTrxAmt().equals(payment.getPayAmt()))
+					if(payment.isReceipt())
 					{
-						;
+						if(bsls[i].getTrxAmt().equals(payment.getPayAmt()))
+						{
+							;
+						}else{
+							return "明細番号:" + bsls[i].getLine() + " 入金／支払伝票の金額と取引金額が一致していません。";
+						}
 					}else{
-						return "明細番号:" + bsls[i].getLine() + " 入金／支払伝票の金額と取引金額が一致していません。";
+						if(bsls[i].getTrxAmt().equals(payment.getPayAmt().negate()))
+						{
+							;
+						}else{
+							return "明細番号:" + bsls[i].getLine() + " 入金／支払伝票の金額と取引金額が一致していません。";
+						}
 					}
 
 				}//if
