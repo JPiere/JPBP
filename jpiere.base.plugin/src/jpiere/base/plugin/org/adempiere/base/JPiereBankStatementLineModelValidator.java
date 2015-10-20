@@ -26,12 +26,14 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 
 /**
  *  JPiere Bank Statement Line Model Validator
+ *  JPIERE-0012
  *
- *  @author  Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: JPiereBankStatementTaxModelValidator.java,v 1.0 2014/08/20
  *
  */
@@ -78,12 +80,18 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 			MBankAccount ba = MBankAccount.get(bsl.getCtx(), bsl.getParent().getC_BankAccount_ID());
 			if(bsl.getAD_Org_ID() != ba.getAD_Org_ID())
 			{
-				return "アカウントに設定されている組織と出納帳の組織が異なります。";//TODO 多言語化
+				return Msg.getMsg(bsl.getCtx(), "JP_DifferentOrg");
 			}
 
 			if(bsl.getC_Currency_ID() != ba.getC_Currency_ID())
 			{
-				return "アカウントに設定されている通貨と出納帳の通貨が異なります。";//TODO 多言語化
+				return Msg.getMsg(bsl.getCtx(), "JP_DifferentCurrency");
+			}
+
+			if(bsl.getChargeAmt().compareTo(Env.ZERO)==0)
+			{
+				bsl.setC_Charge_ID(0);
+				bsl.set_ValueNoCheck("C_Tax_ID", null);
 			}
 
 		}
@@ -116,7 +124,7 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 
 			MTax tax = new MTax(po.getCtx(), new Integer(C_Tax_ID.toString()).intValue(), po.get_TrxName());
 			if(tax.getC_TaxProvider_ID()==0){
-				return "タックスバリデーターを設定して下さい。";//TODO 多言語化
+				return Msg.getMsg(bsl.getCtx(), "JP_SetTaxProvider");
 			}
 
 	        MTaxProvider provider = new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName());
@@ -129,11 +137,11 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 				JPiereBankStatementTaxProvider calculator = (JPiereBankStatementTaxProvider)ppClass.newInstance();
 				boolean isCalculate = calculator.recalculateTax(provider, bsl, newRecord);
 				if(!isCalculate)
-					return "エラー";
+					return Msg.getMsg(bsl.getCtx(), "Error");
 
 	        }else{
 
-	    		return "タックスバリデータの値が不適切です。jpiere.base.plugin.org.adempiere.model.JPiereTaxProviderを設定して下さい。";//TODO 多言語化
+	    		return Msg.getMsg(bsl.getCtx(), "JP_InvalidTaxProvider");
 
 	        }
 
@@ -151,7 +159,7 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 
 	@Override
 	public String docValidate(PO po, int timing) {
-		// TODO 自動生成されたメソッド・スタブ
+
 		return null;
 	}
 
