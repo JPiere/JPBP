@@ -4,7 +4,6 @@ Bundle-Name: jpiere.base.plugin
 Bundle-SymbolicName: jpiere.base.plugin;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ActivationPolicy: lazy
 Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  org.adempiere.plugin.utils;bundle-version="2.1.0",
  org.adempiere.ui.zk;bundle-version="2.1.0",
@@ -24,3 +23,4 @@ Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.webui.editor,
  jpiere.base.plugin.org.compiere.acct,
  jpiere.base.plugin.webui.apps.form
+Bundle-ActivationPolicy: lazy
