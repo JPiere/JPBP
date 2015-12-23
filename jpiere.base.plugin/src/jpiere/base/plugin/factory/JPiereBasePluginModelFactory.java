@@ -12,7 +12,7 @@
  * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 
-package jpiere.base.plugin.ffactory;
+package jpiere.base.plugin.factory;
 
 import java.sql.ResultSet;
 
