@@ -12,7 +12,7 @@
  * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 
-package jpiere.base.plugin.factory;
+package jpiere.base.plugin.ffactory;
 
 import jpiere.base.plugin.org.adempiere.webui.editor.WNumberEditorJP;
 

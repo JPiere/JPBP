@@ -11,7 +11,7 @@
  * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
  * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
-package jpiere.base.plugin.factory;
+package jpiere.base.plugin.ffactory;
 
 import org.adempiere.base.IModelValidatorFactory;
 import org.compiere.model.ModelValidator;
