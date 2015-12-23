@@ -1,0 +1,30 @@
+CREATE TABLE adempiere.I_CorporationGroupJP
+(
+  i_errormsg character varying(2000),
+  i_isimported character(1) DEFAULT 'N'::bpchar,
+  processing character(1),
+  processed character(1) DEFAULT 'N'::bpchar,
+
+  JP_CorporationGroup_ID numeric(10,0),
+  I_CorporationGroupJP_ID numeric(10,0) NOT NULL,
+  I_CorporationGroupJP_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+
+  Value character varying(40) NOT NULL,
+  Name character varying(120) NOT NULL,
+  Name2 character varying(60),
+  Description character varying(255),
+
+  CorporationValue character varying(40),
+  JP_Corporation_ID  numeric(10,0) ,
+
+
+  CONSTRAINT I_CorporationGroupJP_pkey PRIMARY KEY (I_CorporationGroupJP_ID)
+)

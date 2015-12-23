@@ -41,10 +41,10 @@ public class JPiereBasePluginProcessFactory implements IProcessFactory {
 	@Override
 	public ProcessCall newProcessInstance(String className) {
 
-		if (className.startsWith("jpiere.base.plugin.org.adempiere.porcess"))
+		if (className.startsWith("jpiere.base.plugin.org.adempiere.process"))
 		{
 			ProcessCall process = null;
-			process = EquinoxExtensionLocator.instance().locate(ProcessCall.class, "jpiere.base.plugin.org.adempiere.porcess", className, null).getExtension();
+			process = EquinoxExtensionLocator.instance().locate(ProcessCall.class, "jpiere.base.plugin.org.adempiere.process", className, null).getExtension();
 			if (process == null) {
 				//Get Class
 				Class<?> processClass = null;

@@ -5,47 +5,5 @@
          id="jpiere.base.plugin.factory.JPiereBasePluginTaxProviderFactory"
          point="org.adempiere.model.ITaxProvider">
    </extension>
-   <extension
-         id="jpiere.base.plugin.org.adempiere.process.DunsNoCopyInfoWindow"
-         point="org.adempiere.base.Process">
-         <process
-			class="jpiere.base.plugin.org.adempiere.process.DunsNoCopyInfoWindow">
-		</process>
-   </extension>
-   <extension
-         id="jpiere.base.plugin.org.adempiere.process.GLJournalBulkComplete"
-         point="org.adempiere.base.Process">
-         <process
-			class="jpiere.base.plugin.org.adempiere.process.GLJournalBulkComplete">
-		</process>
-   </extension>
-   <extension
-         id="jpiere.base.plugin.org.adempiere.process.WFActivityRespBulkUpdate"
-         point="org.adempiere.base.Process">
-         <process
-			class="jpiere.base.plugin.org.adempiere.process.WFActivityRespBulkUpdate">
-		</process>
-   </extension>
-   <extension
-         id="jpiere.base.plugin.org.adempiere.process.WFActivityUserBulkUpdate"
-         point="org.adempiere.base.Process">
-         <process
-			class="jpiere.base.plugin.org.adempiere.process.WFActivityUserBulkUpdate">
-		</process>
-   </extension>
-   <extension
-         id="jpiere.base.plugin.org.adempiere.process.InvoiceCorpSummary"
-         point="org.adempiere.base.Process">
-        <process
-			class="jpiere.base.plugin.org.adempiere.process.InvoiceCorpSummary">
-		</process>
-   </extension>
-   <extension
-         id="jpiere.base.plugin.org.adempiere.process.CreateBill"
-         point="org.adempiere.base.Process">
-        <process
-			class="jpiere.base.plugin.org.adempiere.process.CreateBill">
-		</process>
-   </extension>
 
 </plugin>

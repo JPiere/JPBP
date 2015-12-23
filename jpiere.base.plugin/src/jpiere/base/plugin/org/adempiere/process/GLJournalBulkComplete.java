@@ -33,7 +33,7 @@ import org.compiere.util.Msg;
 
 
 /**
- * JPIERE-10 GLJournal Bulk Complete
+ * JPIERE-0010 GLJournal Bulk Complete
  *
  *
  *  @author Hideaki Hagiwara

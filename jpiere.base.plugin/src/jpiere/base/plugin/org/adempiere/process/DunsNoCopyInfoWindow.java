@@ -25,7 +25,7 @@ import org.compiere.model.Query;
 import org.compiere.process.SvrProcess;
 
 /**
- *  DUNSナンバー一括コピープロセス.
+ *  DUNS Number Copy at Info Window.
  *
  *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
  *
