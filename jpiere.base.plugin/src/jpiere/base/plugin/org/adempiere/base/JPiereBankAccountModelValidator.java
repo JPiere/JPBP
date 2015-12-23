@@ -23,6 +23,7 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 public class JPiereBankAccountModelValidator implements ModelValidator {
 
@@ -61,7 +62,7 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 		{
 			MBankAccount bankAcct = (MBankAccount)po;
 			String jp_RequesterName = (String)bankAcct.get_Value("JP_RequesterName");
-			if(jp_RequesterName != null)
+			if(!Util.isEmpty(jp_RequesterName))
 			{
 				for(int i = 0; i < jp_RequesterName.length(); i++)
 				{
@@ -78,53 +79,74 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 
 
 				String jp_RequesterCode = (String)bankAcct.get_Value("JP_RequesterCode");
-				if(jp_RequesterCode.length()!=ZenginCheck.JP_RequesterCode)
+				if(Util.isEmpty(jp_RequesterCode))
 				{
-					return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "は" + ZenginCheck.JP_RequesterCode + "桁です。";
-				}
+					return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "が入力されていません。";
+				}else{
 
-				if(!ZenginCheck.numStringCheck(jp_RequesterCode))
-				{
-					return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "に半角数値以外の文字が使用されています。";
+					if(jp_RequesterCode.length()!=ZenginCheck.JP_RequesterCode)
+					{
+						return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "は" + ZenginCheck.JP_RequesterCode + "桁です。";
+					}
+
+					if(!ZenginCheck.numStringCheck(jp_RequesterCode))
+					{
+						return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "に半角数値以外の文字が使用されています。";
+					}
 				}
 
 
 				String jp_BranchCode = (String)bankAcct.get_Value("JP_BranchCode");
-				if(jp_BranchCode.length()!=ZenginCheck.JP_BranchCode)
+				if(Util.isEmpty(jp_BranchCode))
 				{
-					return Msg.getElement(Env.getCtx(), "JP_BranchCode") + "は" + ZenginCheck.JP_BranchCode + "桁です。";
-				}
+					return Msg.getElement(Env.getCtx(), "jp_BranchCode")  + "が入力されていません。";
+				}else{
+					if(jp_BranchCode.length()!=ZenginCheck.JP_BranchCode)
+					{
+						return Msg.getElement(Env.getCtx(), "JP_BranchCode") + "は" + ZenginCheck.JP_BranchCode + "桁です。";
+					}
 
-				if(!ZenginCheck.numStringCheck(jp_BranchCode))
-				{
-					return Msg.getElement(Env.getCtx(), "JP_BranchCode") + "に半角数値以外の文字が使用されています。";
+					if(!ZenginCheck.numStringCheck(jp_BranchCode))
+					{
+						return Msg.getElement(Env.getCtx(), "JP_BranchCode") + "に半角数値以外の文字が使用されています。";
+					}
 				}
 
 
 				String jp_BranchName_Kana = (String)bankAcct.get_Value("JP_BranchName_Kana");
-				for(int i = 0; i < jp_BranchName_Kana.length(); i++)
+				if(Util.isEmpty(jp_BranchName_Kana))
 				{
-					if(!ZenginCheck.charCheck(jp_BranchName_Kana.charAt(i)))
+					return Msg.getElement(Env.getCtx(), "jp_BranchName_Kana")  + "が入力されていません。";
+				}else{
+					for(int i = 0; i < jp_BranchName_Kana.length(); i++)
 					{
-						return "「" + jp_BranchName_Kana.charAt(i) + "」は使えない文字です。";
+						if(!ZenginCheck.charCheck(jp_BranchName_Kana.charAt(i)))
+						{
+							return "「" + jp_BranchName_Kana.charAt(i) + "」は使えない文字です。";
+						}
+					}//for
+
+					if(jp_BranchName_Kana.length() > ZenginCheck.JP_BranchName_Kana)
+					{
+						return Msg.getElement(Env.getCtx(), "jp_BranchName_Kana") + "は" + ZenginCheck.JP_BranchName_Kana + "以内です。";
 					}
-				}//for
 
-				if(jp_BranchName_Kana.length() > ZenginCheck.JP_BranchName_Kana)
-				{
-					return Msg.getElement(Env.getCtx(), "jp_BranchName_Kana") + "は" + ZenginCheck.JP_BranchName_Kana + "以内です。";
 				}
-
 
 				String accountNo = (String)bankAcct.getAccountNo();
-				if(accountNo.length()!=ZenginCheck.JP_AccountNo)
+				if(Util.isEmpty(accountNo))
 				{
-					return Msg.getElement(Env.getCtx(), "AccountNo") + "は" + ZenginCheck.JP_AccountNo + "桁です。";
-				}
+					return Msg.getElement(Env.getCtx(), "accountNo")  + "が入力されていません。";
+				}else{
+					if(accountNo.length()!=ZenginCheck.JP_AccountNo)
+					{
+						return Msg.getElement(Env.getCtx(), "AccountNo") + "は" + ZenginCheck.JP_AccountNo + "桁です。";
+					}
 
-				if(!ZenginCheck.numStringCheck(accountNo))
-				{
-					return Msg.getElement(Env.getCtx(), "AccountNo") + "に半角数値以外の文字が使用されています。";
+					if(!ZenginCheck.numStringCheck(accountNo))
+					{
+						return Msg.getElement(Env.getCtx(), "AccountNo") + "に半角数値以外の文字が使用されています。";
+					}
 				}
 
 				bankAcct.setPaymentExportClass(ZenginCheck.PAYMENT_EXPORT_CLASS);
@@ -137,7 +159,7 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 
 	@Override
 	public String docValidate(PO po, int timing) {
-		// TODO 自動生成されたメソッド・スタブ
+
 		return null;
 	}
 

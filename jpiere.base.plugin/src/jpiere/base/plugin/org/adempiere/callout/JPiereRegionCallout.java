@@ -33,12 +33,22 @@ public class JPiereRegionCallout implements IColumnCallout {
 		Integer C_Region_ID = (Integer)value;
 		MRegion region = null;
 
-		if(C_Region_ID == null){
-//			mTab.setValue("RegionName", "");
-		}else{
-			region = MRegion.get(ctx, C_Region_ID);
-			mTab.setValue("RegionName", region.getName());
+		if(C_Region_ID == null)
+		{
+			return null;
+		//Display OR Region info.
+		}else if(C_Region_ID==142){
+			Object obj =mTab.getValue("C_Country_ID");
+			if(Integer.parseInt(obj.toString())!=100)
+			{
+				mTab.setValue("C_Region_ID", "");
+				return null;
+			}
 		}
+
+		region = MRegion.get(ctx, C_Region_ID);
+		mTab.setValue("RegionName", region.getName());
+
 
 		return null;
 	}
