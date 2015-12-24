@@ -28,7 +28,7 @@ import org.compiere.util.CLogger;
 /**
  *  JPiere BankStatement Model Validator
  *
- *  @author  Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: JPiereBankStatementModelValidator.java,v 1.0 2015/04/29
  *
  */

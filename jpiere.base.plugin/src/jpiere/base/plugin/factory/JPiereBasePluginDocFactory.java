@@ -30,7 +30,7 @@ import org.compiere.util.DB;
 /**
  *  JPiere Bank Statement Tax Doc Factory
  *
- *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: Doc_JPiereBankStatementTaxDocFactory.java,v 1.0 2014/08/20
  *
  */

@@ -24,7 +24,7 @@ import org.compiere.util.CLogger;
  * JPiere Tax Provider Factory
  *
  *
- * @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ * @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  * @version  $Id: JPiereTaxProviderFactory.java,v 1.0 2014/08/20
  *
  */

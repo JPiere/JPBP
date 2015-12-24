@@ -19,7 +19,7 @@ import org.compiere.model.ModelValidator;
 /**
  *  JPiere Bank Statement Tax Model Validator Factory
  *
- *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: JPiereBankStatementTaxModelValidatorFactory.java,v 1.0 2014/08/20
  *
  */
