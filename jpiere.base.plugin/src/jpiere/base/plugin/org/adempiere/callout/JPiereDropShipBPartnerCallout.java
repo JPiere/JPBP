@@ -17,17 +17,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
-import org.compiere.model.MBPartnerLocation;
-import org.compiere.model.MOrder;
-import org.compiere.model.MPriceList;
-import org.compiere.model.X_C_Order;
 import org.compiere.util.DB;
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 
 /**
