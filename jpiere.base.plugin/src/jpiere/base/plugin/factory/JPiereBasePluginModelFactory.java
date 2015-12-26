@@ -22,9 +22,11 @@ import jpiere.base.plugin.org.adempiere.model.MBillSchema;
 import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
+import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
 
 import org.adempiere.base.IModelFactory;
+import org.compiere.model.MOrder;
 import org.compiere.model.PO;
 import org.compiere.util.Env;
 
@@ -41,20 +43,29 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 	@Override
 	public Class<?> getClass(String tableName) {
-		if(tableName.equals(MCorporation.Table_Name)){
-			return MCorporation.class;
-		}else if(tableName.equals(MCorporationGroup.Table_Name)){
-			return MCorporationGroup.class;
-		}else if(tableName.equals(MGroupCorporations.Table_Name)){
-			return MGroupCorporations.class;
-		}else if(tableName.equals(MBill.Table_Name)){
-			return MBill.class;
-		}else if(tableName.equals(MBillLine.Table_Name)){
-			return MBillLine.class;
-		}else if(tableName.equals(MReferenceTest.Table_Name)){
-			return MReferenceTest.class;
-		}else if(tableName.equals(MBillSchema.Table_Name)){
-			return MBillSchema.class;
+		
+		if(tableName.startsWith("JP"))
+		{
+			if(tableName.equals(MCorporation.Table_Name)){
+				return MCorporation.class;
+			}else if(tableName.equals(MCorporationGroup.Table_Name)){
+				return MCorporationGroup.class;
+			}else if(tableName.equals(MGroupCorporations.Table_Name)){
+				return MGroupCorporations.class;
+			}else if(tableName.equals(MBill.Table_Name)){
+				return MBill.class;
+			}else if(tableName.equals(MBillLine.Table_Name)){
+				return MBillLine.class;
+			}else if(tableName.equals(MReferenceTest.Table_Name)){
+				return MReferenceTest.class;
+			}else if(tableName.equals(MBillSchema.Table_Name)){
+				return MBillSchema.class;
+			}
+			
+		}else{
+			if(tableName.equals(MOrder.Table_Name)){
+				return MOrderJP.class;
+			}
 		}
 
 		return null;
@@ -62,42 +73,60 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 	@Override
 	public PO getPO(String tableName, int Record_ID, String trxName) {
-		if(tableName.equals(MCorporation.Table_Name)){
-			return  new MCorporation(Env.getCtx(), Record_ID, trxName);
-		}else if(tableName.equals(MCorporationGroup.Table_Name)){
-			return  new MCorporationGroup(Env.getCtx(), Record_ID, trxName);
-		}else if(tableName.equals(MGroupCorporations.Table_Name)){
-			return  new MGroupCorporations(Env.getCtx(), Record_ID, trxName);
-		}else if(tableName.equals(MBill.Table_Name)){
-			return  new MBill(Env.getCtx(), Record_ID, trxName);
-		}else if(tableName.equals(MBillLine.Table_Name)){
-			return  new MBillLine(Env.getCtx(), Record_ID, trxName);
-		}else if(tableName.equals(MReferenceTest.Table_Name)){
-			return  new MReferenceTest(Env.getCtx(), Record_ID, trxName);
-		}else if(tableName.equals(MBillSchema.Table_Name)){
-			return  new MBillSchema(Env.getCtx(), Record_ID, trxName);
+		
+		if(tableName.startsWith("JP"))
+		{
+		
+			if(tableName.equals(MCorporation.Table_Name)){
+				return  new MCorporation(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MCorporationGroup.Table_Name)){
+				return  new MCorporationGroup(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MGroupCorporations.Table_Name)){
+				return  new MGroupCorporations(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MBill.Table_Name)){
+				return  new MBill(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MBillLine.Table_Name)){
+				return  new MBillLine(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MReferenceTest.Table_Name)){
+				return  new MReferenceTest(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MBillSchema.Table_Name)){
+				return  new MBillSchema(Env.getCtx(), Record_ID, trxName);
+			}
+			
+		}else{
+			if(tableName.equals(MOrder.Table_Name)){
+				return  new MOrderJP(Env.getCtx(), Record_ID, trxName);
+			}		
 		}
-
 
 		return null;
 	}
 
 	@Override
 	public PO getPO(String tableName, ResultSet rs, String trxName) {
-		if(tableName.equals(MCorporation.Table_Name)){
-			return  new MCorporation(Env.getCtx(), rs, trxName);
-		}else if(tableName.equals(MCorporationGroup.Table_Name)){
-			return  new MCorporationGroup(Env.getCtx(), rs, trxName);
-		}else if(tableName.equals(MGroupCorporations.Table_Name)){
-			return  new MGroupCorporations(Env.getCtx(), rs, trxName);
-		}else if(tableName.equals(MBill.Table_Name)){
-			return  new MBill(Env.getCtx(), rs, trxName);
-		}else if(tableName.equals(MBillLine.Table_Name)){
-			return  new MBillLine(Env.getCtx(), rs, trxName);
-		}else if(tableName.equals(MReferenceTest.Table_Name)){
-			return  new MReferenceTest(Env.getCtx(), rs, trxName);
-		}else if(tableName.equals(MBillSchema.Table_Name)){
-			return  new MBillSchema(Env.getCtx(), rs, trxName);
+		
+		if(tableName.startsWith("JP"))
+		{
+		
+			if(tableName.equals(MCorporation.Table_Name)){
+				return  new MCorporation(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MCorporationGroup.Table_Name)){
+				return  new MCorporationGroup(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MGroupCorporations.Table_Name)){
+				return  new MGroupCorporations(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MBill.Table_Name)){
+				return  new MBill(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MBillLine.Table_Name)){
+				return  new MBillLine(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MReferenceTest.Table_Name)){
+				return  new MReferenceTest(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MBillSchema.Table_Name)){
+				return  new MBillSchema(Env.getCtx(), rs, trxName);
+			}
+		}else{
+			if(tableName.equals(MOrder.Table_Name)){
+				return  new MOrderJP(Env.getCtx(), rs, trxName);
+			}		
 		}
 
 		return null;
