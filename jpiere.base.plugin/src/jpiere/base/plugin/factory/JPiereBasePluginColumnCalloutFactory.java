@@ -20,12 +20,14 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 
 import org.adempiere.base.IColumnCallout;
 import org.adempiere.base.IColumnCalloutFactory;
 import org.compiere.model.MLocation;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 
 /**
@@ -43,20 +45,29 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 		List<IColumnCallout> list = new ArrayList<IColumnCallout>();
 
-		if(tableName.equals(MPayment.Table_Name) && columnName.equals(MPayment.COLUMNNAME_C_BankAccount_ID))
+		if(tableName.startsWith("JP"))
 		{
-			list.add(new JPiereBankAcountCallout());
-		}else if(tableName.equals(MLocation.Table_Name) && columnName.equals(MLocation.COLUMNNAME_C_Region_ID)){
-			list.add(new JPiereRegionCallout());
-		}else if(tableName.equals(MLocation.Table_Name) && columnName.equals(MLocation.COLUMNNAME_C_City_ID)){
-			list.add(new JPiereCityCallout());
-		}else if(tableName.equals(MBill.Table_Name) && columnName.equals(MBill.COLUMNNAME_C_BPartner_ID)){
-			list.add(new JPiereBillBPartnerCallout());
-		}else if(tableName.equals(MBill.Table_Name) && (columnName.equals(MBill.COLUMNNAME_JP_LastBill_ID)
-														|| columnName.equals(MBill.COLUMNNAME_JPLastBillAmt)
-														|| columnName.equals(MBill.COLUMNNAME_C_Payment_ID)
-														|| columnName.equals(MBill.COLUMNNAME_JPLastPayAmt))){
-			list.add(new JPiereBillAmountCallout());
+			if(tableName.equals(MBill.Table_Name) && columnName.equals(MBill.COLUMNNAME_C_BPartner_ID))
+			{
+				list.add(new JPiereBillBPartnerCallout());
+			}else if(tableName.equals(MBill.Table_Name) && (columnName.equals(MBill.COLUMNNAME_JP_LastBill_ID)
+															|| columnName.equals(MBill.COLUMNNAME_JPLastBillAmt)
+															|| columnName.equals(MBill.COLUMNNAME_C_Payment_ID)
+															|| columnName.equals(MBill.COLUMNNAME_JPLastPayAmt))){
+				list.add(new JPiereBillAmountCallout());
+			}
+
+		}else{
+			if(tableName.equals(MPayment.Table_Name) && columnName.equals(MPayment.COLUMNNAME_C_BankAccount_ID))
+			{
+				list.add(new JPiereBankAcountCallout());
+			}else if(tableName.equals(MLocation.Table_Name) && columnName.equals(MLocation.COLUMNNAME_C_Region_ID)){
+				list.add(new JPiereRegionCallout());
+			}else if(tableName.equals(MLocation.Table_Name) && columnName.equals(MLocation.COLUMNNAME_C_City_ID)){
+				list.add(new JPiereCityCallout());
+			}else if(tableName.equals(MOrder.Table_Name) && columnName.equals(MOrder.COLUMNNAME_DropShip_BPartner_ID)){
+				list.add(new JPiereDropShipBPartnerCallout());
+			}
 		}
 
 		return list != null ? list.toArray(new IColumnCallout[0]) : new IColumnCallout[0];
