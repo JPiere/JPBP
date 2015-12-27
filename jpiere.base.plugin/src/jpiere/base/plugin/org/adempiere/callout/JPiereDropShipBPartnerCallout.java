@@ -21,6 +21,7 @@ import java.util.Properties;
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.model.MInOut;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
@@ -36,16 +37,29 @@ public class JPiereDropShipBPartnerCallout implements IColumnCallout {
 
 
 	@Override
-	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue) 
+	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
+
+		boolean IsSOTrx = "Y".equals(Env.getContext(ctx, WindowNo, "IsSOTrx"));
+		if(!IsSOTrx)
+			return "";
 
 		Integer C_BPartner_ID = (Integer)value;
 		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
 			return "";
-		
-		boolean IsSOTrx = "Y".equals(Env.getContext(ctx, WindowNo, "IsSOTrx"));
-		if(!IsSOTrx)
-			return "";
+
+		//C_Order_ID field that is in shipment document is Mandatory.
+		//And I do not want orverwrite Dropship infomarion that is copied form Sales Order Document.
+		if(mTab.getTableName().equals(MInOut.Table_Name))
+		{
+			//Jugement of Shipment
+			if(!mTab.getValue("MovementType").toString().equals("C-"))
+				return "";
+
+			//If not new record, we can overwrite shipment information that was copied from Sales Order.
+			if(mTab.isNew())
+				return "";
+		}
 
 		String sql = "SELECT bp.C_BPartner_ID,"
 			+ "loc.C_BPartner_Location_ID,"
@@ -64,16 +78,7 @@ public class JPiereDropShipBPartnerCallout implements IColumnCallout {
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				
-				if(mField.getColumnName().equals("C_BPartner_ID"))
-				{
-					if (C_BPartner_ID.intValue() == 0)
-						mTab.setValue("DropShip_BPartner_ID", null);
-					else
-						mTab.setValue("DropShip_BPartner_ID", C_BPartner_ID);
-				}
-					
-				int DropShip_Location_ID = rs.getInt(2);	
+				int DropShip_Location_ID = rs.getInt(2);
 				if (DropShip_Location_ID == 0)
 					mTab.setValue("DropShip_Location_ID", null);
 				else
