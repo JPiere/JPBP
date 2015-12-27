@@ -48,6 +48,7 @@ public class JPiereDropShipBPartnerCallout implements IColumnCallout {
 		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
 			return "";
 
+		//JPIERE-0144:JPBP - JPiere Shipment Document CallOut.
 		//C_Order_ID field that is in shipment document is Mandatory.
 		//And I do not want orverwrite Dropship infomarion that is copied form Sales Order Document.
 		if(mTab.getTableName().equals(MInOut.Table_Name))
