@@ -13,14 +13,18 @@
  *****************************************************************************/
 package jpiere.base.plugin.factory;
 
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromShipmentUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromStatementUI;
 
 import org.compiere.grid.ICreateFrom;
 import org.compiere.grid.ICreateFromFactory;
 import org.compiere.model.GridTab;
 import org.compiere.model.I_C_BankStatement;
+import org.compiere.model.MInOut;
 
 /**
+ * JPIERE-0091,0145
+ *
  * @author Hideaki Hagiwara
  *
  */
@@ -32,7 +36,14 @@ public class JPiereBasePluginCreateFromFactory implements ICreateFromFactory
 	{
 		String tableName = mTab.getTableName();
 		if (tableName.equals(I_C_BankStatement.Table_Name))
-			return new JPiereCreateFromStatementUI(mTab);
+		{
+			return new JPiereCreateFromStatementUI(mTab);	//JPIERE-0091
+		}else if(tableName.equals(MInOut.Table_Name)){
+			if(mTab.getGridWindow().isSOTrx())
+			{
+				return new JPiereCreateFromShipmentUI(mTab);//JPIERE-0145
+			}
+		}
 
 		return null;
 	}
