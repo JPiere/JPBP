@@ -19,6 +19,7 @@ import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRegion;
+import org.compiere.util.Util;
 
 /**
  * @author Hideaki Hagiwara
@@ -30,14 +31,14 @@ public class JPiereRegionCallout implements IColumnCallout {
 	@Override
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue) {
 
+		if(value==null || Util.isEmpty(value.toString()))
+			return "";
+
 		Integer C_Region_ID = (Integer)value;
 		MRegion region = null;
 
-		if(C_Region_ID == null)
+		if(C_Region_ID==142)//C_Region_ID==142 is Oragon at United States
 		{
-			return null;
-		//Display OR Region info.
-		}else if(C_Region_ID==142){
 			Object obj =mTab.getValue("C_Country_ID");
 			if(Integer.parseInt(obj.toString())!=100)
 			{
@@ -48,7 +49,6 @@ public class JPiereRegionCallout implements IColumnCallout {
 
 		region = MRegion.get(ctx, C_Region_ID);
 		mTab.setValue("RegionName", region.getName());
-
 
 		return null;
 	}
