@@ -23,6 +23,8 @@ import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
+import jpiere.base.plugin.org.adempiere.model.MProductCategoryL1;
+import jpiere.base.plugin.org.adempiere.model.MProductCategoryL2;
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
 
 import org.adempiere.base.IModelFactory;
@@ -43,7 +45,7 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 	@Override
 	public Class<?> getClass(String tableName) {
-		
+
 		if(tableName.startsWith("JP"))
 		{
 			if(tableName.equals(MCorporation.Table_Name)){
@@ -60,8 +62,12 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MReferenceTest.class;
 			}else if(tableName.equals(MBillSchema.Table_Name)){
 				return MBillSchema.class;
+			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
+				return MProductCategoryL1.class;
+			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
+				return MProductCategoryL2.class;
 			}
-			
+
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
 				return MOrderJP.class;
@@ -73,10 +79,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 	@Override
 	public PO getPO(String tableName, int Record_ID, String trxName) {
-		
+
 		if(tableName.startsWith("JP"))
 		{
-		
+
 			if(tableName.equals(MCorporation.Table_Name)){
 				return  new MCorporation(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MCorporationGroup.Table_Name)){
@@ -91,12 +97,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MReferenceTest(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MBillSchema.Table_Name)){
 				return  new MBillSchema(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
+				return  new MProductCategoryL1(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
+				return  new MProductCategoryL2(Env.getCtx(), Record_ID, trxName);
 			}
-			
+
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
 				return  new MOrderJP(Env.getCtx(), Record_ID, trxName);
-			}		
+			}
 		}
 
 		return null;
@@ -104,10 +114,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 	@Override
 	public PO getPO(String tableName, ResultSet rs, String trxName) {
-		
+
 		if(tableName.startsWith("JP"))
 		{
-		
+
 			if(tableName.equals(MCorporation.Table_Name)){
 				return  new MCorporation(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MCorporationGroup.Table_Name)){
@@ -122,11 +132,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MReferenceTest(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MBillSchema.Table_Name)){
 				return  new MBillSchema(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
+				return  new MProductCategoryL1(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
+				return  new MProductCategoryL2(Env.getCtx(), rs, trxName);
 			}
+
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
 				return  new MOrderJP(Env.getCtx(), rs, trxName);
-			}		
+			}
 		}
 
 		return null;
