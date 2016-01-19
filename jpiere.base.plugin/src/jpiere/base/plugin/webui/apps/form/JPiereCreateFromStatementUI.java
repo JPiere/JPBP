@@ -57,6 +57,7 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Hbox;
 
 /**
+ * JPIERE-0091
  *
  * @author Elaine
  * @author Hideaki Hagiwara
@@ -166,7 +167,7 @@ public class JPiereCreateFromStatementUI extends JPiereCreateFromStatement imple
 		tenderTypeField = new WTableDirEditor (MPayment.COLUMNNAME_TenderType,false,false,true,lookup);
 		tenderTypeField.getComponent().addEventListener(Events.ON_CHANGE, this);
 
-		lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, 3499, DisplayType.Search);
+		lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, 5844, DisplayType.Search);//5844=AD_User.C_BPartner_ID
 		bPartnerLookup = new WSearchEditor ("C_BPartner_ID", false, false, true, lookup);
 
 		Timestamp date = Env.getContextAsDate(Env.getCtx(), p_WindowNo, MBankStatement.COLUMNNAME_StatementDate);
