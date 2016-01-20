@@ -27,6 +27,8 @@ import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryGLine;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryL1;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryL2;
+import jpiere.base.plugin.org.adempiere.model.MProductGroup;
+import jpiere.base.plugin.org.adempiere.model.MProductGroupLine;
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
 
 import org.adempiere.base.IModelFactory;
@@ -73,6 +75,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MProductCategoryG.class;
 			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
 				return MProductCategoryGLine.class;
+			}else if(tableName.equals(MProductGroup.Table_Name)){
+				return MProductGroup.class;
+			}else if(tableName.equals(MProductGroupLine.Table_Name)){
+				return MProductGroupLine.class;
 			}
 
 		}else{
@@ -112,6 +118,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MProductCategoryG(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
 				return  new MProductCategoryGLine(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MProductGroup.Table_Name)){
+				return  new MProductGroup(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MProductGroupLine.Table_Name)){
+				return  new MProductGroupLine(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -151,6 +161,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MProductCategoryG(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
 				return  new MProductCategoryGLine(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MProductGroup.Table_Name)){
+				return  new MProductGroup(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MProductGroupLine.Table_Name)){
+				return  new MProductGroupLine(Env.getCtx(), rs, trxName);
 			}
 
 		}else{
