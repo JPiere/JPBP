@@ -4,18 +4,18 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /**
- * JPIERE-0148
+ * JPIERE-0149
  *
  * @author Hideaki Hagiwara
  *
  */
-public class MProductCategoryL2 extends X_JP_ProductCategoryL2 {
+public class MProductCategoryG extends X_JP_ProductCategoryG {
 
-	public MProductCategoryL2(Properties ctx, int JP_ProductCategoryL2_ID, String trxName) {
-		super(ctx, JP_ProductCategoryL2_ID, trxName);
+	public MProductCategoryG(Properties ctx, int JP_ProductCategoryG_ID, String trxName) {
+		super(ctx, JP_ProductCategoryG_ID, trxName);
 	}
 
-	public MProductCategoryL2(Properties ctx, ResultSet rs, String trxName) {
+	public MProductCategoryG(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
 

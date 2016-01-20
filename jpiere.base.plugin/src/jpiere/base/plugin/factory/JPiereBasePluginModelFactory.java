@@ -23,6 +23,8 @@ import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
+import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
+import jpiere.base.plugin.org.adempiere.model.MProductCategoryGLine;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryL1;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryL2;
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
@@ -37,6 +39,7 @@ import org.compiere.util.Env;
  *
  *  JPIERE-0024:JPBP:Corporation Master & Corporation Group Master
  *  JPIERE-0106:JPBP:Bill
+ *  JPIERE-0148,0149,0150
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
@@ -66,6 +69,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MProductCategoryL1.class;
 			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
 				return MProductCategoryL2.class;
+			}else if(tableName.equals(MProductCategoryG.Table_Name)){
+				return MProductCategoryG.class;
+			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
+				return MProductCategoryGLine.class;
 			}
 
 		}else{
@@ -101,6 +108,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MProductCategoryL1(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
 				return  new MProductCategoryL2(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MProductCategoryG.Table_Name)){
+				return  new MProductCategoryG(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
+				return  new MProductCategoryGLine(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -136,6 +147,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MProductCategoryL1(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
 				return  new MProductCategoryL2(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MProductCategoryG.Table_Name)){
+				return  new MProductCategoryG(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
+				return  new MProductCategoryGLine(Env.getCtx(), rs, trxName);
 			}
 
 		}else{
