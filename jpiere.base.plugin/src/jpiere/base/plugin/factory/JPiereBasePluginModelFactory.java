@@ -21,6 +21,7 @@ import jpiere.base.plugin.org.adempiere.model.MBillLine;
 import jpiere.base.plugin.org.adempiere.model.MBillSchema;
 import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
+import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
@@ -30,6 +31,10 @@ import jpiere.base.plugin.org.adempiere.model.MProductCategoryL2;
 import jpiere.base.plugin.org.adempiere.model.MProductGroup;
 import jpiere.base.plugin.org.adempiere.model.MProductGroupLine;
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
+import jpiere.base.plugin.org.adempiere.model.MSalesRegionG;
+import jpiere.base.plugin.org.adempiere.model.MSalesRegionGLine;
+import jpiere.base.plugin.org.adempiere.model.MSalesRegionL1;
+import jpiere.base.plugin.org.adempiere.model.MSalesRegionL2;
 
 import org.adempiere.base.IModelFactory;
 import org.compiere.model.MOrder;
@@ -41,7 +46,8 @@ import org.compiere.util.Env;
  *
  *  JPIERE-0024:JPBP:Corporation Master & Corporation Group Master
  *  JPIERE-0106:JPBP:Bill
- *  JPIERE-0148,0149,0150
+ *  JPIERE-0148,0149,0150	Product category Group
+ *  JPIERE-0151,0152,0153   Sales Region Group & Delivery Days from Warehouse
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
@@ -79,6 +85,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MProductGroup.class;
 			}else if(tableName.equals(MProductGroupLine.Table_Name)){
 				return MProductGroupLine.class;
+			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
+				return MSalesRegionL2.class;
+			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
+				return MSalesRegionL1.class;
+			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
+				return MSalesRegionG.class;
+			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
+				return MSalesRegionGLine.class;
+			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
+				return MDeliveryDays.class;
 			}
 
 		}else{
@@ -122,6 +138,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MProductGroup(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MProductGroupLine.Table_Name)){
 				return  new MProductGroupLine(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
+				return  new MSalesRegionL2(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
+				return  new MSalesRegionL1(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
+				return  new MSalesRegionG(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
+				return  new MSalesRegionGLine(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
+				return  new MDeliveryDays(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -165,6 +191,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MProductGroup(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MProductGroupLine.Table_Name)){
 				return  new MProductGroupLine(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
+				return  new MSalesRegionL2(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
+				return  new MSalesRegionL1(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
+				return  new MSalesRegionG(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
+				return  new MSalesRegionGLine(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
+				return  new MDeliveryDays(Env.getCtx(), rs, trxName);
 			}
 
 		}else{
