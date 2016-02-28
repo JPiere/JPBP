@@ -239,7 +239,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 
 		if(oList.size() < 1)
 		{
-			return Msg.getMsg(getCtx(), "NotFound");
+			return Msg.getMsg(getCtx(), "NotFound");//* Not found *
 		}
 
 		for(MOrder order : oList)
@@ -317,7 +317,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 			}
 			m_invoice = new MInvoice (order, 0, dateInvoiced);
 			if (!m_invoice.save())
-				throw new IllegalStateException("Could not create Invoice (s)");
+				throw new IllegalStateException(Msg.getMsg(getCtx(), "SaveError"));//Could not save changes:
 		}
 
 		//	Create Shipment Comment Line
@@ -347,7 +347,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 			line.setDescription(reference.toString());
 			line.setLine(m_line + sLine.getLine() - 2);
 			if (!line.save())
-				throw new IllegalStateException("Could not create Invoice Comment Line (sh)");
+				throw new IllegalStateException(Msg.getMsg(getCtx(), "SaveError"));//Could not save changes:
 			//	Optional Ship Address if not Bill Address
 			if (order.getBill_Location_ID() != ship.getC_BPartner_Location_ID())
 			{
@@ -357,7 +357,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 				line.setDescription(addr.toString());
 				line.setLine(m_line + sLine.getLine() - 1);
 				if (!line.save())
-					throw new IllegalStateException("Could not create Invoice Comment Line 2 (sh)");
+					throw new IllegalStateException(Msg.getMsg(getCtx(), "SaveError"));//Could not save changes:
 			}
 		}
 		//
@@ -370,11 +370,11 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 		line.setQtyInvoiced(sLine.getMovementQty());
 		line.setLine(m_line + sLine.getLine());
 		if (!line.save())
-			throw new IllegalStateException("Could not create Invoice Line (s)");
+			throw new IllegalStateException(Msg.getMsg(getCtx(), "SaveError"));//Could not save changes:
 		//	Link
 		sLine.setIsInvoiced(true);
 		if (!sLine.save())
-			throw new IllegalStateException("Could not update Shipment Line");
+			throw new IllegalStateException(Msg.getMsg(getCtx(), "SaveError"));//Could not save changes:
 
 		if (log.isLoggable(Level.FINE)) log.fine(line.toString());
 	}	//	createLine
@@ -450,7 +450,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 			{
 				log.warning("completeInvoice - failed: " + m_invoice);
 				addBufferLog(0, null, null,"completeInvoice - failed: " + m_invoice,m_invoice.get_Table_ID(),m_invoice.getC_Invoice_ID());
-				throw new IllegalStateException("Invoice Process Failed: " + m_invoice + " - " + m_invoice.getProcessMsg());
+				throw new IllegalStateException(Msg.getMsg(getCtx(), "ProcessFailed") +" "+ m_invoice + " - " + m_invoice.getProcessMsg());
 
 			}
 			m_invoice.saveEx();
