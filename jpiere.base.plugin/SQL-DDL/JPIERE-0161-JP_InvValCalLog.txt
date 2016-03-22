@@ -1,0 +1,45 @@
+CREATE TABLE adempiere.JP_InvValCalLog
+(
+  JP_InvValCalLog_ID numeric(10,0) NOT NULL,
+  JP_InvValCalLog_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  JP_InvValCalLine_ID numeric(10,0) NOT NULL,
+  Line numeric(10,0) NOT NULL,
+  M_InOutLine_ID numeric(10,0),
+  C_OrderLine_ID numeric(10,0),
+  C_InvoiceLine_ID numeric(10,0),
+  IsTaxIncluded  character(1) NOT NULL DEFAULT 'N'::bpchar,
+  M_PriceList_ID numeric(10,0),
+  C_Currency_ID  numeric(10,0) NOT NULL,
+  C_ConversionType_ID numeric(10,0),
+
+  QtyEntered numeric DEFAULT 0,
+  C_UOM_ID numeric(10,0),
+  Qty numeric DEFAULT 0,
+
+  PriceEntered numeric DEFAULT 0,
+  PriceActual numeric DEFAULT 0,
+  C_Tax_ID  numeric(10,0),
+  LineNetAmt numeric DEFAULT 0,
+
+  C_Currency_ID_To numeric(10,0),
+  MultiplyRate numeric DEFAULT 0,
+  DivideRate numeric DEFAULT 0,
+
+  JP_ExchangedAmt numeric DEFAULT 0,
+  JP_ExchangedNoTaxAmt numeric DEFAULT 0,
+  JP_ExchangedPriceActual numeric DEFAULT 0,
+  JP_ApplyQty numeric DEFAULT 0,
+  JP_ApplyAmt numeric DEFAULT 0,
+
+  Description character varying(255),
+
+  CONSTRAINT JP_InvValCalLog_pkey PRIMARY KEY (JP_InvValCalLog_ID)
+)

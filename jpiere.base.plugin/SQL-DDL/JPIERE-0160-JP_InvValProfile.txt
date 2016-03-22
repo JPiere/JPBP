@@ -1,0 +1,33 @@
+CREATE TABLE adempiere.JP_InvValProfile
+(
+  JP_InvValProfile_ID numeric(10,0) NOT NULL,
+  JP_InvValProfile_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  Value character varying(40) NOT NULL,
+  Name character varying(120) NOT NULL,
+  Description character varying(255),
+
+  IsDefault character(1) NOT NULL DEFAULT 'N'::bpchar,
+  C_AcctSchema_ID numeric(10,0),
+  CostingMethod character(1) NOT NULL,
+  CostingLevel character(1) NOT NULL,
+  C_Currency_ID numeric(10,0) NOT NULL,
+  JP_ApplyAmtList character(2),
+  JP_InvValCalLineClass character varying(255),
+  JP_InvValCalClass character varying(255),
+  JP_InvValUpdateCostClass character varying(255),
+  JP_InvValAdjustLineClass character varying(255),
+  JP_InvValAdjustCalClass character varying(255),
+  JP_GLJournalCreateClass character varying(255),
+
+  M_Product_Category_ID  numeric(10,0),
+
+  CONSTRAINT JP_InvValProfile_pkey PRIMARY KEY (JP_InvValProfile_ID)
+)

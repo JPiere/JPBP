@@ -23,6 +23,11 @@ import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
+import jpiere.base.plugin.org.adempiere.model.MInvValCal;
+import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
+import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryGLine;
@@ -48,6 +53,7 @@ import org.compiere.util.Env;
  *  JPIERE-0106:JPBP:Bill
  *  JPIERE-0148,0149,0150	Product category Group
  *  JPIERE-0151,0152,0153   Sales Region Group & Delivery Days from Warehouse
+ *  JPIERE-0160,0161		Inventory Valuation Calculate
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
@@ -95,6 +101,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MSalesRegionGLine.class;
 			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
 				return MDeliveryDays.class;
+			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
+				return MInvValProfile.class;
+			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
+				return MInvValProfileOrg.class;
+			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
+				return MInvValCal.class;
+			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
+				return MInvValCalLine.class;
+			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
+				return MInvValCalLog.class;
 			}
 
 		}else{
@@ -148,6 +164,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MSalesRegionGLine(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
 				return  new MDeliveryDays(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
+				return  new MInvValProfile(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
+				return  new MInvValProfileOrg(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
+				return  new MInvValCal(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
+				return  new MInvValCalLine(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
+				return  new MInvValCalLog(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -201,6 +227,16 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MSalesRegionGLine(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
 				return  new MDeliveryDays(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
+				return  new MInvValProfile(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
+				return  new MInvValProfileOrg(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
+				return  new MInvValCal(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
+				return  new MInvValCalLine(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
+				return  new MInvValCalLog(Env.getCtx(), rs, trxName);
 			}
 
 		}else{

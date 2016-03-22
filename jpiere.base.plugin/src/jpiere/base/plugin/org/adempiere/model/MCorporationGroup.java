@@ -23,22 +23,22 @@ import java.util.logging.Level;
 import org.compiere.util.DB;
 
 /**
- *  Corporation Group(企業グループマスタ) Model.
+ *  JPIERE-0094
+ *  Corporation Group Model.
  *
- *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
 public class MCorporationGroup extends X_JP_CorporationGroup {
 
-	public MCorporationGroup(Properties ctx, int JP_CorporationGroup_ID,
-			String trxName) {
+	public MCorporationGroup(Properties ctx, int JP_CorporationGroup_ID, String trxName)
+	{
 		super(ctx, JP_CorporationGroup_ID, trxName);
-		// TODO 自動生成されたコンストラクター・スタブ
 	}
 
-	public MCorporationGroup(Properties ctx, ResultSet rs, String trxName) {
+	public MCorporationGroup(Properties ctx, ResultSet rs, String trxName)
+	{
 		super(ctx, rs, trxName);
-		// TODO 自動生成されたコンストラクター・スタブ
 	}
 
 
