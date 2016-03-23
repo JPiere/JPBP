@@ -31,7 +31,7 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160321L;
+	private static final long serialVersionUID = 20160323L;
 
     /** Standard Constructor */
     public X_JP_InvValProfile (Properties ctx, int JP_InvValProfile_ID, String trxName)
@@ -375,6 +375,27 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 	public String getJP_InvValUpdateCostClass () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_InvValUpdateCostClass);
+	}
+
+	/** Current Cost Price = CC */
+	public static final String JP_UPDATECOST_CurrentCostPrice = "CC";
+	/** Future Cost Price = FC */
+	public static final String JP_UPDATECOST_FutureCostPrice = "FC";
+	/** Both Current Cost and Future Cost = BT */
+	public static final String JP_UPDATECOST_BothCurrentCostAndFutureCost = "BT";
+	/** Set Update Cost.
+		@param JP_UpdateCost Update Cost	  */
+	public void setJP_UpdateCost (String JP_UpdateCost)
+	{
+
+		set_Value (COLUMNNAME_JP_UpdateCost, JP_UpdateCost);
+	}
+
+	/** Get Update Cost.
+		@return Update Cost	  */
+	public String getJP_UpdateCost () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_UpdateCost);
 	}
 
 	public org.compiere.model.I_M_Product_Category getM_Product_Category() throws RuntimeException

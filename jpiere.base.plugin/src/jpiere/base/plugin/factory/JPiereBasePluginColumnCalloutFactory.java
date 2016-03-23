@@ -22,8 +22,10 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBill;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
 import org.adempiere.base.IColumnCallout;
 import org.adempiere.base.IColumnCalloutFactory;
@@ -61,6 +63,11 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 							|| columnName.equals(MBill.COLUMNNAME_C_Payment_ID)
 							|| columnName.equals(MBill.COLUMNNAME_JPLastPayAmt)){
 					list.add(new JPiereBillAmountCallout());
+				}
+			}else if(tableName.equals(MInvValProfile.Table_Name)){
+				if(columnName.equals(MInvValProfile.COLUMNNAME_C_AcctSchema_ID))
+				{
+					list.add(new JPiereInvValProfileCallout());
 				}
 			}
 

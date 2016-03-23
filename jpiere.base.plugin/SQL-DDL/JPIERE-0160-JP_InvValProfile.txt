@@ -28,6 +28,7 @@ CREATE TABLE adempiere.JP_InvValProfile
   JP_GLJournalCreateClass character varying(255),
 
   M_Product_Category_ID  numeric(10,0),
+  JP_UpdateCost character varying(2) DEFAULT NULL::character varying,
 
   CONSTRAINT JP_InvValProfile_pkey PRIMARY KEY (JP_InvValProfile_ID)
 )

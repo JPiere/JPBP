@@ -62,8 +62,8 @@ public class CallInvValUpdateCostClass extends SvrProcess {
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
 		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
 
-		m_InvValCal.setJP_Processing1("Y");
-		m_InvValCal.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
+		m_InvValCal.setJP_Processing3("Y");
+		m_InvValCal.setJP_ProcessedTime3(new Timestamp(System.currentTimeMillis()));
 		m_InvValCal.saveEx(get_TrxName());
 
 		if(isOK)

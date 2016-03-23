@@ -256,6 +256,15 @@ public interface I_JP_InvValProfile
 	/** Get Product Cost Update Class	  */
 	public String getJP_InvValUpdateCostClass();
 
+    /** Column name JP_UpdateCost */
+    public static final String COLUMNNAME_JP_UpdateCost = "JP_UpdateCost";
+
+	/** Set Update Cost	  */
+	public void setJP_UpdateCost (String JP_UpdateCost);
+
+	/** Get Update Cost	  */
+	public String getJP_UpdateCost();
+
     /** Column name M_Product_Category_ID */
     public static final String COLUMNNAME_M_Product_Category_ID = "M_Product_Category_ID";
 

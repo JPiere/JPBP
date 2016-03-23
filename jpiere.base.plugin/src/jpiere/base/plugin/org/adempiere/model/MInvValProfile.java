@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MAcctSchema;
 import org.compiere.model.Query;
 
 /**
@@ -59,9 +60,20 @@ public class MInvValProfile extends X_JP_InvValProfile {
 		return orgs;
 	}	//	getOrgs
 
+
 	@Override
-	protected boolean beforeSave(boolean newRecord) {
-		return super.beforeSave(newRecord);
+	protected boolean beforeSave(boolean newRecord)
+	{
+
+		if((newRecord && getC_AcctSchema_ID() != 0)
+				|| (is_ValueChanged("C_AcctSchema_ID") && getC_AcctSchema_ID() != 0))
+		{
+			MAcctSchema as = MAcctSchema.get(getCtx(), getC_AcctSchema_ID());
+			setCostingLevel(as.getCostingLevel());
+			setC_Currency_ID(as.getC_Currency_ID());
+		}
+
+		return true;
 	}
 
 
