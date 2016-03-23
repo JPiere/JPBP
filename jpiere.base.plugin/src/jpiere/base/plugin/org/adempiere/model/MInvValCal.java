@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -23,8 +24,10 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
+import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.Util;
 
 /**
  * JPIERE-0161:Inventory Valuation Calculate
@@ -35,6 +38,8 @@ import org.compiere.process.DocumentEngine;
 public class MInvValCal extends X_JP_InvValCal implements DocAction
 {
 	private static final long serialVersionUID = -7588955558162632796L;
+
+	private MInvValCalLine[] m_lines =null;
 
 	public MInvValCal(Properties ctx, int JP_InvValCal_ID, String trxName)
 	{
@@ -148,7 +153,7 @@ public class MInvValCal extends X_JP_InvValCal implements DocAction
 			return DocAction.STATUS_Invalid;
 		}
 
-		MInvValCalLine[] lines = getLines(false);
+		MInvValCalLine[] lines = getLines(false,null);
 		if (lines.length == 0)
 		{
 			m_processMsg = "@NoLines@";
@@ -358,10 +363,60 @@ public class MInvValCal extends X_JP_InvValCal implements DocAction
 		return getTotalLines();
 	}
 
-	public MInvValCalLine[] getLines(boolean aaa)
+
+	/**************************************************************************
+	 * 	Get Lines of Inventory Valuation Calculate
+	 * 	@param whereClause where clause or null (starting with AND)
+	 * 	@param orderClause order clause
+	 * 	@return lines
+	 */
+	public MInvValCalLine[] getLines (String whereClause, String orderClause)
 	{
-		return null;
-	}
+		StringBuilder whereClauseFinal = new StringBuilder(MInvValCalLine.COLUMNNAME_JP_InvValCal_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MInvValCalLine.COLUMNNAME_Line;
+		//
+		List<MInvValCalLine> list = new Query(getCtx(), MInvValCalLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		return list.toArray(new MInvValCalLine[list.size()]);
+	}	//	getLines
+
+	/**
+	 * 	Get Lines of Inventory Valuation Calculate.
+	 * 	@param requery requery
+	 * 	@param orderBy optional order by column
+	 * 	@return lines
+	 */
+	public MInvValCalLine[] getLines (boolean requery, String orderBy)
+	{
+		if (m_lines != null && !requery) {
+			set_TrxName(m_lines, get_TrxName());
+			return m_lines;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += "Line";
+		m_lines = getLines(null, orderClause);
+		return m_lines;
+	}	//	getLines
+
+	/**
+	 * 	Get Lines of Inventory Valuation Calculate.
+	 *
+	 * 	@return lines
+	 */
+	public MInvValCalLine[] getLines()
+	{
+		return getLines(false, null);
+	}	//	getLines
 
 	@Override
 	protected boolean beforeSave(boolean newRecord) {

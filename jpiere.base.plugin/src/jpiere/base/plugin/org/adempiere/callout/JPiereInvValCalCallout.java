@@ -11,50 +11,40 @@
  * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
  * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
-package jpiere.base.plugin.org.adempiere.process;
+package jpiere.base.plugin.org.adempiere.callout;
 
-import java.math.BigDecimal;
-import java.util.logging.Level;
+import java.util.Properties;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
-import jpiere.base.plugin.util.JPiereInvValUtil;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
-import org.compiere.process.SvrProcess;
-import org.compiere.util.Msg;
+import org.adempiere.base.IColumnCallout;
+import org.compiere.model.GridField;
+import org.compiere.model.GridTab;
 
 /**
- * JPIERE-0161 Inventory Valuation Calculate Doc
  *
+ * JPIERE-0161:
  *
- *  @author Hideaki Hagiwara
+ * @author Hideaki Hagiwara
  *
  */
-public class InvValCalLineSum extends SvrProcess {
-
-	MInvValCal m_InvValCal = null;
-	int Record_ID = 0;
+public class JPiereInvValCalCallout implements IColumnCallout {
 
 	@Override
-	protected void prepare()
+	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
-		Record_ID = getRecord_ID();
-		if(Record_ID > 0)
+		if(value == null)
+			return "";
+
+		if(mField.getColumnName().equals("JP_InvValProfile_ID"))
 		{
-			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
+			MInvValProfile ivProfile = MInvValProfile.get(ctx, (Integer)value);
+			mTab.setValue("C_Currency_ID", ivProfile.getC_Currency_ID());
 		}else{
-			log.log(Level.SEVERE, "Record_ID <= 0 ");
+
 		}
-	}
 
-	@Override
-	protected String doIt() throws Exception
-	{
-
-		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), Record_ID, get_TrxName());
-		m_InvValCal.setTotalLines(totalLines);
-		m_InvValCal.saveEx(get_TrxName());
-
-		return Msg.getElement(getCtx(), MInvValCal.COLUMNNAME_TotalLines) + " = " + totalLines;
+		return null;
 	}
 
 }

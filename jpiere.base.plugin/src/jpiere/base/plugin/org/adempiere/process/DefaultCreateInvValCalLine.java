@@ -49,7 +49,7 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 		if(Record_ID > 0)
 		{
 			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
-			m_InvValProfile = new MInvValProfile(getCtx(), m_InvValCal.getJP_InvValProfile_ID(), null);
+			m_InvValProfile = MInvValProfile.get(getCtx(), m_InvValCal.getJP_InvValProfile_ID());
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}

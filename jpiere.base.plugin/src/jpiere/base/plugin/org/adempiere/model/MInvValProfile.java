@@ -19,6 +19,7 @@ import java.util.Properties;
 
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.Query;
+import org.compiere.util.CCache;
 
 /**
  * JPIERE-0160:Inventory Valuation Profile
@@ -76,5 +77,26 @@ public class MInvValProfile extends X_JP_InvValProfile {
 		return true;
 	}
 
+	/**	Cache						*/
+	private static CCache<Integer,MInvValProfile> s_cache	= new CCache<Integer,MInvValProfile>(Table_Name, 40, 5);	//	5 minutes
 
+	public static MInvValProfile get (Properties ctx, int JP_InvValProfile_ID)
+	{
+		if (JP_InvValProfile_ID <= 0)
+		{
+			return null;
+		}
+		Integer key = new Integer (JP_InvValProfile_ID);
+		MInvValProfile retValue = (MInvValProfile) s_cache.get (key);
+		if (retValue != null)
+		{
+			return retValue;
+		}
+		retValue = new MInvValProfile (ctx, JP_InvValProfile_ID, null);
+		if (retValue.get_ID () != 0)
+		{
+			s_cache.put (key, retValue);
+		}
+		return retValue;
+	}	//	get
 }
