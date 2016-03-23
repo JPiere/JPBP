@@ -32,6 +32,7 @@ import org.compiere.util.Msg;
 /**
  * JPIERE-0161 Inventory Valuation Calculate Doc
  *
+ * Default Create Inventory Valuation Calculate Doc Line
  *
  *  @author Hideaki Hagiwara
  *

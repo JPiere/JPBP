@@ -65,7 +65,7 @@ public class CreateStockOrgTimeStamp extends SvrProcess {
 		//YYYY-MM-DD HH24:MI:SS.mmmm  JDBC Timestamp format
 		StringBuilder DateValue = new StringBuilder(p_DateValue.toString());
 		StringBuilder DateValue_00 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
-		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 23:59:59','YYYY-MM-DD HH24:MI:SS')");
+		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
 
 		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_StockOrg ")
 										.append(" WHERE DateValue=").append(DateValue_00)
@@ -84,7 +84,7 @@ public class CreateStockOrgTimeStamp extends SvrProcess {
 		.append("FROM M_Transaction t")
 		.append(" INNER JOIN M_Locator l ON (t.M_Locator_ID=l.M_Locator_ID) ")
 		.append("WHERE t.AD_Client_ID=").append(p_AD_Client_ID)
-		.append(" AND t.MovementDate <=").append(DateValue_24)
+		.append(" AND t.MovementDate <").append(DateValue_24)
 		.append(" GROUP BY t.AD_Client_ID, l.AD_Org_ID, t.M_Product_ID");
 		int insertedNo = DB.executeUpdateEx(sql.toString(), get_TrxName());
 

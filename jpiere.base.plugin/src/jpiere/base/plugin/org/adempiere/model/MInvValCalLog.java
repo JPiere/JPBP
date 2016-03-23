@@ -34,4 +34,12 @@ public class MInvValCalLog extends X_JP_InvValCalLog {
 		super(ctx, rs, trxName);
 	}
 
+	public MInvValCalLog (MInvValCalLine invValCalLine)
+	{
+		this (invValCalLine.getCtx(), 0, invValCalLine.get_TrxName());
+		if (invValCalLine.get_ID() == 0)
+			throw new IllegalArgumentException("Line not saved");
+		setJP_InvValCalLine_ID(invValCalLine.getJP_InvValCalLine_ID());	//	parent
+		setAD_Org_ID(invValCalLine.getAD_Org_ID());
+	}
 }
