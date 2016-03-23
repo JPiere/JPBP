@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -13,6 +13,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 public class JPiereInvValUtil {
 
@@ -64,13 +65,13 @@ public class JPiereInvValUtil {
 		return retValue;
 	}
 
-	static public HashMap<Integer, BigDecimal> getAllQtyBookFromStockOrg(Properties ctx, Timestamp dateValue, MInvValProfileOrg[] Orgs)
+	static public LinkedHashMap<Integer, BigDecimal> getAllQtyBookFromStockOrg(Properties ctx, Timestamp dateValue, MInvValProfileOrg[] Orgs, String OrderClause)
 	{
-		HashMap<Integer, BigDecimal> retValue = new HashMap<Integer, BigDecimal> ();
+		LinkedHashMap<Integer, BigDecimal> retValue = new LinkedHashMap<Integer, BigDecimal> ();
 
-		StringBuilder sql = new StringBuilder("SELECT M_Product_ID, SUM(COALESCE(QtyBook ,0)) ")
-		.append("FROM JP_StockOrg ")
-		.append("WHERE dateValue=? AND AD_Org_ID IN (");
+		StringBuilder sql = new StringBuilder("SELECT s.M_Product_ID, SUM(COALESCE(s.QtyBook ,0)) ")
+		.append("FROM JP_StockOrg s INNER JOIN M_Product p ON (s.M_Product_ID=p.M_Product_ID) ")
+		.append("WHERE s.dateValue=? AND s.AD_Org_ID IN (");
 		for(int i = 0; i < Orgs.length; i++)
 		{
 			if(i==0)
@@ -78,7 +79,13 @@ public class JPiereInvValUtil {
 			else
 				sql.append(","+Orgs[i].getAD_Org_ID());
 		}
-		sql.append(") AND AD_Client_ID=? GROUP BY M_Product_ID");
+		sql.append(") AND s.AD_Client_ID=? GROUP BY s.M_Product_ID ");
+		if(Util.isEmpty(OrderClause))
+		{
+			sql.append(",p.Value ORDER BY p.Value");
+		}else{
+			sql.append("," + OrderClause).append(" ORDER BY ").append(OrderClause);
+		}
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

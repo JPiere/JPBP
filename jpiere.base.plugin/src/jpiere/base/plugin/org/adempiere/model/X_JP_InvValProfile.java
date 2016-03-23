@@ -45,6 +45,8 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 			setCostingMethod (null);
 			setIsDefault (false);
 // N
+			setIsZeroStockInvValJP (false);
+// N
 			setJP_InvValProfile_ID (0);
 			setName (null);
 			setValue (null);
@@ -231,6 +233,27 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 	public boolean isDefault () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Do Inventory Valuation when 0 stock.
+		@param IsZeroStockInvValJP Do Inventory Valuation when 0 stock	  */
+	public void setIsZeroStockInvValJP (boolean IsZeroStockInvValJP)
+	{
+		set_Value (COLUMNNAME_IsZeroStockInvValJP, Boolean.valueOf(IsZeroStockInvValJP));
+	}
+
+	/** Get Do Inventory Valuation when 0 stock.
+		@return Do Inventory Valuation when 0 stock	  */
+	public boolean isZeroStockInvValJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsZeroStockInvValJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

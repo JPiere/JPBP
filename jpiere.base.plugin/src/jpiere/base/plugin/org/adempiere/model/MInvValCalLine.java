@@ -34,4 +34,13 @@ public class MInvValCalLine extends X_JP_InvValCalLine {
 		super(ctx, rs, trxName);
 	}
 
+	public MInvValCalLine (MInvValCal invValCal)
+	{
+		this (invValCal.getCtx(), 0, invValCal.get_TrxName());
+		if (invValCal.get_ID() == 0)
+			throw new IllegalArgumentException("Header not saved");
+		setJP_InvValCal_ID(invValCal.getJP_InvValCal_ID());	//	parent
+		setAD_Org_ID(invValCal.getAD_Org_ID());
+	}
+
 }

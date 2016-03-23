@@ -175,6 +175,15 @@ public interface I_JP_InvValProfile
 	  */
 	public boolean isDefault();
 
+    /** Column name IsZeroStockInvValJP */
+    public static final String COLUMNNAME_IsZeroStockInvValJP = "IsZeroStockInvValJP";
+
+	/** Set Do Inventory Valuation when 0 stock	  */
+	public void setIsZeroStockInvValJP (boolean IsZeroStockInvValJP);
+
+	/** Get Do Inventory Valuation when 0 stock	  */
+	public boolean isZeroStockInvValJP();
+
     /** Column name JP_ApplyAmtList */
     public static final String COLUMNNAME_JP_ApplyAmtList = "JP_ApplyAmtList";
 
