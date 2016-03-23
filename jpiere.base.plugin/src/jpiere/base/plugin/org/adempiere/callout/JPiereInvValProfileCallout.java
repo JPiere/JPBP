@@ -21,13 +21,17 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MAcctSchema;
 
 /**
+ *
+ * JPIERE-0160:
+ *
  * @author Hideaki Hagiwara
  *
  */
 public class JPiereInvValProfileCallout implements IColumnCallout {
 
 	@Override
-	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue) {
+	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
 
 		if(value == null)
 			return "";
