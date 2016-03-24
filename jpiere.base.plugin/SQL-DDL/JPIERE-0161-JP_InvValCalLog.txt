@@ -41,5 +41,16 @@ CREATE TABLE adempiere.JP_InvValCalLog
 
   Description character varying(255),
 
+  MovementDate timestamp without time zone,
+  DateOrdered timestamp without time zone,
+  DateInvoiced timestamp without time zone,
+  MovementType character varying(2) DEFAULT NULL::character varying,
+  QtyOrdered numeric DEFAULT 0::numeric,
+  QtyReserved numeric DEFAULT 0::numeric,
+  QtyInvoiced numeric DEFAULT 0::numeric,
+  QtyDelivered numeric DEFAULT 0::numeric,
+  M_MatchPO_ID numeric(10,0) DEFAULT NULL::numeric,
+  M_MatchInv_ID numeric(10,0) DEFAULT NULL::numeric,
+
   CONSTRAINT JP_InvValCalLog_pkey PRIMARY KEY (JP_InvValCalLog_ID)
 )

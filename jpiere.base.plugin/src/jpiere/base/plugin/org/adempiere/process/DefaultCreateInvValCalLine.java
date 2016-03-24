@@ -23,6 +23,10 @@ import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.util.JPiereInvValUtil;
 
+import org.compiere.model.MAcctSchema;
+import org.compiere.model.MClientInfo;
+import org.compiere.model.MCost;
+import org.compiere.model.MCostElement;
 import org.compiere.model.MProduct;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -67,6 +71,7 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 				, m_InvValProfile.getOrgs(), " p.M_Product_Category_ID, p.Value");
 		Set<Integer> set_M_Product_IDs = map_Product_Qty.keySet();
 		int line = 0;
+		MCostElement[] costElements = JPiereInvValUtil.getMaterialStandardCostElements (getCtx());
 		for(Integer M_Product_ID :set_M_Product_IDs)
 		{
 			MProduct product = MProduct.get(getCtx(), M_Product_ID);
@@ -88,6 +93,49 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 			ivcLine.setC_AcctSchema_ID(m_InvValProfile.getC_AcctSchema_ID());
 			ivcLine.setCostingMethod(m_InvValProfile.getCostingMethod());
 			ivcLine.setCostingLevel(m_InvValProfile.getCostingLevel());
+
+			int C_AcctSchema_ID = m_InvValProfile.getC_AcctSchema_ID();
+			if(ivcLine.getC_AcctSchema_ID()==0)
+			{
+				C_AcctSchema_ID = MClientInfo.get(getCtx()).getC_AcctSchema1_ID();
+			}
+			int M_CostType_ID =  MAcctSchema.get(getCtx(), C_AcctSchema_ID).getM_CostType_ID();
+
+			//If CostElement is not one, CurrentCostPrice and FutureCostPrice are Overwritten.
+			for(int j = 0; j < costElements.length; j++)
+			{
+				MCost cost = null;
+				if(ivcLine.getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_Client))
+				{
+					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
+																			,costElements[j].get_ID(), 0, get_TrxName());
+
+					if(cost == null)
+						continue;
+
+				}else if (ivcLine.getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_Organization)){
+
+
+					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), ivcLine.getAD_Org_ID(), M_Product_ID, M_CostType_ID
+																, C_AcctSchema_ID, costElements[j].get_ID(), 0, get_TrxName());
+
+					if(cost == null)
+						continue;
+
+
+				}else if (ivcLine.getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_BatchLot)){
+					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
+									, costElements[j].get_ID(), ivcLine.getM_AttributeSetInstance_ID(), get_TrxName());
+					if(cost == null)
+						continue;
+				}//if
+
+				ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice());
+				ivcLine.setFutureCostPrice(cost.getFutureCostPrice());
+
+			}//for j
+
+
 			ivcLine.saveEx(get_TrxName());
 
 		}

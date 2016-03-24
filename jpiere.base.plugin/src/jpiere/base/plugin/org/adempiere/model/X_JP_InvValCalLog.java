@@ -19,6 +19,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
@@ -32,7 +33,7 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160321L;
+	private static final long serialVersionUID = 20160324L;
 
     /** Standard Constructor */
     public X_JP_InvValCalLog (Properties ctx, int JP_InvValCalLog_ID, String trxName)
@@ -267,6 +268,40 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Date Invoiced.
+		@param DateInvoiced 
+		Date printed on Invoice
+	  */
+	public void setDateInvoiced (Timestamp DateInvoiced)
+	{
+		set_ValueNoCheck (COLUMNNAME_DateInvoiced, DateInvoiced);
+	}
+
+	/** Get Date Invoiced.
+		@return Date printed on Invoice
+	  */
+	public Timestamp getDateInvoiced () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateInvoiced);
+	}
+
+	/** Set Date Ordered.
+		@param DateOrdered 
+		Date of Order
+	  */
+	public void setDateOrdered (Timestamp DateOrdered)
+	{
+		set_ValueNoCheck (COLUMNNAME_DateOrdered, DateOrdered);
+	}
+
+	/** Get Date Ordered.
+		@return Date of Order
+	  */
+	public Timestamp getDateOrdered () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
 	}
 
 	/** Set Description.
@@ -542,6 +577,62 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_M_MatchInv getM_MatchInv() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_MatchInv)MTable.get(getCtx(), org.compiere.model.I_M_MatchInv.Table_Name)
+			.getPO(getM_MatchInv_ID(), get_TrxName());	}
+
+	/** Set Match Invoice.
+		@param M_MatchInv_ID 
+		Match Shipment/Receipt to Invoice
+	  */
+	public void setM_MatchInv_ID (int M_MatchInv_ID)
+	{
+		if (M_MatchInv_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_M_MatchInv_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_M_MatchInv_ID, Integer.valueOf(M_MatchInv_ID));
+	}
+
+	/** Get Match Invoice.
+		@return Match Shipment/Receipt to Invoice
+	  */
+	public int getM_MatchInv_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_MatchInv_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_MatchPO getM_MatchPO() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_MatchPO)MTable.get(getCtx(), org.compiere.model.I_M_MatchPO.Table_Name)
+			.getPO(getM_MatchPO_ID(), get_TrxName());	}
+
+	/** Set Match PO.
+		@param M_MatchPO_ID 
+		Match Purchase Order to Shipment/Receipt and Invoice
+	  */
+	public void setM_MatchPO_ID (int M_MatchPO_ID)
+	{
+		if (M_MatchPO_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_M_MatchPO_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_M_MatchPO_ID, Integer.valueOf(M_MatchPO_ID));
+	}
+
+	/** Get Match PO.
+		@return Match Purchase Order to Shipment/Receipt and Invoice
+	  */
+	public int getM_MatchPO_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_MatchPO_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException
     {
 		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
@@ -568,6 +659,67 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Movement Date.
+		@param MovementDate 
+		Date a product was moved in or out of inventory
+	  */
+	public void setMovementDate (Timestamp MovementDate)
+	{
+		set_Value (COLUMNNAME_MovementDate, MovementDate);
+	}
+
+	/** Get Movement Date.
+		@return Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
+	}
+
+	/** MovementType AD_Reference_ID=189 */
+	public static final int MOVEMENTTYPE_AD_Reference_ID=189;
+	/** Customer Shipment = C- */
+	public static final String MOVEMENTTYPE_CustomerShipment = "C-";
+	/** Customer Returns = C+ */
+	public static final String MOVEMENTTYPE_CustomerReturns = "C+";
+	/** Vendor Receipts = V+ */
+	public static final String MOVEMENTTYPE_VendorReceipts = "V+";
+	/** Vendor Returns = V- */
+	public static final String MOVEMENTTYPE_VendorReturns = "V-";
+	/** Inventory Out = I- */
+	public static final String MOVEMENTTYPE_InventoryOut = "I-";
+	/** Inventory In = I+ */
+	public static final String MOVEMENTTYPE_InventoryIn = "I+";
+	/** Movement From = M- */
+	public static final String MOVEMENTTYPE_MovementFrom = "M-";
+	/** Movement To = M+ */
+	public static final String MOVEMENTTYPE_MovementTo = "M+";
+	/** Production + = P+ */
+	public static final String MOVEMENTTYPE_ProductionPlus = "P+";
+	/** Production - = P- */
+	public static final String MOVEMENTTYPE_Production_ = "P-";
+	/** Work Order + = W+ */
+	public static final String MOVEMENTTYPE_WorkOrderPlus = "W+";
+	/** Work Order - = W- */
+	public static final String MOVEMENTTYPE_WorkOrder_ = "W-";
+	/** Set Movement Type.
+		@param MovementType 
+		Method of moving the inventory
+	  */
+	public void setMovementType (String MovementType)
+	{
+
+		set_ValueNoCheck (COLUMNNAME_MovementType, MovementType);
+	}
+
+	/** Get Movement Type.
+		@return Method of moving the inventory
+	  */
+	public String getMovementType () 
+	{
+		return (String)get_Value(COLUMNNAME_MovementType);
 	}
 
 	/** Set Multiply Rate.
@@ -650,6 +802,26 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 		return bd;
 	}
 
+	/** Set Delivered Quantity.
+		@param QtyDelivered 
+		Delivered Quantity
+	  */
+	public void setQtyDelivered (BigDecimal QtyDelivered)
+	{
+		set_Value (COLUMNNAME_QtyDelivered, QtyDelivered);
+	}
+
+	/** Get Delivered Quantity.
+		@return Delivered Quantity
+	  */
+	public BigDecimal getQtyDelivered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyDelivered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Quantity.
 		@param QtyEntered 
 		The Quantity Entered is based on the selected UoM
@@ -665,6 +837,66 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 	public BigDecimal getQtyEntered () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Quantity Invoiced.
+		@param QtyInvoiced 
+		Invoiced Quantity
+	  */
+	public void setQtyInvoiced (BigDecimal QtyInvoiced)
+	{
+		set_Value (COLUMNNAME_QtyInvoiced, QtyInvoiced);
+	}
+
+	/** Get Quantity Invoiced.
+		@return Invoiced Quantity
+	  */
+	public BigDecimal getQtyInvoiced () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyInvoiced);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Ordered Quantity.
+		@param QtyOrdered 
+		Ordered Quantity
+	  */
+	public void setQtyOrdered (BigDecimal QtyOrdered)
+	{
+		set_Value (COLUMNNAME_QtyOrdered, QtyOrdered);
+	}
+
+	/** Get Ordered Quantity.
+		@return Ordered Quantity
+	  */
+	public BigDecimal getQtyOrdered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyOrdered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Reserved Quantity.
+		@param QtyReserved 
+		Reserved Quantity
+	  */
+	public void setQtyReserved (BigDecimal QtyReserved)
+	{
+		set_Value (COLUMNNAME_QtyReserved, QtyReserved);
+	}
+
+	/** Get Reserved Quantity.
+		@return Reserved Quantity
+	  */
+	public BigDecimal getQtyReserved () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyReserved);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;

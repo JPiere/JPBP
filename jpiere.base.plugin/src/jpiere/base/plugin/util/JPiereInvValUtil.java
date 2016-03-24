@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 
+import org.compiere.model.I_C_InvoiceLine;
+import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrderLine;
@@ -168,7 +171,7 @@ public class JPiereInvValUtil {
 	}	//	getStandardMaterialCostElements
 
 
-	public static MInOutLine[] getMInOutLine(Properties ctx, int M_Product_ID, Timestamp fromDate, Timestamp toDate, MInvValProfileOrg[] Orgs, String OrderClause)
+	public static MInOutLine[] getInOutLines(Properties ctx, int M_Product_ID, Timestamp fromDate, Timestamp toDate, MInvValProfileOrg[] Orgs, String OrderClause)
 	{
 		StringBuilder DateValueFrom = null;
 		StringBuilder DateValueTo = null;
@@ -251,21 +254,21 @@ public class JPiereInvValUtil {
 	 * @param OrderClause
 	 * @return
 	 */
-	public static MOrderLine[] getMOrderLines(Properties ctx, int M_InOutLine_ID, String OrderClause)
+	public static MOrderLine[] getOrderLinesByInOutLine(Properties ctx, int M_InOutLine_ID, boolean isDateOrderedASC)
 	{
 		ArrayList<MOrderLine> list = new ArrayList<MOrderLine> ();
 
-		StringBuilder sql = new StringBuilder("SELECT DISTINCT ol.* FROM C_OrderLine ol  ")
+		StringBuilder sql = new StringBuilder("SELECT DISTINCT ol.*, ol.DateOrdered FROM C_OrderLine ol  ")
 								.append("INNER JOIN C_Order o ON (o.C_Order_ID = ol.C_Order_ID) ")
 								.append("INNER JOIN M_MatchPO mp ON (ol.C_OrderLine_ID = mp.C_OrderLine_ID) ")
 								.append("INNER JOIN M_InOutLine iol ON (mp.M_InOutLine_ID = iol.M_InOutLine_ID) ")
 								.append("WHERE o.DocStatus in ('CO','CL') AND iol.M_InOutLine_ID = ?");
-//		if(Util.isEmpty(OrderClause))
-//		{
-//			sql.append(" ORDER BY ol.DateOrdered");
-//		}else{
-//			sql.append(" ORDER BY ").append(OrderClause);
-//		}
+		if(isDateOrderedASC)
+		{
+			sql.append(" ORDER BY ol.DateOrdered ASC");
+		}else{
+			sql.append(" ORDER BY ol.DateOrdered DESC");
+		}
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -290,5 +293,75 @@ public class JPiereInvValUtil {
 		}
 
 		return  list.toArray(new MOrderLine[list.size()]);
+	}
+
+	static public void copyInfoFromOrderLineToLog(MInvValCalLog log, I_C_OrderLine orderLine)
+	{
+		log.setC_OrderLine_ID(orderLine.getC_OrderLine_ID());
+		log.setDateOrdered(orderLine.getDateOrdered());
+		log.setIsTaxIncluded(orderLine.getC_Order().isTaxIncluded());
+		log.setM_PriceList_ID(orderLine.getC_Order().getM_PriceList_ID());
+		log.setC_Currency_ID(orderLine.getC_Order().getC_Currency_ID());
+		log.setC_ConversionType_ID(orderLine.getC_Order().getC_ConversionType_ID());
+		log.setQtyEntered(orderLine.getQtyEntered());
+		log.setC_UOM_ID(orderLine.getC_UOM_ID());
+		log.setQtyOrdered(orderLine.getQtyOrdered());
+		log.setQtyReserved(orderLine.getQtyReserved());
+		log.setQtyDelivered(orderLine.getQtyDelivered());
+		log.setQtyInvoiced(orderLine.getQtyInvoiced());
+		log.setPriceEntered(orderLine.getPriceEntered());
+		log.setPriceActual(orderLine.getPriceActual());
+		log.setC_Tax_ID(orderLine.getC_Tax_ID());
+		log.setLineNetAmt(orderLine.getLineNetAmt());
+	}
+
+	static public void copyInfoFromInvoiceLineToLog(MInvValCalLog log, I_C_InvoiceLine invoiceLine)
+	{
+		log.setC_InvoiceLine_ID(invoiceLine.getC_InvoiceLine_ID());
+		log.setDateInvoiced(invoiceLine.getC_Invoice().getDateInvoiced());
+		log.setIsTaxIncluded(invoiceLine.getC_Invoice().isTaxIncluded());
+		log.setM_PriceList_ID(invoiceLine.getC_Invoice().getM_PriceList_ID());
+		log.setC_Currency_ID(invoiceLine.getC_Invoice().getC_Currency_ID());
+		log.setC_ConversionType_ID(invoiceLine.getC_Invoice().getC_ConversionType_ID());
+		log.setQtyEntered(invoiceLine.getQtyEntered());
+		log.setC_UOM_ID(invoiceLine.getC_UOM_ID());
+		log.setQtyInvoiced(invoiceLine.getQtyInvoiced());
+		log.setPriceEntered(invoiceLine.getPriceEntered());
+		log.setPriceActual(invoiceLine.getPriceActual());
+		log.setC_Tax_ID(invoiceLine.getC_Tax_ID());
+		log.setLineNetAmt(invoiceLine.getLineNetAmt());
+	}
+
+	static public BigDecimal calculateInvValTotalAmt(Properties ctx, int JP_InvValCalLine_ID, String trxName)
+	{
+		BigDecimal retValue = null;
+		StringBuilder sql = new StringBuilder("SELECT SUM(COALESCE(JP_ApplyAmt,0)) FROM JP_InvValCalLog ")
+								.append("WHERE JP_InvValCalLine_ID=?");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql.toString(), trxName);
+			pstmt.setInt(1, JP_InvValCalLine_ID);
+			rs = pstmt.executeQuery ();
+			if (rs.next ())
+				retValue = rs.getBigDecimal(1);
+
+		}
+		catch (Exception e)
+		{
+			s_log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		if(retValue == null)
+			return Env.ZERO;
+
+		return retValue;
 	}
 }

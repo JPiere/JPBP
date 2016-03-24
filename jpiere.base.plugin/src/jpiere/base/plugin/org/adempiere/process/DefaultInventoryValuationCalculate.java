@@ -14,6 +14,9 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
@@ -22,9 +25,16 @@ import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.util.JPiereInvValUtil;
 
+import org.adempiere.exceptions.DBException;
+import org.compiere.model.I_C_InvoiceLine;
+import org.compiere.model.I_C_OrderLine;
+import org.compiere.model.MConversionRate;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MOrderLine;
+import org.compiere.model.MMatchInv;
+import org.compiere.model.MMatchPO;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
@@ -51,6 +61,29 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
 			m_InvValProfile = MInvValProfile.get(getCtx(), m_InvValCal.getJP_InvValProfile_ID());
 			lines = m_InvValCal.getLines();
+
+			//Delete InvValCalLog
+			StringBuilder DeleteSQL = new StringBuilder("DELETE FROM " + MInvValCalLog.Table_Name + " WHERE JP_InvValCalLine_ID = ?");
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			for(int i = 0; i < lines.length; i++)
+			{
+				try
+				{
+					pstmt = DB.prepareStatement(DeleteSQL.toString(), get_TrxName());
+					pstmt.setInt (1, lines[i].get_ID());
+					pstmt.executeUpdate();
+				}
+				catch (SQLException e)
+				{
+					log.log(Level.SEVERE, DeleteSQL.toString(), e);
+					throw new DBException(e, DeleteSQL.toString());
+				} finally {
+					DB.close(rs, pstmt);
+					rs = null; pstmt = null;
+				}
+
+			}
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
@@ -86,52 +119,191 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		return Msg.getElement(getCtx(), MInvValCal.COLUMNNAME_TotalLines) + " = " + totalLines;
 	}
 
+	/**
+	 *
+	 *
+	 * @param line
+	 */
 	private void calculate_Fifo(MInvValCalLine line)
 	{
 		BigDecimal qtyBook = line.getQtyBook();
-		MInOutLine[] ioLines = JPiereInvValUtil.getMInOutLine(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
+		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
 
+		int lineNo = 1;
 		for(int i = 0; i < ioLines.length; i++)
 		{
-			if(qtyBook.compareTo(ioLines[i].getMovementQty()) >= 0)
+			MInvValCalLog log = new MInvValCalLog(line);
+			log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
+			log.setLine(lineNo * 10);
+			log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
+			log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
+			log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+			if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))
 			{
-				MInvValCalLog log = new MInvValCalLog(line);
-				log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
-				log.setLine(i++ * 10);
-				log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-				if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))
+				MMatchPO[] matchPos = MMatchPO.get(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+				I_C_OrderLine orderLine =null;
+				for(int j = 0; j < matchPos.length; j++)
 				{
-					MOrderLine[] orderLines = JPiereInvValUtil.getMOrderLines(getCtx(), ioLines[i].getM_InOutLine_ID(), "ol.DateOrdered DESC");
-					for(int j = 0; j < orderLines.length; j++)
+					//Set Macth PO Info
+					log.setM_MatchPO_ID(matchPos[j].get_ID());
+					log.setQty(matchPos[j].getQty());
+
+					//Set PO Info
+					orderLine = matchPos[j].getC_OrderLine();
+					JPiereInvValUtil.copyInfoFromOrderLineToLog(log, orderLine);
+
+					//Set Reference Field Gorup
+					log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+					if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
-						log.setC_OrderLine_ID(orderLines[j].getC_OrderLine_ID());
-						log.setIsTaxIncluded(orderLines[j].isTaxIncluded());
-						log.setM_PriceList_ID(orderLines[j].getC_Order().getM_PriceList_ID());
-						log.setC_Currency_ID(orderLines[j].getC_Order().getC_Currency_ID());
-						log.setC_ConversionType_ID(orderLines[j].getC_Order().getC_ConversionType_ID());
-						log.setQtyEntered(orderLines[j].getQtyEntered());
-						log.setC_UOM_ID(orderLines[j].getC_UOM_ID());
-						log.setQty(orderLines[j].getQtyOrdered());
-						log.setPriceEntered(orderLines[j].getPriceEntered());
-						log.setPriceActual(orderLines[j].getPriceActual());
-						log.setC_Tax_ID(orderLines[j].getC_Tax_ID());
-						log.setLineNetAmt(orderLines[j].getLineNetAmt());
-						log.saveEx(get_TrxName());
+						BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
+								orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+						log.setMultiplyRate(rate);
+					}else{
+						log.setMultiplyRate(Env.ONE);
 					}
 
+					log.setJP_ExchangedAmt(log.getLineNetAmt().multiply(log.getMultiplyRate()));
+
+					if(log.isTaxIncluded())
+					{
+						;//TODO:税抜処理の実装
+					}else{
+						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
+					}
+
+					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQty()));
+
+					if(qtyBook.compareTo(log.getQty()) >= 0)
+					{
+						log.setJP_ApplyQty(log.getQty());
+						if(log.getQty().compareTo(log.getQtyOrdered())==0)
+							log.setJP_ApplyAmt(log.getJP_ExchangedNoTaxAmt());
+						else
+							log.setJP_ApplyAmt(log.getJP_ExchangedPriceActual().multiply(log.getQty()));
+						qtyBook = qtyBook.subtract(log.getQty());
+					}else{
+						log.setJP_ApplyQty(qtyBook);
+						log.setJP_ApplyAmt(qtyBook.multiply(log.getJP_ExchangedPriceActual()));
+						qtyBook = Env.ZERO;
+					}
+
+					log.saveEx(get_TrxName());
+					lineNo++;
+
+					if(qtyBook.signum() > 0)
+					{
+						continue;
+					}else{
+						break;	//Go Out form Loop j
+					}
+				}//for j
+
+				if(qtyBook.signum() > 0)
+				{
+					continue;
 				}else{
-
+					break;//Go Out form Loop i
 				}
+
+			}else if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor)){
+
+				MMatchInv[] matchInvs = MMatchInv.getInOutLine(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+				I_C_InvoiceLine invoiceLine =null;
+				for(int j = 0; j < matchInvs.length; j++)
+				{
+					//Set Macth PO Info
+					log.setM_MatchInv_ID(matchInvs[j].get_ID());
+					log.setQty(matchInvs[j].getQty());
+
+					//Set PO Info
+					invoiceLine = matchInvs[j].getC_InvoiceLine();
+					JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invoiceLine);
+
+					//Set Reference Field Gorup
+					log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+					if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
+					{
+						BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
+								invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+						log.setMultiplyRate(rate);
+					}else{
+						log.setMultiplyRate(Env.ONE);
+					}
+
+					log.setJP_ExchangedAmt(log.getLineNetAmt().multiply(log.getMultiplyRate()));
+
+					if(log.isTaxIncluded())
+					{
+						;//TODO:税抜処理の実装
+					}else{
+						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
+					}
+
+					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQty()));
+
+					if(qtyBook.compareTo(log.getQty()) >= 0)
+					{
+						log.setJP_ApplyQty(log.getQty());
+						if(log.getQty().compareTo(log.getQtyOrdered())==0)
+							log.setJP_ApplyAmt(log.getJP_ExchangedNoTaxAmt());
+						else
+							log.setJP_ApplyAmt(log.getJP_ExchangedPriceActual().multiply(log.getQty()));
+						qtyBook = qtyBook.subtract(log.getQty());
+					}else{
+						log.setJP_ApplyQty(qtyBook);
+						log.setJP_ApplyAmt(qtyBook.multiply(log.getJP_ExchangedPriceActual()));
+						qtyBook = Env.ZERO;
+					}
+
+					log.saveEx(get_TrxName());
+					lineNo++;
+
+					if(qtyBook.signum() > 0)
+					{
+						continue;
+					}else{
+						break;	//Go Out form Loop j
+					}
+				}//for j
+
+				if(qtyBook.signum() > 0)
+				{
+					continue;
+				}else{
+					break;//Go Out form Loop i
+				}
+
+			}else{
+				log.setDescription("Can not Calculate");
+				log.saveEx(get_TrxName());
+				return ;
 			}
 
-			qtyBook = qtyBook.subtract(ioLines[i].getMovementQty());
-			if(qtyBook.signum() > 0)
-			{
+		}//for i
 
-			}
-				;
+		if(qtyBook.signum() > 0)
+		{
+			MInvValCalLog log = new MInvValCalLog(line);
+			log.setLine(lineNo * 10);
+			log.setC_Currency_ID(m_InvValCal.getC_Currency_ID());
+			log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+			log.setJP_ExchangedPriceActual(line.getCurrentCostPrice());
+			log.setJP_ApplyQty(qtyBook);
+			log.setJP_ApplyAmt(qtyBook.multiply(line.getCurrentCostPrice()));
+			log.setDescription(Msg.getElement(getCtx(), "CurrentCostPrice"));
+			log.saveEx(get_TrxName());
+
+		}else{
+			;
 		}
+
+		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
+		line.setJP_InvValTotalAmt(JP_InvValTotalAmt);
+		line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(),2));
+		line.saveEx(get_TrxName());
+
 	}
 
 	private void calculate_Lifo(MInvValCalLine line)

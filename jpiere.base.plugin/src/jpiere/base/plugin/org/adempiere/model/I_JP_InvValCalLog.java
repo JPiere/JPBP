@@ -185,6 +185,32 @@ public interface I_JP_InvValCalLog
 	  */
 	public int getCreatedBy();
 
+    /** Column name DateInvoiced */
+    public static final String COLUMNNAME_DateInvoiced = "DateInvoiced";
+
+	/** Set Date Invoiced.
+	  * Date printed on Invoice
+	  */
+	public void setDateInvoiced (Timestamp DateInvoiced);
+
+	/** Get Date Invoiced.
+	  * Date printed on Invoice
+	  */
+	public Timestamp getDateInvoiced();
+
+    /** Column name DateOrdered */
+    public static final String COLUMNNAME_DateOrdered = "DateOrdered";
+
+	/** Set Date Ordered.
+	  * Date of Order
+	  */
+	public void setDateOrdered (Timestamp DateOrdered);
+
+	/** Get Date Ordered.
+	  * Date of Order
+	  */
+	public Timestamp getDateOrdered();
+
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 
@@ -352,6 +378,36 @@ public interface I_JP_InvValCalLog
 
 	public org.compiere.model.I_M_InOutLine getM_InOutLine() throws RuntimeException;
 
+    /** Column name M_MatchInv_ID */
+    public static final String COLUMNNAME_M_MatchInv_ID = "M_MatchInv_ID";
+
+	/** Set Match Invoice.
+	  * Match Shipment/Receipt to Invoice
+	  */
+	public void setM_MatchInv_ID (int M_MatchInv_ID);
+
+	/** Get Match Invoice.
+	  * Match Shipment/Receipt to Invoice
+	  */
+	public int getM_MatchInv_ID();
+
+	public org.compiere.model.I_M_MatchInv getM_MatchInv() throws RuntimeException;
+
+    /** Column name M_MatchPO_ID */
+    public static final String COLUMNNAME_M_MatchPO_ID = "M_MatchPO_ID";
+
+	/** Set Match PO.
+	  * Match Purchase Order to Shipment/Receipt and Invoice
+	  */
+	public void setM_MatchPO_ID (int M_MatchPO_ID);
+
+	/** Get Match PO.
+	  * Match Purchase Order to Shipment/Receipt and Invoice
+	  */
+	public int getM_MatchPO_ID();
+
+	public org.compiere.model.I_M_MatchPO getM_MatchPO() throws RuntimeException;
+
     /** Column name M_PriceList_ID */
     public static final String COLUMNNAME_M_PriceList_ID = "M_PriceList_ID";
 
@@ -366,6 +422,32 @@ public interface I_JP_InvValCalLog
 	public int getM_PriceList_ID();
 
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException;
+
+    /** Column name MovementDate */
+    public static final String COLUMNNAME_MovementDate = "MovementDate";
+
+	/** Set Movement Date.
+	  * Date a product was moved in or out of inventory
+	  */
+	public void setMovementDate (Timestamp MovementDate);
+
+	/** Get Movement Date.
+	  * Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate();
+
+    /** Column name MovementType */
+    public static final String COLUMNNAME_MovementType = "MovementType";
+
+	/** Set Movement Type.
+	  * Method of moving the inventory
+	  */
+	public void setMovementType (String MovementType);
+
+	/** Get Movement Type.
+	  * Method of moving the inventory
+	  */
+	public String getMovementType();
 
     /** Column name MultiplyRate */
     public static final String COLUMNNAME_MultiplyRate = "MultiplyRate";
@@ -419,6 +501,19 @@ public interface I_JP_InvValCalLog
 	  */
 	public BigDecimal getQty();
 
+    /** Column name QtyDelivered */
+    public static final String COLUMNNAME_QtyDelivered = "QtyDelivered";
+
+	/** Set Delivered Quantity.
+	  * Delivered Quantity
+	  */
+	public void setQtyDelivered (BigDecimal QtyDelivered);
+
+	/** Get Delivered Quantity.
+	  * Delivered Quantity
+	  */
+	public BigDecimal getQtyDelivered();
+
     /** Column name QtyEntered */
     public static final String COLUMNNAME_QtyEntered = "QtyEntered";
 
@@ -431,6 +526,45 @@ public interface I_JP_InvValCalLog
 	  * The Quantity Entered is based on the selected UoM
 	  */
 	public BigDecimal getQtyEntered();
+
+    /** Column name QtyInvoiced */
+    public static final String COLUMNNAME_QtyInvoiced = "QtyInvoiced";
+
+	/** Set Quantity Invoiced.
+	  * Invoiced Quantity
+	  */
+	public void setQtyInvoiced (BigDecimal QtyInvoiced);
+
+	/** Get Quantity Invoiced.
+	  * Invoiced Quantity
+	  */
+	public BigDecimal getQtyInvoiced();
+
+    /** Column name QtyOrdered */
+    public static final String COLUMNNAME_QtyOrdered = "QtyOrdered";
+
+	/** Set Ordered Quantity.
+	  * Ordered Quantity
+	  */
+	public void setQtyOrdered (BigDecimal QtyOrdered);
+
+	/** Get Ordered Quantity.
+	  * Ordered Quantity
+	  */
+	public BigDecimal getQtyOrdered();
+
+    /** Column name QtyReserved */
+    public static final String COLUMNNAME_QtyReserved = "QtyReserved";
+
+	/** Set Reserved Quantity.
+	  * Reserved Quantity
+	  */
+	public void setQtyReserved (BigDecimal QtyReserved);
+
+	/** Get Reserved Quantity.
+	  * Reserved Quantity
+	  */
+	public BigDecimal getQtyReserved();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

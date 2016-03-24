@@ -24,6 +24,7 @@ import jpiere.base.plugin.util.JPiereInvValUtil;
 import org.compiere.model.MCost;
 import org.compiere.model.MCostElement;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 
 /**
  * JPIERE-0161 Inventory Valuation Calculate Doc
@@ -74,7 +75,7 @@ public class DefaultInvValCalUpdateCost extends SvrProcess {
 				MCost cost = null;
 				if(lines[i].getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_Client))
 				{
-					cost = MCost.get(getCtx(), getAD_Client_ID(), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
+					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
 																			,costElements[j].get_ID(), 0, get_TrxName());
 
 					if(cost == null)
@@ -95,7 +96,7 @@ public class DefaultInvValCalUpdateCost extends SvrProcess {
 
 					for(int k = 0; k < profileOrgs.length; k++)
 					{
-						cost = MCost.get(getCtx(), getAD_Client_ID(), profileOrgs[k].getAD_Org_ID(), M_Product_ID, M_CostType_ID
+						cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), profileOrgs[k].getAD_Org_ID(), M_Product_ID, M_CostType_ID
 																	, C_AcctSchema_ID, costElements[j].get_ID(), 0, get_TrxName());
 
 						if(cost == null)
@@ -115,7 +116,7 @@ public class DefaultInvValCalUpdateCost extends SvrProcess {
 					}//for k
 
 				}else if (lines[i].getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_BatchLot)){
-					cost = MCost.get(getCtx(), getAD_Client_ID(), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
+					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
 									, costElements[j].get_ID(), lines[i].getM_AttributeSetInstance_ID(), get_TrxName());
 					if(cost == null)
 						continue;
