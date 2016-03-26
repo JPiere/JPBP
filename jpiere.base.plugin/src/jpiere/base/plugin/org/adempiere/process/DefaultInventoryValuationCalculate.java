@@ -126,13 +126,16 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	 */
 	private void calculate_Fifo(MInvValCalLine line)
 	{
-		BigDecimal qtyBook = line.getQtyBook();
+		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
 
 		int lineNo = 1;
 		for(int i = 0; i < ioLines.length; i++)
 		{
+			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
+				continue;
+
 			MInvValCalLog log = new MInvValCalLog(line);
 			log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 			log.setLine(lineNo * 10);
@@ -300,8 +303,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		}
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
-		line.setJP_InvValTotalAmt(JP_InvValTotalAmt);
-		line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(),2));
+		if(line.getQtyBook().compareTo(Env.ZERO) >= 0)
+		{
+			line.setJP_InvValTotalAmt(JP_InvValTotalAmt);
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(),2));
+		}else{
+			line.setJP_InvValTotalAmt(JP_InvValTotalAmt.negate());
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook().abs(),2));
+		}
 		line.saveEx(get_TrxName());
 
 	}
