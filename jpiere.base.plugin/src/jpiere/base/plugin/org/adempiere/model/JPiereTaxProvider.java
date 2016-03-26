@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
+
 import org.adempiere.exceptions.DBException;
 import org.adempiere.model.ITaxProvider;
 import org.compiere.model.I_C_BPartner;
@@ -48,11 +50,11 @@ import org.compiere.util.Msg;
 /**
  * JPiere Tax Provider
  *
- *  @author  Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: JPiereTaxProvider.java,v 1.0 2014/08/20
  *
  */
-public class JPiereTaxProvider implements ITaxProvider {
+public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 	/**	Logger							*/
 	protected transient CLogger	log = CLogger.getCLogger (getClass());
@@ -719,13 +721,13 @@ public class JPiereTaxProvider implements ITaxProvider {
 		throw new IllegalStateException(Msg.getMsg(provider.getCtx(), "ActionNotSupported"));
 	}
 
-	private static RoundingMode getRoundingMode(int C_BPartner_ID, boolean isSOTrx, I_C_TaxProvider provider)
+	public static RoundingMode getRoundingMode(int C_BPartner_ID, boolean isSOTrx, I_C_TaxProvider provider)
 	{
 		Integer key = new Integer (C_BPartner_ID);
 		MBPartner bp = (MBPartner) s_cache.get (key);
 		if (bp == null){
 			bp = MBPartner.get(Env.getCtx(), C_BPartner_ID);
-			if(bp == null){ //TODO:Mobile-UI対応(Mobile-UIではCtxからAD_Client_IDが取得できない事で取引先がNullになるため)
+			if(bp == null){ //For Mobile-UI - Mobile-UI can not get BPartner Info, because Mobile-UI can not get AD_Client_ID from ctx.
 				String whereClause = "C_BPartner_ID=? AND AD_Client_ID=?";
 				bp = new Query(Env.getCtx(),I_C_BPartner.Table_Name,whereClause,null)
 				.setParameters(C_BPartner_ID,provider.getAD_Client_ID())
@@ -778,7 +780,7 @@ public class JPiereTaxProvider implements ITaxProvider {
 	}
 
 
-	private BigDecimal calculateTax (MTax m_tax, BigDecimal amount, boolean taxIncluded, int scale, RoundingMode roundingMode)
+	public BigDecimal calculateTax (MTax m_tax, BigDecimal amount, boolean taxIncluded, int scale, RoundingMode roundingMode)
 	{
 		//	Null Tax
 		if (m_tax.isZeroTax())

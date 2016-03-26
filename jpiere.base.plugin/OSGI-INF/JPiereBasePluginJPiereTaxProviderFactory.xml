@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="jpiere.base.plugin.jpiere.taxprovider.factory">
+   <implementation class="jpiere.base.plugin.factory.JPiereBasePluginJPiereTaxProviderFactory"/>
+   <service>
+      <provide interface="jpiere.base.plugin.org.adempiere.base.IJPiereTaxProviderFactory"/>
+   </service>
+</scr:component>

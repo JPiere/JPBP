@@ -14,8 +14,8 @@ Import-Package: org.compiere.apps,
  org.compiere.apps.form,
  org.compiere.grid,
  org.compiere.minigrid
-Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml,OSGI-INF/JPiereBasePluginTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginModelValidatorFactory.xml,OSGI-INF/JPiereBasePluginDocFactory.xml,OSGI-INF/JPiereBasePluginModelFactory.xml,OSGI-INF/JPiereBasePluginEditorFactory.xml,OSGI-INF/JPiereBasePluginDisplayTypeFactory.xml,OSGI-INF/JPiereBasePluginCreateFromFactory.xml,OSGI-INF/JPiereBasePluginColumnCalloutFactory.xml,
- OSGI-INF/JPiereBasePluginProcessFactory.xml
+Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml,OSGI-INF/JPiereBasePluginTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginModelValidatorFactory.xml,OSGI-INF/JPiereBasePluginDocFactory.xml,OSGI-INF/JPiereBasePluginModelFactory.xml,OSGI-INF/JPiereBasePluginEditorFactory.xml,OSGI-INF/JPiereBasePluginDisplayTypeFactory.xml,OSGI-INF/JPiereBasePluginCreateFromFactory.xml,OSGI-INF/JPiereBasePluginColumnCalloutFactory.xml,OSGI-INF/JPiereBasePluginProcessFactory.xml,
+ OSGI-INF/JPiereBasePluginJPiereTaxProviderFactory.xml
 Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
  jpiere.base.plugin.org.adempiere.model,

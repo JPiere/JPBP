@@ -169,9 +169,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 					log.setJP_ExchangedAmt(log.getLineNetAmt().multiply(log.getMultiplyRate()));
 
+					//Adjust Tax
 					if(log.isTaxIncluded())
 					{
-						;//TODO:税抜処理の実装
+						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt().subtract(log.calculateTax(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder)));
+
 					}else{
 						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 					}
@@ -237,9 +239,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 					log.setJP_ExchangedAmt(log.getLineNetAmt().multiply(log.getMultiplyRate()));
 
+					//Adjust Tax
 					if(log.isTaxIncluded())
 					{
-						;//TODO:税抜処理の実装
+						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt().subtract(log.calculateTax(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor)));
 					}else{
 						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 					}
