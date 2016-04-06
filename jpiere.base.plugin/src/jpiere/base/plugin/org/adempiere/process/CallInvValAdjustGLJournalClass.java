@@ -27,13 +27,13 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 
 /**
- * JPIERE-0163 Inventory Valuation Adjust Doc
+ * JPIERE-0163 Create GL Journal Doc for Inventory Valuation Adjust
  *
  *
  *  @author Hideaki Hagiwara
  *
  */
-public class CallInvValCalLineClass extends SvrProcess {
+public class CallInvValAdjustGLJournalClass extends SvrProcess {
 
 	MInvValProfile m_InvValProfile = null;
 	MInvValAdjust m_InvValAdjust = null;
@@ -55,23 +55,21 @@ public class CallInvValCalLineClass extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		pi.setClassName(m_InvValProfile.getJP_InvValAdjustLineClass());
+		pi.setClassName(m_InvValProfile.getJP_GLJournalCreateClass());
 		pi.setAD_Client_ID(getAD_PInstance_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
 		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
 
-		m_InvValAdjust.setJP_Processing1("Y");
-		m_InvValAdjust.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
+		m_InvValAdjust.setJP_Processing3("Y");
+		m_InvValAdjust.setJP_ProcessedTime3(new Timestamp(System.currentTimeMillis()));
 		m_InvValAdjust.saveEx(get_TrxName());
 
 		if(isOK)
 			return Msg.getMsg(getCtx(), "ProcessOK");
 		else
 			return Msg.getMsg(getCtx(), "ProcessFailed");
-
 	}
 
 }

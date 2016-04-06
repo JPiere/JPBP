@@ -1,0 +1,40 @@
+CREATE TABLE adempiere.JP_InvValAdjustLine
+(
+  JP_InvValAdjustLine_ID numeric(10,0) NOT NULL,
+  JP_InvValAdjustLine_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  JP_InvValAdjust_ID numeric(10,0) NOT NULL,
+  Line numeric(10,0) NOT NULL,
+  M_Product_ID numeric(10,0) NOT NULL,
+  M_AttributeSetInstance_ID numeric(10,0),
+  
+  C_AcctSchema_ID numeric(10,0) NOT NULL,
+  CostingMethod character(1) NOT NULL,
+  CostingLevel character(1) NOT NULL,
+  Account_ID numeric(10,0) NOT NULL,
+  QtyBook numeric NOT NULL DEFAULT 0,
+  JP_InvValAmt numeric NOT NULL DEFAULT 0,
+  JP_InvValTotalAmt numeric NOT NULL DEFAULT 0,
+  AmtAcctDr numeric NOT NULL DEFAULT 0,
+  AmtAcctCr numeric NOT NULL DEFAULT 0,
+  AmtAcctBalance numeric NOT NULL DEFAULT 0,
+  DifferenceAmt numeric NOT NULL DEFAULT 0,
+  
+  JP_InvValCalLine_ID numeric(10,0), 
+  QtyOnHand numeric NOT NULL DEFAULT 0,
+  DifferenceQty numeric NOT NULL DEFAULT 0,
+  JP_JournalLineDr_ID numeric(10,0),
+  JP_JournalLineCr_ID numeric(10,0),
+  IsConfirmed character(1) NOT NULL DEFAULT 'N'::bpchar,
+  
+  Description character varying(255),
+
+  CONSTRAINT JP_InvValAdjustLine_pkey PRIMARY KEY (JP_InvValAdjustLine_ID)
+)

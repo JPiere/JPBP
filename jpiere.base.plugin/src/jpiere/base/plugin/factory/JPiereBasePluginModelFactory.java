@@ -23,6 +23,8 @@ import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
@@ -53,7 +55,7 @@ import org.compiere.util.Env;
  *  JPIERE-0106:JPBP:Bill
  *  JPIERE-0148,0149,0150	Product category Group
  *  JPIERE-0151,0152,0153   Sales Region Group & Delivery Days from Warehouse
- *  JPIERE-0160,0161		Inventory Valuation Calculate
+ *  JPIERE-0160,0161,0163	Inventory Valuation Calculate
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
@@ -111,6 +113,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MInvValCalLine.class;
 			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
 				return MInvValCalLog.class;
+			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
+				return MInvValAdjust.class;
+			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
+				return MInvValAdjustLine.class;
 			}
 
 		}else{
@@ -174,6 +180,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MInvValCalLine(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
 				return  new MInvValCalLog(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
+				return  new MInvValAdjust(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
+				return  new MInvValAdjustLine(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -237,6 +247,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MInvValCalLine(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
 				return  new MInvValCalLog(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
+				return  new MInvValAdjust(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
+				return  new MInvValAdjustLine(Env.getCtx(), rs, trxName);
 			}
 
 		}else{
