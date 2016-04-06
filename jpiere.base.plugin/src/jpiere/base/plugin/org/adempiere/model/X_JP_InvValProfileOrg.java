@@ -30,7 +30,7 @@ public class X_JP_InvValProfileOrg extends PO implements I_JP_InvValProfileOrg, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160323L;
+	private static final long serialVersionUID = 20160406L;
 
     /** Standard Constructor */
     public X_JP_InvValProfileOrg (Properties ctx, int JP_InvValProfileOrg_ID, String trxName)
