@@ -21,6 +21,7 @@ import java.util.Properties;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceTax;
+import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -57,6 +58,15 @@ public class MBillLine extends X_JP_BillLine {
 			}
 
 			invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+			
+			if(invoice.getDocStatus().equals(DocAction.STATUS_Completed) 
+					|| invoice.getDocStatus().equals(DocAction.STATUS_Closed))
+			{
+				;//noting to do;
+			}else{
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_Not_Completed_Document"));//Document is not completed
+				return false;
+			}
 
 			if(invoice.getC_Currency_ID() != getParent().getC_Currency_ID())
 			{
