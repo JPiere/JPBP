@@ -37,6 +37,9 @@ public class JPiereBasePluginJPiereTaxProviderFactory implements IJPiereTaxProvi
 	@Override
 	public IJPiereTaxProvider newJPiereTaxProviderInstance(String className) {
 
+		if(className==null)
+			return null;
+		
 		if(className.startsWith("jpiere.base.plugin")){
 
 

@@ -30,11 +30,8 @@ import org.compiere.util.Env;
 
 public class JPiereOrderLineModelValidator implements ModelValidator {
 
-	private static CLogger log = CLogger.getCLogger(JPiereOrderLineModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
+
 
 	@Override
 	public void initialize(ModelValidationEngine engine, MClient client) {
@@ -51,9 +48,6 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 	@Override
 	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
 
 		return null;
 	}
@@ -68,6 +62,8 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			BigDecimal taxAmt = Env.ZERO;
 			MOrderLine ol = (MOrderLine)po;
 			MTax m_tax = MTax.get(Env.getCtx(), ol.getC_Tax_ID());
+			if(m_tax == null)
+				return null;
 
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 			if(taxCalculater != null)
