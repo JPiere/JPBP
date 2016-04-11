@@ -36,6 +36,7 @@ CREATE TABLE adempiere.JP_InvValCal
 
   TotalLines numeric NOT NULL DEFAULT 0,
   Description character varying(255),
+  DateAcct timestamp without time zone NOT NULL,
 
   CONSTRAINT JP_InvValCal_pkey PRIMARY KEY (JP_InvValCal_ID)
 )

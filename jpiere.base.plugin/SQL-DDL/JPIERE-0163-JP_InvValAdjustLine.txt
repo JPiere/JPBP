@@ -35,6 +35,7 @@ CREATE TABLE adempiere.JP_InvValAdjustLine
   IsConfirmed character(1) NOT NULL DEFAULT 'N'::bpchar,
   
   Description character varying(255),
+  AD_OrgTrx_ID numeric(10,0) 
 
   CONSTRAINT JP_InvValAdjustLine_pkey PRIMARY KEY (JP_InvValAdjustLine_ID)
 )

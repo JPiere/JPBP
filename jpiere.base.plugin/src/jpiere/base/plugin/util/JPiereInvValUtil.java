@@ -32,6 +32,42 @@ public class JPiereInvValUtil {
 	public JPiereInvValUtil() {
 		;
 	}
+	
+	static public BigDecimal getQtyBookFromStockOrg(Properties ctx, Timestamp dateValue, int M_Product_ID, int AD_Org_ID)
+	{
+
+		BigDecimal retValue = Env.ZERO;
+		StringBuilder sql = new StringBuilder("SELECT QtyBook ")
+			.append("FROM JP_StockOrg ")
+			.append("WHERE dateValue=? AND AD_Org_ID=?")
+			.append(" AND M_Product_ID=? AND AD_Client_ID=?");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql.toString(), null);
+			pstmt.setTimestamp(1, dateValue);
+			pstmt.setInt (2, AD_Org_ID);
+			pstmt.setInt (3, M_Product_ID);
+			pstmt.setInt (4, Env.getAD_Client_ID(ctx));
+			rs = pstmt.executeQuery ();
+			if (rs.next ())
+				retValue = rs.getBigDecimal(1);
+		}
+		catch (Exception e)
+		{
+			s_log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		return retValue;
+	}
+
 
 	static public BigDecimal getQtyBookFromStockOrg(Properties ctx, Timestamp dateValue, int M_Product_ID, MInvValProfileOrg[] Orgs)
 	{
@@ -47,7 +83,7 @@ public class JPiereInvValUtil {
 				else
 					sql.append(","+Orgs[i].getAD_Org_ID());
 			}
-			sql.append(") AND MProduct_ID=? AND AD_Client_ID=?");
+			sql.append(") AND M_Product_ID=? AND AD_Client_ID=?");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

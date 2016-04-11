@@ -1,5 +1,6 @@
 CREATE TABLE adempiere.JP_StockOrg
 (
+  JP_StockOrg_UU character varying(36) DEFAULT NULL::character varying,
   AD_Client_ID numeric(10,0) NOT NULL,
   AD_Org_ID numeric(10,0) NOT NULL,
   IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,

@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_InvValCal
  *  @author iDempiere (generated) 
@@ -33,7 +34,7 @@ public class X_JP_InvValCal extends PO implements I_JP_InvValCal, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160321L;
+	private static final long serialVersionUID = 20160411L;
 
     /** Standard Constructor */
     public X_JP_InvValCal (Properties ctx, int JP_InvValCal_ID, String trxName)
@@ -43,6 +44,8 @@ public class X_JP_InvValCal extends PO implements I_JP_InvValCal, I_Persistent
         {
 			setC_Currency_ID (0);
 			setC_DocType_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @SQL=SELECT DATE_TRUNC('month', TO_DATE('@#Date@', 'YYYY-MM-DD'))-1
 			setDateValue (new Timestamp( System.currentTimeMillis() ));
 // @SQL=SELECT DATE_TRUNC('month', TO_DATE('@#Date@', 'YYYY-MM-DD'))-1
 			setDocAction (null);
@@ -142,6 +145,23 @@ public class X_JP_InvValCal extends PO implements I_JP_InvValCal, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Account Date.
+		@param DateAcct 
+		Accounting Date
+	  */
+	public void setDateAcct (Timestamp DateAcct)
+	{
+		set_Value (COLUMNNAME_DateAcct, DateAcct);
+	}
+
+	/** Get Account Date.
+		@return Accounting Date
+	  */
+	public Timestamp getDateAcct () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
 	}
 
 	/** Set Valuation Date.
@@ -286,6 +306,14 @@ public class X_JP_InvValCal extends PO implements I_JP_InvValCal, I_Persistent
 	{
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), getDocumentNo());
+    }
 
 	/** Set Approved.
 		@param IsApproved 

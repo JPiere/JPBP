@@ -32,7 +32,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160406L;
+	private static final long serialVersionUID = 20160411L;
 
     /** Standard Constructor */
     public X_JP_InvValAdjustLine (Properties ctx, int JP_InvValAdjustLine_ID, String trxName)
@@ -100,6 +100,29 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
       return sb.toString();
     }
 
+	/** Set Trx Organization.
+		@param AD_OrgTrx_ID 
+		Performing or initiating organization
+	  */
+	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
+	{
+		if (AD_OrgTrx_ID < 1) 
+			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
+		else 
+			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
+	}
+
+	/** Get Trx Organization.
+		@return Performing or initiating organization
+	  */
+	public int getAD_OrgTrx_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_ElementValue getAccount() throws RuntimeException
     {
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
@@ -134,7 +157,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	  */
 	public void setAmtAcctBalance (BigDecimal AmtAcctBalance)
 	{
-		set_ValueNoCheck (COLUMNNAME_AmtAcctBalance, AmtAcctBalance);
+		set_Value (COLUMNNAME_AmtAcctBalance, AmtAcctBalance);
 	}
 
 	/** Get Accounted Balance.
@@ -154,7 +177,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	  */
 	public void setAmtAcctCr (BigDecimal AmtAcctCr)
 	{
-		set_ValueNoCheck (COLUMNNAME_AmtAcctCr, AmtAcctCr);
+		set_Value (COLUMNNAME_AmtAcctCr, AmtAcctCr);
 	}
 
 	/** Get Accounted Credit.
@@ -174,7 +197,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	  */
 	public void setAmtAcctDr (BigDecimal AmtAcctDr)
 	{
-		set_ValueNoCheck (COLUMNNAME_AmtAcctDr, AmtAcctDr);
+		set_Value (COLUMNNAME_AmtAcctDr, AmtAcctDr);
 	}
 
 	/** Get Accounted Debit.
@@ -200,9 +223,9 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	public void setC_AcctSchema_ID (int C_AcctSchema_ID)
 	{
 		if (C_AcctSchema_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_AcctSchema_ID, null);
+			set_Value (COLUMNNAME_C_AcctSchema_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_AcctSchema_ID, Integer.valueOf(C_AcctSchema_ID));
+			set_Value (COLUMNNAME_C_AcctSchema_ID, Integer.valueOf(C_AcctSchema_ID));
 	}
 
 	/** Get Accounting Schema.
@@ -269,7 +292,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	public void setCostingMethod (String CostingMethod)
 	{
 
-		set_ValueNoCheck (COLUMNNAME_CostingMethod, CostingMethod);
+		set_Value (COLUMNNAME_CostingMethod, CostingMethod);
 	}
 
 	/** Get Costing Method.
@@ -303,7 +326,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	  */
 	public void setDifferenceAmt (BigDecimal DifferenceAmt)
 	{
-		set_ValueNoCheck (COLUMNNAME_DifferenceAmt, DifferenceAmt);
+		set_Value (COLUMNNAME_DifferenceAmt, DifferenceAmt);
 	}
 
 	/** Get Difference.
@@ -343,7 +366,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	  */
 	public void setIsConfirmed (boolean IsConfirmed)
 	{
-		set_ValueNoCheck (COLUMNNAME_IsConfirmed, Boolean.valueOf(IsConfirmed));
+		set_Value (COLUMNNAME_IsConfirmed, Boolean.valueOf(IsConfirmed));
 	}
 
 	/** Get Confirmed.
@@ -447,9 +470,9 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	public void setJP_InvValCalLine_ID (int JP_InvValCalLine_ID)
 	{
 		if (JP_InvValCalLine_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_InvValCalLine_ID, null);
+			set_Value (COLUMNNAME_JP_InvValCalLine_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_InvValCalLine_ID, Integer.valueOf(JP_InvValCalLine_ID));
+			set_Value (COLUMNNAME_JP_InvValCalLine_ID, Integer.valueOf(JP_InvValCalLine_ID));
 	}
 
 	/** Get Inventory Valuation Calculate Document Line.
@@ -535,7 +558,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	  */
 	public void setLine (int Line)
 	{
-		set_ValueNoCheck (COLUMNNAME_Line, Integer.valueOf(Line));
+		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
 	}
 
 	/** Get Line No.
@@ -631,7 +654,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	  */
 	public void setQtyOnHand (BigDecimal QtyOnHand)
 	{
-		set_ValueNoCheck (COLUMNNAME_QtyOnHand, QtyOnHand);
+		set_Value (COLUMNNAME_QtyOnHand, QtyOnHand);
 	}
 
 	/** Get On Hand Quantity.

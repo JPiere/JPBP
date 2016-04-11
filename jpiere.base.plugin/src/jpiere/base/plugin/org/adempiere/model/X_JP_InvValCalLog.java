@@ -33,7 +33,7 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160324L;
+	private static final long serialVersionUID = 20160411L;
 
     /** Standard Constructor */
     public X_JP_InvValCalLog (Properties ctx, int JP_InvValCalLog_ID, String trxName)

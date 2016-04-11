@@ -15,16 +15,20 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
-import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
-import jpiere.base.plugin.util.JPiereInvValUtil;
 
-import org.compiere.model.MCost;
-import org.compiere.model.MCostElement;
+import org.compiere.model.MConversionType;
+import org.compiere.model.MJournal;
+import org.compiere.model.MJournalLine;
+import org.compiere.model.MPeriod;
+import org.compiere.process.DocAction;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  * JPIERE-0163 Inventory Valuation Adjust Doc
@@ -37,9 +41,7 @@ import org.compiere.util.Env;
 public class DefaultInvValAdjustGLJournal extends SvrProcess {
 
 	MInvValProfile m_InvValProfile = null;
-	MInvValProfileOrg[] profileOrgs = null;
-	MInvValCal m_InvValCal = null;
-	MInvValCalLine[] lines = null;
+	MInvValAdjust m_InvValAdjust = null;
 	int Record_ID = 0;
 
 	@Override
@@ -48,10 +50,8 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
-			lines = m_InvValCal.getLines();
-			m_InvValProfile = MInvValProfile.get(getCtx(), m_InvValCal.getJP_InvValProfile_ID());
-			profileOrgs = m_InvValProfile.getOrgs();
+			m_InvValAdjust = new MInvValAdjust(getCtx(), Record_ID, null);
+			m_InvValProfile = MInvValProfile.get(getCtx(), m_InvValAdjust.getJP_InvValProfile_ID());
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
@@ -60,84 +60,103 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		MCostElement[] costElements = JPiereInvValUtil.getMaterialStandardCostElements (getCtx());
-		int C_AcctSchema_ID = 0;
-		int M_CostType_ID = 0;
-		int M_Product_ID = 0;
-		for(int i = 0; i < lines.length; i++)
+		MInvValProfileOrg[] orgs = m_InvValProfile.getOrgs();
+		int C_AcctSchema_ID = m_InvValProfile.getC_AcctSchema_ID();
+		
+		for(int i = 0; i < orgs.length; i++)
 		{
-			C_AcctSchema_ID = lines[i].getC_AcctSchema_ID();
-			M_CostType_ID = lines[i].getC_AcctSchema().getM_CostType_ID();
-			M_Product_ID = lines[i].getM_Product_ID();
-
-			for(int j = 0; j < costElements.length; j++)
+			MInvValAdjustLine[] lines = m_InvValAdjust.getLines("AND AD_OrgTrx_ID="+orgs[i].getAD_Org_ID(), "");
+			
+			//Befor Check
+			boolean isDifferenceAmt = false;
+			for(int j = 0 ; j < lines.length; j++)
 			{
-				MCost cost = null;
-				if(lines[i].getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_Client))
+				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO)!=0)
+					isDifferenceAmt = true;
+			}
+			
+			if(!isDifferenceAmt)
+				continue;
+			
+			
+			MJournal journal = new MJournal(getCtx(), 0 , get_TrxName());
+			journal.setAD_Org_ID(orgs[i].getAD_Org_ID());
+			journal.setC_AcctSchema_ID(C_AcctSchema_ID);
+			journal.setC_DocType_ID(m_InvValProfile.getC_DocType_ID());
+			journal.setGL_Category_ID(m_InvValProfile.getC_DocType().getGL_Category_ID());
+			journal.setPostingType(MJournal.POSTINGTYPE_Actual);
+			journal.setC_Currency_ID(m_InvValProfile.getC_Currency_ID());
+			journal.setC_ConversionType_ID(MConversionType.getDefault(getAD_Client_ID()));
+			journal.setDateDoc(m_InvValAdjust.getDateAcct());
+			journal.setDateAcct(m_InvValAdjust.getDateAcct());
+			journal.setC_Period_ID(MPeriod.getC_Period_ID(getCtx(),  m_InvValAdjust.getDateValue(), orgs[i].getAD_Org_ID()));
+			journal.setDescription(Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_JP_InvValAdjust_ID));
+			journal.save(get_TrxName());
+			
+			int lineNo = 0;
+			for(int j = 0 ; j < lines.length; j++)
+			{
+
+				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO)==0)
+					continue;
+				
+				lineNo = lineNo + 10;
+				MJournalLine jl1 = new MJournalLine(getCtx(), 0, get_TrxName());
+				jl1.setGL_Journal_ID(journal.getGL_Journal_ID());
+				jl1.setAD_Org_ID(orgs[i].getAD_Org_ID());
+				jl1.setLine(lineNo);
+				jl1.setAccount_ID(lines[j].getAccount_ID());
+				jl1.setC_Currency_ID(m_InvValProfile.getC_Currency_ID());
+				jl1.setC_ConversionType_ID(MConversionType.getDefault(getAD_Client_ID()));
+				jl1.setM_Product_ID(lines[j].getM_Product_ID());
+				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO) > 0)
 				{
-					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
-																			,costElements[j].get_ID(), 0, get_TrxName());
-
-					if(cost == null)
-						continue;
-
-					if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_CurrentCostPrice))
-					{
-						cost.setCurrentCostPrice(lines[i].getJP_InvValAmt());
-					}else if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_FutureCostPrice)){
-						cost.setFutureCostPrice(lines[i].getJP_InvValAmt());
-					}else if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_BothCurrentCostAndFutureCost)){
-						cost.setCurrentCostPrice(lines[i].getJP_InvValAmt());
-						cost.setFutureCostPrice(lines[i].getJP_InvValAmt());
-					}
-					cost.saveEx(get_TrxName());
-
-				}else if (lines[i].getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_Organization)){
-
-					for(int k = 0; k < profileOrgs.length; k++)
-					{
-						cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), profileOrgs[k].getAD_Org_ID(), M_Product_ID, M_CostType_ID
-																	, C_AcctSchema_ID, costElements[j].get_ID(), 0, get_TrxName());
-
-						if(cost == null)
-							continue;
-
-						if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_CurrentCostPrice))
-						{
-							cost.setCurrentCostPrice(lines[i].getJP_InvValAmt());
-						}else if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_FutureCostPrice)){
-							cost.setFutureCostPrice(lines[i].getJP_InvValAmt());
-						}else if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_BothCurrentCostAndFutureCost)){
-							cost.setCurrentCostPrice(lines[i].getJP_InvValAmt());
-							cost.setFutureCostPrice(lines[i].getJP_InvValAmt());
-						}
-						cost.saveEx(get_TrxName());
-
-					}//for k
-
-				}else if (lines[i].getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_BatchLot)){
-					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
-									, costElements[j].get_ID(), lines[i].getM_AttributeSetInstance_ID(), get_TrxName());
-					if(cost == null)
-						continue;
-
-					if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_CurrentCostPrice))
-					{
-						cost.setCurrentCostPrice(lines[i].getJP_InvValAmt());
-					}else if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_FutureCostPrice)){
-						cost.setFutureCostPrice(lines[i].getJP_InvValAmt());
-					}else if(m_InvValProfile.getJP_UpdateCost().equals(MInvValProfile.JP_UPDATECOST_BothCurrentCostAndFutureCost)){
-						cost.setCurrentCostPrice(lines[i].getJP_InvValAmt());
-						cost.setFutureCostPrice(lines[i].getJP_InvValAmt());
-					}
-					cost.saveEx(get_TrxName());
-
-				}//if
-
+					jl1.setAmtSourceDr(lines[j].getDifferenceAmt());
+					jl1.setAmtAcctDr(lines[j].getDifferenceAmt());
+				}else{
+					jl1.setAmtSourceCr(lines[j].getDifferenceAmt().negate());
+					jl1.setAmtAcctCr(lines[j].getDifferenceAmt().negate());
+				}
+				jl1.saveEx(get_TrxName());
+				
+				lineNo = lineNo + 10;
+				MJournalLine jl2 = new MJournalLine(getCtx(), 0, get_TrxName());
+				jl2.setGL_Journal_ID(journal.getGL_Journal_ID());
+				jl2.setAD_Org_ID(orgs[i].getAD_Org_ID());
+				jl2.setLine(lineNo);
+				jl2.setAccount_ID(m_InvValProfile.getAccount_ID());
+				jl2.setC_Currency_ID(m_InvValProfile.getC_Currency_ID());
+				jl2.setC_ConversionType_ID(MConversionType.getDefault(getAD_Client_ID()));
+				jl2.setM_Product_ID(lines[j].getM_Product_ID());
+				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO) > 0)
+				{
+					jl2.setAmtSourceCr(lines[j].getDifferenceAmt());
+					jl2.setAmtAcctCr(lines[j].getDifferenceAmt());
+				}else{
+					jl2.setAmtSourceDr(lines[j].getDifferenceAmt().negate());
+					jl2.setAmtAcctDr(lines[j].getDifferenceAmt().negate());
+				}
+				jl2.saveEx(get_TrxName());
+				
+				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO) > 0)
+				{
+					lines[j].setJP_JournalLineDr_ID(jl1.getGL_JournalLine_ID());
+					lines[j].setJP_JournalLineCr_ID(jl2.getGL_JournalLine_ID());
+				}else{
+					lines[j].setJP_JournalLineDr_ID(jl2.getGL_JournalLine_ID());
+					lines[j].setJP_JournalLineCr_ID(jl1.getGL_JournalLine_ID());
+				}
+				
+				lines[j].saveEx(get_TrxName());
+				
 			}//for j
-
+			
+			journal.processIt(Util.isEmpty(m_InvValProfile.getDocAction())==true ? DocAction.ACTION_Complete : m_InvValProfile.getDocAction());
+			journal.saveEx(get_TrxName());
+			addBufferLog(0, null, null, journal.getDocumentNo(), MJournal.Table_ID, journal.getGL_Journal_ID());
+			
 		}//for i
-
+		
 		return null;
 	}
 

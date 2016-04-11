@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
@@ -36,7 +37,7 @@ import org.compiere.util.Trx;
 public class CallInvValAdjustLineClass extends SvrProcess {
 
 	MInvValProfile m_InvValProfile = null;
-	MInvValCal m_InvValCal = null;
+	MInvValAdjust m_InvValAdjust = null;
 	int Record_ID = 0;
 
 	@Override
@@ -45,8 +46,8 @@ public class CallInvValAdjustLineClass extends SvrProcess {
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
-			m_InvValProfile = new MInvValProfile(getCtx(), m_InvValCal.getJP_InvValProfile_ID(), null);
+			m_InvValAdjust = new MInvValAdjust(getCtx(), Record_ID, null);
+			m_InvValProfile = new MInvValProfile(getCtx(), m_InvValAdjust.getJP_InvValProfile_ID(), null);
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
@@ -57,15 +58,15 @@ public class CallInvValAdjustLineClass extends SvrProcess {
 	{
 
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		pi.setClassName(m_InvValProfile.getJP_InvValCalLineClass());
+		pi.setClassName(m_InvValProfile.getJP_InvValAdjustLineClass());
 		pi.setAD_Client_ID(getAD_PInstance_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
 		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
 
-		m_InvValCal.setJP_Processing1("Y");
-		m_InvValCal.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
-		m_InvValCal.saveEx(get_TrxName());
+		m_InvValAdjust.setJP_Processing1("Y");
+		m_InvValAdjust.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
+		m_InvValAdjust.saveEx(get_TrxName());
 
 		if(isOK)
 			return Msg.getMsg(getCtx(), "ProcessOK");

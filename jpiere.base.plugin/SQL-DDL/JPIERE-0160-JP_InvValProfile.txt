@@ -20,6 +20,7 @@ CREATE TABLE adempiere.JP_InvValProfile
   CostingLevel character(1) NOT NULL,
   C_Currency_ID numeric(10,0) NOT NULL,
   JP_ApplyAmtList character(2),
+  Account_ID numeric(10,0),
   JP_InvValCalLineClass character varying(255),
   JP_InvValCalClass character varying(255),
   JP_InvValUpdateCostClass character varying(255),
@@ -29,6 +30,10 @@ CREATE TABLE adempiere.JP_InvValProfile
 
   M_Product_Category_ID  numeric(10,0),
   JP_UpdateCost character varying(2) DEFAULT NULL::character varying,
-
+  IsZeroStockInvValJP character(1) NOT NULL DEFAULT 'N'::bpchar,
+  C_DocType_ID numeric(10,0) DEFAULT NULL::numeric,
+  Account_ID numeric(10,0) DEFAULT NULL::numeric,
+  Docaction character varying(2) DEFAULT 'CO'::character varying,
+  
   CONSTRAINT JP_InvValProfile_pkey PRIMARY KEY (JP_InvValProfile_ID)
 )

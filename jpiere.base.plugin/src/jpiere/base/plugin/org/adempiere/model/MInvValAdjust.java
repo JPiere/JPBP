@@ -1,41 +1,39 @@
 /******************************************************************************
- * Product: Adempiere ERP & CRM Smart Business Solution                       *
- * Copyright (C) 1999-2006 ComPiere, Inc. All Rights Reserved.                *
- * This program is free software; you can redistribute it and/or modify it    *
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
  * under the terms version 2 of the GNU General Public License as published   *
  * by the Free Software Foundation. This program is distributed in the hope   *
- * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
  * See the GNU General Public License for more details.                       *
- * You should have received a copy of the GNU General Public License along    *
- * with this program; if not, write to the Free Software Foundation, Inc.,    *
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
- * For the text or an alternative of this public license, you may reach us    *
- * ComPiere, Inc., 2620 Augustine Dr. #245, Santa Clara, CA 95054, USA        *
- * or via info@compiere.org or http://www.compiere.org/license.html           *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
+import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
-import org.compiere.model.PO;
-import org.compiere.model.POInfo;
+import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.Util;
 
 /**
- *	Template for DocAction
- *	
- *  Instead of modifying DocumentEngine, you could simply extend DocOptions interface and use customizeValidActions 
- *  @author Jorg Janke
- *  @version $Id: DocActionTemplate.java,v 1.3 2006/07/30 00:54:44 jjanke Exp $
+ * JPIERE-0163:Inventory Valuation Adjust
+ *
+ * @author Hideaki Hagiwara
+ *
  */
 public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 {
@@ -43,6 +41,8 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 	 * 
 	 */
 	private static final long serialVersionUID = -7588955558162632796L;
+	
+	private MInvValAdjustLine[] m_lines =null;
 
 	public MInvValAdjust(Properties ctx, int JP_InvValAdjust_ID, String trxName) 
 	{
@@ -55,20 +55,6 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 
 	}
 
-	/**
-	 * 	Init PO
-	 *	@param ctx ctx
-	 *	@return null
-	 */
-	protected POInfo initPO (Properties ctx)
-	{
-		return null;
-	}	//	initPO
-	
-	protected int get_AccessLevel ()
-	{
-		return 0;
-	}
 
 	/**
 	 * 	Get Document Info
@@ -161,22 +147,22 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
-		/**
-		MDocType dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
+		
+		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 
 		//	Std Period open?
-		if (!MPeriod.isOpen(getCtx(), getDateAcct(), dt.getDocBaseType()))
+		if (!MPeriod.isOpen(getCtx(), getDateValue(), dt.getDocBaseType(),getAD_Org_ID()))
 		{
 			m_processMsg = "@PeriodClosed@";
 			return DocAction.STATUS_Invalid;
 		}
-		MLine[] lines = getLines(false);
+		MInvValAdjustLine[] lines = getLines(false, null);
 		if (lines.length == 0)
 		{
 			m_processMsg = "@NoLines@";
 			return DocAction.STATUS_Invalid;
 		}
-		**/
+		
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -242,8 +228,8 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 			m_processMsg = valid;
 			return DocAction.STATUS_Invalid;
 		}
-	//	setProcessed(true);
-	//	setDocAction(DOCACTION_Close);
+		setProcessed(true);
+		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 	
@@ -352,15 +338,6 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 	}	//	getSummary
 
 	/**
-	 * 	Get Document no
-	 *	@return Document No
-	 */
-	public String getDocumentNo()
-	{
-		return "-";
-	}	//	getDocumentNo
-
-	/**
 	 * 	Get Process Message
 	 *	@return clear text error message
 	 */
@@ -375,9 +352,8 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 	 */
 	public int getDoc_User_ID()
 	{
-	//	return getSalesRep_ID();
-		return 0;
-	}	//	getDoc_User_ID
+		return getSalesRep_ID();
+	}
 
 	/**
 	 * 	Get Document Approval Amount
@@ -385,59 +361,76 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 	 */
 	public BigDecimal getApprovalAmt()
 	{
-		return null;	//getTotalLines();
+		return getTotalLines();
 	}	//	getApprovalAmt
+	
+	
+	/**************************************************************************
+	 * 	Get Lines of Inventory Valuation Adjust
+	 * 	@param whereClause where clause or null (starting with AND)
+	 * 	@param orderClause order clause
+	 * 	@return lines
+	 */
+	public MInvValAdjustLine[] getLines (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MInvValAdjustLine.COLUMNNAME_JP_InvValAdjust_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MInvValAdjustLine.COLUMNNAME_Line;
+		//
+		List<MInvValAdjustLine> list = new Query(getCtx(), MInvValAdjustLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		return list.toArray(new MInvValAdjustLine[list.size()]);
+	}	//	getLines
+
+	/**
+	 * 	Get Lines of Inventory Valuation Adjust.
+	 * 	@param requery requery
+	 * 	@param orderBy optional order by column
+	 * 	@return lines
+	 */
+	public MInvValAdjustLine[] getLines (boolean requery, String orderBy)
+	{
+		if (m_lines != null && !requery) {
+			set_TrxName(m_lines, get_TrxName());
+			return m_lines;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += "Line";
+		m_lines = getLines(null, orderClause);
+		return m_lines;
+	}	//	getLines
+
+	/**
+	 * 	Get Lines of Inventory Valuation Adjust.
+	 *
+	 * 	@return lines
+	 */
+	public MInvValAdjustLine[] getLines()
+	{
+		return getLines(false, null);
+	}	//	getLines
 
 	
-	
-	
-	
-	/**
-	 * 	Get Document Currency
-	 *	@return C_Currency_ID
-	 */
-	public int getC_Currency_ID()
-	{
-	//	MPriceList pl = MPriceList.get(getCtx(), getM_PriceList_ID());
-	//	return pl.getC_Currency_ID();
-		return 0;
-	}	//	getC_Currency_ID
+	@Override
+	protected boolean beforeSave(boolean newRecord) {
+
+		if(newRecord || is_ValueChanged("JP_InvValProfile"))
+		{
+			setC_Currency_ID(getJP_InvValProfile().getC_Currency_ID());
+		}
+		
+		return true;
+	}
 
 	
-	
-	
-	
-	
-	/**
-	 * 	Set Doc Status
-	 *	@param newStatus status
-	 */
-	public void setDocStatus (String newStatus)
-	{
-	}
-	/**
-	 * 	Get Doc Status
-	 *	@return doc status
-	 */
-	public String getDocStatus ()
-	{
-		return null;
-	}
-	/**
-	 * 	Get Doc Action
-	 *	@return doc action
-	 */
-	public String getDocAction ()
-	{
-		return null;
-	}
-	/**
-	 * 	Save
-	 *	@return true if saved
-	 */
-	public boolean save ()
-	{
-		return false;
-	}
 
-}	//	DocActionTemplate
+}

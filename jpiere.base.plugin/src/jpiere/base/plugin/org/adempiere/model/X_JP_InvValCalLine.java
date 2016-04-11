@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_InvValCalLine
  *  @author iDempiere (generated) 
@@ -32,7 +33,7 @@ public class X_JP_InvValCalLine extends PO implements I_JP_InvValCalLine, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160321L;
+	private static final long serialVersionUID = 20160411L;
 
     /** Standard Constructor */
     public X_JP_InvValCalLine (Properties ctx, int JP_InvValCalLine_ID, String trxName)
@@ -169,7 +170,7 @@ public class X_JP_InvValCalLine extends PO implements I_JP_InvValCalLine, I_Pers
 	public void setCostingMethod (String CostingMethod)
 	{
 
-		set_ValueNoCheck (COLUMNNAME_CostingMethod, CostingMethod);
+		set_Value (COLUMNNAME_CostingMethod, CostingMethod);
 	}
 
 	/** Get Costing Method.
@@ -310,6 +311,14 @@ public class X_JP_InvValCalLine extends PO implements I_JP_InvValCalLine, I_Pers
 		return ii.intValue();
 	}
 
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getJP_InvValCal_ID()));
+    }
+
 	/** Set Inventory Valuation Total Amount.
 		@param JP_InvValTotalAmt Inventory Valuation Total Amount	  */
 	public void setJP_InvValTotalAmt (BigDecimal JP_InvValTotalAmt)
@@ -409,7 +418,7 @@ public class X_JP_InvValCalLine extends PO implements I_JP_InvValCalLine, I_Pers
 	  */
 	public void setQtyBook (BigDecimal QtyBook)
 	{
-		set_ValueNoCheck (COLUMNNAME_QtyBook, QtyBook);
+		set_Value (COLUMNNAME_QtyBook, QtyBook);
 	}
 
 	/** Get Quantity book.

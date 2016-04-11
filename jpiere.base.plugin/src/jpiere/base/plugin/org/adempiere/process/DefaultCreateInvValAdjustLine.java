@@ -13,25 +13,20 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
-import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
-import jpiere.base.plugin.util.JPiereInvValUtil;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
 
-import org.compiere.model.MAcctSchema;
-import org.compiere.model.MClientInfo;
-import org.compiere.model.MCost;
-import org.compiere.model.MCostElement;
-import org.compiere.model.MProduct;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
+
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
-import org.compiere.util.Env;
-import org.compiere.util.Msg;
+
 
 /**
  * JPIERE-0163 Inventory Valuation Adjust Doc
@@ -44,7 +39,7 @@ import org.compiere.util.Msg;
 public class DefaultCreateInvValAdjustLine extends SvrProcess {
 
 	MInvValProfile m_InvValProfile = null;
-	MInvValCal m_InvValCal = null;
+	MInvValAdjust m_InvValAdjust = null;
 	int Record_ID = 0;
 
 	@Override
@@ -53,8 +48,8 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
-			m_InvValProfile = MInvValProfile.get(getCtx(), m_InvValCal.getJP_InvValProfile_ID());
+			m_InvValAdjust = new MInvValAdjust(getCtx(), Record_ID, null);
+			m_InvValProfile = MInvValProfile.get(getCtx(), m_InvValAdjust.getJP_InvValProfile_ID());
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
@@ -63,95 +58,69 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InvValCalLine ")
-											.append(" WHERE JP_InvValCal_ID=").append(m_InvValCal.getJP_InvValCal_ID());
-		int deleteNo = DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
+		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InvValAdjustLine ")
+											.append(" WHERE JP_InvValAdjust_ID=").append(m_InvValAdjust.getJP_InvValAdjust_ID());
+		DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
 
-		LinkedHashMap<Integer, BigDecimal> map_Product_Qty = JPiereInvValUtil.getAllQtyBookFromStockOrg(getCtx(), m_InvValCal.getDateValue()
-				, m_InvValProfile.getOrgs(), " p.M_Product_Category_ID, p.Value");
-		Set<Integer> set_M_Product_IDs = map_Product_Qty.keySet();
-		int line = 0;
-		MCostElement[] costElements = JPiereInvValUtil.getMaterialStandardCostElements (getCtx());
-		for(Integer M_Product_ID :set_M_Product_IDs)
+			
+		MInvValProfileOrg[]  Orgs = m_InvValProfile.getOrgs();
+		StringBuilder sql = new StringBuilder("SELECT AD_Org_ID, M_Product_ID, Account_ID ")//1 - 3
+								.append(",QtyBook, AmtAcctDr, AmtAcctCr, AmtAcctBalance ")	//4 - 7
+		.append("FROM JP_InvOrgBalance ")
+		.append("WHERE C_AcctSchema_ID=? AND dateValue=? AND AD_Org_ID IN (");
+		for(int i = 0; i < Orgs.length; i++)
 		{
-			MProduct product = MProduct.get(getCtx(), M_Product_ID);
-			if(product.getM_Product_ID()==0 || !product.getProductType().equals(MProduct.PRODUCTTYPE_Item) || !product.isStocked())
-				continue;
-
-			BigDecimal QtyBook =map_Product_Qty.get(M_Product_ID);
-			if(QtyBook.compareTo(Env.ZERO)==0)
+			if(i==0)
+				sql.append(Orgs[i].getAD_Org_ID());
+			else
+				sql.append(","+Orgs[i].getAD_Org_ID());
+		}
+		sql.append(") ")
+		.append(" ORDER BY M_Product_ID, AD_Org_ID");
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		MInvValAdjustLine ivaLine = null;
+		int line = 0;
+		try
+		{
+			pstmt = DB.prepareStatement (sql.toString(), null);
+			pstmt.setInt(1, m_InvValProfile.getC_AcctSchema_ID());
+			pstmt.setTimestamp(2, m_InvValAdjust.getDateValue());
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
 			{
-				if(!m_InvValProfile.isZeroStockInvValJP())
-					continue;
+				line = line + 10;
+				ivaLine = new MInvValAdjustLine(getCtx(), 0, get_TrxName());
+				ivaLine.setAD_Org_ID(m_InvValAdjust.getAD_Org_ID());
+				ivaLine.setAD_OrgTrx_ID(rs.getInt(1));
+				ivaLine.setJP_InvValAdjust_ID(m_InvValAdjust.getJP_InvValAdjust_ID());
+				ivaLine.setLine(line);
+				ivaLine.setM_Product_ID(rs.getInt(2));
+				ivaLine.setC_AcctSchema_ID(m_InvValProfile.getC_AcctSchema_ID());
+				ivaLine.setCostingMethod(m_InvValProfile.getCostingMethod());
+				ivaLine.setCostingLevel(m_InvValProfile.getCostingLevel());
+				ivaLine.setAccount_ID(rs.getInt(3));
+				ivaLine.setQtyBook(rs.getBigDecimal(4));
+				ivaLine.setAmtAcctDr(rs.getBigDecimal(5));
+				ivaLine.setAmtAcctCr(rs.getBigDecimal(6));
+				ivaLine.setAmtAcctBalance(rs.getBigDecimal(7));
+				ivaLine.saveEx(get_TrxName());
 			}
-
-			MInvValCalLine ivcLine = new MInvValCalLine(m_InvValCal);
-			line++;
-			ivcLine.setLine(line*10);
-			ivcLine.setM_Product_ID(M_Product_ID.intValue());
-			ivcLine.setQtyBook(QtyBook);
-			ivcLine.setC_AcctSchema_ID(m_InvValProfile.getC_AcctSchema_ID());
-			ivcLine.setCostingMethod(m_InvValProfile.getCostingMethod());
-			ivcLine.setCostingLevel(m_InvValProfile.getCostingLevel());
-
-			int C_AcctSchema_ID = m_InvValProfile.getC_AcctSchema_ID();
-			if(ivcLine.getC_AcctSchema_ID()==0)
-			{
-				C_AcctSchema_ID = MClientInfo.get(getCtx()).getC_AcctSchema1_ID();
-			}
-			int M_CostType_ID =  MAcctSchema.get(getCtx(), C_AcctSchema_ID).getM_CostType_ID();
-
-			//If CostElement is not one, CurrentCostPrice and FutureCostPrice are Overwritten.
-			for(int j = 0; j < costElements.length; j++)
-			{
-				MCost cost = null;
-				if(ivcLine.getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_Client))
-				{
-					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
-																			,costElements[j].get_ID(), 0, get_TrxName());
-
-					if(cost == null)
-						continue;
-
-				}else if (ivcLine.getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_Organization)){
-
-
-					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), ivcLine.getAD_Org_ID(), M_Product_ID, M_CostType_ID
-																, C_AcctSchema_ID, costElements[j].get_ID(), 0, get_TrxName());
-
-					if(cost == null)
-						continue;
-
-
-				}else if (ivcLine.getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_BatchLot)){
-					cost = MCost.get(getCtx(), Env.getAD_Client_ID(getCtx()), 0, M_Product_ID, M_CostType_ID, C_AcctSchema_ID
-									, costElements[j].get_ID(), ivcLine.getM_AttributeSetInstance_ID(), get_TrxName());
-					if(cost == null)
-						continue;
-				}//if
-
-				ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice());
-				ivcLine.setFutureCostPrice(cost.getFutureCostPrice());
-
-			}//for j
-
-
-			ivcLine.saveEx(get_TrxName());
 
 		}
-
-
-		int insertedNo = line;
-		String deleted = Msg.getMsg(getCtx(), "Deleted");
-		String inserted = Msg.getMsg(getCtx(), "Inserted");
-		String retVal = null;
-		if(deleteNo == 0)
-			retVal = inserted + " : " + insertedNo;
-		else
-			retVal = deleted + " : " + deleteNo + " / " +inserted + " : " + insertedNo;
-		addLog(retVal);
-
-		return retVal;
+		catch (Exception e)
+		{
+//			s_log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		
+		return "";
 	}
 
 }

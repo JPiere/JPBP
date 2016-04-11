@@ -36,13 +36,13 @@ import org.compiere.util.Env;
 
 /**
  *  Post Bank Statement Documents with Calculate Tax.
- *  このプログラムはDoc_BankStatement.javaをもとに作成しています。
+ *  Refer:Doc_BankStatement.java
  *
  *  Table:              C_BankStatement (392)
  *
  *  @author Jorg Janke
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
- *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: Doc_JPiereBankStatementTax.java,v 1.0 2014/08/20
  *
  *

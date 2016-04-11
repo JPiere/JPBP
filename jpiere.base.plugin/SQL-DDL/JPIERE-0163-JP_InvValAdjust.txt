@@ -36,6 +36,7 @@ CREATE TABLE adempiere.JP_InvValAdjust
   Description character varying(255),
   JP_InvValCal_ID numeric(10,0),
   GL_Journal_ID numeric(10,0),
- 
+  DateAcct timestamp without time zone NOT NULL,
+   
   CONSTRAINT JP_InvValAdjust_pkey PRIMARY KEY (JP_InvValAdjust_ID)
 )
