@@ -135,6 +135,36 @@ public interface I_JP_InvValProfileOrg
 
 	public I_JP_InvValProfile getJP_InvValProfile() throws RuntimeException;
 
+    /** Column name M_DiscountSchema_ID */
+    public static final String COLUMNNAME_M_DiscountSchema_ID = "M_DiscountSchema_ID";
+
+	/** Set Discount Schema.
+	  * Schema to calculate the trade discount percentage
+	  */
+	public void setM_DiscountSchema_ID (int M_DiscountSchema_ID);
+
+	/** Get Discount Schema.
+	  * Schema to calculate the trade discount percentage
+	  */
+	public int getM_DiscountSchema_ID();
+
+	public org.compiere.model.I_M_DiscountSchema getM_DiscountSchema() throws RuntimeException;
+
+    /** Column name M_PriceList_ID */
+    public static final String COLUMNNAME_M_PriceList_ID = "M_PriceList_ID";
+
+	/** Set Price List.
+	  * Unique identifier of a Price List
+	  */
+	public void setM_PriceList_ID (int M_PriceList_ID);
+
+	/** Get Price List.
+	  * Unique identifier of a Price List
+	  */
+	public int getM_PriceList_ID();
+
+	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException;
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 

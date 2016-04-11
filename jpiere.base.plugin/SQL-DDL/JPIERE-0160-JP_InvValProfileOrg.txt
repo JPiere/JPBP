@@ -12,6 +12,9 @@ CREATE TABLE adempiere.JP_InvValProfileOrg
 
   JP_InvValProfile_ID numeric(10,0) NOT NULL,
   Description character varying(255) DEFAULT NULL::character varying,
+  
+  M_Pricelist_ID numeric(10,0) DEFAULT NULL::numeric,
+  M_DiscountSchema_ID numeric(10,0) DEFAULT NULL::numeric,
 
   CONSTRAINT JP_InvValProfileOrg_pkey PRIMARY KEY (JP_InvValProfileOrg_ID)
 )

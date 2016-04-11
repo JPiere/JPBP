@@ -33,7 +33,9 @@ CREATE TABLE adempiere.JP_InvValProfile
   IsZeroStockInvValJP character(1) NOT NULL DEFAULT 'N'::bpchar,
   C_DocType_ID numeric(10,0) DEFAULT NULL::numeric,
   Account_ID numeric(10,0) DEFAULT NULL::numeric,
-  Docaction character varying(2) DEFAULT 'CO'::character varying,
+  DocAction character varying(2) DEFAULT 'CO'::character varying,
+  M_PriceList_ID  numeric(10,0) DEFAULT NULL::numeric,
+  M_DiscountSchema_ID numeric(10,0) DEFAULT NULL::numeric,
   
   CONSTRAINT JP_InvValProfile_pkey PRIMARY KEY (JP_InvValProfile_ID)
 )
