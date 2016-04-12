@@ -11,7 +11,7 @@ CREATE TABLE adempiere.T_InOutTransactionJP
 	C_BPartner_ID  numeric(10,0) NOT NULL,
 	M_Warehouse_ID  numeric(10,0) NOT NULL,
 	DocStatus character(2) NOT NULL,
-	posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+	JP_Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
 	Description character varying(255),
 	
 	M_InOutLine_ID numeric(10,0) NOT NULL,
