@@ -148,7 +148,8 @@ public class DiffQtyLogiAndAcct extends SvrProcess {
 			sql.append(",MovementQty");
 			
 		sql.append(" FROM JP_InOutTransaction ")
-			.append("WHERE AD_Client_ID = " + getAD_Client_ID());
+			.append("WHERE AD_Client_ID = " + getAD_Client_ID() + " AND DocStatus IN ('CO', 'CL')");
+		
 		if(IsFutureDateAcct)
 		{
 			sql.append(" AND MovementDate < " + DateValue_24)

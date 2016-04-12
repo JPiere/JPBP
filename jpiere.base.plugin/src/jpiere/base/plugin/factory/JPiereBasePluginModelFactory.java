@@ -30,6 +30,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
+import jpiere.base.plugin.org.adempiere.model.MInventoryDiffQtyLog;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryGLine;
@@ -117,6 +118,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MInvValAdjust.class;
 			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
 				return MInvValAdjustLine.class;
+			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
+				return MInventoryDiffQtyLog.class;
 			}
 
 		}else{
@@ -184,6 +187,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MInvValAdjust(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
 				return  new MInvValAdjustLine(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
+				return  new MInventoryDiffQtyLog(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -251,6 +256,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MInvValAdjust(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
 				return  new MInvValAdjustLine(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
+				return  new MInventoryDiffQtyLog(Env.getCtx(), rs, trxName);
 			}
 
 		}else{

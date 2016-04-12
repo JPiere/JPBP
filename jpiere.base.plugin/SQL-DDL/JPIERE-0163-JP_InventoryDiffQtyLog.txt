@@ -1,0 +1,28 @@
+CREATE TABLE adempiere.JP_InventoryDiffQtyLog
+(
+  	JP_InventoryDiffQtyLog_ID numeric(10,0) NOT NULL,
+  	JP_InventoryDiffQtyLog_uu character varying(36) DEFAULT NULL::character varying,
+  	AD_Client_ID numeric(10,0) NOT NULL,
+  	AD_Org_ID numeric(10,0) NOT NULL,
+ 	IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+ 	Created timestamp without time zone NOT NULL DEFAULT now(),
+  	CreatedBy numeric(10,0) NOT NULL,
+  	Updated timestamp without time zone NOT NULL DEFAULT now(),
+  	UpdatedBy numeric(10,0) NOT NULL,
+  	
+	JP_InvValAdjustLine_ID numeric(10,0) NOT NULL,
+    Line numeric(10,0) NOT NULL,
+    AD_OrgTrx_ID numeric(10,0), 
+	M_InOutLine_ID numeric(10,0),	
+	M_Transaction_ID numeric(10,0) ,
+	MovementType character(2),
+ 	M_Product_ID numeric(10,0),
+	MovementDate timestamp without time zone,
+	DateAcct timestamp without time zone,
+	MovementQty numeric DEFAULT 0,
+	JP_AdjustToAcctQty  numeric DEFAULT 0,
+	
+	Description character varying(255),
+	
+	CONSTRAINT JP_InventoryDiffQtyLog_pkey PRIMARY KEY (JP_InventoryDiffQtyLog_ID)
+)
