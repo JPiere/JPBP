@@ -20,6 +20,7 @@ import java.util.Properties;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.Query;
 import org.compiere.util.CCache;
+import org.compiere.util.Msg;
 
 /**
  * JPIERE-0160:Inventory Valuation Profile
@@ -74,6 +75,17 @@ public class MInvValProfile extends X_JP_InvValProfile {
 			setC_Currency_ID(as.getC_Currency_ID());
 		}
 
+		if(newRecord || is_ValueChanged("CostingMethod"))
+		{
+			if(getCostingMethod().equals(MInvValProfile.COSTINGMETHOD__)
+					|| getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_StandardCosting))
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_Can_Not_Calculate_Costing_Method"));
+				return false; 
+			}
+			
+		}
+		
 		return true;
 	}
 

@@ -1,0 +1,40 @@
+CREATE TABLE adempiere.T_InOutTransactionJP
+(
+  	AD_Pinstance_ID numeric(10,0) NOT NULL,
+  	AD_Client_ID numeric(10,0) NOT NULL,
+	AD_Org_ID numeric(10,0) NOT NULL,
+	M_InOut_ID numeric(10,0) NOT NULL,
+	DocumentNo character varying(30) NOT NULL,
+	C_DocType_ID numeric(10,0) NOT NULL,
+	DateAcct timestamp without time zone NOT NULL,
+	SalesRep_ID numeric(10,0),
+	C_BPartner_ID  numeric(10,0) NOT NULL,
+	M_Warehouse_ID  numeric(10,0) NOT NULL,
+	DocStatus character(2) NOT NULL,
+	posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+	Description character varying(255),
+	
+	M_InOutLine_ID numeric(10,0) NOT NULL,
+	line numeric(10,0) NOT NULL,
+	QtyEntered numeric NOT NULL,
+	C_UOM_ID numeric(10,0) NOT NULL,
+	ConfirmedQty numeric DEFAULT 0,
+ 	PickedQty numeric DEFAULT 0,
+  	ScrappedQty numeric DEFAULT 0,
+ 	TargetQty numeric DEFAULT 0,
+	M_InOutLine_Description character varying(255),
+	
+	M_Transaction_ID numeric(10,0) NOT NULL,
+	MovementType character(2) NOT NULL,
+	M_Locator_ID  numeric(10,0) NOT NULL,
+ 	M_Product_ID numeric(10,0) NOT NULL,
+	M_AttributeSetInstance_ID numeric(10,0) NOT NULL DEFAULT 0,
+	MovementDate timestamp without time zone NOT NULL,
+	MovementQty numeric NOT NULL DEFAULT 0,
+
+	JP_AdjustToAcctQty  numeric DEFAULT 0,
+	DocbaseType character(3) NOT NULL,
+	DateValue timestamp without time zone NOT NULL,
+	
+	CONSTRAINT T_InOutTransactionJP_pkey PRIMARY KEY (AD_Pinstance_ID, M_InOutLine_ID)
+)

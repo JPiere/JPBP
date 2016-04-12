@@ -1,0 +1,35 @@
+CREATE OR REPLACE VIEW adempiere.JP_InOutTransaction AS 
+SELECT 
+	io.M_InOut_ID
+	,io.DocumentNo
+	,io.C_DocType_ID
+	,io.DateAcct
+	,io.SalesRep_ID
+	,io.C_BPartner_ID 
+	,io.M_Warehouse_ID
+	,io.DocStatus
+	,io.posted
+	,io.Description
+	,iol.M_InOutLine_ID
+	,iol.line
+	,iol.QtyEntered
+	,iol.C_UOM_ID
+	,iol.pickedQty
+	,iol.TargetQty
+	,iol.ConfirmedQty
+	,iol.ScrappedQty
+	,iol.description as M_InOutLine_Description
+	,t.M_Transaction_ID
+	,t.AD_Client_ID
+	,t.AD_Org_ID
+	,t.MovementType 
+	,t.M_Locator_ID 
+	,t.M_Product_ID
+	,t.M_AttributeSetInstance_ID
+	,t.MovementDate
+	,t.MovementQty
+	,dt.DocBaseType
+	From adempiere.M_InOutLine iol 
+		INNER JOIN adempiere.M_InOUT io ON (io.M_InOUT_ID = iol.M_InOUT_ID)
+		INNER JOIN adempiere.M_Transaction t ON(t.M_InOutLine_ID = iol.M_InOutLine_ID)
+		INNER JOIN adempiere.C_DocType dt ON(dt.C_DocType_ID = io.C_DocType_ID)
