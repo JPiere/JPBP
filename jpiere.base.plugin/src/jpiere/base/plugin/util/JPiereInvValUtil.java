@@ -157,18 +157,18 @@ public class JPiereInvValUtil {
 		return retValue;
 	}
 
-	static public BigDecimal calculateTotalLines(Properties ctx, int JP_InvValCal_ID, String trxName)
+	static public BigDecimal calculateTotalLines(Properties ctx, String TableName, String ColumnName, int Record_ID, String trxName)
 	{
 		BigDecimal retValue = null;
 		StringBuilder sql = new StringBuilder("SELECT SUM(COALESCE(JP_InvValTotalAmt ,0)) ")
-		.append("FROM JP_InvValCalLine ")
-		.append("WHERE JP_InvValCal_ID=? ");
+		.append("FROM "+ TableName)
+		.append(" WHERE "+ ColumnName +" =?");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
 			pstmt = DB.prepareStatement (sql.toString(), trxName);
-			pstmt.setInt (1, JP_InvValCal_ID);
+			pstmt.setInt (1, Record_ID);
 			rs = pstmt.executeQuery ();
 			if (rs.next ())
 				retValue = rs.getBigDecimal(1);

@@ -20,6 +20,7 @@ import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
+import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInventoryDiffQtyLog;
 import jpiere.base.plugin.util.JPiereInvValUtil;
@@ -29,6 +30,7 @@ import org.compiere.model.MCostElement;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  * JPIERE-0163 Inventory Valuation Adjust Doc
@@ -149,7 +151,11 @@ public class DefaultInvValAdjustCalculate extends SvrProcess {
 			
 		}//For
 		
-		return "";
+		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), MInvValAdjustLine.Table_Name, "JP_InvValAdjust_ID", Record_ID, get_TrxName());
+		m_InvValAdjust.setTotalLines(totalLines);
+		m_InvValAdjust.saveEx(get_TrxName());
+
+		return Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_TotalLines) + " = " + totalLines;
 	}
 
 	private int createMInventoryDiffQtyLog(String sql, boolean IsFutureDateAcct, MInvValAdjustLine ivaLine, int lineNo)

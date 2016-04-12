@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
+import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
 import jpiere.base.plugin.util.JPiereInvValUtil;
 
 import org.compiere.process.SvrProcess;
@@ -50,7 +51,7 @@ public class InvValCalLineSum extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 
-		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), Record_ID, get_TrxName());
+		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), MInvValCalLine.Table_Name, "JP_InvValCal_ID", Record_ID, get_TrxName());
 		m_InvValCal.setTotalLines(totalLines);
 		m_InvValCal.saveEx(get_TrxName());
 

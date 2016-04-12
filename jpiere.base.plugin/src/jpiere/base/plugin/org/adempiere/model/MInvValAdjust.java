@@ -423,7 +423,7 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction
 	@Override
 	protected boolean beforeSave(boolean newRecord) {
 
-		if(newRecord || is_ValueChanged("JP_InvValProfile"))
+		if(newRecord || is_ValueChanged("JP_InvValProfile_ID"))
 		{
 			setC_Currency_ID(getJP_InvValProfile().getC_Currency_ID());
 		}

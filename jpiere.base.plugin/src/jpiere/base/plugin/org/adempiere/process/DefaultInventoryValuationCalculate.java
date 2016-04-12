@@ -117,7 +117,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			}
 		}
 
-		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), Record_ID, get_TrxName());
+		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), MInvValCalLine.Table_Name, "JP_InvValCal_ID", Record_ID, get_TrxName());
 		m_InvValCal.setTotalLines(totalLines);
 		m_InvValCal.saveEx(get_TrxName());
 
