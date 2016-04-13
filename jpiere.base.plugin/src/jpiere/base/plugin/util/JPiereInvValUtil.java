@@ -116,15 +116,22 @@ public class JPiereInvValUtil {
 
 		StringBuilder sql = new StringBuilder("SELECT s.M_Product_ID, SUM(COALESCE(s.QtyBook ,0)) ")
 		.append("FROM JP_StockOrg s INNER JOIN M_Product p ON (s.M_Product_ID=p.M_Product_ID) ")
-		.append("WHERE s.dateValue=? AND s.AD_Org_ID IN (");
-		for(int i = 0; i < Orgs.length; i++)
+		.append(" WHERE s.dateValue=? ");
+		
+		if(Orgs!=null && Orgs.length > 0)
 		{
-			if(i==0)
-				sql.append(Orgs[i].getAD_Org_ID());
-			else
-				sql.append(","+Orgs[i].getAD_Org_ID());
+			sql.append(" AND s.AD_Org_ID IN (");
+			for(int i = 0; i < Orgs.length; i++)
+			{
+				if(i==0)
+					sql.append(Orgs[i].getAD_Org_ID());
+				else
+					sql.append(","+Orgs[i].getAD_Org_ID());
+			}
+			sql.append(")");
 		}
-		sql.append(") AND s.AD_Client_ID=? GROUP BY s.M_Product_ID ");
+		
+		sql.append(" AND s.AD_Client_ID=? GROUP BY s.M_Product_ID ");
 		if(Util.isEmpty(OrderClause))
 		{
 			sql.append(",p.Value ORDER BY p.Value");
@@ -372,6 +379,39 @@ public class JPiereInvValUtil {
 	{
 		BigDecimal retValue = null;
 		StringBuilder sql = new StringBuilder("SELECT SUM(COALESCE(JP_ApplyAmt,0)) FROM JP_InvValCalLog ")
+								.append("WHERE JP_InvValCalLine_ID=?");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql.toString(), trxName);
+			pstmt.setInt(1, JP_InvValCalLine_ID);
+			rs = pstmt.executeQuery ();
+			if (rs.next ())
+				retValue = rs.getBigDecimal(1);
+
+		}
+		catch (Exception e)
+		{
+			s_log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		if(retValue == null)
+			return Env.ZERO;
+
+		return retValue;
+	}
+	
+	static public BigDecimal calculateApplyQty(Properties ctx, int JP_InvValCalLine_ID, String trxName)
+	{
+		BigDecimal retValue = null;
+		StringBuilder sql = new StringBuilder("SELECT SUM(COALESCE(JP_ApplyQty,0)) FROM JP_InvValCalLog ")
 								.append("WHERE JP_InvValCalLine_ID=?");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

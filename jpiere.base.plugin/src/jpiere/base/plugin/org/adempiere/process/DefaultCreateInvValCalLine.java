@@ -23,13 +23,15 @@ import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.util.JPiereInvValUtil;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClientInfo;
+import org.compiere.model.MConversionRate;
+import org.compiere.model.MConversionRateUtil;
 import org.compiere.model.MCost;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MProduct;
 import org.compiere.process.SvrProcess;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -63,15 +65,13 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InvValCalLine ")
-											.append(" WHERE JP_InvValCal_ID=").append(m_InvValCal.getJP_InvValCal_ID());
-		int deleteNo = DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
-
 		LinkedHashMap<Integer, BigDecimal> map_Product_Qty = JPiereInvValUtil.getAllQtyBookFromStockOrg(getCtx(), m_InvValCal.getDateValue()
 				, m_InvValProfile.getOrgs(), " p.M_Product_Category_ID, p.Value");
 		Set<Integer> set_M_Product_IDs = map_Product_Qty.keySet();
 		int line = 0;
 		MCostElement[] costElements = JPiereInvValUtil.getMaterialStandardCostElements (getCtx());
+		MAcctSchema m_AcctSchema =null;
+		
 		for(Integer M_Product_ID :set_M_Product_IDs)
 		{
 			MProduct product = MProduct.get(getCtx(), M_Product_ID);
@@ -99,7 +99,8 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 			{
 				C_AcctSchema_ID = MClientInfo.get(getCtx()).getC_AcctSchema1_ID();
 			}
-			int M_CostType_ID =  MAcctSchema.get(getCtx(), C_AcctSchema_ID).getM_CostType_ID();
+			m_AcctSchema =MAcctSchema.get(getCtx(), C_AcctSchema_ID);
+			int M_CostType_ID =  m_AcctSchema.getM_CostType_ID();
 
 			//If CostElement is not one, CurrentCostPrice and FutureCostPrice are Overwritten.
 			for(int j = 0; j < costElements.length; j++)
@@ -130,11 +131,25 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 						continue;
 				}//if
 
-				ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice());
-				ivcLine.setFutureCostPrice(cost.getFutureCostPrice());
+				if(m_AcctSchema.getC_Currency_ID()==m_InvValCal.getC_Currency_ID())
+				{
+					ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice());
+					ivcLine.setFutureCostPrice(cost.getFutureCostPrice());
+				}else{
+					BigDecimal rate =MConversionRate.getRate(m_AcctSchema.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValCal.getDateValue(),
+							m_InvValProfile.getC_ConversionType_ID(), ivcLine.getAD_Client_ID(), ivcLine.getAD_Org_ID());
+					if(rate == null)
+					{
+						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+								m_AcctSchema.getC_Currency_ID(), m_InvValProfile.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+					}else{
+						ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().multiply(rate));
+						ivcLine.setFutureCostPrice(cost.getFutureCostPrice().multiply(rate));
+					}
+					
+				}
 
 			}//for j
-
 
 			ivcLine.saveEx(get_TrxName());
 
@@ -142,13 +157,9 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 
 
 		int insertedNo = line;
-		String deleted = Msg.getMsg(getCtx(), "Deleted");
 		String inserted = Msg.getMsg(getCtx(), "Inserted");
 		String retVal = null;
-		if(deleteNo == 0)
-			retVal = inserted + " : " + insertedNo;
-		else
-			retVal = deleted + " : " + deleteNo + " / " +inserted + " : " + insertedNo;
+		retVal = inserted + " : " + insertedNo;
 		addLog(retVal);
 
 		return retVal;

@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
@@ -62,14 +63,16 @@ public class CallInvValCalClass extends SvrProcess {
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
 		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
 
-		m_InvValCal.setJP_Processing2("Y");
-		m_InvValCal.setJP_ProcessedTime2(new Timestamp(System.currentTimeMillis()));
-		m_InvValCal.saveEx(get_TrxName());
-
 		if(isOK)
-			return Msg.getMsg(getCtx(), "ProcessOK");
-		else
-			return Msg.getMsg(getCtx(), "ProcessFailed");
+		{
+			m_InvValCal.setJP_Processing2("Y");
+			m_InvValCal.setJP_ProcessedTime2(new Timestamp(System.currentTimeMillis()));
+			m_InvValCal.saveEx(get_TrxName());
+		}else{
+			throw new AdempiereException(pi.getSummary());
+		}
+		
+		return "";
 	}
 
 }

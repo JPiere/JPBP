@@ -36,6 +36,7 @@ CREATE TABLE adempiere.JP_InvValProfile
   DocAction character varying(2) DEFAULT 'CO'::character varying,
   M_PriceList_ID  numeric(10,0) DEFAULT NULL::numeric,
   M_DiscountSchema_ID numeric(10,0) DEFAULT NULL::numeric,
+  C_ConversionType_ID numeric(10,0) NOT NULL DEFAULT NULL::numeric,
   
   CONSTRAINT JP_InvValProfile_pkey PRIMARY KEY (JP_InvValProfile_ID)
 )

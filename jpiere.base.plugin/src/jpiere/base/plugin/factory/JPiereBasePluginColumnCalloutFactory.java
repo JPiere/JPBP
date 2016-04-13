@@ -22,10 +22,12 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereInvValAdjustCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValCalCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBill;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
@@ -63,7 +65,8 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				}else if(columnName.equals(MBill.COLUMNNAME_JP_LastBill_ID)
 							|| columnName.equals(MBill.COLUMNNAME_JPLastBillAmt)
 							|| columnName.equals(MBill.COLUMNNAME_C_Payment_ID)
-							|| columnName.equals(MBill.COLUMNNAME_JPLastPayAmt)){
+							|| columnName.equals(MBill.COLUMNNAME_JPLastPayAmt))
+				{
 					list.add(new JPiereBillAmountCallout());
 				}
 			}else if(tableName.equals(MInvValProfile.Table_Name)){
@@ -71,10 +74,17 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereInvValProfileCallout());
 				}
-			}else if(tableName.equals(MInvValCal.Table_Name)){
-				if(columnName.equals(MInvValCal.COLUMNNAME_JP_InvValProfile_ID))
+			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
+				if(columnName.equals(MInvValCal.COLUMNNAME_JP_InvValProfile_ID)
+						|| columnName.equals(MInvValCal.COLUMNNAME_DateValue))
 				{
 					list.add(new JPiereInvValCalCallout());
+				}
+			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
+				if(columnName.equals(MInvValAdjust.COLUMNNAME_JP_InvValProfile_ID)
+						|| columnName.equals(MInvValCal.COLUMNNAME_DateValue))
+				{
+					list.add(new JPiereInvValAdjustCallout());
 				}
 			}
 		}else{

@@ -26,7 +26,9 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
+import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
@@ -35,7 +37,7 @@ import org.compiere.util.Util;
  * @author Hideaki Hagiwara
  *
  */
-public class MInvValCal extends X_JP_InvValCal implements DocAction
+public class MInvValCal extends X_JP_InvValCal implements DocAction, DocOptions
 {
 	private static final long serialVersionUID = -7588955558162632796L;
 
@@ -311,9 +313,7 @@ public class MInvValCal extends X_JP_InvValCal implements DocAction
 	{
 		if (log.isLoggable(Level.INFO)) log.info("reActivateIt - " + toString());
 		setProcessed(false);
-		if (reverseCorrectIt())
-			return true;
-		return false;
+		return true;
 	}	//	reActivateIt
 
 
@@ -419,10 +419,32 @@ public class MInvValCal extends X_JP_InvValCal implements DocAction
 	}	//	getLines
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) {
-
-		return super.beforeSave(newRecord);
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		return true;
 	}
 
+	@Override
+	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
+			int AD_Table_ID, String[] docAction, String[] options, int index) 
+	{
+		
+		if (docStatus.equals(DocumentEngine.STATUS_Completed)) 
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Close; 
+			options[index++] = DocumentEngine.ACTION_ReActivate;
+			options[index++] = DocumentEngine.ACTION_Void;
+			return index;
+		}else if(docStatus.equals(DocumentEngine.STATUS_Drafted)){
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Complete; 
+			options[index++] = DocumentEngine.ACTION_Prepare;
+			options[index++] = DocumentEngine.ACTION_Void;
+			return index;
+		}
+		
+		return index;
+	}
 
 }

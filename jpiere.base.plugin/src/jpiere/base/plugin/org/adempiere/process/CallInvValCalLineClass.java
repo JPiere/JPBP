@@ -16,18 +16,20 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 
 /**
- * JPIERE-0163 Inventory Valuation Adjust Doc
+ * JPIERE-0161 Inventory Valuation Calculate Doc
  *
  *
  *  @author Hideaki Hagiwara
@@ -36,7 +38,7 @@ import org.compiere.util.Trx;
 public class CallInvValCalLineClass extends SvrProcess {
 
 	MInvValProfile m_InvValProfile = null;
-	MInvValAdjust m_InvValAdjust = null;
+	MInvValCal m_InvValCal = null;
 	int Record_ID = 0;
 
 	@Override
@@ -45,8 +47,8 @@ public class CallInvValCalLineClass extends SvrProcess {
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-			m_InvValAdjust = new MInvValAdjust(getCtx(), Record_ID, null);
-			m_InvValProfile = new MInvValProfile(getCtx(), m_InvValAdjust.getJP_InvValProfile_ID(), null);
+			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
+			m_InvValProfile = new MInvValProfile(getCtx(), m_InvValCal.getJP_InvValProfile_ID(), null);
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
@@ -55,23 +57,32 @@ public class CallInvValCalLineClass extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InvValCalLine ")
+										.append(" WHERE JP_InvValCal_ID=").append(m_InvValCal.getJP_InvValCal_ID());
+		DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
 
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		pi.setClassName(m_InvValProfile.getJP_InvValAdjustLineClass());
+		pi.setClassName(m_InvValProfile.getJP_InvValCalLineClass());
 		pi.setAD_Client_ID(getAD_PInstance_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
 		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
 
-		m_InvValAdjust.setJP_Processing1("Y");
-		m_InvValAdjust.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
-		m_InvValAdjust.saveEx(get_TrxName());
-
 		if(isOK)
-			return Msg.getMsg(getCtx(), "ProcessOK");
-		else
-			return Msg.getMsg(getCtx(), "ProcessFailed");
+		{
+			m_InvValCal.setJP_Processing1("Y");
+			m_InvValCal.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
+			m_InvValCal.setJP_Processing2("N");
+			m_InvValCal.setJP_ProcessedTime2(null);
+			m_InvValCal.setJP_Processing3("N");
+			m_InvValCal.setJP_ProcessedTime3(null);
+			m_InvValCal.setTotalLines(Env.ZERO);
+			m_InvValCal.saveEx(get_TrxName());
+		}else{
+			throw new AdempiereException(pi.getSummary());
+		}
 
+		return "";
 	}
 
 }

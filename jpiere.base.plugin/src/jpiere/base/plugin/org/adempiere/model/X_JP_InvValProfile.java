@@ -31,7 +31,7 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160411L;
+	private static final long serialVersionUID = 20160413L;
 
     /** Standard Constructor */
     public X_JP_InvValProfile (Properties ctx, int JP_InvValProfile_ID, String trxName)
@@ -39,6 +39,7 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
       super (ctx, JP_InvValProfile_ID, trxName);
       /** if (JP_InvValProfile_ID == 0)
         {
+			setC_ConversionType_ID (0);
 			setC_Currency_ID (0);
 			setCostingLevel (null);
 // C
@@ -132,6 +133,34 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 	public int getC_AcctSchema_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_AcctSchema_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ConversionType getC_ConversionType() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ConversionType)MTable.get(getCtx(), org.compiere.model.I_C_ConversionType.Table_Name)
+			.getPO(getC_ConversionType_ID(), get_TrxName());	}
+
+	/** Set Currency Type.
+		@param C_ConversionType_ID 
+		Currency Conversion Rate Type
+	  */
+	public void setC_ConversionType_ID (int C_ConversionType_ID)
+	{
+		if (C_ConversionType_ID < 1) 
+			set_Value (COLUMNNAME_C_ConversionType_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_ConversionType_ID, Integer.valueOf(C_ConversionType_ID));
+	}
+
+	/** Get Currency Type.
+		@return Currency Conversion Rate Type
+	  */
+	public int getC_ConversionType_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_ConversionType_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

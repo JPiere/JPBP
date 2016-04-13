@@ -29,6 +29,7 @@ import org.adempiere.exceptions.DBException;
 import org.compiere.model.I_C_InvoiceLine;
 import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MConversionRate;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchPO;
@@ -50,6 +51,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	MInvValProfile m_InvValProfile = null;
 	MInvValCal m_InvValCal = null;
 	MInvValCalLine[] lines = null;
+	MCurrency m_Currency = null;
 	int Record_ID = 0;
 
 	@Override
@@ -61,7 +63,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
 			m_InvValProfile = MInvValProfile.get(getCtx(), m_InvValCal.getJP_InvValProfile_ID());
 			lines = m_InvValCal.getLines();
-
+			m_Currency = MCurrency.get(getCtx(), m_InvValCal.getC_Currency_ID());
 			//Delete InvValCalLog
 			StringBuilder DeleteSQL = new StringBuilder("DELETE FROM " + MInvValCalLog.Table_Name + " WHERE JP_InvValCalLine_ID = ?");
 			PreparedStatement pstmt = null;
@@ -107,10 +109,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				calculate_AveragePO(lines[i]);
 			}else if(lines[i].getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_AverageInvoice)){
 				calculate_AverageInvoice(lines[i]);
-			}else if(lines[i].getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_StandardCosting)){
-				
-//				calculate_StandardCosting(lines[i]);
-				
+			}else if(lines[i].getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_StandardCosting)){				
 				return Msg.getMsg(getCtx(), "JP_Can_Not_Calculate_Costing_Method");
 			}else{
 				return Msg.getMsg(getCtx(), "JP_Can_Not_Calculate_Costing_Method");
@@ -136,11 +135,31 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
 
 		int lineNo = 1;
+		MMatchPO[] matchPos = null;
+		MMatchInv[] matchInvs = null;
 		for(int i = 0; i < ioLines.length; i++)
 		{
+			/***Check***/
 			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
 				continue;
 
+			matchPos = null;
+			matchInvs = null;
+			if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))
+			{
+				matchPos = MMatchPO.get(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+				if(matchPos == null || matchPos.length < 1 )
+					continue;
+				
+			}else if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor)){
+				matchInvs = MMatchInv.getInOutLine(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+				if(matchInvs == null || matchInvs.length < 1 )
+					continue;
+			}else{
+				break;
+			}
+			
+			/***Calculate***/
 			MInvValCalLog log = new MInvValCalLog(line);
 			log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 			log.setLine(lineNo * 10);
@@ -149,7 +168,6 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			log.setMovementType(ioLines[i].getM_InOut().getMovementType());
 			if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))
 			{
-				MMatchPO[] matchPos = MMatchPO.get(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
 				I_C_OrderLine orderLine =null;
 				for(int j = 0; j < matchPos.length; j++)
 				{
@@ -219,7 +237,6 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 			}else if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor)){
 
-				MMatchInv[] matchInvs = MMatchInv.getInOutLine(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
 				I_C_InvoiceLine invoiceLine =null;
 				for(int j = 0; j < matchInvs.length; j++)
 				{
@@ -314,10 +331,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		if(line.getQtyBook().compareTo(Env.ZERO) >= 0)
 		{
 			line.setJP_InvValTotalAmt(JP_InvValTotalAmt);
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(),2));
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 		}else{
 			line.setJP_InvValTotalAmt(JP_InvValTotalAmt.negate());
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook().abs(),2));
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook().abs(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 		}
 		
 		line.saveEx(get_TrxName());
@@ -509,10 +526,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		if(line.getQtyBook().compareTo(Env.ZERO) >= 0)
 		{
 			line.setJP_InvValTotalAmt(JP_InvValTotalAmt);
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(),2));
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 		}else{
 			line.setJP_InvValTotalAmt(JP_InvValTotalAmt.negate());
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook().abs(),2));
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook().abs(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 		}
 		
 		line.saveEx(get_TrxName());
@@ -594,10 +611,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 			log.saveEx(get_TrxName());
 			JP_InvValAmt = log.getJP_ExchangedPriceActual();;
-
+			break;
 		}
 	
-		line.setJP_InvValAmt(JP_InvValAmt);
+		if(JP_InvValAmt.compareTo(Env.ZERO)==0)
+			line.setJP_InvValAmt(line.getCurrentCostPrice());
+		else
+			line.setJP_InvValAmt(JP_InvValAmt);
+		
 		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(JP_InvValAmt));
 		
 		line.saveEx(get_TrxName());
@@ -680,10 +701,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 			log.saveEx(get_TrxName());
 			JP_InvValAmt = log.getJP_ExchangedPriceActual();;
-
+			break;
 		}
 	
-		line.setJP_InvValAmt(JP_InvValAmt);
+		if(JP_InvValAmt.compareTo(Env.ZERO)==0)
+			line.setJP_InvValAmt(line.getCurrentCostPrice());
+		else
+			line.setJP_InvValAmt(JP_InvValAmt);
+		
 		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(JP_InvValAmt));
 		
 		line.saveEx(get_TrxName());
@@ -697,11 +722,19 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate ASC");
 
 		int lineNo = 1;
+		MMatchPO[] matchPos = null;
 		for(int i = 0; i < ioLines.length; i++)
 		{
+			/***Check*/
 			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
 				continue;
 
+			matchPos = MMatchPO.get(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+			if(matchPos == null || matchPos.length < 1 )
+					continue;
+			
+			
+			/**Calculate**/
 			MInvValCalLog log = new MInvValCalLog(line);
 			log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 			log.setLine(lineNo * 10);
@@ -709,7 +742,6 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
 			log.setMovementType(ioLines[i].getM_InOut().getMovementType());
 
-			MMatchPO[] matchPos = MMatchPO.get(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
 			I_C_OrderLine orderLine =null;
 			for(int j = 0; j < matchPos.length; j++)
 			{
@@ -783,14 +815,9 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		}
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
-		if(line.getQtyBook().compareTo(Env.ZERO) >= 0)
-		{
-			line.setJP_InvValTotalAmt(JP_InvValTotalAmt);
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(),2));
-		}else{
-			line.setJP_InvValTotalAmt(JP_InvValTotalAmt.negate());
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook().abs(),2));
-		}
+		BigDecimal JP_ApplyQty = JPiereInvValUtil.calculateApplyQty(getCtx(), line.get_ID(), get_TrxName());
+		line.setJP_InvValAmt(JP_InvValTotalAmt.divide(JP_ApplyQty, m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
 		
 		line.saveEx(get_TrxName());
 
@@ -803,11 +830,20 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
 
 		int lineNo = 1;
+		MMatchInv[] matchInvs = null;
 		for(int i = 0; i < ioLines.length; i++)
 		{
+			
+			/**Check**/
 			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
 				continue;
+			
+			matchInvs =MMatchInv.getInOutLine(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+			if(matchInvs == null || matchInvs.length < 1 )
+					continue;
+			
 
+			/**Calcualte**/
 			MInvValCalLog log = new MInvValCalLog(line);
 			log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 			log.setLine(lineNo * 10);
@@ -815,7 +851,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
 			log.setMovementType(ioLines[i].getM_InOut().getMovementType());
 	
-			MMatchInv[] matchInvs = MMatchInv.getInOutLine(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+			matchInvs = MMatchInv.getInOutLine(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
 			I_C_InvoiceLine invoiceLine =null;
 			for(int j = 0; j < matchInvs.length; j++)
 			{
@@ -872,21 +908,16 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		}//for i
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
-		if(line.getQtyBook().compareTo(Env.ZERO) >= 0)
-		{
-			line.setJP_InvValTotalAmt(JP_InvValTotalAmt);
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook(),2));
-		}else{
-			line.setJP_InvValTotalAmt(JP_InvValTotalAmt.negate());
-			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(line.getQtyBook().abs(),2));
-		}
+		BigDecimal JP_ApplyQty = JPiereInvValUtil.calculateApplyQty(getCtx(), line.get_ID(), get_TrxName());
+		line.setJP_InvValAmt(JP_InvValTotalAmt.divide(JP_ApplyQty, m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
 		
 		line.saveEx(get_TrxName());
 	}
 
-	private void calculate_StandardCosting(MInvValCalLine line)
-	{
-		;
-	}
+//	private void calculate_StandardCosting(MInvValCalLine line)
+//	{
+//		;
+//	}
 
 }

@@ -28,7 +28,7 @@ import org.compiere.model.GridTab;
  * @author Hideaki Hagiwara
  *
  */
-public class JPiereInvValCalCallout implements IColumnCallout {
+public class JPiereInvValAdjustCallout implements IColumnCallout {
 
 	@Override
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
