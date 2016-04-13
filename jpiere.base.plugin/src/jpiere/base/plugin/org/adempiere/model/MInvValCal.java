@@ -447,4 +447,12 @@ public class MInvValCal extends X_JP_InvValCal implements DocAction, DocOptions
 		return index;
 	}
 
+	@Override
+	public String toString() 
+	{
+	      StringBuffer sb = new StringBuffer ("MInvValCal[")
+	        .append(get_ID()).append("]-DocumentNo:")
+	        .append(getDocumentNo());
+		return sb.toString();
+	}
 }

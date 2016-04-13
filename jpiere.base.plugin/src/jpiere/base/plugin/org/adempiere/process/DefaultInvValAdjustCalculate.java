@@ -20,7 +20,6 @@ import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInventoryDiffQtyLog;
 import jpiere.base.plugin.util.JPiereInvValUtil;
@@ -152,7 +151,9 @@ public class DefaultInvValAdjustCalculate extends SvrProcess {
 		}//For
 		
 		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), MInvValAdjustLine.Table_Name, "JP_InvValAdjust_ID", Record_ID, get_TrxName());
+		BigDecimal diffAmt = JPiereInvValUtil.calculateTotals(getCtx(), "DifferenceAmt", MInvValAdjustLine.Table_Name, "JP_InvValAdjust_ID", Record_ID, get_TrxName());
 		m_InvValAdjust.setTotalLines(totalLines);
+		m_InvValAdjust.setDifferenceAmt(diffAmt);
 		m_InvValAdjust.saveEx(get_TrxName());
 
 		return Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_TotalLines) + " = " + totalLines;

@@ -34,7 +34,7 @@ public class X_JP_InvValAdjust extends PO implements I_JP_InvValAdjust, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160411L;
+	private static final long serialVersionUID = 20160413L;
 
     /** Standard Constructor */
     public X_JP_InvValAdjust (Properties ctx, int JP_InvValAdjust_ID, String trxName)
@@ -48,6 +48,10 @@ public class X_JP_InvValAdjust extends PO implements I_JP_InvValAdjust, I_Persis
 // @SQL=SELECT DATE_TRUNC('month', TO_DATE('@#Date@', 'YYYY-MM-DD'))-1
 			setDateValue (new Timestamp( System.currentTimeMillis() ));
 // @SQL=SELECT DATE_TRUNC('month', TO_DATE('@#Date@', 'YYYY-MM-DD'))-1
+			setDifferenceAmt (Env.ZERO);
+// 0
+			setDifferenceQty (Env.ZERO);
+// 0
 			setDocAction (null);
 // CO
 			setDocStatus (null);
@@ -196,6 +200,46 @@ public class X_JP_InvValAdjust extends PO implements I_JP_InvValAdjust, I_Persis
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** Set Difference.
+		@param DifferenceAmt 
+		Difference Amount
+	  */
+	public void setDifferenceAmt (BigDecimal DifferenceAmt)
+	{
+		set_Value (COLUMNNAME_DifferenceAmt, DifferenceAmt);
+	}
+
+	/** Get Difference.
+		@return Difference Amount
+	  */
+	public BigDecimal getDifferenceAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_DifferenceAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Difference.
+		@param DifferenceQty 
+		Difference Quantity
+	  */
+	public void setDifferenceQty (BigDecimal DifferenceQty)
+	{
+		set_Value (COLUMNNAME_DifferenceQty, DifferenceQty);
+	}
+
+	/** Get Difference.
+		@return Difference Quantity
+	  */
+	public BigDecimal getDifferenceQty () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_DifferenceQty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** DocAction AD_Reference_ID=135 */
@@ -411,9 +455,9 @@ public class X_JP_InvValAdjust extends PO implements I_JP_InvValAdjust, I_Persis
 	public void setJP_InvValCal_ID (int JP_InvValCal_ID)
 	{
 		if (JP_InvValCal_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_InvValCal_ID, null);
+			set_Value (COLUMNNAME_JP_InvValCal_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_InvValCal_ID, Integer.valueOf(JP_InvValCal_ID));
+			set_Value (COLUMNNAME_JP_InvValCal_ID, Integer.valueOf(JP_InvValCal_ID));
 	}
 
 	/** Get Inventory Valuation Calculate Doc.
@@ -436,9 +480,9 @@ public class X_JP_InvValAdjust extends PO implements I_JP_InvValAdjust, I_Persis
 	public void setJP_InvValProfile_ID (int JP_InvValProfile_ID)
 	{
 		if (JP_InvValProfile_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_InvValProfile_ID, null);
+			set_Value (COLUMNNAME_JP_InvValProfile_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_InvValProfile_ID, Integer.valueOf(JP_InvValProfile_ID));
+			set_Value (COLUMNNAME_JP_InvValProfile_ID, Integer.valueOf(JP_InvValProfile_ID));
 	}
 
 	/** Get Inventory Valuation Profile.

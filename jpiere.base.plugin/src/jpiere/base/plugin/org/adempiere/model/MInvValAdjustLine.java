@@ -88,4 +88,14 @@ public class MInvValAdjustLine extends X_JP_InvValAdjustLine {
 	{
 		return getDiffQtyLogs(false, null);
 	}	//	getDiffQtyLogs
+	
+	
+	@Override
+	public String toString() 
+	{
+	      StringBuffer sb = new StringBuffer ("MInvValAdjustLine[")
+	        .append(get_ID()).append("]-Line:")
+	        .append(getLine());
+		return sb.toString();
+	}
 }

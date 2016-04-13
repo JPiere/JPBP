@@ -194,6 +194,37 @@ public class JPiereInvValUtil {
 
 		return retValue;
 	}
+	
+	static public BigDecimal calculateTotals(Properties ctx, String totalColumn, String TableName, String KeyColumnName, int Record_ID, String trxName)
+	{
+		BigDecimal retValue = null;
+		StringBuilder sql = new StringBuilder("SELECT SUM(COALESCE("+ totalColumn +",0)) ")
+		.append("FROM "+ TableName)
+		.append(" WHERE "+ KeyColumnName +" =?");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql.toString(), trxName);
+			pstmt.setInt (1, Record_ID);
+			rs = pstmt.executeQuery ();
+			if (rs.next ())
+				retValue = rs.getBigDecimal(1);
+		}
+		catch (Exception e)
+		{
+			s_log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+
+		return retValue;
+	}
 
 	/**
 	 * 	Get Material Standard Cost Element

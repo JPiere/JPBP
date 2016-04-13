@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_InvValAdjustLine
  *  @author iDempiere (generated) 
@@ -32,7 +33,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160411L;
+	private static final long serialVersionUID = 20160413L;
 
     /** Standard Constructor */
     public X_JP_InvValAdjustLine (Properties ctx, int JP_InvValAdjustLine_ID, String trxName)
@@ -442,6 +443,14 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 			 return 0;
 		return ii.intValue();
 	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getJP_InvValAdjust_ID()));
+    }
 
 	/** Set Inventory Valuation Amount.
 		@param JP_InvValAmt Inventory Valuation Amount	  */

@@ -17,7 +17,6 @@ import java.sql.Timestamp;
 import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
 import org.adempiere.exceptions.AdempiereException;
@@ -25,7 +24,6 @@ import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
-import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 
 /**
@@ -69,6 +67,13 @@ public class CallInvValAdjustLineClass extends SvrProcess {
 		{
 			m_InvValAdjust.setJP_Processing1("Y");
 			m_InvValAdjust.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
+			m_InvValAdjust.setJP_Processing2("N");
+			m_InvValAdjust.setJP_ProcessedTime2(null);
+			m_InvValAdjust.setJP_Processing3("N");
+			m_InvValAdjust.setJP_ProcessedTime3(null);
+			m_InvValAdjust.setTotalLines(Env.ZERO);
+			m_InvValAdjust.setDifferenceAmt(Env.ZERO);
+			m_InvValAdjust.setDifferenceQty(Env.ZERO);
 			m_InvValAdjust.saveEx(get_TrxName());
 			
 		}else{

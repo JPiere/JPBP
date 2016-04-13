@@ -149,6 +149,32 @@ public interface I_JP_InvValAdjust
 	  */
 	public String getDescription();
 
+    /** Column name DifferenceAmt */
+    public static final String COLUMNNAME_DifferenceAmt = "DifferenceAmt";
+
+	/** Set Difference.
+	  * Difference Amount
+	  */
+	public void setDifferenceAmt (BigDecimal DifferenceAmt);
+
+	/** Get Difference.
+	  * Difference Amount
+	  */
+	public BigDecimal getDifferenceAmt();
+
+    /** Column name DifferenceQty */
+    public static final String COLUMNNAME_DifferenceQty = "DifferenceQty";
+
+	/** Set Difference.
+	  * Difference Quantity
+	  */
+	public void setDifferenceQty (BigDecimal DifferenceQty);
+
+	/** Get Difference.
+	  * Difference Quantity
+	  */
+	public BigDecimal getDifferenceQty();
+
     /** Column name DocAction */
     public static final String COLUMNNAME_DocAction = "DocAction";
 

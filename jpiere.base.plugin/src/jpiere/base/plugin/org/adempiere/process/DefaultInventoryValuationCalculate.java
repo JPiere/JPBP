@@ -25,10 +25,12 @@ import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.util.JPiereInvValUtil;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.compiere.model.I_C_InvoiceLine;
 import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MConversionRate;
+import org.compiere.model.MConversionRateUtil;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MMatchInv;
@@ -185,6 +187,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					{
 						BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
 								orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+						if(rate == null)
+						{
+							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+									orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+						}
 						log.setMultiplyRate(rate);
 					}else{
 						log.setMultiplyRate(Env.ONE);
@@ -254,6 +261,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					{
 						BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
 								invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+						if(rate == null)
+						{
+							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+									invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+						}
 						log.setMultiplyRate(rate);
 					}else{
 						log.setMultiplyRate(Env.ONE);
@@ -379,6 +391,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					{
 						BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
 								orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+						if(rate == null)
+						{
+							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+									orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+						}
 						log.setMultiplyRate(rate);
 					}else{
 						log.setMultiplyRate(Env.ONE);
@@ -449,6 +466,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					{
 						BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
 								invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+						if(rate == null)
+						{
+							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+									invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+						}
 						log.setMultiplyRate(rate);
 					}else{
 						log.setMultiplyRate(Env.ONE);
@@ -577,6 +599,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			{
 				BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
 						orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+				if(rate == null)
+				{
+					throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+							orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+				}
 				log.setMultiplyRate(rate);
 			}else{
 				log.setMultiplyRate(Env.ONE);
@@ -638,12 +665,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
 				continue;
 
-			MMatchPO[] matchPos = MMatchPO.get(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());	
-			if(matchPos.length > 0)
-				;
-			else
+			MMatchInv[] matchInvs =MMatchInv.getInOutLine(getCtx(), ioLines[i].getM_InOutLine_ID(), get_TrxName());
+			if(matchInvs == null || matchInvs.length < 1 )
 				continue;
-				
+			
+			
 			MInvValCalLog log = new MInvValCalLog(line);
 			log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 			log.setLine(lineNo);
@@ -654,11 +680,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 			I_C_InvoiceLine invLine =null;
 			//Set Macth PO Info
-			log.setM_MatchPO_ID(matchPos[0].get_ID());
-			log.setQty(matchPos[0].getQty());
+			log.setM_MatchInv_ID(matchInvs[0].get_ID());
+			log.setQty(matchInvs[0].getQty());
 
 			//Set PO Info
-			invLine = matchPos[0].getC_InvoiceLine();
+			invLine = matchInvs[0].getC_InvoiceLine();
 			JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invLine);
 
 			//Set Reference Field Gorup
@@ -667,6 +693,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			{
 				BigDecimal rate =MConversionRate.getRate(invLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID()
 						,invLine.getC_Invoice().getDateInvoiced(), invLine.getC_Invoice().getC_ConversionType_ID(), invLine.getAD_Client_ID(), invLine.getAD_Org_ID());
+				if(rate == null)
+				{
+					throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+							invLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+				}
 				log.setMultiplyRate(rate);
 			}else{
 				log.setMultiplyRate(Env.ONE);
@@ -759,6 +790,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				{
 					BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
 							orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+					if(rate == null)
+					{
+						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+								orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+					}
 					log.setMultiplyRate(rate);
 				}else{
 					log.setMultiplyRate(Env.ONE);
@@ -797,22 +833,6 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			}//for j
 			
 		}//for i
-
-		if(qtyBook.signum() > 0)
-		{
-			MInvValCalLog log = new MInvValCalLog(line);
-			log.setLine(lineNo * 10);
-			log.setC_Currency_ID(m_InvValCal.getC_Currency_ID());
-			log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
-			log.setJP_ExchangedPriceActual(line.getCurrentCostPrice());
-			log.setJP_ApplyQty(qtyBook);
-			log.setJP_ApplyAmt(qtyBook.multiply(line.getCurrentCostPrice()));
-			log.setDescription(Msg.getElement(getCtx(), "CurrentCostPrice"));
-			log.saveEx(get_TrxName());
-
-		}else{
-			;
-		}
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
 		BigDecimal JP_ApplyQty = JPiereInvValUtil.calculateApplyQty(getCtx(), line.get_ID(), get_TrxName());
@@ -855,7 +875,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			I_C_InvoiceLine invoiceLine =null;
 			for(int j = 0; j < matchInvs.length; j++)
 			{
-				//Set Macth PO Info
+				//Set Macth Invoice Info
 				log.setM_MatchInv_ID(matchInvs[j].get_ID());
 				log.setQty(matchInvs[j].getQty());
 
@@ -869,6 +889,11 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				{
 					BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
 							invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+					if(rate == null)
+					{
+						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
+								invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+					}
 					log.setMultiplyRate(rate);
 				}else{
 					log.setMultiplyRate(Env.ONE);

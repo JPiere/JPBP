@@ -37,6 +37,8 @@ CREATE TABLE adempiere.JP_InvValAdjust
   JP_InvValCal_ID numeric(10,0),
   GL_Journal_ID numeric(10,0),
   DateAcct timestamp without time zone NOT NULL,
+  DifferenceQty numeric NOT NULL DEFAULT 0,
+  DifferenceAmt numeric NOT NULL DEFAULT 0,
    
   CONSTRAINT JP_InvValAdjust_pkey PRIMARY KEY (JP_InvValAdjust_ID)
 )

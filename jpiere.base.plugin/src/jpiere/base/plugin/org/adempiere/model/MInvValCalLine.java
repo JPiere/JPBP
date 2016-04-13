@@ -43,4 +43,15 @@ public class MInvValCalLine extends X_JP_InvValCalLine {
 		setAD_Org_ID(invValCal.getAD_Org_ID());
 	}
 
+	@Override
+	public String toString() 
+	{
+	      StringBuffer sb = new StringBuffer ("MInvValCalLine[")
+	        .append(get_ID()).append("]-Line:")
+	        .append(getLine());
+		return sb.toString();
+	}
+
+	
+	
 }

@@ -452,5 +452,14 @@ public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction, DocOp
 		
 		return index;
 	}
+	
+	@Override
+	public String toString() 
+	{
+	      StringBuffer sb = new StringBuffer ("MInvValAdjust[")
+	        .append(get_ID()).append("]-DocumentNo:")
+	        .append(getDocumentNo());
+		return sb.toString();
+	}
 
 }
