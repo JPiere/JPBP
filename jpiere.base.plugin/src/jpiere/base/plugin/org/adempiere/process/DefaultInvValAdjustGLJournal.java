@@ -90,7 +90,7 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 			journal.setDateDoc(m_InvValAdjust.getDateAcct());
 			journal.setDateAcct(m_InvValAdjust.getDateAcct());
 			journal.setC_Period_ID(MPeriod.getC_Period_ID(getCtx(),  m_InvValAdjust.getDateAcct(), orgs[i].getAD_Org_ID()));
-			journal.setDescription(Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_JP_InvValAdjust_ID));
+			journal.setDescription(Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_JP_InvValAdjust_ID)+" : "+m_InvValAdjust.getDocumentNo());
 			journal.save(get_TrxName());
 			
 			int lineNo = 0;
@@ -109,6 +109,8 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 				jl1.setC_Currency_ID(m_InvValProfile.getC_Currency_ID());
 				jl1.setC_ConversionType_ID(MConversionType.getDefault(getAD_Client_ID()));
 				jl1.setM_Product_ID(lines[j].getM_Product_ID());
+				jl1.setDateAcct(m_InvValAdjust.getDateAcct());
+				jl1.setDescription(Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_JP_InvValAdjust_ID)+" : "+m_InvValAdjust.getDocumentNo()+" - "+lines[j].getLine());
 				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO) > 0)
 				{
 					jl1.setAmtSourceDr(lines[j].getDifferenceAmt());
@@ -117,7 +119,6 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 					jl1.setAmtSourceCr(lines[j].getDifferenceAmt().negate());
 					jl1.setAmtAcctCr(lines[j].getDifferenceAmt().negate());
 				}
-				jl1.setDateAcct(m_InvValAdjust.getDateAcct());
 				jl1.saveEx(get_TrxName());
 				
 				lineNo = lineNo + 10;
@@ -129,6 +130,8 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 				jl2.setC_Currency_ID(m_InvValProfile.getC_Currency_ID());
 				jl2.setC_ConversionType_ID(MConversionType.getDefault(getAD_Client_ID()));
 				jl2.setM_Product_ID(lines[j].getM_Product_ID());
+				jl2.setDateAcct(m_InvValAdjust.getDateAcct());
+				jl2.setDescription(Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_JP_InvValAdjust_ID)+" : "+m_InvValAdjust.getDocumentNo()+" - "+lines[j].getLine());
 				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO) > 0)
 				{
 					jl2.setAmtSourceCr(lines[j].getDifferenceAmt());
@@ -137,7 +140,6 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 					jl2.setAmtSourceDr(lines[j].getDifferenceAmt().negate());
 					jl2.setAmtAcctDr(lines[j].getDifferenceAmt().negate());
 				}
-				jl2.setDateAcct(m_InvValAdjust.getDateAcct());
 				jl2.saveEx(get_TrxName());
 				
 				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO) > 0)
