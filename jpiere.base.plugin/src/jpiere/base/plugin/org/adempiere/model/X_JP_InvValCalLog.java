@@ -33,7 +33,7 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160411L;
+	private static final long serialVersionUID = 20160414L;
 
     /** Standard Constructor */
     public X_JP_InvValCalLog (Properties ctx, int JP_InvValCalLog_ID, String trxName)
@@ -89,9 +89,9 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 	public void setC_ConversionType_ID (int C_ConversionType_ID)
 	{
 		if (C_ConversionType_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_ConversionType_ID, null);
+			set_Value (COLUMNNAME_C_ConversionType_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_ConversionType_ID, Integer.valueOf(C_ConversionType_ID));
+			set_Value (COLUMNNAME_C_ConversionType_ID, Integer.valueOf(C_ConversionType_ID));
 	}
 
 	/** Get Currency Type.
@@ -128,31 +128,6 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 	public int getC_Currency_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_Currency getC_Currency_To() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
-			.getPO(getC_Currency_ID_To(), get_TrxName());	}
-
-	/** Set Currency To.
-		@param C_Currency_ID_To 
-		Target currency
-	  */
-	public void setC_Currency_ID_To (int C_Currency_ID_To)
-	{
-		set_Value (COLUMNNAME_C_Currency_ID_To, Integer.valueOf(C_Currency_ID_To));
-	}
-
-	/** Get Currency To.
-		@return Target currency
-	  */
-	public int getC_Currency_ID_To () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID_To);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -397,6 +372,34 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	public org.compiere.model.I_C_Currency getJP_CurrencyTo() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
+			.getPO(getJP_CurrencyTo_ID(), get_TrxName());	}
+
+	/** Set Currency To.
+		@param JP_CurrencyTo_ID 
+		Target currency
+	  */
+	public void setJP_CurrencyTo_ID (int JP_CurrencyTo_ID)
+	{
+		if (JP_CurrencyTo_ID < 1) 
+			set_Value (COLUMNNAME_JP_CurrencyTo_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_CurrencyTo_ID, Integer.valueOf(JP_CurrencyTo_ID));
+	}
+
+	/** Get Currency To.
+		@return Target currency
+	  */
+	public int getJP_CurrencyTo_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CurrencyTo_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Exchanged Amt.

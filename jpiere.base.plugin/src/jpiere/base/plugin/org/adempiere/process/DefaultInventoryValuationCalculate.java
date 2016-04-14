@@ -182,7 +182,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					JPiereInvValUtil.copyInfoFromOrderLineToLog(log, orderLine);
 
 					//Set Reference Field Gorup
-					log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+					log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 					if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
 						BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
@@ -256,7 +256,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invoiceLine);
 
 					//Set Reference Field Gorup
-					log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+					log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 					if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
 						BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
@@ -328,11 +328,12 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			MInvValCalLog log = new MInvValCalLog(line);
 			log.setLine(lineNo * 10);
 			log.setC_Currency_ID(m_InvValCal.getC_Currency_ID());
-			log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+			log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 			log.setJP_ExchangedPriceActual(line.getCurrentCostPrice());
 			log.setJP_ApplyQty(qtyBook);
 			log.setJP_ApplyAmt(qtyBook.multiply(line.getCurrentCostPrice()));
 			log.setDescription(Msg.getElement(getCtx(), "CurrentCostPrice"));
+			log.setIsTaxIncluded(false);
 			log.saveEx(get_TrxName());
 
 		}else{
@@ -386,7 +387,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					JPiereInvValUtil.copyInfoFromOrderLineToLog(log, orderLine);
 
 					//Set Reference Field Gorup
-					log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+					log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 					if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
 						BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
@@ -461,7 +462,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invoiceLine);
 
 					//Set Reference Field Gorup
-					log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+					log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 					if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
 						BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
@@ -533,11 +534,12 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			MInvValCalLog log = new MInvValCalLog(line);
 			log.setLine(lineNo * 10);
 			log.setC_Currency_ID(m_InvValCal.getC_Currency_ID());
-			log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+			log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 			log.setJP_ExchangedPriceActual(line.getCurrentCostPrice());
 			log.setJP_ApplyQty(qtyBook);
 			log.setJP_ApplyAmt(qtyBook.multiply(line.getCurrentCostPrice()));
 			log.setDescription(Msg.getElement(getCtx(), "CurrentCostPrice"));
+			log.setIsTaxIncluded(false);
 			log.saveEx(get_TrxName());
 
 		}else{
@@ -594,7 +596,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			JPiereInvValUtil.copyInfoFromOrderLineToLog(log, orderLine);
 
 			//Set Reference Field Gorup
-			log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+			log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 			if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 			{
 				BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
@@ -646,7 +648,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		else
 			line.setJP_InvValAmt(JP_InvValAmt);
 		
-		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(JP_InvValAmt));
+		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()));
 		
 		line.saveEx(get_TrxName());
 		
@@ -688,7 +690,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invLine);
 
 			//Set Reference Field Gorup
-			log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+			log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 			if(invLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 			{
 				BigDecimal rate =MConversionRate.getRate(invLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID()
@@ -740,7 +742,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		else
 			line.setJP_InvValAmt(JP_InvValAmt);
 		
-		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(JP_InvValAmt));
+		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()));
 		
 		line.saveEx(get_TrxName());
 		
@@ -785,7 +787,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				JPiereInvValUtil.copyInfoFromOrderLineToLog(log, orderLine);
 
 				//Set Reference Field Gorup
-				log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+				log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 				if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 				{
 					BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
@@ -836,11 +838,20 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
 		BigDecimal JP_ApplyQty = JPiereInvValUtil.calculateApplyQty(getCtx(), line.get_ID(), get_TrxName());
-		line.setJP_InvValAmt(JP_InvValTotalAmt.divide(JP_ApplyQty, m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
-		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
+		if(JP_ApplyQty.compareTo(Env.ZERO)==0)
+		{
+			line.setJP_InvValAmt(line.getCurrentCostPrice());
+		}else{
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(JP_ApplyQty, m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+		}
 		
+		if(line.getQtyBook().compareTo(Env.ZERO)==0)
+		{
+			line.setJP_InvValTotalAmt(Env.ZERO);
+		}else{
+			line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
+		}
 		line.saveEx(get_TrxName());
-
 	}
 
 	private void calculate_AverageInvoice(MInvValCalLine line)
@@ -884,7 +895,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invoiceLine);
 
 				//Set Reference Field Gorup
-				log.setC_Currency_ID_To(m_InvValCal.getC_Currency_ID());
+				log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
 				if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 				{
 					BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
@@ -934,9 +945,19 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
 		BigDecimal JP_ApplyQty = JPiereInvValUtil.calculateApplyQty(getCtx(), line.get_ID(), get_TrxName());
-		line.setJP_InvValAmt(JP_InvValTotalAmt.divide(JP_ApplyQty, m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
-		line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
+		if(JP_ApplyQty.compareTo(Env.ZERO)==0)
+		{
+			line.setJP_InvValAmt(line.getCurrentCostPrice());
+		}else{
+			line.setJP_InvValAmt(JP_InvValTotalAmt.divide(JP_ApplyQty, m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+		}
 		
+		if(line.getQtyBook().compareTo(Env.ZERO)==0)
+		{
+			line.setJP_InvValTotalAmt(Env.ZERO);
+		}else{
+			line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
+		}
 		line.saveEx(get_TrxName());
 	}
 

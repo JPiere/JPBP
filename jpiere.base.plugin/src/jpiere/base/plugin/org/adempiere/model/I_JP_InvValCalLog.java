@@ -94,21 +94,6 @@ public interface I_JP_InvValCalLog
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
-    /** Column name C_Currency_ID_To */
-    public static final String COLUMNNAME_C_Currency_ID_To = "C_Currency_ID_To";
-
-	/** Set Currency To.
-	  * Target currency
-	  */
-	public void setC_Currency_ID_To (int C_Currency_ID_To);
-
-	/** Get Currency To.
-	  * Target currency
-	  */
-	public int getC_Currency_ID_To();
-
-	public org.compiere.model.I_C_Currency getC_Currency_To() throws RuntimeException;
-
     /** Column name C_InvoiceLine_ID */
     public static final String COLUMNNAME_C_InvoiceLine_ID = "C_InvoiceLine_ID";
 
@@ -280,6 +265,21 @@ public interface I_JP_InvValCalLog
 
 	/** Get Apply Qty	  */
 	public BigDecimal getJP_ApplyQty();
+
+    /** Column name JP_CurrencyTo_ID */
+    public static final String COLUMNNAME_JP_CurrencyTo_ID = "JP_CurrencyTo_ID";
+
+	/** Set Currency To.
+	  * Target currency
+	  */
+	public void setJP_CurrencyTo_ID (int JP_CurrencyTo_ID);
+
+	/** Get Currency To.
+	  * Target currency
+	  */
+	public int getJP_CurrencyTo_ID();
+
+	public org.compiere.model.I_C_Currency getJP_CurrencyTo() throws RuntimeException;
 
     /** Column name JP_ExchangedAmt */
     public static final String COLUMNNAME_JP_ExchangedAmt = "JP_ExchangedAmt";

@@ -67,16 +67,21 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 		StringBuilder sql = new StringBuilder("SELECT AD_Org_ID, M_Product_ID, Account_ID ")//1 - 3
 								.append(",QtyBook, AmtAcctDr, AmtAcctCr, AmtAcctBalance ")	//4 - 7
 		.append("FROM JP_InvOrgBalance ")
-		.append("WHERE C_AcctSchema_ID=? AND dateValue=? AND AD_Org_ID IN (");
-		for(int i = 0; i < Orgs.length; i++)
+		.append("WHERE C_AcctSchema_ID=? AND dateValue=? ");
+		if(Orgs!=null && Orgs.length > 0)
 		{
-			if(i==0)
-				sql.append(Orgs[i].getAD_Org_ID());
-			else
-				sql.append(","+Orgs[i].getAD_Org_ID());
+			sql.append(" AND AD_Org_ID IN (");
+			for(int i = 0; i < Orgs.length; i++)
+			{
+				if(i==0)
+					sql.append(Orgs[i].getAD_Org_ID());
+				else
+					sql.append(","+Orgs[i].getAD_Org_ID());
+			}
+			sql.append(")");
 		}
-		sql.append(") ")
-		.append(" ORDER BY M_Product_ID, AD_Org_ID");
+		
+		sql.append(" ORDER BY M_Product_ID, AD_Org_ID");
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

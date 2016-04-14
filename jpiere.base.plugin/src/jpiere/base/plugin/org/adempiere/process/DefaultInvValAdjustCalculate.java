@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
@@ -24,8 +25,12 @@ import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInventoryDiffQtyLog;
 import jpiere.base.plugin.util.JPiereInvValUtil;
 
+import org.compiere.model.I_M_PriceList_Version;
 import org.compiere.model.MCost;
 import org.compiere.model.MCostElement;
+import org.compiere.model.MPriceListVersion;
+import org.compiere.model.MProductPrice;
+import org.compiere.model.Query;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -69,6 +74,12 @@ public class DefaultInvValAdjustCalculate extends SvrProcess {
 		int C_AcctSchema_ID =  m_InvValProfile.getC_AcctSchema_ID();
 		MCostElement[] costElements =JPiereInvValUtil.getMaterialStandardCostElements(getCtx());
 		int M_CostElement_ID = costElements[0].get_ID();
+		MPriceListVersion plversion = getPriceListVersion(m_InvValProfile.getM_PriceList_ID(), m_InvValAdjust.getDateValue());
+		MProductPrice[]  pp = null;
+		if(plversion !=null)
+			pp =plversion.getProductPrice(true);
+		
+		
 		MCost m_Cost = null;
 		BigDecimal currentCostPrice = Env.ZERO;
 		BigDecimal QtyOnHand = Env.ZERO;
@@ -77,9 +88,9 @@ public class DefaultInvValAdjustCalculate extends SvrProcess {
 		for(int i = 0; i < lines.length; i++)
 		{
 			
-			StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InventoryDiffQtyLog ")
-			.append(" WHERE JP_InvValAdjustLine_ID=").append(lines[i].getJP_InvValAdjustLine_ID());
-			DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
+//			StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InventoryDiffQtyLog ")
+//			.append(" WHERE JP_InvValAdjustLine_ID=").append(lines[i].getJP_InvValAdjustLine_ID());
+//			DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
 			
 			if(lines[i].getCostingLevel().equals(MInvValAdjustLine.COSTINGLEVEL_Client))
 				AD_Org_ID = 0;
@@ -90,13 +101,28 @@ public class DefaultInvValAdjustCalculate extends SvrProcess {
 			else 
 				AD_Org_ID = 0;
 			
-			m_Cost = MCost.get(getCtx(), lines[i].getAD_Client_ID(), AD_Org_ID, lines[i].getM_Product_ID()
+			if(pp!=null)
+			{
+				for(int j = 0; j < pp.length; j++)
+				{
+					if(pp[j].getM_Product_ID() == lines[i].getM_Product_ID())
+					{
+						currentCostPrice = pp[j].getPriceStd();
+						break;
+					}
+				}
+			}
+			
+			if(currentCostPrice.compareTo(Env.ZERO)==0)
+			{
+				m_Cost = MCost.get(getCtx(), lines[i].getAD_Client_ID(), AD_Org_ID, lines[i].getM_Product_ID()
 					, M_CostType_ID,C_AcctSchema_ID, M_CostElement_ID, lines[i].getM_AttributeSetInstance_ID(), get_TrxName());
 			
-			if(m_Cost == null)
-				continue;
+				if(m_Cost != null)
+					currentCostPrice = m_Cost.getCurrentCostPrice();
+			}
 			
-			currentCostPrice = m_Cost.getCurrentCostPrice();
+			
 			lines[i].setJP_InvValAmt(currentCostPrice);
 			lines[i].setJP_InvValTotalAmt(lines[i].getQtyBook().multiply(currentCostPrice));
 			lines[i].setDifferenceAmt(lines[i].getJP_InvValTotalAmt().subtract(lines[i].getAmtAcctBalance()));
@@ -202,4 +228,18 @@ public class DefaultInvValAdjustCalculate extends SvrProcess {
 		
 		return lineNo;
 	}
+	
+	private MPriceListVersion getPriceListVersion (int M_PriceList_ID, Timestamp valid)
+	{
+		if (valid == null)
+			valid = new Timestamp (System.currentTimeMillis());
+
+		final String whereClause = "M_PriceList_ID=? AND TRUNC(ValidFrom)=?";
+		MPriceListVersion m_plv = new Query(getCtx(), I_M_PriceList_Version.Table_Name, whereClause, get_TrxName())
+					.setParameters(M_PriceList_ID, valid)
+					.setOnlyActiveRecords(true)
+					.first();
+
+		return m_plv;
+	}	//	getPriceListVersion
 }

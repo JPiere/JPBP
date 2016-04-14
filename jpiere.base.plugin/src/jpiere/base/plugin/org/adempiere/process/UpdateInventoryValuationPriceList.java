@@ -13,7 +13,6 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -23,12 +22,14 @@ import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 import jpiere.base.plugin.util.JPiereInvValUtil;
 
+import org.compiere.model.I_M_PriceList_Version;
 import org.compiere.model.MCost;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MProductPrice;
 import org.compiere.model.MRefList;
+import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -78,6 +79,8 @@ public class UpdateInventoryValuationPriceList extends SvrProcess {
 			return Msg.getMsg(getCtx(), "CopyError") + MRefList.getListName(getCtx(), MInvValProfile.COSTINGLEVEL_AD_Reference_ID, MInvValProfile.COSTINGLEVEL_BatchLot);
 		
 		String DateValueString = new String(p_DateValue.toString().substring(0,10));
+		int M_PriceListVersion_ID = 0;
+		String returnName = null;
 		
 		if(ivp.getCostingLevel().equals(MInvValProfile.COSTINGLEVEL_Client))
 		{
@@ -88,7 +91,7 @@ public class UpdateInventoryValuationPriceList extends SvrProcess {
 				return Msg.getMsg(getCtx(), "ParameterMissing") + Msg.getElement(getCtx(), "M_DiscountSchema_ID");//Error:  Parameter missing
 			
 			MPriceList pl = new MPriceList(getCtx(),ivp.getM_PriceList_ID(), get_TrxName());
-			MPriceListVersion version =pl.getPriceListVersion(p_DateValue);
+			MPriceListVersion version =getPriceListVersion(pl.getM_PriceList_ID(), p_DateValue);
 			if(version ==null)
 			{
 				version = new MPriceListVersion(pl);
@@ -103,7 +106,11 @@ public class UpdateInventoryValuationPriceList extends SvrProcess {
 				DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
 			}
 			
+
 			createProductPrice(ivp, 0, version);
+			M_PriceListVersion_ID = version.getM_PriceList_Version_ID();
+			returnName = pl.getName() + "-" +version.getName();
+			addBufferLog(0, null, null, returnName, MPriceListVersion.Table_ID, M_PriceListVersion_ID);
 		
 		}else if(ivp.getCostingLevel().equals(MInvValProfile.COSTINGLEVEL_Organization)){
 			MInvValProfileOrg[] orgs = ivp.getOrgs();
@@ -132,10 +139,13 @@ public class UpdateInventoryValuationPriceList extends SvrProcess {
 				}
 				
 				 createProductPrice(ivp, orgs[i].getAD_Org_ID(), version);
+				 M_PriceListVersion_ID = version.getM_PriceList_Version_ID();
+				 returnName = pl.getName() + "-" +version.getName();
+				 addBufferLog(0, null, null, returnName, MPriceListVersion.Table_ID, M_PriceListVersion_ID);
 			}//for i
 		}
 		
-		return Msg.getMsg(getCtx(), "Procecced");
+		return Msg.getMsg(getCtx(), "ProcessOK");
 	}
 	
 	private void createProductPrice(MInvValProfile ivp, int AD_Org_ID, MPriceListVersion version) throws Exception
@@ -187,4 +197,18 @@ public class UpdateInventoryValuationPriceList extends SvrProcess {
 		}
 	
 	}
+	
+	private MPriceListVersion getPriceListVersion (int M_PriceList_ID, Timestamp valid)
+	{
+		if (valid == null)
+			valid = new Timestamp (System.currentTimeMillis());
+
+		final String whereClause = "M_PriceList_ID=? AND TRUNC(ValidFrom)=?";
+		MPriceListVersion m_plv = new Query(getCtx(), I_M_PriceList_Version.Table_Name, whereClause, get_TrxName())
+					.setParameters(M_PriceList_ID, valid)
+					.setOnlyActiveRecords(true)
+					.first();
+
+		return m_plv;
+	}	//	getPriceListVersion
 }

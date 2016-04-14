@@ -29,7 +29,7 @@ CREATE TABLE adempiere.JP_InvValCalLog
   C_Tax_ID  numeric(10,0),
   LineNetAmt numeric DEFAULT 0,
 
-  C_Currency_ID_To numeric(10,0),
+  JP_CurrencyTo_ID numeric(10,0),
   MultiplyRate numeric DEFAULT 0,
   DivideRate numeric DEFAULT 0,
 

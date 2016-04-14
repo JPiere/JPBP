@@ -34,7 +34,7 @@ public class X_JP_InvValCal extends PO implements I_JP_InvValCal, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160411L;
+	private static final long serialVersionUID = 20160414L;
 
     /** Standard Constructor */
     public X_JP_InvValCal (Properties ctx, int JP_InvValCal_ID, String trxName)

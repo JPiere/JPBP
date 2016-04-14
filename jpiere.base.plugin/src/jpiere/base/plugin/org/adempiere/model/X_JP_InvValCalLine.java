@@ -33,7 +33,7 @@ public class X_JP_InvValCalLine extends PO implements I_JP_InvValCalLine, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160411L;
+	private static final long serialVersionUID = 20160414L;
 
     /** Standard Constructor */
     public X_JP_InvValCalLine (Properties ctx, int JP_InvValCalLine_ID, String trxName)
@@ -55,6 +55,7 @@ public class X_JP_InvValCalLine extends PO implements I_JP_InvValCalLine, I_Pers
 			setJP_InvValTotalAmt (Env.ZERO);
 // 0
 			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_InvValCalLine WHERE JP_InvValCal_ID=@JP_InvValCal_ID@
 			setM_Product_ID (0);
 			setQtyBook (Env.ZERO);
 // 0

@@ -20,6 +20,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MConversionType;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
@@ -62,6 +63,13 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 	{
 		MInvValProfileOrg[] orgs = m_InvValProfile.getOrgs();
 		int C_AcctSchema_ID = m_InvValProfile.getC_AcctSchema_ID();
+		
+		if(orgs==null || orgs.length < 1)
+		{
+			//Can Not Generate GL Journal ;
+			//Inventory valuation profile is not setting Organization
+			throw new AdempiereException(Msg.getMsg(getCtx(), "JP_CanNotGenerateGLJournal")+" - "+Msg.getMsg(getCtx(), "JP_InvValProfileNotOrganization"));
+		}
 		
 		for(int i = 0; i < orgs.length; i++)
 		{
