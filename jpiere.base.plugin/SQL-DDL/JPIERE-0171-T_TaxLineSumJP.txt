@@ -1,0 +1,16 @@
+CREATE TABLE adempiere.T_TaxLineSumJP
+(
+  	AD_Pinstance_ID numeric(10,0) NOT NULL,
+  	AD_Client_ID numeric(10,0) NOT NULL,
+	AD_Org_ID numeric(10,0) NOT NULL,	
+	C_Tax_ID numeric(10,0) NOT NULL,
+	C_Currency_ID numeric(10,0) NOT NULL,
+	C_DocType_ID numeric(10,0),
+	
+	DateAcct timestamp without time zone NOT NULL,
+	DocStatus character(2) NOT NULL,
+	IsSOTrx	character(1) NOT NULL DEFAULT 'N'::bpchar,
+	Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+	TaxBaseAmt numeric NOT NULL DEFAULT 0,
+	TaxAmt numeric NOT NULL DEFAULT 0
+)
