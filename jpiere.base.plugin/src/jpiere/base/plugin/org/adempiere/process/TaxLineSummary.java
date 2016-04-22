@@ -73,7 +73,7 @@ public class TaxLineSummary extends SvrProcess {
 		StringBuilder DateValue_to = new StringBuilder("TO_DATE('").append(DateTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
 
 		StringBuilder sql = new StringBuilder ("INSERT INTO T_TaxLineSumJP ")
-							.append("(AD_PInstance_ID, DateAcct, AD_Client_ID, AD_Org_ID,C_DocType_ID,IsSOTrx ,C_Tax_ID, C_Currency_ID, DocStatus, Posted, TaxbaseAmt, TaxAmt)")
+							.append("(AD_PInstance_ID, DateAcct, AD_Client_ID, AD_Org_ID,C_DocType_ID,IsSOTrx ,C_Tax_ID, C_Currency_ID, DocStatus, JP_Posted, TaxbaseAmt, TaxAmt)")
 							.append(" SELECT ").append(getAD_PInstance_ID()).append(", ").append(DateValue_from.toString())
 								.append(", AD_Client_ID, AD_Org_ID,C_DocType_ID,IsSOTrx ,C_Tax_ID, C_Currency_ID, DocStatus, Posted, SUM(taxbaseamt),SUM(taxamt)")
 							.append(" FROM JP_TaxLine ")

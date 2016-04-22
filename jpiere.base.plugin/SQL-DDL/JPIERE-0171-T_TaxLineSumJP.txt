@@ -10,7 +10,7 @@ CREATE TABLE adempiere.T_TaxLineSumJP
 	DateAcct timestamp without time zone NOT NULL,
 	DocStatus character(2) NOT NULL,
 	IsSOTrx	character(1) NOT NULL DEFAULT 'N'::bpchar,
-	Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+	JP_Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
 	TaxBaseAmt numeric NOT NULL DEFAULT 0,
 	TaxAmt numeric NOT NULL DEFAULT 0
 )
