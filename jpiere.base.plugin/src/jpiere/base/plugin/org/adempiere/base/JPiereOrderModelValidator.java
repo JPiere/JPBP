@@ -17,6 +17,7 @@ import jpiere.base.plugin.util.JPierePaymentTerms;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPaymentTerm;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -24,9 +25,9 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 
-public class JPiereInvoiceModelValidator implements ModelValidator {
+public class JPiereOrderModelValidator implements ModelValidator {
 
-	private static CLogger log = CLogger.getCLogger(JPiereInvoiceModelValidator.class);
+	private static CLogger log = CLogger.getCLogger(JPiereOrderModelValidator.class);
 	private int AD_Client_ID = -1;
 	private int AD_Org_ID = -1;
 	private int AD_Role_ID = -1;
@@ -36,7 +37,7 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 	public void initialize(ModelValidationEngine engine, MClient client) {
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
-		engine.addModelChange(MInvoice.Table_Name, this);
+		engine.addModelChange(MOrder.Table_Name, this);
 
 	}
 
@@ -56,34 +57,16 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 
 	@Override
 	public String modelChange(PO po, int type) throws Exception {
-		//JPIERE-0105
-		if(type == ModelValidator.TYPE_BEFORE_NEW 
-				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_PaymentTerm_ID")))
-		{
-			MInvoice invoice = (MInvoice)po;
-			MPaymentTerm paymentTerm = new MPaymentTerm(Env.getCtx(),invoice.getC_PaymentTerm_ID(),null);
-			Boolean IsPaymentTerms = (Boolean)paymentTerm.get_Value("IsPaymentTermsJP");
-			if(IsPaymentTerms.booleanValue())
-			{
-				MPaymentTerm pt= JPierePaymentTerms.getPaymentTerm(Env.getCtx(), invoice.getC_PaymentTerm_ID(), invoice.getDateInvoiced());
-				if(pt != null)
-				{
-					invoice.setC_PaymentTerm_ID(pt.get_ID());
-				}
 
-			}//if
-
-		}
-		
-		//For Simple Input Window(JPIERE-0175/JPIERE-0176)
+		//For Simple Input Window(JPIERE-0146/JPIERE-0147)
 		if(type == ModelValidator.TYPE_BEFORE_NEW 
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_DocTypeTarget_ID"))
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_PriceList_ID")))
 		{
-			MInvoice invoice = (MInvoice)po;
-			invoice.setIsSOTrx(invoice.getC_DocTypeTarget().isSOTrx());
-			invoice.setIsTaxIncluded(invoice.getM_PriceList().isTaxIncluded());
-			invoice.setC_Currency_ID(invoice.getM_PriceList().getC_Currency_ID());
+			MOrder order = (MOrder)po;
+			order.setIsSOTrx(order.getC_DocTypeTarget().isSOTrx());
+			order.setIsTaxIncluded(order.getM_PriceList().isTaxIncluded());
+			order.setC_Currency_ID(order.getM_PriceList().getC_Currency_ID());
 		}
 
 		return null;
