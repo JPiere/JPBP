@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_Bill
  *  @author iDempiere (generated) 
- *  @version Release 2.1 - $Id$ */
+ *  @version Release 3.1 - $Id$ */
 public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150816L;
+	private static final long serialVersionUID = 20160430L;
 
     /** Standard Constructor */
     public X_JP_Bill (Properties ctx, int JP_Bill_ID, String trxName)
@@ -46,6 +46,8 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 			setC_Currency_ID (0);
 			setC_DocType_ID (0);
 			setC_PaymentTerm_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
 			setDocAction (null);
 // CO
 			setDocStatus (null);
@@ -335,6 +337,23 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Account Date.
+		@param DateAcct 
+		Accounting Date
+	  */
+	public void setDateAcct (Timestamp DateAcct)
+	{
+		set_Value (COLUMNNAME_DateAcct, DateAcct);
+	}
+
+	/** Get Account Date.
+		@return Accounting Date
+	  */
+	public Timestamp getDateAcct () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
 	}
 
 	/** Set Description.
