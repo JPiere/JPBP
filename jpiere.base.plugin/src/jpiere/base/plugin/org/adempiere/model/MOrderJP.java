@@ -22,6 +22,12 @@ import org.compiere.model.MProject;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 
+/**
+ * JPIERE-0142
+ * 
+ * @author Hideaki Hagiwara
+ *
+ */
 public class MOrderJP extends MOrder implements DocOptions {
 	
 	public MOrderJP(Properties ctx, int C_Order_ID, String trxName) {
@@ -49,13 +55,13 @@ public class MOrderJP extends MOrder implements DocOptions {
 			return index;
 		}
 		
-		if (docStatus.equals(DocumentEngine.STATUS_Completed)) 
-		{
-			index = 0; //initialize the index
-			options[index++] = DocumentEngine.ACTION_Close; 
-			options[index++] = DocumentEngine.ACTION_ReActivate;
-			return index;
-		}
+//		if (docStatus.equals(DocumentEngine.STATUS_Completed)) 
+//		{
+//			index = 0; //initialize the index
+//			options[index++] = DocumentEngine.ACTION_Close; 
+//			options[index++] = DocumentEngine.ACTION_ReActivate;
+//			return index;
+//		}
 		
 		return index;
 	}

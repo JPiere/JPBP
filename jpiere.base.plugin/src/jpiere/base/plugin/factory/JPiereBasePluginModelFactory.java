@@ -54,6 +54,7 @@ import org.compiere.util.Env;
  *
  *  JPIERE-0024:JPBP:Corporation Master & Corporation Group Master
  *  JPIERE-0106:JPBP:Bill
+ *  JPIERE-0142:
  *  JPIERE-0148,0149,0150	Product category Group
  *  JPIERE-0151,0152,0153   Sales Region Group & Delivery Days from Warehouse
  *  JPIERE-0160,0161,0163	Inventory Valuation Calculate
