@@ -34,6 +34,7 @@ import org.compiere.model.MCurrency;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
 
@@ -60,6 +61,8 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	private int displayType;
 
 	private boolean tableEditor;
+	
+	private String originalStyle;
 
     public WNumberEditorJP()
     {
@@ -150,6 +153,8 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 
 		popupMenu = new WEditorPopupMenu(false, false, isShowPreference());
     	addChangeLogMenu(popupMenu);
+    	
+    	originalStyle = getComponent().getDecimalbox().getStyle();
     }
 
 	/**
@@ -178,12 +183,43 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	        {
 	    	    return;
 	    	}
-
+	        
+	        //IDEMPIERE-2553 - Enter amounts without decimal separator
+	        if(displayType == DisplayType.Amount || displayType == DisplayType.CostPrice){
+	        	if (newValue != null && newValue instanceof BigDecimal) {
+	        		newValue = addDecimalPlaces((BigDecimal)newValue);
+		        }	        
+	        }
+	        
 	        ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), oldValue, newValue);
 	        super.fireValueChange(changeEvent);
 	        oldValue = getComponent().getValue(); // IDEMPIERE-963 - check again the value could be changed by callout
     	}
     }
+
+    /**
+     * IDEMPIERE-2553 - Enter amounts without decimal separator
+     * @param oldValue
+     * @return
+     */
+    public BigDecimal addDecimalPlaces(BigDecimal oldValue){
+    	if(oldValue.toString().contains("."))
+    		return oldValue;
+    	
+    	int decimalPlaces = Env.getContextAsInt(Env.getCtx(), "AutomaticDecimalPlacesForAmoun");
+    	if(decimalPlaces <= 0)
+    		return oldValue;
+
+    	BigDecimal divisor;
+    	if (decimalPlaces == 2) // most common case
+    		divisor = Env.ONEHUNDRED;
+    	else if (decimalPlaces == 1)
+    		divisor = BigDecimal.TEN;
+    	else
+    		divisor = BigDecimal.TEN.pow(decimalPlaces);
+    	BigDecimal newValue = oldValue.divide(divisor, decimalPlaces, BigDecimal.ROUND_HALF_UP);
+    	return newValue;
+    } //getAddDecimalPlaces
 
     @Override
 	public NumberBox getComponent() {
@@ -271,8 +307,23 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		getComponent().setTableEditorMode(b);
 	}
 
+	
+	/* (non-Javadoc)
+	 * @see org.adempiere.webui.editor.WEditor#setFieldStyle(java.lang.String)
+	 */
+	@Override
+	protected void setFieldStyle(String style) {
+		StringBuilder s = new StringBuilder(originalStyle);
+		if (!(s.charAt(s.length()-1)==';'))
+			s.append(";");
+		if (!Util.isEmpty(style))
+			s.append(style);
+		getComponent().getDecimalbox().setStyle(s.toString());
+	}     
+	
 	/**
-	* 通貨の小数点以下の表示桁数を取得するために、画面で使用されているC_Currency_IDを取得します。
+	* Get Currency for precision
+	* 
 	* JPIERE-3 Add WNumberEditor#getC_Currency_ID()
 	*
 	* @author Hideaki Hagiwara
