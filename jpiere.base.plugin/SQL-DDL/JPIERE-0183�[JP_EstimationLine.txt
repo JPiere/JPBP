@@ -1,0 +1,116 @@
+CREATE TABLE adempiere.JP_EstimationLine
+(
+  JP_EstimationLine_ID numeric(10,0) NOT NULL,
+  JP_EstimationLine_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  JP_Estimation_ID numeric(10,0) NOT NULL,
+  Line numeric(10,0) NOT NULL,
+  
+  C_BPartner_ID numeric(10,0),
+
+  C_BPartner_Location_ID numeric(10,0),
+
+  DateOrdered timestamp without time zone,
+
+  DatePromised timestamp without time zone,
+
+  DateDelivered timestamp without time zone,
+
+  DateInvoiced timestamp without time zone,
+
+  Description character varying(255),
+
+
+  M_Product_ID numeric(10,0),
+
+  M_Warehouse_ID numeric(10,0) NOT NULL,
+
+  C_UOM_ID numeric(10,0) NOT NULL,
+
+  QtyOrdered numeric NOT NULL DEFAULT 0,
+
+  QtyReserved numeric NOT NULL DEFAULT 0,
+
+  QtyDelivered numeric NOT NULL DEFAULT 0,
+
+  QtyInvoiced numeric NOT NULL DEFAULT 0,
+
+  M_Shipper_ID numeric(10,0),
+
+  C_Currency_ID numeric(10,0) NOT NULL,
+
+  PriceList numeric NOT NULL DEFAULT 0,
+
+  PriceActual numeric NOT NULL DEFAULT 0,
+
+  PriceLimit numeric NOT NULL DEFAULT 0,
+
+
+  LineNetAmt numeric NOT NULL DEFAULT 0,
+
+  Discount numeric,
+
+  FreightAmt numeric NOT NULL DEFAULT 0,
+
+  C_Charge_ID numeric(10,0),
+
+  C_Tax_ID numeric(10,0) NOT NULL,
+
+  S_ResourceAssignment_ID numeric(10,0),
+
+  Ref_OrderLine_ID numeric(10,0),
+
+  M_Attributesetinstance_ID numeric(10,0) DEFAULT 0,
+
+  IsDescription character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+
+
+  Qtyentered numeric NOT NULL,
+  
+  PriceEntered numeric NOT NULL,
+
+  C_Project_ID numeric(10,0),
+
+  PriceCost numeric,
+
+  QtyLostSales numeric NOT NULL DEFAULT 0,
+
+
+  C_ProjectPhase_ID numeric(10,0),
+
+  C_ProjectTask_ID numeric(10,0),
+
+  rrstartdate timestamp without time zone,
+
+  rramt numeric,
+
+  C_Campaign_ID numeric(10,0),
+
+  C_Activity_ID numeric(10,0),
+
+  User1_ID numeric(10,0),
+
+  User2_ID numeric(10,0),
+
+  AD_OrgTrx_ID numeric(10,0),
+
+  Link_OrderLine_ID numeric(10,0),
+
+  PP_Cost_Collector_ID numeric(10,0),
+
+  M_Promotion_ID numeric(10,0),
+  JP_TaxAmt numeric DEFAULT (0)::numeric,
+
+  JP_TaxBaseAmt numeric DEFAULT (0)::numeric,
+
+
+  CONSTRAINT JP_EstimationLine_pkey PRIMARY KEY (JP_EstimationLine_ID)
+)

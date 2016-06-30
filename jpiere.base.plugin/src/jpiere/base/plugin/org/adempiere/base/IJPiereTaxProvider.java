@@ -16,7 +16,13 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import jpiere.base.plugin.org.adempiere.model.MEstimation;
+import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
+
+import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 
 /**
  * Interface JPiere Tax Provider
@@ -27,5 +33,13 @@ import org.compiere.model.MTax;
 public interface IJPiereTaxProvider {
 
 	public BigDecimal calculateTax (MTax m_tax, BigDecimal amount, boolean taxIncluded, int scale, RoundingMode roundingMode);
+	
+	public boolean calculateEstimationTaxTotal(MTaxProvider provider, MEstimation estimation);
+	
+	public boolean recalculateTax(MTaxProvider provider, MEstimationLine line, boolean newRecord);
+	
+	public boolean updateEstimationTax(MTaxProvider provider, MEstimationLine line);
+	
+	public boolean updateHeaderTax(MTaxProvider provider, MEstimationLine line);
 
 }

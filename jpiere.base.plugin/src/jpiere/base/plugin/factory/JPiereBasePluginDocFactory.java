@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MBill;
+import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 
@@ -167,6 +168,36 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 				rs = null;
 				pstmt = null;
 			}
+		}if(AD_Table_ID==MEstimation.Table_ID){//1000080
+
+			String tableName = MEstimation.Table_Name;
+			StringBuffer sql = new StringBuffer("SELECT * FROM ")
+				.append(tableName)
+				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement (sql.toString(), trxName);
+				pstmt.setInt (1, Record_ID);
+				rs = pstmt.executeQuery ();
+				if (rs.next ())
+				{
+					doc = getDocument(as, AD_Table_ID, rs, trxName);
+				}
+				else
+					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
+			}
+			catch (Exception e)
+			{
+				s_log.log (Level.SEVERE, sql.toString(), e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
 		}
 
 
@@ -188,6 +219,8 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPInvValCal";
 		}else if(AD_Table_ID == MInvValAdjust.Table_ID){
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPInvValAdjust";
+		}else if(AD_Table_ID == MEstimation.Table_ID){
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPEstimation";
 		}else {
 			return null;
 		}

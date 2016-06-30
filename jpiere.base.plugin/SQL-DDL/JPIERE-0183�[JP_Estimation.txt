@@ -1,0 +1,181 @@
+CREATE TABLE adempiere.JP_Estimation
+(
+  JP_Estimation_ID numeric(10,0) NOT NULL,
+  JP_Estimation_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  DocumentNo character varying(30) NOT NULL,
+  DocStatus character(2) NOT NULL,
+  DocAction character(2) NOT NULL,
+  Processing character(1),
+  Processed character(1) NOT NULL DEFAULT 'N'::bpchar,
+  Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+  IsApproved character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  ProcessedOn numeric,
+
+  JP_EstimationDate  timestamp without time zone NOT NULL DEFAULT now(),
+  Version numeric NOT NULL DEFAULT 1,
+
+  IsSOTrx character(1) NOT NULL DEFAULT 'Y'::bpchar,
+
+  C_DocType_ID numeric(10,0) NOT NULL,
+
+  C_DocTypeTarget_ID numeric(10,0) NOT NULL,
+
+  Description character varying(255),
+
+  IsCreditApproved character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  IsDelivered character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  IsInvoiced character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  IsPrinted character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  IsTransferred character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  IsSelected character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  Salesrep_ID numeric(10,0),
+
+  DateOrdered timestamp without time zone,
+
+  DatePromised timestamp without time zone,
+
+  Dateprinted timestamp without time zone,
+
+  DateAcct timestamp without time zone NOT NULL,
+
+
+  C_BPartner_ID numeric(10,0) NOT NULL,
+
+  C_BPartner_Location_ID numeric(10,0) NOT NULL,
+
+  POReference character varying(20),
+
+  IsDiscountPrinted character(1) NOT NULL DEFAULT 'Y'::bpchar,
+
+  C_Currency_ID numeric(10,0) NOT NULL,
+
+  Paymentrule character(1) NOT NULL,
+
+  C_PaymentTerm_ID numeric(10,0) NOT NULL,
+
+  InvoiceRule character(1) NOT NULL,
+
+  DeliveryRule character(1) NOT NULL,
+
+  FreightCostRule character(1) NOT NULL,
+
+  FreightAmt numeric DEFAULT 0,
+
+  DeliveryViaRule character(1) NOT NULL,
+
+  M_Shipper_ID numeric(10,0),
+
+  C_Charge_ID numeric(10,0),
+
+  ChargeAmt numeric DEFAULT 0,
+
+  PriorityRule character(1) NOT NULL,
+
+  TotalLines numeric NOT NULL DEFAULT 0,
+
+  GrandTotal numeric NOT NULL DEFAULT 0,
+
+
+  M_Warehouse_ID numeric(10,0) NOT NULL,
+
+  M_PriceList_ID numeric(10,0) NOT NULL,
+
+  IsTaxIncluded character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  C_Campaign_ID numeric(10,0),
+
+  C_Project_ID numeric(10,0),
+
+  C_Activity_ID numeric(10,0),
+
+  C_Payment_ID numeric(10,0),
+
+  C_CashLine_ID numeric(10,0),
+
+  SendeMail character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+
+  AD_User_ID numeric(10,0),
+
+  CopyFrom character(1),
+
+  IsSelfService character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  AD_OrgTrx_ID numeric(10,0),
+
+  User1_ID numeric(10,0),
+
+  User2_ID numeric(10,0),
+
+  C_ConversionType_ID numeric(10,0),
+
+  Bill_BPartner_ID numeric(10,0),
+
+  Bill_Location_ID numeric(10,0),
+
+  Bill_User_ID numeric(10,0),
+
+  Pay_BPartner_id numeric(10,0),
+
+  Pay_Location_ID numeric(10,0),
+
+  Ref_Order_ID numeric(10,0),
+
+  IsDropShip character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  Volume numeric,
+
+  Weight numeric,
+
+  OrderType character varying(510),
+
+  C_Pos_ID numeric(10,0),
+
+  AmountTendered numeric(22,2),
+
+  AmountRefunded numeric(22,2),
+
+  Link_Order_ID numeric(10,0),
+
+  M_FreightCategory_ID numeric(10,0) DEFAULT NULL::numeric,
+
+
+  Dropship_BPartner_ID numeric(10,0),
+
+  Dropship_Location_ID numeric(10,0),
+
+  Dropship_User_ID numeric(10,0),
+
+  PromotionCode character varying(30),
+
+  C_OrderSource_ID numeric(10,0),
+
+  IsPayScheduleValid character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  C_CashplanLine_ID numeric(10,0) DEFAULT NULL::numeric,
+
+  ShippingRateInquiry character(1) DEFAULT NULL::bpchar,
+
+  IsPriviledgedRate character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+
+  C_Opportunity_ID numeric(10,0) DEFAULT NULL::numeric,
+  
+  QuotationOrder_ID numeric(10,0) DEFAULT NULL::numeric,
+
+  CONSTRAINT JP_Estimation_pkey PRIMARY KEY (JP_Estimation_ID)
+)

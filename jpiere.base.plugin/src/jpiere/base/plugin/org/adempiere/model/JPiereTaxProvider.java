@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
-
 import org.adempiere.exceptions.DBException;
 import org.adempiere.model.ITaxProvider;
 import org.compiere.model.I_C_BPartner;
@@ -806,4 +805,208 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			+ ") = " + finalTax + " [" + tax + "]");
 		return finalTax;
 	}	//	calculateTax
+	
+	public boolean calculateEstimationTaxTotal(MTaxProvider provider, MEstimation estimation){
+		
+		BigDecimal totalLines = Env.ZERO;
+		ArrayList<Integer> taxList = new ArrayList<Integer>();
+		MEstimationLine[] lines = estimation.getLines();
+		for (int i = 0; i < lines.length; i++)
+		{
+			MEstimationLine line = lines[i];
+			totalLines = totalLines.add(line.getLineNetAmt());
+			Integer taxID = new Integer(line.getC_Tax_ID());
+			if (!taxList.contains(taxID))
+			{
+				MTax tax = new MTax(estimation.getCtx(), taxID, estimation.get_TrxName());
+				if (tax.getC_TaxProvider_ID() == 0)
+					continue;
+				MEstimationTax oTax = MEstimationTax.get (line, estimation.getPrecision(), false, estimation.get_TrxName());	//	current Tax
+				oTax.setIsTaxIncluded(estimation.isTaxIncluded());
+				if (!calculateTaxFromEstimationLines(line, oTax))
+					return false;
+				if (!oTax.save(estimation.get_TrxName()))
+					return false;
+				taxList.add(taxID);
+			}
+		}
+
+		//	Taxes
+		BigDecimal grandTotal = totalLines;
+		MEstimationTax[] taxes = estimation.getTaxes(true);
+
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(lines[0].getParent().getC_BPartner_ID(), lines[0].getParent().isSOTrx(), provider);
+
+		for (int i = 0; i < taxes.length; i++)
+		{
+			MEstimationTax oTax = taxes[i];
+			if (oTax.getC_TaxProvider_ID() == 0) {
+				if (!estimation.isTaxIncluded())
+					grandTotal = grandTotal.add(oTax.getTaxAmt());
+				continue;
+			}
+			MTax tax = MTax.get(oTax.getCtx(), oTax.getC_Tax_ID());
+			if (tax.isSummary())
+			{
+				MTax[] cTaxes = tax.getChildTaxes(false);
+				for (int j = 0; j < cTaxes.length; j++)
+				{
+					MTax cTax = cTaxes[j];
+					BigDecimal taxAmt = calculateTax(cTax, oTax.getTaxBaseAmt(), estimation.isTaxIncluded(), estimation.getPrecision(), roundingMode);
+					//
+					MEstimationTax newOTax = new MEstimationTax(estimation.getCtx(), 0, estimation.get_TrxName());
+					newOTax.set_ValueOfColumn("AD_Client_ID", estimation.getAD_Client_ID());
+					newOTax.setAD_Org_ID(estimation.getAD_Org_ID());
+					newOTax.setJP_Estimation_ID(estimation.getJP_Estimation_ID());
+					newOTax.setC_Tax_ID(cTax.getC_Tax_ID());
+//					newOTax.setPrecision(order.getPrecision());
+					newOTax.setIsTaxIncluded(estimation.isTaxIncluded());
+					newOTax.setTaxBaseAmt(oTax.getTaxBaseAmt());
+					newOTax.setTaxAmt(taxAmt);
+					if (!newOTax.save(estimation.get_TrxName()))
+						return false;
+					//
+					if (!estimation.isTaxIncluded())
+						grandTotal = grandTotal.add(taxAmt);
+				}
+				if (!oTax.delete(true, estimation.get_TrxName()))
+					return false;
+				if (!oTax.save(estimation.get_TrxName()))
+					return false;
+			}
+			else
+			{
+				if (!estimation.isTaxIncluded())
+					grandTotal = grandTotal.add(oTax.getTaxAmt());
+			}
+		}
+		//
+		estimation.setTotalLines(totalLines);
+		estimation.setGrandTotal(grandTotal);
+		return true;
+	}
+	
+	private boolean calculateTaxFromEstimationLines (MEstimationLine line, MEstimationTax m_oderTax)
+	{
+		BigDecimal taxBaseAmt = Env.ZERO;
+		BigDecimal taxAmt = Env.ZERO;
+
+		MTax tax = MTax.get(m_oderTax.getCtx(), m_oderTax.getC_Tax_ID());
+		boolean documentLevel = tax.isDocumentLevel();
+
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
+
+		//
+		String sql = "SELECT LineNetAmt FROM JP_EstimationLine WHERE JP_Estimation_ID=? AND C_Tax_ID=?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, m_oderTax.get_TrxName());
+			pstmt.setInt (1,m_oderTax.getJP_Estimation_ID());
+			pstmt.setInt (2, m_oderTax.getC_Tax_ID());
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				BigDecimal baseAmt = rs.getBigDecimal(1);
+				taxBaseAmt = taxBaseAmt.add(baseAmt);
+				//
+				if (!documentLevel)		// calculate line tax
+					taxAmt = taxAmt.add(calculateTax(tax, baseAmt, m_oderTax.isTaxIncluded(), line.getPrecision(), roundingMode));
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, m_oderTax.get_TrxName(), e);
+			taxBaseAmt = null;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		//
+		if (taxBaseAmt == null)
+			return false;
+
+		//	Calculate Tax
+		if (documentLevel)		//	document level
+			taxAmt = calculateTax(tax, taxBaseAmt, m_oderTax.isTaxIncluded(), line.getPrecision(), roundingMode);
+		m_oderTax.setTaxAmt(taxAmt);
+
+		//	Set Base
+		if (m_oderTax.isTaxIncluded())
+			m_oderTax.setTaxBaseAmt (taxBaseAmt.subtract(taxAmt));
+		else
+			m_oderTax.setTaxBaseAmt (taxBaseAmt);
+		if (log.isLoggable(Level.FINE)) log.fine(toString());
+		return true;
+	}	//	calculateTaxFromLines
+
+	
+	@Override
+	public boolean recalculateTax(MTaxProvider provider, MEstimationLine line, boolean newRecord)
+	{
+		if (!newRecord && line.is_ValueChanged(MEstimationLine.COLUMNNAME_C_Tax_ID) && !line.getParent().isProcessed())
+		{
+    		if (!updateEstimationTax(line, true))
+				return false;
+		}
+
+		if(!updateEstimationTax(line, false))
+			return false;
+
+		return updateHeaderTax(provider, line);
+	}
+	
+	public boolean updateEstimationTax(MTaxProvider provider, MEstimationLine line)
+	{
+		return  updateEstimationTax(line, false);
+	}
+	
+	private boolean updateEstimationTax(MEstimationLine line, boolean oldTax)
+	{
+		MEstimationTax tax = MEstimationTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
+		if (tax != null) {
+			if (!calculateTaxFromEstimationLines(line,tax))
+				return false;
+			if (tax.getTaxAmt().signum() != 0) {
+				if (!tax.save(line.get_TrxName()))
+					return false;
+			} else {
+				if (!tax.is_new() && !tax.delete(false, line.get_TrxName()))
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean updateHeaderTax(MTaxProvider provider, MEstimationLine line)
+	{
+//		Update Order Header
+		String sql = "UPDATE JP_Estimation i"
+			+ " SET TotalLines="
+				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID) "
+			+ "WHERE JP_Estimation_ID=" + line.getJP_Estimation_ID();
+		int no = DB.executeUpdate(sql, line.get_TrxName());
+		if (no != 1)
+			log.warning("(1) #" + no);
+
+		if (line.isTaxIncluded())
+			sql = "UPDATE JP_Estimation i "
+				+ " SET GrandTotal=TotalLines "
+				+ "WHERE JP_Estimation_ID=" + line.getJP_Estimation_ID();
+		else
+			sql = "UPDATE JP_Estimation i "
+				+ " SET GrandTotal=TotalLines+"
+					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_EstimationTax it WHERE i.JP_Estimation_ID=it.JP_Estimation_ID) "
+					+ "WHERE JP_Estimation_ID=" + line.getJP_Estimation_ID();
+		no = DB.executeUpdate(sql, line.get_TrxName());
+		if (no != 1)
+			log.warning("(2) #" + no);
+
+		line.clearParent();
+		return no == 1;
+	}
 }
