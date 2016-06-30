@@ -21,12 +21,14 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereEstimationCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValAdjustCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValCalCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBill;
+import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
@@ -86,7 +88,14 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereInvValAdjustCallout());
 				}
+			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
+				if(columnName.equals(MEstimation.COLUMNNAME_C_DocType_ID))
+				{
+					list.add(new JPiereEstimationCallout());
+				}				
 			}
+			
+			
 		}else{
 
 			if(tableName.equals(MPayment.Table_Name))
