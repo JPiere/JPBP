@@ -66,12 +66,12 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	protected boolean beforeSave(boolean newRecord)
 	{
 
-		if(getDateOrdered() == null)
+		if(getDateOrdered() == null && getParent().getDateOrdered() != null)
 		{
 			setDateOrdered(getParent().getDateOrdered());
 		}
 		
-		if(getDatePromised() == null)
+		if(getDatePromised() == null && getParent().getDatePromised() != null)
 		{
 			setDatePromised(getParent().getDatePromised());
 		}
