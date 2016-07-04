@@ -452,7 +452,40 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	}
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) {
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		
+		if(newRecord || is_ValueChanged("C_DocType_ID"))
+		{
+			MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
+			setOrderType(dt.getDocSubTypeSO());
+			
+		}		
+		return true;
+	}
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success) {
+		
+		if(is_ValueChanged("DateOrdered") || is_ValueChanged("DatePromised") )
+		{
+			
+			MEstimationLine[] lines = getLines();
+			for(int i = 0; i < lines.length; i++)
+			{
+				if(is_ValueChanged("DateOrdered") && (lines[i].getDateOrdered() == null || get_ValueOld("DateOrdered").equals(lines[i].getDateOrdered())))
+				{
+					lines[i].setDateOrdered(getDateOrdered());
+				}	
+				
+				if(is_ValueChanged("DatePromised") && (lines[i].getDatePromised() == null || get_ValueOld("DatePromised").equals(lines[i].getDatePromised())))
+				{
+					lines[i].setDatePromised(getDatePromised());
+				}	
+				
+				lines[i].saveEx(get_TrxName());
+			}//for
+		}
 		
 		return true;
 	}

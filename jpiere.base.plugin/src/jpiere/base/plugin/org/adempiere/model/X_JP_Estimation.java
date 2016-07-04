@@ -34,7 +34,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160630L;
+	private static final long serialVersionUID = 20160703L;
 
     /** Standard Constructor */
     public X_JP_Estimation (Properties ctx, int JP_Estimation_ID, String trxName)
@@ -48,7 +48,6 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 // @C_Currency_ID@
 			setC_DocTypeTarget_ID (0);
 			setC_DocType_ID (0);
-// 0
 			setC_PaymentTerm_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
@@ -91,6 +90,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			setJP_Estimation_ID (0);
 			setM_PriceList_ID (0);
 			setM_Warehouse_ID (0);
+			setOrderType (null);
 			setPaymentRule (null);
 // B
 			setPosted (false);
@@ -1762,12 +1762,31 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return ii.intValue();
 	}
 
+	/** OrderType AD_Reference_ID=148 */
+	public static final int ORDERTYPE_AD_Reference_ID=148;
+	/** On Credit Order = WI */
+	public static final String ORDERTYPE_OnCreditOrder = "WI";
+	/** POS Order = WR */
+	public static final String ORDERTYPE_POSOrder = "WR";
+	/** Warehouse Order = WP */
+	public static final String ORDERTYPE_WarehouseOrder = "WP";
+	/** Standard Order = SO */
+	public static final String ORDERTYPE_StandardOrder = "SO";
+	/** Proposal = ON */
+	public static final String ORDERTYPE_Proposal = "ON";
+	/** Quotation = OB */
+	public static final String ORDERTYPE_Quotation = "OB";
+	/** Return Material = RM */
+	public static final String ORDERTYPE_ReturnMaterial = "RM";
+	/** Prepay Order = PR */
+	public static final String ORDERTYPE_PrepayOrder = "PR";
 	/** Set Order Type.
 		@param OrderType 
 		Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)
 	  */
 	public void setOrderType (String OrderType)
 	{
+
 		set_ValueNoCheck (COLUMNNAME_OrderType, OrderType);
 	}
 

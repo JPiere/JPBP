@@ -15,6 +15,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 
 import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
@@ -62,7 +63,19 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	}
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) {
+	protected boolean beforeSave(boolean newRecord)
+	{
+
+		if(getDateOrdered() == null)
+		{
+			setDateOrdered(getParent().getDateOrdered());
+		}
+		
+		if(getDatePromised() == null)
+		{
+			setDatePromised(getParent().getDatePromised());
+		}
+		
 		
 		//Tax Calculation
 		if(newRecord || is_ValueChanged("LineNetAmt") || is_ValueChanged("C_Tax_ID"))
@@ -94,7 +107,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				set_ValueOfColumn("JP_TaxAmt", taxAmt);
 				
 			}
-		}
+		}//Tax Calculation
 		
 		
 		return true;

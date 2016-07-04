@@ -17,13 +17,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MOrder;
-import org.compiere.model.MSequence;
 import org.compiere.model.X_C_Order;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -92,6 +90,8 @@ public class JPiereEstimationCallout implements IColumnCallout {
 				if (DocSubTypeSO == null)
 					DocSubTypeSO = "--";
 				Env.setContext(ctx, WindowNo, "OrderType", DocSubTypeSO);
+				mTab.setValue ("OrderType", DocSubTypeSO);
+				
 				//	No Drop Ship other than Standard
 				if (!DocSubTypeSO.equals(MOrder.DocSubTypeSO_Standard))
 					mTab.setValue ("IsDropShip", "N");
