@@ -22,15 +22,20 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 
+
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
+import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
+import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -62,7 +67,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	{
 		super(ctx, rs, trxName);
 	}
-
+	
 	/**
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
@@ -490,6 +495,60 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		return true;
 	}
 	
+	public int copyLinesFrom (MEstimation otherOrder, boolean counter, boolean copyASI)
+	{
+		if (isProcessed() || isPosted() || otherOrder == null)
+			return 0;
+		MEstimationLine[] fromLines = otherOrder.getLines(false, null);
+		int count = 0;
+		for (int i = 0; i < fromLines.length; i++)
+		{
+			MEstimationLine line = new MEstimationLine (this);
+			PO.copyValues(fromLines[i], line, getAD_Client_ID(), getAD_Org_ID());
+			line.setJP_Estimation_ID(getJP_Estimation_ID());
+			//
+			line.setQtyDelivered(Env.ZERO);
+			line.setQtyInvoiced(Env.ZERO);
+			line.setQtyReserved(Env.ZERO);
+			line.setDateDelivered(null);
+			line.setDateInvoiced(null);
+			//
+			line.setEstimation(this);
+			line.set_ValueNoCheck ("JP_EstimationLine_ID", I_ZERO);	//	new
+			//	References
+			if (!copyASI)
+			{
+				line.setM_AttributeSetInstance_ID(0);
+				line.setS_ResourceAssignment_ID(0);
+			}
+			
+//			if (counter)
+//				line.setRef_OrderLine_ID(fromLines[i].getC_OrderLine_ID());
+//			else
+//				line.setRef_OrderLine_ID(0);
+
+			// don't copy linked lines
+			line.setLink_OrderLine_ID(0);
+			//	Tax
+//			if (getC_BPartner_ID() != otherOrder.getC_BPartner_ID())
+//				line.setTax();		//	recalculate
+			//
+			//
+//			line.setProcessed(false);
+			if (line.save(get_TrxName()))
+				count++;
+			//	Cross Link
+//			if (counter)
+//			{
+//				fromLines[i].setRef_OrderLine_ID(line.getC_OrderLine_ID());
+//				fromLines[i].saveEx(get_TrxName());
+//			}
+		}
+		if (fromLines.length != count)
+			log.log(Level.SEVERE, "Line difference - From=" + fromLines.length + " <> Saved=" + count);
+		return count;
+	}	//	copyLinesFrom
+
 	
 	
 }	//	DocActionTemplate

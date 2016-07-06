@@ -24,6 +24,7 @@ import jpiere.base.plugin.util.JPiereUtil;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPricing;
@@ -61,22 +62,21 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	public MEstimationLine(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
+	
+	
+	public MEstimationLine (MEstimation estimation)
+	{
+		this (estimation.getCtx(), 0, estimation.get_TrxName());
+		if (estimation.get_ID() == 0)
+			throw new IllegalArgumentException("Header not saved");
+		setJP_Estimation_ID (estimation.getJP_Estimation_ID());	//	parent
+		setEstimation(estimation);
+	}	//	MOrderLine
+	
 
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
-
-		if(getDateOrdered() == null && getParent().getDateOrdered() != null)
-		{
-			setDateOrdered(getParent().getDateOrdered());
-		}
-		
-		if(getDatePromised() == null && getParent().getDatePromised() != null)
-		{
-			setDatePromised(getParent().getDatePromised());
-		}
-		
-		
 		//Tax Calculation
 		if(newRecord || is_ValueChanged("LineNetAmt") || is_ValueChanged("C_Tax_ID"))
 		{
@@ -186,7 +186,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		//
 		if (getC_Currency_ID() == 0)
 		{
-			setOrder (getParent());
+			setEstimation (getParent());
 			if (m_precision != null)
 				return m_precision.intValue();
 		}
@@ -209,11 +209,11 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	}	//	getPrecision
 	
 	/**
-	 * 	Set Defaults from Order.
+	 * 	Set Defaults from Estimtion.
 	 * 	Does not set Parent !!
-	 * 	@param estimation order
+	 * 	@param MEstimation estimation
 	 */
-	public void setOrder (MEstimation estimation)
+	public void setEstimation (MEstimation estimation)
 	{
 		setClientOrg(estimation);
 		setC_BPartner_ID(estimation.getC_BPartner_ID());
