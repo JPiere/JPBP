@@ -23,6 +23,7 @@ import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
@@ -82,6 +83,21 @@ public class CreateSOfromEstimation extends SvrProcess {
 		
 		estimation.setLink_Order_ID(order.getC_Order_ID());
 		estimation.saveEx(get_TrxName());
+		
+		MUser user1 = MUser.get(getCtx(), "user01@oss-erp.co.jp");
+		MUser user2 = MUser.get(getCtx(), "user02@oss-erp.co.jp");
+		String sql = "UPDATE JP_Estimation "
+					+ " SET Created = " + "TO_DATE('2016-10-12 00:00:00','YYYY-MM-DD HH24:MI:SS')"
+						+ ",CreatedBy =" + user1.get_ID()
+						+ ",Updated =" +  "TO_DATE('2016-10-12 00:00:00','YYYY-MM-DD HH24:MI:SS')"
+						+ ",UpdatedBy =" + user2.get_ID()
+				+ " WHERE JP_Estimation_ID=" + estimation.getJP_Estimation_ID() ;
+		
+		int no = DB.executeUpdate(sql, get_TrxName());
+		if(no != 1)
+		{
+			//TODO:エラー
+		}
 		
 		for(int i = 0; i < eLines.length; i++)
 		{
