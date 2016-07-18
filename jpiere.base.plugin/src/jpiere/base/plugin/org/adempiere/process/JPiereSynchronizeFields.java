@@ -95,10 +95,19 @@ public class JPiereSynchronizeFields extends SvrProcess
 		for (MField fromField : fromTab.getFields(false, get_TrxName()))
 		{
 			isCopyOK = false;
+			if(fromField.getDisplayLength() == -1)
+				continue;
+			
 			for(MField toField : toTab.getFields(false, get_TrxName()))
 			{
 				if(fromField.getAD_Column_ID()==toField.getAD_Column_ID())
 				{
+					if(toField.getDisplayLength() == -1)
+					{
+						isCopyOK = true;
+						break;
+					}
+					
 					PO.copyValues(fromField, toField);
 					if (!fromField.isActive())
 						toField.setIsActive(false);
@@ -123,7 +132,8 @@ public class JPiereSynchronizeFields extends SvrProcess
 				DB.executeUpdateEx(sqluptrlfld, new Object[]{fromField.get_ID(),fromField.get_ID(),fromField.get_ID(),fromField.get_ID(),newField.get_ID()}, get_TrxName());
 				count++;
 			}
-		}//for
+		}//for (MField fromField : fromTab.getFields(false, get_TrxName()))
+		
 		
 		for (MField toField : toTab.getFields(false, get_TrxName()))
 		{
@@ -141,12 +151,17 @@ public class JPiereSynchronizeFields extends SvrProcess
 			{
 				continue;
 			}else{
+				
+				if(toField.getDisplayLength() == -1)
+				{
+					continue;
+				}
 				toField.setIsDisplayed(false);
 				toField.setIsDisplayedGrid(false);
 				toField.saveEx(get_TrxName());
 				count++;
 			}
-		}//for		
+		}//for (MField toField : toTab.getFields(false, get_TrxName()))	
 
 		StringBuilder msgreturn = new StringBuilder("@Copied@ #").append(count);
 		return msgreturn.toString();
