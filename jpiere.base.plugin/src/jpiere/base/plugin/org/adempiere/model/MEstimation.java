@@ -21,18 +21,16 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-
-
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
-import org.compiere.model.MOrder;
-import org.compiere.model.MOrderLine;
+import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
+import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -40,16 +38,15 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
- *	Template for DocAction
- *	
- *  Instead of modifying DocumentEngine, you could simply extend DocOptions interface and use customizeValidActions 
- *  @author Jorg Janke
- *  @version $Id: DocActionTemplate.java,v 1.3 2006/07/30 00:54:44 jjanke Exp $
+ *	JPIERE-0183: Estimation
+ *
+ *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
+ *
  */
-public class MEstimation extends X_JP_Estimation implements DocAction
+public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7588955558162632796L;
 
@@ -67,7 +64,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
@@ -109,7 +106,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	//	return re.getPDF(file);
 	}	//	createPDF
 
-	
+
 	/**************************************************************************
 	 * 	Process document
 	 *	@param processAction document action
@@ -121,7 +118,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		DocumentEngine engine = new DocumentEngine (this, getDocStatus());
 		return engine.processIt (processAction, getDocAction());
 	}	//	processIt
-	
+
 	/**	Process Message 			*/
 	private String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
@@ -129,7 +126,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 
 	/**
 	 * 	Unlock Document.
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean unlockIt()
 	{
@@ -137,10 +134,10 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		setProcessing(false);
 		return true;
 	}	//	unlockIt
-	
+
 	/**
 	 * 	Invalidate Document
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean invalidateIt()
 	{
@@ -148,10 +145,10 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		setDocAction(DOCACTION_Prepare);
 		return true;
 	}	//	invalidateIt
-	
+
 	/**
 	 *	Prepare Document
-	 * 	@return new status (In Progress or Invalid) 
+	 * 	@return new status (In Progress or Invalid)
 	 */
 	public String prepareIt()
 	{
@@ -159,7 +156,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
-		
+
 		MDocType dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
 
 		//	Std Period open?
@@ -174,7 +171,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 			m_processMsg = "@NoLines@";
 			return DocAction.STATUS_Invalid;
 		}
-		
+
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -184,10 +181,10 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 			setDocAction(DOCACTION_Complete);
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
-	
+
 	/**
 	 * 	Approve Document
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean  approveIt()
 	{
@@ -195,10 +192,10 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		setIsApproved(true);
 		return true;
 	}	//	approveIt
-	
+
 	/**
 	 * 	Reject Approval
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean rejectIt()
 	{
@@ -206,7 +203,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		setIsApproved(false);
 		return true;
 	}	//	rejectIt
-	
+
 	/**
 	 * 	Complete Document
 	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
@@ -226,13 +223,13 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
-		
+
 		//	Implicit Approval
 	//	if (!isApproved())
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
-		
+
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (valid != null)
@@ -244,7 +241,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
-	
+
 	/**
 	 * 	Set the definite document number after completed
 	 */
@@ -270,18 +267,34 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	/**
 	 * 	Void Document.
 	 * 	Same as Close.
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean voidIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("voidIt - " + toString());
-		return closeIt();
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		// Before Void
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
+		if (m_processMsg != null)
+			return false;
+
+		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Estimation_ID(), get_TrxName());
+		setPosted(true);
+
+		// After Void
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
+		if (m_processMsg != null)
+			return false;
+
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+
+		return true;
 	}	//	voidIt
-	
+
 	/**
 	 * 	Close Document.
 	 * 	Cancel not delivered Qunatities
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean closeIt()
 	{
@@ -290,41 +303,74 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		setDocAction(DOCACTION_None);
 		return true;
 	}	//	closeIt
-	
+
 	/**
 	 * 	Reverse Correction
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("reverseCorrectIt - " + toString());
 		return false;
 	}	//	reverseCorrectionIt
-	
+
 	/**
 	 * 	Reverse Accrual - none
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("reverseAccrualIt - " + toString());
 		return false;
 	}	//	reverseAccrualIt
-	
-	/** 
+
+	/**
 	 * 	Re-activate
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean reActivateIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("reActivateIt - " + toString());
-	//	setProcessed(false);
-		if (reverseCorrectIt())
-			return true;
-		return false;
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		// Before reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
+		if (m_processMsg != null)
+			return false;
+
+		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Estimation_ID(), get_TrxName());
+		setPosted(false);
+
+		// After reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
+		if (m_processMsg != null)
+			return false;
+
+		setDocAction(DOCACTION_Complete);
+		setProcessed(false);
+
+		return true;
 	}	//	reActivateIt
-	
-	
+
+	/**
+	 * 	Set Processed.
+	 * 	Propagate to Lines/Taxes
+	 *	@param processed processed
+	 */
+	public void setProcessed (boolean processed)
+	{
+		super.setProcessed (processed);
+//		if (get_ID() == 0)
+//			return;
+//		String set = "SET Processed='"
+//			+ (processed ? "Y" : "N")
+//			+ "' WHERE JP_Estimation_ID =" + getJP_Estimation_ID();
+//		int noLine = DB.executeUpdateEx("UPDATE JP_EstimationLine " + set, get_TrxName());
+//		int noTax = DB.executeUpdateEx("UPDATE JP_EstimationTax " + set, get_TrxName());
+//		m_lines = null;
+//		m_taxes = null;
+//		if (log.isLoggable(Level.FINE)) log.fine("setProcessed - " + processed + " - Lines=" + noLine + ", Tax=" + noTax);
+	}	//	setProcessed
+
+
 	/*************************************************************************
 	 * 	Get Summary
 	 *	@return Summary of Document
@@ -352,7 +398,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	{
 		return m_processMsg;
 	}	//	getProcessMsg
-	
+
 	/**
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID
@@ -368,7 +414,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	 */
 	public BigDecimal getApprovalAmt()
 	{
-		return getGrandTotal();	
+		return getGrandTotal();
 	}	//	getApprovalAmt
 
 
@@ -380,7 +426,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	{
 		return MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
 	}	//	getPrecision
-	
+
 	/**************************************************************************
 	 * 	Get Lines of Order
 	 * 	@param whereClause where clause or null (starting with AND)
@@ -404,7 +450,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 			ol.setHeaderInfo(this);
 		}
 		//
-		return list.toArray(new MEstimationLine[list.size()]);		
+		return list.toArray(new MEstimationLine[list.size()]);
 	}	//	getLines
 
 	/**
@@ -457,44 +503,44 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 	}
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) 
+	protected boolean beforeSave(boolean newRecord)
 	{
-		
+
 		if(newRecord || is_ValueChanged("C_DocType_ID"))
 		{
 			MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 			setOrderType(dt.getDocSubTypeSO());
-			
-		}		
+
+		}
 		return true;
 	}
 
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
-		
+
 		if(is_ValueChanged("DateOrdered") || is_ValueChanged("DatePromised") )
 		{
-			
+
 			MEstimationLine[] lines = getLines();
 			for(int i = 0; i < lines.length; i++)
 			{
 				if(is_ValueChanged("DateOrdered") && (lines[i].getDateOrdered() == null || get_ValueOld("DateOrdered").equals(lines[i].getDateOrdered())))
 				{
 					lines[i].setDateOrdered(getDateOrdered());
-				}	
-				
+				}
+
 				if(is_ValueChanged("DatePromised") && (lines[i].getDatePromised() == null || get_ValueOld("DatePromised").equals(lines[i].getDatePromised())))
 				{
 					lines[i].setDatePromised(getDatePromised());
-				}	
-				
+				}
+
 				lines[i].saveEx(get_TrxName());
 			}//for
 		}
-		
+
 		return true;
 	}
-	
+
 	public int copyLinesFrom (MEstimation otherOrder, boolean counter, boolean copyASI)
 	{
 		if (isProcessed() || isPosted() || otherOrder == null)
@@ -521,7 +567,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 				line.setM_AttributeSetInstance_ID(0);
 				line.setS_ResourceAssignment_ID(0);
 			}
-			
+
 //			if (counter)
 //				line.setRef_OrderLine_ID(fromLines[i].getC_OrderLine_ID());
 //			else
@@ -549,6 +595,22 @@ public class MEstimation extends X_JP_Estimation implements DocAction
 		return count;
 	}	//	copyLinesFrom
 
-	
-	
+
+	@Override
+	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
+			int AD_Table_ID, String[] docAction, String[] options, int index)
+	{
+
+		if(docStatus.equals(DocAction.STATUS_Completed))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Close;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_ReActivate;
+			return index;
+		}
+
+		return index;
+	}
+
 }	//	DocActionTemplate
