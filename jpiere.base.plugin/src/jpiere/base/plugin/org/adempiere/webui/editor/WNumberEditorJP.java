@@ -61,7 +61,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	private int displayType;
 
 	private boolean tableEditor;
-	
+
 	private String originalStyle;
 
     public WNumberEditorJP()
@@ -153,7 +153,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 
 		popupMenu = new WEditorPopupMenu(false, false, isShowPreference());
     	addChangeLogMenu(popupMenu);
-    	
+
     	originalStyle = getComponent().getDecimalbox().getStyle();
     }
 
@@ -183,14 +183,14 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	        {
 	    	    return;
 	    	}
-	        
+
 	        //IDEMPIERE-2553 - Enter amounts without decimal separator
 	        if(displayType == DisplayType.Amount || displayType == DisplayType.CostPrice){
 	        	if (newValue != null && newValue instanceof BigDecimal) {
 	        		newValue = addDecimalPlaces((BigDecimal)newValue);
-		        }	        
+		        }
 	        }
-	        
+
 	        ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), oldValue, newValue);
 	        super.fireValueChange(changeEvent);
 	        oldValue = getComponent().getValue(); // IDEMPIERE-963 - check again the value could be changed by callout
@@ -205,7 +205,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     public BigDecimal addDecimalPlaces(BigDecimal oldValue){
     	if(oldValue.toString().contains("."))
     		return oldValue;
-    	
+
     	int decimalPlaces = Env.getContextAsInt(Env.getCtx(), "AutomaticDecimalPlacesForAmoun");
     	if(decimalPlaces <= 0)
     		return oldValue;
@@ -256,7 +256,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     	else if (value instanceof BigDecimal)
     	{ 										//JPIERE-3 Modify WNumberEditor#setValue() by Hideaki Hagiwara
     		oldValue = (BigDecimal) value;
-    		if(gridField != null && (displayType==DisplayType.Amount || displayType==DisplayType.CostPrice) )
+    		if(gridField != null && displayType==DisplayType.Amount)
     		{
 	    		DecimalFormat format = null;
 				List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
@@ -268,7 +268,18 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	    		getComponent().getDecimalbox().setFormat(format.toPattern());
 	    		getComponent().setFormat(format);
 
+    		}else if(gridField != null && displayType==DisplayType.CostPrice){
+	    		DecimalFormat format = null;
+				List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
+				for(IDisplayTypeFactory factory : factoryList){
+					format = factory.getNumberFormat(displayType, null, gridField.getFormatPattern());
+				}
+
+	    		format.setMinimumFractionDigits(MCurrency.getCostingPrecision(Env.getCtx(), getC_Currency_ID()));
+	    		getComponent().getDecimalbox().setFormat(format.toPattern());
+	    		getComponent().setFormat(format);
     		}
+
     	} 										//JPiere-3 Finish
     	else if (value instanceof Number)
     		oldValue = BigDecimal.valueOf(((Number)value).doubleValue());
@@ -307,7 +318,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		getComponent().setTableEditorMode(b);
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see org.adempiere.webui.editor.WEditor#setFieldStyle(java.lang.String)
 	 */
@@ -319,11 +330,11 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		if (!Util.isEmpty(style))
 			s.append(style);
 		getComponent().getDecimalbox().setStyle(s.toString());
-	}     
-	
+	}
+
 	/**
 	* Get Currency for precision
-	* 
+	*
 	* JPIERE-3 Add WNumberEditor#getC_Currency_ID()
 	*
 	* @author Hideaki Hagiwara
