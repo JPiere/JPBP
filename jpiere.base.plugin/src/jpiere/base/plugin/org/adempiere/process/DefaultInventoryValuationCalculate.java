@@ -208,7 +208,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 					}
 
-					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(orderLine.getQtyOrdered(),m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyOrdered(),m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 					if(qtyBook.compareTo(log.getQty()) >= 0)
 					{
@@ -281,7 +281,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 					}
 
-					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(invoiceLine.getQtyInvoiced(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyInvoiced(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 					if(qtyBook.compareTo(log.getQty()) >= 0)
 					{
@@ -425,7 +425,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 					}
 
-					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(orderLine.getQtyOrdered(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyOrdered(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 					if(qtyBook.compareTo(log.getQty()) >= 0)
 					{
@@ -499,7 +499,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 						log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 					}
 
-					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(invoiceLine.getQtyInvoiced(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+					log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyInvoiced(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 					if(qtyBook.compareTo(log.getQty()) >= 0)
 					{
@@ -646,7 +646,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 			}
 
-			log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQty(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+			log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyOrdered(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 			if(qtyBook.compareTo(log.getQty()) >= 0)
 			{
@@ -740,7 +740,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 			}
 
-			log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQty(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+			log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyInvoiced(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 			if(qtyBook.compareTo(log.getQty()) >= 0)
 			{
@@ -837,7 +837,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 				}
 
-				log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQty(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+				log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyOrdered(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 				if(qtyBook.compareTo(log.getQty()) >= 0)
 				{
@@ -944,7 +944,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					log.setJP_ExchangedNoTaxAmt(log.getJP_ExchangedAmt());
 				}
 
-				log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQty(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+				log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyInvoiced(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 
 				if(qtyBook.compareTo(log.getQty()) >= 0)
 				{
