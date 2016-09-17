@@ -1178,6 +1178,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
 		JP_InvValTotalAmt = JP_InvValTotalAmt.setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP);
 		BigDecimal JP_ApplyQty = JPiereInvValUtil.calculateApplyQty(getCtx(), line.get_ID(), get_TrxName());
+
 		if(JP_ApplyQty.compareTo(Env.ZERO)==0)
 		{
 			line.setJP_InvValAmt(line.getCurrentCostPrice());
