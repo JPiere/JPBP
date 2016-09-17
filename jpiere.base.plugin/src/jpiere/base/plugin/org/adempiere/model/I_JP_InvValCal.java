@@ -214,6 +214,17 @@ public interface I_JP_InvValCal
 	  */
 	public boolean isApproved();
 
+    /** Column name JP_BeginInvValCal_ID */
+    public static final String COLUMNNAME_JP_BeginInvValCal_ID = "JP_BeginInvValCal_ID";
+
+	/** Set Beginning Inventory Valuation	  */
+	public void setJP_BeginInvValCal_ID (int JP_BeginInvValCal_ID);
+
+	/** Get Beginning Inventory Valuation	  */
+	public int getJP_BeginInvValCal_ID();
+
+	public I_JP_InvValCal getJP_BeginInvValCal() throws RuntimeException;
+
     /** Column name JP_InvValCal_ID */
     public static final String COLUMNNAME_JP_InvValCal_ID = "JP_InvValCal_ID";
 

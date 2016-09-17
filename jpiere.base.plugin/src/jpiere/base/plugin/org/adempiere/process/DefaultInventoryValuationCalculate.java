@@ -122,6 +122,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		}
 
 		BigDecimal totalLines = JPiereInvValUtil.calculateTotalLines(getCtx(), MInvValCalLine.Table_Name, "JP_InvValCal_ID", Record_ID, get_TrxName());
+		if(totalLines == null)
+			totalLines = Env.ZERO;
 		totalLines = totalLines.setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP);
 		m_InvValCal.setTotalLines(totalLines);
 		m_InvValCal.saveEx(get_TrxName());
@@ -926,7 +928,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 	private void calculate_AveragePO(MInvValCalLine line)//TODO
 	{
-		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
+//		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate ASC");
 
@@ -1009,27 +1011,37 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyOrdered(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 				log.setJP_ApplyQty(log.getQty());
 				log.setJP_ApplyAmt(log.getJP_ExchangedPriceActual().multiply(log.getQty()).setScale(m_Currency.getCostingPrecision(), BigDecimal.ROUND_HALF_UP));
-
-//				if(qtyBook.compareTo(log.getQty()) >= 0)
-//				{
-//					log.setJP_ApplyQty(log.getQty());
-//					if(log.getQty().compareTo(log.getQtyOrdered())==0)
-//						log.setJP_ApplyAmt(log.getJP_ExchangedNoTaxAmt());
-//					else
-//						log.setJP_ApplyAmt(log.getJP_ExchangedPriceActual().multiply(log.getQty()).setScale(m_Currency.getCostingPrecision(), BigDecimal.ROUND_HALF_UP));
-//					qtyBook = qtyBook.subtract(log.getQty());
-//				}else{
-//					log.setJP_ApplyQty(qtyBook);
-//					log.setJP_ApplyAmt(qtyBook.multiply(log.getJP_ExchangedPriceActual()).setScale(m_Currency.getCostingPrecision(), BigDecimal.ROUND_HALF_UP));
-//					qtyBook = Env.ZERO;
-//				}
-
 				log.saveEx(get_TrxName());
 				lineNo++;
 
 			}//for j
 
 		}//for i
+
+
+		if(m_InvValProfile.getJP_TypeOfAverageCost().equals(MInvValProfile.JP_TYPEOFAVERAGECOST_GrossAverage))
+		{
+			MInvValCalLine beginInvValCalLine = MInvValCalLine.getBeginInvValCalLine(line);
+			if(beginInvValCalLine != null)
+			{
+				line.setJP_BeginInvValCalLine_ID(beginInvValCalLine.getJP_InvValCalLine_ID());
+
+				MInvValCalLog log = new MInvValCalLog(line);
+				log.setLine(lineNo * 10);
+
+				log.setC_Currency_ID(m_InvValCal.getC_Currency_ID());
+				log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
+
+				log.setJP_ExchangedPriceActual(beginInvValCalLine.getJP_InvValAmt().setScale(m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+				log.setJP_ApplyQty(beginInvValCalLine.getQtyBook());
+				log.setJP_ApplyAmt(beginInvValCalLine.getJP_InvValTotalAmt().setScale(m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+				log.setDescription(Msg.getElement(getCtx(), "JP_BeginningInventory"));
+				log.setJP_BeginInvValCalLine_ID(beginInvValCalLine.getJP_InvValCalLine_ID());
+				log.saveEx(get_TrxName());
+			}
+
+		}
+
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
 		JP_InvValTotalAmt = JP_InvValTotalAmt.setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP);
@@ -1052,7 +1064,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 	private void calculate_AverageInvoice(MInvValCalLine line)//TODO
 	{
-		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
+//		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
 
@@ -1133,27 +1145,35 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setJP_ExchangedPriceActual(log.getJP_ExchangedNoTaxAmt().divide(log.getQtyInvoiced(), m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 				log.setJP_ApplyQty(log.getQty());
 				log.setJP_ApplyAmt(log.getJP_ExchangedPriceActual().multiply(log.getQty()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
-
-//				if(qtyBook.compareTo(log.getQty()) >= 0)
-//				{
-//					log.setJP_ApplyQty(log.getQty());
-//					if(log.getQty().compareTo(log.getQtyOrdered())==0)
-//						log.setJP_ApplyAmt(log.getJP_ExchangedNoTaxAmt());
-//					else
-//						log.setJP_ApplyAmt(log.getJP_ExchangedPriceActual().multiply(log.getQty()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
-//					qtyBook = qtyBook.subtract(log.getQty());
-//				}else{
-//					log.setJP_ApplyQty(qtyBook);
-//					log.setJP_ApplyAmt(qtyBook.multiply(log.getJP_ExchangedPriceActual()).setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP));
-//					qtyBook = Env.ZERO;
-//				}
-
 				log.saveEx(get_TrxName());
 				lineNo++;
 
 			}//for j
 
 		}//for i
+
+		if(m_InvValProfile.getJP_TypeOfAverageCost().equals(MInvValProfile.JP_TYPEOFAVERAGECOST_GrossAverage))
+		{
+			MInvValCalLine beginInvValCalLine = MInvValCalLine.getBeginInvValCalLine(line);
+			if(beginInvValCalLine != null)
+			{
+				line.setJP_BeginInvValCalLine_ID(beginInvValCalLine.getJP_InvValCalLine_ID());
+
+				MInvValCalLog log = new MInvValCalLog(line);
+				log.setLine(lineNo * 10);
+
+				log.setC_Currency_ID(m_InvValCal.getC_Currency_ID());
+				log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
+
+				log.setJP_ExchangedPriceActual(beginInvValCalLine.getJP_InvValAmt().setScale(m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+				log.setJP_ApplyQty(beginInvValCalLine.getQtyBook());
+				log.setJP_ApplyAmt(beginInvValCalLine.getJP_InvValTotalAmt().setScale(m_Currency.getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+				log.setDescription(Msg.getMsg(getCtx(), "JP_BeginningInventory"));
+				log.setJP_BeginInvValCalLine_ID(beginInvValCalLine.getJP_InvValCalLine_ID());
+				log.saveEx(get_TrxName());
+			}
+
+		}
 
 		BigDecimal JP_InvValTotalAmt = JPiereInvValUtil.calculateInvValTotalAmt(getCtx(), line.get_ID(), get_TrxName());
 		JP_InvValTotalAmt = JP_InvValTotalAmt.setScale(m_Currency.getStdPrecision(), BigDecimal.ROUND_HALF_UP);

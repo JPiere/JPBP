@@ -323,6 +323,15 @@ public interface I_JP_InvValProfile
 	/** Get Product Cost Update Class	  */
 	public String getJP_InvValUpdateCostClass();
 
+    /** Column name JP_TypeOfAverageCost */
+    public static final String COLUMNNAME_JP_TypeOfAverageCost = "JP_TypeOfAverageCost";
+
+	/** Set Type of Average Cost	  */
+	public void setJP_TypeOfAverageCost (String JP_TypeOfAverageCost);
+
+	/** Get Type of Average Cost	  */
+	public String getJP_TypeOfAverageCost();
+
     /** Column name JP_UpdateCost */
     public static final String COLUMNNAME_JP_UpdateCost = "JP_UpdateCost";
 

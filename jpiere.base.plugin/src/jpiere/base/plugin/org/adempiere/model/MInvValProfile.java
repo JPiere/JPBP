@@ -81,11 +81,14 @@ public class MInvValProfile extends X_JP_InvValProfile {
 					|| getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_StandardCosting))
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_Can_Not_Calculate_Costing_Method"));
-				return false; 
+				return false;
 			}
-			
+
+			if(!(getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_AveragePO) || getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_AverageInvoice)))
+				setJP_TypeOfAverageCost(null);
+
 		}
-		
+
 		return true;
 	}
 

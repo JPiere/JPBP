@@ -72,6 +72,27 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 		MCostElement[] costElements = JPiereInvValUtil.getMaterialStandardCostElements (getCtx());
 		MAcctSchema m_AcctSchema =null;
 
+		if(set_M_Product_IDs.size() < 1)
+			throw new Exception(Msg.getMsg(getCtx(), "JP_CreateStockOrgTimestamp"));//Please Create Stock Org TimeStamp
+
+
+		//Get Beginning Inventory Valuation Calculate
+		if((m_InvValCal.getJP_InvValProfile().getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_AveragePO) ||
+				m_InvValCal.getJP_InvValProfile().getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_AverageInvoice))
+				&& m_InvValCal.getJP_InvValProfile().getJP_TypeOfAverageCost().equals(MInvValProfile.JP_TYPEOFAVERAGECOST_GrossAverage))
+		{
+			if(m_InvValCal.getJP_BeginInvValCal_ID()==0)
+			{
+				MInvValCal  beginInvValCal = MInvValCal.getBeginInvValCal(m_InvValCal);
+				if(beginInvValCal != null)
+				{
+					m_InvValCal.setJP_BeginInvValCal_ID(beginInvValCal.getJP_InvValCal_ID());
+					m_InvValCal.save(get_TrxName());
+				}
+			}
+		}
+
+
 		for(Integer M_Product_ID :set_M_Product_IDs)
 		{
 			MProduct product = MProduct.get(getCtx(), M_Product_ID);

@@ -28,6 +28,7 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -419,40 +420,96 @@ public class MInvValCal extends X_JP_InvValCal implements DocAction, DocOptions
 	}	//	getLines
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) 
+	protected boolean beforeSave(boolean newRecord)
 	{
+
+		if(newRecord || is_ValueChanged("JP_BeginInvValCal_ID"))
+		{
+			if((getJP_InvValProfile().getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_AveragePO) ||
+					getJP_InvValProfile().getCostingMethod().equals(MInvValProfile.COSTINGMETHOD_AverageInvoice))
+					&& getJP_InvValProfile().getJP_TypeOfAverageCost().equals(MInvValProfile.JP_TYPEOFAVERAGECOST_GrossAverage))
+			{
+
+
+				I_JP_InvValCal biginInvValCal = getJP_BeginInvValCal();
+				 if(biginInvValCal.getJP_InvValProfile_ID() == 0)
+				 {
+						; //Nothing to do;
+				 }else if(getJP_InvValProfile_ID() == biginInvValCal.getJP_InvValProfile_ID()){
+
+					if(!(biginInvValCal.getDocStatus().equals(DOCSTATUS_Completed)|| biginInvValCal.getDocStatus().equals(DOCSTATUS_Closed)))
+					{
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus")+" : " + Msg.getElement(getCtx(), "JP_BeginInvValCal_ID"));
+						return false;
+					}
+
+					if(biginInvValCal.getDateValue().compareTo(getJP_LastDateValue()) != 0)
+					{
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_DiffDateValue"));//Last Date Value is different from Valuation Date of Beginning Inventory Valuation
+						return false;
+					}
+
+				}else{
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_DifferentInvValProfile"));//Different Inventory Valuation Profile
+					return false;
+				}
+
+			}
+
+		} //if(biginInvValCal.getJP_InvValProfile_ID() == 0)
+
 		return true;
 	}
 
 	@Override
 	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
-			int AD_Table_ID, String[] docAction, String[] options, int index) 
+			int AD_Table_ID, String[] docAction, String[] options, int index)
 	{
-		
-		if (docStatus.equals(DocumentEngine.STATUS_Completed)) 
+
+		if (docStatus.equals(DocumentEngine.STATUS_Completed))
 		{
 			index = 0; //initialize the index
-			options[index++] = DocumentEngine.ACTION_Close; 
+			options[index++] = DocumentEngine.ACTION_Close;
 			options[index++] = DocumentEngine.ACTION_ReActivate;
 			options[index++] = DocumentEngine.ACTION_Void;
 			return index;
 		}else if(docStatus.equals(DocumentEngine.STATUS_Drafted)){
 			index = 0; //initialize the index
-			options[index++] = DocumentEngine.ACTION_Complete; 
+			options[index++] = DocumentEngine.ACTION_Complete;
 			options[index++] = DocumentEngine.ACTION_Prepare;
 			options[index++] = DocumentEngine.ACTION_Void;
 			return index;
 		}
-		
+
 		return index;
 	}
 
 	@Override
-	public String toString() 
+	public String toString()
 	{
 	      StringBuffer sb = new StringBuffer ("MInvValCal[")
 	        .append(get_ID()).append("]-DocumentNo:")
-	        .append(getDocumentNo());
+	        .append(getDocumentNo())
+	      	.append(" - " + getDateValue());
 		return sb.toString();
+	}
+
+
+	/**
+	 * 	Get Beginning Inventory Valuation Calculate
+	 * 	@param MInvValCal
+	 * 	@return Beginning InvValCal
+	 */
+	public static MInvValCal getBeginInvValCal(MInvValCal invValCal)
+	{
+		String whereClause = "DocStatus in ('CO','CL') AND DateValue = ? AND JP_InvValProfile_ID = ? AND AD_Org_ID = ?";
+		String orderClause = "JP_InvValCal_ID DESC";
+
+		MInvValCal beginInvValCal = new Query(Env.getCtx(), MInvValCal.Table_Name, whereClause, null)
+								.setParameters(invValCal.getJP_LastDateValue(), invValCal.getJP_InvValProfile_ID(), invValCal.getAD_Org_ID())
+								.setOrderBy(orderClause)
+								.firstOnly();
+
+		return beginInvValCal;
 	}
 }
