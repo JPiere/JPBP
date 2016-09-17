@@ -71,7 +71,7 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 		int line = 0;
 		MCostElement[] costElements = JPiereInvValUtil.getMaterialStandardCostElements (getCtx());
 		MAcctSchema m_AcctSchema =null;
-		
+
 		for(Integer M_Product_ID :set_M_Product_IDs)
 		{
 			MProduct product = MProduct.get(getCtx(), M_Product_ID);
@@ -133,8 +133,8 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 
 				if(m_AcctSchema.getC_Currency_ID()==m_InvValCal.getC_Currency_ID())
 				{
-					ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice());
-					ivcLine.setFutureCostPrice(cost.getFutureCostPrice());
+					ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+					ivcLine.setFutureCostPrice(cost.getFutureCostPrice().setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 				}else{
 					BigDecimal rate =MConversionRate.getRate(m_AcctSchema.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValCal.getDateValue(),
 							m_InvValProfile.getC_ConversionType_ID(), ivcLine.getAD_Client_ID(), ivcLine.getAD_Org_ID());
@@ -143,10 +143,10 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
 								m_AcctSchema.getC_Currency_ID(), m_InvValProfile.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
 					}else{
-						ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().multiply(rate));
-						ivcLine.setFutureCostPrice(cost.getFutureCostPrice().multiply(rate));
+						ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().multiply(rate).setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+						ivcLine.setFutureCostPrice(cost.getFutureCostPrice().multiply(rate).setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
 					}
-					
+
 				}
 
 			}//for j
