@@ -33,7 +33,7 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160414L;
+	private static final long serialVersionUID = 20160917L;
 
     /** Standard Constructor */
     public X_JP_InvValCalLog (Properties ctx, int JP_InvValCalLog_ID, String trxName)
@@ -372,6 +372,31 @@ public class X_JP_InvValCalLog extends PO implements I_JP_InvValCalLog, I_Persis
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	public I_JP_InvValCalLine getJP_BeginInvValCalLine() throws RuntimeException
+    {
+		return (I_JP_InvValCalLine)MTable.get(getCtx(), I_JP_InvValCalLine.Table_Name)
+			.getPO(getJP_BeginInvValCalLine_ID(), get_TrxName());	}
+
+	/** Set Beginning Inventory Valuation Line.
+		@param JP_BeginInvValCalLine_ID Beginning Inventory Valuation Line	  */
+	public void setJP_BeginInvValCalLine_ID (int JP_BeginInvValCalLine_ID)
+	{
+		if (JP_BeginInvValCalLine_ID < 1) 
+			set_Value (COLUMNNAME_JP_BeginInvValCalLine_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_BeginInvValCalLine_ID, Integer.valueOf(JP_BeginInvValCalLine_ID));
+	}
+
+	/** Get Beginning Inventory Valuation Line.
+		@return Beginning Inventory Valuation Line	  */
+	public int getJP_BeginInvValCalLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BeginInvValCalLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_Currency getJP_CurrencyTo() throws RuntimeException

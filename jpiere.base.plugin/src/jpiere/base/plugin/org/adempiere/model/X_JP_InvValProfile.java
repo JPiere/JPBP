@@ -31,7 +31,7 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160413L;
+	private static final long serialVersionUID = 20160917L;
 
     /** Standard Constructor */
     public X_JP_InvValProfile (Properties ctx, int JP_InvValProfile_ID, String trxName)
@@ -531,6 +531,25 @@ public class X_JP_InvValProfile extends PO implements I_JP_InvValProfile, I_Pers
 	public String getJP_InvValUpdateCostClass () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_InvValUpdateCostClass);
+	}
+
+	/** Gross Average = GA */
+	public static final String JP_TYPEOFAVERAGECOST_GrossAverage = "GA";
+	/** Periodic Average = PA */
+	public static final String JP_TYPEOFAVERAGECOST_PeriodicAverage = "PA";
+	/** Set Type of Average Cost.
+		@param JP_TypeOfAverageCost Type of Average Cost	  */
+	public void setJP_TypeOfAverageCost (String JP_TypeOfAverageCost)
+	{
+
+		set_Value (COLUMNNAME_JP_TypeOfAverageCost, JP_TypeOfAverageCost);
+	}
+
+	/** Get Type of Average Cost.
+		@return Type of Average Cost	  */
+	public String getJP_TypeOfAverageCost () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_TypeOfAverageCost);
 	}
 
 	/** Current Cost Price = CC */

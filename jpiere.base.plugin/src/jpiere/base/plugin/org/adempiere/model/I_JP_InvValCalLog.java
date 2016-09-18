@@ -266,6 +266,17 @@ public interface I_JP_InvValCalLog
 	/** Get Apply Qty	  */
 	public BigDecimal getJP_ApplyQty();
 
+    /** Column name JP_BeginInvValCalLine_ID */
+    public static final String COLUMNNAME_JP_BeginInvValCalLine_ID = "JP_BeginInvValCalLine_ID";
+
+	/** Set Beginning Inventory Valuation Line	  */
+	public void setJP_BeginInvValCalLine_ID (int JP_BeginInvValCalLine_ID);
+
+	/** Get Beginning Inventory Valuation Line	  */
+	public int getJP_BeginInvValCalLine_ID();
+
+	public I_JP_InvValCalLine getJP_BeginInvValCalLine() throws RuntimeException;
+
     /** Column name JP_CurrencyTo_ID */
     public static final String COLUMNNAME_JP_CurrencyTo_ID = "JP_CurrencyTo_ID";
 

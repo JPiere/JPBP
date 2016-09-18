@@ -16,6 +16,9 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.model.Query;
+import org.compiere.util.Env;
+
 /**
  * JPIERE-0161:Inventory Valuation Calculate
  *
@@ -44,7 +47,7 @@ public class MInvValCalLine extends X_JP_InvValCalLine {
 	}
 
 	@Override
-	public String toString() 
+	public String toString()
 	{
 	      StringBuffer sb = new StringBuffer ("MInvValCalLine[")
 	        .append(get_ID()).append("]-Line:")
@@ -52,6 +55,20 @@ public class MInvValCalLine extends X_JP_InvValCalLine {
 		return sb.toString();
 	}
 
-	
-	
+
+	/**
+	 * 	Get Beginning Inventory Valuation Calculate
+	 * 	@param MInvValCal
+	 * 	@return Beginning InvValCal
+	 */
+	public static MInvValCalLine getBeginInvValCalLine(MInvValCalLine invValCalLine)
+	{
+		String whereClause = "JP_InvValCal_ID = ? AND M_Product_ID = ?";
+
+		MInvValCalLine beginInvValCalLine = new Query(Env.getCtx(), MInvValCalLine.Table_Name, whereClause, null)
+								.setParameters(invValCalLine.getJP_InvValCal().getJP_BeginInvValCal_ID(), invValCalLine.getM_Product_ID())
+								.firstOnly();
+
+		return beginInvValCalLine;
+	}
 }

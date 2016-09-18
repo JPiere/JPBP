@@ -23,5 +23,6 @@ Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.process,
  jpiere.base.plugin.org.adempiere.webui.editor,
  jpiere.base.plugin.org.compiere.acct,
+ jpiere.base.plugin.util,
  jpiere.base.plugin.webui.apps.form
 Bundle-ActivationPolicy: lazy

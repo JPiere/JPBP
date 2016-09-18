@@ -34,7 +34,7 @@ public class X_JP_InvValCal extends PO implements I_JP_InvValCal, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160414L;
+	private static final long serialVersionUID = 20160917L;
 
     /** Standard Constructor */
     public X_JP_InvValCal (Properties ctx, int JP_InvValCal_ID, String trxName)
@@ -337,6 +337,31 @@ public class X_JP_InvValCal extends PO implements I_JP_InvValCal, I_Persistent
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	public I_JP_InvValCal getJP_BeginInvValCal() throws RuntimeException
+    {
+		return (I_JP_InvValCal)MTable.get(getCtx(), I_JP_InvValCal.Table_Name)
+			.getPO(getJP_BeginInvValCal_ID(), get_TrxName());	}
+
+	/** Set Beginning Inventory Valuation.
+		@param JP_BeginInvValCal_ID Beginning Inventory Valuation	  */
+	public void setJP_BeginInvValCal_ID (int JP_BeginInvValCal_ID)
+	{
+		if (JP_BeginInvValCal_ID < 1) 
+			set_Value (COLUMNNAME_JP_BeginInvValCal_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_BeginInvValCal_ID, Integer.valueOf(JP_BeginInvValCal_ID));
+	}
+
+	/** Get Beginning Inventory Valuation.
+		@return Beginning Inventory Valuation	  */
+	public int getJP_BeginInvValCal_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BeginInvValCal_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Inventory Valuation Calculate Doc.

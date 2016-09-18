@@ -15,10 +15,15 @@ import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 
 import org.compiere.model.I_C_InvoiceLine;
 import org.compiere.model.I_C_OrderLine;
+import org.compiere.model.I_M_MatchInv;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MMatchInv;
+import org.compiere.model.MMatchPO;
+import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.Query;
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -32,7 +37,7 @@ public class JPiereInvValUtil {
 	public JPiereInvValUtil() {
 		;
 	}
-	
+
 	static public BigDecimal getQtyBookFromStockOrg(Properties ctx, Timestamp dateValue, int M_Product_ID, int AD_Org_ID)
 	{
 
@@ -117,7 +122,7 @@ public class JPiereInvValUtil {
 		StringBuilder sql = new StringBuilder("SELECT s.M_Product_ID, SUM(COALESCE(s.QtyBook ,0)) ")
 		.append("FROM JP_StockOrg s INNER JOIN M_Product p ON (s.M_Product_ID=p.M_Product_ID) ")
 		.append(" WHERE s.dateValue=? ");
-		
+
 		if(Orgs!=null && Orgs.length > 0)
 		{
 			sql.append(" AND s.AD_Org_ID IN (");
@@ -130,7 +135,7 @@ public class JPiereInvValUtil {
 			}
 			sql.append(")");
 		}
-		
+
 		sql.append(" AND s.AD_Client_ID=? GROUP BY s.M_Product_ID ");
 		if(Util.isEmpty(OrderClause))
 		{
@@ -194,7 +199,7 @@ public class JPiereInvValUtil {
 
 		return retValue;
 	}
-	
+
 	static public BigDecimal calculateTotals(Properties ctx, String totalColumn, String TableName, String KeyColumnName, int Record_ID, String trxName)
 	{
 		BigDecimal retValue = null;
@@ -245,7 +250,7 @@ public class JPiereInvValUtil {
 	}	//	getStandardMaterialCostElements
 
 
-	public static MInOutLine[] getInOutLines(Properties ctx, int M_Product_ID, Timestamp fromDate, Timestamp toDate, MInvValProfileOrg[] Orgs, String OrderClause)
+	public static MInOutLine[] getInOutLines(Properties ctx, int M_Product_ID, Timestamp lastDateValue, Timestamp dateValue, MInvValProfileOrg[] Orgs, String OrderClause)
 	{
 		StringBuilder DateValueFrom = null;
 		StringBuilder DateValueTo = null;
@@ -268,24 +273,24 @@ public class JPiereInvValUtil {
 			sql.append(")");
 		}
 
-		if(fromDate != null && toDate != null)
+		if(lastDateValue != null && dateValue != null)
 		{
-			DateValueFrom = new StringBuilder(fromDate.toString());
-			DateValueTo = new StringBuilder(toDate.toString());
+			DateValueFrom = new StringBuilder(lastDateValue.toString());
+			DateValueTo = new StringBuilder(dateValue.toString());
 
-			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
-			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
+			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Except lastDateValue
+			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Include all DateValue
 
 			sql.append(" AND io.MovementDate >=").append(DateValueFrom).append(" AND io.MovementDate < ").append(DateValueTo);
 
-		}else if(fromDate != null){
-			DateValueFrom = new StringBuilder(fromDate.toString());
-			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
+		}else if(lastDateValue != null){
+			DateValueFrom = new StringBuilder(lastDateValue.toString());
+			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Except lastDateValue
 			sql.append(" AND io.MovementDate >=").append(DateValueFrom);
 
-		}else if(toDate != null){
-			DateValueTo = new StringBuilder(toDate.toString());
-			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
+		}else if(dateValue != null){
+			DateValueTo = new StringBuilder(dateValue.toString());
+			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Include all DateValue
 			sql.append(" AND io.MovementDate < ").append(DateValueTo);
 		}
 
@@ -438,7 +443,7 @@ public class JPiereInvValUtil {
 
 		return retValue;
 	}
-	
+
 	static public BigDecimal calculateApplyQty(Properties ctx, int JP_InvValCalLine_ID, String trxName)
 	{
 		BigDecimal retValue = null;
@@ -471,4 +476,99 @@ public class JPiereInvValUtil {
 
 		return retValue;
 	}
+
+	/**
+	 * 	Get PO Match of Receipt Line
+	 *	@param ctx context
+	 *	@param M_InOutLine_ID receipt
+	 *	@param OrderClause Order by
+	 *	@param trxName transaction
+	 *	@return array of matches
+	 */
+	public static MMatchPO[] getMatchPOs (Properties ctx, int M_InOutLine_ID, String OrderClause, String trxName)
+	{
+		if (M_InOutLine_ID == 0)
+			return new MMatchPO[]{};
+		//
+		String sql = "SELECT * FROM M_MatchPO WHERE M_InOutLine_ID=?";
+		if(!Util.isEmpty(OrderClause))
+			sql = sql + " ORDER BY" + OrderClause;
+
+		ArrayList<MMatchPO> list = new ArrayList<MMatchPO>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, trxName);
+			pstmt.setInt (1, M_InOutLine_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+				list.add (new MMatchPO (ctx, rs, trxName));
+		}
+		catch (Exception e)
+		{
+			s_log.log(Level.SEVERE, sql, e);
+			if (e instanceof RuntimeException)
+			{
+				throw (RuntimeException)e;
+			}
+			else
+			{
+				throw new IllegalStateException(e);
+			}
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+		}
+
+		MMatchPO[] retValue = new MMatchPO[list.size()];
+		list.toArray (retValue);
+		return retValue;
+	}	//	get
+
+	/**
+	 * 	Get Inv Matches for InOutLine
+	 *	@param ctx context
+	 *	@param M_InOutLine_ID shipment
+	 *	@param OrderClause Order by
+	 *	@param trxName transaction
+	 *	@return array of matches
+	 */
+	public static MMatchInv[] getMatchInvs (Properties ctx, int M_InOutLine_ID, String OrderClause, String trxName)
+		{
+			if (M_InOutLine_ID <= 0)
+			{
+				return new MMatchInv[]{};
+			}
+			//
+			final String whereClause = MMatchInv.COLUMNNAME_M_InOutLine_ID+"=?";
+			List<MMatchInv> list = new Query(ctx, I_M_MatchInv.Table_Name, whereClause, trxName)
+			.setParameters(M_InOutLine_ID)
+			.setOrderBy(OrderClause)
+			.list();
+			return list.toArray (new MMatchInv[list.size()]);
+		}	//	getInOutLine
+
+
+	/**	Cache						*/
+	private static CCache<Integer,MOrder>	s_cache	= new CCache<Integer,MOrder>("C_Order", 20, 2);	//	2 minutes
+
+	/**
+	 * 	Get MOrder from Cache
+	 *	@param ctx context
+	 *	@param C_Order_ID id
+	 *	@return MOrder
+	 */
+	public static MOrder getMOrder (Properties ctx, int C_Order_ID)
+	{
+		Integer key = new Integer (C_Order_ID);
+		MOrder retValue = (MOrder) s_cache.get (key);
+		if (retValue != null)
+			return retValue;
+		retValue = new MOrder (ctx, C_Order_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (key, retValue);
+		return retValue;
+	} //	get
 }

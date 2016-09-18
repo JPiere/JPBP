@@ -169,6 +169,17 @@ public interface I_JP_InvValCalLine
 	  */
 	public boolean isActive();
 
+    /** Column name JP_BeginInvValCalLine_ID */
+    public static final String COLUMNNAME_JP_BeginInvValCalLine_ID = "JP_BeginInvValCalLine_ID";
+
+	/** Set Beginning Inventory Valuation Line	  */
+	public void setJP_BeginInvValCalLine_ID (int JP_BeginInvValCalLine_ID);
+
+	/** Get Beginning Inventory Valuation Line	  */
+	public int getJP_BeginInvValCalLine_ID();
+
+	public I_JP_InvValCalLine getJP_BeginInvValCalLine() throws RuntimeException;
+
     /** Column name JP_InvValAmt */
     public static final String COLUMNNAME_JP_InvValAmt = "JP_InvValAmt";
 
