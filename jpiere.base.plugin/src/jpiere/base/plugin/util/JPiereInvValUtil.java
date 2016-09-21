@@ -296,7 +296,7 @@ public class JPiereInvValUtil {
 
 		if(Util.isEmpty(OrderClause))
 		{
-			sql.append(" ORDER BY io.MovementDate");
+			sql.append(" ORDER BY io.MovementDate, io.DocumentNo, io.M_InOut_ID, iol.Line, iol.M_InOutLine_ID");
 		}else{
 			sql.append(" ORDER BY ").append(OrderClause);
 		}

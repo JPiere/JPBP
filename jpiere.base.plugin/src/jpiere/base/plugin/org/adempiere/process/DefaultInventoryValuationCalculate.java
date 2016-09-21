@@ -140,7 +140,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	{
 		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
-									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
+									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC, io.DocumentNo DESC, io.M_InOut_ID DESC, iol.Line DESC, iol.M_InOutLine_ID DESC");
 
 		int lineNo = 1;
 		MMatchPO[] matchPos = null;
@@ -424,7 +424,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	{
 		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
-									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate ASC");
+									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate ASC, io.DocumentNo ASC, io.M_InOut_ID ASC, iol.Line ASC, iol.M_InOutLine_ID ASC");
 
 		int lineNo = 1;
 		for(int i = 0; i < ioLines.length; i++)
@@ -689,7 +689,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	{
 		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
-									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
+									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC, io.DocumentNo DESC, io.M_InOut_ID DESC,  iol.Line DESC, iol.M_InOutLine_ID DESC");
 
 		int lineNo = 10;
 		BigDecimal JP_InvValAmt = Env.ZERO;
@@ -811,7 +811,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	{
 		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
-									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
+									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC, io.DocumentNo DESC, io.M_InOut_ID DESC, iol.Line DESC, iol.M_InOutLine_ID DESC");
 
 		int lineNo = 10;
 		BigDecimal JP_InvValAmt = Env.ZERO;
@@ -930,7 +930,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	{
 //		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
-									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate ASC");
+									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC, io.DocumentNo DESC, io.M_InOut_ID DESC, iol.Line DESC, iol.M_InOutLine_ID DESC");
 
 		int lineNo = 1;
 		MMatchPO[] matchPos = null;
@@ -1066,7 +1066,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	{
 //		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
-									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC");
+									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC, io.DocumentNo DESC, io.M_InOut_ID DESC, iol.Line DESC, iol.M_InOutLine_ID DESC");
 
 		int lineNo = 1;
 		MMatchInv[] matchInvs = null;
