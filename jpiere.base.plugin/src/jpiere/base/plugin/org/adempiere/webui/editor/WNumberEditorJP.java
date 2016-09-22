@@ -341,7 +341,13 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	*/
 	public int getC_Currency_ID() {
 
-		return Env.getContextAsInt(Env.getCtx(), getGridField().getWindowNo(), "C_Currency_ID");
+		int C_Currency_ID = Env.getContextAsInt(Env.getCtx(), getGridField().getWindowNo(), "C_Currency_ID");
+		if(C_Currency_ID == 0)
+			C_Currency_ID = Env.getContextAsInt(Env.getCtx(), getGridField().getWindowNo(), 0, "C_Currency_ID");
+		if(C_Currency_ID == 0)
+			C_Currency_ID = Env.getContextAsInt(Env.getCtx(), "$C_Currency_ID");
+
+		return C_Currency_ID;
 	}
 
 }
