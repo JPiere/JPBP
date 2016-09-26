@@ -119,7 +119,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 		{
 			MOpportunity op = new MOpportunity(getCtx(),estimation.getC_Opportunity_ID(), get_TrxName());
 			op.setC_Order_ID(order.getC_Order_ID());
-			int C_SalesStages[] = PO.getAllIDs("C_SalesStage", "Probability = 100 AND IsClosed='Y' AND IsWon = 'Y' AND IsActive='Y'", get_TrxName());
+			int C_SalesStages[] = PO.getAllIDs("C_SalesStage", "Probability = 100 AND IsClosed='Y' AND IsWon = 'Y' AND IsActive='Y' ORDER BY Value ASC", get_TrxName());
 			if(C_SalesStages.length > 0)
 				op.setC_SalesStage_ID(C_SalesStages[0]);
 			op.setCloseDate(order.getDateOrdered());
