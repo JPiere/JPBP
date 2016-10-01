@@ -21,6 +21,7 @@ import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 
 import org.adempiere.util.Callback;
 import org.adempiere.util.IProcessUI;
+import org.compiere.model.MOpportunity;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;
@@ -42,13 +43,13 @@ public class CreateSOfromEstimation extends SvrProcess {
 	private String		p_DocAction = null;
 	private MEstimation estimation = null;
 	IProcessUI processUI = null;
-	
+
 	@Override
 	protected void prepare() {
 
 		p_JP_Estimation_ID = getRecord_ID();
 
-		
+
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
 		{
@@ -62,7 +63,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 			}//if
 
 		}//for
-		
+
 		processUI = Env.getProcessUI(getCtx());
 		estimation = new MEstimation(getCtx(), p_JP_Estimation_ID, get_TrxName()) ;
 		if(processUI != null && estimation.getLink_Order_ID() != 0)
@@ -85,46 +86,57 @@ public class CreateSOfromEstimation extends SvrProcess {
 		}
 	}
 
-	private String createSO() 
+	private String createSO()
 	{
 
 		MEstimationLine[] eLines = estimation.getLines();
-		
+
 		MOrder order = new MOrder(getCtx(), 0, get_TrxName()) ;
 		PO.copyValues(estimation, order);
 		order.setAD_Org_ID(estimation.getAD_Org_ID());
 		order.setDocumentNo(null);
 		order.setC_DocTypeTarget_ID(estimation.getC_DocType_ID());
 		order.setDocStatus(DocAction.STATUS_Drafted);
-		order.setDocAction(DocAction.ACTION_Complete);		
+		order.setDocAction(DocAction.ACTION_Complete);
 		order.saveEx(get_TrxName());
-		
+
 		estimation.setLink_Order_ID(order.getC_Order_ID());
 		estimation.saveEx(get_TrxName());
-		
+
 		for(int i = 0; i < eLines.length; i++)
 		{
 			MOrderLine oLine = new MOrderLine(order);
-			PO.copyValues(eLines[i], oLine);	
+			PO.copyValues(eLines[i], oLine);
 			oLine.setAD_Org_ID(eLines[i].getAD_Org_ID());
 			oLine.saveEx(get_TrxName());
-			
+
 		}//for
-		
+
 		order.processIt(p_DocAction);
 		order.saveEx(get_TrxName());
-		
+
+		if(estimation.getC_Opportunity_ID()!=0)
+		{
+			MOpportunity op = new MOpportunity(getCtx(),estimation.getC_Opportunity_ID(), get_TrxName());
+			op.setC_Order_ID(order.getC_Order_ID());
+			int C_SalesStages[] = PO.getAllIDs("C_SalesStage", "Probability = 100 AND IsClosed='Y' AND IsWon = 'Y' AND IsActive='Y' ORDER BY Value ASC", get_TrxName());
+			if(C_SalesStages.length > 0)
+				op.setC_SalesStage_ID(C_SalesStages[0]);
+			op.setCloseDate(order.getDateOrdered());
+			op.saveEx(get_TrxName());
+		}
+
 		return order.getDocumentInfo();
 	}
-	
+
 	@Override
-	protected String doIt() throws Exception 
+	protected String doIt() throws Exception
 	{
 		if(processUI == null || estimation.getLink_Order_ID() == 0)
 		{
 			return createSO();
 		}
-		
+
 		return "";
 	}
 
