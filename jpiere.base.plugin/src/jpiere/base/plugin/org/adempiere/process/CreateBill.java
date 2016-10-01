@@ -352,6 +352,7 @@ public class CreateBill extends SvrProcess {
 		bill.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
 		bill.setJPDateBilled(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 		bill.setJPCutOffDate(p_JPCutOffDate);
+		bill.setDateAcct(p_JPCutOffDate);
 		bill.setSalesRep_ID(Env.getAD_User_ID(getCtx()));
 		bill.setC_DocType_ID(billSchema.getC_DocType_ID());
 		bill.setC_BPartner_ID(invoice.getC_BPartner_ID());
