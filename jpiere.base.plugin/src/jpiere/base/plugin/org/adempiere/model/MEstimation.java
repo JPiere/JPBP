@@ -214,6 +214,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		if (!m_justPrepared)
 		{
 			String status = prepareIt();
+			m_justPrepared = false;
 			if (!DocAction.STATUS_InProgress.equals(status))
 				return status;
 		}

@@ -207,6 +207,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		if (!m_justPrepared)
 		{
 			String status = prepareIt();
+			m_justPrepared = false;
 			if (!DocAction.STATUS_InProgress.equals(status))
 				return status;
 		}
