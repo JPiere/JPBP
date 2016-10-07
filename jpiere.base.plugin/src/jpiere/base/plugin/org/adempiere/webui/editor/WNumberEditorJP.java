@@ -123,6 +123,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 
 	private void init()
     {
+		setChangeEventWhenEditing (true);
 		if (gridField != null)
 		{
 			getComponent().setTooltiptext(gridField.getDescription());
