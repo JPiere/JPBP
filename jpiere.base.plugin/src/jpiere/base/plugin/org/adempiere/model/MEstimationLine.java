@@ -22,14 +22,20 @@ import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPricing;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxProvider;
+import org.compiere.model.ModelValidator;
+import org.compiere.model.ProductCost;
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -109,10 +115,46 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			}
 		}//Tax Calculation
 		
+		//JPIERE-0202:Set Cost to Estimation Line
+		if(getM_Product_ID() != 0 
+				&& ( (newRecord && getPriceCost().compareTo(Env.ZERO) == 0) 
+						|| (!newRecord && is_ValueChanged("QtyOrdered") && !is_ValueChanged("PriceCost")) )
+				&& !MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx())).equals("NO"))
+		{
+
+			String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
+			if(config.equals("BT"))//Both SO and PO
+				setPriceCost();
+			else if(config.equals("SO") && getParent().isSOTrx())
+				setPriceCost();
+			else if(config.equals("PO") && !getParent().isSOTrx())
+				setPriceCost();	
+		}
 		
 		return true;
 	}
 
+	//JPIERE-0202
+	private void setPriceCost()
+	{
+		MAcctSchema as = MAcctSchema.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(), "$C_AcctSchema_ID"));
+		BigDecimal cost = getProductCosts(as, getAD_Org_ID(), true);
+		setPriceCost(cost);
+	}
+	
+	//JPIERE-0202
+	private BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK)
+	{
+		ProductCost pc = new ProductCost (Env.getCtx(), getM_Product_ID(), getM_AttributeSetInstance_ID(), get_TrxName());
+		pc.setQty(getQtyOrdered());
+		String costingMethod = null;
+		BigDecimal costs = pc.getProductCosts(as, AD_Org_ID, costingMethod, 0, zeroCostsOK);
+		if (costs != null)
+			return costs;
+		return Env.ZERO;
+	}//  getProductCosts
+	
+	
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
 		
