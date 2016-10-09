@@ -22,6 +22,7 @@ import java.util.Properties;
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.model.MDocType;
 import org.compiere.model.MOrder;
 import org.compiere.model.X_C_Order;
 import org.compiere.util.DB;
@@ -46,7 +47,11 @@ public class JPiereEstimationCallout implements IColumnCallout {
 		{
 			Integer C_DocType_ID = (Integer)value;		//	Actually C_DocType_ID is JP_Estimtion Table
 			if (C_DocType_ID == null || C_DocType_ID.intValue() == 0)
+			{
+				Env.setContext(ctx, WindowNo, "OrderType", MDocType.DOCSUBTYPESO_StandardOrder);
+				mTab.setValue ("OrderType",  MDocType.DOCSUBTYPESO_StandardOrder);
 				return "";
+			}
 	
 			//	Re-Create new DocNo, if there is a doc number already
 			//	and the existing source used a different Sequence number

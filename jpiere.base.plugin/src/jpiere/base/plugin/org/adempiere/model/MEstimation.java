@@ -507,12 +507,19 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 	protected boolean beforeSave(boolean newRecord)
 	{
 
-		if(newRecord || is_ValueChanged("C_DocType_ID"))
+		if( newRecord || is_ValueChanged("C_DocType_ID") )
 		{
-			MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
-			setOrderType(dt.getDocSubTypeSO());
+			if(getC_DocType_ID()==0)
+			{
+				setOrderType(MDocType.DOCSUBTYPESO_StandardOrder);
+			}else{
+				MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
+				setOrderType(dt.getDocSubTypeSO());
+			}
 
 		}
+		
+		
 		return true;
 	}
 
