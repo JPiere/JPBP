@@ -43,9 +43,9 @@ public class JPiereEstimationCallout implements IColumnCallout {
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 
-		if(mField.getColumnName().equals("C_DocType_ID"))
+		if(mField.getColumnName().equals("JP_DocTypeSO_ID"))
 		{
-			Integer C_DocType_ID = (Integer)value;		//	Actually C_DocType_ID is JP_Estimtion Table
+			Integer C_DocType_ID = (Integer)value;		//	Actually JP_DocTypeSO_ID is JP_Estimtion Table
 			if (C_DocType_ID == null || C_DocType_ID.intValue() == 0)
 			{
 				Env.setContext(ctx, WindowNo, "OrderType", MDocType.DOCSUBTYPESO_StandardOrder);
