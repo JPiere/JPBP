@@ -15,7 +15,6 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.util.Properties;
 
 import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
@@ -25,17 +24,14 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
-import org.compiere.model.MOrder;
-import org.compiere.model.MOrderLine;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPricing;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxProvider;
-import org.compiere.model.ModelValidator;
+import org.compiere.model.MUOMConversion;
 import org.compiere.model.ProductCost;
-import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -114,6 +110,33 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				
 			}
 		}//Tax Calculation
+		
+		
+		//Check UOM
+		if(getM_Product_ID() > 0 && (newRecord || is_ValueChanged("M_Product_ID") || is_ValueChanged("C_UOM_ID")))
+		{
+			MUOMConversion[]  UOMConversions = MUOMConversion.getProductConversions(getCtx(), getM_Product_ID());
+			boolean isOK = false;
+			for(int i = 0; i < UOMConversions.length; i++ )
+			{
+				if(getC_UOM_ID() == UOMConversions[i].getC_UOM_ID())
+				{
+					isOK = true;
+					break;
+				}else if(getC_UOM_ID() == UOMConversions[i].getC_UOM_To_ID()){
+					isOK = true;
+					break;
+				}
+			}
+				
+			if(!isOK)
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "NoUOMConversion"));
+				return false;
+			}
+			
+		}
+		
 		
 		//JPIERE-0202:Set Cost to Estimation Line
 		if(getM_Product_ID() != 0 
