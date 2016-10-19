@@ -29,11 +29,25 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.ProductCost;
 import org.compiere.util.CCache;
-import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 public class JPiereOrderLineModelValidator implements ModelValidator {
 
+	//Qty
+	static final String SALES_ORDER_UNDER_QUANTITY_PROHIBIT = "SUP";	
+	static final String SALES_ORDER_CHANGE_QUANTITY_PROHIBIT = "SCP";
+	static final String PURCHASE_ORDER_UNDER_QUANTITY_PROHIBIT = "PUP";	
+	static final String PURCHASE_ORDER_CHANGE_QUANTITY_PROHIBIT = "PCP";
+	static final String BOTH_ORDER_UNDER_QUANTITY_PROHIBIT = "BUP";	
+	static final String BOTH_ORDER_CHANGE_QUANTITY_PROHIBIT = "BCP";
+	
+	//Amt
+	static final String SALES_ORDER_CHANGE_AMOUNT_PROHIBIT = "SCP";
+	static final String PURCHASE_ORDER_CHANGE_AMOUNT_PROHIBIT = "PCP";
+	static final String BOTH_ORDER_CHANGE_AMOUNT_PROHIBIT = "BCP";
+	static final String BOTH_ORDER_NO_PROHIBIT = "NON";
+	
 	private int AD_Client_ID = -1;
 
 
@@ -107,7 +121,75 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				else if(config.equals("PO") && !ol.getParent().isSOTrx())
 					setPriceCost(ol);	
 			}
-		}//JPIERE-0202
+		}
+		
+		//JPIEERE-0207:Order Re-Activate Check
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
+		{
+			MOrderLine ol = (MOrderLine)po;
+			
+			//Check Qty
+			if(ol.is_ValueChanged("QtyOrdered") && ( ol.getQtyDelivered().compareTo(Env.ZERO) != 0 || ol.getQtyInvoiced().compareTo(Env.ZERO) != 0 ))
+			{
+				String  QTY_CHECK = MSysConfig.getValue("JP_ORDER_REACTIVATE_QTY_CHECK", BOTH_ORDER_NO_PROHIBIT, ol.getAD_Client_ID(), ol.getAD_Org_ID());
+				if(!QTY_CHECK.equals(BOTH_ORDER_NO_PROHIBIT))
+				{
+					if(ol.getParent().isSOTrx())
+					{
+						if(QTY_CHECK.equals(SALES_ORDER_CHANGE_QUANTITY_PROHIBIT) || QTY_CHECK.equals(BOTH_ORDER_CHANGE_QUANTITY_PROHIBIT))
+						{
+							return  Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyForQtyDeliveredOrQtyInvoiced");//You can not change Qty. Because Delivered or Invoiced Qty are not 0.
+							
+						}else if(QTY_CHECK.equals(SALES_ORDER_UNDER_QUANTITY_PROHIBIT) || QTY_CHECK.equals(BOTH_ORDER_UNDER_QUANTITY_PROHIBIT)){
+							
+							if(ol.getQtyOrdered().compareTo(ol.getQtyDelivered()) < 0 || ol.getQtyOrdered().compareTo(ol.getQtyInvoiced()) < 0 )
+							{
+								return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyLessThanQtyDeliveredOrQtyInvoiced");//You can not change Qty less than Delivered or Invoiced Qty.
+							}
+						}
+						
+						
+					}else{
+						
+						if(QTY_CHECK.equals(PURCHASE_ORDER_CHANGE_QUANTITY_PROHIBIT) || QTY_CHECK.equals(BOTH_ORDER_CHANGE_QUANTITY_PROHIBIT))
+						{
+							return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyForQtyDeliveredOrQtyInvoiced");//You can not change Qty. Because Delivered or Invoiced Qty are not 0.
+							
+						}else if(QTY_CHECK.equals(PURCHASE_ORDER_UNDER_QUANTITY_PROHIBIT) || QTY_CHECK.equals(BOTH_ORDER_UNDER_QUANTITY_PROHIBIT)){
+							
+							if(ol.getQtyOrdered().compareTo(ol.getQtyDelivered()) < 0 || ol.getQtyOrdered().compareTo(ol.getQtyInvoiced()) < 0 )
+							{
+								return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyLessThanQtyDeliveredOrQtyInvoiced");//You can not change Qty less than Delivered or Invoiced Qty.
+							}
+						}						
+					}
+				}//if(!QTY_CHECK.equals(BOTH_ORDER_NO_PROHIBIT))
+			}//Check Qty
+			
+			//Check Amount
+			if((ol.is_ValueChanged("PriceEntered") || ol.is_ValueChanged("C_Tax_ID"))  && ol.getQtyInvoiced().compareTo(Env.ZERO) != 0 )
+			{
+				String  AMT_CHECK = MSysConfig.getValue("JP_ORDER_REACTIVATE_AMT_CHECK", BOTH_ORDER_NO_PROHIBIT, ol.getAD_Client_ID(), ol.getAD_Org_ID());
+				if(!AMT_CHECK.equals(BOTH_ORDER_NO_PROHIBIT))
+				{
+					if(ol.getParent().isSOTrx())
+					{
+						if(AMT_CHECK.equals(SALES_ORDER_CHANGE_AMOUNT_PROHIBIT) || AMT_CHECK.equals(BOTH_ORDER_CHANGE_AMOUNT_PROHIBIT))
+						{
+							return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeAmountForQtyInvoiced");//You can not change Amount. Because invoice was issued.
+						}
+						
+					}else{
+						if(AMT_CHECK.equals(PURCHASE_ORDER_CHANGE_AMOUNT_PROHIBIT) || AMT_CHECK.equals(BOTH_ORDER_CHANGE_AMOUNT_PROHIBIT))
+						{
+							return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeAmountForQtyInvoiced");//You can not change Amount. Because invoice was issued.
+							
+						}
+					}
+				}
+			}//Check Amount
+			
+		}
 
 		return null;
 	}
