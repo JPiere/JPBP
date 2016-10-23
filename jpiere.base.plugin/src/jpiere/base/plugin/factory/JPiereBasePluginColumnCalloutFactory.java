@@ -89,7 +89,8 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 					list.add(new JPiereInvValAdjustCallout());
 				}
 			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
-				if(columnName.equals(MEstimation.COLUMNNAME_C_DocType_ID))
+				if(columnName.equals(MEstimation.COLUMNNAME_C_DocType_ID)
+						|| columnName.equals(MEstimation.COLUMNNAME_C_Opportunity_ID))
 				{
 					list.add(new JPiereEstimationCallout());
 				}				

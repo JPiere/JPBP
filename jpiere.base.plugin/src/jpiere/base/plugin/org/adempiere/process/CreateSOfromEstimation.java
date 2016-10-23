@@ -87,15 +87,14 @@ public class CreateSOfromEstimation extends SvrProcess {
 	}
 
 	private String createSO()
-	{
-
+	{		
 		MEstimationLine[] eLines = estimation.getLines();
 
 		MOrder order = new MOrder(getCtx(), 0, get_TrxName()) ;
 		PO.copyValues(estimation, order);
 		order.setAD_Org_ID(estimation.getAD_Org_ID());
 		order.setDocumentNo(null);
-		order.setC_DocTypeTarget_ID(estimation.getC_DocType_ID());
+		order.setC_DocTypeTarget_ID(estimation.getJP_DocTypeSO_ID());
 		order.setDocStatus(DocAction.STATUS_Drafted);
 		order.setDocAction(DocAction.ACTION_Complete);
 		order.saveEx(get_TrxName());
@@ -132,6 +131,13 @@ public class CreateSOfromEstimation extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		
+		if(estimation.getJP_DocTypeSO_ID()==0)
+		{
+			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID"));
+		}
+		
+		
 		if(processUI == null || estimation.getLink_Order_ID() == 0)
 		{
 			return createSO();

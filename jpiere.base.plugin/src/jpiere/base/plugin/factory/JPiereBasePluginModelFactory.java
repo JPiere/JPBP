@@ -26,6 +26,7 @@ import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MEstimationTax;
 import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
+import jpiere.base.plugin.org.adempiere.model.MInOutConfirmJP;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
@@ -48,6 +49,7 @@ import jpiere.base.plugin.org.adempiere.model.MSalesRegionL1;
 import jpiere.base.plugin.org.adempiere.model.MSalesRegionL2;
 
 import org.adempiere.base.IModelFactory;
+import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MOrder;
 import org.compiere.model.PO;
 import org.compiere.util.Env;
@@ -136,6 +138,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
 				return MOrderJP.class;
+			}else if(tableName.equals(MInOutConfirm.Table_Name)){
+				return MInOutConfirmJP.class;			//JPIERE-0208
 			}
 		}
 
@@ -211,6 +215,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
 				return  new MOrderJP(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MInOutConfirm.Table_Name)){
+				return new MInOutConfirmJP(Env.getCtx(), Record_ID, trxName);			//JPIERE-0208
 			}
 		}
 
@@ -287,6 +293,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
 				return  new MOrderJP(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MInOutConfirm.Table_Name)){
+				return new MInOutConfirmJP(Env.getCtx(), rs, trxName);			//JPIERE-0208
 			}
 		}
 

@@ -316,6 +316,21 @@ public interface I_JP_Estimation
 
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
 
+    /** Column name C_Invoice_ID */
+    public static final String COLUMNNAME_C_Invoice_ID = "C_Invoice_ID";
+
+	/** Set Invoice.
+	  * Invoice Identifier
+	  */
+	public void setC_Invoice_ID (int C_Invoice_ID);
+
+	/** Get Invoice.
+	  * Invoice Identifier
+	  */
+	public int getC_Invoice_ID();
+
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException;
+
     /** Column name C_Opportunity_ID */
     public static final String COLUMNNAME_C_Opportunity_ID = "C_Opportunity_ID";
 
@@ -850,6 +865,17 @@ public interface I_JP_Estimation
 	  */
 	public boolean isTransferred();
 
+    /** Column name JP_DocTypeSO_ID */
+    public static final String COLUMNNAME_JP_DocTypeSO_ID = "JP_DocTypeSO_ID";
+
+	/** Set Doc Type SO	  */
+	public void setJP_DocTypeSO_ID (int JP_DocTypeSO_ID);
+
+	/** Get Doc Type SO	  */
+	public int getJP_DocTypeSO_ID();
+
+	public org.compiere.model.I_C_DocType getJP_DocTypeSO() throws RuntimeException;
+
     /** Column name JP_EstimationDate */
     public static final String COLUMNNAME_JP_EstimationDate = "JP_EstimationDate";
 
@@ -907,6 +933,21 @@ public interface I_JP_Estimation
 
 	public org.compiere.model.I_M_FreightCategory getM_FreightCategory() throws RuntimeException;
 
+    /** Column name M_InOut_ID */
+    public static final String COLUMNNAME_M_InOut_ID = "M_InOut_ID";
+
+	/** Set Shipment/Receipt.
+	  * Material Shipment Document
+	  */
+	public void setM_InOut_ID (int M_InOut_ID);
+
+	/** Get Shipment/Receipt.
+	  * Material Shipment Document
+	  */
+	public int getM_InOut_ID();
+
+	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException;
+
     /** Column name M_PriceList_ID */
     public static final String COLUMNNAME_M_PriceList_ID = "M_PriceList_ID";
 
@@ -921,6 +962,21 @@ public interface I_JP_Estimation
 	public int getM_PriceList_ID();
 
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException;
+
+    /** Column name M_RMA_ID */
+    public static final String COLUMNNAME_M_RMA_ID = "M_RMA_ID";
+
+	/** Set RMA.
+	  * Return Material Authorization
+	  */
+	public void setM_RMA_ID (int M_RMA_ID);
+
+	/** Get RMA.
+	  * Return Material Authorization
+	  */
+	public int getM_RMA_ID();
+
+	public org.compiere.model.I_M_RMA getM_RMA() throws RuntimeException;
 
     /** Column name M_Shipper_ID */
     public static final String COLUMNNAME_M_Shipper_ID = "M_Shipper_ID";

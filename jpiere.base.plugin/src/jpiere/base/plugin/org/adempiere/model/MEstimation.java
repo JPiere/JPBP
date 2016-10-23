@@ -507,12 +507,23 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 	protected boolean beforeSave(boolean newRecord)
 	{
 
-		if(newRecord || is_ValueChanged("C_DocType_ID"))
+		if( newRecord || is_ValueChanged("C_DocTypeTarget_ID") )
 		{
-			MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
-			setOrderType(dt.getDocSubTypeSO());
+			setC_DocType_ID(getC_DocTypeTarget_ID());
+		}
+		
+		if( newRecord || is_ValueChanged("JP_DocTypeSO_ID") )
+		{
+			if(getJP_DocTypeSO_ID()==0)
+			{
+				setOrderType(MDocType.DOCSUBTYPESO_StandardOrder);
+			}else{
+				MDocType dt = MDocType.get(getCtx(), getJP_DocTypeSO_ID());
+				setOrderType(dt.getDocSubTypeSO());
+			}
 
 		}
+		
 		return true;
 	}
 
@@ -608,6 +619,15 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			options[index++] = DocumentEngine.ACTION_Close;
 			options[index++] = DocumentEngine.ACTION_Void;
 			options[index++] = DocumentEngine.ACTION_ReActivate;
+			return index;
+		}
+		
+		if(docStatus.equals(DocAction.STATUS_Drafted))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Prepare;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_Complete;
 			return index;
 		}
 

@@ -34,7 +34,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160703L;
+	private static final long serialVersionUID = 20161009L;
 
     /** Standard Constructor */
     public X_JP_Estimation (Properties ctx, int JP_Estimation_ID, String trxName)
@@ -50,6 +50,10 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			setC_DocType_ID (0);
 			setC_PaymentTerm_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setDeliveryRule (null);
 // F
@@ -603,6 +607,34 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	public int getC_DocType_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_Name)
+			.getPO(getC_Invoice_ID(), get_TrxName());	}
+
+	/** Set Invoice.
+		@param C_Invoice_ID 
+		Invoice Identifier
+	  */
+	public void setC_Invoice_ID (int C_Invoice_ID)
+	{
+		if (C_Invoice_ID < 1) 
+			set_Value (COLUMNNAME_C_Invoice_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+	}
+
+	/** Get Invoice.
+		@return Invoice Identifier
+	  */
+	public int getC_Invoice_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -1574,6 +1606,31 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return false;
 	}
 
+	public org.compiere.model.I_C_DocType getJP_DocTypeSO() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
+			.getPO(getJP_DocTypeSO_ID(), get_TrxName());	}
+
+	/** Set Doc Type SO.
+		@param JP_DocTypeSO_ID Doc Type SO	  */
+	public void setJP_DocTypeSO_ID (int JP_DocTypeSO_ID)
+	{
+		if (JP_DocTypeSO_ID < 1) 
+			set_Value (COLUMNNAME_JP_DocTypeSO_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_DocTypeSO_ID, Integer.valueOf(JP_DocTypeSO_ID));
+	}
+
+	/** Get Doc Type SO.
+		@return Doc Type SO	  */
+	public int getJP_DocTypeSO_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_DocTypeSO_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Estimation Date.
 		@param JP_EstimationDate Estimation Date	  */
 	public void setJP_EstimationDate (Timestamp JP_EstimationDate)
@@ -1678,6 +1735,34 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_InOut)MTable.get(getCtx(), org.compiere.model.I_M_InOut.Table_Name)
+			.getPO(getM_InOut_ID(), get_TrxName());	}
+
+	/** Set Shipment/Receipt.
+		@param M_InOut_ID 
+		Material Shipment Document
+	  */
+	public void setM_InOut_ID (int M_InOut_ID)
+	{
+		if (M_InOut_ID < 1) 
+			set_Value (COLUMNNAME_M_InOut_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_InOut_ID, Integer.valueOf(M_InOut_ID));
+	}
+
+	/** Get Shipment/Receipt.
+		@return Material Shipment Document
+	  */
+	public int getM_InOut_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOut_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException
     {
 		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
@@ -1701,6 +1786,34 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	public int getM_PriceList_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_PriceList_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_RMA getM_RMA() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_RMA)MTable.get(getCtx(), org.compiere.model.I_M_RMA.Table_Name)
+			.getPO(getM_RMA_ID(), get_TrxName());	}
+
+	/** Set RMA.
+		@param M_RMA_ID 
+		Return Material Authorization
+	  */
+	public void setM_RMA_ID (int M_RMA_ID)
+	{
+		if (M_RMA_ID < 1) 
+			set_Value (COLUMNNAME_M_RMA_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_RMA_ID, Integer.valueOf(M_RMA_ID));
+	}
+
+	/** Get RMA.
+		@return Return Material Authorization
+	  */
+	public int getM_RMA_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_RMA_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
