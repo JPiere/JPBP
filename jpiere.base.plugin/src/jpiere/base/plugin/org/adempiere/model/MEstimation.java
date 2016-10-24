@@ -503,6 +503,20 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		return m_taxes;
 	}
 
+	/**
+	 * 	Before Delete
+	 *	@return true of it can be deleted
+	 */
+	@Override
+	protected boolean beforeDelete ()
+	{
+		if (isProcessed())
+			return false;
+		// automatic deletion of lines is driven by model cascade definition in dictionary - see IDEMPIERE-2060
+		return true;
+	}	//	beforeDelete
+	
+	
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{

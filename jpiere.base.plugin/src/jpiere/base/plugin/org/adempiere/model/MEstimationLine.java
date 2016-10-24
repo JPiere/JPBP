@@ -16,20 +16,25 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPricing;
+import org.compiere.model.MResourceAssignment;
+import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxProvider;
+import org.compiere.model.MUOM;
 import org.compiere.model.MUOMConversion;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
@@ -79,6 +84,68 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//	Get Defaults from Parent
+		if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0
+			|| getM_Warehouse_ID() == 0 
+			|| getC_Currency_ID() == 0)
+			setEstimation(getParent());
+		if (m_M_PriceList_ID == 0)
+			setHeaderInfo(getParent());
+		
+		//	Charge
+		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
+				setM_Product_ID(0);
+		
+		//No Product
+		if (getM_Product_ID() == 0)
+			setM_AttributeSetInstance_ID(0);
+		//	Product
+		else	//	Set/check Product Price
+		{
+			//	Set Price if Actual = 0
+			if (m_productPrice == null 
+				&&  Env.ZERO.compareTo(getPriceActual()) == 0
+				&&  Env.ZERO.compareTo(getPriceList()) == 0)
+				setPrice();
+			//	Check if on Price list
+			if (m_productPrice == null)
+				getProductPricing(m_M_PriceList_ID);
+			// IDEMPIERE-1574 Sales Order Line lets Price under the Price Limit when updating
+			//	Check PriceLimit
+			boolean enforce = m_IsSOTrx && getParent().getM_PriceList().isEnforcePriceLimit();
+			if (enforce && MRole.getDefault().isOverwritePriceLimit())
+				enforce = false;
+			//	Check Price Limit?
+			if (enforce && getPriceLimit() != Env.ZERO
+			  && getPriceActual().compareTo(getPriceLimit()) < 0)
+			{
+				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
+				return false;
+			}
+			//
+			if (!m_productPrice.isCalculated())
+			{
+				throw new ProductNotOnPriceListException(m_productPrice, getLine());
+			}
+		}
+		
+		//	UOM
+		if (getC_UOM_ID() == 0 
+			&& (getM_Product_ID() != 0 
+				|| getPriceEntered().compareTo(Env.ZERO) != 0
+				|| getC_Charge_ID() != 0))
+		{
+			int C_UOM_ID = MUOM.getDefault_UOM_ID(getCtx());
+			if (C_UOM_ID > 0)
+				setC_UOM_ID (C_UOM_ID);
+		}
+		//	Qty Precision
+		if (newRecord || is_ValueChanged("QtyEntered"))
+			setQtyEntered(getQtyEntered());
+		if (newRecord || is_ValueChanged("QtyOrdered"))
+			setQtyOrdered(getQtyOrdered());
+		
+		
 		//Tax Calculation
 		if(newRecord || is_ValueChanged("LineNetAmt") || is_ValueChanged("C_Tax_ID"))
 		{
@@ -154,9 +221,120 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				setPriceCost();	
 		}
 		
+		
+		//IDEMPIERE-178 Orders and Invoices must disallow amount lines without product/charge
+		if (getParent().getC_DocTypeTarget().isChargeOrProductMandatory()) {
+			if (getC_Charge_ID() == 0 && getM_Product_ID() == 0 && getPriceEntered().signum() != 0) {
+				log.saveError("FillMandatory", Msg.translate(getCtx(), "ChargeOrProductMandatory"));
+				return false;
+			}
+		}
+		
+		
 		return true;
 	}
 
+	/**
+	 * 	Set Price for Product and PriceList.
+	 * 	Use only if newly created.
+	 * 	Uses standard price list of not set by order constructor
+	 */
+	public void setPrice()
+	{
+		if (getM_Product_ID() == 0)
+			return;
+		if (m_M_PriceList_ID == 0)
+			throw new IllegalStateException("PriceList unknown!");
+		setPrice (m_M_PriceList_ID);
+	}
+	
+	/**
+	 * 	Set Price for Product and PriceList
+	 * 	@param M_PriceList_ID price list
+	 */
+	public void setPrice (int M_PriceList_ID)
+	{
+		if (getM_Product_ID() == 0)
+			return;
+		//
+		if (log.isLoggable(Level.FINE)) log.fine(toString() + " - M_PriceList_ID=" + M_PriceList_ID);
+		getProductPricing (M_PriceList_ID);
+		setPriceActual (m_productPrice.getPriceStd());
+		setPriceList (m_productPrice.getPriceList());
+		setPriceLimit (m_productPrice.getPriceLimit());
+		//
+		if (getQtyEntered().compareTo(getQtyOrdered()) == 0)
+			setPriceEntered(getPriceActual());
+		else
+			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
+				.divide(getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP)));	//	recision
+		
+		//	Calculate Discount
+		setDiscount(m_productPrice.getDiscount());
+		//	Set UOM
+		setC_UOM_ID(m_productPrice.getC_UOM_ID());
+	}	//	setPrice
+	
+	
+	/**
+	 * 	Get and calculate Product Pricing
+	 *	@param M_PriceList_ID id
+	 *	@return product pricing
+	 */
+	protected MProductPricing getProductPricing (int M_PriceList_ID)
+	{
+		m_productPrice = new MProductPricing (getM_Product_ID(), 
+			getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx);
+		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
+		m_productPrice.setPriceDate(getDateOrdered());
+		//
+		m_productPrice.calculatePrice();
+		return m_productPrice;
+	}	//	getProductPrice
+	
+	
+	/**
+	 * 	Set Qty Entered - enforce entered UOM 
+	 *	@param QtyEntered
+	 */
+	public void setQtyEntered (BigDecimal QtyEntered)
+	{
+		if (QtyEntered != null && getC_UOM_ID() != 0)
+		{
+			int precision = MUOM.getPrecision(getCtx(), getC_UOM_ID());
+			QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_UP);
+		}
+		super.setQtyEntered (QtyEntered);
+	}	//	setQtyEntered
+	
+	
+	/**
+	 * 	Get Product
+	 *	@return product or null
+	 */
+	public MProduct getProduct()
+	{
+		if (m_product == null && getM_Product_ID() != 0)
+			m_product =  MProduct.get (getCtx(), getM_Product_ID());
+		return m_product;
+	}	//	getProduct
+	
+	/**
+	 * 	Set Qty Ordered - enforce Product UOM 
+	 *	@param QtyOrdered
+	 */
+	public void setQtyOrdered (BigDecimal QtyOrdered)
+	{
+		MProduct product = getProduct();
+		if (QtyOrdered != null && product != null)
+		{
+			int precision = product.getUOMPrecision();
+			QtyOrdered = QtyOrdered.setScale(precision, BigDecimal.ROUND_HALF_UP);
+		}
+		super.setQtyOrdered(QtyOrdered);
+	}	//	setQtyOrdered
+	
+	
 	//JPIERE-0202
 	private void setPriceCost()
 	{
@@ -199,6 +377,28 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		return success;
 	}
 	
+	
+	
+	
+	@Override
+	protected boolean afterDelete(boolean success) {
+		if (!success)
+			return success;
+		if (getS_ResourceAssignment_ID() != 0)
+		{
+			MResourceAssignment ra = new MResourceAssignment(getCtx(), getS_ResourceAssignment_ID(), get_TrxName());
+			ra.delete(true);
+		}
+		
+		MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
+		IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+		MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
+		if (taxCalculater == null)
+			throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+    	return taxCalculater.recalculateTax(provider, this, false);
+		
+	}
+
 	/**
 	 * 	Get Parent
 	 *	@return parent
