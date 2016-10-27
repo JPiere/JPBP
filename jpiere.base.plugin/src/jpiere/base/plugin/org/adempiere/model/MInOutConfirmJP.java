@@ -18,10 +18,12 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
+import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
@@ -119,4 +121,39 @@ public class MInOutConfirmJP extends MInOutConfirm implements DocOptions {
 		return 0;
 	}
 	
+	
+	/**
+	 *  JPIERE-0213
+	 *  
+	 * 	Complete Document
+	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
+	 */
+	public String completeIt()
+	{
+		String docStatus = super.completeIt();
+		MInOut io = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+		MDocType dt = MDocType.get(getCtx(), io.getC_DocType_ID());
+		boolean isIOComplete = dt.get_ValueAsBoolean("IsInOutCompleteJP");
+		
+		if(isIOComplete && docStatus.equals(DocAction.STATUS_Completed))
+		{
+			saveEx(get_TrxName());
+			
+			//Work Flow
+//			ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(io, DocAction.ACTION_Complete);
+//			if (processInfo.isError()) 
+//			{
+//				return docStatus;
+//			}
+			
+			boolean isOK = io.processIt(DocAction.ACTION_Complete);
+			if(isOK)
+				io.saveEx(get_TrxName());
+		}
+		
+		return docStatus;
+		
+
+	}	//	completeIt
+
 }
