@@ -39,6 +39,7 @@ import org.compiere.apps.IStatusBar;
 import org.compiere.grid.CreateFrom;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.GridTab;
+import org.compiere.model.MBPBankAccount;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
@@ -50,6 +51,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MWarehouse;
+import org.compiere.model.PO;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -186,6 +188,20 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		return list;
 	}
 
+	private class IOLineOrderLineSummary
+	{
+		int C_OrderLine_ID = 0;
+		BigDecimal QtyEntered = Env.ZERO;
+		int C_UOM_ID = 0;
+		
+		public IOLineOrderLineSummary(int C_OrderLine_ID, BigDecimal QtyEntered, int C_UOM_ID) 
+		{
+			this. C_OrderLine_ID =  C_OrderLine_ID;
+			this.QtyEntered = QtyEntered;
+			this.C_UOM_ID = C_UOM_ID;
+		}
+	}
+	
 	/**
 	 *  Load Data - Order
 	 *  @param C_Order_ID Order
@@ -193,6 +209,31 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 	 */
 	protected Vector<Vector<Object>> getOrderData (int C_Order_ID, boolean forInvoice)
 	{
+		
+		//Objective of this SQL is to exclude Order Lines that are contained Shipment Lines already.
+		StringBuilder preSQL = new StringBuilder("SELECT iol.C_OrderLine_ID, SUM(iol.QtyEntered), iol.C_UOM_ID FROM M_InOutLine iol INNER JOIN M_InOut io ON(io.M_InOut_ID = iol.M_InOut_ID) "
+													+" WHERE iol.M_InOut_ID=? GROUP BY C_OrderLine_ID, C_UOM_ID");
+		PreparedStatement prePSTMT = null;
+		ResultSet preRS = null;
+		ArrayList<IOLineOrderLineSummary> IOLineOrderLineSummary_list = new ArrayList<IOLineOrderLineSummary>();
+		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
+		try{
+			
+			prePSTMT = DB.prepareStatement(preSQL.toString(), null);
+			prePSTMT.setInt(1, M_InOut_ID);
+			preRS = prePSTMT.executeQuery();
+			while (preRS.next())
+				IOLineOrderLineSummary_list.add(new IOLineOrderLineSummary (preRS.getInt(1), preRS.getBigDecimal(2), preRS.getInt(3)));
+			
+		}catch (SQLException e){
+			log.log(Level.SEVERE, preSQL.toString(), e);
+//			throw new DBException(e, preSQL.toString());
+		}finally{
+			DB.close(preRS, prePSTMT);
+			preRS = null; prePSTMT = null;
+		}
+		
+		
 		/**
 		 *  Selected        - 0
 		 *  Qty             - 1
@@ -241,8 +282,46 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_Order_ID);
 			rs = pstmt.executeQuery();
+			boolean isContain = false;
 			while (rs.next())
 			{
+				isContain = false;
+				for(IOLineOrderLineSummary olSum : IOLineOrderLineSummary_list)
+				{
+					if(olSum.C_OrderLine_ID == rs.getInt(10)
+							&& olSum.C_UOM_ID == rs.getInt(3) )	
+					{
+						isContain = true;
+						BigDecimal qtyOrdered = rs.getBigDecimal(1);
+						BigDecimal multiplier = rs.getBigDecimal(2);
+						BigDecimal qtyEntered = qtyOrdered.multiply(multiplier).subtract(olSum.QtyEntered);
+						if(qtyEntered.compareTo(Env.ZERO)==0)
+							break;
+						
+						Vector<Object> line = new Vector<Object>();
+						line.add(new Boolean(false));           //  0-Selection
+						line.add(qtyEntered);  //  1-Qty
+						KeyNamePair pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
+						line.add(pp);                           //  2-UOM
+						// Add locator
+						line.add(getLocatorKeyNamePair(rs.getInt(5)));// 3-Locator
+						// Add product
+						pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
+						line.add(pp);                           //  4-Product
+						line.add(rs.getString(9));				// 5-VendorProductNo
+						pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
+						line.add(pp);                           //  6-OrderLine
+						line.add(null);                         //  7-Ship
+						line.add(null);                         //  8-Invoice
+						data.add(line);						
+						
+						break;
+					}				
+				}
+				if(isContain)
+					continue;
+				
+				
 				Vector<Object> line = new Vector<Object>();
 				line.add(new Boolean(false));           //  0-Selection
 				BigDecimal qtyOrdered = rs.getBigDecimal(1);
