@@ -416,10 +416,23 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		orderField.addItem(pp);
 
 		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseCb.isSelected());
+		int C_Order_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_Order_ID");
+		int i = 0;
 		for(KeyNamePair knp : list)
+		{
+			i++;
 			orderField.addItem(knp);
-
-		orderField.setSelectedIndex(0);
+			if(knp.getKey()==C_Order_ID && C_Order_ID > 0)
+			{
+				orderField.setSelectedIndex(i);
+				rmaField.setSelectedIndex(-1);
+				loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
+			}
+		}
+		
+		if(C_Order_ID <= 0)
+			orderField.setSelectedIndex(0);
+		
 		orderField.addActionListener(this);
 
 		initBPDetails(C_BPartner_ID);
