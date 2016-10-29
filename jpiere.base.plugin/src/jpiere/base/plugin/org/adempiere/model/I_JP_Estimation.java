@@ -865,6 +865,17 @@ public interface I_JP_Estimation
 	  */
 	public boolean isTransferred();
 
+    /** Column name JP_Bill_ID */
+    public static final String COLUMNNAME_JP_Bill_ID = "JP_Bill_ID";
+
+	/** Set JP Bill	  */
+	public void setJP_Bill_ID (int JP_Bill_ID);
+
+	/** Get JP Bill	  */
+	public int getJP_Bill_ID();
+
+	public I_JP_Bill getJP_Bill() throws RuntimeException;
+
     /** Column name JP_DocTypeSO_ID */
     public static final String COLUMNNAME_JP_DocTypeSO_ID = "JP_DocTypeSO_ID";
 
@@ -888,10 +899,10 @@ public interface I_JP_Estimation
     /** Column name JP_Estimation_ID */
     public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
 
-	/** Set Estimation	  */
+	/** Set Estimation & Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID);
 
-	/** Get Estimation	  */
+	/** Get Estimation & Handwritten	  */
 	public int getJP_Estimation_ID();
 
     /** Column name JP_Estimation_UU */

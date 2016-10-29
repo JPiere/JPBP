@@ -34,7 +34,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20161009L;
+	private static final long serialVersionUID = 20161029L;
 
     /** Standard Constructor */
     public X_JP_Estimation (Properties ctx, int JP_Estimation_ID, String trxName)
@@ -1080,7 +1080,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	  */
 	public void setDocumentNo (String DocumentNo)
 	{
-		set_ValueNoCheck (COLUMNNAME_DocumentNo, DocumentNo);
+		set_Value (COLUMNNAME_DocumentNo, DocumentNo);
 	}
 
 	/** Get Document No.
@@ -1606,6 +1606,31 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return false;
 	}
 
+	public I_JP_Bill getJP_Bill() throws RuntimeException
+    {
+		return (I_JP_Bill)MTable.get(getCtx(), I_JP_Bill.Table_Name)
+			.getPO(getJP_Bill_ID(), get_TrxName());	}
+
+	/** Set JP Bill.
+		@param JP_Bill_ID JP Bill	  */
+	public void setJP_Bill_ID (int JP_Bill_ID)
+	{
+		if (JP_Bill_ID < 1) 
+			set_Value (COLUMNNAME_JP_Bill_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Bill_ID, Integer.valueOf(JP_Bill_ID));
+	}
+
+	/** Get JP Bill.
+		@return JP Bill	  */
+	public int getJP_Bill_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Bill_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_DocType getJP_DocTypeSO() throws RuntimeException
     {
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
@@ -1645,8 +1670,8 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_JP_EstimationDate);
 	}
 
-	/** Set Estimation.
-		@param JP_Estimation_ID Estimation	  */
+	/** Set Estimation & Handwritten.
+		@param JP_Estimation_ID Estimation & Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID)
 	{
 		if (JP_Estimation_ID < 1) 
@@ -1655,8 +1680,8 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			set_ValueNoCheck (COLUMNNAME_JP_Estimation_ID, Integer.valueOf(JP_Estimation_ID));
 	}
 
-	/** Get Estimation.
-		@return Estimation	  */
+	/** Get Estimation & Handwritten.
+		@return Estimation & Handwritten	  */
 	public int getJP_Estimation_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Estimation_ID);
