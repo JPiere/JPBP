@@ -15,14 +15,20 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
 
+import javax.print.Doc;
+
 import org.compiere.model.I_C_Payment;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
+import org.compiere.model.MPayment;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
+import org.compiere.util.Msg;
 
 
 /**
@@ -75,10 +81,7 @@ public class JPiereBankStatementModelValidator implements ModelValidator {
 	public String docValidate(PO po, int timing) {
 
 		//JPIERE-0091
-		if(timing == ModelValidator.TIMING_BEFORE_COMPLETE ||
-				timing == ModelValidator.TIMING_BEFORE_CLOSE ||
-				timing == ModelValidator.TIMING_AFTER_COMPLETE ||
-				timing == ModelValidator.TIMING_AFTER_CLOSE  )
+		if(timing == ModelValidator.TIMING_BEFORE_COMPLETE)
 		{
 			MBankStatement bs = (MBankStatement)po;
 			MBankStatementLine[] bsls = bs.getLines(false) ;
@@ -86,40 +89,55 @@ public class JPiereBankStatementModelValidator implements ModelValidator {
 			{
 				if(bsls[i].getC_Payment_ID() > 0)
 				{
-					I_C_Payment payment = bsls[i].getC_Payment();
+					MPayment payment = new MPayment(po.getCtx(), bsls[i].getC_Payment_ID(),  po.get_TrxName());
 					String dosStatus =  payment.getDocStatus();
-					if(dosStatus.compareTo("CO") == 0 || dosStatus.compareTo("CL")== 0)
+					if(dosStatus.equals(DocAction.STATUS_Voided) || dosStatus.equals(DocAction.STATUS_Reversed))
 					{
-						;
-					}else{
-						return "明細番号:" + bsls[i].getLine() + " 入金／支払伝票の伝票ステータスが完成もしくはクローズではありません。";
+						//Payment was Voided or Reversed
+						return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_PaymentVOorRE");
 					}
-
-					BigDecimal payAmt = payment.getPayAmt();
-					if(!payment.isReceipt())
-						payAmt = payAmt.negate();
 
 					if(payment.isReceipt())
 					{
-						if(bsls[i].getTrxAmt().equals(payment.getPayAmt()))
+						
+						if(bsls[i].getTrxAmt().compareTo(payment.getPayAmt()) != 0)
 						{
-							;
-						}else{
-							return "明細番号:" + bsls[i].getLine() + " 入金／支払伝票の金額と取引金額が一致していません。";
+							return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_AmtNotSamePaymentAndBSLine");
 						}
 					}else{
-						if(bsls[i].getTrxAmt().equals(payment.getPayAmt().negate()))
+						if(bsls[i].getTrxAmt().compareTo(payment.getPayAmt().negate()) != 0)
 						{
-							;
-						}else{
-							return "明細番号:" + bsls[i].getLine() + " 入金／支払伝票の金額と取引金額が一致していません。";
+							return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_AmtNotSamePaymentAndBSLine");
 						}
 					}
-
 				}//if
 			}//for
-
+		}			
+		
+		//JPIERE-0217:JPBP
+		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
+		{
+			MBankStatement bs = (MBankStatement)po;
+			MBankStatementLine[] bsls = bs.getLines(false) ;
+			for(int i = 0; i < bsls.length; i++)
+			{
+				MPayment payment = new MPayment(po.getCtx(), bsls[i].getC_Payment_ID(),  po.get_TrxName());
+				String dosStatus =  payment.getDocStatus();
+				if(!dosStatus.equals(DocAction.STATUS_Completed) && !dosStatus.equals(DocAction.STATUS_Closed))
+				{
+					MDocType dt = new MDocType(po.getCtx(), payment.getC_DocType_ID(),  po.get_TrxName());
+					if(dt.get_ValueAsBoolean("IsReconcileCompleteJP"))
+					{
+						if(payment.processIt(DocAction.ACTION_Complete))
+							payment.saveEx(po.get_TrxName());
+						else
+							return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + "JP_UnexpectedErrorPaymentComplete";
+					}
+				}
+			}//for
 		}
+
+
 
 		return null;
 	}
