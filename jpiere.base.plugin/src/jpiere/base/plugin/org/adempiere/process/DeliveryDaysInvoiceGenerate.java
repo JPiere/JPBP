@@ -21,7 +21,6 @@ import java.sql.Savepoint;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -30,7 +29,6 @@ import jpiere.base.plugin.util.JPierePaymentTerms;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.acct.Doc;
-import org.compiere.model.I_C_BPartner_Location;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
@@ -45,7 +43,6 @@ import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
 import org.compiere.model.MPaymentTerm;
-import org.compiere.model.MSalesRegion;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
@@ -59,7 +56,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 
 /**
- *	JPIERE-0154
+ *	JPIERE-0154,0155
  *	Generate Invoices that add Delivery Days
  *
  *  @author Jorg Janke
@@ -255,25 +252,12 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 					continue;
 				}
 
-				//Get delivery days
-				I_C_BPartner_Location bpl = null;
-				if(ship.getDropShip_Location_ID()==0)
-					bpl = ship.getC_BPartner_Location();
-				else
-					bpl = ship.getDropShip_Location();;
+				
+				MDocType shipDocType = MDocType.get(ship.getCtx(), ship.getC_DocType_ID());
+				Timestamp dateInvoiced = MDeliveryDays.getInvoiceDate(ship, shipDocType.get_ValueAsBoolean("IsHolidayNotInspectionJP"));
 
-				MSalesRegion salesRegion = new MSalesRegion(getCtx(), bpl.getC_SalesRegion_ID(), get_TrxName());
-				BigDecimal deliveryDays = new BigDecimal(MDeliveryDays.getDeliveryDays(ship.getM_Warehouse_ID(), salesRegion.getC_SalesRegion_ID()));
-
-				Timestamp dateInvoiced = ship.getDateAcct();
-
-				if(deliveryDays.compareTo(Env.ZERO)!=0)
+				if(!dateInvoiced.equals(ship.getDateAcct()))
 				{
-					Calendar cal = Calendar.getInstance();
-					cal.setTimeInMillis(dateInvoiced.getTime());
-					cal.add(Calendar.DAY_OF_MONTH, deliveryDays.intValue());
-					dateInvoiced = new Timestamp(cal.getTimeInMillis());
-
 					//Repost Sipment document at dateInvoiced for principle of matching costs with revenues
 					ship.setDateAcct(dateInvoiced);
 					ship.saveEx(get_TrxName());
