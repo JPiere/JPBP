@@ -122,12 +122,12 @@ public class JPiereBankStatementModelValidator implements ModelValidator {
 			for(int i = 0; i < bsls.length; i++)
 			{
 				MPayment payment = new MPayment(po.getCtx(), bsls[i].getC_Payment_ID(),  po.get_TrxName());
-				String dosStatus =  payment.getDocStatus();
-				if(!dosStatus.equals(DocAction.STATUS_Completed) && !dosStatus.equals(DocAction.STATUS_Closed))
+				if(!payment.getDocStatus().equals(DocAction.STATUS_Completed) && !payment.getDocStatus().equals(DocAction.STATUS_Closed))
 				{
 					MDocType dt = new MDocType(po.getCtx(), payment.getC_DocType_ID(),  po.get_TrxName());
 					if(dt.get_ValueAsBoolean("IsReconcileCompleteJP"))
 					{
+						payment.setDateAcct(bs.getDateAcct());
 						if(payment.processIt(DocAction.ACTION_Complete))
 							payment.saveEx(po.get_TrxName());
 						else

@@ -15,6 +15,8 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -133,9 +135,8 @@ public class MInOutConfirmJP extends MInOutConfirm implements DocOptions {
 		String docStatus = super.completeIt();
 		MInOut io = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
 		MDocType dt = MDocType.get(getCtx(), io.getC_DocType_ID());
-		boolean isIOComplete = dt.get_ValueAsBoolean("IsInOutCompleteJP");
 		
-		if(isIOComplete && docStatus.equals(DocAction.STATUS_Completed))
+		if(dt.get_ValueAsBoolean("IsInOutCompleteJP") && docStatus.equals(DocAction.STATUS_Completed))
 		{
 			saveEx(get_TrxName());
 			
@@ -145,6 +146,26 @@ public class MInOutConfirmJP extends MInOutConfirm implements DocOptions {
 //			{
 //				return docStatus;
 //			}
+			
+			String cf = getConfirmType();
+			if(cf.equals(MInOutConfirm.CONFIRMTYPE_ShipReceiptConfirm))
+			{
+				if(dt.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//Ship & Return vendor
+				{
+					io.setShipDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+					
+				}else if(dt.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt)){
+					
+					io.setDateReceived(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+				}
+				
+			}else if(cf.equals(MInOutConfirm.CONFIRMTYPE_PickQAConfirm)){
+				
+				if(io.isSOTrx() && dt.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)){ //Ship & Return vendor
+					io.setPickDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+				}
+				
+			}
 			
 			boolean isOK = io.processIt(DocAction.ACTION_Complete);
 			if(isOK)
