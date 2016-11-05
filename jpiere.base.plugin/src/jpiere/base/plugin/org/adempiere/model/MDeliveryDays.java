@@ -10,9 +10,11 @@ import java.util.Properties;
 import org.compiere.model.I_C_BPartner_Location;
 import org.compiere.model.I_C_Location;
 import org.compiere.model.MInOut;
+import org.compiere.model.MProduct;
 import org.compiere.model.MSalesRegion;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.Query;
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
@@ -25,7 +27,7 @@ import org.compiere.util.Env;
 public class MDeliveryDays extends X_JP_DeliveryDays {
 
 	static MDeliveryDays[] m_deliveryDays = null;
-
+	
 	public MDeliveryDays(Properties ctx, int JP_DeliveryDays_ID, String trxName) {
 		super(ctx, JP_DeliveryDays_ID, trxName);
 	}
@@ -128,19 +130,19 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 
 	static public boolean isNonBusinessDay(int AD_Client_ID, int AD_Org_ID, int C_Country_ID,Timestamp date)
 	{
-//		String sql = "SELECT nbd.C_Calendar_ID from C_NonBusinessDay nbd "
-//						+ "INNER JOIN AD_ClientInfo ci ON (nbd.C_Calendar_ID = ci.C_Calendar_ID) "
-//						+ " WHERE nbd.AD_Client_ID =? "
-//						+ " AND nbd.AD_Org_ID IN (0,?)"
-//						+ " AND (nbd.C_Country_ID is null or nbd.C_Country_ID = ?)"
-//						+ " AND nbd.Date1 = TO_DATE('? 00:00:00', 'YYYY-MM-DD HH24:MI:SS');";
-		
 		String sql = "SELECT nbd.C_Calendar_ID from C_NonBusinessDay nbd "
-				+ "INNER JOIN AD_ClientInfo ci ON (nbd.C_Calendar_ID = ci.C_Calendar_ID) "
-				+ " WHERE nbd.AD_Client_ID = " + AD_Client_ID
-				+ " AND nbd.AD_Org_ID IN (0," + AD_Org_ID + ")"
-				+ " AND (nbd.C_Country_ID IS NULL OR nbd.C_Country_ID ="+C_Country_ID+")"
-				+ " AND nbd.Date1 = TO_DATE('" +date.toString().substring(0, 10) + " 00:00:00', 'YYYY-MM-DD HH24:MI:SS');";
+						+ "INNER JOIN AD_ClientInfo ci ON (nbd.C_Calendar_ID = ci.C_Calendar_ID) "
+						+ " WHERE nbd.AD_Client_ID =? "
+						+ " AND nbd.AD_Org_ID IN (0,?)"
+						+ " AND (nbd.C_Country_ID is null or nbd.C_Country_ID = ?)"
+						+ " AND nbd.Date1 = ? ";
+		
+//		String sql = "SELECT nbd.C_Calendar_ID from C_NonBusinessDay nbd "
+//				+ "INNER JOIN AD_ClientInfo ci ON (nbd.C_Calendar_ID = ci.C_Calendar_ID) "
+//				+ " WHERE nbd.AD_Client_ID = " + AD_Client_ID
+//				+ " AND nbd.AD_Org_ID IN (0," + AD_Org_ID + ")"
+//				+ " AND (nbd.C_Country_ID IS NULL OR nbd.C_Country_ID ="+C_Country_ID+")"
+//				+ " AND nbd.Date1 = TO_DATE('" +date.toString().substring(0, 10) + " 00:00:00', 'YYYY-MM-DD HH24:MI:SS');";
 		
 		boolean isNonBusinessDay = false;
 		PreparedStatement pstmt = null;
@@ -148,10 +150,10 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 		try
 		{
 			pstmt = DB.prepareStatement(sql, null);
-//			pstmt.setInt(1, AD_Client_ID);
-//			pstmt.setInt(2, AD_Org_ID);
-//			pstmt.setInt(3, C_Country_ID);
-//			pstmt.setString(4, date.toString().substring(0, 10));
+			pstmt.setInt(1, AD_Client_ID);
+			pstmt.setInt(2, AD_Org_ID);
+			pstmt.setInt(3, C_Country_ID);
+			pstmt.setTimestamp(4, date);
 			rs = pstmt.executeQuery();
 			if (rs.next())
 				isNonBusinessDay =  true;
