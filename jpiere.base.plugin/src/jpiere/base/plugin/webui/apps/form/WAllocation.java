@@ -16,9 +16,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.webui.apps.form;
 
-import static org.compiere.model.SystemIDs.COLUMN_C_INVOICE_C_BPARTNER_ID;
-import static org.compiere.model.SystemIDs.COLUMN_C_INVOICE_C_CURRENCY_ID;
-import static org.compiere.model.SystemIDs.COLUMN_C_PERIOD_AD_ORG_ID;
+import static org.compiere.model.SystemIDs.*;
 
 import java.util.Vector;
 import java.util.logging.Level;
@@ -46,6 +44,7 @@ import org.adempiere.webui.event.WTableModelListener;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MLookup;
@@ -74,7 +73,7 @@ import org.zkoss.zul.Space;
  *
  * @author  Jorg Janke
  * @version $Id: VAllocation.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
- * 
+ *
  * Contributor : Fabian Aguilar - Multi Business Partner
  */
 public class WAllocation extends Allocation
@@ -105,7 +104,7 @@ public class WAllocation extends Allocation
 			log.log(Level.SEVERE, "", e);
 		}
 	}	//	init
-	
+
 	//
 	private Borderlayout mainLayout = new Borderlayout();
 	private Panel parameterPanel = new Panel();
@@ -143,7 +142,7 @@ public class WAllocation extends Allocation
 	private Checkbox autoWriteOff = new Checkbox();
 	private Label organizationLabel = new Label();
 	private WTableDirEditor organizationPick;
-	
+
 	private Panel southPanel = new Panel();
 
 	/**
@@ -154,8 +153,8 @@ public class WAllocation extends Allocation
 	{
 		//
 		form.appendChild(mainLayout);
-		mainLayout.setWidth("99%");
-		mainLayout.setHeight("100%");
+		ZKUpdateUtil.setWidth(mainLayout, "99%");
+		ZKUpdateUtil.setHeight(mainLayout, "100%");
 		dateLabel.setText(Msg.getMsg(Env.getCtx(), "Date"));
 		autoWriteOff.setSelected(false);
 		autoWriteOff.setText(Msg.getMsg(Env.getCtx(), "AutoWriteOff", true));
@@ -185,76 +184,76 @@ public class WAllocation extends Allocation
 		multiCurrency.setText(Msg.getMsg(Env.getCtx(), "MultiCurrency"));
 		multiCurrency.addActionListener(this);
 		allocCurrencyLabel.setText(".");
-		
+
 		organizationLabel.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
-		
+
 		North north = new North();
 		north.setStyle("border: none");
 		mainLayout.appendChild(north);
 		north.appendChild(parameterPanel);
-		
+
 		Rows rows = null;
 		Row row = null;
-		
-		parameterLayout.setWidth("80%");
+
+		ZKUpdateUtil.setWidth(parameterLayout, "80%");
 		rows = parameterLayout.newRows();
 		row = rows.newRow();
 		row.appendCellChild(dateLabel.rightAlign());
 		row.appendCellChild(dateField.getComponent());
 		row.appendCellChild(organizationLabel.rightAlign());
-		organizationPick.getComponent().setHflex("true");
+		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
 		row.appendCellChild(organizationPick.getComponent(),1);
-		
+
 		row = rows.newRow();
 		row.appendCellChild(bpartnerLabel.rightAlign());
-		bpartnerSearch.getComponent().setHflex("true");
+		ZKUpdateUtil.setHflex(bpartnerSearch.getComponent(), "true");
 		row.appendCellChild(bpartnerSearch.getComponent(),2);
 		row.appendCellChild(bpartnerLabel2.rightAlign());
-		bpartnerSearch2.getComponent().setHflex("true");
+		ZKUpdateUtil.setHflex(bpartnerSearch2.getComponent(), "true");
 		row.appendCellChild(bpartnerSearch2.getComponent(),2);
-		
+
 		row = rows.newRow();
 		row.appendCellChild(currencyLabel.rightAlign(),1);
-		currencyPick.getComponent().setHflex("true");
-		row.appendCellChild(currencyPick.getComponent(),1);		
-		row.appendCellChild(multiCurrency,1);		
+		ZKUpdateUtil.setHflex(currencyPick.getComponent(), "true");
+		row.appendCellChild(currencyPick.getComponent(),1);
+		row.appendCellChild(multiCurrency,1);
 		row.appendCellChild(autoWriteOff,2);
-		row.appendCellChild(new Space(),1);		
-		
+		row.appendCellChild(new Space(),1);
+
 		South south = new South();
 		south.setStyle("border: none");
 		mainLayout.appendChild(south);
 		south.appendChild(southPanel);
 		southPanel.appendChild(allocationPanel);
 		allocationPanel.appendChild(allocationLayout);
-		allocationLayout.setHflex("min");
+		ZKUpdateUtil.setHflex(allocationLayout, "min");
 		rows = allocationLayout.newRows();
 		row = rows.newRow();
 		row.appendCellChild(differenceLabel.rightAlign());
 		row.appendCellChild(allocCurrencyLabel.rightAlign());
-		differenceField.setHflex("true");
+		ZKUpdateUtil.setHflex(differenceField, "true");
 		row.appendCellChild(differenceField);
 		row.appendCellChild(chargeLabel.rightAlign());
-		chargePick.getComponent().setHflex("true");
+		ZKUpdateUtil.setHflex(chargePick.getComponent(), "true");
 		row.appendCellChild(chargePick.getComponent());
-		allocateButton.setHflex("true");
+		ZKUpdateUtil.setHflex(allocateButton, "true");
 		row.appendCellChild(allocateButton);
 		row.appendCellChild(refreshButton);
-		
+
 		paymentPanel.appendChild(paymentLayout);
-		paymentPanel.setWidth("100%");
-		paymentPanel.setHeight("100%");
-		paymentLayout.setWidth("100%");
-		paymentLayout.setHeight("100%");
+		ZKUpdateUtil.setWidth(paymentPanel, "100%");
+		ZKUpdateUtil.setHeight(paymentPanel, "100%");
+		ZKUpdateUtil.setWidth(paymentLayout, "100%");
+		ZKUpdateUtil.setHeight(paymentLayout, "100%");
 		paymentLayout.setStyle("border: none");
-		
+
 		invoicePanel.appendChild(invoiceLayout);
-		invoicePanel.setWidth("100%");
-		invoicePanel.setHeight("100%");
-		invoiceLayout.setWidth("100%");
-		invoiceLayout.setHeight("100%");
+		ZKUpdateUtil.setWidth(invoicePanel, "100%");
+		ZKUpdateUtil.setHeight(invoicePanel, "100%");
+		ZKUpdateUtil.setWidth(invoiceLayout, "100%");
+		ZKUpdateUtil.setHeight(invoiceLayout, "100%");
 		invoiceLayout.setStyle("border: none");
-		
+
 		north = new North();
 		north.setStyle("border: none");
 		paymentLayout.appendChild(north);
@@ -266,10 +265,10 @@ public class WAllocation extends Allocation
 		Center center = new Center();
 		paymentLayout.appendChild(center);
 		center.appendChild(paymentTable);
-		paymentTable.setWidth("99%");
-		paymentTable.setHeight("99%");
+		ZKUpdateUtil.setWidth(paymentTable, "99%");
+		ZKUpdateUtil.setHeight(paymentTable, "99%");
 		center.setStyle("border: none");
-		
+
 		north = new North();
 		north.setStyle("border: none");
 		invoiceLayout.appendChild(north);
@@ -281,23 +280,23 @@ public class WAllocation extends Allocation
 		center = new Center();
 		invoiceLayout.appendChild(center);
 		center.appendChild(invoiceTable);
-		invoiceTable.setWidth("99%");
-		invoiceTable.setHeight("99%");
+		ZKUpdateUtil.setWidth(invoiceTable, "99%");
+		ZKUpdateUtil.setHeight(invoiceTable, "99%");
 		center.setStyle("border: none");
 		//
 		center = new Center();
 		mainLayout.appendChild(center);
 		center.appendChild(infoPanel);
-		infoPanel.setHflex("1");
-		infoPanel.setVflex("1");
-		
+		ZKUpdateUtil.setHflex(infoPanel, "1");
+		ZKUpdateUtil.setVflex(infoPanel, "1");
+
 		infoPanel.setStyle("border: none");
-		infoPanel.setWidth("100%");
-		infoPanel.setHeight("100%");
-		
+		ZKUpdateUtil.setWidth(infoPanel, "100%");
+		ZKUpdateUtil.setHeight(infoPanel, "100%");
+
 		north = new North();
 		north.setStyle("border: none");
-		north.setHeight("49%");
+		ZKUpdateUtil.setHeight(north, "49%");
 		infoPanel.appendChild(north);
 		north.appendChild(paymentPanel);
 		north.setSplittable(true);
@@ -305,8 +304,8 @@ public class WAllocation extends Allocation
 		center.setStyle("border: none");
 		infoPanel.appendChild(center);
 		center.appendChild(invoicePanel);
-		invoicePanel.setHflex("1");
-		invoicePanel.setVflex("1");
+		ZKUpdateUtil.setHflex(invoicePanel, "1");
+		ZKUpdateUtil.setVflex(invoicePanel, "1");
 	}   //  jbInit
 
 	/**
@@ -328,13 +327,13 @@ public class WAllocation extends Allocation
 		organizationPick = new WTableDirEditor("AD_Org_ID", true, false, true, lookupOrg);
 		organizationPick.setValue(Env.getAD_Org_ID(Env.getCtx()));
 		organizationPick.addValueChangeListener(this);
-		
+
 		//  BPartner
 		AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
 		MLookup lookupBP = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
 		bpartnerSearch = new WSearchEditor("C_BPartner_ID", true, false, true, lookupBP);
 		bpartnerSearch.addValueChangeListener(this);
-		
+
 	    //  BPartner2
 		AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
 		MLookup lookupBP2 = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
@@ -344,12 +343,12 @@ public class WAllocation extends Allocation
 		//  Translation
 		statusBar.appendChild(new Label(Msg.getMsg(Env.getCtx(), "AllocateStatus")));
 		statusBar.setVflex("min");
-		
+
 		//  Date set to Login Date
 		dateField.setValue(Env.getContextAsDate(Env.getCtx(), "#Date"));
 		dateField.addValueChangeListener(this);
 
-		
+
 		//  Charge
 		AD_Column_ID = 61804;    //  C_AllocationLine.C_Charge_ID
 		MLookup lookupCharge = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
@@ -357,7 +356,7 @@ public class WAllocation extends Allocation
 		chargePick.setValue(new Integer(m_C_Charge_ID));
 		chargePick.addValueChangeListener(this);
 	}   //  dynInit
-	
+
 	/**************************************************************************
 	 *  Action Listener.
 	 *  - MultiCurrency
@@ -380,15 +379,15 @@ public class WAllocation extends Allocation
 			loadBPartner();
 			loadBPartner2();
 			allocateButton.setEnabled(true);
-			if (allocation != null) 
+			if (allocation != null)
 			{
 				A link = new A(allocation.getDocumentNo());
 				link.setAttribute("Record_ID", allocation.get_ID());
 				link.setAttribute("AD_Table_ID", allocation.get_Table_ID());
-				link.addEventListener(Events.ON_CLICK, new EventListener<Event>() 
+				link.addEventListener(Events.ON_CLICK, new EventListener<Event>()
 						{
 					@Override
-					public void onEvent(Event event) throws Exception 
+					public void onEvent(Event event) throws Exception
 					{
 						Component comp = event.getTarget();
 						Integer Record_ID = (Integer) comp.getAttribute("Record_ID");
@@ -400,7 +399,7 @@ public class WAllocation extends Allocation
 					}
 				});
 				statusBar.appendChild(link);
-			}					
+			}
 		}
 		else if (e.getTarget().equals(refreshButton))
 		{
@@ -423,28 +422,28 @@ public class WAllocation extends Allocation
 			calculate();
 			return;
 		}
-		
+
 		int row = e.getFirstRow();
 		int col = e.getColumn();
-	
+
 		if (row < 0)
 			return;
-		
+
 		boolean isInvoice = (e.getModel().equals(invoiceTable.getModel()));
 		boolean isAutoWriteOff = autoWriteOff.isSelected();
-		
+
 		String msg = writeOff(row, col, isInvoice, paymentTable, invoiceTable, isAutoWriteOff);
-		
+
 		//render row
-		ListModelTable model = isInvoice ? invoiceTable.getModel() : paymentTable.getModel(); 
+		ListModelTable model = isInvoice ? invoiceTable.getModel() : paymentTable.getModel();
 		model.updateComponent(row);
-	    
+
 		if(msg != null && msg.length() > 0)
 			FDialog.warn(form.getWindowNo(), "AllocationWriteOffWarn");
-		
+
 		calculate();
 	}   //  tableChanged
-	
+
 	/**
 	 *  Vetoable Change Listener.
 	 *  - Business Partner
@@ -459,12 +458,12 @@ public class WAllocation extends Allocation
 		if (log.isLoggable(Level.CONFIG)) log.config(name + "=" + value);
 		if (value == null && !name.equals("C_Charge_ID"))
 			return;
-		
+
 		// Organization
 		if (name.equals("AD_Org_ID"))
 		{
 			m_AD_Org_ID = ((Integer) value).intValue();
-			
+
 			loadBPartner();
 			loadBPartner2 ();
 		}
@@ -472,7 +471,7 @@ public class WAllocation extends Allocation
 		else if (name.equals("C_Charge_ID") )
 		{
 			m_C_Charge_ID = value!=null? ((Integer) value).intValue() : 0;
-			
+
 			setAllocateButton();
 		}
 
@@ -504,7 +503,7 @@ public class WAllocation extends Allocation
 			loadBPartner2 ();
 		}
 	}   //  vetoableChange
-	
+
 	private void setAllocateButton() {
 			if (totalDiff.signum() == 0 ^ m_C_Charge_ID > 0 )
 			{
@@ -529,30 +528,30 @@ public class WAllocation extends Allocation
 	private void loadBPartner ()
 	{
 		checkBPartner();
-		
+
 		Vector<Vector<Object>> data = getPaymentData(multiCurrency.isSelected(), dateField.getValue(), paymentTable);
 		Vector<String> columnNames = getPaymentColumnNames(multiCurrency.isSelected());
-		
+
 		paymentTable.clear();
-		
+
 		//  Remove previous listeners
 		paymentTable.getModel().removeTableModelListener(this);
-		
+
 		//  Set Model
 		ListModelTable modelP = new ListModelTable(data);
 		modelP.addTableModelListener(this);
 		paymentTable.setData(modelP, columnNames);
 		setPaymentColumnClass(paymentTable, multiCurrency.isSelected());
 		//
-		
+
 		calculate(multiCurrency.isSelected());
-		
+
 		//  Calculate Totals
 		calculate();
-		
+
 		statusBar.getChildren().clear();
 	}   //  loadBPartner
-	
+
 	/**
 	 *  Load Business Partner Info
 	 *  - Invoices
@@ -563,34 +562,34 @@ public class WAllocation extends Allocation
 
 		Vector<Vector<Object>> data = getInvoiceData(multiCurrency.isSelected(), dateField.getValue(), invoiceTable);
 		Vector<String> columnNames = getInvoiceColumnNames(multiCurrency.isSelected());
-		
+
 		invoiceTable.clear();
-		
+
 		//  Remove previous listeners
 		invoiceTable.getModel().removeTableModelListener(this);
-		
+
 		//  Set Model
 		ListModelTable modelI = new ListModelTable(data);
 		modelI.addTableModelListener(this);
 		invoiceTable.setData(modelI, columnNames);
 		setInvoiceColumnClass(invoiceTable, multiCurrency.isSelected());
 		//
-		
+
 		calculate(multiCurrency.isSelected());
-		
+
 		//  Calculate Totals
 		calculate();
-		
+
 		statusBar.getChildren().clear();
 	}   //  loadBPartner
-	
+
 	public void calculate()
 	{
 		allocDate = null;
-		
+
 		paymentInfo.setText(calculatePayment(paymentTable, multiCurrency.isSelected()));
 		invoiceInfo.setText(calculateInvoice(invoiceTable, multiCurrency.isSelected()));
-		
+
 		//	Set AllocationDate
 		if (allocDate != null)
 			dateField.setValue(allocDate);
@@ -598,11 +597,11 @@ public class WAllocation extends Allocation
 		allocCurrencyLabel.setText(currencyPick.getDisplay());
 		//  Difference
 		totalDiff = totalPay.subtract(totalInv);
-		differenceField.setText(format.format(totalDiff));		
+		differenceField.setText(format.format(totalDiff));
 
 		setAllocateButton();
 	}
-	
+
 	/**************************************************************************
 	 *  Save Data
 	 */
@@ -615,16 +614,16 @@ public class WAllocation extends Allocation
 		try
 		{
 			final MAllocationHdr[] allocation = new MAllocationHdr[1];
-			Trx.run(new TrxRunnable() 
+			Trx.run(new TrxRunnable()
 			{
 				public void run(String trxName)
 				{
 					statusBar.getChildren().clear();
 					allocation[0] = saveData(form.getWindowNo(), dateField.getValue(), paymentTable, invoiceTable, trxName);
-					
+
 				}
 			});
-			
+
 			return allocation[0];
 		}
 		catch (Exception e)
@@ -633,7 +632,7 @@ public class WAllocation extends Allocation
 			return null;
 		}
 	}   //  saveData
-	
+
 	/**
 	 * Called by org.adempiere.webui.panel.ADForm.openForm(int)
 	 * @return
