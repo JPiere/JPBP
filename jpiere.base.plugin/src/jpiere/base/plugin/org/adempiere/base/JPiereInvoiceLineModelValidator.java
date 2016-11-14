@@ -20,6 +20,7 @@ import jpiere.base.plugin.util.JPiereUtil;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
@@ -27,6 +28,7 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
@@ -61,7 +63,7 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 	@Override
 	public String modelChange(PO po, int type) throws Exception {
 
-		//JPIERE-0165
+		//JPIERE-0165:
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				(type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("LineNetAmt")|| po.is_ValueChanged("C_Tax_ID"))))
 		{
@@ -87,6 +89,30 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			}
 
 			il.set_ValueOfColumn("JP_TaxAmt", taxAmt);
+		}
+
+		//JPIERE-0223:Match Inv control
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_InOutLine_ID")))
+		{
+			MInvoiceLine il = (MInvoiceLine)po;
+			if(il.getM_InOutLine_ID() > 0 && !il.getParent().isSOTrx())
+			{
+				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//AP Invoice
+				{
+					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
+					{
+						return Msg.getMsg(il.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
+					}
+				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//AP credit Memo
+
+					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+					{
+						return Msg.getMsg(il.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
+					}
+				}
+			}
+
 		}
 
 		return null;
