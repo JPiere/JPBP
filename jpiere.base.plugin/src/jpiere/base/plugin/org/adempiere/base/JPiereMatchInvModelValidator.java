@@ -46,7 +46,7 @@ public class JPiereMatchInvModelValidator implements ModelValidator {
 
 		//JPIERE-0223:Match Inv control
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
-				(type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("M_InOutLine_ID") || po.is_ValueChanged("M_InvoiceLine_ID") ) ) )
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("M_InOutLine_ID") || po.is_ValueChanged("C_InvoiceLine_ID") ) ) )
 		{
 			MMatchInv mInv = (MMatchInv)po;
 
