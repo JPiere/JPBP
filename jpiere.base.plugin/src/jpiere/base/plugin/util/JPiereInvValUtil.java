@@ -17,6 +17,7 @@ import org.compiere.model.I_C_InvoiceLine;
 import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.I_M_MatchInv;
 import org.compiere.model.MCostElement;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchPO;
@@ -259,7 +260,7 @@ public class JPiereInvValUtil {
 		StringBuilder sql = new StringBuilder("SELECT iol.* FROM M_InOut io ")
 								.append("INNER JOIN M_InOutLine iol ON (io.M_InOut_ID = iol.M_InOut_ID) ")
 								.append("INNER JOIN C_DocType dt ON (dt.C_DocType_ID = io.C_DocType_ID) ")
-								.append("WHERE io.IsSOTrx='N' AND io.DocStatus in ('CO','CL') AND dt.DocBaseType='MMR' AND iol.M_Product_ID=?");
+								.append("WHERE io.IsSOTrx='N' AND io.DocStatus in ('CO','CL') AND dt.DocBaseType in ('MMR','MMS') AND iol.M_Product_ID=?");
 		if(Orgs != null && Orgs.length != 0)
 		{
 			sql.append(" AND io.AD_Org_ID IN (");
@@ -396,19 +397,32 @@ public class JPiereInvValUtil {
 
 	static public void copyInfoFromInvoiceLineToLog(MInvValCalLog log, I_C_InvoiceLine invoiceLine)
 	{
+		String docBaseType = invoiceLine.getC_Invoice().getC_DocType().getDocBaseType();
+
 		log.setC_InvoiceLine_ID(invoiceLine.getC_InvoiceLine_ID());
 		log.setDateInvoiced(invoiceLine.getC_Invoice().getDateInvoiced());
 		log.setIsTaxIncluded(invoiceLine.getC_Invoice().isTaxIncluded());
 		log.setM_PriceList_ID(invoiceLine.getC_Invoice().getM_PriceList_ID());
 		log.setC_Currency_ID(invoiceLine.getC_Invoice().getC_Currency_ID());
 		log.setC_ConversionType_ID(invoiceLine.getC_Invoice().getC_ConversionType_ID());
-		log.setQtyEntered(invoiceLine.getQtyEntered());
 		log.setC_UOM_ID(invoiceLine.getC_UOM_ID());
-		log.setQtyInvoiced(invoiceLine.getQtyInvoiced());
-		log.setPriceEntered(invoiceLine.getPriceEntered());
-		log.setPriceActual(invoiceLine.getPriceActual());
 		log.setC_Tax_ID(invoiceLine.getC_Tax_ID());
-		log.setLineNetAmt(invoiceLine.getLineNetAmt());
+		if(docBaseType.equals(MDocType.DOCBASETYPE_APInvoice))
+		{
+			log.setQtyEntered(invoiceLine.getQtyEntered());
+			log.setQtyInvoiced(invoiceLine.getQtyInvoiced());
+			log.setPriceEntered(invoiceLine.getPriceEntered());
+			log.setPriceActual(invoiceLine.getPriceActual());
+			log.setLineNetAmt(invoiceLine.getLineNetAmt());
+		}if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)){
+			log.setQtyEntered(invoiceLine.getQtyEntered().negate());
+			log.setQtyInvoiced(invoiceLine.getQtyInvoiced());
+			log.setPriceEntered(invoiceLine.getPriceEntered());
+			log.setPriceActual(invoiceLine.getPriceActual());
+			log.setLineNetAmt(invoiceLine.getLineNetAmt());
+		}
+
+
 	}
 
 	static public BigDecimal calculateInvValTotalAmt(Properties ctx, int JP_InvValCalLine_ID, String trxName)

@@ -32,6 +32,7 @@ import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MConversionRateUtil;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MMatchInv;
@@ -148,7 +149,9 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		for(int i = 0; i < ioLines.length; i++)
 		{
 			/***Check***/
-			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
+			//ignore nagative inventory.
+			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			matchPos = null;
@@ -429,7 +432,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		int lineNo = 1;
 		for(int i = 0; i < ioLines.length; i++)
 		{
-			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
+			/**Check**/
+			//ignore nagative inventory.
+			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))//TODO
@@ -695,7 +701,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		BigDecimal JP_InvValAmt = Env.ZERO;
 		for(int i = 0; i < ioLines.length; i++)
 		{
-			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
+			/**Check**/
+			//ignore nagative inventory.
+			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			MMatchPO[] matchPos = JPiereInvValUtil.getMatchPOs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchPO_ID DESC", get_TrxName());
@@ -817,7 +826,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		BigDecimal JP_InvValAmt = Env.ZERO;
 		for(int i = 0; i < ioLines.length; i++)
 		{
-			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
+			/**Check**/
+			//ignore nagative inventory.
+			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			MMatchInv[] matchInvs = JPiereInvValUtil.getMatchInvs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchInv_ID DESC", get_TrxName());
@@ -928,7 +940,6 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 	private void calculate_AveragePO(MInvValCalLine line)//TODO
 	{
-//		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC, io.DocumentNo DESC, io.M_InOut_ID DESC, iol.Line DESC, iol.M_InOutLine_ID DESC");
 
@@ -936,8 +947,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		MMatchPO[] matchPos = null;
 		for(int i = 0; i < ioLines.length; i++)
 		{
-			/***Check*/
-			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
+			/**Check**/
+			//ignore nagative inventory.
+			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			matchPos = JPiereInvValUtil.getMatchPOs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchPO_ID DESC", get_TrxName());
@@ -1062,9 +1075,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		line.saveEx(get_TrxName());
 	}
 
-	private void calculate_AverageInvoice(MInvValCalLine line)//TODO
+	private void calculate_AverageInvoice(MInvValCalLine line)//JPIERE-Default Average Invoice
 	{
-//		BigDecimal qtyBook = line.getQtyBook().abs();//abs is for nagative Inventory.
 		MInOutLine[] ioLines = JPiereInvValUtil.getInOutLines(getCtx(),line.getM_Product_ID(), m_InvValCal.getJP_LastDateValue()
 									, m_InvValCal.getDateValue(), m_InvValProfile.getOrgs(), "io.MovementDate DESC, io.DocumentNo DESC, io.M_InOut_ID DESC, iol.Line DESC, iol.M_InOutLine_ID DESC");
 
@@ -1074,9 +1086,6 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		{
 
 			/**Check**/
-			if(ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)//ignore nagative inventory.
-				continue;
-
 			matchInvs =JPiereInvValUtil.getMatchInvs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchInv_ID DESC", get_TrxName());
 			if(matchInvs == null || matchInvs.length < 1 )
 					continue;
@@ -1110,7 +1119,10 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 				//Set MacthInv Info to Log
 				log.setM_MatchInv_ID(matchInvs[j].get_ID());
-				log.setQty(matchInvs[j].getQty());
+				if(ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
+					log.setQty(matchInvs[j].getQty());
+				else if(ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+					log.setQty(matchInvs[j].getQty().negate());
 
 				//Set AP Invoice Info to Log
 				JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invoiceLine);

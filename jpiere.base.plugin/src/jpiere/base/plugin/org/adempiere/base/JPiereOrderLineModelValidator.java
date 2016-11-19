@@ -28,6 +28,7 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.ProductCost;
+import org.compiere.process.DocAction;
 import org.compiere.util.CCache;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -38,13 +39,13 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 	static final String PROHIBIT_CHANGE_QTY = "PCQ";
 	static final String ALLOW_INCREASE_QTY = "AIQ";
 	static final String ALLOW_CHANGE_QTY_WHEN_RESERVED = "ACR";
-		
+
 	//Amt
 	static final String ALLOW_CHANGE_AMT_WHEN_NOT_INVOICED = "ANI";
-	
+
 	static final String NON = "NON";
 
-	
+
 	private int AD_Client_ID = -1;
 
 
@@ -99,13 +100,13 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 			ol.set_ValueOfColumn("JP_TaxAmt", taxAmt);
 		}
-		
+
 		//JPIERE-0202:Set cost to OrderLine automatically.
 		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
-		{	
+		{
 			MOrderLine ol = (MOrderLine)po;
-			if(ol.getM_Product_ID() != 0 
-					&& ( (type == ModelValidator.TYPE_BEFORE_NEW && ol.getPriceCost().compareTo(Env.ZERO) == 0) 
+			if(ol.getM_Product_ID() != 0
+					&& ( (type == ModelValidator.TYPE_BEFORE_NEW && ol.getPriceCost().compareTo(Env.ZERO) == 0)
 							|| (type == ModelValidator.TYPE_BEFORE_CHANGE && ol.is_ValueChanged("QtyOrdered") && !ol.is_ValueChanged("PriceCost")) )
 					&& !MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx())).equals("NO"))
 			{
@@ -116,10 +117,10 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				else if(config.equals("SO") && ol.getParent().isSOTrx())
 					setPriceCost(ol);
 				else if(config.equals("PO") && !ol.getParent().isSOTrx())
-					setPriceCost(ol);	
+					setPriceCost(ol);
 			}
 		}
-		
+
 		//JPIEERE-0207:Order Re-Activate Check
 		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
 		{
@@ -130,15 +131,15 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				QTY_CHECK = MSysConfig.getValue("JP_SO_REACTIVATE_QTY_CHECK", NON, ol.getAD_Client_ID(), ol.getAD_Org_ID());
 			else
 				QTY_CHECK = MSysConfig.getValue("JP_PO_REACTIVATE_QTY_CHECK", NON, ol.getAD_Client_ID(), ol.getAD_Org_ID());
-			
+
 			//Check Qty
 			if(QTY_CHECK.equals(NON))
 			{
 				;//Nothing to do
-				
+
 			}else if(QTY_CHECK.equals(PROHIBIT_CHANGE_QTY)){
-				
-				if(ol.is_ValueChanged("QtyOrdered") && 
+
+				if(ol.is_ValueChanged("QtyOrdered") && !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close) &&
 						(ol.getQtyReserved().compareTo(Env.ZERO) != 0 || ol.getQtyDelivered().compareTo(Env.ZERO) != 0 || ol.getQtyInvoiced().compareTo(Env.ZERO) != 0 ))
 				{
 					if(isSOTrx)
@@ -146,39 +147,40 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					else
 						return  Msg.getMsg(Env.getCtx(), "JP_CanNotChangeAmountForQtyReservedPO");//You can not Change Qty. Because of Reserved Qty
 				}
-				
+
 			}else if(QTY_CHECK.equals(ALLOW_INCREASE_QTY)){
-				
-				if(ol.is_ValueChanged("QtyOrdered") && 
+
+				if(ol.is_ValueChanged("QtyOrdered") && !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close) &&
 						( ol.getQtyOrdered().compareTo(ol.getQtyDelivered()) < 0 || ol.getQtyOrdered().compareTo(ol.getQtyInvoiced()) < 0 ))
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyLessThanQtyDeliveredOrQtyInvoiced");//You can not change Qty less than Delivered or Invoiced Qty.
-					
+
 			}else if(QTY_CHECK.equals(ALLOW_CHANGE_QTY_WHEN_RESERVED)){
-				
-				if(ol.is_ValueChanged("QtyOrdered") && 
+
+				if(ol.is_ValueChanged("QtyOrdered") && !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close) &&
 						( ol.getQtyDelivered().compareTo(Env.ZERO) != 0 || ol.getQtyInvoiced().compareTo(Env.ZERO) != 0 ))
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyForQtyDeliveredOrQtyInvoiced");//You can not change Qty. Because Delivered or Invoiced Qty are not 0.
-				
+
 			}
-			
-			
+
+
 			String  AMT_CHECK = NON;
 			if(isSOTrx)
 				AMT_CHECK = MSysConfig.getValue("JP_SO_REACTIVATE_AMT_CHECK", NON, ol.getAD_Client_ID(), ol.getAD_Org_ID());
 			else
 				AMT_CHECK = MSysConfig.getValue("JP_PO_REACTIVATE_AMT_CHECK", NON, ol.getAD_Client_ID(), ol.getAD_Org_ID());
-			
-			
+
+
 			if(AMT_CHECK.equals(NON))
 			{
 				;//Nothing to do
-				
+
 			}else if(AMT_CHECK.equals(ALLOW_CHANGE_AMT_WHEN_NOT_INVOICED))
 			{
-				if((ol.is_ValueChanged("PriceEntered") || ol.is_ValueChanged("C_Tax_ID"))  && ol.getQtyInvoiced().compareTo(Env.ZERO) != 0 )
+				if((ol.is_ValueChanged("PriceEntered") || ol.is_ValueChanged("C_Tax_ID"))  && ol.getQtyInvoiced().compareTo(Env.ZERO) != 0
+						&& !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close))
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeAmountForQtyInvoiced");//You can not change Amount. Because invoice was issued.
 			}
-			
+
 		}
 
 		return null;
@@ -189,7 +191,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 		return null;
 	}
-	
+
 	//JPIERE-0202
 	private void setPriceCost(MOrderLine ol)
 	{
@@ -197,7 +199,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		BigDecimal cost = getProductCosts(ol, as, ol.getAD_Org_ID(), true);
 		ol.setPriceCost(cost);
 	}
-	
+
 	//JPIERE-0202
 	private BigDecimal getProductCosts (MOrderLine ol, MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK)
 	{
@@ -210,7 +212,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			return costs;
 		return Env.ZERO;
 	}//  getProductCosts
-	
+
 	//JPIERE-0202
 	private static CCache<String, ProductCost> s_cache = new CCache<String, ProductCost>("OderLineCost", 1000, 10, true);
 
@@ -221,7 +223,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		ProductCost	m_productCost = s_cache.get(key);
 		if(m_productCost == null)
 		{
-			m_productCost = new ProductCost (Env.getCtx(), 
+			m_productCost = new ProductCost (Env.getCtx(),
 						ol.getM_Product_ID(), ol.getM_AttributeSetInstance_ID(), ol.get_TrxName());
 			s_cache.put(key, m_productCost);
 		}

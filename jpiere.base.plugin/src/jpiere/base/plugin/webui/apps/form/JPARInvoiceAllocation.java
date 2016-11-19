@@ -49,6 +49,7 @@ import org.adempiere.webui.event.WTableModelListener;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MAllocationHdr;
@@ -327,8 +328,8 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		form.appendChild(mainLayout);
 
 		/*【メインレイアウト(Borderlayout)】*/
-		mainLayout.setWidth("99%");
-		mainLayout.setHeight("100%");
+		ZKUpdateUtil.setWidth(mainLayout, "99%");
+		ZKUpdateUtil.setHeight(mainLayout, "100%");
 
 		//【メインレイアウト(Borderlayout)-北】
 		North north = new North();
@@ -338,7 +339,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		north.appendChild(parameterPanel);
 		north.setStyle("border: none");
 		parameterPanel.appendChild(parameterLayout); 		//parameterLayout = Grid
-		parameterLayout.setWidth("90%");
+		ZKUpdateUtil.setWidth(parameterLayout, "90%");
 		Rows parameterLayoutRows = parameterLayout.newRows();
 
 		//パラメータパネル-1段目(売上請求伝票検索条件パネル)
@@ -354,25 +355,25 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			row = rows.newRow();
 				Invoice_Org_Label.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));	//組織ラベル
 				row.appendCellChild(Invoice_Org_Label.rightAlign());
-				Invoice_Org_Editor.getComponent().setHflex("true");
+				ZKUpdateUtil.setHflex(Invoice_Org_Editor.getComponent(), "true");
 				row.appendCellChild(Invoice_Org_Editor.getComponent(),1);
 				row.appendCellChild(new Space(),1);
 				Invoice_Currency_Label.setText(Msg.translate(Env.getCtx(), "C_Currency_ID"));	//通貨ラベル
 				row.appendCellChild(Invoice_Currency_Label.rightAlign(),1);
-				Invoice_Currency_Editor.getComponent().setHflex("true");							//通貨マスタ検索
+				ZKUpdateUtil.setHflex(Invoice_Currency_Editor.getComponent(), "true");	//通貨マスタ検索
 				row.appendCellChild(Invoice_Currency_Editor.getComponent(),1);
 				row.appendCellChild(new Space(),1);
 				row.setStyle("background-color: #ffffff");
 			row = rows.newRow();
 				Invoice_BP_Label.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));	//取引先マスタラベル
 				row.appendCellChild(Invoice_BP_Label.rightAlign());
-				Invoice_BP_Editor.getComponent().setHflex("true");							//取引先マスタ検索
+				ZKUpdateUtil.setHflex(Invoice_BP_Editor.getComponent(), "true");	//取引先マスタ検索
 				row.appendCellChild(Invoice_BP_Editor.getComponent(),2);
 				if(isCorporation)
 				{
 					Corportion_Label.setText(Msg.translate(Env.getCtx(), "JP_Corporation_ID"));	//取引先マスタラベル
 					row.appendCellChild(Corportion_Label.rightAlign());
-					Corportion_Editor.getComponent().setHflex("true");							//取引先マスタ検索
+					ZKUpdateUtil.setHflex(Corportion_Editor.getComponent(), "true");	//取引先マスタ検索
 					row.appendCellChild(Corportion_Editor.getComponent(),2);
 				}
 				row.setStyle("background-color: #ffffff");
@@ -392,12 +393,12 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			row = rows.newRow();
 				Payment_Org_Label.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));	//組織ラベル
 				row.appendCellChild(Payment_Org_Label.rightAlign());
-				Payment_Org_Editor.getComponent().setHflex("true");
+				ZKUpdateUtil.setHflex(Payment_Org_Editor.getComponent(), "true");
 				Payment_Org_Editor.setMandatory(true);
 				row.appendCellChild(Payment_Org_Editor.getComponent(),1);
 				Payment_DocType_Label.setText(Msg.translate(Env.getCtx(), "C_DocType_ID"));		//伝票タイプラベル
 				row.appendCellChild(Payment_DocType_Label.rightAlign(),1);
-				Payment_DocType_Editor.getComponent().setHflex("true");
+				ZKUpdateUtil.setHflex(Payment_DocType_Editor.getComponent(), "true");
 				Payment_DocType_Editor.setMandatory(true);
 				row.appendCellChild(Payment_DocType_Editor.getComponent(),1);
 				Payment_Date_Label.setText(Msg.getMsg(Env.getCtx(), "Date"));					//日付ラベル
@@ -409,12 +410,12 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			row = rows.newRow();
 				Payment_Account_Label.setText(Msg.translate(Env.getCtx(), "C_BankAccount_ID"));	//アカウントラベル
 				row.appendCellChild(Payment_Account_Label.rightAlign(),1);
-				Payment_Account_Editor.getComponent().setHflex("true");
+				ZKUpdateUtil.setHflex(Payment_Account_Editor.getComponent(), "true");
 				row.appendCellChild(Payment_Account_Editor.getComponent(),2);
 				row.setStyle("background-color: #ffffff");
 				Payment_BP_Label.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));	//取引先マスタラベル
 				row.appendCellChild(Payment_BP_Label.rightAlign());
-				Payment_BP_Editor.getComponent().setHflex("true");							//取引先マスタ検索
+				ZKUpdateUtil.setHflex(Payment_BP_Editor.getComponent(), "true");	//取引先マスタ検索
 				row.appendCellChild(Payment_BP_Editor.getComponent(),2);
 				row.setStyle("background-color: #ffffff");
 
@@ -422,7 +423,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			row = rows.newRow();
 				Payment_Currency_Label.setText(Msg.translate(Env.getCtx(), "C_Currency_ID"));	//通貨ラベル
 				row.appendCellChild(Payment_Currency_Label.rightAlign(),1);
-				Payment_Currency_Editor.getComponent().setHflex("true");							//通貨マスタ検索
+				ZKUpdateUtil.setHflex(Payment_Currency_Editor.getComponent(), "true");//通貨マスタ検索
 				row.appendCellChild(Payment_Currency_Editor.getComponent(),1);
 //				multiCurrency.setText(Msg.getMsg(Env.getCtx(), "MultiCurrency"));		//マルチ通貨は未実装
 //				multiCurrency.addActionListener(this);
@@ -444,11 +445,11 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 
 		//情報パネル(BorderLayout)
 		center.appendChild(infoPanel);
-		infoPanel.setHflex("1");
-		infoPanel.setVflex("1");
+		ZKUpdateUtil.setHflex(infoPanel, "1");
+		ZKUpdateUtil.setVflex(infoPanel, "1");
 		infoPanel.setStyle("border: none");
-		infoPanel.setWidth("100%");
-		infoPanel.setHeight("100%");
+		ZKUpdateUtil.setWidth(infoPanel, "100%");
+		ZKUpdateUtil.setHeight(infoPanel, "100%");
 
 		//情報パネル-北
 		north = new North();
@@ -459,12 +460,12 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		//情報パネル-北：請求書パネル(BorderLayout)
 		north.appendChild(invoicePanel);
 		invoicePanel.appendChild(invoiceLayout);
-		invoicePanel.setWidth("100%");
-		invoicePanel.setHeight("100%");
-		invoicePanel.setHflex("1");
-		invoicePanel.setVflex("1");
-		invoiceLayout.setWidth("100%");
-		invoiceLayout.setHeight("100%");
+		ZKUpdateUtil.setWidth(invoicePanel, "100%");
+		ZKUpdateUtil.setHeight(invoicePanel, "100%");
+		ZKUpdateUtil.setHflex(invoicePanel, "1");
+		ZKUpdateUtil.setVflex(invoicePanel, "1");
+		ZKUpdateUtil.setWidth(invoiceLayout, "100%");
+		ZKUpdateUtil.setHeight(invoiceLayout, "100%");
 		invoiceLayout.setStyle("border: none");
 		invoiceInfo.setText(".");
 
@@ -479,8 +480,8 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		center = new Center();
 		invoiceLayout.appendChild(center);
 		center.appendChild(invoiceTable);
-		invoiceTable.setWidth("99%");
-		invoiceTable.setHeight("99%");
+		ZKUpdateUtil.setWidth(invoiceTable, "99%");
+		ZKUpdateUtil.setHeight(invoiceTable, "99%");
 		center.setStyle("border: none");
 		//情報パネル-北：請求書パネル-南
 		South south = new South();
@@ -503,24 +504,24 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		southPanel.appendChild(allocationPanel);
 
 		allocationPanel.appendChild(allocationLayout);		//allocationLayout = Grid
-		allocationLayout.setHflex("min");
+		ZKUpdateUtil.setHflex(allocationLayout, "min");
 		rows = allocationLayout.newRows();
 		row = rows.newRow();
 		differenceLabel.setText(Msg.getMsg(Env.getCtx(), "Difference"));
 		row.appendCellChild(differenceLabel.rightAlign());
 		row.appendCellChild(allocCurrencyLabel.rightAlign());
-		differenceField.setHflex("true");
+		ZKUpdateUtil.setHflex(differenceField, "true");
 		differenceField.setText("0");
 		differenceField.setReadonly(true);
 		differenceField.setStyle("text-align: right");
 		row.appendCellChild(differenceField);
 		chargeLabel.setText(" " + Msg.translate(Env.getCtx(), "C_Charge_ID"));
 		row.appendCellChild(chargeLabel.rightAlign());
-		chargePick.getComponent().setHflex("true");
+		ZKUpdateUtil.setHflex(chargePick.getComponent(), "true");
 		row.appendCellChild(chargePick.getComponent());
 		allocateButton.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Process")));
 		allocateButton.addActionListener(this);
-		allocateButton.setHflex("true");
+		ZKUpdateUtil.setHflex(allocateButton, "true");
 		row.appendCellChild(allocateButton);
 		refreshButton.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Refresh")));
 		refreshButton.addActionListener(this);
