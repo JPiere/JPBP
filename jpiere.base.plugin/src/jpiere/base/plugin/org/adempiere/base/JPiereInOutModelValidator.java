@@ -203,11 +203,10 @@ public class JPiereInOutModelValidator implements ModelValidator {
 								log.severe("Allocation not Save after Complete");
 								return null;
 							}
-
-						}//if(unAllocatedAmt.compareTo(Env.ZERO) > 0)
+						}
 					}
 
-				}
+				}//Allocation
 
 
 			}//if(ioDocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
