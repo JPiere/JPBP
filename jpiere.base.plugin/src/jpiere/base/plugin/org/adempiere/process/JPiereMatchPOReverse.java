@@ -18,7 +18,6 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MMatchPO;
-import org.compiere.model.MOrderLine;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 
@@ -64,22 +63,22 @@ public class JPiereMatchPOReverse extends SvrProcess {
 			throw new AdempiereException("@NotFound@ @M_MatchPO_ID@ " + p_M_MatchPO_ID);
 
 		//JPiere logic
-		MOrderLine oLine = null;
-		boolean isMatchReceipt = (po.getM_InOutLine_ID() != 0);
-		if (isMatchReceipt)
-		{
-			oLine = new MOrderLine (getCtx(), po.getC_OrderLine_ID(), get_TrxName());
-			if (oLine.getM_Product_ID() != 0)		//	other in VMatch.createMatchRecord
-			{
-				//JPIERE-0224 Refer-MOrder.reserveStock(Line:1706)
-				if (oLine.getQtyOrdered().signum() < 0 && oLine.getQtyReserved().signum() == 0 )
-				{
-						;//Nothing to do because Order did not reserved Qty for nagative Order Qty
-				}else{
-					oLine.setQtyReserved(oLine.getQtyReserved().add(po.getQty()));
-				}
-			}
-		}
+//		MOrderLine oLine = null;
+//		boolean isMatchReceipt = (po.getM_InOutLine_ID() != 0);
+//		if (isMatchReceipt)
+//		{
+//			oLine = new MOrderLine (getCtx(), po.getC_OrderLine_ID(), get_TrxName());
+//			if (oLine.getM_Product_ID() != 0)		//	other in VMatch.createMatchRecord
+//			{
+//				//JPIERE-0224 Refer-MOrder.reserveStock(Line:1706)
+//				if (oLine.getQtyOrdered().signum() < 0 && oLine.getQtyReserved().signum() == 0 )
+//				{
+//						;//Nothing to do because Order did not reserved Qty for nagative Order Qty
+//				}else{
+//					oLine.setQtyReserved(oLine.getQtyReserved().add(po.getQty()));
+//				}
+//			}
+//		}
 
 		if (po.isProcessed())
 		{

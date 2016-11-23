@@ -15,6 +15,7 @@ package jpiere.base.plugin.org.adempiere.base;
 
 
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MSysConfig;
@@ -55,10 +56,10 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception 
+	public String modelChange(PO po, int type) throws Exception
 	{
 
-		
+
 		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
 		{
 			//JPIERE-0211
@@ -69,10 +70,10 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 				{
 					return Msg.getMsg(iol.getCtx(), "JP_ProductOfOrderAndInOutDiffer");//Product of Ship/Receipt Line is different from Product of Order Line
 				}
-				
+
 			}
-			
-			
+
+
 			//JPIERE-0212
 			if(MSysConfig.getBooleanValue("JP_CHECK_INOUTLINE_CONFIRM", false,  iol.getAD_Client_ID(), iol.getAD_Org_ID()))
 			{
@@ -82,21 +83,95 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					if(type == ModelValidator.TYPE_BEFORE_NEW)
 					{
 						return Msg.getMsg(iol.getCtx(), "JP_CanNotAddLineForConfirmations");//You can not add a line because of Confirmations.
-						
+
 					}else if(type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("QtyEntered")){
-						
+
 						return Msg.getMsg(iol.getCtx(), "JP_CanNotChangeQtyForConfirmations");//You can not change Qty because of Confirmations.
 					}
-				}				
+				}
 			}
-			
+
 		}
+
+
+		//JPIERE-0225:Match PO control - Check Doc Base Type
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_OrderLine_ID")) )
+		{
+			MInOutLine iol = (MInOutLine)po;
+			if(iol.getC_OrderLine_ID() > 0)
+			{
+				if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+				{
+					if(!iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+					{
+						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(iol.getCtx(), "JP_MMR_MATCH_POO_ONLY");//MMR of Doc Base Type can match POO of Doc Base type only.
+					}
+				}else if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)){//MMS
+
+					if(!iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
+					{
+						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(iol.getCtx(), "JP_MMS_MATCH_SOO_ONLY");//MMS of Doc Base Type can match SOO of Doc Base type only.
+					}
+				}
+
+			}
+		}
+
+		//JPIERE-0225:Match PO Return control - Check Doc Base Type
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_RMALine_ID")) )
+		{
+			MInOutLine iol = (MInOutLine)po;
+			if(iol.getM_RMALine_ID() > 0)
+			{
+				if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+				{
+					if(!iol.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+					{
+						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(iol.getCtx(), "JP_MMR_MATCH_POO_ONLY");//MMR of Doc Base Type can match POO of Doc Base type only.
+					}
+				}else if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)){//MMS
+
+					if(!iol.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//SOO
+					{
+						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(iol.getCtx(), "JP_MMS_MATCH_SOO_ONLY");//MMS of Doc Base Type can match SOO of Doc Base type only.
+					}
+				}
+			}
+		}
+
+		//JPIERE-0225:Match PO controll-Check Qty signum
+//		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+//				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("MovementQty")) )
+//		{
+//			MInOutLine iol = (MInOutLine)po;
+//			if(iol.getC_OrderLine_ID() > 0)
+//			{
+//				if(iol.getMovementQty().signum() != iol.getC_OrderLine().getQtyOrdered().signum())
+//				{
+//					return Msg.getMsg(iol.getCtx(), "JP_Diff_Signum_QtyOrdered_MovementQty");//Different signum between QtyOrdered and MovementQty.
+//				}
+//
+//			}else if(iol.getM_RMALine_ID() > 0){
+//
+//				if(iol.getMovementQty().signum() != iol.getM_RMALine().getQty().signum())
+//				{
+//					return Msg.getMsg(iol.getCtx(), "JP_Diff_Signum_RMAQty_MovementQty");//Different signum between RMA Qty and MovementQty.
+//				}
+//			}
+//		}
+
 
 		return null;
 	}
 
 	@Override
-	public String docValidate(PO po, int timing) 
+	public String docValidate(PO po, int timing)
 	{
 
 		return null;

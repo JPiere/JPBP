@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.base;
 import jpiere.base.plugin.util.JPierePaymentTerms;
 
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPaymentTerm;
 import org.compiere.model.ModelValidationEngine;
@@ -23,6 +24,7 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 public class JPiereInvoiceModelValidator implements ModelValidator {
 
@@ -57,7 +59,7 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 	@Override
 	public String modelChange(PO po, int type) throws Exception {
 		//JPIERE-0105
-		if(type == ModelValidator.TYPE_BEFORE_NEW 
+		if(type == ModelValidator.TYPE_BEFORE_NEW
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_PaymentTerm_ID")))
 		{
 			MInvoice invoice = (MInvoice)po;
@@ -74,9 +76,9 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 			}//if
 
 		}
-		
+
 		//For Simple Input Window(JPIERE-0175/JPIERE-0176)
-		if(type == ModelValidator.TYPE_BEFORE_NEW 
+		if(type == ModelValidator.TYPE_BEFORE_NEW
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_DocTypeTarget_ID"))
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_PriceList_ID")))
 		{
@@ -86,11 +88,21 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 			invoice.setC_Currency_ID(invoice.getM_PriceList().getC_Currency_ID());
 		}
 
+		//JPIERE-0223
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_DocTypeTarget_ID"))
+		{
+			MInvoice invoice = (MInvoice)po;
+			int C_DocTypeTarget_ID = invoice.get_ValueOldAsInt("C_DocTypeTarget_ID");
+			MDocType oldDocType = MDocType.get(po.getCtx(), C_DocTypeTarget_ID);
+			if(!invoice.getC_DocTypeTarget().getDocBaseType().equals(oldDocType.getDocBaseType()))
+				return Msg.getMsg(po.getCtx(), "JP_Can_Not_Change_Diff_DocBaseType");//You can not change different Doc Base type.
+		}
+
 		return null;
 	}
 
 	@Override
-	public String docValidate(PO po, int timing) 
+	public String docValidate(PO po, int timing)
 	{
 		return null;
 	}

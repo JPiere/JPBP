@@ -59,13 +59,15 @@ public class JPiereMatchInvModelValidator implements ModelValidator {
 				{
 					if(!iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
 					{
-						return Msg.getMsg(mInv.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
+						return Msg.getMsg(mInv.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(mInv.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
 					}
 				}else if(invl.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//AP credit Memo
 
 					if(!iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 					{
-						return Msg.getMsg(mInv.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
+						return Msg.getMsg(mInv.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(mInv.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
 					}
 				}
 			}
