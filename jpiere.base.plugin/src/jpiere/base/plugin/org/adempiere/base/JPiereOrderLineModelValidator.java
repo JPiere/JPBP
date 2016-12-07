@@ -22,7 +22,7 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
-import org.compiere.model.MLocatorType;
+import org.compiere.model.MLocator;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
@@ -200,7 +200,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 			MDocType docType = MDocType.get(oLine.getCtx(), oLine.getParent().getC_DocTypeTarget_ID());
 			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
-			if(JP_DocTypeMM_ID > 0)
+			if(JP_DocTypeMM_ID > 0 && (JP_LocatorFrom_ID != 0 || JP_LocatorTo_ID !=0) )
 			{
 				if(oLine.get_ValueAsInt("JP_MovementLine_ID") > 0)
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeMMInfoForMM");//You can not change Inventory Move Info. Because Inventory Move Doc created.
@@ -211,7 +211,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorFrom_ID") ;//Please input a value into the field.
 				if(JP_LocatorFrom_ID == JP_LocatorTo_ID)
 					return Msg.getMsg(Env.getCtx(), "JP_SameLocatorMM");//You are goring to create Inventory Move Doc at same Locator.
-				if(MLocatorType.get(oLine.getCtx(), JP_LocatorFrom_ID).getM_LocatorType_ID() != MLocatorType.get(oLine.getCtx(), JP_LocatorTo_ID).getM_LocatorType_ID())
+				if(MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).getM_LocatorType_ID() != MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).getM_LocatorType_ID())
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffLocatorType");//You can not create Inventory move doc at Sales Order because of different Locator type.
 
 			}else{
