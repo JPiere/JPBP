@@ -80,14 +80,14 @@ public class JPiereOrderModelValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
-		//JPIERE-0227 Common Warehouse
+		//JPIERE-0227 Create Logical Inventory Move Doc
 		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
 		{
 			MOrder order = (MOrder)po;
 			MDocType docType = MDocType.get(order.getCtx(), order.getC_DocTypeTarget_ID());
 			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
 
-			if(JP_DocTypeMM_ID > 0)
+			if(JP_DocTypeMM_ID > 0 && order.isSOTrx()) //Sales Order Only
 			{
 				MOrderLine[] oLines = order.getLines();
 				MMovement mm = null;
@@ -141,34 +141,38 @@ public class JPiereOrderModelValidator implements ModelValidator {
 					mm = null;
 				}
 
-			}//JPIERE-0227 Common Warehouse
+			}
 
 		}
 
+		//JPIERE-0227 Reverse Logical Inventory Move Doc
 		if(timing == ModelValidator.TIMING_AFTER_VOID
 				||timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL || timing == ModelValidator.TIMING_AFTER_REVERSECORRECT )
 		{
 			MOrder order = (MOrder)po;
-			final String whereClause = "SELECT JP_Order_ID =? ";
-			List<MMovement> list = new Query(order.getCtx(), I_M_Movement.Table_Name, whereClause, order.get_TrxName())
-											.setParameters(order.getC_Order_ID())
-											.list();
-
-			for(MMovement mm : list)
+			if(order.isSOTrx())
 			{
-				if(mm.getDocStatus().equals(DocAction.STATUS_Completed))
+				final String whereClause = "SELECT JP_Order_ID =? ";
+				List<MMovement> list = new Query(order.getCtx(), I_M_Movement.Table_Name, whereClause, order.get_TrxName())
+												.setParameters(order.getC_Order_ID())
+												.list();
+
+				for(MMovement mm : list)
 				{
-					if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL)
-						mm.processIt(DocAction.ACTION_Reverse_Accrual);
-					else
-						mm.processIt(DocAction.ACTION_Reverse_Correct);
+					if(mm.getDocStatus().equals(DocAction.STATUS_Completed))
+					{
+						if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL)
+							mm.processIt(DocAction.ACTION_Reverse_Accrual);
+						else
+							mm.processIt(DocAction.ACTION_Reverse_Correct);
 
-					mm.saveEx(order.get_TrxName());
+						mm.saveEx(order.get_TrxName());
+					}
+
 				}
-
 			}
 
-		}
+		}//JPIERE-0227
 
 
 		return null;
