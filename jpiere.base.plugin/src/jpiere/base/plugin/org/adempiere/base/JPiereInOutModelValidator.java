@@ -30,6 +30,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -50,6 +51,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 	public void initialize(ModelValidationEngine engine, MClient client) {
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
+		engine.addModelChange(MInOut.Table_Name, this);
 		engine.addDocValidate(MInOut.Table_Name, this);
 
 	}
@@ -72,12 +74,79 @@ public class JPiereInOutModelValidator implements ModelValidator {
 	public String modelChange(PO po, int type) throws Exception
 	{
 
+		//JPIERE-0229
+		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE )
+		{
+			MInOut io = (MInOut)po;
+			if(io.get_Value("JP_ScheduledInOutDate") == null)
+			{
+				io.set_ValueNoCheck("JP_ScheduledInOutDate", io.getMovementDate());
+			}
+
+			if(type == ModelValidator.TYPE_BEFORE_NEW)
+			{
+				String trxName = po.get_TrxName();
+				MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
+				if(ioDocType.get_ValueAsBoolean("IsInspectionInvoiceJP") && io.getC_Order_ID() > 0)
+				{
+					MOrder order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
+					MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+					if(orderDocType.equals(MOrder.DocSubTypeSO_OnCredit)
+							|| orderDocType.equals(MOrder.DocSubTypeSO_POS)
+							|| orderDocType.equals(MOrder.DocSubTypeSO_Prepay))
+					{
+						;//Nothing to do because InOut Doc is created automatically.
+					}else{
+						Timestamp invoiceDate = MDeliveryDays.getInvoiceDate(io, ioDocType.get_ValueAsBoolean("IsHolidayNotInspectionJP"), "JP_ScheduledInOutDate");
+						io.setDateAcct(invoiceDate);
+						if(MSysConfig.getBooleanValue("JP_INSPECTION_MOVEMENTDATE", false, io.getAD_Client_ID(), io.getAD_Org_ID()))
+						{
+							io.setMovementDate(invoiceDate);
+						}
+					}
+
+				}
+
+			}//if(type == ModelValidator.TYPE_BEFORE_NEW)
+
+		}//JPiere-0229
+
 		return null;
 	}
 
 	@Override
 	public String docValidate(PO po, int timing)
 	{
+		//JPIERE-0229
+		if(timing == ModelValidator.TIMING_BEFORE_COMPLETE)
+		{
+			MInOut io = (MInOut)po;
+			String trxName = po.get_TrxName();
+			boolean isReversal = io.isReversal();
+			MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
+
+			if(!isReversal && ioDocType.get_ValueAsBoolean("IsInspectionInvoiceJP") && io.getC_Order_ID() > 0)
+			{
+				MOrder order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
+				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+				if(orderDocType.equals(MOrder.DocSubTypeSO_OnCredit)
+						|| orderDocType.equals(MOrder.DocSubTypeSO_POS)
+						|| orderDocType.equals(MOrder.DocSubTypeSO_Prepay))
+				{
+					;//Nothing to do because InOut Doc is created automatically.
+				}else{
+					Timestamp invoiceDate = MDeliveryDays.getInvoiceDate(io, ioDocType.get_ValueAsBoolean("IsHolidayNotInspectionJP"), "ShipDate");
+					io.setDateAcct(invoiceDate);
+					if(MSysConfig.getBooleanValue("JP_INSPECTION_MOVEMENTDATE", false, io.getAD_Client_ID(), io.getAD_Org_ID()))
+					{
+						io.setMovementDate(invoiceDate);
+					}
+				}
+
+			}
+		}//JPiere-0229
+
+
 		//JPIERE-0219:Create Invoice When Ship/Receipt
 		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
 		{
@@ -101,14 +170,6 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 				if(orderDocType.getC_DocTypeInvoice_ID() == 0)
 					return null;
-
-
-				if(!isReversal && ioDocType.get_ValueAsBoolean("IsInspectionInvoiceJP"))
-				{
-					Timestamp invoiceDate = MDeliveryDays.getInvoiceDate(io, ioDocType.get_ValueAsBoolean("IsHolidayNotInspectionJP"));
-					io.setDateAcct(invoiceDate);
-					io.saveEx(trxName);
-				}
 
 				MInvoice invoice = new MInvoice (order, orderDocType.getC_DocTypeInvoice_ID(), io.getDateAcct());
 				if (!invoice.save(trxName))
@@ -210,7 +271,8 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 
 			}//if(ioDocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
-		}
+
+		}//JPiere-0219
 
 		return null;
 	}

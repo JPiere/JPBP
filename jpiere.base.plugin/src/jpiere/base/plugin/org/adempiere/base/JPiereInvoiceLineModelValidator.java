@@ -91,29 +91,153 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			il.set_ValueOfColumn("JP_TaxAmt", taxAmt);
 		}
 
-		//JPIERE-0223:Match Inv control
+		//JPIERE-0223:Match Inv control-Check Doc Base Type
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
-				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_InOutLine_ID")))
+				(type == ModelValidator.TYPE_BEFORE_CHANGE &&
+					(po.is_ValueChanged("M_InOutLine_ID") || po.is_ValueChanged("C_OrderLine_ID") || po.is_ValueChanged("M_RMALine_ID")) ) )
 		{
 			MInvoiceLine il = (MInvoiceLine)po;
-			if(il.getM_InOutLine_ID() > 0 && !il.getParent().isSOTrx())
-			{
-				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//AP Invoice
-				{
-					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
-					{
-						return Msg.getMsg(il.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
-					}
-				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//AP credit Memo
 
-					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+			//Check Receipt/Shipment
+			if(il.getM_InOutLine_ID() > 0 && !il.getParent().isSOTrx())//PO
+			{
+				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
+				{
+					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
 					{
-						return Msg.getMsg(il.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
+					}
+				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
+
+					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
+					{
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMS of Doc Base type only.
+					}
+				}
+
+			}else if(il.getM_InOutLine_ID() > 0 && il.getParent().isSOTrx()){//SO
+
+				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
+				{
+					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
+					{
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_ARI_MATCH_MMS_ONLY");//ARI of Doc Base Type can match MMS of Doc Base type only.
+					}
+				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
+
+					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+					{
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_ARC_MATCH_MMR_ONLY");//ARI of Doc Base Type can match MMR of Doc Base type only.
 					}
 				}
 			}
 
+			//Check PO/SO
+			if(il.getC_OrderLine_ID() > 0 && !il.getParent().isSOTrx())//PO
+			{
+				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
+				{
+					if(!il.getC_OrderLine().getC_Order().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+					{
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_API_MATCH_POO_ONLY");//API of Doc Base Type can match POO of Doc Base type only.
+					}
+				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
+
+					//APC of Doc Base Type can not match Purchase Order. Please try to match with RMA.
+					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+							Msg.getMsg(il.getCtx(), "JP_APC_MATCH_RMA_ONLY");
+
+				}
+
+			}else if(il.getC_OrderLine_ID() > 0 && il.getParent().isSOTrx()){//SO
+				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
+				{
+					if(!il.getC_OrderLine().getC_Order().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
+					{
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_ARI_MATCH_SOO_ONLY");//ARI of Doc Base Type can match SOO of Doc Base type only.
+					}
+				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
+
+					//ARC of Doc Base Type can not match Sales Order. Please try to match with RMA.
+					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+							Msg.getMsg(il.getCtx(), "JP_ARC_MATCH_RMA_ONLY");
+				}
+			}
+
+			//Check Return
+			if(il.getM_RMALine_ID() > 0 && !il.getParent().isSOTrx())//PO
+			{
+				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
+				{
+					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+							Msg.getMsg(il.getCtx(), "JP_RMA_MATCH_APC_ONLY");//RMA can match APC of Doc Base type only.
+
+				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
+
+					if(!il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
+					{
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMS of Doc Base type only.
+					}
+				}
+			}else if(il.getM_RMALine_ID() > 0 && il.getParent().isSOTrx()){//SO
+
+				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
+				{
+					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+							Msg.getMsg(il.getCtx(), "JP_RMA_MATCH_ARC_ONLY");//RMA can match ARC of Doc Base type only.
+
+				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
+
+					if(!il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+					{
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+								Msg.getMsg(il.getCtx(), "JP_ARC_MATCH_POO_ONLY");//ARC of Doc Base Type can match POO of Doc Base type only.
+					}
+				}
+			}
 		}
+
+		//JPIERE-0223:Match Inv control-Check Qty signum -> Can not Implement because of reverse
+//		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+//				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("QtyInvoiced")) )
+//		{
+//			MInvoiceLine il = (MInvoiceLine)po;
+//
+//			//Check Receipt/Shipment
+//			if(il.getM_InOutLine_ID() > 0)
+//			{
+//				if(il.getQtyInvoiced().signum() != il.getM_InOutLine().getMovementQty().signum())
+//				{
+//					return Msg.getMsg(il.getCtx(), "JP_Diff_Signum_MovementQty_QtyInvoiced");//Different signum between MovementQty and QtyInvoiced.
+//				}
+//			}
+//
+//			//Check PO/SO
+//			if(il.getC_OrderLine_ID() > 0)
+//			{
+//				if(il.getQtyInvoiced().signum() != il.getC_OrderLine().getQtyOrdered().signum())
+//				{
+//					return Msg.getMsg(il.getCtx(), "JP_Diff_Signum_QtyOrdered_QtyInvoiced");//Different signum between QtyOrdered and QtyInvoiced.
+//				}
+//			}
+//
+//			//Check Return
+//			if(il.getM_RMALine_ID() > 0)
+//			{
+//				if(il.getQtyInvoiced().signum() != il.getM_RMALine().getQty().signum())
+//				{
+//					return Msg.getMsg(il.getCtx(), "JP_Diff_Signum_RMAQty_QtyInvoiced");//Different signum between RMA Qty and QtyInvoiced.
+//				}
+//			}
+//
+//		}
 
 		return null;
 	}

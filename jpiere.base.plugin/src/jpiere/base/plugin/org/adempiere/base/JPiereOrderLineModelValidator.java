@@ -21,6 +21,8 @@ import jpiere.base.plugin.util.JPiereUtil;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MDocType;
+import org.compiere.model.MLocator;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
@@ -137,11 +139,14 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			{
 				;//Nothing to do
 
-			}else if(QTY_CHECK.equals(PROHIBIT_CHANGE_QTY)){
+			}else if(QTY_CHECK.equals(PROHIBIT_CHANGE_QTY) || ol.get_ValueAsInt("JP_MovementLine_ID") > 0){
 
 				if(ol.is_ValueChanged("QtyOrdered") && !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close) &&
 						(ol.getQtyReserved().compareTo(Env.ZERO) != 0 || ol.getQtyDelivered().compareTo(Env.ZERO) != 0 || ol.getQtyInvoiced().compareTo(Env.ZERO) != 0 ))
 				{
+					if(ol.get_ValueAsInt("JP_MovementLine_ID") > 0)
+						return  Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyForMM");//You can not change Qty. Because Inventory Move Doc created.
+
 					if(isSOTrx)
 						return  Msg.getMsg(Env.getCtx(), "JP_CanNotChangeAmountForQtyReservedSO");//You can not Change Qty. Because of Reserved Qty
 					else
@@ -181,6 +186,41 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeAmountForQtyInvoiced");//You can not change Amount. Because invoice was issued.
 			}
 
+		}//JPIEERE-0207:Order Re-Activate Check
+
+
+		//JPIERE-0227 Common Warehouse
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				( type == ModelValidator.TYPE_BEFORE_CHANGE &&
+					( po.is_ValueChanged("JP_LocatorFrom_ID") || po.is_ValueChanged("JP_LocatorTo_ID") || po.is_ValueChanged("JP_ASI_From_ID") || po.is_ValueChanged("JP_ASI_To_ID") )) )
+		{
+			MOrderLine oLine = (MOrderLine)po;
+			int JP_LocatorFrom_ID = oLine.get_ValueAsInt("JP_LocatorFrom_ID");
+			int JP_LocatorTo_ID = oLine.get_ValueAsInt("JP_LocatorTo_ID");
+
+			MDocType docType = MDocType.get(oLine.getCtx(), oLine.getParent().getC_DocTypeTarget_ID());
+			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
+			if(JP_DocTypeMM_ID > 0 && (JP_LocatorFrom_ID != 0 || JP_LocatorTo_ID !=0) )
+			{
+				if(oLine.get_ValueAsInt("JP_MovementLine_ID") > 0)
+					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeMMInfoForMM");//You can not change Inventory Move Info. Because Inventory Move Doc created.
+
+				if(JP_LocatorFrom_ID > 0 && JP_LocatorTo_ID==0)
+					return Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorTo_ID") ;//Please input a value into the field.
+				if(JP_LocatorFrom_ID == 0 && JP_LocatorTo_ID > 0)
+					return Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorFrom_ID") ;//Please input a value into the field.
+				if(JP_LocatorFrom_ID == JP_LocatorTo_ID)
+					return Msg.getMsg(Env.getCtx(), "JP_SameLocatorMM");//You are goring to create Inventory Move Doc at same Locator.
+				if(MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).getM_LocatorType_ID() != MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).getM_LocatorType_ID())
+					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffLocatorType");//You can not create Inventory move doc at Sales Order because of different Locator type.
+
+			}else{
+
+				if(JP_LocatorFrom_ID != 0 || JP_LocatorTo_ID !=0)
+				{
+					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDocType");//You can not create Inventory move doc because of missing Doc Type setting.
+				}
+			}
 		}
 
 		return null;
