@@ -10,11 +10,9 @@ import java.util.Properties;
 import org.compiere.model.I_C_BPartner_Location;
 import org.compiere.model.I_C_Location;
 import org.compiere.model.MInOut;
-import org.compiere.model.MProduct;
 import org.compiere.model.MSalesRegion;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.Query;
-import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
@@ -27,7 +25,7 @@ import org.compiere.util.Env;
 public class MDeliveryDays extends X_JP_DeliveryDays {
 
 	static MDeliveryDays[] m_deliveryDays = null;
-	
+
 	public MDeliveryDays(Properties ctx, int JP_DeliveryDays_ID, String trxName) {
 		super(ctx, JP_DeliveryDays_ID, trxName);
 	}
@@ -67,11 +65,17 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 
 		return -1;
 	}
-	
-	static public Timestamp getInvoiceDate(MInOut io, boolean isHolidayNotInspection)
+
+	static public Timestamp getInvoiceDate(MInOut io, boolean isHolidayNotInspection, String DateColumn)
 	{
+		Timestamp dateInvoiced = null;
+		dateInvoiced = (Timestamp)io.get_Value(DateColumn);
+		if(dateInvoiced == null)
+			return io.getDateAcct();
+
+
 		int deliveryDays = MSysConfig.getIntValue("JP_DEFAULT_INSPECTION_DAYS", 0, io.getAD_Client_ID(), io.getAD_Org_ID());
-		
+
 		//Get Location
 		I_C_BPartner_Location bpl = null;
 		if(io.getDropShip_Location_ID()==0)
@@ -79,7 +83,7 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 		else
 			bpl = io.getDropShip_Location();
 		I_C_Location location = bpl.getC_Location();
-		
+
 		if(bpl.getC_SalesRegion_ID() > 0)
 		{
 			MSalesRegion salesRegion = new MSalesRegion(io.getCtx(), bpl.getC_SalesRegion_ID(), io.get_TrxName());
@@ -87,16 +91,14 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 			if(dd > -1)
 				deliveryDays = dd;
 		}
-		
-		
-		Timestamp dateInvoiced = io.getDateAcct();
+
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(dateInvoiced.getTime());
-		
+
 		if(isHolidayNotInspection)
 		{
 			int i = 0;
-			do 
+			do
 			{
 				dateInvoiced = new Timestamp(cal.getTimeInMillis());
 				if(isNonBusinessDay(io.getAD_Client_ID(), 0 , location == null ? 0 : location.getC_Country_ID(),dateInvoiced))
@@ -114,19 +116,19 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 						cal.add(Calendar.DAY_OF_MONTH, 1);
 				}
 				i++;
-				
+
 			} while (0 < deliveryDays);
-			
-			
+
+
 		}else{
 
 			cal.add(Calendar.DAY_OF_MONTH, deliveryDays);
 			dateInvoiced = new Timestamp(cal.getTimeInMillis());
 		}
-			
+
 		return dateInvoiced;
 	}
-	
+
 
 	static public boolean isNonBusinessDay(int AD_Client_ID, int AD_Org_ID, int C_Country_ID,Timestamp date)
 	{
@@ -136,14 +138,14 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 						+ " AND nbd.AD_Org_ID IN (0,?)"
 						+ " AND (nbd.C_Country_ID is null or nbd.C_Country_ID = ?)"
 						+ " AND nbd.Date1 = ? ";
-		
+
 //		String sql = "SELECT nbd.C_Calendar_ID from C_NonBusinessDay nbd "
 //				+ "INNER JOIN AD_ClientInfo ci ON (nbd.C_Calendar_ID = ci.C_Calendar_ID) "
 //				+ " WHERE nbd.AD_Client_ID = " + AD_Client_ID
 //				+ " AND nbd.AD_Org_ID IN (0," + AD_Org_ID + ")"
 //				+ " AND (nbd.C_Country_ID IS NULL OR nbd.C_Country_ID ="+C_Country_ID+")"
 //				+ " AND nbd.Date1 = TO_DATE('" +date.toString().substring(0, 10) + " 00:00:00', 'YYYY-MM-DD HH24:MI:SS');";
-		
+
 		boolean isNonBusinessDay = false;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -168,7 +170,7 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 			rs = null;
 			pstmt = null;
 		}
-		
+
 		return isNonBusinessDay;
 	}
 }

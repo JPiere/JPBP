@@ -24,12 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.util.JPierePaymentTerms;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.compiere.acct.Doc;
-import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
@@ -252,18 +249,20 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 					continue;
 				}
 
-				
-				MDocType shipDocType = MDocType.get(ship.getCtx(), ship.getC_DocType_ID());
-				Timestamp dateInvoiced = MDeliveryDays.getInvoiceDate(ship, shipDocType.get_ValueAsBoolean("IsHolidayNotInspectionJP"));
+				Timestamp dateInvoiced = ship.getDateAcct();
 
-				if(!dateInvoiced.equals(ship.getDateAcct()))
-				{
-					//Repost Sipment document at dateInvoiced for principle of matching costs with revenues
-					ship.setDateAcct(dateInvoiced);
-					ship.saveEx(get_TrxName());
-					Doc.postImmediate(MAcctSchema.getClientAcctSchema(Env.getCtx(), ship.getAD_Client_ID()),
-														ship.get_Table_ID(), ship.get_ID(), true, get_TrxName());
-				}
+				//JPIERE-0229 Comment out
+//				MDocType shipDocType = MDocType.get(ship.getCtx(), ship.getC_DocType_ID());
+//				Timestamp dateInvoiced = MDeliveryDays.getInvoiceDate(ship, shipDocType.get_ValueAsBoolean("IsHolidayNotInspectionJP"));
+//
+//				if(!dateInvoiced.equals(ship.getDateAcct()))
+//				{
+//					//Repost Sipment document at dateInvoiced for principle of matching costs with revenues
+//					ship.setDateAcct(dateInvoiced);
+//					ship.saveEx(get_TrxName());
+//					Doc.postImmediate(MAcctSchema.getClientAcctSchema(Env.getCtx(), ship.getAD_Client_ID()),
+//														ship.get_Table_ID(), ship.get_ID(), true, get_TrxName());
+//				}
 
 				MInOutLine[] shipLines = ship.getLines(false);
 				for (int j = 0; j < shipLines.length; j++)
