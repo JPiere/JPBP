@@ -83,7 +83,8 @@ public class JPiereInOutModelValidator implements ModelValidator {
 				io.set_ValueNoCheck("JP_ScheduledInOutDate", io.getMovementDate());
 			}
 
-			if(type == ModelValidator.TYPE_BEFORE_NEW)
+			if(type == ModelValidator.TYPE_BEFORE_NEW
+					|| (type == ModelValidator.TYPE_BEFORE_CHANGE && io.is_ValueChanged("JP_ScheduledInOutDate")) )
 			{
 				String trxName = po.get_TrxName();
 				MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
