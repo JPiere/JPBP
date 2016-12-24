@@ -180,7 +180,9 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
 
-					if(!il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
+					if( !(il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder) //POO
+							&& il.getM_RMALine().getM_RMA().getC_DocType().getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
+
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(il.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMS of Doc Base type only.
@@ -195,49 +197,14 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
 
-					if(!il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+					if( !(il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder) //SOO
+							&& il.getM_RMALine().getM_RMA().getC_DocType().getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
 					{
-						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
-								Msg.getMsg(il.getCtx(), "JP_ARC_MATCH_POO_ONLY");//ARC of Doc Base Type can match POO of Doc Base type only.
+						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType");//ARC of Doc Base Type can match POO of Doc Base type only.
 					}
 				}
 			}
 		}
-
-		//JPIERE-0223:Match Inv control-Check Qty signum -> Can not Implement because of reverse
-//		if(type == ModelValidator.TYPE_BEFORE_NEW ||
-//				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("QtyInvoiced")) )
-//		{
-//			MInvoiceLine il = (MInvoiceLine)po;
-//
-//			//Check Receipt/Shipment
-//			if(il.getM_InOutLine_ID() > 0)
-//			{
-//				if(il.getQtyInvoiced().signum() != il.getM_InOutLine().getMovementQty().signum())
-//				{
-//					return Msg.getMsg(il.getCtx(), "JP_Diff_Signum_MovementQty_QtyInvoiced");//Different signum between MovementQty and QtyInvoiced.
-//				}
-//			}
-//
-//			//Check PO/SO
-//			if(il.getC_OrderLine_ID() > 0)
-//			{
-//				if(il.getQtyInvoiced().signum() != il.getC_OrderLine().getQtyOrdered().signum())
-//				{
-//					return Msg.getMsg(il.getCtx(), "JP_Diff_Signum_QtyOrdered_QtyInvoiced");//Different signum between QtyOrdered and QtyInvoiced.
-//				}
-//			}
-//
-//			//Check Return
-//			if(il.getM_RMALine_ID() > 0)
-//			{
-//				if(il.getQtyInvoiced().signum() != il.getM_RMALine().getQty().signum())
-//				{
-//					return Msg.getMsg(il.getCtx(), "JP_Diff_Signum_RMAQty_QtyInvoiced");//Different signum between RMA Qty and QtyInvoiced.
-//				}
-//			}
-//
-//		}
 
 		return null;
 	}
