@@ -34,7 +34,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
-
 import org.compiere.apps.IStatusBar;
 import org.compiere.grid.CreateFrom;
 import org.compiere.minigrid.IMiniTable;
@@ -142,7 +141,19 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 		return list;
 	}
 
-	
+	private class IOLineRMALineSummary
+	{
+		int M_RMALine_ID = 0;
+		BigDecimal QtyEntered = Env.ZERO;
+		int C_UOM_ID = 0;
+		
+		public IOLineRMALineSummary(int M_RMALine_ID, BigDecimal QtyEntered, int C_UOM_ID) 
+		{
+			this. M_RMALine_ID =  M_RMALine_ID;
+			this.QtyEntered = QtyEntered;
+			this.C_UOM_ID = C_UOM_ID;
+		}
+	}
 
 	/**
 	 * Load RMA details
@@ -153,6 +164,32 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 		m_invoice = null;
 		p_order = null;
 		m_rma = new MRMA(Env.getCtx(), M_RMA_ID, null);
+		
+		
+		//Objective of this SQL is to exclude RMA Lines that are contained Shipment/Receipt Lines already.
+		StringBuilder preSQL = new StringBuilder("SELECT iol.M_RMALine_ID, SUM(iol.QtyEntered), iol.C_UOM_ID FROM M_InOutLine iol INNER JOIN M_InOut io ON(io.M_InOut_ID = iol.M_InOut_ID) "
+													+" WHERE iol.M_InOut_ID=? GROUP BY M_RMALine_ID, C_UOM_ID");
+		PreparedStatement prePSTMT = null;
+		ResultSet preRS = null;
+		ArrayList<IOLineRMALineSummary> IOLineRMALineSummary_list = new ArrayList<IOLineRMALineSummary>();
+		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
+		try{
+			
+			prePSTMT = DB.prepareStatement(preSQL.toString(), null);
+			prePSTMT.setInt(1, M_InOut_ID);
+			preRS = prePSTMT.executeQuery();
+			while (preRS.next())
+				IOLineRMALineSummary_list.add(new IOLineRMALineSummary (preRS.getInt(1), preRS.getBigDecimal(2), preRS.getInt(3)));
+			
+		}catch (SQLException e){
+			log.log(Level.SEVERE, preSQL.toString(), e);
+//			throw new DBException(e, preSQL.toString());
+		}finally{
+			DB.close(preRS, prePSTMT);
+			preRS = null; prePSTMT = null;
+		}
+		
+		
 
 	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 	    StringBuilder sqlStmt = new StringBuilder();
@@ -215,8 +252,41 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 	        pstmt.setInt(3, M_RMA_ID);
 	        rs = pstmt.executeQuery();
 
+	        boolean isContain = false;
 	        while (rs.next())
             {
+				isContain = false;
+				for(IOLineRMALineSummary olSum : IOLineRMALineSummary_list)
+				{
+					if(olSum.M_RMALine_ID == rs.getInt(1))	
+					{
+						isContain = true;
+						BigDecimal qtyReturn = rs.getBigDecimal(3);
+						BigDecimal qtyEntered = qtyReturn.subtract(olSum.QtyEntered);
+						if(qtyEntered.compareTo(Env.ZERO)==0)
+							break;
+						
+			            Vector<Object> line = new Vector<Object>(7);
+			            line.add(new Boolean(false));   // 0-Selection
+			            line.add(qtyEntered);  // 1-Qty
+			            KeyNamePair pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
+			            line.add(pp); // 2-UOM
+						line.add(getLocatorKeyNamePair(0));
+			            pp = new KeyNamePair(rs.getInt(4), rs.getString(5));
+						line.add(pp); // 4-Product
+						line.add(null); //5-Vendor Product No
+						line.add(null); //6-Order
+						pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
+						line.add(pp);   //7-RMA
+						line.add(null); //8-invoice
+			            data.add(line);					
+						
+						break;
+					}				
+				}
+				if(isContain)
+					continue;
+	        	
 	            Vector<Object> line = new Vector<Object>(7);
 	            line.add(new Boolean(false));   // 0-Selection
 	            line.add(rs.getBigDecimal(3));  // 1-Qty
@@ -555,7 +625,7 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", false));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "C_OrderLine_ID", true));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMA_ID", true));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMALine_ID", true));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "C_Invoice_ID", true));
 
 	    return columnNames;
