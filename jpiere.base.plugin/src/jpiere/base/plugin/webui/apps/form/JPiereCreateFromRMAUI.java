@@ -137,8 +137,8 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 
 		window.setTitle(getTitle());
 
-		sameWarehouseCb.setSelected(true);
-		sameWarehouseCb.addActionListener(this);
+//		sameWarehouseCb.setSelected(true);
+//		sameWarehouseCb.addActionListener(this);
 		//  load Locator
 		MLocatorLookup locator = new MLocatorLookup(Env.getCtx(), p_WindowNo);
 		locatorField = new WLocatorEditor ("M_Locator_ID", true, false, true, locator, p_WindowNo);
@@ -158,14 +158,14 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
     	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
         rmaLabel.setText(Msg.getElement(Env.getCtx(), "M_RMA_ID",isSOTrx));
 		locatorLabel.setText(Msg.translate(Env.getCtx(), "M_Locator_ID"));
-		if(isSOTrx)
-		{
-	        sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Customer", true));
-	        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Customer", true));
-		}else{
-	        sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Vendor", true));
-	        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Vendor", true));			
-		}
+//		if(isSOTrx)
+//		{
+//	        sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Customer", true));
+//	        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Customer", true));
+//		}else{
+//	        sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Vendor", true));
+//	        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyRMA-Vendor", true));			
+//		}
         upcLabel.setText(Msg.getElement(Env.getCtx(), "UPC", false));
 
 		Vlayout vlayout = new Vlayout();
@@ -194,9 +194,9 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 		row.appendChild(locatorLabel.rightAlign());
 		row.appendChild(locatorField.getComponent());
 
-		row = rows.newRow();
-		row.appendChild(new Space());
-		row.appendChild(sameWarehouseCb);
+//		row = rows.newRow();
+//		row.appendChild(new Space());
+//		row.appendChild(sameWarehouseCb);
 
 		row = rows.newRow();
 		row.appendChild(upcLabel.rightAlign());
@@ -228,10 +228,10 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
             }
         }
 		//sameWarehouseCb
-        else if (e.getTarget().equals(sameWarehouseCb))
-        {
-        	initBPRMADetails(((Integer)bPartnerField.getValue()).intValue(), false);
-        }
+//        else if (e.getTarget().equals(sameWarehouseCb))
+//        {
+//        	initBPRMADetails(((Integer)bPartnerField.getValue()).intValue(), false);
+//        }
 		else if (e.getTarget().equals(upcField.getComponent()))
 		{
 			checkProductUsingUPC();
