@@ -335,10 +335,20 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 	    rmaField.addItem(pp);
 
 	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
-		for(KeyNamePair knp : list)
-			rmaField.addItem(knp);
-
+	    int M_RMA_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "M_RMA_ID");
 	    rmaField.setSelectedIndex(0);
+	    int i = 0;
+		for(KeyNamePair knp : list)
+		{
+			i++;
+			rmaField.addItem(knp);
+			if(knp.getKey()==M_RMA_ID && M_RMA_ID > 0)
+			{
+				rmaField.setSelectedIndex(i);
+				loadRMA(M_RMA_ID, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
+				break;
+			}
+		}
 	    rmaField.addActionListener(this);
 	    upcField.addValueChangeListener(this);
 	}
