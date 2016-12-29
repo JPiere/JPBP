@@ -13,6 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.factory;
 
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromShipmentUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromStatementUI;
 
@@ -20,10 +21,12 @@ import org.compiere.grid.ICreateFrom;
 import org.compiere.grid.ICreateFromFactory;
 import org.compiere.model.GridTab;
 import org.compiere.model.I_C_BankStatement;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
+import org.compiere.util.Env;
 
 /**
- * JPIERE-0091,0145
+ * JPIERE-0091,0145,234
  *
  * @author Hideaki Hagiwara
  *
@@ -38,10 +41,26 @@ public class JPiereBasePluginCreateFromFactory implements ICreateFromFactory
 		if (tableName.equals(I_C_BankStatement.Table_Name))
 		{
 			return new JPiereCreateFromStatementUI(mTab);	//JPIERE-0091
+			
 		}else if(tableName.equals(MInOut.Table_Name)){
+			
+			Integer C_DocType_ID = (Integer)mTab.getField("C_DocType_ID").getValue();
+			MDocType docType = MDocType.get(Env.getCtx(), C_DocType_ID.intValue());
+			
 			if(mTab.getGridWindow().isSOTrx())
 			{
-				return new JPiereCreateFromShipmentUI(mTab);//JPIERE-0145
+
+				if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+					return new JPiereCreateFromShipmentUI(mTab);//JPIERE-0145
+				else if (docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
+					return new JPiereCreateFromRMAUI(mTab);//JPIERE-0234
+				
+			}else{
+				
+				if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+					return new JPiereCreateFromRMAUI(mTab);//JPIERE-0234
+				else if (docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
+					return null;
 			}
 		}
 
