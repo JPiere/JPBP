@@ -241,6 +241,7 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
         }
 	    sqlStmt.append("WHERE rl.M_RMA_ID=? ");
 	    sqlStmt.append("AND rl.C_Charge_ID IS NOT NULL AND rl.M_InOutLine_ID IS NULL");
+	    sqlStmt.append(" ORDER BY Line");
 
 	    PreparedStatement pstmt = null;
 	    ResultSet rs = null;
@@ -268,18 +269,16 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 						
 			            Vector<Object> line = new Vector<Object>(7);
 			            line.add(new Boolean(false));   // 0-Selection
-			            line.add(qtyEntered);  // 1-Qty
-			            KeyNamePair pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
-			            line.add(pp); // 2-UOM
-						line.add(getLocatorKeyNamePair(0));
+			            KeyNamePair pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
+						line.add(pp);   //1-RMA	            
 			            pp = new KeyNamePair(rs.getInt(4), rs.getString(5));
-						line.add(pp); // 4-Product
-						line.add(null); //5-Vendor Product No
-						line.add(null); //6-Order
-						pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
-						line.add(pp);   //7-RMA
-						line.add(null); //8-invoice
-			            data.add(line);					
+						line.add(pp); // 2-Product            
+			            line.add(qtyEntered);  // 3-Qty
+			            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
+			            line.add(pp); // 4-UOM
+						line.add(getLocatorKeyNamePair(0)); //5-Locator
+						line.add(null); //6-Vendor Product No				
+						data.add(line);
 						
 						break;
 					}				
@@ -289,17 +288,15 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 	        	
 	            Vector<Object> line = new Vector<Object>(7);
 	            line.add(new Boolean(false));   // 0-Selection
-	            line.add(rs.getBigDecimal(3));  // 1-Qty
-	            KeyNamePair pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
-	            line.add(pp); // 2-UOM
-				line.add(getLocatorKeyNamePair(0));
+	            KeyNamePair pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
+				line.add(pp);   //1-RMA	            
 	            pp = new KeyNamePair(rs.getInt(4), rs.getString(5));
-				line.add(pp); // 4-Product
-				line.add(null); //5-Vendor Product No
-				line.add(null); //6-Order
-				pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
-				line.add(pp);   //7-RMA
-				line.add(null); //8-invoice
+				line.add(pp); // 2-Product            
+	            line.add(rs.getBigDecimal(3));  // 3-Qty
+	            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
+	            line.add(pp); // 4-UOM
+				line.add(getLocatorKeyNamePair(0)); //5-Locator
+				line.add(null); //6-Vendor Product No
 	            data.add(line);
             }
 	    }
@@ -381,15 +378,12 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 	protected void configureMiniTable (IMiniTable miniTable)
 	{
 		miniTable.setColumnClass(0, Boolean.class, false);     //  Selection
-		miniTable.setColumnClass(1, BigDecimal.class, false);      //  Qty
-		miniTable.setColumnClass(2, String.class, true);          //  UOM
-		miniTable.setColumnClass(3, String.class, false);  //  Locator
-		miniTable.setColumnClass(4, String.class, true);   //  Product
-		miniTable.setColumnClass(5, String.class, true); //  VendorProductNo
-		miniTable.setColumnClass(6, String.class, true);     //  Order
-		miniTable.setColumnClass(7, String.class, true);     //  Ship
-		miniTable.setColumnClass(8, String.class, true);   //  Invoice
-
+		miniTable.setColumnClass(1, String.class, true);     // RMA Line
+		miniTable.setColumnClass(2, String.class, true);   //  Product
+		miniTable.setColumnClass(3, BigDecimal.class, false);      //  Qty
+		miniTable.setColumnClass(4, String.class, true);          //  UOM
+		miniTable.setColumnClass(5, String.class, false);  //  Locator
+		miniTable.setColumnClass(6, String.class, true); //  VendorProductNo
 		//  Table UI
 		miniTable.autoSize();
 
@@ -429,32 +423,21 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 		{
 			if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) {
 				// variable values
-				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 1); // Qty
-				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 2); // UOM
+				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 3); // Qty
+				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 4); // UOM
 				int C_UOM_ID = pp.getKey();
-				pp = (KeyNamePair) miniTable.getValueAt(i, 3); // Locator
+				pp = (KeyNamePair) miniTable.getValueAt(i, 5); // Locator
 				// If a locator is specified on the product, choose that otherwise default locator
 				M_Locator_ID = pp!=null && pp.getKey()!=0 ? pp.getKey() : defaultLocator_ID;
 
-				pp = (KeyNamePair) miniTable.getValueAt(i, 4); // Product
+				pp = (KeyNamePair) miniTable.getValueAt(i, 2); // Product
 				int M_Product_ID = pp.getKey();
-				int C_OrderLine_ID = 0;
-				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // OrderLine
-				if (pp != null)
-					C_OrderLine_ID = pp.getKey();
 				int M_RMALine_ID = 0;
-				pp = (KeyNamePair) miniTable.getValueAt(i, 7); // RMA
+				pp = (KeyNamePair) miniTable.getValueAt(i, 1); // RMA
 				// If we have RMA
 				if (pp != null)
 					M_RMALine_ID = pp.getKey();
-				int C_InvoiceLine_ID = 0;
-				MInvoiceLine il = null;
-				pp = (KeyNamePair) miniTable.getValueAt(i, 8); // InvoiceLine
-				if (pp != null)
-					C_InvoiceLine_ID = pp.getKey();
-				if (C_InvoiceLine_ID != 0)
-					il = new MInvoiceLine (Env.getCtx(), C_InvoiceLine_ID, trxName);
-				//boolean isInvoiced = (C_InvoiceLine_ID != 0);
+				
 				//	Precision of Qty UOM
 				int precision = 2;
 				if (M_Product_ID != 0)
@@ -465,97 +448,37 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 				QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_DOWN);
 				//
 				if (log.isLoggable(Level.FINE)) log.fine("Line QtyEntered=" + QtyEntered
-						+ ", Product=" + M_Product_ID
-						+ ", OrderLine=" + C_OrderLine_ID + ", InvoiceLine=" + C_InvoiceLine_ID);
-
-				//	Credit Memo - negative Qty
-				if (m_invoice != null && m_invoice.isCreditMemo() )
-					QtyEntered = QtyEntered.negate();
+						+ ", Product=" + M_Product_ID);
 
 				//	Create new InOut Line
 				MInOutLine iol = new MInOutLine (inout);
 				iol.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 				iol.setQty(QtyEntered);							//	Movement/Entered
 				//
-				MOrderLine ol = null;
 				MRMALine rmal = null;
-				if (C_OrderLine_ID != 0)
-				{
-					iol.setC_OrderLine_ID(C_OrderLine_ID);
-					ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
-					if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
-					{
-						iol.setMovementQty(QtyEntered
-								.multiply(ol.getQtyOrdered())
-								.divide(ol.getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP));
-						iol.setC_UOM_ID(ol.getC_UOM_ID());
-					}
-					iol.setM_AttributeSetInstance_ID(ol.getM_AttributeSetInstance_ID());
-					iol.setDescription(ol.getDescription());
-					//
-					iol.setC_Project_ID(ol.getC_Project_ID());
-					iol.setC_ProjectPhase_ID(ol.getC_ProjectPhase_ID());
-					iol.setC_ProjectTask_ID(ol.getC_ProjectTask_ID());
-					iol.setC_Activity_ID(ol.getC_Activity_ID());
-					iol.setC_Campaign_ID(ol.getC_Campaign_ID());
-					iol.setAD_OrgTrx_ID(ol.getAD_OrgTrx_ID());
-					iol.setUser1_ID(ol.getUser1_ID());
-					iol.setUser2_ID(ol.getUser2_ID());
-				}
-				else if (il != null)
-				{
-					if (il.getQtyEntered().compareTo(il.getQtyInvoiced()) != 0)
-					{
-						iol.setQtyEntered(QtyEntered
-								.multiply(il.getQtyInvoiced())
-								.divide(il.getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP));
-						iol.setC_UOM_ID(il.getC_UOM_ID());
-					}
-					iol.setDescription(il.getDescription());
-					iol.setC_Project_ID(il.getC_Project_ID());
-					iol.setC_ProjectPhase_ID(il.getC_ProjectPhase_ID());
-					iol.setC_ProjectTask_ID(il.getC_ProjectTask_ID());
-					iol.setC_Activity_ID(il.getC_Activity_ID());
-					iol.setC_Campaign_ID(il.getC_Campaign_ID());
-					iol.setAD_OrgTrx_ID(il.getAD_OrgTrx_ID());
-					iol.setUser1_ID(il.getUser1_ID());
-					iol.setUser2_ID(il.getUser2_ID());
-				}
-				else if (M_RMALine_ID != 0)
-				{
-					rmal = new MRMALine(Env.getCtx(), M_RMALine_ID, trxName);
-					iol.setM_RMALine_ID(M_RMALine_ID);
-					iol.setQtyEntered(QtyEntered);
-					iol.setDescription(rmal.getDescription());
-					iol.setM_AttributeSetInstance_ID(rmal.getM_AttributeSetInstance_ID());
-					iol.setC_Project_ID(rmal.getC_Project_ID());
-					iol.setC_ProjectPhase_ID(rmal.getC_ProjectPhase_ID());
-					iol.setC_ProjectTask_ID(rmal.getC_ProjectTask_ID());
-					iol.setC_Activity_ID(rmal.getC_Activity_ID());
-					iol.setAD_OrgTrx_ID(rmal.getAD_OrgTrx_ID());
-					iol.setUser1_ID(rmal.getUser1_ID());
-					iol.setUser2_ID(rmal.getUser2_ID());
-				}
+				rmal = new MRMALine(Env.getCtx(), M_RMALine_ID, trxName);
+				iol.setM_RMALine_ID(M_RMALine_ID);
+				iol.setQtyEntered(QtyEntered);
+				iol.setDescription(rmal.getDescription());
+				iol.setM_AttributeSetInstance_ID(rmal.getM_AttributeSetInstance_ID());
+				iol.setC_Project_ID(rmal.getC_Project_ID());
+				iol.setC_ProjectPhase_ID(rmal.getC_ProjectPhase_ID());
+				iol.setC_ProjectTask_ID(rmal.getC_ProjectTask_ID());
+				iol.setC_Activity_ID(rmal.getC_Activity_ID());
+				iol.setAD_OrgTrx_ID(rmal.getAD_OrgTrx_ID());
+				iol.setUser1_ID(rmal.getUser1_ID());
+				iol.setUser2_ID(rmal.getUser2_ID());
 
 				//	Charge
 				if (M_Product_ID == 0)
 				{
-					if (ol != null && ol.getC_Charge_ID() != 0)			//	from order
-						iol.setC_Charge_ID(ol.getC_Charge_ID());
-					else if (il != null && il.getC_Charge_ID() != 0)	//	from invoice
-						iol.setC_Charge_ID(il.getC_Charge_ID());
-					else if (rmal != null && rmal.getC_Charge_ID() != 0) // from rma
+					if (rmal.getC_Charge_ID() != 0) // from rma
 						iol.setC_Charge_ID(rmal.getC_Charge_ID());
 				}
 				// Set locator
 				iol.setM_Locator_ID(M_Locator_ID);
 				iol.saveEx();
-				//	Create Invoice Line Link
-				if (il != null)
-				{
-					il.setM_InOutLine_ID(iol.getM_InOutLine_ID());
-					il.saveEx();
-				}
+
 			}   //   if selected
 		}   //  for all rows
 
@@ -619,15 +542,12 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 		//  Header Info
 	    Vector<String> columnNames = new Vector<String>(7);
 	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "Line"));
+	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Locator_ID"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", false));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "C_OrderLine_ID", true));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMALine_ID", true));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "C_Invoice_ID", true));
-
 	    return columnNames;
 	}
 
