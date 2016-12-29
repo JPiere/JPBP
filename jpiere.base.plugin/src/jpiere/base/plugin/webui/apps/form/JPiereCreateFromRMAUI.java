@@ -113,9 +113,6 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 	protected Label bPartnerLabel = new Label();
 	protected WEditor bPartnerField;
 
-	protected Label orderLabel = new Label();
-	protected Listbox orderField = ListboxFactory.newDropdownListbox();
-
     /** Label for the rma selection */
     protected Label rmaLabel = new Label();
     /** Combo box for selecting RMA document */
@@ -158,10 +155,7 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 
 	protected void zkInit() throws Exception
 	{
-    	boolean isRMAWindow = true;
-
     	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
-		orderLabel.setText(Msg.getElement(Env.getCtx(), "C_Order_ID", true));
         rmaLabel.setText(Msg.getElement(Env.getCtx(), "M_RMA_ID",isSOTrx));
 		locatorLabel.setText(Msg.translate(Env.getCtx(), "M_Locator_ID"));
         sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
@@ -184,12 +178,11 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 			row.appendChild(bPartnerField.getComponent());
 			bPartnerField.fillHorizontal();
 		}
-    	if (isRMAWindow) {
-            // Add RMA document selection to panel
-            row.appendChild(rmaLabel.rightAlign());
-            row.appendChild(rmaField);
-            rmaField.setHflex("1");
-    	}
+    	
+        // Add RMA document selection to panel
+        row.appendChild(rmaLabel.rightAlign());
+        row.appendChild(rmaField);
+        rmaField.setHflex("1");
 
 		row = rows.newRow();
 		row.appendChild(locatorLabel.rightAlign());
@@ -225,15 +218,13 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
             else
             {
                 int M_RMA_ID = pp.getKey();
-                //  set Order and Shipment to Null
-                orderField.setSelectedIndex(-1);
                 loadRMA(M_RMA_ID, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
             }
         }
 		//sameWarehouseCb
         else if (e.getTarget().equals(sameWarehouseCb))
         {
-        	initBPOrderDetails(((Integer)bPartnerField.getValue()).intValue(), false);
+        	initBPRMADetails(((Integer)bPartnerField.getValue()).intValue(), false);
         }
 		else if (e.getTarget().equals(upcField.getComponent()))
 		{
@@ -306,7 +297,7 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 				C_BPartner_ID = ((Integer)e.getNewValue()).intValue();
 			}
 
-			initBPOrderDetails (C_BPartner_ID, true);
+			initBPRMADetails (C_BPartner_ID, true);
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange
@@ -327,67 +318,15 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 		bPartnerField.setValue(new Integer(C_BPartner_ID));
 
 		//  initial loading
-		initBPOrderDetails(C_BPartner_ID, forInvoice);
+		initBPRMADetails(C_BPartner_ID, forInvoice);
 	}   //  initBPartner
-
-	/**
-	 * Init Details - load invoices not shipped
-	 * @param C_BPartner_ID BPartner
-	 */
-	private void initBPInvoiceDetails(int C_BPartner_ID)
-	{
-		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID" + C_BPartner_ID);
-		upcField.addValueChangeListener(this);
-	}
 
 	/**
 	 *  Load PBartner dependent Order/Invoice/Shipment Field.
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
 	 */
-	protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice)
-	{
-		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID=" + C_BPartner_ID);
-		KeyNamePair pp = new KeyNamePair(0,"");
-		//  load PO Orders - Closed, Completed
-		orderField.removeActionListener(this);
-		orderField.removeAllItems();
-		orderField.addItem(pp);
-
-		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseCb.isSelected());
-		int C_Order_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_Order_ID");
-		int i = 0;
-		for(KeyNamePair knp : list)
-		{
-			i++;
-			orderField.addItem(knp);
-			if(knp.getKey()==C_Order_ID && C_Order_ID > 0)
-			{
-				orderField.setSelectedIndex(i);
-				rmaField.setSelectedIndex(-1);
-			}
-		}
-		
-		if(C_Order_ID <= 0)
-			orderField.setSelectedIndex(0);
-		
-		orderField.addActionListener(this);
-
-		initBPDetails(C_BPartner_ID);
-	}   //  initBPartnerOIS
-
-	public void initBPDetails(int C_BPartner_ID)
-	{
-		initBPInvoiceDetails(C_BPartner_ID);
-		initBPRMADetails(C_BPartner_ID);
-	}
-
-
-	/**
-	 * Load RMA that are candidates for shipment
-	 * @param C_BPartner_ID BPartner
-	 */
-	private void initBPRMADetails(int C_BPartner_ID)
+	protected void initBPRMADetails (int C_BPartner_ID, boolean forInvoice)
 	{
 	    rmaField.removeActionListener(this);
 	    rmaField.removeAllItems();
@@ -401,6 +340,7 @@ public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventL
 
 	    rmaField.setSelectedIndex(0);
 	    rmaField.addActionListener(this);
+	    upcField.addValueChangeListener(this);
 	}
 
 
