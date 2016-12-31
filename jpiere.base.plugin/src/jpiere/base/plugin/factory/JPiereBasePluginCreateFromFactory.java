@@ -13,7 +13,9 @@
  *****************************************************************************/
 package jpiere.base.plugin.factory;
 
-import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAUI;
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAInOutUI;
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAOrder;
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAOrderUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromShipmentUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromStatementUI;
 
@@ -23,6 +25,7 @@ import org.compiere.model.GridTab;
 import org.compiere.model.I_C_BankStatement;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
+import org.compiere.model.MRMA;
 import org.compiere.util.Env;
 
 /**
@@ -53,15 +56,18 @@ public class JPiereBasePluginCreateFromFactory implements ICreateFromFactory
 				if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 					return new JPiereCreateFromShipmentUI(mTab);//JPIERE-0145
 				else if (docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
-					return new JPiereCreateFromRMAUI(mTab);//JPIERE-0234
+					return new JPiereCreateFromRMAInOutUI(mTab);//JPIERE-0234
 				
 			}else{
 				
 				if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
-					return new JPiereCreateFromRMAUI(mTab);//JPIERE-0234
+					return new JPiereCreateFromRMAInOutUI(mTab);//JPIERE-0234
 				else if (docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
 					return null;
 			}
+		}else if(tableName.equals(MRMA.Table_Name)){
+			
+			return new JPiereCreateFromRMAOrderUI(mTab); //JPIERE-0235
 		}
 
 		return null;

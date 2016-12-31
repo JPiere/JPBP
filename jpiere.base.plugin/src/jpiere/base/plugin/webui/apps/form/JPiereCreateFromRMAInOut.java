@@ -42,9 +42,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
-import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocator;
-import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
@@ -67,7 +65,7 @@ import org.compiere.util.Msg;
  * @author Hideaki Hagiwara
  *
  */
-public abstract class JPiereCreateFromRMA extends CreateFrom
+public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 {
 	/**  Loaded Invoice             */
 	private MInvoice		m_invoice = null;
@@ -83,7 +81,7 @@ public abstract class JPiereCreateFromRMA extends CreateFrom
 	 *  Protected Constructor
 	 *  @param mTab MTab
 	 */
-	public JPiereCreateFromRMA(GridTab mTab)
+	public JPiereCreateFromRMAInOut(GridTab mTab)
 	{
 		super(mTab);
 		Integer C_DocType_ID = (Integer)mTab.getField("C_DocType_ID").getValue();

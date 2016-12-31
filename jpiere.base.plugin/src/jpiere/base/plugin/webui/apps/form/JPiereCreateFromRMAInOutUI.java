@@ -74,12 +74,12 @@ import org.zkoss.zul.Vlayout;
  * @author Hideaki Hagiwara
  *
  */
-public class JPiereCreateFromRMAUI extends JPiereCreateFromRMA implements EventListener<Event>, ValueChangeListener
+public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut implements EventListener<Event>, ValueChangeListener
 {
 
 	private WCreateFromWindow window;
 
-	public JPiereCreateFromRMAUI(GridTab tab)
+	public JPiereCreateFromRMAInOutUI(GridTab tab)
 	{
 		super(tab);
 		log.info(getGridTab().toString());
