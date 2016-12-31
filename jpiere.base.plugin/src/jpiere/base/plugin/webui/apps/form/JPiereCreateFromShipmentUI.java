@@ -223,45 +223,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		if (m_actionActive)
 			return;
 		m_actionActive = true;
-		/*
-		//  Order
-		if (e.getTarget().equals(orderField))
-		{
-			ListItem li = orderField.getSelectedItem();
-			int C_Order_ID = 0;
-			if (li != null && li.getValue() != null)
-				C_Order_ID = ((Integer) li.getValue()).intValue();
-			//  set Invoice, RMA and Shipment to Null
-			rmaField.setSelectedIndex(-1);
-			//shipmentField.setSelectedIndex(-1);
-			loadOrder(C_Order_ID, true);
-		}
-		//  Shipment
-		else if (e.getTarget().equals(invoiceField))
-		{
-			ListItem li = shipmentField.getSelectedItem();
-			int M_InOut_ID = 0;
-			if (li != null && li.getValue() != null)
-				M_InOut_ID = ((Integer) li.getValue()).intValue();
-			//  set Order, RMA and Invoice to Null
-			orderField.setSelectedIndex(-1);
-			rmaField.setSelectedIndex(-1);
-			loadShipment(M_InOut_ID);
-		}
-		//  RMA
-		else if (e.getTarget().equals(rmaField))
-		{
-			ListItem li = rmaField.getSelectedItem();
-		    int M_RMA_ID = 0;
-		    if (li != null && li.getValue() != null)
-		        M_RMA_ID = ((Integer) li.getValue()).intValue();
-		    //  set Order and Invoice to Null
-		    orderField.setSelectedIndex(-1);
-		    //shipmentField.setSelectedIndex(-1);
-		    loadRMA(M_RMA_ID);
-		}
-		m_actionActive = false;
-		*/
 
 		//  Order
 		if (e.getTarget().equals(orderField))
@@ -277,20 +238,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 				loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
 			}
 		}
-		// RMA
-        else if (e.getTarget().equals(rmaField))
-        {
-            KeyNamePair pp = rmaField.getSelectedItem().toKeyNamePair();
-            if (pp == null || pp.getKey() == 0)
-                ;
-            else
-            {
-                int M_RMA_ID = pp.getKey();
-                //  set Order and Shipment to Null
-                orderField.setSelectedIndex(-1);
-                loadRMA(M_RMA_ID, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
-            }
-        }
 		//sameWarehouseCb
         else if (e.getTarget().equals(sameWarehouseCb))
         {
@@ -392,16 +339,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 	}   //  initBPartner
 
 	/**
-	 * Init Details - load invoices not shipped
-	 * @param C_BPartner_ID BPartner
-	 */
-	private void initBPInvoiceDetails(int C_BPartner_ID)
-	{
-		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID" + C_BPartner_ID);
-		upcField.addValueChangeListener(this);
-	}
-
-	/**
 	 *  Load PBartner dependent Order/Invoice/Shipment Field.
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
@@ -435,55 +372,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		
 		orderField.addActionListener(this);
 
-		initBPDetails(C_BPartner_ID);
 	}   //  initBPartnerOIS
-
-	public void initBPDetails(int C_BPartner_ID)
-	{
-		initBPInvoiceDetails(C_BPartner_ID);
-		initBPRMADetails(C_BPartner_ID);
-	}
-
-
-	/**
-	 * Load RMA that are candidates for shipment
-	 * @param C_BPartner_ID BPartner
-	 */
-	private void initBPRMADetails(int C_BPartner_ID)
-	{
-	    rmaField.removeActionListener(this);
-	    rmaField.removeAllItems();
-	    //  None
-	    KeyNamePair pp = new KeyNamePair(0,"");
-	    rmaField.addItem(pp);
-
-	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
-		for(KeyNamePair knp : list)
-			rmaField.addItem(knp);
-
-	    rmaField.setSelectedIndex(0);
-	    rmaField.addActionListener(this);
-	}
-
-	/**
-	 *  Load Data - Order
-	 *  @param C_Order_ID Order
-	 *  @param forInvoice true if for invoice vs. delivery qty
-	 */
-/*	protected void loadOrder (int C_Order_ID, boolean forInvoice)
-	{
-		loadTableOIS(getOrderData(C_Order_ID, forInvoice));
-	}   //  LoadOrder
-
-	protected void loadRMA (int M_RMA_ID)
-	{
-		loadTableOIS(getRMAData(M_RMA_ID));
-	}
-
-	protected void loadShipment (int M_InOut_ID)
-	{
-		loadTableOIS(getShipmentData(M_InOut_ID));
-	}*/
 
 	/**
 	 *  Load Data - Order
@@ -496,25 +385,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		loadTableOIS(getOrderData(C_Order_ID, forInvoice, M_Locator_ID));
 	}   //  LoadOrder
 
-	/**
-	 *  Load Data - RMA
-	 *  @param M_RMA_ID RMA
-	 *  @param M_Locator_ID
-	 */
-	protected void loadRMA (int M_RMA_ID, int M_Locator_ID)
-	{
-		loadTableOIS(getRMAData(M_RMA_ID, M_Locator_ID));
-	}
-
-	/**
-	 *  Load Data - Invoice
-	 *  @param C_Invoice_ID Invoice
-	 *  @param M_Locator_ID
-	 */
-	protected void loadInvoice (int C_Invoice_ID, int M_Locator_ID)
-	{
-		loadTableOIS(getInvoiceData(C_Invoice_ID, M_Locator_ID));
-	}
 
 	/**
 	 *  Load Order/Invoice/Shipment data into Table
