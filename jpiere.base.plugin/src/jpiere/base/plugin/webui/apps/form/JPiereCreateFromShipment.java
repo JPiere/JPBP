@@ -41,14 +41,10 @@ import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.GridTab;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoice;
-import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
-import org.compiere.model.MRMA;
-import org.compiere.model.MRMALine;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -70,10 +66,6 @@ import org.compiere.util.Msg;
  */
 public abstract class JPiereCreateFromShipment extends CreateFrom
 {
-	/**  Loaded Invoice             */
-	private MInvoice		m_invoice = null;
-	/**  Loaded RMA             */
-	private MRMA            m_rma = null;
 	private int defaultLocator_ID=0;
 
 	/**
@@ -166,7 +158,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				+ " l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name),"			//	3..4
 				+ " p.M_Locator_ID, loc.Value, " // 5..6
 				+ " COALESCE(l.M_Product_ID,0),COALESCE(p.Name,c.Name), " //	7..8
-				+ " po.VendorProductNo, " // 9
+				+ " p.Value AS ProductValue, " // 9
 				+ " l.C_OrderLine_ID,l.Line "	//	10..11
 				+ "FROM C_OrderLine l"
 					+ " LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND l.C_BPartner_ID = po.C_BPartner_ID) ");
@@ -181,7 +173,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		//
 		sql.append(" WHERE l.C_Order_ID=? "			//	#1
 				+ "GROUP BY l.QtyOrdered,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END, "
-				+ "l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name), p.M_Locator_ID, loc.Value, po.VendorProductNo, "
+				+ "l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name), p.M_Locator_ID, loc.Value, p.Value, "
 				+ "l.M_Product_ID,COALESCE(p.Name,c.Name), l.Line,l.C_OrderLine_ID "
 				+ "ORDER BY l.Line");
 		//
@@ -222,8 +214,6 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						line.add(rs.getString(9));				// 5-VendorProductNo
 						pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
 						line.add(pp);                           //  6-OrderLine
-						line.add(null);                         //  7-Ship
-						line.add(null);                         //  8-Invoice
 						data.add(line);						
 						
 						break;
@@ -249,8 +239,6 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				line.add(rs.getString(9));				// 5-VendorProductNo
 				pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
 				line.add(pp);                           //  6-OrderLine
-				line.add(null);                         //  7-Ship
-				line.add(null);                         //  8-Invoice
 				data.add(line);
 			}
 		}
@@ -335,10 +323,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		miniTable.setColumnClass(2, String.class, true);          //  UOM
 		miniTable.setColumnClass(3, String.class, false);  //  Locator
 		miniTable.setColumnClass(4, String.class, true);   //  Product
-		miniTable.setColumnClass(5, String.class, true); //  VendorProductNo
+		miniTable.setColumnClass(5, String.class, true); //  Product Value
 		miniTable.setColumnClass(6, String.class, true);     //  Order
-		miniTable.setColumnClass(7, String.class, true);     //  Ship
-		miniTable.setColumnClass(8, String.class, true);   //  Invoice
 
 		//  Table UI
 		miniTable.autoSize();
@@ -392,18 +378,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // OrderLine
 				if (pp != null)
 					C_OrderLine_ID = pp.getKey();
-				int M_RMALine_ID = 0;
-				pp = (KeyNamePair) miniTable.getValueAt(i, 7); // RMA
-				// If we have RMA
-				if (pp != null)
-					M_RMALine_ID = pp.getKey();
-				int C_InvoiceLine_ID = 0;
-				MInvoiceLine il = null;
-				pp = (KeyNamePair) miniTable.getValueAt(i, 8); // InvoiceLine
-				if (pp != null)
-					C_InvoiceLine_ID = pp.getKey();
-				if (C_InvoiceLine_ID != 0)
-					il = new MInvoiceLine (Env.getCtx(), C_InvoiceLine_ID, trxName);
+
 				//boolean isInvoiced = (C_InvoiceLine_ID != 0);
 				//	Precision of Qty UOM
 				int precision = 2;
@@ -415,12 +390,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_DOWN);
 				//
 				if (log.isLoggable(Level.FINE)) log.fine("Line QtyEntered=" + QtyEntered
-						+ ", Product=" + M_Product_ID
-						+ ", OrderLine=" + C_OrderLine_ID + ", InvoiceLine=" + C_InvoiceLine_ID);
-
-				//	Credit Memo - negative Qty
-				if (m_invoice != null && m_invoice.isCreditMemo() )
-					QtyEntered = QtyEntered.negate();
+						+ ", Product=" + M_Product_ID+ ", OrderLine=" + C_OrderLine_ID);
 
 				//	Create new InOut Line
 				MInOutLine iol = new MInOutLine (inout);
@@ -428,7 +398,6 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				iol.setQty(QtyEntered);							//	Movement/Entered
 				//
 				MOrderLine ol = null;
-				MRMALine rmal = null;
 				if (C_OrderLine_ID != 0)
 				{
 					iol.setC_OrderLine_ID(C_OrderLine_ID);
@@ -452,60 +421,18 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 					iol.setUser1_ID(ol.getUser1_ID());
 					iol.setUser2_ID(ol.getUser2_ID());
 				}
-				else if (il != null)
-				{
-					if (il.getQtyEntered().compareTo(il.getQtyInvoiced()) != 0)
-					{
-						iol.setQtyEntered(QtyEntered
-								.multiply(il.getQtyInvoiced())
-								.divide(il.getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP));
-						iol.setC_UOM_ID(il.getC_UOM_ID());
-					}
-					iol.setDescription(il.getDescription());
-					iol.setC_Project_ID(il.getC_Project_ID());
-					iol.setC_ProjectPhase_ID(il.getC_ProjectPhase_ID());
-					iol.setC_ProjectTask_ID(il.getC_ProjectTask_ID());
-					iol.setC_Activity_ID(il.getC_Activity_ID());
-					iol.setC_Campaign_ID(il.getC_Campaign_ID());
-					iol.setAD_OrgTrx_ID(il.getAD_OrgTrx_ID());
-					iol.setUser1_ID(il.getUser1_ID());
-					iol.setUser2_ID(il.getUser2_ID());
-				}
-				else if (M_RMALine_ID != 0)
-				{
-					rmal = new MRMALine(Env.getCtx(), M_RMALine_ID, trxName);
-					iol.setM_RMALine_ID(M_RMALine_ID);
-					iol.setQtyEntered(QtyEntered);
-					iol.setDescription(rmal.getDescription());
-					iol.setM_AttributeSetInstance_ID(rmal.getM_AttributeSetInstance_ID());
-					iol.setC_Project_ID(rmal.getC_Project_ID());
-					iol.setC_ProjectPhase_ID(rmal.getC_ProjectPhase_ID());
-					iol.setC_ProjectTask_ID(rmal.getC_ProjectTask_ID());
-					iol.setC_Activity_ID(rmal.getC_Activity_ID());
-					iol.setAD_OrgTrx_ID(rmal.getAD_OrgTrx_ID());
-					iol.setUser1_ID(rmal.getUser1_ID());
-					iol.setUser2_ID(rmal.getUser2_ID());
-				}
+
 
 				//	Charge
 				if (M_Product_ID == 0)
 				{
 					if (ol != null && ol.getC_Charge_ID() != 0)			//	from order
 						iol.setC_Charge_ID(ol.getC_Charge_ID());
-					else if (il != null && il.getC_Charge_ID() != 0)	//	from invoice
-						iol.setC_Charge_ID(il.getC_Charge_ID());
-					else if (rmal != null && rmal.getC_Charge_ID() != 0) // from rma
-						iol.setC_Charge_ID(rmal.getC_Charge_ID());
 				}
 				// Set locator
 				iol.setM_Locator_ID(M_Locator_ID);
 				iol.saveEx();
-				//	Create Invoice Line Link
-				if (il != null)
-				{
-					il.setM_InOutLine_ID(iol.getM_InOutLine_ID());
-					il.saveEx();
-				}
+
 			}   //   if selected
 		}   //  for all rows
 
@@ -533,32 +460,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				inout.setDropShip_User_ID(p_order.getDropShip_User_ID());
 			}
 		}
-		if (m_invoice != null && m_invoice.getC_Invoice_ID() != 0)
-		{
-			if (inout.getC_Order_ID() == 0)
-				inout.setC_Order_ID (m_invoice.getC_Order_ID());
-			inout.setC_Invoice_ID (m_invoice.getC_Invoice_ID());
-			inout.setAD_OrgTrx_ID(m_invoice.getAD_OrgTrx_ID());
-			inout.setC_Project_ID(m_invoice.getC_Project_ID());
-			inout.setC_Campaign_ID(m_invoice.getC_Campaign_ID());
-			inout.setC_Activity_ID(m_invoice.getC_Activity_ID());
-			inout.setUser1_ID(m_invoice.getUser1_ID());
-			inout.setUser2_ID(m_invoice.getUser2_ID());
-		}
-		if (m_rma != null && m_rma.getM_RMA_ID() != 0)
-		{
-			MInOut originalIO = m_rma.getShipment();
-			inout.setIsSOTrx(m_rma.isSOTrx());
-			inout.setC_Order_ID(0);
-			inout.setC_Invoice_ID(0);
-			inout.setM_RMA_ID(m_rma.getM_RMA_ID());
-			inout.setAD_OrgTrx_ID(originalIO.getAD_OrgTrx_ID());
-			inout.setC_Project_ID(originalIO.getC_Project_ID());
-			inout.setC_Campaign_ID(originalIO.getC_Campaign_ID());
-			inout.setC_Activity_ID(originalIO.getC_Activity_ID());
-			inout.setUser1_ID(originalIO.getUser1_ID());
-			inout.setUser2_ID(originalIO.getUser2_ID());
-		}
+
 		inout.saveEx();
 		return true;
 
@@ -573,10 +475,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Locator_ID"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", false));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "C_OrderLine_ID", true));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMA_ID", true));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "C_Invoice_ID", true));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "Value", false));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "Line", true));
 
 	    return columnNames;
 	}
