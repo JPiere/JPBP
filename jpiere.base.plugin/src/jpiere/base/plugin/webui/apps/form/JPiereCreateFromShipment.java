@@ -203,17 +203,17 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						
 						Vector<Object> line = new Vector<Object>();
 						line.add(new Boolean(false));           //  0-Selection
-						line.add(qtyEntered);  //  1-Qty
-						KeyNamePair pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
-						line.add(pp);                           //  2-UOM
-						// Add locator
-						line.add(getLocatorKeyNamePair(rs.getInt(5)));// 3-Locator
+						KeyNamePair pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
+						line.add(pp);                           //  1-OrderLine						
+						line.add(qtyEntered);  //  2-Qty
+						pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
+						line.add(pp);                           //  3-UOM
 						// Add product
+						line.add(rs.getString(9));				// 4-Product Value
 						pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
-						line.add(pp);                           //  4-Product
-						line.add(rs.getString(9));				// 5-VendorProductNo
-						pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
-						line.add(pp);                           //  6-OrderLine
+						line.add(pp);                           //  5-Product Name
+						// Add locator
+						line.add(getLocatorKeyNamePair(rs.getInt(5)));// 6-Locator
 						data.add(line);						
 						
 						break;
@@ -225,20 +225,23 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				
 				Vector<Object> line = new Vector<Object>();
 				line.add(new Boolean(false));           //  0-Selection
+				KeyNamePair pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
+				line.add(pp);                           //  1-OrderLine
 				BigDecimal qtyOrdered = rs.getBigDecimal(1);
 				BigDecimal multiplier = rs.getBigDecimal(2);
 				BigDecimal qtyEntered = qtyOrdered.multiply(multiplier);
-				line.add(qtyEntered);  //  1-Qty
-				KeyNamePair pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
-				line.add(pp);                           //  2-UOM
-				// Add locator
-				line.add(getLocatorKeyNamePair(rs.getInt(5)));// 3-Locator
+				line.add(qtyEntered);  //  2-Qty
+				 pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
+				line.add(pp);                           //  3-UOM
 				// Add product
+				line.add(rs.getString(9));				// 4-Product Value
 				pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
-				line.add(pp);                           //  4-Product
-				line.add(rs.getString(9));				// 5-VendorProductNo
-				pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
-				line.add(pp);                           //  6-OrderLine
+				line.add(pp);                           //  5-Product Name
+				// Add locator
+				line.add(getLocatorKeyNamePair(rs.getInt(5)));// 6-Locator
+
+
+
 				data.add(line);
 			}
 		}
@@ -318,13 +321,16 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 
 	protected void configureMiniTable (IMiniTable miniTable)
 	{
-		miniTable.setColumnClass(0, Boolean.class, false);     //  Selection
-		miniTable.setColumnClass(1, BigDecimal.class, false);      //  Qty
-		miniTable.setColumnClass(2, String.class, true);          //  UOM
-		miniTable.setColumnClass(3, String.class, false);  //  Locator
-		miniTable.setColumnClass(4, String.class, true);   //  Product
-		miniTable.setColumnClass(5, String.class, true); //  Product Value
-		miniTable.setColumnClass(6, String.class, true);     //  Order
+		miniTable.setColumnClass(0, Boolean.class, false);    	 //  Selection
+		miniTable.setColumnClass(1, String.class, true);    	 //  Order Line
+		miniTable.setColumnClass(2, BigDecimal.class, false);    //  Qty
+		miniTable.setColumnClass(3, String.class, true);         //  UOM
+		miniTable.setColumnClass(4, String.class, true); 		//  Product Value
+		miniTable.setColumnClass(5, String.class, true);   		//  Product Name
+		miniTable.setColumnClass(6, String.class, false); 		 //  Locator
+
+
+
 
 		//  Table UI
 		miniTable.autoSize();
@@ -365,17 +371,17 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		{
 			if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) {
 				// variable values
-				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 1); // Qty
-				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 2); // UOM
+				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 2); // Qty
+				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 3); // UOM
 				int C_UOM_ID = pp.getKey();
-				pp = (KeyNamePair) miniTable.getValueAt(i, 3); // Locator
+				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
 				// If a locator is specified on the product, choose that otherwise default locator
 				M_Locator_ID = pp!=null && pp.getKey()!=0 ? pp.getKey() : defaultLocator_ID;
 
-				pp = (KeyNamePair) miniTable.getValueAt(i, 4); // Product
+				pp = (KeyNamePair) miniTable.getValueAt(i, 5); // Product
 				int M_Product_ID = pp.getKey();
 				int C_OrderLine_ID = 0;
-				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // OrderLine
+				pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
 				if (pp != null)
 					C_OrderLine_ID = pp.getKey();
 
@@ -471,12 +477,12 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		//  Header Info
 	    Vector<String> columnNames = new Vector<String>(7);
 	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "Line", true));
 	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "M_Locator_ID"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "ProductValue", false));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "Value", false));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "Line", true));
+	    columnNames.add(Msg.translate(Env.getCtx(), "M_Locator_ID"));
 
 	    return columnNames;
 	}
