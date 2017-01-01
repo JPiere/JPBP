@@ -191,11 +191,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 			row.appendChild(bPartnerField.getComponent());
 			bPartnerField.fillHorizontal();
 		}
-		
-		row = rows.newRow();
-		row.appendChild(locatorLabel.rightAlign());
-		row.appendChild(locatorField.getComponent());
-		locatorField.fillHorizontal();
 
 		row = rows.newRow();
 		row.appendChild(new Space());
@@ -209,6 +204,11 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		row = rows.newRow();
 		row.appendChild(upcLabel.rightAlign());
 		row.appendChild(upcField.getComponent());
+		
+		row = rows.newRow();
+		row.appendChild(locatorLabel.rightAlign());
+		row.appendChild(locatorField.getComponent());
+		locatorField.fillHorizontal();
 
 	}
 
