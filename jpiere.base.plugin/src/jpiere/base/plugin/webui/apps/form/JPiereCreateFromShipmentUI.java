@@ -27,8 +27,6 @@
 
 package jpiere.base.plugin.webui.apps.form;
 
-import static org.compiere.model.SystemIDs.*;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,11 +116,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 	protected Label orderLabel = new Label();
 	protected Listbox orderField = ListboxFactory.newDropdownListbox();
 
-    /** Label for the rma selection */
-    protected Label rmaLabel = new Label();
-    /** Combo box for selecting RMA document */
-    protected Listbox rmaField = ListboxFactory.newDropdownListbox();
-
 	protected Checkbox sameWarehouseCb = new Checkbox();
 	protected Label locatorLabel = new Label();
 	protected WLocatorEditor locatorField = new WLocatorEditor();
@@ -147,6 +140,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		//  load Locator
 		MLocatorLookup locator = new MLocatorLookup(Env.getCtx(), p_WindowNo);
 		locatorField = new WLocatorEditor ("M_Locator_ID", true, false, true, locator, p_WindowNo);
+		locatorField.getComponent().addEventListener(Events.ON_CHANGE, this);
 
 		initBPartner(false);
 		bPartnerField.addValueChangeListener(this);
@@ -160,11 +154,8 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 
 	protected void zkInit() throws Exception
 	{
-    	boolean isRMAWindow = ((getGridTab().getAD_Window_ID() == WINDOW_RETURNTOVENDOR) || (getGridTab().getAD_Window_ID() == WINDOW_CUSTOMERRETURN));
-
-    	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
+       	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
 		orderLabel.setText(Msg.getElement(Env.getCtx(), "C_Order_ID", true));
-        rmaLabel.setText(Msg.translate(Env.getCtx(), "M_RMA_ID"));
 		locatorLabel.setText(Msg.translate(Env.getCtx(), "M_Locator_ID"));
         sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
         sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "FromSameWarehouseOnly", true));
@@ -186,12 +177,11 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 			row.appendChild(bPartnerField.getComponent());
 			bPartnerField.fillHorizontal();
 		}
-    	if (! isRMAWindow) {
-    		row.appendChild(orderLabel.rightAlign());
-    		row.appendChild(orderField);
-    		orderField.setHflex("1");
-    	}
 
+		row.appendChild(orderLabel.rightAlign());
+		row.appendChild(orderField);
+		orderField.setHflex("1");
+    	
 		row = rows.newRow();
 		row.appendChild(locatorLabel.rightAlign());
 		row.appendChild(locatorField.getComponent());
@@ -203,12 +193,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		row = rows.newRow();
 		row.appendChild(upcLabel.rightAlign());
 		row.appendChild(upcField.getComponent());
-    	if (isRMAWindow) {
-            // Add RMA document selection to panel
-            row.appendChild(rmaLabel.rightAlign());
-            row.appendChild(rmaField);
-            rmaField.setHflex("1");
-    	}
+
 	}
 
 	private boolean 	m_actionActive = false;
@@ -233,8 +218,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 			else
 			{
 				int C_Order_ID = pp.getKey();
-				//  set Invoice and Shipment to Null
-                rmaField.setSelectedIndex(-1);
 				loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
 			}
 		}
@@ -268,8 +251,8 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 			int row = findProductRow(product.get_ID());
 			if (row >= 0)
 			{
-				BigDecimal qty = (BigDecimal)model.getValueAt(row, 1);
-				model.setValueAt(qty, row, 1);
+				BigDecimal qty = (BigDecimal)model.getValueAt(row, 2);
+				model.setValueAt(qty, row, 2);
 				model.setValueAt(Boolean.TRUE, row, 0);
 				model.updateComponent(row, row);
 			}
@@ -285,12 +268,12 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 	 *
 	 */
 	private int findProductRow(int M_Product_ID)
-	{
+	{	
 		//DefaultTableModel model = (DefaultTableModel)dialog.getMiniTable().getModel();
-		ListModelTable model = (ListModelTable) window.getWListbox().getModel();
+		ListModelTable model = (ListModelTable) window.getWListbox().getModel();		
 		KeyNamePair kp;
 		for (int i=0; i<model.getRowCount(); i++) {
-			kp = (KeyNamePair)model.getValueAt(i, 4);
+			kp = (KeyNamePair)model.getValueAt(i, 5);
 			if (kp.getKey()==M_Product_ID) {
 				return(i);
 			}
@@ -362,7 +345,6 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 			if(knp.getKey()==C_Order_ID && C_Order_ID > 0)
 			{
 				orderField.setSelectedIndex(i);
-				rmaField.setSelectedIndex(-1);
 				loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
 			}
 		}

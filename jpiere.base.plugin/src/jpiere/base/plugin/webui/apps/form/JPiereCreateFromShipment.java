@@ -156,14 +156,13 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				+ "l.QtyOrdered - l.QtyDelivered," //1
 				+ " CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END,"	//	2
 				+ " l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name),"			//	3..4
-				+ " p.M_Locator_ID, loc.Value, " // 5..6
+				+ " l.JP_Locator_ID, loc.Value, " // 5..6
 				+ " COALESCE(l.M_Product_ID,0),COALESCE(p.Name,c.Name), " //	7..8
 				+ " p.Value AS ProductValue, " // 9
 				+ " l.C_OrderLine_ID,l.Line "	//	10..11
-				+ "FROM C_OrderLine l"
-					+ " LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND l.C_BPartner_ID = po.C_BPartner_ID) ");
+				+ "FROM C_OrderLine l");
 		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)"
-				+ " LEFT OUTER JOIN M_Locator loc on (p.M_Locator_ID=loc.M_Locator_ID)"
+				+ " LEFT OUTER JOIN M_Locator loc on (l.JP_Locator_ID=loc.M_Locator_ID)"
 				+ " LEFT OUTER JOIN C_Charge c ON (l.C_Charge_ID=c.C_Charge_ID)");
 		if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
 			sql.append(" LEFT OUTER JOIN C_UOM uom ON (l.C_UOM_ID=uom.C_UOM_ID)");
@@ -173,7 +172,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		//
 		sql.append(" WHERE l.C_Order_ID=? "			//	#1
 				+ "GROUP BY l.QtyOrdered,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END, "
-				+ "l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name), p.M_Locator_ID, loc.Value, p.Value, "
+				+ "l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name), l.JP_Locator_ID, loc.Value, p.Value, "
 				+ "l.M_Product_ID,COALESCE(p.Name,c.Name), l.Line,l.C_OrderLine_ID "
 				+ "ORDER BY l.Line");
 		//
@@ -278,6 +277,10 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 			{
 				locator = null;
 			}
+		}else{
+			KeyNamePair pp = null ;
+			pp = new KeyNamePair(0, "");
+			return pp;
 		}
 
 		// Try to use default locator from Order Warehouse
@@ -328,9 +331,6 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		miniTable.setColumnClass(4, String.class, true); 		//  Product Value
 		miniTable.setColumnClass(5, String.class, true);   		//  Product Name
 		miniTable.setColumnClass(6, String.class, false); 		 //  Locator
-
-
-
 
 		//  Table UI
 		miniTable.autoSize();
@@ -482,7 +482,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "ProductValue", false));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "M_Locator_ID"));
+	    columnNames.add(Msg.translate(Env.getCtx(), "JP_Locator_ID"));
 
 	    return columnNames;
 	}
