@@ -27,16 +27,13 @@
 
 package jpiere.base.plugin.webui.apps.form;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.form.WCreateFromWindow;
-import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Label;
@@ -49,14 +46,12 @@ import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WLocatorEditor;
 import org.adempiere.webui.editor.WSearchEditor;
-import org.adempiere.webui.editor.WStringEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.compiere.model.GridTab;
 import org.compiere.model.MLocatorLookup;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
-import org.compiere.model.MProduct;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -64,8 +59,6 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.Space;
 import org.zkoss.zul.Vlayout;
 
 /**
@@ -120,8 +113,6 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 
 	protected Label locatorLabel = new Label();
 	protected WLocatorEditor locatorField = new WLocatorEditor();
-	protected Label upcLabel = new Label();
-	protected WStringEditor upcField = new WStringEditor();
 
 	/**
 	 *  Dynamic Init
@@ -144,9 +135,6 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 		bPartnerField.addValueChangeListener(this);
 		locatorLabel.setMandatory(true);
 
-		upcField = new WStringEditor ("UPC", false, false, true, 10, 30, null, null);
-		upcField.getComponent().addEventListener(Events.ON_CHANGE, this);
-
 		return true;
 	}   //  dynInit
 
@@ -155,7 +143,6 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
     	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
         rmaLabel.setText(Msg.getElement(Env.getCtx(), "M_RMA_ID",isSOTrx));
 		locatorLabel.setText(Msg.translate(Env.getCtx(), "M_Locator_ID"));
-        upcLabel.setText(Msg.getElement(Env.getCtx(), "UPC", false));
 
 		Vlayout vlayout = new Vlayout();
 		vlayout.setVflex("1");
@@ -183,9 +170,6 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 		row.appendChild(locatorLabel.rightAlign());
 		row.appendChild(locatorField.getComponent());
 
-		row = rows.newRow();
-		row.appendChild(upcLabel.rightAlign());
-		row.appendChild(upcField.getComponent());
 	}
 
 	private boolean 	m_actionActive = false;
@@ -212,60 +196,10 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
                 loadRMA(M_RMA_ID, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
             }
         }
-		else if (e.getTarget().equals(upcField.getComponent()))
-		{
-			checkProductUsingUPC();
-		}
 
 		m_actionActive = false;
 	}
 
-	/**
-	 * Checks the UPC value and checks if the UPC matches any of the products in the
-	 * list.
-	 */
-	private void checkProductUsingUPC()
-	{
-		String upc = upcField.getDisplay();
-		//DefaultTableModel model = (DefaultTableModel) dialog.getMiniTable().getModel();
-		ListModelTable model = (ListModelTable) window.getWListbox().getModel();
-
-		// Lookup UPC
-		List<MProduct> products = MProduct.getByUPC(Env.getCtx(), upc, null);
-		for (MProduct product : products)
-		{
-			int row = findProductRow(product.get_ID());
-			if (row >= 0)
-			{
-				BigDecimal qty = (BigDecimal)model.getValueAt(row, 1);
-				model.setValueAt(qty, row, 1);
-				model.setValueAt(Boolean.TRUE, row, 0);
-				model.updateComponent(row, row);
-			}
-		}
-		upcField.setValue("");
-	}
-
-	/**
-	 * Finds the row where a given product is. If the product is not found
-	 * in the table -1 is returned.
-	 * @param M_Product_ID
-	 * @return  Row of the product or -1 if non existing.
-	 *
-	 */
-	private int findProductRow(int M_Product_ID)
-	{
-		//DefaultTableModel model = (DefaultTableModel)dialog.getMiniTable().getModel();
-		ListModelTable model = (ListModelTable) window.getWListbox().getModel();
-		KeyNamePair kp;
-		for (int i=0; i<model.getRowCount(); i++) {
-			kp = (KeyNamePair)model.getValueAt(i, 4);
-			if (kp.getKey()==M_Product_ID) {
-				return(i);
-			}
-		}
-		return(-1);
-	}
 
 	/**
 	 *  Change Listener
@@ -335,7 +269,6 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 			}
 		}
 	    rmaField.addActionListener(this);
-	    upcField.addValueChangeListener(this);
 	}
 
 
