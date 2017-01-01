@@ -66,7 +66,7 @@ import org.compiere.util.Msg;
  */
 public abstract class JPiereCreateFromShipment extends CreateFrom
 {
-	private int defaultLocator_ID=0;
+	protected int shipLocator_ID=0;
 
 	/**
 	 *  Protected Constructor
@@ -295,9 +295,9 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		// Try to get from locator field
 		if (locator == null)
 		{
-			if (defaultLocator_ID > 0)
+			if (shipLocator_ID > 0)
 			{
-				locator = MLocator.get(Env.getCtx(), defaultLocator_ID);
+				locator = MLocator.get(Env.getCtx(), shipLocator_ID);
 			}
 		}
 		// Validate Warehouse
@@ -357,7 +357,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 			return false;
 		}
 		*/
-		int M_Locator_ID = defaultLocator_ID;
+		int M_Locator_ID = shipLocator_ID;
 		if (M_Locator_ID == 0) {
 			return false;
 		}
@@ -374,9 +374,6 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 2); // Qty
 				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 3); // UOM
 				int C_UOM_ID = pp.getKey();
-				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
-				// If a locator is specified on the product, choose that otherwise default locator
-				M_Locator_ID = pp!=null && pp.getKey()!=0 ? pp.getKey() : defaultLocator_ID;
 
 				pp = (KeyNamePair) miniTable.getValueAt(i, 5); // Product
 				int M_Product_ID = pp.getKey();
@@ -489,7 +486,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 
 	protected Vector<Vector<Object>> getOrderData (int C_Order_ID, boolean forInvoice, int M_Locator_ID)
 	{
-		defaultLocator_ID = M_Locator_ID;
+		shipLocator_ID = M_Locator_ID;
 		return getOrderData (C_Order_ID, forInvoice);
 	}
 

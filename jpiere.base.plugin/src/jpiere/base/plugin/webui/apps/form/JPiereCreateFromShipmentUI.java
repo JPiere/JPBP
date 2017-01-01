@@ -50,13 +50,16 @@ import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WLocatorEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WStringEditor;
+import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.compiere.model.GridTab;
-import org.compiere.model.MLocatorLookup;
+import org.compiere.model.MColumn;
+import org.compiere.model.MLocator;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MProduct;
+import org.compiere.model.MWarehouse;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -118,7 +121,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 
 	protected Checkbox sameWarehouseCb = new Checkbox();
 	protected Label locatorLabel = new Label();
-	protected WLocatorEditor locatorField = new WLocatorEditor();
+	protected WTableDirEditor locatorField = null;
 	protected Label upcLabel = new Label();
 	protected WStringEditor upcField = new WStringEditor();
 
@@ -138,8 +141,19 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		sameWarehouseCb.setSelected(true);
 		sameWarehouseCb.addActionListener(this);
 		//  load Locator
-		MLocatorLookup locator = new MLocatorLookup(Env.getCtx(), p_WindowNo);
-		locatorField = new WLocatorEditor ("M_Locator_ID", true, false, true, locator, p_WindowNo);
+		int AD_Column_ID = MColumn.getColumn_ID("M_InOutLine", "M_Locator_ID");
+		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
+		locatorField = new WTableDirEditor("M_Locator_ID", true, false, true, lookupLocator);
+		MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
+		if (wh != null)
+		{
+			MLocator locator = wh.getDefaultLocator();
+			if(locator != null)
+			{
+				locatorField.setValue(locator.getM_Locator_ID());
+				shipLocator_ID = locator.getM_Locator_ID();
+			}
+		}
 		locatorField.getComponent().addEventListener(Events.ON_CHANGE, this);
 
 		initBPartner(false);
@@ -163,7 +177,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 
 		Vlayout vlayout = new Vlayout();
 		vlayout.setVflex("1");
-		vlayout.setWidth("100%");
+		vlayout.setWidth("98%");
     	Panel parameterPanel = window.getParameterPanel();
 		parameterPanel.appendChild(vlayout);
 
@@ -177,19 +191,21 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 			row.appendChild(bPartnerField.getComponent());
 			bPartnerField.fillHorizontal();
 		}
-
-		row.appendChild(orderLabel.rightAlign());
-		row.appendChild(orderField);
-		orderField.setHflex("1");
-    	
+		
 		row = rows.newRow();
 		row.appendChild(locatorLabel.rightAlign());
 		row.appendChild(locatorField.getComponent());
+		locatorField.fillHorizontal();
 
 		row = rows.newRow();
 		row.appendChild(new Space());
 		row.appendChild(sameWarehouseCb);
-
+		
+		row = rows.newRow();
+		row.appendChild(orderLabel.rightAlign());
+		row.appendChild(orderField);
+		orderField.setHflex("1");
+		
 		row = rows.newRow();
 		row.appendChild(upcLabel.rightAlign());
 		row.appendChild(upcField.getComponent());
@@ -220,6 +236,8 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 				int C_Order_ID = pp.getKey();
 				loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
 			}
+		}else if(e.getTarget().equals(locatorField.getComponent())){
+			shipLocator_ID = (Integer)locatorField.getValue();
 		}
 		//sameWarehouseCb
         else if (e.getTarget().equals(sameWarehouseCb))
@@ -312,7 +330,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		//  load BPartner
 		int AD_Column_ID = 3499;        //  C_Invoice.C_BPartner_ID
 		MLookup lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
-		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, false, true, lookup);
+		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, true, true, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
 		bPartnerField.setValue(new Integer(C_BPartner_ID));
