@@ -44,14 +44,16 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.editor.WEditor;
-import org.adempiere.webui.editor.WLocatorEditor;
 import org.adempiere.webui.editor.WSearchEditor;
+import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.compiere.model.GridTab;
-import org.compiere.model.MLocatorLookup;
+import org.compiere.model.MColumn;
+import org.compiere.model.MLocator;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
+import org.compiere.model.MWarehouse;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -59,6 +61,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Vlayout;
 
 /**
@@ -112,7 +115,8 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
     protected Listbox rmaField = ListboxFactory.newDropdownListbox();
 
 	protected Label locatorLabel = new Label();
-	protected WLocatorEditor locatorField = new WLocatorEditor();
+	// Locator
+	protected WTableDirEditor locatorField = null;
 
 	/**
 	 *  Dynamic Init
@@ -128,8 +132,20 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 		window.setTitle(getTitle());
 
 		//  load Locator
-		MLocatorLookup locator = new MLocatorLookup(Env.getCtx(), p_WindowNo);
-		locatorField = new WLocatorEditor ("M_Locator_ID", true, false, true, locator, p_WindowNo);
+		int AD_Column_ID = MColumn.getColumn_ID("M_InOutLine", "M_Locator_ID");
+		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
+		locatorField = new WTableDirEditor("M_Locator_ID", true, false, true, lookupLocator);
+		MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
+		if (wh != null)
+		{
+			MLocator locator = wh.getDefaultLocator();
+			if(locator != null)
+			{
+				locatorField.setValue(locator.getM_Locator_ID());
+				receiptLocator_ID = locator.getM_Locator_ID();
+			}
+		}
+		locatorField.getComponent().addEventListener(Events.ON_CHANGE, this);
 
 		initBPartner(false);
 		bPartnerField.addValueChangeListener(this);
@@ -146,7 +162,7 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 
 		Vlayout vlayout = new Vlayout();
 		vlayout.setVflex("1");
-		vlayout.setWidth("100%");
+		vlayout.setWidth("98%");
     	Panel parameterPanel = window.getParameterPanel();
 		parameterPanel.appendChild(vlayout);
 
@@ -162,6 +178,7 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 		}
     	
         // Add RMA document selection to panel
+		row = rows.newRow();
         row.appendChild(rmaLabel.rightAlign());
         row.appendChild(rmaField);
         rmaField.setHflex("1");
@@ -195,7 +212,9 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
                 int M_RMA_ID = pp.getKey();
                 loadRMA(M_RMA_ID, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
             }
-        }
+        }else if(e.getTarget().equals(locatorField.getComponent())){
+			receiptLocator_ID = (Integer)locatorField.getValue();
+		}
 
 		m_actionActive = false;
 	}

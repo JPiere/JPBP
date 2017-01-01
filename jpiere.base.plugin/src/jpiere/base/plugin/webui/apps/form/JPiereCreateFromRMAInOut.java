@@ -73,9 +73,8 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	private MRMA            m_rma = null;
 	protected MDocType 		m_DocType = null;
 	protected boolean		isSOTrx = true;
-
 	
-	private int defaultLocator_ID=0;
+	protected int receiptLocator_ID=0;
 
 	/**
 	 *  Protected Constructor
@@ -274,8 +273,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 			            line.add(qtyEntered);  // 3-Qty
 			            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
 			            line.add(pp); // 4-UOM
-						line.add(getLocatorKeyNamePair(0)); //5-Locator
-						line.add(null); //6-Vendor Product No				
+						line.add(null); //5-Vendor Product No				
 						data.add(line);
 						
 						break;
@@ -293,8 +291,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	            line.add(rs.getBigDecimal(3));  // 3-Qty
 	            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
 	            line.add(pp); // 4-UOM
-				line.add(getLocatorKeyNamePair(0)); //5-Locator
-				line.add(null); //6-Vendor Product No
+				line.add(null); //5-Vendor Product No
 	            data.add(line);
             }
 	    }
@@ -346,9 +343,9 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 		// Try to get from locator field
 		if (locator == null)
 		{
-			if (defaultLocator_ID > 0)
+			if (receiptLocator_ID > 0)
 			{
-				locator = MLocator.get(Env.getCtx(), defaultLocator_ID);
+				locator = MLocator.get(Env.getCtx(), receiptLocator_ID);
 			}
 		}
 		// Validate Warehouse
@@ -380,8 +377,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 		miniTable.setColumnClass(2, String.class, true);   //  Product
 		miniTable.setColumnClass(3, BigDecimal.class, false);      //  Qty
 		miniTable.setColumnClass(4, String.class, true);          //  UOM
-		miniTable.setColumnClass(5, String.class, false);  //  Locator
-		miniTable.setColumnClass(6, String.class, true); //  VendorProductNo
+		miniTable.setColumnClass(5, String.class, true); //  VendorProductNo
 		//  Table UI
 		miniTable.autoSize();
 
@@ -407,7 +403,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 			return false;
 		}
 		*/
-		int M_Locator_ID = defaultLocator_ID;
+		int M_Locator_ID = receiptLocator_ID;
 		if (M_Locator_ID == 0) {
 			return false;
 		}
@@ -424,9 +420,6 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 3); // Qty
 				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 4); // UOM
 				int C_UOM_ID = pp.getKey();
-				pp = (KeyNamePair) miniTable.getValueAt(i, 5); // Locator
-				// If a locator is specified on the product, choose that otherwise default locator
-				M_Locator_ID = pp!=null && pp.getKey()!=0 ? pp.getKey() : defaultLocator_ID;
 
 				pp = (KeyNamePair) miniTable.getValueAt(i, 2); // Product
 				int M_Product_ID = pp.getKey();
@@ -544,14 +537,13 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "M_Locator_ID"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", false));
 	    return columnNames;
 	}
 
 	protected Vector<Vector<Object>> getRMAData (int M_RMA_ID, int M_Locator_ID)
 	{
-		defaultLocator_ID = M_Locator_ID;
+		receiptLocator_ID = M_Locator_ID;
 		return getRMAData (M_RMA_ID);
 	}
 
