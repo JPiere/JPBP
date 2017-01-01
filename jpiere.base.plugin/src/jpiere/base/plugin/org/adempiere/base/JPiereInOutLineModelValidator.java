@@ -22,6 +22,7 @@ import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Msg;
 
@@ -74,7 +75,7 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 			}
 
 
-			//JPIERE-0212
+			//JPIERE-0212:Check InOutLineConfirm
 			if(MSysConfig.getBooleanValue("JP_CHECK_INOUTLINE_CONFIRM", false,  iol.getAD_Client_ID(), iol.getAD_Org_ID()))
 			{
 				MInOutConfirm[] ioConfirms =  iol.getParent().getConfirmations(false);
@@ -84,7 +85,8 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					{
 						return Msg.getMsg(iol.getCtx(), "JP_CanNotAddLineForConfirmations");//You can not add a line because of Confirmations.
 
-					}else if(type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("QtyEntered")){
+					}else if(type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("QtyEntered")
+							&& !iol.getParent().getDocAction().equals(DocAction.ACTION_Void)){
 
 						return Msg.getMsg(iol.getCtx(), "JP_CanNotChangeQtyForConfirmations");//You can not change Qty because of Confirmations.
 					}
