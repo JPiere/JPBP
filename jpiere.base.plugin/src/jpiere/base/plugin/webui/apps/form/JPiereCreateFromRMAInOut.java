@@ -272,8 +272,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 						line.add(pp); // 2-Product            
 			            line.add(qtyEntered);  // 3-Qty
 			            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
-			            line.add(pp); // 4-UOM
-						line.add(null); //5-Vendor Product No				
+			            line.add(pp); // 4-UOM			
 						data.add(line);
 						
 						break;
@@ -291,7 +290,6 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	            line.add(rs.getBigDecimal(3));  // 3-Qty
 	            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
 	            line.add(pp); // 4-UOM
-				line.add(null); //5-Vendor Product No
 	            data.add(line);
             }
 	    }
@@ -377,7 +375,6 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 		miniTable.setColumnClass(2, String.class, true);   //  Product
 		miniTable.setColumnClass(3, BigDecimal.class, false);      //  Qty
 		miniTable.setColumnClass(4, String.class, true);          //  UOM
-		miniTable.setColumnClass(5, String.class, true); //  VendorProductNo
 		//  Table UI
 		miniTable.autoSize();
 
@@ -537,7 +534,6 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", false));
 	    return columnNames;
 	}
 

@@ -169,7 +169,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 	{
        	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
 		orderLabel.setText(Msg.getElement(Env.getCtx(), "C_Order_ID", true));
-		locatorLabel.setText(Msg.translate(Env.getCtx(), "M_Locator_ID"));
+		locatorLabel.setText(Msg.translate(Env.getCtx(), "JP_ShipLocator_ID"));
         sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
         sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "FromSameWarehouseOnly", true));
         upcLabel.setText(Msg.getElement(Env.getCtx(), "UPC", false));
