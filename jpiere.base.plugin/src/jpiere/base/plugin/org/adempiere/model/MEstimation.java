@@ -25,13 +25,18 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MQuery;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.model.PrintInfo;
 import org.compiere.model.Query;
+import org.compiere.print.MPrintFormat;
+import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -71,7 +76,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 	 */
 	public String getDocumentInfo()
 	{
-		MDocType dt = MDocType.get(getCtx(), 0);
+		MDocType dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
 		return dt.getNameTrl() + " " + getDocumentNo();
 	}	//	getDocumentInfo
 
@@ -91,19 +96,51 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			log.severe("Could not create PDF - " + e.getMessage());
 		}
 		return null;
+
 	}	//	getPDF
 
 	/**
 	 * 	Create PDF file
 	 *	@param file output file
 	 *	@return file if success
+	 *
+	 *	Thanks - Takanobu Tsuchii
 	 */
 	public File createPDF (File file)
 	{
-	//	ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.INVOICE, getC_Invoice_ID());
-	//	if (re == null)
-			return null;
-	//	return re.getPDF(file);
+		// set query to search this document
+		int m_docid = getJP_Estimation_ID();
+		MQuery query = new MQuery(Table_Name);
+		query.addRestriction( COLUMNNAME_JP_Estimation_ID, MQuery.EQUAL, new Integer(m_docid));
+
+		// get Print Format
+		//int AD_PrintFormat_ID = 1000133;
+		//System.out.print(getC_DocTypeTarget_ID());
+		int AD_PrintFormat_ID = getC_DocTypeTarget().getAD_PrintFormat_ID();
+		MPrintFormat pf = new  MPrintFormat(getCtx(), AD_PrintFormat_ID, get_TrxName());
+
+		// set PrintInfo (temp)
+		PrintInfo info = new PrintInfo("0", 0, 0, 0);
+
+		// Create ReportEngine
+		//ReportEngine re = ReportEngine.get(getCtx(), ReportEngine.JPE,  getJP_Estimation_ID(), get_TrxName());
+		ReportEngine re = new ReportEngine(getCtx(), pf, query, info);
+
+		// For JaperReport
+		//System.out.print("PrintFormat: " + re.getPrintFormat().get_ID());
+		//MPrintFormat format = re.getPrintFormat();
+		// We have a Jasper Print Format
+		// ==============================
+		if(pf.getJasperProcess_ID() > 0)
+		{
+			ProcessInfo pi = new ProcessInfo ("", pf.getJasperProcess_ID());
+			pi.setRecord_ID ( getJP_Estimation_ID() );
+			pi.setIsBatch(true);
+		}
+		// Standard Print Format (Non-Jasper)
+		// ==================================
+
+		return re.getPDF(file);
 	}	//	createPDF
 
 
@@ -515,8 +552,8 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		// automatic deletion of lines is driven by model cascade definition in dictionary - see IDEMPIERE-2060
 		return true;
 	}	//	beforeDelete
-	
-	
+
+
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
@@ -525,7 +562,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		{
 			setC_DocType_ID(getC_DocTypeTarget_ID());
 		}
-		
+
 		if( newRecord || is_ValueChanged("JP_DocTypeSO_ID") )
 		{
 			if(getJP_DocTypeSO_ID()==0)
@@ -537,7 +574,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			}
 
 		}
-		
+
 		return true;
 	}
 
@@ -635,7 +672,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			options[index++] = DocumentEngine.ACTION_ReActivate;
 			return index;
 		}
-		
+
 		if(docStatus.equals(DocAction.STATUS_Drafted))
 		{
 			index = 0; //initialize the index
