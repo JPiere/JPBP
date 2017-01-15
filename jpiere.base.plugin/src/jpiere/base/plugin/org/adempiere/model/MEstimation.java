@@ -37,6 +37,7 @@ import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
+import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -129,18 +130,23 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		// For JaperReport
 		//System.out.print("PrintFormat: " + re.getPrintFormat().get_ID());
 		//MPrintFormat format = re.getPrintFormat();
-		// We have a Jasper Print Format
-		// ==============================
-		if(pf.getJasperProcess_ID() > 0)
-		{
-			ProcessInfo pi = new ProcessInfo ("", pf.getJasperProcess_ID());
-			pi.setRecord_ID ( getJP_Estimation_ID() );
-			pi.setIsBatch(true);
-		}
-		// Standard Print Format (Non-Jasper)
-		// ==================================
+			// We have a Jasper Print Format
+			// ==============================
+			if(pf.getJasperProcess_ID() > 0)
+			{
+				ProcessInfo pi = new ProcessInfo ("", pf.getJasperProcess_ID());
+				pi.setRecord_ID ( getJP_Estimation_ID() );
+				pi.setIsBatch(true);
 
-		return re.getPDF(file);
+				ServerProcessCtl.process(pi, null);
+
+				return pi.getPDFReport();
+
+			}
+			// Standard Print Format (Non-Jasper)
+			// ==================================
+
+			return re.getPDF(file);
 	}	//	createPDF
 
 
