@@ -13,7 +13,6 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.callout;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,16 +42,31 @@ public class JPiereEstimationCallout implements IColumnCallout {
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 
+		if(mField.getColumnName().equals("C_DocTypeTarget_ID"))
+		{
+			Integer C_DocTypeTarget_ID = (Integer)value;
+			mTab.setValue ("C_DocType_ID", C_DocTypeTarget_ID);
+		}
+
+
 		if(mField.getColumnName().equals("JP_DocTypeSO_ID"))
 		{
-			Integer C_DocType_ID = (Integer)value;		//	Actually JP_DocTypeSO_ID is JP_Estimtion Table
-			if (C_DocType_ID == null || C_DocType_ID.intValue() == 0)
+			Integer JP_DocTypeSO_ID = (Integer)value;		//	Actually JP_DocTypeSO_ID is JP_Estimtion Table
+			if (JP_DocTypeSO_ID == null || JP_DocTypeSO_ID.intValue() == 0)
 			{
 				Env.setContext(ctx, WindowNo, "OrderType", MDocType.DOCSUBTYPESO_StandardOrder);
 				mTab.setValue ("OrderType",  MDocType.DOCSUBTYPESO_StandardOrder);
 				return "";
 			}
-	
+
+			MDocType docTypeSO = MDocType.get(ctx, JP_DocTypeSO_ID);
+			String DocSubTypeSO = docTypeSO.getDocSubTypeSO();
+			if (DocSubTypeSO == null)
+				DocSubTypeSO = "--";
+			Env.setContext(ctx, WindowNo, "OrderType", DocSubTypeSO);
+			mTab.setValue ("OrderType", DocSubTypeSO);
+
+
 			//	Re-Create new DocNo, if there is a doc number already
 			//	and the existing source used a different Sequence number
 			String oldDocNo = (String)mTab.getValue("DocumentNo");
@@ -60,7 +74,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 			if (!newDocNo && oldDocNo.startsWith("<") && oldDocNo.endsWith(">"))
 				newDocNo = true;
 			Integer oldC_DocType_ID = (Integer)mTab.getValue("C_DocType_ID");
-	
+
 			String sql = "SELECT d.DocSubTypeSO,d.HasCharges,"			//	1..2
 				+ "d.IsDocNoControlled,"     //  3
 				+ "s.AD_Sequence_ID,d.IsSOTrx "                             //	4..5
@@ -72,7 +86,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 			try
 			{
 				int oldAD_Sequence_ID = 0;
-	
+
 				//	Get old AD_SeqNo for comparison
 				if (!newDocNo && oldC_DocType_ID.intValue() != 0)
 				{
@@ -85,25 +99,18 @@ public class JPiereEstimationCallout implements IColumnCallout {
 					rs = null;
 					pstmt = null;
 				}
-				
+
 				pstmt = DB.prepareStatement(sql, null);
-				pstmt.setInt(1, C_DocType_ID.intValue());
+				pstmt.setInt(1, JP_DocTypeSO_ID.intValue());
 				rs = pstmt.executeQuery();
-				String DocSubTypeSO = "";
+
 				boolean IsSOTrx = true;
 				if (rs.next())		//	we found document type
 				{
-					//	Set Context:	Document Sub Type for Sales Orders
-					DocSubTypeSO = rs.getString("DocSubTypeSO");
-					if (DocSubTypeSO == null)
-						DocSubTypeSO = "--";
-					Env.setContext(ctx, WindowNo, "OrderType", DocSubTypeSO);
-					mTab.setValue ("OrderType", DocSubTypeSO);
-					
 					//	No Drop Ship other than Standard
 					if (!DocSubTypeSO.equals(MOrder.DocSubTypeSO_Standard))
 						mTab.setValue ("IsDropShip", "N");
-					
+
 					//	Delivery Rule
 					if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS))
 						mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Force);
@@ -111,7 +118,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 						mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_AfterReceipt);
 					else
 						mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Availability);
-					
+
 					//	Invoice Rule
 					if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS)
 						|| DocSubTypeSO.equals(MOrder.DocSubTypeSO_Prepay)
@@ -119,20 +126,20 @@ public class JPiereEstimationCallout implements IColumnCallout {
 						mTab.setValue ("InvoiceRule", X_C_Order.INVOICERULE_Immediate);
 					else
 						mTab.setValue ("InvoiceRule", X_C_Order.INVOICERULE_AfterDelivery);
-					
+
 					//	Payment Rule - POS Order
 					if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS))
 						mTab.setValue("PaymentRule", X_C_Order.PAYMENTRULE_Cash);
 					else
 						mTab.setValue("PaymentRule", X_C_Order.PAYMENTRULE_OnCredit);
-	
+
 					//	IsSOTrx
 					if ("N".equals(rs.getString("IsSOTrx")))
 						IsSOTrx = false;
-	
+
 					//	Set Context:
 					Env.setContext(ctx, WindowNo, "HasCharges", rs.getString("HasCharges"));
-	
+
 					//	DocumentNo
 	//				if (rs.getString("IsDocNoControlled").equals("Y"))			//	IsDocNoControlled
 	//				{
@@ -144,15 +151,15 @@ public class JPiereEstimationCallout implements IColumnCallout {
 	//					}
 	//				}
 				}
-				
+
 				DB.close(rs, pstmt);
 				rs = null;
 				pstmt = null;
-				
+
 				//  When BPartner is changed, the Rules are not set if
 				//  it is a POS or Credit Order (i.e. defaults from Standard BPartner)
 				//  This re-reads the Rules and applies them.
-				if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS) 
+				if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS)
 					|| DocSubTypeSO.equals(MOrder.DocSubTypeSO_Prepay))    //  not for POS/PrePay
 					;
 				else
@@ -201,7 +208,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 						if (s != null && s.length() != 0)
 							mTab.setValue("DeliveryViaRule", s);
 					}
-				} 
+				}
 				//  re-read customer rules
 			}
 			catch (SQLException e)
@@ -215,19 +222,19 @@ public class JPiereEstimationCallout implements IColumnCallout {
 				rs = null; pstmt = null;
 			}
 		}
-		
+
 		if(mField.getColumnName().equals("C_Opportunity_ID") && value!=null)
 		{
-			Integer C_Opportunity_ID = (Integer)value;	
-			
+			Integer C_Opportunity_ID = (Integer)value;
+
 //			SELECT COALESCE(MAX(Version),0)+10 AS DefaultValue FROM JP_EstimationLine WHERE C_Opportunity_ID=@C_Opportunity_ID@
-			
+
 			String sql = "SELECT COALESCE(MAX(Version),0)+1 "			//1
 					+ "FROM JP_Estimation "
 					+ "WHERE C_Opportunity_ID=?";	//	#1
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
-				
+
 			try
 			{
 				pstmt = DB.prepareStatement(sql, null);
@@ -246,7 +253,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 				rs = null; pstmt = null;
 				}
 		}
-		
+
 		return "";
 	}
 

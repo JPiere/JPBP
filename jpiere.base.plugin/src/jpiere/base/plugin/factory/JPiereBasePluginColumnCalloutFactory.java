@@ -16,6 +16,13 @@ package jpiere.base.plugin.factory;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.adempiere.base.IColumnCallout;
+import org.adempiere.base.IColumnCalloutFactory;
+import org.compiere.model.MInOut;
+import org.compiere.model.MLocation;
+import org.compiere.model.MOrder;
+import org.compiere.model.MPayment;
+
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
@@ -32,13 +39,6 @@ import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
-
-import org.adempiere.base.IColumnCallout;
-import org.adempiere.base.IColumnCalloutFactory;
-import org.compiere.model.MInOut;
-import org.compiere.model.MLocation;
-import org.compiere.model.MOrder;
-import org.compiere.model.MPayment;
 
 /**
  *  JPiere Base Plugin Callout Factory
@@ -89,14 +89,15 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 					list.add(new JPiereInvValAdjustCallout());
 				}
 			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
-				if(columnName.equals(MEstimation.COLUMNNAME_C_DocType_ID)
+				if(columnName.equals(MEstimation.COLUMNNAME_JP_DocTypeSO_ID)
+						|| columnName.equals(MEstimation.COLUMNNAME_C_DocTypeTarget_ID)
 						|| columnName.equals(MEstimation.COLUMNNAME_C_Opportunity_ID))
 				{
 					list.add(new JPiereEstimationCallout());
-				}				
+				}
 			}
-			
-			
+
+
 		}else{
 
 			if(tableName.equals(MPayment.Table_Name))
