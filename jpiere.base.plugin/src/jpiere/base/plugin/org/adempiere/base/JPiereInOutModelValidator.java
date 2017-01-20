@@ -17,8 +17,6 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
-
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
@@ -38,6 +36,8 @@ import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 
 public class JPiereInOutModelValidator implements ModelValidator {
 
@@ -84,7 +84,8 @@ public class JPiereInOutModelValidator implements ModelValidator {
 			}
 
 			if(type == ModelValidator.TYPE_BEFORE_NEW
-					|| (type == ModelValidator.TYPE_BEFORE_CHANGE && io.is_ValueChanged("JP_ScheduledInOutDate")) )
+					|| (type == ModelValidator.TYPE_BEFORE_CHANGE
+						&&( io.is_ValueChanged("JP_ScheduledInOutDate")	|| io.is_ValueChanged("C_BPartner_Location_ID") || io.is_ValueChanged("M_Warehouse_ID")) ))
 			{
 				String trxName = po.get_TrxName();
 				MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());

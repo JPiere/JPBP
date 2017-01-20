@@ -178,8 +178,7 @@ public class CreateNonBusinessDay extends SvrProcess {
 
 	private boolean isExistHoliday(Timestamp holidayDate, int C_Country_ID, int AD_Org_ID )
 	{
-		StringBuilder sql = new StringBuilder("SELECT Date1 ")
-				.append("FROM C_NonBusinessDay");
+		StringBuilder sql = new StringBuilder("SELECT Date1 FROM C_NonBusinessDay");
 		if(C_Country_ID > 0)
 			sql.append(" WHERE AD_Client_ID=? AND C_Calendar_ID=? AND AD_Org_ID=? AND C_Country_ID=? AND Date1=? " );
 		else
