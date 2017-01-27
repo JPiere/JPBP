@@ -13,6 +13,7 @@ CREATE TABLE adempiere.T_OpenInvPointOfTimeJP
   C_BPartner_ID numeric(10,0) NOT NULL,
   JP_Corporation_ID numeric(10,0),
   C_Currency_ID numeric(10,0) NOT NULL,
+  JP_CurrencyTo_ID numeric(10,0),
   SalesRep_ID numeric(10,0),
   C_PaymentTerm_ID numeric(10,0) NOT NULL,
   C_AcctSchema_ID  numeric(10,0) ,
@@ -25,12 +26,16 @@ CREATE TABLE adempiere.T_OpenInvPointOfTimeJP
   DocStatus character(2) NOT NULL,
   DateInvoiced timestamp without time zone,
   DateAcct timestamp without time zone,
-  JP_PointOfTime timestamp without time zone
+  JP_PointOfTime timestamp without time zone,
   IsPaid character(1) NOT NULL DEFAULT 'N'::bpchar,
   IsSOTrx character(1) NOT NULL DEFAULT 'N'::bpchar,
   GrandTotal numeric NOT NULL DEFAULT 0,
   OpenAmt numeric NOT NULL DEFAULT 0,
-  JP_OpenAmtPointOfTime numeric NOT NULL DEFAULT 0
+  JP_OpenAmtPointOfTime numeric NOT NULL DEFAULT 0,
+  JP_ExchangedGrandTotal numeric NOT NULL DEFAULT 0,
+  JP_ExchangedOpenAmt numeric NOT NULL DEFAULT 0,
+  JP_ExchangedOpenAmtPOT numeric NOT NULL DEFAULT 0,
+  Rate numeric NOT NULL DEFAULT 0 
 )
 WITH (
   OIDS=FALSE

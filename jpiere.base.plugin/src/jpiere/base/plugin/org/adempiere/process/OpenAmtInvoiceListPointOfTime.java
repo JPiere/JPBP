@@ -22,6 +22,8 @@ import java.util.logging.Level;
 
 import jpiere.base.plugin.util.JPiereInvoiceUtil;
 
+import org.compiere.model.MAcctSchema;
+import org.compiere.model.MConversionRate;
 import org.compiere.model.MInvoice;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -34,10 +36,11 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 	private int		p_AD_PInstance_ID = 0;
 	private int		p_AD_Client_ID = 0;
 	private int		p_AD_Org_ID = 0;
-	private Timestamp	p_JP_PointOfTime = null;			//Mandatory
+	private Timestamp	p_JP_PointOfTime = null;	//Mandatory
 	private int 		p_C_BPartner_ID = 0;
 	private int		p_JP_Corporation_ID = 0;
 	private int		p_C_AcctSchema_ID = 0;		//Mandatory
+	private MAcctSchema m_MAcctSchema = null;
 	private boolean	p_IsSOTrx = false;			//Mandatory
 
 
@@ -76,6 +79,8 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			}//if
 		}//for
 
+		m_MAcctSchema = MAcctSchema.get(getCtx(), p_C_AcctSchema_ID);
+		
 	}
 
 	@Override
@@ -85,7 +90,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		
 		
 		/**
-		 * 
+		 * Get Data of IsPaid = 'N'
 		 */
 		StringBuilder sql1 = new StringBuilder("SELECT "
 						+"dt.DocBaseType"
@@ -174,7 +179,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		
 		
 		/**
-		 * 
+		 * Get Date of IsPaid = 'Y'
 		 */
 		StringBuilder sql2 = new StringBuilder("SELECT DISTINCT "
 								+ " dt.DocBaseType"
@@ -271,7 +276,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		
 		
 		/**
-		 * Insert temporally teble
+		 * Insert to temporally teble
 		 */
 		
 		StringBuilder sql3 = new StringBuilder("INSERT INTO T_OpenInvPointOfTimeJP("
@@ -284,7 +289,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				+ ", C_BPartner_ID"			//7
 				+ ", JP_Corporation_ID"		//8
 				+ ", C_Currency_ID"			//9
-				+ ", Salesrep_ID"			//10
+				+ ", SalesRep_ID"			//10
 				+ ", C_PaymentTerm_ID"		//11
 				+ ", C_AcctSchema_ID"		//12
 				+ ", C_ElementValue_ID"		//13
@@ -299,10 +304,16 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				+ ", IsPaid"				//22
 				+ ", IsSOTrx"				//23
 				+ ", Grandtotal"			//24
-				+ ", Openamt"				//25
+				+ ", OpenAmt"				//25
 				+ ", JP_OpenAmtPointOfTime"	//26
-				+ ", JP_PointOfTime)"		//27
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
+				+ ", JP_CurrencyTo_ID"		//27
+				+ ", JP_ExchangedGrandtotal"//28
+				+ ", JP_ExchangedOpenAmt"	//29
+				+ ", JP_ExchangedOpenAmtPOT"//30
+				+ ", Rate"					//31
+				+ ", JP_PointOfTime"		//32
+				+ ")"
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,   ?, ?)");
 		
 		PreparedStatement pstmt3 = null;
 		ResultSet rs3 = null;
@@ -354,10 +365,21 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 					pstmt3.setBigDecimal(24, openAmtInv.getInvoice().getGrandTotal());
 				pstmt3.setBigDecimal(25, openAmtInv.getOpenAmt());
 				pstmt3.setBigDecimal(26, openAmtInv.getJP_OpenAmtPointOfTime());
-				pstmt3.setTimestamp(27, p_JP_PointOfTime);
-				int insertNum = pstmt3.executeUpdate();
-				if(insertNum != 1)
-					;
+				
+				//Foreign currency conversion
+				pstmt3.setInt(27, m_MAcctSchema.getC_Currency_ID());
+				if(openAmtInv.getInvoice().isCreditMemo())
+					pstmt3.setBigDecimal(28, openAmtInv.getJP_ExchangedGrandTotal().negate());
+				else
+					pstmt3.setBigDecimal(28, openAmtInv.getJP_ExchangedGrandTotal());				
+				
+				pstmt3.setBigDecimal(29, openAmtInv.getJP_ExchangedOpenAmt());			
+				pstmt3.setBigDecimal(30, openAmtInv.getJP_ExchangedOpenAmtPOT());	
+				pstmt3.setBigDecimal(31, openAmtInv.getRate());
+				
+				pstmt3.setTimestamp(32, p_JP_PointOfTime);
+				pstmt3.executeUpdate();
+
 			}
 
 		}catch (Exception e){
@@ -383,6 +405,10 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		
 		private BigDecimal OpenAmt = Env.ZERO;
 		private BigDecimal JP_OpenAmtPointOfTime = Env.ZERO;
+		private BigDecimal JP_ExchangedGrandTotal  = Env.ZERO;
+		private BigDecimal JP_ExchangedOpenAmt  = Env.ZERO;
+		private BigDecimal JP_ExchangedOpenAmtPOT  = Env.ZERO;
+		private BigDecimal Rate = Env.ONE;
 		
 		public OpemAmtInvoice (MInvoice invoice, String DocBaseType,int JP_Corporation_ID, int Account_ID)
 		{
@@ -392,7 +418,24 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			this.Account_ID = Account_ID;
 			OpenAmt =invoice.getOpenAmt(true, null);
 			JP_OpenAmtPointOfTime = JPiereInvoiceUtil.getOpenAmtPointOfTime(getCtx(), invoice, p_JP_PointOfTime, true, get_TrxName());
-
+			
+			
+			if(invoice.getC_Currency_ID() == m_MAcctSchema.getC_Currency_ID())
+			{
+				JP_ExchangedGrandTotal = invoice.getGrandTotal();
+				JP_ExchangedOpenAmt = OpenAmt;
+				JP_ExchangedOpenAmtPOT = JP_OpenAmtPointOfTime;
+				
+			}else{
+				JP_ExchangedGrandTotal= MConversionRate.convert (getCtx(),invoice.getGrandTotal(), invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(),
+														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
+				JP_ExchangedOpenAmt= MConversionRate.convert (getCtx(), OpenAmt, invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(),
+														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
+				JP_ExchangedOpenAmtPOT= MConversionRate.convert (getCtx(), JP_OpenAmtPointOfTime, invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(),
+														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
+				Rate = MConversionRate.getRate(invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(), 
+														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
+			}
 		}
 		
 		public MInvoice getInvoice(){return invoice;}
@@ -401,6 +444,11 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		public int getAccount_ID(){return  Account_ID;}
 		public BigDecimal getOpenAmt(){return OpenAmt;}
 		public BigDecimal getJP_OpenAmtPointOfTime(){return JP_OpenAmtPointOfTime;}
-	}
-}
+		public BigDecimal getJP_ExchangedGrandTotal(){return JP_ExchangedGrandTotal;}
+		public BigDecimal getJP_ExchangedOpenAmt(){return JP_ExchangedOpenAmt;}
+		public BigDecimal getJP_ExchangedOpenAmtPOT(){return JP_ExchangedOpenAmtPOT;}
+		public BigDecimal getRate(){return Rate;}
+	}//private class OpemAmtInvoice
+	
+}//public class OpenAmtInvoiceListPointOfTime 
 
