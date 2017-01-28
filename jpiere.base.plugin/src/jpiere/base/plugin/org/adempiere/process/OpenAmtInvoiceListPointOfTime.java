@@ -99,10 +99,18 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 						+",i.*"
 					+ " FROM C_Invoice i "
 					+ " INNER JOIN C_DocType dt ON (dt.C_DocType_ID = i.C_DocTypeTarget_ID)"
-					+ " INNER JOIN C_BPartner bp ON (bp.C_BPartner_ID = i.C_BPartner_ID)"
-						+ " INNER JOIN C_BP_Customer_Acct bpca ON (bp.C_BPartner_ID = bpca.C_BPartner_ID AND bpca.C_AcctSchema_ID = ?)"//1
-						+ " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)"
-					+ " WHERE i.IsPaid='N' AND i.AD_Client_ID = ? "//2 for use Table index
+					+ " INNER JOIN C_BPartner bp ON (bp.C_BPartner_ID = i.C_BPartner_ID)");
+		
+		if(p_IsSOTrx)
+		{
+			sql1.append(" INNER JOIN C_BP_Customer_Acct bpca ON (bp.C_BPartner_ID = bpca.C_BPartner_ID AND bpca.C_AcctSchema_ID = ?)"//1
+					    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");
+		}else{
+			sql1.append(" INNER JOIN C_BP_Vendor_Acct bpva ON (bp.C_BPartner_ID = bpva.C_BPartner_ID AND bpva.C_AcctSchema_ID = ?)"//1
+				    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");			
+		}
+
+		sql1.append(" WHERE i.IsPaid='N' AND i.AD_Client_ID = ? "//2 for use Table index
 						+ " AND i.DocStatus IN ('CO','CL','VO','RE') "
 						+ " AND i.DateAcct <= ?" //3
 						+ " AND i.IsSOTrx = ?"//4
@@ -190,11 +198,18 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 					    	+ " INNER JOIN C_AllocationLIne al ON (i.C_Invoice_ID = al.C_Invoice_ID)"
 					        + " INNER JOIN C_AllocationHdr a ON (al.C_AllocationHdr_ID = a.C_AllocationHdr_ID)"
 					        + " INNER JOIN C_DocType dt ON (dt.C_DocType_ID = i.C_DocTypeTarget_ID)"
-					        + " INNER JOIN C_BPartner bp ON (bp.C_BPartner_ID = i.C_BPartner_ID)"
-							+ " INNER JOIN C_BP_Customer_Acct bpca ON (bp.C_BPartner_ID = bpca.C_BPartner_ID AND bpca.C_AcctSchema_ID = ?)"
-						    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)"
+					        + " INNER JOIN C_BPartner bp ON (bp.C_BPartner_ID = i.C_BPartner_ID)");
+					        
+		if(p_IsSOTrx)
+		{
+			sql2.append(" INNER JOIN C_BP_Customer_Acct bpca ON (bp.C_BPartner_ID = bpca.C_BPartner_ID AND bpca.C_AcctSchema_ID = ?)"//1
+					    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");
+		}else{
+			sql2.append(" INNER JOIN C_BP_Vendor_Acct bpva ON (bp.C_BPartner_ID = bpva.C_BPartner_ID AND bpva.C_AcctSchema_ID = ?)"//1
+				    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");			
+		}
 			    
-							+ " WHERE i.IsPaid='Y' AND i.AD_Client_ID = ? "//2 for use Table index
+		sql2.append(" WHERE i.IsPaid='Y' AND i.AD_Client_ID = ? "//2 for use Table index
 								+ " AND i.DocStatus IN ('CO','CL','VO','RE') "
 								+ " AND i.DateAcct <= ?" //3
 								+ " AND a.DateAcct > ?" //4
