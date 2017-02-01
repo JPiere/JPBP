@@ -41,6 +41,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 	private int		p_JP_Corporation_ID = 0;
 	private int		p_C_AcctSchema_ID = 0;		//Mandatory
 	private MAcctSchema m_MAcctSchema = null;
+	private int 		p_Account_ID = 0;
 	private boolean	p_IsSOTrx = false;			//Mandatory
 
 
@@ -70,6 +71,9 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				
 			}else if(name.equals("C_AcctSchema_ID")){
 				p_C_AcctSchema_ID = para[i].getParameterAsInt();
+			
+			}else if(name.equals("Account_ID")){
+				p_Account_ID = para[i].getParameterAsInt();
 				
 			}else if(name.equals("IsSOTrx")){
 				p_IsSOTrx = para[i].getParameterAsString().equals("Y");
@@ -107,7 +111,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 					    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");
 		}else{
 			sql1.append(" INNER JOIN C_BP_Vendor_Acct bpva ON (bp.C_BPartner_ID = bpva.C_BPartner_ID AND bpva.C_AcctSchema_ID = ?)"//1
-				    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");			
+				    + " INNER JOIN C_ValidCombination vc ON (bpva.V_Liability_Acct = vc.C_ValidCombination_ID)");			
 		}
 
 		sql1.append(" WHERE i.IsPaid='N' AND i.AD_Client_ID = ? "//2 for use Table index
@@ -130,6 +134,12 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		{
 			sql1.append(" AND bp.JP_Corporation_ID= ? ");
 		}
+		
+		if(p_Account_ID > 0)
+		{
+			sql1.append(" AND vc.Account_ID= ? ");
+		}
+
 		
 		PreparedStatement pstmt1 = null;
 		ResultSet rs1 = null;
@@ -162,6 +172,12 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				pstmt1.setInt(i, p_JP_Corporation_ID);
 			}			
 			
+			if(p_Account_ID > 0)
+			{
+				i++;
+				pstmt1.setInt(i, p_Account_ID);
+			}			
+			
 			
 			rs1 = pstmt1.executeQuery();
 			while(rs1.next())
@@ -177,7 +193,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			}
 
 		}catch (Exception e){
-			//log.log(Level.SEVERE, preSql, e);
+			log.log(Level.SEVERE,sql1.toString(), e);
 		}
 		finally{
 			DB.close(rs1, pstmt1);
@@ -206,7 +222,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 					    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");
 		}else{
 			sql2.append(" INNER JOIN C_BP_Vendor_Acct bpva ON (bp.C_BPartner_ID = bpva.C_BPartner_ID AND bpva.C_AcctSchema_ID = ?)"//1
-				    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");			
+				    + " INNER JOIN C_ValidCombination vc ON (bpva.V_Liability_Acct = vc.C_ValidCombination_ID)");			
 		}
 			    
 		sql2.append(" WHERE i.IsPaid='Y' AND i.AD_Client_ID = ? "//2 for use Table index
@@ -229,6 +245,11 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		if(p_JP_Corporation_ID > 0)
 		{
 			sql2.append(" AND bp.JP_Corporation_ID= ? ");
+		}
+		
+		if(p_Account_ID > 0)
+		{
+			sql2.append(" AND vc.Account_ID= ? ");
 		}
 		
 		PreparedStatement pstmt2 = null;
@@ -263,6 +284,11 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				pstmt2.setInt(i, p_JP_Corporation_ID);
 			}			
 			
+			if(p_Account_ID > 0)
+			{
+				i++;
+				pstmt2.setInt(i, p_Account_ID);
+			}	
 			
 			rs2 = pstmt2.executeQuery();
 			OpemAmtInvoice  openAmnInv =null;
@@ -282,7 +308,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			}
 
 		}catch (Exception e){
-			//log.log(Level.SEVERE, preSql, e);
+			log.log(Level.SEVERE, sql2.toString(), e);
 		}
 		finally{
 			DB.close(rs2, pstmt2);
@@ -307,7 +333,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				+ ", SalesRep_ID"			//10
 				+ ", C_PaymentTerm_ID"		//11
 				+ ", C_AcctSchema_ID"		//12
-				+ ", C_ElementValue_ID"		//13
+				+ ", Account_ID"		//13
 				+ ", C_Doctype_ID"			//14
 				+ ", DocBasetype"			//15
 				+ ", Documentno"			//16

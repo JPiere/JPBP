@@ -17,7 +17,7 @@ CREATE TABLE adempiere.T_OpenInvPointOfTimeJP
   SalesRep_ID numeric(10,0),
   C_PaymentTerm_ID numeric(10,0) NOT NULL,
   C_AcctSchema_ID  numeric(10,0) ,
-  C_Elementvalue_ID numeric(10,0) ,
+  Account_ID numeric(10,0) ,
   C_DocType_ID numeric(10,0) NOT NULL,
   DocBaseType character(3) NOT NULL,
   DocumentNo character varying(30) NOT NULL,
