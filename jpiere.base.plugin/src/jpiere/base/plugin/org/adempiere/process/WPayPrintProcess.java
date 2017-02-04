@@ -17,6 +17,8 @@ import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.Level;
 
 import org.adempiere.util.IProcessUI;
@@ -132,9 +134,10 @@ public class WPayPrintProcess extends SvrProcess{
 
 				//Download the exported file
 
-				String routingNo = bankAccount.getBank().getRoutingNo();
 				String AccountNo = bankAccount.getAccountNo();
-				String dateString = paySelection.getPayDate().toString().substring(0,10).replace("-", "");
+				String payDateString = paySelection.getPayDate().toString().substring(0,10).replace("-", "");
+				LocalDateTime dateTime = LocalDateTime.now();
+				
 				int downloadNum = 0;
 				if( paySelection.get_ColumnIndex("JP_DownloadNum") > 0)
 				{
@@ -145,8 +148,9 @@ public class WPayPrintProcess extends SvrProcess{
 				}
 				
 				Path inputPath = FileSystems.getDefault().getPath(tempFile.getAbsolutePath());
-				Path outputPath = FileSystems.getDefault().getPath(tempFile.getParent() + "\\paymentExport_"
-									+ routingNo +"_" + AccountNo + "_" + dateString + (downloadNum == 0 ? "": "_" + downloadNum) +".txt");
+				Path outputPath = FileSystems.getDefault().getPath(tempFile.getParent() + "\\ExpPayment_"
+									+ AccountNo + "_" + payDateString + (downloadNum == 0 ? "": "_" + downloadNum)  
+									+ "_" + dateTime.truncatedTo(ChronoUnit.SECONDS).toString().replace(":", "").replace("-", "") + ".txt");
 
 				Files.copy(inputPath, outputPath);
 				tempFile.delete();
