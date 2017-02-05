@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_BillSchema
  *  @author iDempiere (generated) 
- *  @version Release 2.1
+ *  @version Release 4.1
  */
 @SuppressWarnings("all")
 public interface I_JP_BillSchema 
@@ -129,6 +129,19 @@ public interface I_JP_BillSchema
 
 	/** Get IsBillOrgJP	  */
 	public boolean isBillOrgJP();
+
+    /** Column name IsSOTrx */
+    public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
+
+	/** Set Sales Transaction.
+	  * This is a Sales Transaction
+	  */
+	public void setIsSOTrx (boolean IsSOTrx);
+
+	/** Get Sales Transaction.
+	  * This is a Sales Transaction
+	  */
+	public boolean isSOTrx();
 
     /** Column name JP_BillOrg_ID */
     public static final String COLUMNNAME_JP_BillOrg_ID = "JP_BillOrg_ID";

@@ -18,8 +18,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MBillLine;
@@ -27,6 +30,7 @@ import jpiere.base.plugin.org.adempiere.model.MBillSchema;
 
 import org.compiere.model.MBPartner;
 import org.compiere.model.MInvoice;
+import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -34,14 +38,16 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
-
-
 /**
- * JPIERE-0107 Crate Bill
- *
+ * JPIERE-0107 Create Bill by Process
+ * JPIERE-0275 Create Bill by Manual
+ * JPIERE-0276 Create Payment Request by Manual
+ * JPIERE-0278 Craate Payment Request by Process
  *
  *  @author Hideaki Hagiwara
  *
+ *
+ *	modified by Hiroshi Iwama
  */
 public class CreateBill extends SvrProcess {
 
@@ -65,44 +71,94 @@ public class CreateBill extends SvrProcess {
 	/**Target DocStatus(Mandatory)*/
 	private String		p_DocAction = "DR";
 
+	/*True if called from info window (if invoices are selected in the info window),
+	 * and False, otherwise.
+	 */
+	boolean IsCalledFromInfoWindow = false;
+
+	/**Invoices selected in the info window.*/
+	ArrayList<MInvoice> p_selectedInvoices = null;
 
 	/**
 	 *  Prepare - get Parameters.
 	 */
 	protected void prepare()
 	{
-		p_AD_Client_ID =getProcessInfo().getAD_Client_ID();
-		ProcessInfoParameter[] para = getParameter();
-		for (int i = 0; i < para.length; i++)
-		{
-			String name = para[i].getParameterName();
-			if (para[i].getParameter() == null){
-				;
-			}else if (name.equals("AD_Org_ID")){
-				p_AD_Org_ID = para[i].getParameterAsInt();
-			}else if (name.equals("C_BP_Group_ID")){
-				p_C_BP_Group_ID = para[i].getParameterAsInt();
-			}else if (name.equals("DateInvoiced")){
-				p_DateInvoiced_From = (Timestamp)para[i].getParameter();
-				p_DateInvoiced_To = (Timestamp)para[i].getParameter_To();
-				if(p_DateInvoiced_To!=null)
-				{
-					Calendar cal = Calendar.getInstance();
-					cal.setTimeInMillis(p_DateInvoiced_To.getTime());
-					cal.add(Calendar.DAY_OF_MONTH, 1);
-					p_DateInvoiced_To = new Timestamp(cal.getTimeInMillis());
-				}
-			}else if (name.equals("JPCutOffDate")){
-				p_JPCutOffDate = (Timestamp)para[i].getParameter();
-			}else if (name.equals("C_PaymentTerm_ID")){
-				p_C_PaymentTerm_ID = para[i].getParameterAsInt();
-			}else if (name.equals("DocAction")){
-				p_DocAction = para[i].getParameterAsString();
 
-			}else{
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
-			}//if
-		}//for
+		String whereClause = "EXISTS (SELECT T_Selection_ID FROM T_Selection WHERE T_Selection.AD_PInstance_ID=? " +
+				"AND T_Selection.T_Selection_ID = C_Invoice.C_Invoice_ID)";
+
+		Collection<MInvoice> selectedInvoices = new Query(getCtx(), "C_Invoice", whereClause, get_TrxName())
+						.setClient_ID()
+						.setParameters(new Object[]{getAD_PInstance_ID()})
+						.list();
+
+		/*
+		 *if invoices are selected, then the process is called from info window.
+		 */
+		if(selectedInvoices.size() != 0){
+			IsCalledFromInfoWindow = true;
+			p_selectedInvoices = (ArrayList<MInvoice>) selectedInvoices;
+		}
+
+		if(IsCalledFromInfoWindow){
+
+			p_AD_Client_ID =getProcessInfo().getAD_Client_ID();
+			ProcessInfoParameter[] para = getParameter();
+			for (int i = 0; i < para.length; i++)
+			{
+				String name = para[i].getParameterName();
+				if (para[i].getParameter() == null){
+					;
+				}else if (name.equals("C_PaymentTerm_ID")){
+					p_C_PaymentTerm_ID = para[i].getParameterAsInt();
+				}else if (name.equals("DocAction")){
+					p_DocAction = para[i].getParameterAsString();
+				}else if (name.equals("JPCutOffDate")){
+					p_JPCutOffDate = (Timestamp)para[i].getParameter();
+				}else{
+					log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				}//if
+			}//for
+		/*
+		 * if no invoices are selected in the info window when this process is called
+		 * (if this process is plainly called)
+		 */
+		}else{
+
+			p_AD_Client_ID =getProcessInfo().getAD_Client_ID();
+			ProcessInfoParameter[] para = getParameter();
+			for (int i = 0; i < para.length; i++)
+			{
+				String name = para[i].getParameterName();
+				if (para[i].getParameter() == null){
+					;
+				}else if (name.equals("AD_Org_ID")){
+					p_AD_Org_ID = para[i].getParameterAsInt();
+				}else if (name.equals("C_BP_Group_ID")){
+					p_C_BP_Group_ID = para[i].getParameterAsInt();
+				}else if (name.equals("DateInvoiced")){
+					p_DateInvoiced_From = (Timestamp)para[i].getParameter();
+					p_DateInvoiced_To = (Timestamp)para[i].getParameter_To();
+					if(p_DateInvoiced_To!=null)
+					{
+						Calendar cal = Calendar.getInstance();
+						cal.setTimeInMillis(p_DateInvoiced_To.getTime());
+						cal.add(Calendar.DAY_OF_MONTH, 1);
+						p_DateInvoiced_To = new Timestamp(cal.getTimeInMillis());
+					}
+				}else if (name.equals("JPCutOffDate")){
+					p_JPCutOffDate = (Timestamp)para[i].getParameter();
+				}else if (name.equals("C_PaymentTerm_ID")){
+					p_C_PaymentTerm_ID = para[i].getParameterAsInt();
+				}else if (name.equals("DocAction")){
+					p_DocAction = para[i].getParameterAsString();
+				}else{
+					log.log(Level.SEVERE, "Unknown Parameter: " + name);
+
+				}//if
+			}//for
+		}
 	}//	prepare
 
 	/**
@@ -112,60 +168,108 @@ public class CreateBill extends SvrProcess {
 	 */
 	protected String doIt() throws Exception
 	{
-		MBPartner[] bpartners = getBPartners();
-		int billCounter = 0;
 
-		StringBuilder sql = null;
-		String selectSQL = new String("SELECT C_Invoice.* FROM C_Invoice"
-				+ " INNER JOIN C_BPartner ON (C_Invoice.C_BPartner_ID = C_BPartner.C_BPartner_ID) ");
+		if(IsCalledFromInfoWindow){
 
-		String selectWhereSQL = selectSQL + createWhereClause() + " AND C_Invoice.C_BPartner_ID=?";
+			int billCounter = 0;
 
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		for(int i = 0; i < bpartners.length; i++)
-		{
+			ArrayList<MInvoice> invoices = new ArrayList<MInvoice>();
+			ArrayList<Integer> distinctBPartnerID = new ArrayList<Integer>();
+			Integer[] BPartnerID = new Integer[p_selectedInvoices.size()];
 
-			sql = null;
-			Object JP_BillSchema_ID = bpartners[i].get_Value("JP_BillSchema_ID");
-			if(JP_BillSchema_ID == null)
-				continue;
+			//get bpartners' IDs whose paymentterm is p_C_PaymentTerm_ID from every invoices selected
+			for(int i = 0; i < p_selectedInvoices.size(); i++){
+				MBPartner BPartner = new MBPartner(getCtx(), p_selectedInvoices.get(i).getC_BPartner_ID(), get_TrxName());
+				if(BPartner.getC_PaymentTerm_ID() == p_C_PaymentTerm_ID){
+					BPartnerID[i] = p_selectedInvoices.get(i).getC_BPartner_ID();
+				}else{
+					BPartnerID[i] = 0;
+				}
+			}
 
-			try
-			{
-				String orderByClause = createOrderByClause(bpartners[i]);
-				if(orderByClause != null)
-					sql = new StringBuilder(selectWhereSQL+orderByClause);
-				else
-					sql = new StringBuilder(selectWhereSQL);
+			Stream<Integer> BPartnerIDStream = Arrays.stream(BPartnerID);
+			//make those BPartnerIDs distinct.
+			Stream<Integer> distinctBPartnerIDStream = BPartnerIDStream.distinct();
+			//create a list of distinctBPartnerIDs
+			distinctBPartnerIDStream.forEach(value -> distinctBPartnerID.add(value));
 
-				pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
-				ArrayList<MInvoice> invoiceList = new ArrayList<MInvoice>();
-				pstmt.setInt(1, bpartners[i].getC_BPartner_ID());
-				rs = pstmt.executeQuery();
-				while (rs.next())
-				{
-					invoiceList.add(new MInvoice (getCtx(), rs, get_TrxName()));
+			//Start bill-creating process.
+			for(int i = 0; i < distinctBPartnerID.size(); i++){
+
+				MBPartner bpartner = new MBPartner(getCtx(), distinctBPartnerID.get(i), get_TrxName());
+
+				//From the selected invoices, get the invoices whose bpartner is p_BPartner_ID
+				//and whose payment term is C_PaymentTerm_ID
+				for(int j = 0; j < p_selectedInvoices.size(); j++){
+					if(p_selectedInvoices.get(j).getC_BPartner_ID() == distinctBPartnerID.get(i) && p_selectedInvoices.get(j).getC_PaymentTerm_ID() == p_C_PaymentTerm_ID){
+						invoices.add(p_selectedInvoices.get(j));
+					}
 				}
 
-				billCounter = billCounter + createBill(bpartners[i], invoiceList);
+				billCounter = billCounter + createBill(bpartner, invoices);
 				commitEx();
-			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null; pstmt = null;
+				invoices.clear();
+
 			}
 
-		}
+			return Msg.getElement(getCtx(), "C_BPartner_ID")+" : " + distinctBPartnerID.size() +"   "+ Msg.getElement(getCtx(), "JP_Bill_ID") +" : " +  billCounter;
 
-		return Msg.getElement(getCtx(), "C_BPartner_ID")+" : " + bpartners.length +"   "+ Msg.getElement(getCtx(), "JP_Bill_ID") +" : " +  billCounter;
+		}else{
+
+			MBPartner[] bpartners = getBPartners();
+			int billCounter = 0;
+
+			StringBuilder sql = null;
+			String selectSQL = new String("SELECT C_Invoice.* FROM C_Invoice"
+					+ " INNER JOIN C_BPartner ON (C_Invoice.C_BPartner_ID = C_BPartner.C_BPartner_ID) ");
+
+			String selectWhereSQL = selectSQL + createWhereClause() + " AND C_Invoice.C_BPartner_ID=?";
+
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			for(int i = 0; i < bpartners.length; i++)
+			{
+
+				sql = null;
+				Object JP_BillSchema_ID = bpartners[i].get_Value("JP_BillSchema_ID");
+				if(JP_BillSchema_ID == null)
+					continue;
+
+				try
+				{
+					String orderByClause = createOrderByClause(bpartners[i]);
+					if(orderByClause != null)
+						sql = new StringBuilder(selectWhereSQL+orderByClause);
+					else
+						sql = new StringBuilder(selectWhereSQL);
+
+					pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+					ArrayList<MInvoice> invoiceList = new ArrayList<MInvoice>();
+					pstmt.setInt(1, bpartners[i].getC_BPartner_ID());
+					rs = pstmt.executeQuery();
+					while (rs.next())
+					{
+						invoiceList.add(new MInvoice (getCtx(), rs, get_TrxName()));
+					}
+
+					billCounter = billCounter + createBill(bpartners[i], invoiceList);
+					commitEx();
+				}
+				catch (Exception e)
+				{
+					log.log(Level.SEVERE, sql.toString(), e);
+				}
+				finally
+				{
+					DB.close(rs, pstmt);
+					rs = null; pstmt = null;
+				}
+
+			}
+			return Msg.getElement(getCtx(), "C_BPartner_ID")+" : " + bpartners.length +"   "+ Msg.getElement(getCtx(), "JP_Bill_ID") +" : " +  billCounter;
+		}//else
+
 	}	//	doIt
-
 
 	private MBPartner[] getBPartners()
 	{
@@ -196,7 +300,6 @@ public class CreateBill extends SvrProcess {
 		return list.toArray(new MBPartner[list.size()]);
 	}
 
-
 	private String createWhereClause()
 	{
 		StringBuilder whereClause = new StringBuilder(" WHERE C_Invoice.AD_Client_ID ="+ p_AD_Client_ID
@@ -224,7 +327,6 @@ public class CreateBill extends SvrProcess {
 		{
 			whereClause.append(" AND C_Invoice.DateInvoiced < '" + p_DateInvoiced_To + "'");
 		}
-
 
 		return whereClause.toString();
 	}
@@ -328,7 +430,6 @@ public class CreateBill extends SvrProcess {
 			bLine.saveEx(get_TrxName());
 
 			oldInvoice = invoice;
-
 
 		}//for
 

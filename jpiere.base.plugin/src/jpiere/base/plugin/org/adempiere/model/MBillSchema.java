@@ -22,7 +22,7 @@ import org.compiere.util.Msg;
 
 /**
  * JPIERE-0107 Bill Schema Model
- *
+ * JPIERE-0277 Payment Request Model
  *
  *  @author Hideaki Hagiwara
  *
@@ -43,7 +43,7 @@ public class MBillSchema extends X_JP_BillSchema {
 		if(newRecord || is_ValueChanged("C_DocType_ID"))
 		{
 			I_C_DocType docType = getC_DocType();
-			if(!docType.getDocBaseType().equals("JPB"))
+			if(!(docType.getDocBaseType().equals("JPB") ||docType.getDocBaseType().equals("JPP")))
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_DocTypeIncorrect"));
 				return false;

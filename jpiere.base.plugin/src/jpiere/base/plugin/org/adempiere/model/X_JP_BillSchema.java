@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_BillSchema
  *  @author iDempiere (generated) 
- *  @version Release 2.1 - $Id$ */
+ *  @version Release 4.1 - $Id$ */
 public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150816L;
+	private static final long serialVersionUID = 20170205L;
 
     /** Standard Constructor */
     public X_JP_BillSchema (Properties ctx, int JP_BillSchema_ID, String trxName)
@@ -41,6 +41,7 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 			setC_DocType_ID (0);
 			setIsBillOrgJP (false);
 // N
+			setIsSOTrx (false);
 			setJP_BillSchema_ID (0);
 			setName (null);
 			setValue (null);
@@ -132,6 +133,30 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 	public boolean isBillOrgJP () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsBillOrgJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Sales Transaction.
+		@param IsSOTrx 
+		This is a Sales Transaction
+	  */
+	public void setIsSOTrx (boolean IsSOTrx)
+	{
+		set_Value (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+	}
+
+	/** Get Sales Transaction.
+		@return This is a Sales Transaction
+	  */
+	public boolean isSOTrx () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSOTrx);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
