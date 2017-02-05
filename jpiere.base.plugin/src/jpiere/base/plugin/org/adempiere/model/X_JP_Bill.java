@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_Bill
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 4.1 - $Id$ */
 public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160430L;
+	private static final long serialVersionUID = 20170205L;
 
     /** Standard Constructor */
     public X_JP_Bill (Properties ctx, int JP_Bill_ID, String trxName)
@@ -57,8 +57,8 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 // 0
 			setIsApproved (true);
 // Y
-			setIsSOTrx (true);
-// Y
+			setIsSOTrx (false);
+// @IsSOTrx@
 			setJPBillAmt (Env.ZERO);
 // 0
 			setJPCarriedForwardAmt (Env.ZERO);
@@ -222,6 +222,34 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	public int getC_BPartner_Location_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_Name)
+			.getPO(getC_BankAccount_ID(), get_TrxName());	}
+
+	/** Set Bank Account.
+		@param C_BankAccount_ID 
+		Account at the Bank
+	  */
+	public void setC_BankAccount_ID (int C_BankAccount_ID)
+	{
+		if (C_BankAccount_ID < 1) 
+			set_Value (COLUMNNAME_C_BankAccount_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_BankAccount_ID, Integer.valueOf(C_BankAccount_ID));
+	}
+
+	/** Get Bank Account.
+		@return Account at the Bank
+	  */
+	public int getC_BankAccount_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankAccount_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -717,6 +745,20 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Promised Payment Date.
+		@param JP_PromisedPayDate Promised Payment Date	  */
+	public void setJP_PromisedPayDate (Timestamp JP_PromisedPayDate)
+	{
+		set_Value (COLUMNNAME_JP_PromisedPayDate, JP_PromisedPayDate);
+	}
+
+	/** Get Promised Payment Date.
+		@return Promised Payment Date	  */
+	public Timestamp getJP_PromisedPayDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_PromisedPayDate);
 	}
 
 	public org.compiere.model.I_AD_User getJP_User() throws RuntimeException

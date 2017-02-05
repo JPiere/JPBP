@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Bill
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 4.1
  */
 @SuppressWarnings("all")
 public interface I_JP_Bill 
@@ -121,6 +121,21 @@ public interface I_JP_Bill
 	public int getC_BPartner_Location_ID();
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException;
+
+    /** Column name C_BankAccount_ID */
+    public static final String COLUMNNAME_C_BankAccount_ID = "C_BankAccount_ID";
+
+	/** Set Bank Account.
+	  * Account at the Bank
+	  */
+	public void setC_BankAccount_ID (int C_BankAccount_ID);
+
+	/** Get Bank Account.
+	  * Account at the Bank
+	  */
+	public int getC_BankAccount_ID();
+
+	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException;
 
     /** Column name C_Currency_ID */
     public static final String COLUMNNAME_C_Currency_ID = "C_Currency_ID";
@@ -406,6 +421,15 @@ public interface I_JP_Bill
 	public int getJP_LastBill_ID();
 
 	public I_JP_Bill getJP_LastBill() throws RuntimeException;
+
+    /** Column name JP_PromisedPayDate */
+    public static final String COLUMNNAME_JP_PromisedPayDate = "JP_PromisedPayDate";
+
+	/** Set Promised Payment Date	  */
+	public void setJP_PromisedPayDate (Timestamp JP_PromisedPayDate);
+
+	/** Get Promised Payment Date	  */
+	public Timestamp getJP_PromisedPayDate();
 
     /** Column name JP_User_ID */
     public static final String COLUMNNAME_JP_User_ID = "JP_User_ID";
