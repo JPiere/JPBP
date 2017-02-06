@@ -156,21 +156,21 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		String sql = "UPDATE C_Order i"
 			+ " SET TotalLines="
 				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM C_OrderLine il WHERE i.C_Order_ID=il.C_Order_ID) "
-			+ "WHERE C_Order_ID=" + line.getC_Order_ID();
-		int no = DB.executeUpdate(sql, line.get_TrxName());
+			+ "WHERE C_Order_ID = ?";
+		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(1) #" + no);
 
 		if (line.isTaxIncluded())
 			sql = "UPDATE C_Order i "
 				+ " SET GrandTotal=TotalLines "
-				+ "WHERE C_Order_ID=" + line.getC_Order_ID();
+				+ "WHERE C_Order_ID = ?";
 		else
 			sql = "UPDATE C_Order i "
 				+ " SET GrandTotal=TotalLines+"
 					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM C_OrderTax it WHERE i.C_Order_ID=it.C_Order_ID) "
-					+ "WHERE C_Order_ID=" + line.getC_Order_ID();
-		no = DB.executeUpdate(sql, line.get_TrxName());
+					+ "WHERE C_Order_ID = ?" ;
+		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(2) #" + no);
 
@@ -988,21 +988,21 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		String sql = "UPDATE JP_Estimation i"
 			+ " SET TotalLines="
 				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID) "
-			+ "WHERE JP_Estimation_ID=" + line.getJP_Estimation_ID();
-		int no = DB.executeUpdate(sql, line.get_TrxName());
+			+ "WHERE JP_Estimation_ID=?";
+		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(1) #" + no);
 
 		if (line.isTaxIncluded())
 			sql = "UPDATE JP_Estimation i "
 				+ " SET GrandTotal=TotalLines "
-				+ "WHERE JP_Estimation_ID=" + line.getJP_Estimation_ID();
+				+ "WHERE JP_Estimation_ID=?";
 		else
 			sql = "UPDATE JP_Estimation i "
 				+ " SET GrandTotal=TotalLines+"
 					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_EstimationTax it WHERE i.JP_Estimation_ID=it.JP_Estimation_ID) "
-					+ "WHERE JP_Estimation_ID=" + line.getJP_Estimation_ID();
-		no = DB.executeUpdate(sql, line.get_TrxName());
+					+ "WHERE JP_Estimation_ID=?";
+		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(2) #" + no);
 
