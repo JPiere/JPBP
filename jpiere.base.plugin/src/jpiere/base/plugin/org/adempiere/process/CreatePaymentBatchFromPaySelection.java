@@ -85,7 +85,7 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 		}
 
 		MPaymentBatch batch = MPaymentBatch.getForPaySelection (getCtx(), getRecord_ID(), get_TrxName());
-		batch.setProcessingDate(batch.getCreated());
+		batch.setProcessingDate(paySelection.getPayDate());
 		batch.saveEx(get_TrxName());
 		for(MPaySelectionCheck check : checks)
 		{
