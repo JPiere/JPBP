@@ -24,8 +24,13 @@ import java.util.logging.Level;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MOrder;
+import org.compiere.model.MPayment;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MQuery;
+import org.compiere.model.MRMA;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -215,6 +220,15 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 
+		//JPIERE-0279:Check Estimation Amount Consistency
+		String msg =  amountConsistencyCheck();
+		if(!Util.isEmpty(msg))
+		{
+			m_processMsg = msg;
+			return DocAction.STATUS_Invalid;
+		}
+		
+		
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -690,5 +704,83 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 
 		return index;
 	}
+	
+	boolean JP_ESTIMATION_ORDER_AMT_CHECK = false;
+	boolean JP_ESTIMATION_INVOICE_AMT_CHECK = false;
+	boolean JP_ESTIMATION_BILL_AMT_CHECK = false;
+	boolean JP_ESTIMATION_PAYMENT_AMT_CHECK = false;
+	boolean JP_ESTIMATION_RMA_AMT_CHECK = false;
+	
+	/**
+	 * 
+	 * @return null of String(if Error)
+	 */
+	public String amountConsistencyCheck()
+	{
+		if(getRef_Order_ID() > 0)
+			JP_ESTIMATION_ORDER_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_ORDER_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
+		
+		if(getC_Invoice_ID() > 0)
+			JP_ESTIMATION_INVOICE_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_INVOICE_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
+		
+		if(getJP_Bill_ID() > 0)
+			JP_ESTIMATION_BILL_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_BILL_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
+		
+		if(getC_Payment_ID() > 0)
+			JP_ESTIMATION_PAYMENT_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_PAYMENT_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
+		
+		if(getM_RMA_ID() > 0)
+			JP_ESTIMATION_RMA_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_RMA_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
+		
+		
+		
+		if(JP_ESTIMATION_ORDER_AMT_CHECK)
+		{
+			MOrder order = new MOrder( getCtx(), getRef_Order_ID(), get_TrxName() );
+			if(order.getGrandTotal().compareTo(getGrandTotal()) != 0)
+			{
+				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + order.getDocumentInfo();
+			}
+		}
+		
+		if(JP_ESTIMATION_INVOICE_AMT_CHECK)
+		{
+			MInvoice invoice = new MInvoice( getCtx(), getC_Invoice_ID(), get_TrxName() );
+			if(invoice.getGrandTotal().compareTo(getGrandTotal()) != 0)
+			{
+				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + invoice.getDocumentInfo();
+			}			
+		}
+		
+		if(JP_ESTIMATION_BILL_AMT_CHECK)
+		{
+			MBill bill = new MBill( getCtx(), getJP_Bill_ID(), get_TrxName() );
+			if(bill.getGrandTotal().compareTo(getGrandTotal()) != 0)
+			{
+				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + bill.getDocumentInfo();
+			}
+		}
+		
+		if(JP_ESTIMATION_PAYMENT_AMT_CHECK)
+		{
+			MPayment payment = new MPayment( getCtx(), getC_Payment_ID(), get_TrxName() );
+			if(payment.getPayAmt().compareTo(getGrandTotal()) != 0)
+			{
+				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + payment.getDocumentInfo();
+			}
+		}
+		
+		if(JP_ESTIMATION_RMA_AMT_CHECK)
+		{
+			MRMA rma = new MRMA( getCtx(), getM_RMA_ID(), get_TrxName() );
+			if(rma.getAmt().compareTo(getTotalLines()) != 0)
+			{
+				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + rma.getDocumentInfo();
+			}
+		}
+		
+		return "";
+		
+	}
 
-}	//	DocActionTemplate
+}	//MEstimation
