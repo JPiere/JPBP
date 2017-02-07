@@ -30,7 +30,7 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170205L;
+	private static final long serialVersionUID = 20170207L;
 
     /** Standard Constructor */
     public X_JP_BillSchema (Properties ctx, int JP_BillSchema_ID, String trxName)
@@ -76,6 +76,34 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
       return sb.toString();
     }
 
+	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_Name)
+			.getPO(getC_BankAccount_ID(), get_TrxName());	}
+
+	/** Set Bank Account.
+		@param C_BankAccount_ID 
+		Account at the Bank
+	  */
+	public void setC_BankAccount_ID (int C_BankAccount_ID)
+	{
+		if (C_BankAccount_ID < 1) 
+			set_Value (COLUMNNAME_C_BankAccount_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_BankAccount_ID, Integer.valueOf(C_BankAccount_ID));
+	}
+
+	/** Get Bank Account.
+		@return Account at the Bank
+	  */
+	public int getC_BankAccount_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankAccount_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
     {
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
@@ -102,6 +130,23 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Classname.
+		@param Classname 
+		Java Classname
+	  */
+	public void setClassname (String Classname)
+	{
+		set_Value (COLUMNNAME_Classname, Classname);
+	}
+
+	/** Get Classname.
+		@return Java Classname
+	  */
+	public String getClassname () 
+	{
+		return (String)get_Value(COLUMNNAME_Classname);
 	}
 
 	/** Set Description.

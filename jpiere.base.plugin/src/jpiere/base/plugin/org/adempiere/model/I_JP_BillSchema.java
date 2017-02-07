@@ -64,6 +64,21 @@ public interface I_JP_BillSchema
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name C_BankAccount_ID */
+    public static final String COLUMNNAME_C_BankAccount_ID = "C_BankAccount_ID";
+
+	/** Set Bank Account.
+	  * Account at the Bank
+	  */
+	public void setC_BankAccount_ID (int C_BankAccount_ID);
+
+	/** Get Bank Account.
+	  * Account at the Bank
+	  */
+	public int getC_BankAccount_ID();
+
+	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException;
+
     /** Column name C_DocType_ID */
     public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
 
@@ -78,6 +93,19 @@ public interface I_JP_BillSchema
 	public int getC_DocType_ID();
 
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
+
+    /** Column name Classname */
+    public static final String COLUMNNAME_Classname = "Classname";
+
+	/** Set Classname.
+	  * Java Classname
+	  */
+	public void setClassname (String Classname);
+
+	/** Get Classname.
+	  * Java Classname
+	  */
+	public String getClassname();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
