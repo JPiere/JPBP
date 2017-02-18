@@ -26,9 +26,9 @@ import org.compiere.util.Util;
 
 
 /**
- *  Corporation(法人マスタ) Model.
+ *  JPIERE-0024 : Corporation Model.
  *
- *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
 public class MCorporation extends X_JP_Corporation {
