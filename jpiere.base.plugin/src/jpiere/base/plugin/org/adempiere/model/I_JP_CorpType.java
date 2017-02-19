@@ -21,18 +21,18 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for JP_Corporation
+/** Generated Interface for JP_CorpType
  *  @author iDempiere (generated) 
  *  @version Release 4.1
  */
 @SuppressWarnings("all")
-public interface I_JP_Corporation 
+public interface I_JP_CorpType 
 {
 
-    /** TableName=JP_Corporation */
-    public static final String Table_Name = "JP_Corporation";
+    /** TableName=JP_CorpType */
+    public static final String Table_Name = "JP_CorpType";
 
-    /** AD_Table_ID=1000002 */
+    /** AD_Table_ID=1000105 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -64,36 +64,6 @@ public interface I_JP_Corporation
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name C_BPartner_ID */
-    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
-
-	/** Set Business Partner .
-	  * Identifies a Business Partner
-	  */
-	public void setC_BPartner_ID (int C_BPartner_ID);
-
-	/** Get Business Partner .
-	  * Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID();
-
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
-
-    /** Column name C_Greeting_ID */
-    public static final String COLUMNNAME_C_Greeting_ID = "C_Greeting_ID";
-
-	/** Set Greeting.
-	  * Greeting to print on correspondence
-	  */
-	public void setC_Greeting_ID (int C_Greeting_ID);
-
-	/** Get Greeting.
-	  * Greeting to print on correspondence
-	  */
-	public int getC_Greeting_ID();
-
-	public org.compiere.model.I_C_Greeting getC_Greeting() throws RuntimeException;
-
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -109,19 +79,6 @@ public interface I_JP_Corporation
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name DUNS */
-    public static final String COLUMNNAME_DUNS = "DUNS";
-
-	/** Set D-U-N-S.
-	  * Dun & Bradstreet Number
-	  */
-	public void setDUNS (String DUNS);
-
-	/** Get D-U-N-S.
-	  * Dun & Bradstreet Number
-	  */
-	public String getDUNS();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -149,15 +106,6 @@ public interface I_JP_Corporation
 	  */
 	public boolean isActive();
 
-    /** Column name JP_Capital */
-    public static final String COLUMNNAME_JP_Capital = "JP_Capital";
-
-	/** Set Capital	  */
-	public void setJP_Capital (BigDecimal JP_Capital);
-
-	/** Get Capital	  */
-	public BigDecimal getJP_Capital();
-
     /** Column name JP_CorpType_ID */
     public static final String COLUMNNAME_JP_CorpType_ID = "JP_CorpType_ID";
 
@@ -167,36 +115,14 @@ public interface I_JP_Corporation
 	/** Get Corp Type	  */
 	public int getJP_CorpType_ID();
 
-	public I_JP_CorpType getJP_CorpType() throws RuntimeException;
+    /** Column name JP_CorpType_UU */
+    public static final String COLUMNNAME_JP_CorpType_UU = "JP_CorpType_UU";
 
-    /** Column name JP_Corporation_ID */
-    public static final String COLUMNNAME_JP_Corporation_ID = "JP_Corporation_ID";
+	/** Set JP_CorpType_UU	  */
+	public void setJP_CorpType_UU (String JP_CorpType_UU);
 
-	/** Set Corporation	  */
-	public void setJP_Corporation_ID (int JP_Corporation_ID);
-
-	/** Get Corporation	  */
-	public int getJP_Corporation_ID();
-
-    /** Column name JP_Corporation_UU */
-    public static final String COLUMNNAME_JP_Corporation_UU = "JP_Corporation_UU";
-
-	/** Set JP_Corporation_UU	  */
-	public void setJP_Corporation_UU (String JP_Corporation_UU);
-
-	/** Get JP_Corporation_UU	  */
-	public String getJP_Corporation_UU();
-
-    /** Column name JP_IndustryType_ID */
-    public static final String COLUMNNAME_JP_IndustryType_ID = "JP_IndustryType_ID";
-
-	/** Set Industry Type	  */
-	public void setJP_IndustryType_ID (int JP_IndustryType_ID);
-
-	/** Get Industry Type	  */
-	public int getJP_IndustryType_ID();
-
-	public I_JP_IndustryType getJP_IndustryType() throws RuntimeException;
+	/** Get JP_CorpType_UU	  */
+	public String getJP_CorpType_UU();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
@@ -210,32 +136,6 @@ public interface I_JP_Corporation
 	  * Alphanumeric identifier of the entity
 	  */
 	public String getName();
-
-    /** Column name Name2 */
-    public static final String COLUMNNAME_Name2 = "Name2";
-
-	/** Set Name 2.
-	  * Additional Name
-	  */
-	public void setName2 (String Name2);
-
-	/** Get Name 2.
-	  * Additional Name
-	  */
-	public String getName2();
-
-    /** Column name URL */
-    public static final String COLUMNNAME_URL = "URL";
-
-	/** Set URL.
-	  * Full URL address - e.g. http://www.idempiere.org
-	  */
-	public void setURL (String URL);
-
-	/** Get URL.
-	  * Full URL address - e.g. http://www.idempiere.org
-	  */
-	public String getURL();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

@@ -33,7 +33,7 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170218L;
+	private static final long serialVersionUID = 20170219L;
 
     /** Standard Constructor */
     public X_JP_Corporation (Properties ctx, int JP_Corporation_ID, String trxName)
@@ -182,27 +182,29 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 		return bd;
 	}
 
-	/** Corporation = CO */
-	public static final String JP_CORPTYPE_Corporation = "CO";
-	/** Limited Liability Company = GK */
-	public static final String JP_CORPTYPE_LimitedLiabilityCompany = "GK";
-	/** individual owner-manager = ID */
-	public static final String JP_CORPTYPE_IndividualOwner_Manager = "ID";
-	/** Others = ZZ */
-	public static final String JP_CORPTYPE_Others = "ZZ";
-	/** Set Corp Type.
-		@param JP_CorpType Corp Type	  */
-	public void setJP_CorpType (String JP_CorpType)
-	{
+	public I_JP_CorpType getJP_CorpType() throws RuntimeException
+    {
+		return (I_JP_CorpType)MTable.get(getCtx(), I_JP_CorpType.Table_Name)
+			.getPO(getJP_CorpType_ID(), get_TrxName());	}
 
-		set_Value (COLUMNNAME_JP_CorpType, JP_CorpType);
+	/** Set Corp Type.
+		@param JP_CorpType_ID Corp Type	  */
+	public void setJP_CorpType_ID (int JP_CorpType_ID)
+	{
+		if (JP_CorpType_ID < 1) 
+			set_Value (COLUMNNAME_JP_CorpType_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_CorpType_ID, Integer.valueOf(JP_CorpType_ID));
 	}
 
 	/** Get Corp Type.
 		@return Corp Type	  */
-	public String getJP_CorpType () 
+	public int getJP_CorpType_ID () 
 	{
-		return (String)get_Value(COLUMNNAME_JP_CorpType);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CorpType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Corporation.
