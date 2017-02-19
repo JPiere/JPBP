@@ -18,60 +18,60 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
+
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
 
 /**
- * JPIERE-0290 Industory Types Master
- * 
- * @author h.hagiwara
+ *  JPIERE-0292 : Business Area.
+ *
+ *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
-public class MIndustryType extends X_JP_IndustryType {
+public class MBusinessArea extends X_JP_BusinessArea {
 	
-	
-	public MIndustryType(Properties ctx, int JP_IndustryType_ID, String trxName) 
+	public MBusinessArea(Properties ctx, int JP_BusinessArea_ID, String trxName) 
 	{
-		super(ctx, JP_IndustryType_ID, trxName);
+		super(ctx, JP_BusinessArea_ID, trxName);
 	}
 	
-	public MIndustryType(Properties ctx, ResultSet rs, String trxName)
+	public MBusinessArea(Properties ctx, ResultSet rs, String trxName) 
 	{
 		super(ctx, rs, trxName);
 	}
-
+	
 	/**	Categopry Cache				*/
-	private static CCache<Integer,MIndustryType>	s_cache = new CCache<Integer,MIndustryType>(Table_Name, 20);
+	private static CCache<Integer,MBusinessArea>	s_cache = new CCache<Integer,MBusinessArea>(Table_Name, 20);
 	
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
-	 *	@param JP_IndustryTyp_ID id
-	 *	@return Industory Type
+	 *	@param JP_BusinessArea_ID id
+	 *	@return Business Area
 	 */
-	public static MIndustryType get (Properties ctx, int JP_IndustryTyp_ID)
+	public static MBusinessArea get (Properties ctx, int JP_BusinessArea_ID)
 	{
-		Integer ii = new Integer (JP_IndustryTyp_ID);
-		MIndustryType retValue = (MIndustryType)s_cache.get(ii);
+		Integer ii = new Integer (JP_BusinessArea_ID);
+		MBusinessArea retValue = (MBusinessArea)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
-		retValue = new MIndustryType (ctx, JP_IndustryTyp_ID, null);
+		retValue = new MBusinessArea (ctx, JP_BusinessArea_ID, null);
 		if (retValue.get_ID () != 0)
-			s_cache.put (JP_IndustryTyp_ID, retValue);
+			s_cache.put (JP_BusinessArea_ID, retValue);
 		return retValue;
 	}	//	get
 	
 	
-	private MCorporation[] m_Corporations = null;
+	private MBusinessUnit[] m_BusinessUnits = null;
 	
-	public MCorporation[] getCorporations (boolean requery)
+	public MBusinessUnit[] getBusinessUnits (boolean requery)
 	{
-		if(m_Corporations != null && !requery)
-			return m_Corporations;
+		if(m_BusinessUnits != null && !requery)
+			return m_BusinessUnits;
 
-		ArrayList<MCorporation> list = new ArrayList<MCorporation>();
-		final String sql = "SELECT JP_Corporation_ID FROM JP_Corporation WHERE JP_IndustryType_ID=? AND IsActive='Y'";
+		ArrayList<MBusinessUnit> list = new ArrayList<MBusinessUnit>();
+		final String sql = "SELECT JP_BusinessUnit_ID FROM JP_BusinessUnit WHERE JP_BusinessArea_ID=? AND IsActive='Y'";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -80,7 +80,7 @@ public class MIndustryType extends X_JP_IndustryType {
 			pstmt.setInt(1, get_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(MCorporation.get(getCtx(), rs.getInt(1)) );
+				list.add(MBusinessUnit.get(getCtx(), rs.getInt(1)) );
 		}
 		catch (Exception e)
 		{
@@ -92,8 +92,8 @@ public class MIndustryType extends X_JP_IndustryType {
 			rs = null; pstmt = null;
 		}
 
-		m_Corporations = new MCorporation[list.size()];
-		list.toArray(m_Corporations);
-		return m_Corporations;
+		m_BusinessUnits = new MBusinessUnit[list.size()];
+		list.toArray(m_BusinessUnits);
+		return m_BusinessUnits;
 	}
 }

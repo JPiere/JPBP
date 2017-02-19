@@ -79,7 +79,7 @@ public class MCorpType extends X_JP_CorpType {
 			pstmt.setInt(1, get_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MCorporation (getCtx(), rs.getInt(1), get_TrxName()));
+				list.add(MCorporation.get(getCtx(), rs.getInt(1)) );
 		}
 		catch (Exception e)
 		{

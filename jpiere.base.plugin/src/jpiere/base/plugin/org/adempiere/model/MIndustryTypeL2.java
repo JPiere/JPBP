@@ -79,7 +79,7 @@ public class MIndustryTypeL2 extends X_JP_IndustryTypeL2 {
 			pstmt.setInt(1, get_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MIndustryTypeL1 (getCtx(), rs.getInt(1), get_TrxName()));
+				list.add(MIndustryTypeL1.get(getCtx(), rs.getInt(1)));
 		}
 		catch (Exception e)
 		{
