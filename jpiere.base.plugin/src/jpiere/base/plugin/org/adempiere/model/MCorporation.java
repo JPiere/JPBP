@@ -22,13 +22,14 @@ import java.util.Properties;
 import org.compiere.model.I_C_BPartner;
 import org.compiere.model.MBPartner;
 import org.compiere.model.Query;
+import org.compiere.util.CCache;
 import org.compiere.util.Util;
 
 
 /**
- *  Corporation(法人マスタ) Model.
+ *  JPIERE-0024 : Corporation Model.
  *
- *  @author Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
+ *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
 public class MCorporation extends X_JP_Corporation {
@@ -40,6 +41,28 @@ public class MCorporation extends X_JP_Corporation {
 	public MCorporation(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
+	
+	/**	Categopry Cache				*/
+	private static CCache<Integer,MCorporation>	s_cache = new CCache<Integer,MCorporation>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_Corporation_ID id
+	 *	@return Corporation
+	 */
+	public static MCorporation get (Properties ctx, int JP_Corporation_ID)
+	{
+		Integer ii = new Integer (JP_Corporation_ID);
+		MCorporation retValue = (MCorporation)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MCorporation (ctx, JP_Corporation_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_Corporation_ID, retValue);
+		return retValue;
+	}	//	get
+	
 
 	private MBPartner[] m_BPartners = null;
 
@@ -121,7 +144,7 @@ public class MCorporation extends X_JP_Corporation {
 
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
-		// TODO 自動生成されたメソッド・スタブ
+
 		return super.afterSave(newRecord, success);
 	}
 
