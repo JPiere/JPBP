@@ -398,13 +398,20 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				//	Create new InOut Line
 				MInOutLine iol = new MInOutLine (inout);
 				iol.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
-				iol.setQty(QtyEntered);							//	Movement/Entered
+				iol.setQty(QtyEntered);							//	Movement/Entered				
 				//
 				MOrderLine ol = null;
 				if (C_OrderLine_ID != 0)
 				{
 					iol.setC_OrderLine_ID(C_OrderLine_ID);
 					ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
+					
+					//JPIERE-0294
+					if(iol.get_ColumnIndex("JP_ProductExplodeBOM_ID") >= 0)
+					{
+						iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ol.get_Value("JP_ProductExplodeBOM_ID") );
+					}
+					
 					if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
 					{
 						iol.setMovementQty(QtyEntered
