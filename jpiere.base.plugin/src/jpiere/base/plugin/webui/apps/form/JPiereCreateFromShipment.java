@@ -407,10 +407,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 					ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
 					
 					//JPIERE-0294
-					if(iol.get_ColumnIndex("JP_ProductExplodeBOM_ID") >= 0)
-					{
-						iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ol.get_Value("JP_ProductExplodeBOM_ID") );
-					}
+					iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ol.get_Value("JP_ProductExplodeBOM_ID") );
 					
 					if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
 					{

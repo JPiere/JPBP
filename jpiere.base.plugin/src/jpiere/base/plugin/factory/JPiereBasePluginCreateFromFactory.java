@@ -13,16 +13,19 @@
  *****************************************************************************/
 package jpiere.base.plugin.factory;
 
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromInvoiceUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAInOutUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAOrder;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAOrderUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromShipmentUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromStatementUI;
 
+import org.adempiere.webui.apps.form.WCreateFromInvoiceUI;
 import org.compiere.grid.ICreateFrom;
 import org.compiere.grid.ICreateFromFactory;
 import org.compiere.model.GridTab;
 import org.compiere.model.I_C_BankStatement;
+import org.compiere.model.I_C_Invoice;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MRMA;
@@ -65,9 +68,14 @@ public class JPiereBasePluginCreateFromFactory implements ICreateFromFactory
 				else if (docType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
 					return null;
 			}
+			
 		}else if(tableName.equals(MRMA.Table_Name)){
 			
 			return new JPiereCreateFromRMAOrderUI(mTab); //JPIERE-0235
+			
+		}else if(tableName.equals(I_C_Invoice.Table_Name)){
+			
+				return new JPiereCreateFromInvoiceUI(mTab); //JPIERE-0296
 		}
 
 		return null;

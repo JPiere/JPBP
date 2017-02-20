@@ -124,10 +124,10 @@ public class MInvoiceJP extends MInvoice implements DocOptions {
 					{
 						MInvoiceLine newLine = new MInvoiceLine(this);
 						newLine.setLine(++lineNo);
-						if(newLine.get_ColumnIndex("JP_ProductExplodeBOM_ID") >= 0)
-						{
-							newLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", JP_ProductExplodeBOM_ID);
-						}
+						
+						//JPIERE-0295
+						newLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", JP_ProductExplodeBOM_ID);
+
 						newLine.setM_Product_ID(bom.getM_ProductBOM_ID(), true);
 						newLine.setQty(line.getQtyInvoiced().multiply(bom.getBOMQty()));
 						if (bom.getDescription() != null)
@@ -137,10 +137,9 @@ public class MInvoiceJP extends MInvoice implements DocOptions {
 						
 					}else{
 
-						if(line.get_ColumnIndex("JP_ProductExplodeBOM_ID") >= 0)
-						{
-							line.set_ValueNoCheck("JP_ProductExplodeBOM_ID", JP_ProductExplodeBOM_ID);
-						}
+						//JPIERE-0295
+						line.set_ValueNoCheck("JP_ProductExplodeBOM_ID", JP_ProductExplodeBOM_ID);
+						
 						line.setM_Product_ID(bom.getM_ProductBOM_ID(), true);
 						
 						//Reset once
@@ -164,10 +163,9 @@ public class MInvoiceJP extends MInvoice implements DocOptions {
 				//	Convert into Comment Line
 				if(isRemain)
 				{
-					if(line.get_ColumnIndex("JP_ProductExplodeBOM_ID") >= 0)
-					{
-						line.set_ValueNoCheck("JP_ProductExplodeBOM_ID", line.getM_Product_ID());
-					}
+					//JPIERE-0295
+					line.set_ValueNoCheck("JP_ProductExplodeBOM_ID", line.getM_Product_ID());
+					
 					line.setM_Product_ID (0);
 					line.setM_AttributeSetInstance_ID (0);
 					line.setPrice (Env.ZERO);
