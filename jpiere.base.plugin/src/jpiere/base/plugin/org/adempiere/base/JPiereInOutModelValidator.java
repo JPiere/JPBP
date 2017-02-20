@@ -38,6 +38,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
+import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 
 public class JPiereInOutModelValidator implements ModelValidator {
 
@@ -173,7 +174,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 				if(orderDocType.getC_DocTypeInvoice_ID() == 0)
 					return null;
 
-				MInvoice invoice = new MInvoice (order, orderDocType.getC_DocTypeInvoice_ID(), io.getDateAcct());
+				MInvoiceJP invoice = new MInvoiceJP (order, orderDocType.getC_DocTypeInvoice_ID(), io.getDateAcct());//JPIERE-0295
 				if (!invoice.save(trxName))
 				{
 					log.warning("Could not create Invoice: "+ io.getDocumentInfo());
@@ -187,6 +188,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 					//
 					MInvoiceLine iLine = new MInvoiceLine(invoice);
 					iLine.setShipLine(sLine);
+					iLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
 					//	Qty = Delivered
 					if (sLine.sameOrderLineUOM())
 						iLine.setQtyEntered(sLine.getQtyEntered());
