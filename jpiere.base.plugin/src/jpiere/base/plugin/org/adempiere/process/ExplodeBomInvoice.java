@@ -17,22 +17,22 @@ package jpiere.base.plugin.org.adempiere.process;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Msg;
 
-import jpiere.base.plugin.org.adempiere.model.MOrderJP;
+import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 
 /**
- * JPIERE-0294
+ * JPIERE-0295
  * 
  * @author Hideaki Hagiwara
  *
  */
-public class ExplodeBomOrder extends SvrProcess {
+public class ExplodeBomInvoice extends SvrProcess {
 	
-	int C_Order_ID = 0;
+	int C_Invoice_ID = 0;
 	
 	@Override
 	protected void prepare() 
 	{
-		C_Order_ID = getRecord_ID();
+		C_Invoice_ID = getRecord_ID();
 		
 	}
 	
@@ -40,8 +40,8 @@ public class ExplodeBomOrder extends SvrProcess {
 	protected String doIt() throws Exception 
 	{
 
-		MOrderJP order = new MOrderJP(getCtx(),C_Order_ID, get_TrxName());
-		boolean isOK = order.explodeBOM();
+		MInvoiceJP invoice = new MInvoiceJP(getCtx(),C_Invoice_ID, get_TrxName());
+		boolean isOK = invoice.explodeBOM();
 		
 		if(isOK)
 			return Msg.getElement(getCtx(), "Success");

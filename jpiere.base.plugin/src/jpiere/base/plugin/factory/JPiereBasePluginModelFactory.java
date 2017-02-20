@@ -35,6 +35,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 import jpiere.base.plugin.org.adempiere.model.MInventoryDiffQtyLog;
+import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryGLine;
@@ -50,6 +51,7 @@ import jpiere.base.plugin.org.adempiere.model.MSalesRegionL2;
 
 import org.adempiere.base.IModelFactory;
 import org.compiere.model.MInOutConfirm;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.PO;
 import org.compiere.util.Env;
@@ -140,6 +142,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MOrderJP.class;
 			}else if(tableName.equals(MInOutConfirm.Table_Name)){
 				return MInOutConfirmJP.class;			//JPIERE-0208
+			}else if(tableName.equals(MInvoice.Table_Name)){
+				return MInvoiceJP.class;			//JPIERE-0295
 			}
 		}
 
@@ -217,6 +221,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MOrderJP(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MInOutConfirm.Table_Name)){
 				return new MInOutConfirmJP(Env.getCtx(), Record_ID, trxName);			//JPIERE-0208
+			}else if(tableName.equals(MInvoice.Table_Name)){
+				return new MInvoiceJP(Env.getCtx(), Record_ID, trxName);			//JPIERE-0295
 			}
 		}
 
@@ -295,6 +301,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MOrderJP(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MInOutConfirm.Table_Name)){
 				return new MInOutConfirmJP(Env.getCtx(), rs, trxName);			//JPIERE-0208
+			}else if(tableName.equals(MInvoice.Table_Name)){
+				return new MInvoiceJP(Env.getCtx(), rs, trxName);			//JPIERE-0295
 			}
 		}
 

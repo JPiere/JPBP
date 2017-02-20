@@ -13,6 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 import jpiere.base.plugin.util.JPierePaymentTerms;
 
 import org.compiere.model.MClient;
@@ -39,6 +40,7 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MInvoice.Table_Name, this);
+		engine.addDocValidate(MInvoice.Table_Name, this);
 
 	}
 
@@ -104,6 +106,12 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
+		if(timing ==  ModelValidator.TIMING_BEFORE_PREPARE)//JPIERE-0295
+		{
+			MInvoiceJP inv = (MInvoiceJP)po;
+			inv.explodeBOM();
+		}
+		
 		return null;
 	}
 
