@@ -118,10 +118,22 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 				if(new_Payment_ID > 0)
 				{
 					MPayment newPayment = new MPayment(bsl.getCtx(), new_Payment_ID, bsl.get_TrxName());
-					if(newPayment.getDocStatus().equals(DocAction.STATUS_Voided) || newPayment.getDocStatus().equals(DocAction.STATUS_Reversed)
+					if(newPayment.getDocStatus().equals(DocAction.ACTION_Complete) || newPayment.getDocStatus().equals(DocAction.ACTION_Close))
+					{
+						;//Nothing to do;
+					}else if(newPayment.getDocStatus().equals(DocAction.STATUS_Voided) || newPayment.getDocStatus().equals(DocAction.STATUS_Reversed)
 							|| newPayment.getDocStatus().equals(DocAction.STATUS_Invalid) )
 					{
 						return Msg.getMsg(bsl.getCtx(), "JP_NotValidDocStatus");//Not Valid Doc Status
+						
+					}else{
+						
+						MBankStatement bs = bsl.getParent();
+						if(bs.getDocStatus().equals(DocAction.STATUS_Completed) || bs.getDocStatus().equals(DocAction.STATUS_Closed))
+						{
+							return Msg.getMsg(bsl.getCtx(), "JP_NotMatchIncompletePaymentAndCompleteBS");//Not match incomplete Payment and complete Bank Statement
+						}
+						
 					}
 					
 					
