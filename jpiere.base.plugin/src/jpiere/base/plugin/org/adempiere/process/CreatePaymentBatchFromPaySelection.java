@@ -86,6 +86,7 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 
 		MPaymentBatch batch = MPaymentBatch.getForPaySelection (getCtx(), getRecord_ID(), get_TrxName());
 		batch.setProcessingDate(paySelection.getPayDate());
+		batch.set_ValueOfColumnReturningBoolean("IsReceiptJP", paySelection.get_ValueAsBoolean("IsReceiptJP"));//JPIERE-0298
 		batch.saveEx(get_TrxName());
 		for(MPaySelectionCheck check : checks)
 		{

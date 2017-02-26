@@ -42,11 +42,14 @@ public class ExplodeBomOrder extends SvrProcess {
 
 		MOrderJP order = new MOrderJP(getCtx(),C_Order_ID, get_TrxName());
 		boolean isOK = order.explodeBOM();
+		String msg = null;
 		
 		if(isOK)
-			return Msg.getElement(getCtx(), "Success");
+			msg = Msg.getMsg(getCtx(), "Success");
 		else
-			return Msg.getElement(getCtx(), "JP_NoProductExplodeBOM");
+			msg = Msg.getMsg(getCtx(), "JP_NoProductExplodeBOM");
+		
+		return msg;
 			
 	}
 	

@@ -13,17 +13,34 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MBPartner;
 import org.compiere.model.MDocType;
+import org.compiere.model.MDocTypeCounter;
+import org.compiere.model.MInOut;
+import org.compiere.model.MInOutLine;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MInvoicePaySchedule;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MOrg;
+import org.compiere.model.MOrgInfo;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductBOM;
 import org.compiere.model.MProject;
+import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MWarehouse;
+import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
@@ -200,7 +217,248 @@ public class MOrderJP extends MOrder implements DocOptions {
 		}	//	while count != 0
 		return retValue;
 	}
+
+	@Override
+	protected MInOut createShipment(MDocType dt, Timestamp movementDate) {//JPIERE-0295
+		
+		if (log.isLoggable(Level.INFO)) log.info("For " + dt);
+		MInOut shipment = new MInOut (this, dt.getC_DocTypeShipment_ID(), movementDate);
+	//	shipment.setDateAcct(getDateAcct());
+		if (!shipment.save(get_TrxName()))
+		{
+			m_processMsg = "Could not create Shipment";
+			return null;
+		}
+		//
+		MOrderLine[] oLines = getLines(true, null);
+		for (int i = 0; i < oLines.length; i++)
+		{
+			MOrderLine oLine = oLines[i];
+			//
+			MInOutLine ioLine = new MInOutLine(shipment);
+			ioLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", oLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+			
+			//	Qty = Ordered - Delivered
+			BigDecimal MovementQty = oLine.getQtyOrdered().subtract(oLine.getQtyDelivered()); 
+			//	Location
+			int M_Locator_ID = MStorageOnHand.getM_Locator_ID (oLine.getM_Warehouse_ID(), 
+					oLine.getM_Product_ID(), oLine.getM_AttributeSetInstance_ID(), 
+					MovementQty, get_TrxName());
+			if (M_Locator_ID == 0)		//	Get default Location
+			{
+				MWarehouse wh = MWarehouse.get(getCtx(), oLine.getM_Warehouse_ID());
+				M_Locator_ID = wh.getDefaultLocator().getM_Locator_ID();
+			}
+			//
+			ioLine.setOrderLine(oLine, M_Locator_ID, MovementQty);
+			ioLine.setQty(MovementQty);
+			if (oLine.getQtyEntered().compareTo(oLine.getQtyOrdered()) != 0)
+				ioLine.setQtyEntered(MovementQty
+					.multiply(oLine.getQtyEntered())
+					.divide(oLine.getQtyOrdered(), 6, BigDecimal.ROUND_HALF_UP));
+			if (!ioLine.save(get_TrxName()))
+			{
+				m_processMsg = "Could not create Shipment Line";
+				return null;
+			}
+		}
+		// added AdempiereException by zuhri
+		if (!shipment.processIt(DocAction.ACTION_Complete))
+			throw new AdempiereException("Failed when processing document - " + shipment.getProcessMsg());
+		// end added
+		shipment.saveEx(get_TrxName());
+		if (!DOCSTATUS_Completed.equals(shipment.getDocStatus()))
+		{
+			m_processMsg = "@M_InOut_ID@: " + shipment.getProcessMsg();
+			return null;
+		}
+		return shipment;
+	}
 	
 	
+	@Override
+	protected MInvoice createInvoice (MDocType dt, MInOut shipment, Timestamp invoiceDate)//JPIERE-0295
+	{
+		if (log.isLoggable(Level.INFO)) log.info(dt.toString());
+		MInvoice invoice = new MInvoice (this, dt.getC_DocTypeInvoice_ID(), invoiceDate);
+		if (!invoice.save(get_TrxName()))
+		{
+			m_processMsg = "Could not create Invoice";
+			return null;
+		}
+		
+		//	If we have a Shipment - use that as a base
+		if (shipment != null)
+		{
+			if (!INVOICERULE_AfterDelivery.equals(getInvoiceRule()))
+				setInvoiceRule(INVOICERULE_AfterDelivery);
+			//
+			MInOutLine[] sLines = shipment.getLines(false);
+			for (int i = 0; i < sLines.length; i++)
+			{
+				MInOutLine sLine = sLines[i];
+				//
+				MInvoiceLine iLine = new MInvoiceLine(invoice);
+				iLine.setShipLine(sLine);
+				
+				iLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+				
+				//	Qty = Delivered	
+				if (sLine.sameOrderLineUOM())
+					iLine.setQtyEntered(sLine.getQtyEntered());
+				else
+					iLine.setQtyEntered(sLine.getMovementQty());
+				iLine.setQtyInvoiced(sLine.getMovementQty());
+				if (!iLine.save(get_TrxName()))
+				{
+					m_processMsg = "Could not create Invoice Line from Shipment Line";
+					return null;
+				}
+				//
+				sLine.setIsInvoiced(true);
+				if (!sLine.save(get_TrxName()))
+				{
+					log.warning("Could not update Shipment line: " + sLine);
+				}
+			}
+		}
+		else	//	Create Invoice from Order
+		{
+			if (!INVOICERULE_Immediate.equals(getInvoiceRule()))
+				setInvoiceRule(INVOICERULE_Immediate);
+			//
+			MOrderLine[] oLines = getLines();
+			for (int i = 0; i < oLines.length; i++)
+			{
+				MOrderLine oLine = oLines[i];
+				//
+				MInvoiceLine iLine = new MInvoiceLine(invoice);
+				iLine.setOrderLine(oLine);
+				
+				iLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", oLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+				
+				//	Qty = Ordered - Invoiced	
+				iLine.setQtyInvoiced(oLine.getQtyOrdered().subtract(oLine.getQtyInvoiced()));
+				if (oLine.getQtyOrdered().compareTo(oLine.getQtyEntered()) == 0)
+					iLine.setQtyEntered(iLine.getQtyInvoiced());
+				else
+					iLine.setQtyEntered(iLine.getQtyInvoiced().multiply(oLine.getQtyEntered())
+						.divide(oLine.getQtyOrdered(), 12, BigDecimal.ROUND_HALF_UP));
+				if (!iLine.save(get_TrxName()))
+				{
+					m_processMsg = "Could not create Invoice Line from Order Line";
+					return null;
+				}
+			}
+		}
+		
+		// Copy payment schedule from order to invoice if any
+		for (MOrderPaySchedule ops : MOrderPaySchedule.getOrderPaySchedule(getCtx(), getC_Order_ID(), 0, get_TrxName())) {
+			MInvoicePaySchedule ips = new MInvoicePaySchedule(getCtx(), 0, get_TrxName());
+			PO.copyValues(ops, ips);
+			ips.setC_Invoice_ID(invoice.getC_Invoice_ID());
+			ips.setAD_Org_ID(ops.getAD_Org_ID());
+			ips.setProcessing(ops.isProcessing());
+			ips.setIsActive(ops.isActive());
+			if (!ips.save()) {
+				m_processMsg = "ERROR: creating pay schedule for invoice from : "+ ops.toString();
+				return null;
+			}
+		}
+		
+		// added AdempiereException by zuhri
+		if (!invoice.processIt(DocAction.ACTION_Complete))
+			throw new AdempiereException("Failed when processing document - " + invoice.getProcessMsg());
+		// end added
+		invoice.saveEx(get_TrxName());
+		setC_CashLine_ID(invoice.getC_CashLine_ID());
+		if (!DOCSTATUS_Completed.equals(invoice.getDocStatus()))
+		{
+			m_processMsg = "@C_Invoice_ID@: " + invoice.getProcessMsg();
+			return null;
+		}
+		return invoice;
+	}	//	createInvoice
 	
+	
+	@Override
+	protected MOrder createCounterDoc()//JPIERE-0295
+	{
+		//	Is this itself a counter doc ?
+		if (getRef_Order_ID() != 0)
+			return null;
+		
+		//	Org Must be linked to BPartner
+		MOrg org = MOrg.get(getCtx(), getAD_Org_ID());
+		int counterC_BPartner_ID = org.getLinkedC_BPartner_ID(get_TrxName()); 
+		if (counterC_BPartner_ID == 0)
+			return null;
+		//	Business Partner needs to be linked to Org
+		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int(); 
+		if (counterAD_Org_ID == 0)
+			return null;
+		
+		MBPartner counterBP = new MBPartner (getCtx(), counterC_BPartner_ID, null);
+		MOrgInfo counterOrgInfo = MOrgInfo.get(getCtx(), counterAD_Org_ID, get_TrxName());
+		if (log.isLoggable(Level.INFO)) log.info("Counter BP=" + counterBP.getName());
+
+		//	Document Type
+		int C_DocTypeTarget_ID = 0;
+		MDocTypeCounter counterDT = MDocTypeCounter.getCounterDocType(getCtx(), getC_DocType_ID());
+		if (counterDT != null)
+		{
+			if (log.isLoggable(Level.FINE)) log.fine(counterDT.toString());
+			if (!counterDT.isCreateCounter() || !counterDT.isValid())
+				return null;
+			C_DocTypeTarget_ID = counterDT.getCounter_C_DocType_ID();
+		}
+		else	//	indirect
+		{
+			C_DocTypeTarget_ID = MDocTypeCounter.getCounterDocType_ID(getCtx(), getC_DocType_ID());
+			if (log.isLoggable(Level.FINE)) log.fine("Indirect C_DocTypeTarget_ID=" + C_DocTypeTarget_ID);
+			if (C_DocTypeTarget_ID <= 0)
+				return null;
+		}
+		//	Deep Copy
+		MOrder counter = copyFrom (this, getDateOrdered(), 
+			C_DocTypeTarget_ID, !isSOTrx(), true, false, get_TrxName());
+		//
+		counter.setAD_Org_ID(counterAD_Org_ID);
+		counter.setM_Warehouse_ID(counterOrgInfo.getM_Warehouse_ID());
+		//
+//		counter.setBPartner(counterBP); // was set on copyFrom
+		counter.setDatePromised(getDatePromised());		// default is date ordered 
+		//	References (Should not be required)
+		counter.setSalesRep_ID(getSalesRep_ID());
+		counter.saveEx(get_TrxName());
+		
+		//	Update copied lines
+		MOrderLine[] counterLines = counter.getLines(true, null);
+		for (int i = 0; i < counterLines.length; i++)
+		{
+			MOrderLine counterLine = counterLines[i];
+			counterLine.setOrder(counter);	//	copies header values (BP, etc.)
+			counterLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", counterLines[i].get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+			counterLine.setPrice();
+			counterLine.setTax();
+			counterLine.saveEx(get_TrxName());
+		}
+		if (log.isLoggable(Level.FINE)) log.fine(counter.toString());
+		
+		//	Document Action
+		if (counterDT != null)
+		{
+			if (counterDT.getDocAction() != null)
+			{
+				counter.setDocAction(counterDT.getDocAction());
+				// added AdempiereException by zuhri
+				if (!counter.processIt(counterDT.getDocAction()))
+					throw new AdempiereException("Failed when processing document - " + counter.getProcessMsg());
+				// end added
+				counter.saveEx(get_TrxName());
+			}
+		}
+		return counter;
+	}	//	createCounterDoc
 }

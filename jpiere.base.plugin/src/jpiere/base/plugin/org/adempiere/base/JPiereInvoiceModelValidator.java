@@ -108,8 +108,11 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 	{
 		if(timing ==  ModelValidator.TIMING_BEFORE_PREPARE)//JPIERE-0295
 		{
-			MInvoiceJP inv = (MInvoiceJP)po;
-			inv.explodeBOM();
+			if(po instanceof MInvoiceJP)
+			{
+				MInvoiceJP inv = (MInvoiceJP)po;
+				inv.explodeBOM();
+			}
 		}
 		
 		return null;

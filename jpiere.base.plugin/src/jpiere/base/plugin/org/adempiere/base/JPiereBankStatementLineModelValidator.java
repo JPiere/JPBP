@@ -16,14 +16,20 @@ package jpiere.base.plugin.org.adempiere.base;
 import jpiere.base.plugin.org.adempiere.model.JPiereBankStatementTaxProvider;
 import jpiere.base.plugin.org.adempiere.model.MBankStatementTax;
 
+import java.math.BigDecimal;
+
 import org.compiere.model.MBankAccount;
+import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MClient;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MPayment;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxProvider;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -32,6 +38,8 @@ import org.compiere.util.Msg;
 /**
  *  JPiere Bank Statement Line Model Validator
  *  JPIERE-0012
+ *  JPIERE-0087
+ *  JPIERE-0300
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: JPiereBankStatementTaxModelValidator.java,v 1.0 2014/08/20
@@ -95,15 +103,101 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 			}
 
 		}
-		//JPIERE-0012
+		//JPIERE-0012 & JPIERE-0300
 		else if(type == ModelValidator.TYPE_AFTER_NEW || type == ModelValidator.TYPE_AFTER_CHANGE)
 		{
 
+			MBankStatementLine bsl = (MBankStatementLine)po;
+			
+			//JPIERE-0300
+			if(type == ModelValidator.TYPE_AFTER_NEW || bsl.is_ValueChanged("C_Payment_ID"))
+			{
+				int new_Payment_ID = bsl.getC_Payment_ID();
+				int old_Payment_ID = bsl.get_ValueOldAsInt("C_Payment_ID");
+
+				if(new_Payment_ID > 0)
+				{
+					MPayment newPayment = new MPayment(bsl.getCtx(), new_Payment_ID, bsl.get_TrxName());
+					if(newPayment.getDocStatus().equals(DocAction.ACTION_Complete) || newPayment.getDocStatus().equals(DocAction.ACTION_Close))
+					{
+						;//Nothing to do;
+					}else if(newPayment.getDocStatus().equals(DocAction.STATUS_Voided) || newPayment.getDocStatus().equals(DocAction.STATUS_Reversed)
+							|| newPayment.getDocStatus().equals(DocAction.STATUS_Invalid) )
+					{
+						return Msg.getMsg(bsl.getCtx(), "JP_NotValidDocStatus");//Not Valid Doc Status
+						
+					}else{
+						
+						MBankStatement bs = bsl.getParent();
+						if(bs.getDocStatus().equals(DocAction.STATUS_Completed) || bs.getDocStatus().equals(DocAction.STATUS_Closed))
+						{
+							return Msg.getMsg(bsl.getCtx(), "JP_NotMatchIncompletePaymentAndCompleteBS");//Not match incomplete Payment and complete Bank Statement
+						}
+						
+					}
+					
+					
+					if(newPayment.isReconciled())
+						return Msg.getMsg(bsl.getCtx(), "JP_AlreadyReconciled");//Payment was reconciled with bank statement already
+					
+					if(bsl.getC_BPartner_ID() != newPayment.getC_BPartner_ID())
+						return Msg.getMsg(bsl.getCtx(), "JP_DifferentBusinessPartner_Payment");//Different business partner between Payment and BP field
+					
+					BigDecimal payAmt = newPayment.getPayAmt();
+					if(!newPayment.isReceipt())
+						payAmt = payAmt.negate();
+					
+					if(bsl.getTrxAmt().compareTo(payAmt) != 0)
+					{
+						return Msg.getMsg(bsl.getCtx(), "JP_DifferentAmt");//Different Amount
+					}					
+					
+
+					MBankStatement bs = bsl.getParent();
+					if(bs.getDocStatus().equals(DocAction.STATUS_Completed) || bs.getDocStatus().equals(DocAction.STATUS_Closed))
+					{
+						newPayment.setIsReconciled(true);
+						newPayment.saveEx(bsl.get_TrxName());
+					}
+					
+				}
+				
+				if(old_Payment_ID > 0 && new_Payment_ID != old_Payment_ID)
+				{
+					old_Payment_ID = bsl.get_ValueOldAsInt("C_Payment_ID");
+					MPayment oldPayment = new MPayment(bsl.getCtx(), old_Payment_ID, bsl.get_TrxName());
+					oldPayment.setIsReconciled(false);
+					oldPayment.saveEx(bsl.get_TrxName());
+				}
+			}
+			
+			//JPIERE-0300
+			if(type == ModelValidator.TYPE_AFTER_NEW || bsl.is_ValueChanged("C_BPartner_ID"))
+			{
+				int new_BPartner_ID = bsl.getC_BPartner_ID();
+				int C_Payment_ID = bsl.getC_Payment_ID();
+				if(C_Payment_ID > 0)
+				{
+					MPayment payment = new MPayment(bsl.getCtx(), C_Payment_ID, bsl.get_TrxName());
+					if(new_BPartner_ID != payment.getC_BPartner_ID())
+						return Msg.getMsg(bsl.getCtx(), "JP_DifferentBusinessPartner_Payment");//Different business partner between Payment and BP field
+				}
+	
+				int C_Invoice_ID = bsl.getC_Invoice_ID();
+				if(C_Invoice_ID > 0)
+				{
+					MInvoice invoice = new MInvoice(bsl.getCtx(), C_Invoice_ID, bsl.get_TrxName());
+					if(new_BPartner_ID != invoice.getC_BPartner_ID())
+						return Msg.getMsg(bsl.getCtx(), "JP_DifferentBusinessPartner_Invoice");//Different business partner between Invoice and BP field
+				}
+				
+			}
+			
+			
+			//JPIERE-0012
 			boolean newRecord = true;
 			if(type == ModelValidator.TYPE_AFTER_CHANGE)
 				newRecord = false;
-
-			MBankStatementLine bsl = (MBankStatementLine)po;
 
 			if(bsl.getChargeAmt().compareTo(Env.ZERO)==0){
 				PO bst = MBankStatementTax.get(bsl.getCtx(), bsl.getC_BankStatementLine_ID());
@@ -152,7 +246,6 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 				bst.deleteEx(false);
 			}
 		}
-
 
 		return null;
 	}

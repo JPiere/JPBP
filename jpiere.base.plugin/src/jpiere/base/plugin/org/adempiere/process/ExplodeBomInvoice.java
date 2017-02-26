@@ -42,11 +42,14 @@ public class ExplodeBomInvoice extends SvrProcess {
 
 		MInvoiceJP invoice = new MInvoiceJP(getCtx(),C_Invoice_ID, get_TrxName());
 		boolean isOK = invoice.explodeBOM();
+		String msg = null;
 		
 		if(isOK)
-			return Msg.getElement(getCtx(), "Success");
+			msg = Msg.getMsg(getCtx(), "Success");
 		else
-			return Msg.getElement(getCtx(), "JP_NoProductExplodeBOM");
+			msg = Msg.getMsg(getCtx(), "JP_NoProductExplodeBOM");
+		
+		return msg;
 			
 	}
 	
