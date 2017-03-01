@@ -33,7 +33,7 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170228L;
+	private static final long serialVersionUID = 20170301L;
 
     /** Standard Constructor */
     public X_JP_BankDataLine (Properties ctx, int JP_BankDataLine_ID, String trxName)
@@ -46,7 +46,7 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
 			setInterestAmt (Env.ZERO);
 // 0
-			setIsmMatchedJP (false);
+			setIsMatchedJP (false);
 // N
 			setJP_BankDataLine_ID (0);
 			setJP_BankData_ID (0);
@@ -140,9 +140,9 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
 		if (C_BPartner_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
 	/** Get Business Partner .
@@ -196,9 +196,9 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	public void setC_Charge_ID (int C_Charge_ID)
 	{
 		if (C_Charge_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
+			set_Value (COLUMNNAME_C_Charge_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
+			set_Value (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
 	}
 
 	/** Get Charge.
@@ -224,9 +224,9 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	public void setC_Invoice_ID (int C_Invoice_ID)
 	{
 		if (C_Invoice_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
+			set_Value (COLUMNNAME_C_Invoice_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
 	}
 
 	/** Get Invoice.
@@ -252,9 +252,9 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	public void setC_Payment_ID (int C_Payment_ID)
 	{
 		if (C_Payment_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Payment_ID, null);
+			set_Value (COLUMNNAME_C_Payment_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
+			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
 	}
 
 	/** Get Payment.
@@ -280,9 +280,9 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	public void setC_Tax_ID (int C_Tax_ID)
 	{
 		if (C_Tax_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Tax_ID, null);
+			set_Value (COLUMNNAME_C_Tax_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Tax_ID, Integer.valueOf(C_Tax_ID));
+			set_Value (COLUMNNAME_C_Tax_ID, Integer.valueOf(C_Tax_ID));
 	}
 
 	/** Get Tax.
@@ -388,17 +388,17 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	}
 
 	/** Set Matched.
-		@param IsmMatchedJP Matched	  */
-	public void setIsmMatchedJP (boolean IsmMatchedJP)
+		@param IsMatchedJP Matched	  */
+	public void setIsMatchedJP (boolean IsMatchedJP)
 	{
-		set_Value (COLUMNNAME_IsmMatchedJP, Boolean.valueOf(IsmMatchedJP));
+		set_Value (COLUMNNAME_IsMatchedJP, Boolean.valueOf(IsMatchedJP));
 	}
 
 	/** Get Matched.
 		@return Matched	  */
-	public boolean ismMatchedJP () 
+	public boolean isMatchedJP () 
 	{
-		Object oo = get_Value(COLUMNNAME_IsmMatchedJP);
+		Object oo = get_Value(COLUMNNAME_IsMatchedJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

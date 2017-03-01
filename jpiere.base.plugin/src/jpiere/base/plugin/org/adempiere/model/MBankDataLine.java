@@ -17,7 +17,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /**
- * JPIERE-0302
+ * JPIERE-0302 Import Bank Data Window
  * 
  * 
  * @author h.hagiwara
@@ -34,5 +34,7 @@ public class MBankDataLine extends X_JP_BankDataLine {
 	{
 		super(ctx, rs, trxName);
 	}
+	
+	//TODO:明細を更新した際に、ヘッダの合計フィールドの更新
 	
 }

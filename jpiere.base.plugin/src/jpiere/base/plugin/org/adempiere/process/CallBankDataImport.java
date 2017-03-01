@@ -71,6 +71,9 @@ public class CallBankDataImport extends SvrProcess {
 		{
 			m_BankData.setJP_Processing1("Y");
 			m_BankData.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
+			
+			//TODO:合計フィールドの更新処理
+			
 			m_BankData.saveEx(get_TrxName());
 		}else{
 			throw new AdempiereException(pi.getSummary());
