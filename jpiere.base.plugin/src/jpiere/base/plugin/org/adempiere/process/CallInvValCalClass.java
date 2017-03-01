@@ -58,9 +58,10 @@ public class CallInvValCalClass extends SvrProcess {
 	{
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
 		pi.setClassName(m_InvValProfile.getJP_InvValCalClass());
-		pi.setAD_Client_ID(getAD_PInstance_ID());
+		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
+		pi.setParameter(getParameter());
 		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
 
 		if(isOK)

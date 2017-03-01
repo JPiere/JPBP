@@ -16,28 +16,28 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.org.adempiere.model.MBankData;
+import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
-import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 
 /**
- * JPIERE-0161 Inventory Valuation Calculate Doc
+ * JPIERE-00302 : Bank Data match Invoice
  *
  *
  *  @author Hideaki Hagiwara
  *
  */
-public class CallInvValUpdateCostClass extends SvrProcess {
+public class CallBankDataMatchInv extends SvrProcess {
 
-	MInvValProfile m_InvValProfile = null;
-	MInvValCal m_InvValCal = null;
+	MBankDataSchema m_BankDataSchema = null;
+	MBankData m_BankData = null;
 	int Record_ID = 0;
 
 	@Override
@@ -46,8 +46,8 @@ public class CallInvValUpdateCostClass extends SvrProcess {
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-			m_InvValCal = new MInvValCal(getCtx(), Record_ID, null);
-			m_InvValProfile = new MInvValProfile(getCtx(), m_InvValCal.getJP_InvValProfile_ID(), null);
+			m_BankData = new MBankData(getCtx(), Record_ID, null);
+			m_BankDataSchema = new MBankDataSchema(getCtx(), m_BankData.getJP_BankDataSchema_ID(), null);
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
@@ -57,7 +57,10 @@ public class CallInvValUpdateCostClass extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		pi.setClassName(m_InvValProfile.getJP_InvValUpdateCostClass());
+		if(Util.isEmpty(m_BankDataSchema.getJP_BankDataImportClass()))
+			pi.setClassName("jpiere.base.plugin.org.adempiere.process.DefaultBankDataMatchInv");
+		else
+			pi.setClassName(m_BankDataSchema.getJP_BankDataImportClass());
 		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
@@ -66,9 +69,9 @@ public class CallInvValUpdateCostClass extends SvrProcess {
 
 		if(isOK)
 		{
-			m_InvValCal.setJP_Processing3("Y");
-			m_InvValCal.setJP_ProcessedTime3(new Timestamp(System.currentTimeMillis()));
-			m_InvValCal.saveEx(get_TrxName());
+			m_BankData.setJP_Processing3("Y");
+			m_BankData.setJP_ProcessedTime3(new Timestamp(System.currentTimeMillis()));
+			m_BankData.saveEx(get_TrxName());
 		}else{
 			throw new AdempiereException(pi.getSummary());
 		}

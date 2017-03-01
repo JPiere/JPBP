@@ -16,6 +16,9 @@ package jpiere.base.plugin.factory;
 
 import java.sql.ResultSet;
 
+import jpiere.base.plugin.org.adempiere.model.MBankData;
+import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
+import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MBillLine;
 import jpiere.base.plugin.org.adempiere.model.MBillSchema;
@@ -135,6 +138,12 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MEstimationLine.class;
 			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
 				return MEstimationTax.class;
+			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
+				return MBankDataSchema.class;
+			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
+				return MBankData.class;
+			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
+				return MBankDataLine.class;
 			}
 
 		}else{
@@ -214,6 +223,12 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MEstimationLine(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
 				return  new MEstimationTax(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
+				return new MBankDataSchema(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
+				return new MBankData(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
+				return new MBankDataLine(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -293,6 +308,12 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return  new MEstimationLine(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
 				return  new MEstimationTax(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
+				return new MBankDataSchema(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
+				return new MBankData(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
+				return new MBankDataLine(Env.getCtx(), rs, trxName);
 			}
 
 
