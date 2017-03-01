@@ -32,7 +32,7 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170227L;
+	private static final long serialVersionUID = 20170228L;
 
     /** Standard Constructor */
     public X_JP_BankDataSchema (Properties ctx, int JP_BankDataSchema_ID, String trxName)
