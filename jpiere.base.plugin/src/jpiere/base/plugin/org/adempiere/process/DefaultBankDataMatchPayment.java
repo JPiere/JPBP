@@ -18,7 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
-import org.compiere.model.MInvoice;
+import org.compiere.model.MPayment;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 
@@ -27,12 +27,12 @@ import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
 
 /**
- * JPIERE-0305 : Default Bank Data match Invoice
+ * JPIERE-0307 : Default Bank Data match Payment
  * 
  * @author 
  *
  */
-public class DefaultBankDataMatchInv extends SvrProcess {
+public class DefaultBankDataMatchPayment extends SvrProcess {
 	
 	private int p_JP_BankData_ID = 0;
 	private MBankData m_BankData = null;
@@ -41,14 +41,13 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 	
 	private int p_AD_Client_ID = 0;
 
-
 	@Override
 	protected void prepare()
 	{
 		p_AD_Client_ID = getAD_Client_ID();
 		p_JP_BankData_ID = getRecord_ID();
 		m_BankData = new MBankData(getCtx(), p_JP_BankData_ID, get_TrxName());
-		BDSchema = new MBankDataSchema(getCtx(), m_BankData.getJP_BankDataSchema_ID(), get_TrxName());
+		BDSchema = new MBankDataSchema(getCtx(), m_BankData.getJP_BankDataSchema_ID(), get_TrxName());		
 	}
 	
 	@Override
@@ -58,7 +57,7 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 		
 		
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE IsPaid='N' AND AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )";
+		String sql = "SELECT C_Payment_ID FROM C_Payment WHERE IsReconciled='N' AND AD_Client_ID = ? AND IsReceipt = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
@@ -74,13 +73,13 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 					if(lines[i].isMatchedJP())
 						break;
 					
-					int C_Invoice_ID = rs.getInt(1);
-					MInvoice inv = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
-					BigDecimal openAmt = inv.getOpenAmt();
+					int C_Payment_ID = rs.getInt(1);
+					MPayment payment = new MPayment(getCtx(), C_Payment_ID, get_TrxName());
+					BigDecimal openAmt = payment.getPayAmt();
 					BigDecimal diffAmt = lines[i].getTrxAmt().subtract(openAmt);
 					if(diffAmt.abs().compareTo(acceptableDiffAmt.abs()) <= 0)
 					{
-						lines[i].setC_Invoice_ID(C_Invoice_ID);
+						lines[i].setC_Payment_ID(C_Payment_ID);
 						
 						//TODO:差異があった場合の料金タイプ処理の実装
 						

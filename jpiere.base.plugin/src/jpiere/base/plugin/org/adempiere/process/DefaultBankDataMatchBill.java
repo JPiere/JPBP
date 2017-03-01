@@ -25,23 +25,24 @@ import org.compiere.util.DB;
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
+import jpiere.base.plugin.org.adempiere.model.MBill;
 
 /**
- * JPIERE-0305 : Default Bank Data match Invoice
+ * JPIERE-0306 : Default Bank Data match Bill
  * 
  * @author 
  *
  */
-public class DefaultBankDataMatchInv extends SvrProcess {
+public class DefaultBankDataMatchBill extends SvrProcess {
 	
+
 	private int p_JP_BankData_ID = 0;
 	private MBankData m_BankData = null;
 	
 	private MBankDataSchema BDSchema = null;
 	
 	private int p_AD_Client_ID = 0;
-
-
+	
 	@Override
 	protected void prepare()
 	{
@@ -58,7 +59,7 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 		
 		
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE IsPaid='N' AND AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )";
+		String sql = "SELECT JP_Bill_ID FROM JP_Bill WHERE AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )";//TODO:日付指定を含めないとデータが多すぎる…
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
@@ -74,13 +75,13 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 					if(lines[i].isMatchedJP())
 						break;
 					
-					int C_Invoice_ID = rs.getInt(1);
-					MInvoice inv = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
+					int JP_Bill_ID = rs.getInt(1);
+					MBill inv = new MBill(getCtx(), JP_Bill_ID, get_TrxName());
 					BigDecimal openAmt = inv.getOpenAmt();
 					BigDecimal diffAmt = lines[i].getTrxAmt().subtract(openAmt);
 					if(diffAmt.abs().compareTo(acceptableDiffAmt.abs()) <= 0)
 					{
-						lines[i].setC_Invoice_ID(C_Invoice_ID);
+						lines[i].setJP_Bill_ID(JP_Bill_ID);
 						
 						//TODO:差異があった場合の料金タイプ処理の実装
 						

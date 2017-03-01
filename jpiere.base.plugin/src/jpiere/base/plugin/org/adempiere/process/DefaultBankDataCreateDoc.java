@@ -13,26 +13,22 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.logging.Level;
-
-import org.compiere.model.MInvoice;
+import org.compiere.model.MBankStatement;
+import org.compiere.model.MBankStatementLine;
+import org.compiere.model.PO;
 import org.compiere.process.SvrProcess;
-import org.compiere.util.DB;
 
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
 
 /**
- * JPIERE-0305 : Default Bank Data match Invoice
+ * JPIERE-0308 : Default Bank Data create Doc
  * 
  * @author 
  *
  */
-public class DefaultBankDataMatchInv extends SvrProcess {
+public class DefaultBankDataCreateDoc extends SvrProcess {
 	
 	private int p_JP_BankData_ID = 0;
 	private MBankData m_BankData = null;
@@ -41,67 +37,49 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 	
 	private int p_AD_Client_ID = 0;
 
-
 	@Override
 	protected void prepare()
 	{
 		p_AD_Client_ID = getAD_Client_ID();
 		p_JP_BankData_ID = getRecord_ID();
 		m_BankData = new MBankData(getCtx(), p_JP_BankData_ID, get_TrxName());
-		BDSchema = new MBankDataSchema(getCtx(), m_BankData.getJP_BankDataSchema_ID(), get_TrxName());
+		BDSchema = new MBankDataSchema(getCtx(), m_BankData.getJP_BankDataSchema_ID(), get_TrxName());		
 	}
 	
 	@Override
 	protected String doIt() throws Exception 
 	{
-		BigDecimal acceptableDiffAmt = BDSchema.getJP_AcceptableDiffAmt();
-		
-		
+		MBankStatement bs = new MBankStatement(getCtx(), 0, get_TrxName());
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE IsPaid='N' AND AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
 		{
-			try
+			if(i == 0)
 			{
-				pstmt = DB.prepareStatement(sql, get_TrxName());
-				pstmt.setInt(1, p_AD_Client_ID);
-				pstmt.setInt(2, lines[i].getC_BPartner_ID());
-				rs = pstmt.executeQuery();
-				while (rs.next())
-				{
-					if(lines[i].isMatchedJP())
-						break;
-					
-					int C_Invoice_ID = rs.getInt(1);
-					MInvoice inv = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
-					BigDecimal openAmt = inv.getOpenAmt();
-					BigDecimal diffAmt = lines[i].getTrxAmt().subtract(openAmt);
-					if(diffAmt.abs().compareTo(acceptableDiffAmt.abs()) <= 0)
-					{
-						lines[i].setC_Invoice_ID(C_Invoice_ID);
-						
-						//TODO:差異があった場合の料金タイプ処理の実装
-						
-						lines[i].setIsMatchedJP(true);
-						lines[i].saveEx(get_TrxName());
-					}
-				}
+				PO.copyValues(m_BankData, bs);
+				bs.setAD_Org_ID(m_BankData.getAD_Org_ID());
+				bs.saveEx(get_TrxName());
+				
+				m_BankData.setC_BankStatement_ID(bs.getC_BankStatement_ID());
+				m_BankData.saveEx(get_TrxName());
 			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, sql, e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-
+			
+			MBankStatementLine bsl = new MBankStatementLine(getCtx(), 0, get_TrxName());
+			PO.copyValues(lines[i], bsl);
+			bsl.setC_BankStatement_ID(bs.getC_BankStatement_ID());
+			bsl.setAD_Org_ID(bs.getAD_Org_ID());
+			bsl.setC_Currency_ID(m_BankData.getC_BankAccount().getC_Currency_ID());
+			bsl.setStmtAmt(lines[i].getStmtAmt());
+			bsl.setTrxAmt(lines[i].getTrxAmt());
+			bsl.setChargeAmt(lines[i].getChargeAmt());
+			bsl.setC_Charge_ID(lines[i].getC_Charge_ID());
+			bsl.set_ValueNoCheck("C_Tax_ID", lines[i].get_Value("C_Tax_ID"));
+			bsl.setInterestAmt(lines[i].getInterestAmt());
+			bsl.saveEx(get_TrxName());
+			
+			lines[i].setC_BankStatementLine_ID(bsl.getC_BankStatementLine_ID());
+			lines[i].saveEx(get_TrxName());
 		}
-		
+
 		return null;
 	}
 	
