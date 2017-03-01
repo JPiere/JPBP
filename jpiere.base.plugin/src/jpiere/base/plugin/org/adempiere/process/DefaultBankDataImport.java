@@ -17,20 +17,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.util.logging.Level;
 
-import org.adempiere.util.IProcessUI;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
-import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 
 /**
- * 
+ * JPIERE-0303 : Fefault Import Bank Data
  * 
  * @author 
  *

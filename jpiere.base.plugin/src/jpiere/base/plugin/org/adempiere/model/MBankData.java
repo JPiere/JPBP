@@ -14,7 +14,11 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
+
+import org.compiere.model.Query;
+import org.compiere.util.Util;
 
 /**
  * JPIERE-0302
@@ -35,4 +39,44 @@ public class MBankData extends X_JP_BankData {
 		super(ctx, rs, trxName);
 	}
 	
+	
+	protected MBankDataLine[] 	m_lines = null;
+	
+	public MBankDataLine[] getLines (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MBankDataLine.COLUMNNAME_JP_BankData_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MBankDataLine.COLUMNNAME_Line;
+		//
+		List<MBankDataLine> list = new Query(getCtx(), I_JP_BankDataLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(getJP_BankData_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		return list.toArray(new MBankDataLine[list.size()]);		
+	}	//	getLines
+
+	public MBankDataLine[] getLines (boolean requery, String orderBy)
+	{
+		if (m_lines != null && !requery) {
+			set_TrxName(m_lines, get_TrxName());
+			return m_lines;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += "Line";
+		m_lines = getLines(null, orderClause);
+		return m_lines;
+	}	//	getLines
+	
+	public MBankDataLine[] getLines()
+	{
+		return getLines(false, null);
+	}	//	getLines
+
 }

@@ -61,7 +61,7 @@ public class CallBankDataMatchBP extends SvrProcess {
 			pi.setClassName("jpiere.base.plugin.org.adempiere.process.DefaultBankDataMatchBP");
 		else
 			pi.setClassName(m_BankDataSchema.getJP_BankDataImportClass());
-		pi.setAD_Client_ID(getAD_PInstance_ID());
+		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
 		pi.setParameter(getParameter());
