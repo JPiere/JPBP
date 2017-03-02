@@ -71,6 +71,7 @@ public class CallBankDataCreateDoc extends SvrProcess {
 		{
 			m_BankData.setJP_Processing6("Y");
 			m_BankData.setJP_ProcessedTime6(new Timestamp(System.currentTimeMillis()));
+			m_BankData.setProcessed(true);
 			m_BankData.saveEx(get_TrxName());
 		}else{
 			throw new AdempiereException(pi.getSummary());

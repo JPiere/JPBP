@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import org.compiere.model.MInvoice;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
@@ -58,7 +59,7 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 		
 		
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE IsPaid='N' AND AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )";
+		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE IsPaid='N' AND AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL') ORDER BY DateInvoiced ASC;";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
@@ -82,7 +83,13 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 					{
 						lines[i].setC_Invoice_ID(C_Invoice_ID);
 						
-						//TODO:差異があった場合の料金タイプ処理の実装
+						if(diffAmt.compareTo(Env.ZERO) !=0)
+						{
+							lines[i].setTrxAmt(openAmt);
+							lines[i].setChargeAmt(diffAmt);
+							lines[i].setC_Charge_ID(BDSchema.getC_Charge_ID());
+							lines[i].setC_Tax_ID(BDSchema.getC_Tax_ID());
+						}
 						
 						lines[i].setIsMatchedJP(true);
 						lines[i].saveEx(get_TrxName());

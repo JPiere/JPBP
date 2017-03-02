@@ -50,7 +50,7 @@ public class DefaultBankDataMatchBP extends SvrProcess {
 	{
 
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_BPartner_ID FROM C_BP_BankAccount WHERE AD_Client_ID = ? AND JP_A_Name_Kana = ?";
+		String sql = "SELECT C_BPartner_ID FROM C_BP_BankAccount WHERE AD_Client_ID = ? AND JP_A_Name_Kana = ? ORDER BY C_BP_BankAccount_ID ASC";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
