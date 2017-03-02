@@ -24,6 +24,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereBankDataCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
@@ -34,6 +35,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereInvValAdjustCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValCalCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
+import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
@@ -94,6 +96,14 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 						|| columnName.equals(MEstimation.COLUMNNAME_C_Opportunity_ID))
 				{
 					list.add(new JPiereEstimationCallout());
+				}
+			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
+				if(columnName.equals(MBankDataLine.COLUMNNAME_TrxAmt)
+						|| columnName.equals(MEstimation.COLUMNNAME_C_Invoice_ID)
+						|| columnName.equals(MEstimation.COLUMNNAME_JP_Bill_ID)
+						|| columnName.equals(MEstimation.COLUMNNAME_C_Payment_ID) )
+				{
+					list.add(new JPiereBankDataCallout());
 				}
 			}
 

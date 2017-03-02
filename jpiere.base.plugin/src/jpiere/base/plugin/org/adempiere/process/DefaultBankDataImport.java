@@ -327,7 +327,7 @@ public class DefaultBankDataImport extends SvrProcess{
 	            		sql = new StringBuilder ("INSERT INTO JP_BankDataLine ")
 	            				.append(" (AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy, ")
 	            				.append(" JP_BankDataType_Line, RoutingNo, JP_BankName_Kana, JP_BranchCode, JP_BranchName_Kana, JP_ClearingHouse, ")//0 - 5
-	            				.append(" JP_BankAccountType, AccountNo, JP_A_Name_Kana, StmtAmt, ") // 6 - 9
+	            				.append(" JP_BankAccountType, AccountNo, JP_A_Name_Kana, StmtAmt, TrxAmt,") // 6 - 10
 	            				.append(" Line, JP_BankData_ID, JP_BankDataLine_ID, JP_BankDataLine_UU, StatementLineDate,DateAcct, ValutaDate ) ")
 	            				
 	            				.append(" VALUES (")
@@ -350,6 +350,7 @@ public class DefaultBankDataImport extends SvrProcess{
 	            				.append(" '").append(line[INDEX_LINE_AccountNo]).append("',")				//7
 	            				.append(" '").append(line[INDEX_LINE_JP_A_Name_Kana]).append("',")		//8
 	            				.append(" ").append(line[INDEX_LINE_StmtAmt]).append(",")					//9
+	            				.append(" ").append(line[INDEX_LINE_StmtAmt]).append(",")					//10
 	            				.append(" ").append(lineNo).append(",")
 	            				.append(" ").append(p_JP_BankData_ID).append(",")
 	            				.append(" ").append(DB.getNextID(p_AD_Client_ID, "JP_BankDataLine", get_TrxName())).append(",")

@@ -274,14 +274,14 @@ public interface I_JP_BankDataLine
 	  */
 	public boolean isActive();
 
-    /** Column name IsmMatchedJP */
-    public static final String COLUMNNAME_IsmMatchedJP = "IsmMatchedJP";
+    /** Column name IsMatchedJP */
+    public static final String COLUMNNAME_IsMatchedJP = "IsMatchedJP";
 
 	/** Set Matched	  */
-	public void setIsmMatchedJP (boolean IsmMatchedJP);
+	public void setIsMatchedJP (boolean IsMatchedJP);
 
 	/** Get Matched	  */
-	public boolean ismMatchedJP();
+	public boolean isMatchedJP();
 
     /** Column name JP_A_Name_Kana */
     public static final String COLUMNNAME_JP_A_Name_Kana = "JP_A_Name_Kana";

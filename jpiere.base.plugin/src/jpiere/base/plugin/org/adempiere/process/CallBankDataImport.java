@@ -13,6 +13,9 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
@@ -21,8 +24,10 @@ import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MBPGroup;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
@@ -71,7 +76,36 @@ public class CallBankDataImport extends SvrProcess {
 		{
 			m_BankData.setJP_Processing1("Y");
 			m_BankData.setJP_ProcessedTime1(new Timestamp(System.currentTimeMillis()));
+			
+			String sql = "SELECT SUM(StmtAmt), SUM(TrxAmt), SUM(ChargeAmt), SUM(InterestAmt) From JP_BankDataLine WHERE JP_BankData_ID = ?";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement (sql, get_TrxName());
+				pstmt.setInt (1, m_BankData.getJP_BankData_ID());
+				rs = pstmt.executeQuery();
+				if (rs.next ())
+				{
+					m_BankData.setStmtAmt(rs.getBigDecimal(1));
+					m_BankData.setTrxAmt(rs.getBigDecimal(2));
+					m_BankData.setChargeAmt(rs.getBigDecimal(3));
+					m_BankData.setInterestAmt(rs.getBigDecimal(4));
+				}
+			}
+			catch (Exception e)
+			{
+				log.log (Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+			
 			m_BankData.saveEx(get_TrxName());
+			
 		}else{
 			throw new AdempiereException(pi.getSummary());
 		}
