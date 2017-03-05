@@ -65,7 +65,7 @@ public class JPiereBankDataCallout implements IColumnCallout {
 				mTab.setValue("C_Payment_ID", null);
 				MBill bill = new MBill(ctx, JP_Bill_ID.intValue(), null);
 				mTab.setValue("C_BPartner_ID", bill.getC_BPartner_ID());
-				mTab.setValue("TrxAmt", bill.getOpenAmt());//TODO:現在の未回収金額を取得できた方が良いと思われる…。MBillに追加するか…。
+				mTab.setValue("TrxAmt", bill.getCurrentOpenAmt());
 				updateChargeAmt(mTab);
 			}
 		}

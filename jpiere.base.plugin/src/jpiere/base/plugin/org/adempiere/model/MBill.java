@@ -542,5 +542,25 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		}
 	}	//	addDescription
 
+	
+	/**
+	 * Get Current Open Amt
+	 * 
+	 * @return Total Open Amt
+	 */
+	public BigDecimal getCurrentOpenAmt()
+	{
+		getLines(true);
+		BigDecimal openAmt = Env.ZERO;
+		MInvoice inv = null;
+		for(int i = 0 ; i < m_lines.length; i++)
+		{
+			inv = new MInvoice(getCtx(), m_lines[i].getC_Invoice_ID(), get_TrxName());
+			openAmt = openAmt.add(inv.getOpenAmt(true, null));
+		}
+		
+		return openAmt;
+	}
+	
 
 }	//	DocActionTemplate

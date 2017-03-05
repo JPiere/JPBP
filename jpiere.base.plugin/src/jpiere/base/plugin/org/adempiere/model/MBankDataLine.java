@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
@@ -79,7 +80,7 @@ public class MBankDataLine extends X_JP_BankDataLine {
 			MInvoice invoice = new MInvoice(getCtx(), getC_Invoice_ID(), null);
 			if(invoice.isPaid())
 			{
-				log.saveError("売上請求伝票は既に入金済みです","");//TODO:翻訳
+				log.saveError("JP_InvoicePaid","");//Invoice have paid already
 				return false;
 			}
 			setC_BPartner_ID(invoice.getC_BPartner_ID());
@@ -91,6 +92,12 @@ public class MBankDataLine extends X_JP_BankDataLine {
 			setC_Invoice_ID(0);
 			setC_Payment_ID(0);
 			MBill bill = new MBill(getCtx(), getJP_Bill_ID(), null);
+			BigDecimal currentOpenAmt =  bill.getCurrentOpenAmt();
+			if(!(currentOpenAmt.compareTo(Env.ZERO) > 0))
+			{
+				log.saveError("JP_BillPaid","");//Bill have paid already
+				return false;				
+			}
 			setC_BPartner_ID(bill.getC_BPartner_ID());
 		}
 		
@@ -102,7 +109,7 @@ public class MBankDataLine extends X_JP_BankDataLine {
 			MPayment payment = new MPayment(getCtx(), getC_Payment_ID(), null);
 			if(payment.isReconciled())
 			{
-				log.saveError("入金伝票は既に記帳済みです","");//TODO:翻訳
+				log.saveError("JP_PaymentReconciled","");//Payment have reconciled already
 				return false;
 			}
 			setC_BPartner_ID(payment.getC_BPartner_ID());
