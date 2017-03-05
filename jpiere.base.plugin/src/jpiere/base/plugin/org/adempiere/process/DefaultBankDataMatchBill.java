@@ -84,7 +84,7 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 		BigDecimal acceptableDiffAmt = BDSchema.getJP_AcceptableDiffAmt();
 		MBankDataLine[] lines =  m_BankData.getLines();
 		String sql = "SELECT JP_Bill_ID FROM JP_Bill WHERE AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )"
-						+" AND C_BankAccount_ID = ? AND JP_PromisedPayDate >= ? AND JP_PromisedPayDate <= ? ";
+						+" AND C_BankAccount_ID = ? AND JP_PromisedPayDate >= ? AND JP_PromisedPayDate <= ?  ORDER BY JP_PromisedPayDate ASC";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
@@ -121,6 +121,7 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 						
 						lines[i].setIsMatchedJP(true);
 						lines[i].saveEx(get_TrxName());
+						break;
 					}
 				}
 			}

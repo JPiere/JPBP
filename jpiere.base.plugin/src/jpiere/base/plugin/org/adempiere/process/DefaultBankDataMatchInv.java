@@ -93,6 +93,7 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 						
 						lines[i].setIsMatchedJP(true);
 						lines[i].saveEx(get_TrxName());
+						break;
 					}
 				}
 			}

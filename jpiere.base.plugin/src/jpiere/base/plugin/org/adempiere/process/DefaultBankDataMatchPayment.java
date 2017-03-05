@@ -58,7 +58,8 @@ public class DefaultBankDataMatchPayment extends SvrProcess {
 		
 		
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_Payment_ID FROM C_Payment WHERE IsReconciled='N' AND AD_Client_ID = ? AND IsReceipt = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL') ORDER BY DateTrx ASC;";
+		String sql = "SELECT C_Payment_ID FROM C_Payment WHERE IsReconciled='N' AND AD_Client_ID = ? AND IsReceipt = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL')"
+				+" AND C_BankAccount_ID = ? ORDER BY DateTrx ASC;";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
@@ -68,6 +69,7 @@ public class DefaultBankDataMatchPayment extends SvrProcess {
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				pstmt.setInt(1, p_AD_Client_ID);
 				pstmt.setInt(2, lines[i].getC_BPartner_ID());
+				pstmt.setInt(3, m_BankData.getC_BankAccount_ID());
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
@@ -92,6 +94,7 @@ public class DefaultBankDataMatchPayment extends SvrProcess {
 						
 						lines[i].setIsMatchedJP(true);
 						lines[i].saveEx(get_TrxName());
+						break;
 					}
 				}
 			}
