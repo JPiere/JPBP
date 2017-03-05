@@ -87,11 +87,11 @@ public class CreateNonBusinessDay extends SvrProcess {
 			}else if(name.equals("OnMonday")){
 				onMonday = para[i].getParameterAsBoolean();
 			}else if(name.equals("OnTuesday")){
-				onThursday = para[i].getParameterAsBoolean();
+				onTuesday = para[i].getParameterAsBoolean();
 			}else if(name.equals("OnWednesday")){
 				onWednesday = para[i].getParameterAsBoolean();
 			}else if(name.equals("OnThursday")){
-				onTuesday = para[i].getParameterAsBoolean();
+				 onThursday= para[i].getParameterAsBoolean();
 			}else if(name.equals("OnFriday")){
 				onFriday = para[i].getParameterAsBoolean();
 			}else if(name.equals("OnSaturday")){
