@@ -121,31 +121,35 @@ public class JPiereBankStatementModelValidator implements ModelValidator {
 			MBankStatementLine[] bsls = bs.getLines(false) ;
 			for(int i = 0; i < bsls.length; i++)
 			{
-				MPayment payment = new MPayment(po.getCtx(), bsls[i].getC_Payment_ID(),  po.get_TrxName());
-				if(payment.getDocStatus().equals(DocAction.STATUS_Voided) || payment.getDocStatus().equals(DocAction.STATUS_Reversed)
-						|| payment.getDocStatus().equals(DocAction.STATUS_Invalid) )
+				if(bsls[i].getC_Payment_ID() > 0)
 				{
-					return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_NotValidDocStatus");//Not Valid Doc Status
-				
-				}else if(!payment.getDocStatus().equals(DocAction.STATUS_Completed) && !payment.getDocStatus().equals(DocAction.STATUS_Closed)){
-					
-					MDocType dt = new MDocType(po.getCtx(), payment.getC_DocType_ID(),  po.get_TrxName());
-					if(dt.get_ValueAsBoolean("IsReconcileCompleteJP"))
+					MPayment payment = new MPayment(po.getCtx(), bsls[i].getC_Payment_ID(),  po.get_TrxName());
+					if(payment.getDocStatus().equals(DocAction.STATUS_Voided) || payment.getDocStatus().equals(DocAction.STATUS_Reversed)
+							|| payment.getDocStatus().equals(DocAction.STATUS_Invalid) )
 					{
-						payment.setDateAcct(bs.getDateAcct());
-						if(payment.processIt(DocAction.ACTION_Complete))
-							payment.saveEx(po.get_TrxName());
-						else
-							return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_UnexpectedErrorPaymentComplete");
+						return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_NotValidDocStatus");//Not Valid Doc Status
+					
+					}else if(!payment.getDocStatus().equals(DocAction.STATUS_Completed) && !payment.getDocStatus().equals(DocAction.STATUS_Closed)){
 						
-						if(!payment.getDocStatus().equals(DocAction.STATUS_Completed))
-							return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_UnexpectedErrorPaymentComplete");
-					
-					}else{
-						return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_IncompletePayment");
+						MDocType dt = new MDocType(po.getCtx(), payment.getC_DocType_ID(),  po.get_TrxName());
+						if(dt.get_ValueAsBoolean("IsReconcileCompleteJP"))
+						{
+							payment.setDateAcct(bs.getDateAcct());
+							if(payment.processIt(DocAction.ACTION_Complete))
+								payment.saveEx(po.get_TrxName());
+							else
+								return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_UnexpectedErrorPaymentComplete");
+							
+							if(!payment.getDocStatus().equals(DocAction.STATUS_Completed))
+								return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_UnexpectedErrorPaymentComplete");
+						
+						}else{
+							return Msg.getElement(po.getCtx(),"Line") + " : " + bsls[i].getLine() + " - " + Msg.getMsg(po.getCtx(), "JP_IncompletePayment");
+						}
+						
 					}
-					
-				}
+				}//if(bsls[i].getC_Payment_ID() > 0)
+				
 			}//for
 		}
 

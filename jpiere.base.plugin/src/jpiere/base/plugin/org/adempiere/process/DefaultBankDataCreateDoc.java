@@ -95,6 +95,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 			
 			if(lines[i].getC_Invoice_ID() > 0)
 			{
+				bsl.setC_Invoice_ID(lines[i].getC_Invoice_ID());
 				MPayment payment = createPayment(bsl);
 				if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
 				{
@@ -110,7 +111,8 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 				{
 					payment.processIt(BDSchema.getJP_Payment_DocAction());
 					payment.saveEx(get_TrxName());
-				}			
+				}
+				
 			}else if(lines[i].getC_Payment_ID() > 0){
 				bsl.setC_Payment_ID(lines[i].getC_Payment_ID());
 			}
@@ -281,13 +283,18 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		else
 			return null;
 		payment.saveEx();
-		//
-		if (!payment.processIt(MPayment.DOCACTION_Complete)) {
-			log.warning("Payment Process Failed: " + payment.getDocumentNo() + " " + payment.getProcessMsg());
-			throw new IllegalStateException("Payment Process Failed: " + payment.getDocumentNo() + " " + payment.getProcessMsg());
-			
-		}
-		payment.saveEx();
+		
+//		if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
+//		{
+//			if(!payment.processIt(BDSchema.getJP_Payment_DocAction()))
+//			{
+//				log.warning("Payment Process Failed: " + payment.getDocumentNo() + " " + payment.getProcessMsg());
+//				throw new IllegalStateException("Payment Process Failed: " + payment.getDocumentNo() + " " + payment.getProcessMsg());
+//			}
+//		}
+//		
+//		payment.saveEx();
+		
 		return payment;		
 	}	//	createPayment
 }
