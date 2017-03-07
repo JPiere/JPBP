@@ -58,7 +58,8 @@ public class DefaultBankDataMatchPayment extends SvrProcess {
 		
 		
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_Payment_ID FROM C_Payment WHERE IsReconciled='N' AND AD_Client_ID = ? AND IsReceipt = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL')"
+		String sql = "SELECT C_Payment_ID FROM C_Payment WHERE IsReconciled='N' AND AD_Client_ID = ? AND IsReceipt = 'Y' AND  C_BPartner_ID = ? "
+				+" AND DocStatus NOT IN ('VO','RE','NA','IN') "
 				+" AND C_BankAccount_ID = ? ORDER BY DateTrx ASC;";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

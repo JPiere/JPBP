@@ -17,16 +17,19 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
+import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.model.PO;
+import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MBankData;
@@ -107,7 +110,17 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 				MPayment payment = createPayment(bsl);
 				payment.set_ValueNoCheck("JP_Bill_ID", lines[i].getJP_Bill_ID());
 				payment.saveEx(get_TrxName());
-				if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
+				
+				//Craete Payment Allocate
+				ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), payment.getC_Payment_ID());
+				pi.setClassName("jpiere.base.plugin.org.adempiere.process.CreatePaymentAllocateFromBill");
+				pi.setAD_Client_ID(getAD_Client_ID());
+				pi.setAD_User_ID(getAD_User_ID());
+				pi.setAD_PInstance_ID(getAD_PInstance_ID());
+				pi.setParameter(getParameter());
+				boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+				
+				if(isOK && !Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
 				{
 					payment.processIt(BDSchema.getJP_Payment_DocAction());
 					payment.saveEx(get_TrxName());
@@ -115,11 +128,15 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 				
 			}else if(lines[i].getC_Payment_ID() > 0){
 				bsl.setC_Payment_ID(lines[i].getC_Payment_ID());
+
 			}
 			
 			lines[i].setC_BankStatementLine_ID(bsl.getC_BankStatementLine_ID());
 			lines[i].saveEx(get_TrxName());
-		}
+			
+			bsl.saveEx(get_TrxName());
+			
+		}//For
 
 		if(!Util.isEmpty(BDSchema.getJP_BankStmt_DocAction()))
 		{
