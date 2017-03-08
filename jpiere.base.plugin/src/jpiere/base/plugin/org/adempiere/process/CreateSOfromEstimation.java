@@ -30,6 +30,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  * JPIERE-0185 : Create SO from Estimation
@@ -43,7 +44,8 @@ public class CreateSOfromEstimation extends SvrProcess {
 	private String		p_DocAction = null;
 	private MEstimation estimation = null;
 	IProcessUI processUI = null;
-
+	String msg = "";
+	
 	@Override
 	protected void prepare() {
 
@@ -66,7 +68,23 @@ public class CreateSOfromEstimation extends SvrProcess {
 
 		processUI = Env.getProcessUI(getCtx());
 		estimation = new MEstimation(getCtx(), p_JP_Estimation_ID, get_TrxName()) ;
-		if(processUI != null && estimation.getLink_Order_ID() != 0)
+		
+		if(estimation.getJP_DocTypeSO_ID()==0)
+		{
+			msg = Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID") + System.lineSeparator();
+		}
+		
+		if(estimation.getC_BPartner_ID() == 0)
+		{
+			msg = msg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID") + System.lineSeparator();
+		}
+		
+		if(estimation.getC_BPartner_Location_ID() == 0)
+		{
+			msg = msg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID")+ System.lineSeparator();
+		}		
+		
+		if(Util.isEmpty(msg) && processUI != null && estimation.getLink_Order_ID() != 0)
 		{
 			//Already Sales Order created, Do you want to create Sales Order again?
 			processUI.ask(Msg.getMsg(getCtx(), "JP_CreateSOfromEstimationAgain"), new Callback<Boolean>() {
@@ -84,6 +102,21 @@ public class CreateSOfromEstimation extends SvrProcess {
 
 			});//FDialog.
 		}
+		
+		if(!Util.isEmpty(msg) && processUI != null)
+		{
+			//Already Sales Order created, Do you want to create Sales Order again?
+			processUI.ask(Msg.getMsg(getCtx(), msg), new Callback<Boolean>() {
+
+				@Override
+				public void onCallback(Boolean result)
+				{
+					;
+		        }
+
+			});//FDialog.
+		}
+		
 	}
 
 	private String createSO()
@@ -131,15 +164,24 @@ public class CreateSOfromEstimation extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		
-		if(estimation.getJP_DocTypeSO_ID()==0)
-		{
-			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID"));
-		}
-		
-		
 		if(processUI == null || estimation.getLink_Order_ID() == 0)
 		{
+			if(estimation.getJP_DocTypeSO_ID()==0)
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID"));
+			}
+			
+			if(estimation.getC_BPartner_ID()==0)
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID"));
+			}
+			
+			
+			if(estimation.getC_BPartner_Location_ID()==0)
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID"));
+			}
+			
 			return createSO();
 		}
 
