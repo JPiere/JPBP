@@ -41,16 +41,20 @@ import org.compiere.util.Util;
 public class CreateSOfromEstimation extends SvrProcess {
 
 	private int			p_JP_Estimation_ID = 0;
-	private String		p_DocAction = null;
-	private MEstimation estimation = null;
-	IProcessUI processUI = null;
-	String msg = "";
+	private String			p_DocAction = null;
+	private MEstimation 	estimation = null;
+	private IProcessUI 		processUI = null;
+	private boolean 		isCreateSO = false;
+	private boolean 		isOpenDialog = false;
+	private boolean 		isAskAnswer = true;
+	private String 			errorMsg = "";
+	private String 			returnMsg = "";
 	
 	@Override
-	protected void prepare() {
+	protected void prepare() 
+	{
 
 		p_JP_Estimation_ID = getRecord_ID();
-
 
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
@@ -68,24 +72,36 @@ public class CreateSOfromEstimation extends SvrProcess {
 
 		processUI = Env.getProcessUI(getCtx());
 		estimation = new MEstimation(getCtx(), p_JP_Estimation_ID, get_TrxName()) ;
-		
+				
+	}
+	
+	@Override
+	protected String doIt() throws Exception
+	{
 		if(estimation.getJP_DocTypeSO_ID()==0)
 		{
-			msg = Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID") + System.lineSeparator();
+			errorMsg = Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID") + System.lineSeparator();
 		}
 		
 		if(estimation.getC_BPartner_ID() == 0)
 		{
-			msg = msg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID") + System.lineSeparator();
+			errorMsg = errorMsg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID") + System.lineSeparator();
 		}
 		
 		if(estimation.getC_BPartner_Location_ID() == 0)
 		{
-			msg = msg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID")+ System.lineSeparator();
+			errorMsg = errorMsg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID")+ System.lineSeparator();
 		}		
-		
-		if(Util.isEmpty(msg) && processUI != null && estimation.getLink_Order_ID() != 0)
+				
+		if(!Util.isEmpty(errorMsg))
 		{
+			throw new Exception(errorMsg);
+		}
+		
+		
+		if(processUI != null && estimation.getLink_Order_ID() != 0)
+		{
+			isOpenDialog = true;
 			//Already Sales Order created, Do you want to create Sales Order again?
 			processUI.ask(Msg.getMsg(getCtx(), "JP_CreateSOfromEstimationAgain"), new Callback<Boolean>() {
 
@@ -94,28 +110,30 @@ public class CreateSOfromEstimation extends SvrProcess {
 				{
 					if (result)
 					{
-						createSO();
+						returnMsg = createSO();
+						isCreateSO = true;
 					}else{
-						;
+						isAskAnswer = false;
 					}
 		        }
 
 			});//FDialog.
+			
+		}else{
+			returnMsg = createSO();
+			isCreateSO = true;
 		}
 		
-		if(!Util.isEmpty(msg) && processUI != null)
+		
+		while (isOpenDialog && isAskAnswer && !isCreateSO)
 		{
-			//Already Sales Order created, Do you want to create Sales Order again?
-			processUI.ask(Msg.getMsg(getCtx(), msg), new Callback<Boolean>() {
-
-				@Override
-				public void onCallback(Boolean result)
-				{
-					;
-		        }
-
-			});//FDialog.
+			Thread.sleep(1000*2);
 		}
+		
+		if(isCreateSO)
+			addBufferLog(0, null, null, returnMsg, MOrder.Table_ID, estimation.getLink_Order_ID());
+		
+		return returnMsg;
 		
 	}
 
@@ -161,31 +179,6 @@ public class CreateSOfromEstimation extends SvrProcess {
 		return order.getDocumentInfo();
 	}
 
-	@Override
-	protected String doIt() throws Exception
-	{
-		if(processUI == null || estimation.getLink_Order_ID() == 0)
-		{
-			if(estimation.getJP_DocTypeSO_ID()==0)
-			{
-				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID"));
-			}
-			
-			if(estimation.getC_BPartner_ID()==0)
-			{
-				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID"));
-			}
-			
-			
-			if(estimation.getC_BPartner_Location_ID()==0)
-			{
-				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID"));
-			}
-			
-			return createSO();
-		}
 
-		return "";
-	}
 
 }
