@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_Estimation
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 4.1 - $Id$ */
 public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20161029L;
+	private static final long serialVersionUID = 20170308L;
 
     /** Standard Constructor */
     public X_JP_Estimation (Properties ctx, int JP_Estimation_ID, String trxName)
@@ -42,8 +42,6 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
       super (ctx, JP_Estimation_ID, trxName);
       /** if (JP_Estimation_ID == 0)
         {
-			setC_BPartner_ID (0);
-			setC_BPartner_Location_ID (0);
 			setC_Currency_ID (0);
 // @C_Currency_ID@
 			setC_DocTypeTarget_ID (0);
@@ -1606,6 +1604,48 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return false;
 	}
 
+	/** Set Business Partner Address.
+		@param JP_BP_Address Business Partner Address	  */
+	public void setJP_BP_Address (String JP_BP_Address)
+	{
+		set_Value (COLUMNNAME_JP_BP_Address, JP_BP_Address);
+	}
+
+	/** Get Business Partner Address.
+		@return Business Partner Address	  */
+	public String getJP_BP_Address () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BP_Address);
+	}
+
+	/** Set Business Partner Name.
+		@param JP_BP_Name Business Partner Name	  */
+	public void setJP_BP_Name (String JP_BP_Name)
+	{
+		set_Value (COLUMNNAME_JP_BP_Name, JP_BP_Name);
+	}
+
+	/** Get Business Partner Name.
+		@return Business Partner Name	  */
+	public String getJP_BP_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BP_Name);
+	}
+
+	/** Set Business Partner User Name.
+		@param JP_BP_User_Name Business Partner User Name	  */
+	public void setJP_BP_User_Name (String JP_BP_User_Name)
+	{
+		set_Value (COLUMNNAME_JP_BP_User_Name, JP_BP_User_Name);
+	}
+
+	/** Get Business Partner User Name.
+		@return Business Partner User Name	  */
+	public String getJP_BP_User_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BP_User_Name);
+	}
+
 	public I_JP_Bill getJP_Bill() throws RuntimeException
     {
 		return (I_JP_Bill)MTable.get(getCtx(), I_JP_Bill.Table_Name)
@@ -1702,6 +1742,31 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	public String getJP_Estimation_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Estimation_UU);
+	}
+
+	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_Name)
+			.getPO(getJP_Locator_ID(), get_TrxName());	}
+
+	/** Set Locator.
+		@param JP_Locator_ID Locator	  */
+	public void setJP_Locator_ID (int JP_Locator_ID)
+	{
+		if (JP_Locator_ID < 1) 
+			set_Value (COLUMNNAME_JP_Locator_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Locator_ID, Integer.valueOf(JP_Locator_ID));
+	}
+
+	/** Get Locator.
+		@return Locator	  */
+	public int getJP_Locator_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Locator_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_Order getLink_Order() throws RuntimeException

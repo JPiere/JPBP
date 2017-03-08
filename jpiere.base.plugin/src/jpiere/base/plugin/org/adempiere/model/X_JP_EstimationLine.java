@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_EstimationLine
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 4.1 - $Id$ */
 public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160630L;
+	private static final long serialVersionUID = 20170308L;
 
     /** Standard Constructor */
     public X_JP_EstimationLine (Properties ctx, int JP_EstimationLine_ID, String trxName)
@@ -41,20 +41,22 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
       super (ctx, JP_EstimationLine_ID, trxName);
       /** if (JP_EstimationLine_ID == 0)
         {
-			setC_BPartner_Location_ID (0);
-// @C_BPartner_Location_ID@
 			setC_Currency_ID (0);
 // @C_Currency_ID@
 			setC_Tax_ID (0);
 			setC_UOM_ID (0);
 // @#C_UOM_ID@
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+// @DateOrdered@
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+// @DatePromised@
 			setFreightAmt (Env.ZERO);
 			setIsDescription (false);
 // N
 			setJP_EstimationLine_ID (0);
 			setJP_Estimation_ID (0);
 			setLine (0);
-// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM C_OrderLine WHERE C_Order_ID=@C_Order_ID@
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_EstimationLine WHERE JP_Estimation_ID=@JP_Estimation_ID@
 			setLineNetAmt (Env.ZERO);
 			setM_AttributeSetInstance_ID (0);
 			setM_Warehouse_ID (0);
@@ -417,9 +419,9 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 	public void setC_UOM_ID (int C_UOM_ID)
 	{
 		if (C_UOM_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
+			set_Value (COLUMNNAME_C_UOM_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
+			set_Value (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
 	}
 
 	/** Get UOM.
@@ -582,8 +584,58 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 		return false;
 	}
 
-	/** Set Estimation Line.
-		@param JP_EstimationLine_ID Estimation Line	  */
+	public I_M_AttributeSetInstance getJP_ASI_From() throws RuntimeException
+    {
+		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
+			.getPO(getJP_ASI_From_ID(), get_TrxName());	}
+
+	/** Set Attribute Set Instance(From).
+		@param JP_ASI_From_ID Attribute Set Instance(From)	  */
+	public void setJP_ASI_From_ID (int JP_ASI_From_ID)
+	{
+		if (JP_ASI_From_ID < 1) 
+			set_Value (COLUMNNAME_JP_ASI_From_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ASI_From_ID, Integer.valueOf(JP_ASI_From_ID));
+	}
+
+	/** Get Attribute Set Instance(From).
+		@return Attribute Set Instance(From)	  */
+	public int getJP_ASI_From_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ASI_From_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_M_AttributeSetInstance getJP_ASI_To() throws RuntimeException
+    {
+		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
+			.getPO(getJP_ASI_To_ID(), get_TrxName());	}
+
+	/** Set Attribute Set Instance(To).
+		@param JP_ASI_To_ID Attribute Set Instance(To)	  */
+	public void setJP_ASI_To_ID (int JP_ASI_To_ID)
+	{
+		if (JP_ASI_To_ID < 1) 
+			set_Value (COLUMNNAME_JP_ASI_To_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ASI_To_ID, Integer.valueOf(JP_ASI_To_ID));
+	}
+
+	/** Get Attribute Set Instance(To).
+		@return Attribute Set Instance(To)	  */
+	public int getJP_ASI_To_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ASI_To_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Estimation & Handwritten Line.
+		@param JP_EstimationLine_ID Estimation & Handwritten Line	  */
 	public void setJP_EstimationLine_ID (int JP_EstimationLine_ID)
 	{
 		if (JP_EstimationLine_ID < 1) 
@@ -592,8 +644,8 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 			set_ValueNoCheck (COLUMNNAME_JP_EstimationLine_ID, Integer.valueOf(JP_EstimationLine_ID));
 	}
 
-	/** Get Estimation Line.
-		@return Estimation Line	  */
+	/** Get Estimation & Handwritten Line.
+		@return Estimation & Handwritten Line	  */
 	public int getJP_EstimationLine_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_EstimationLine_ID);
@@ -621,8 +673,8 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 		return (I_JP_Estimation)MTable.get(getCtx(), I_JP_Estimation.Table_Name)
 			.getPO(getJP_Estimation_ID(), get_TrxName());	}
 
-	/** Set Estimation.
-		@param JP_Estimation_ID Estimation	  */
+	/** Set Estimation & Handwritten.
+		@param JP_Estimation_ID Estimation & Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID)
 	{
 		if (JP_Estimation_ID < 1) 
@@ -631,11 +683,86 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 			set_ValueNoCheck (COLUMNNAME_JP_Estimation_ID, Integer.valueOf(JP_Estimation_ID));
 	}
 
-	/** Get Estimation.
-		@return Estimation	  */
+	/** Get Estimation & Handwritten.
+		@return Estimation & Handwritten	  */
 	public int getJP_Estimation_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Estimation_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Locator getJP_LocatorFrom() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_Name)
+			.getPO(getJP_LocatorFrom_ID(), get_TrxName());	}
+
+	/** Set Locator(From).
+		@param JP_LocatorFrom_ID Locator(From)	  */
+	public void setJP_LocatorFrom_ID (int JP_LocatorFrom_ID)
+	{
+		if (JP_LocatorFrom_ID < 1) 
+			set_Value (COLUMNNAME_JP_LocatorFrom_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_LocatorFrom_ID, Integer.valueOf(JP_LocatorFrom_ID));
+	}
+
+	/** Get Locator(From).
+		@return Locator(From)	  */
+	public int getJP_LocatorFrom_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_LocatorFrom_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Locator getJP_LocatorTo() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_Name)
+			.getPO(getJP_LocatorTo_ID(), get_TrxName());	}
+
+	/** Set Locator(To).
+		@param JP_LocatorTo_ID Locator(To)	  */
+	public void setJP_LocatorTo_ID (int JP_LocatorTo_ID)
+	{
+		if (JP_LocatorTo_ID < 1) 
+			set_Value (COLUMNNAME_JP_LocatorTo_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_LocatorTo_ID, Integer.valueOf(JP_LocatorTo_ID));
+	}
+
+	/** Get Locator(To).
+		@return Locator(To)	  */
+	public int getJP_LocatorTo_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_LocatorTo_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_Name)
+			.getPO(getJP_Locator_ID(), get_TrxName());	}
+
+	/** Set Locator.
+		@param JP_Locator_ID Locator	  */
+	public void setJP_Locator_ID (int JP_Locator_ID)
+	{
+		if (JP_Locator_ID < 1) 
+			set_Value (COLUMNNAME_JP_Locator_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Locator_ID, Integer.valueOf(JP_Locator_ID));
+	}
+
+	/** Get Locator.
+		@return Locator	  */
+	public int getJP_Locator_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Locator_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_EstimationLine
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 4.1
  */
 @SuppressWarnings("all")
 public interface I_JP_EstimationLine 
@@ -375,13 +375,35 @@ public interface I_JP_EstimationLine
 	  */
 	public boolean isDescription();
 
+    /** Column name JP_ASI_From_ID */
+    public static final String COLUMNNAME_JP_ASI_From_ID = "JP_ASI_From_ID";
+
+	/** Set Attribute Set Instance(From)	  */
+	public void setJP_ASI_From_ID (int JP_ASI_From_ID);
+
+	/** Get Attribute Set Instance(From)	  */
+	public int getJP_ASI_From_ID();
+
+	public I_M_AttributeSetInstance getJP_ASI_From() throws RuntimeException;
+
+    /** Column name JP_ASI_To_ID */
+    public static final String COLUMNNAME_JP_ASI_To_ID = "JP_ASI_To_ID";
+
+	/** Set Attribute Set Instance(To)	  */
+	public void setJP_ASI_To_ID (int JP_ASI_To_ID);
+
+	/** Get Attribute Set Instance(To)	  */
+	public int getJP_ASI_To_ID();
+
+	public I_M_AttributeSetInstance getJP_ASI_To() throws RuntimeException;
+
     /** Column name JP_EstimationLine_ID */
     public static final String COLUMNNAME_JP_EstimationLine_ID = "JP_EstimationLine_ID";
 
-	/** Set Estimation Line	  */
+	/** Set Estimation & Handwritten Line	  */
 	public void setJP_EstimationLine_ID (int JP_EstimationLine_ID);
 
-	/** Get Estimation Line	  */
+	/** Get Estimation & Handwritten Line	  */
 	public int getJP_EstimationLine_ID();
 
     /** Column name JP_EstimationLine_UU */
@@ -396,13 +418,46 @@ public interface I_JP_EstimationLine
     /** Column name JP_Estimation_ID */
     public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
 
-	/** Set Estimation	  */
+	/** Set Estimation & Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID);
 
-	/** Get Estimation	  */
+	/** Get Estimation & Handwritten	  */
 	public int getJP_Estimation_ID();
 
 	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
+
+    /** Column name JP_LocatorFrom_ID */
+    public static final String COLUMNNAME_JP_LocatorFrom_ID = "JP_LocatorFrom_ID";
+
+	/** Set Locator(From)	  */
+	public void setJP_LocatorFrom_ID (int JP_LocatorFrom_ID);
+
+	/** Get Locator(From)	  */
+	public int getJP_LocatorFrom_ID();
+
+	public org.compiere.model.I_M_Locator getJP_LocatorFrom() throws RuntimeException;
+
+    /** Column name JP_LocatorTo_ID */
+    public static final String COLUMNNAME_JP_LocatorTo_ID = "JP_LocatorTo_ID";
+
+	/** Set Locator(To)	  */
+	public void setJP_LocatorTo_ID (int JP_LocatorTo_ID);
+
+	/** Get Locator(To)	  */
+	public int getJP_LocatorTo_ID();
+
+	public org.compiere.model.I_M_Locator getJP_LocatorTo() throws RuntimeException;
+
+    /** Column name JP_Locator_ID */
+    public static final String COLUMNNAME_JP_Locator_ID = "JP_Locator_ID";
+
+	/** Set Locator	  */
+	public void setJP_Locator_ID (int JP_Locator_ID);
+
+	/** Get Locator	  */
+	public int getJP_Locator_ID();
+
+	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
     /** Column name JP_TaxAmt */
     public static final String COLUMNNAME_JP_TaxAmt = "JP_TaxAmt";

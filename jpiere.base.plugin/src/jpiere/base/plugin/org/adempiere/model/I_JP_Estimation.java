@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Estimation
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 4.1
  */
 @SuppressWarnings("all")
 public interface I_JP_Estimation 
@@ -865,6 +865,33 @@ public interface I_JP_Estimation
 	  */
 	public boolean isTransferred();
 
+    /** Column name JP_BP_Address */
+    public static final String COLUMNNAME_JP_BP_Address = "JP_BP_Address";
+
+	/** Set Business Partner Address	  */
+	public void setJP_BP_Address (String JP_BP_Address);
+
+	/** Get Business Partner Address	  */
+	public String getJP_BP_Address();
+
+    /** Column name JP_BP_Name */
+    public static final String COLUMNNAME_JP_BP_Name = "JP_BP_Name";
+
+	/** Set Business Partner Name	  */
+	public void setJP_BP_Name (String JP_BP_Name);
+
+	/** Get Business Partner Name	  */
+	public String getJP_BP_Name();
+
+    /** Column name JP_BP_User_Name */
+    public static final String COLUMNNAME_JP_BP_User_Name = "JP_BP_User_Name";
+
+	/** Set Business Partner User Name	  */
+	public void setJP_BP_User_Name (String JP_BP_User_Name);
+
+	/** Get Business Partner User Name	  */
+	public String getJP_BP_User_Name();
+
     /** Column name JP_Bill_ID */
     public static final String COLUMNNAME_JP_Bill_ID = "JP_Bill_ID";
 
@@ -913,6 +940,17 @@ public interface I_JP_Estimation
 
 	/** Get JP_Estimation_UU	  */
 	public String getJP_Estimation_UU();
+
+    /** Column name JP_Locator_ID */
+    public static final String COLUMNNAME_JP_Locator_ID = "JP_Locator_ID";
+
+	/** Set Locator	  */
+	public void setJP_Locator_ID (int JP_Locator_ID);
+
+	/** Get Locator	  */
+	public int getJP_Locator_ID();
+
+	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
     /** Column name Link_Order_ID */
     public static final String COLUMNNAME_Link_Order_ID = "Link_Order_ID";

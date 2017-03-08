@@ -726,26 +726,29 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		MBPartner bp = (MBPartner) s_cache.get (key);
 		if (bp == null){
 			bp = MBPartner.get(Env.getCtx(), C_BPartner_ID);
-			if(bp == null){ //For Mobile-UI - Mobile-UI can not get BPartner Info, because Mobile-UI can not get AD_Client_ID from ctx.
+			if(bp == null && C_BPartner_ID != 0){ //For Mobile-UI - Mobile-UI can not get BPartner Info, because Mobile-UI can not get AD_Client_ID from ctx.
 				String whereClause = "C_BPartner_ID=? AND AD_Client_ID=?";
 				bp = new Query(Env.getCtx(),I_C_BPartner.Table_Name,whereClause,null)
 				.setParameters(C_BPartner_ID,provider.getAD_Client_ID())
 				.firstOnly();
 			}
 		}
-		if (bp.get_ID () != 0)
+		
+		RoundingMode roundingMode = null;
+		
+		if(bp != null)
+		{
 			s_cache.put (key, bp);
-
-		RoundingMode roundingMode = null;//TODO
-
-		if(isSOTrx){
-			Object SO_TaxRounding = bp.get_Value("JP_SOTaxRounding");
-			if(SO_TaxRounding != null)
-				roundingMode = RoundingMode.valueOf(new Integer(SO_TaxRounding.toString()).intValue());
-		}else{
-			Object PO_TaxRounding = bp.get_Value("JP_POTaxRounding");
-			if(PO_TaxRounding != null)
-				roundingMode = RoundingMode.valueOf(new Integer(PO_TaxRounding.toString()).intValue());
+			
+			if(isSOTrx){
+				Object SO_TaxRounding = bp.get_Value("JP_SOTaxRounding");
+				if(SO_TaxRounding != null)
+					roundingMode = RoundingMode.valueOf(new Integer(SO_TaxRounding.toString()).intValue());
+			}else{
+				Object PO_TaxRounding = bp.get_Value("JP_POTaxRounding");
+				if(PO_TaxRounding != null)
+					roundingMode = RoundingMode.valueOf(new Integer(PO_TaxRounding.toString()).intValue());
+			}
 		}
 
 		if(roundingMode == null){

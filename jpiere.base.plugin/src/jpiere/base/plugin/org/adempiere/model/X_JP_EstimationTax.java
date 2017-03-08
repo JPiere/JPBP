@@ -25,14 +25,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_EstimationTax
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 4.1 - $Id$ */
 public class X_JP_EstimationTax extends PO implements I_JP_EstimationTax, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160630L;
+	private static final long serialVersionUID = 20170308L;
 
     /** Standard Constructor */
     public X_JP_EstimationTax (Properties ctx, int JP_EstimationTax_ID, String trxName)
@@ -172,8 +172,8 @@ public class X_JP_EstimationTax extends PO implements I_JP_EstimationTax, I_Pers
 		return (I_JP_Estimation)MTable.get(getCtx(), I_JP_Estimation.Table_Name)
 			.getPO(getJP_Estimation_ID(), get_TrxName());	}
 
-	/** Set Estimation.
-		@param JP_Estimation_ID Estimation	  */
+	/** Set Estimation & Handwritten.
+		@param JP_Estimation_ID Estimation & Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID)
 	{
 		if (JP_Estimation_ID < 1) 
@@ -182,8 +182,8 @@ public class X_JP_EstimationTax extends PO implements I_JP_EstimationTax, I_Pers
 			set_ValueNoCheck (COLUMNNAME_JP_Estimation_ID, Integer.valueOf(JP_Estimation_ID));
 	}
 
-	/** Get Estimation.
-		@return Estimation	  */
+	/** Get Estimation & Handwritten.
+		@return Estimation & Handwritten	  */
 	public int getJP_Estimation_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Estimation_ID);

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_EstimationTax
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 4.1
  */
 @SuppressWarnings("all")
 public interface I_JP_EstimationTax 
@@ -144,10 +144,10 @@ public interface I_JP_EstimationTax
     /** Column name JP_Estimation_ID */
     public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
 
-	/** Set Estimation	  */
+	/** Set Estimation & Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID);
 
-	/** Get Estimation	  */
+	/** Get Estimation & Handwritten	  */
 	public int getJP_Estimation_ID();
 
 	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
