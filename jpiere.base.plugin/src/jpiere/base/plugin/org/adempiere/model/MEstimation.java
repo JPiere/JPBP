@@ -21,16 +21,20 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MBPartner;
+import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -594,31 +598,81 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			}
 
 		}
+		
+		if( (newRecord  && getC_BPartner_ID() > 0 ) || (is_ValueChanged("C_BPartner_ID") && getC_BPartner_ID() > 0) )
+		{
+			MBPartner bp = MBPartner.get(getCtx(), getC_BPartner_ID());
+			
+			if(Util.isEmpty(getJP_BP_Name()))
+			{
+				setJP_BP_Name(bp.getName2());
+			}
+			
+			if(Util.isEmpty(getJP_BP_Address()))
+			{
+				MBPartnerLocation[] bpLocations =  bp.getLocations(false);
+				for(int i = 0; i < bpLocations.length; i++)
+				{
+					if(bpLocations[i].isActive())
+					{
+						MLocation loc = bpLocations[i].getLocation(false);
+						setJP_BP_Address(loc.getAddress1() + loc.getAddress2());
+						break;
+					}
+				}
+			}
+			
+			if(Util.isEmpty(getJP_BP_User_Name()))
+			{
+				MUser[] users = MUser.getOfBPartner(getCtx(), bp.getC_BPartner_ID(),get_TrxName());
+				for(int i = 0; i < users.length; i++)
+				{
+					if(users[i].isActive())
+					{
+						setJP_BP_User_Name(users[i].getName());
+						break;
+					}
+				}
+					
+			}
+		}
 
 		return true;
 	}
 
 	@Override
-	protected boolean afterSave(boolean newRecord, boolean success) {
-
-		if(is_ValueChanged("DateOrdered") || is_ValueChanged("DatePromised") )
+	protected boolean afterSave(boolean newRecord, boolean success) 
+	{
+		//Sync Lines
+		if (   is_ValueChanged("AD_Org_ID")
+		    || is_ValueChanged(MEstimation.COLUMNNAME_C_BPartner_ID)
+		    || is_ValueChanged(MEstimation.COLUMNNAME_C_BPartner_Location_ID)
+		    || is_ValueChanged(MEstimation.COLUMNNAME_DateOrdered)
+		    || is_ValueChanged(MEstimation.COLUMNNAME_DatePromised)
+		    || is_ValueChanged(MEstimation.COLUMNNAME_M_Warehouse_ID)
+		    || is_ValueChanged(MEstimation.COLUMNNAME_M_Shipper_ID)
+		    || is_ValueChanged(MEstimation.COLUMNNAME_C_Currency_ID)) 
 		{
-
 			MEstimationLine[] lines = getLines();
-			for(int i = 0; i < lines.length; i++)
-			{
-				if(is_ValueChanged("DateOrdered") && (lines[i].getDateOrdered() == null || get_ValueOld("DateOrdered").equals(lines[i].getDateOrdered())))
-				{
-					lines[i].setDateOrdered(getDateOrdered());
-				}
-
-				if(is_ValueChanged("DatePromised") && (lines[i].getDatePromised() == null || get_ValueOld("DatePromised").equals(lines[i].getDatePromised())))
-				{
-					lines[i].setDatePromised(getDatePromised());
-				}
-
-				lines[i].saveEx(get_TrxName());
-			}//for
+			for (MEstimationLine line : lines) {
+				if (is_ValueChanged("AD_Org_ID"))
+					line.setAD_Org_ID(getAD_Org_ID());
+				if (is_ValueChanged(MEstimation.COLUMNNAME_C_BPartner_ID))
+					line.setC_BPartner_ID(getC_BPartner_ID());
+				if (is_ValueChanged(MEstimation.COLUMNNAME_C_BPartner_Location_ID))
+					line.setC_BPartner_Location_ID(getC_BPartner_Location_ID());
+				if (is_ValueChanged(MEstimation.COLUMNNAME_DateOrdered))
+					line.setDateOrdered(getDateOrdered());
+				if (is_ValueChanged(MEstimation.COLUMNNAME_DatePromised))
+					line.setDatePromised(getDatePromised());
+				if (is_ValueChanged(MEstimation.COLUMNNAME_M_Warehouse_ID))
+					line.setM_Warehouse_ID(getM_Warehouse_ID());
+				if (is_ValueChanged(MEstimation.COLUMNNAME_M_Shipper_ID))
+					line.setM_Shipper_ID(getM_Shipper_ID());
+				if (is_ValueChanged(MEstimation.COLUMNNAME_C_Currency_ID))
+					line.setC_Currency_ID(getC_Currency_ID());
+				line.saveEx();
+			}
 		}
 
 		return true;
