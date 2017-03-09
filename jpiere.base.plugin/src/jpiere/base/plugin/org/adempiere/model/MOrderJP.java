@@ -80,13 +80,15 @@ public class MOrderJP extends MOrder implements DocOptions {
 			return index;
 		}
 		
-//		if (docStatus.equals(DocumentEngine.STATUS_Completed)) 
-//		{
-//			index = 0; //initialize the index
-//			options[index++] = DocumentEngine.ACTION_Close; 
-//			options[index++] = DocumentEngine.ACTION_ReActivate;
-//			return index;
-//		}
+		if (docStatus.equals(DocumentEngine.STATUS_Drafted) || docStatus.equals(DocumentEngine.STATUS_InProgress)) 
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Void; 
+			options[index++] = DocumentEngine.ACTION_Prepare; 
+			options[index++] = DocumentEngine.ACTION_Complete; 
+
+			return index;
+		}
 		
 		return index;
 	}
