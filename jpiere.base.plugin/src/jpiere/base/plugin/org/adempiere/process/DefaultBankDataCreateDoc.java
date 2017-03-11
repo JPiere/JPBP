@@ -164,7 +164,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		
 		if(bankDataLine.getC_Invoice_ID() > 0)
 		{
-			MInvoice invoice = new MInvoice(getCtx(), bankDataLine.getC_Invoice_ID(), null);
+			MInvoice invoice = new MInvoice(getCtx(), bankDataLine.getC_Invoice_ID(), get_TrxName());
 			if(invoice.isPaid())
 			{
 				log.saveError("JP_InvoicePaid","");//Invoice have paid already
@@ -175,7 +175,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		
 		if(bankDataLine.getJP_Bill_ID() > 0)
 		{
-			MBill bill = new MBill(getCtx(), bankDataLine.getJP_Bill_ID(), null);
+			MBill bill = new MBill(getCtx(), bankDataLine.getJP_Bill_ID(), get_TrxName());
 			BigDecimal currentOpenAmt =  bill.getCurrentOpenAmt();
 			if(!(currentOpenAmt.compareTo(Env.ZERO) > 0))
 			{
@@ -187,7 +187,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		
 		if(bankDataLine.getC_Payment_ID() > 0)
 		{
-			MPayment payment = new MPayment(getCtx(), bankDataLine.getC_Payment_ID(), null);
+			MPayment payment = new MPayment(getCtx(), bankDataLine.getC_Payment_ID(), get_TrxName());
 			if(payment.isReconciled())
 			{
 				log.saveError("JP_PaymentReconciled","");//Payment have reconciled already
@@ -197,7 +197,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		
 		if(bankDataLine.getC_Order_ID() > 0)
 		{
-			MOrder order = new MOrder(getCtx(), bankDataLine.getC_Order_ID(), null);
+			MOrder order = new MOrder(getCtx(), bankDataLine.getC_Order_ID(), get_TrxName());
 			if(order.getC_Payment_ID() > 0)
 			{
 				log.saveError("JP_OrderPaid","");//Order have paid already
@@ -285,7 +285,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		//
 		if (C_Invoice_ID != 0)
 		{
-			MInvoice invoice = new MInvoice (getCtx(), C_Invoice_ID, null);
+			MInvoice invoice = new MInvoice (getCtx(), C_Invoice_ID,  get_TrxName());
 			payment.setC_DocType_ID(invoice.isSOTrx());		//	Receipt
 			payment.setC_Invoice_ID(invoice.getC_Invoice_ID());
 			payment.setC_BPartner_ID (invoice.getC_BPartner_ID());
