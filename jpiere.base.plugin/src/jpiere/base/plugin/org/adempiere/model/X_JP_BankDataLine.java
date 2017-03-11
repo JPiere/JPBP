@@ -33,7 +33,7 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170301L;
+	private static final long serialVersionUID = 20170311L;
 
     /** Standard Constructor */
     public X_JP_BankDataLine (Properties ctx, int JP_BankDataLine_ID, String trxName)
@@ -235,6 +235,34 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	public int getC_Invoice_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_Name)
+			.getPO(getC_Order_ID(), get_TrxName());	}
+
+	/** Set Order.
+		@param C_Order_ID 
+		Order
+	  */
+	public void setC_Order_ID (int C_Order_ID)
+	{
+		if (C_Order_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_Order_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
+	}
+
+	/** Get Order.
+		@return Order
+	  */
+	public int getC_Order_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

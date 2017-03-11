@@ -28,6 +28,7 @@ CREATE TABLE adempiere.JP_BankData
   JP_ProcessedTime4 timestamp without time zone,
   JP_ProcessedTime5 timestamp without time zone,
   JP_ProcessedTime6 timestamp without time zone,
+  JP_ProcessedTime7 timestamp without time zone,
   PayDate  timestamp without time zone,
 
   IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
@@ -38,6 +39,7 @@ CREATE TABLE adempiere.JP_BankData
   JP_Processing4 character(1) DEFAULT 'N'::bpchar,
   JP_Processing5 character(1) DEFAULT 'N'::bpchar,
   JP_Processing6 character(1) DEFAULT 'N'::bpchar,
+  JP_Processing7 character(1) DEFAULT 'N'::bpchar,
   Processed character(1) DEFAULT 'N'::bpchar,
 
   JP_BankData_UU character varying(36) DEFAULT NULL::character varying,

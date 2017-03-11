@@ -22,8 +22,8 @@ import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
-import org.compiere.util.Env;
 
 /**
  *
@@ -49,6 +49,7 @@ public class JPiereBankDataCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_Bill_ID", null);
 				mTab.setValue("C_Payment_ID", null);
+				mTab.setValue("C_Order_ID", null);
 				MInvoice invoice = new MInvoice(ctx, C_Invoice_ID.intValue(), null);
 				mTab.setValue("C_BPartner_ID", invoice.getC_BPartner_ID());
 				mTab.setValue("TrxAmt", invoice.getOpenAmt());
@@ -63,6 +64,7 @@ public class JPiereBankDataCallout implements IColumnCallout {
 			{
 				mTab.setValue("C_Invoice_ID", null);
 				mTab.setValue("C_Payment_ID", null);
+				mTab.setValue("C_Order_ID", null);
 				MBill bill = new MBill(ctx, JP_Bill_ID.intValue(), null);
 				mTab.setValue("C_BPartner_ID", bill.getC_BPartner_ID());
 				mTab.setValue("TrxAmt", bill.getCurrentOpenAmt());
@@ -77,9 +79,25 @@ public class JPiereBankDataCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_Bill_ID", null);
 				mTab.setValue("C_Invoice_ID", null);
+				mTab.setValue("C_Order_ID", null);
 				MPayment payment = new MPayment(ctx, C_Payment_ID.intValue(), null);
 				mTab.setValue("C_BPartner_ID", payment.getC_BPartner_ID());
 				mTab.setValue("TrxAmt", payment.getPayAmt());
+				updateChargeAmt(mTab);
+			}
+		}
+
+		if(mField.getColumnName().equals("C_Order_ID"))
+		{
+			Integer C_Order_ID = (Integer)value;
+			if(C_Order_ID != null && C_Order_ID.intValue() != 0)
+			{
+				mTab.setValue("JP_Bill_ID", null);
+				mTab.setValue("C_Invoice_ID", null);
+				mTab.setValue("C_Payment_ID", null);
+				MOrder order = new MOrder(ctx, C_Order_ID.intValue(), null);
+				mTab.setValue("C_BPartner_ID", order.getC_BPartner_ID());
+				mTab.setValue("TrxAmt", order.getGrandTotal());
 				updateChargeAmt(mTab);
 			}
 		}

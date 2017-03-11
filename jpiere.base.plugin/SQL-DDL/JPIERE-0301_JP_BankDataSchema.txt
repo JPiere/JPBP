@@ -26,6 +26,7 @@ CREATE TABLE adempiere.JP_BankDataSchema
   JP_BankDataMatchInvClass character varying(255),
   JP_BankDataMatchBillClass character varying(255),
   JP_BankDataMatchPaymentClass character varying(255),
+  JP_BankDataMatchOrderClass character varying(255),
   JP_BankDataCreateDocClass character varying(255),
   JP_Payment_DocAction character(2),
   JP_BankStmt_DocAction character(2),

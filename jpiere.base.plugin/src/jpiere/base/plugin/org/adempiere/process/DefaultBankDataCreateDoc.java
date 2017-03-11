@@ -21,6 +21,7 @@ import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfo;
@@ -70,7 +71,11 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		{
 			String erroMsg = checkMatchedBankData(lines[i]);
 			if(!Util.isEmpty(erroMsg))
+			{
+				lines[i].setI_ErrorMsg(erroMsg);
+				lines[i].saveEx(get_TrxName());
 				throw new Exception(erroMsg + Msg.getElement(getCtx(), "Line") + " : " +lines[i].getLine());
+			}
 			
 			if(i == 0)
 			{
@@ -99,7 +104,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 			if(lines[i].getC_Invoice_ID() > 0)
 			{
 				bsl.setC_Invoice_ID(lines[i].getC_Invoice_ID());
-				MPayment payment = createPayment(bsl);
+				MPayment payment = createPayment(bsl, lines[i]);
 				if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
 				{
 					payment.processIt(BDSchema.getJP_Payment_DocAction());
@@ -107,7 +112,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 				}
 				
 			}else if(lines[i].getJP_Bill_ID() > 0){
-				MPayment payment = createPayment(bsl);
+				MPayment payment = createPayment(bsl, lines[i]);
 				payment.set_ValueNoCheck("JP_Bill_ID", lines[i].getJP_Bill_ID());
 				payment.saveEx(get_TrxName());
 				
@@ -129,6 +134,13 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 			}else if(lines[i].getC_Payment_ID() > 0){
 				bsl.setC_Payment_ID(lines[i].getC_Payment_ID());
 
+			}else if(lines[i].getC_Order_ID() > 0){
+				MPayment payment = createPayment(bsl, lines[i]);
+				if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
+				{
+					payment.processIt(BDSchema.getJP_Payment_DocAction());
+					payment.saveEx(get_TrxName());
+				}
 			}
 			
 			lines[i].setC_BankStatementLine_ID(bsl.getC_BankStatementLine_ID());
@@ -156,7 +168,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 			if(invoice.isPaid())
 			{
 				log.saveError("JP_InvoicePaid","");//Invoice have paid already
-				return Msg.getElement(getCtx(), "JP_InvoicePaid");
+				return Msg.getMsg(getCtx(), "JP_InvoicePaid");
 			}
 		}
 		
@@ -168,7 +180,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 			if(!(currentOpenAmt.compareTo(Env.ZERO) > 0))
 			{
 				log.saveError("JP_BillPaid","");//Bill have paid already
-				return Msg.getElement(getCtx(), "JP_BillPaid");			
+				return Msg.getMsg(getCtx(), "JP_BillPaid");			
 			}
 		}
 		
@@ -179,9 +191,19 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 			if(payment.isReconciled())
 			{
 				log.saveError("JP_PaymentReconciled","");//Payment have reconciled already
-				return Msg.getElement(getCtx(), "JP_PaymentReconciled");
+				return Msg.getMsg(getCtx(), "JP_PaymentReconciled");
 			}
-		}		
+		}	
+		
+		if(bankDataLine.getC_Order_ID() > 0)
+		{
+			MOrder order = new MOrder(getCtx(), bankDataLine.getC_Order_ID(), null);
+			if(order.getC_Payment_ID() > 0)
+			{
+				log.saveError("JP_OrderPaid","");//Order have paid already
+				return Msg.getMsg(getCtx(), "JP_OrderPaid");
+			}
+		}	
 		
 		return "";
 	}
@@ -193,7 +215,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 	 *	@return Message
 	 *  @throws Exception if not successful
 	 */
-	private MPayment createPayment (MBankStatementLine bsl) throws Exception
+	private MPayment createPayment (MBankStatementLine bsl, MBankDataLine bdLine) throws Exception
 	{
 		if (bsl == null || bsl.getC_Payment_ID() != 0)
 			return null;
@@ -203,7 +225,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		//
 		MBankStatement bs = new MBankStatement (getCtx(), bsl.getC_BankStatement_ID(), get_TrxName());
 		//
-		MPayment payment = createPayment (bsl.getC_Invoice_ID(), bsl.getC_BPartner_ID(),
+		MPayment payment = createPayment (bsl.getC_Invoice_ID(), bdLine.getC_Order_ID(), bsl.getC_BPartner_ID(),
 			bsl.getC_Currency_ID(), bsl.getStmtAmt(), bsl.getTrxAmt(), 
 			bs.getC_BankAccount_ID(), bsl.getStatementLineDate(), bsl.getDateAcct(),
 			bsl.getDescription(), bsl.getAD_Org_ID());
@@ -232,7 +254,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 	 *	@param AD_Org_ID org
 	 *	@return payment
 	 */
-	private MPayment createPayment (int C_Invoice_ID, int C_BPartner_ID, 
+	private MPayment createPayment (int C_Invoice_ID, int C_Order_ID, int C_BPartner_ID, 
 		int C_Currency_ID, BigDecimal StmtAmt, BigDecimal TrxAmt,
 		int C_BankAccount_ID, Timestamp DateTrx, Timestamp DateAcct, 
 		String Description, int AD_Org_ID)
@@ -296,9 +318,14 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 				payment.setPayAmt(PayAmt);
 				payment.setC_DocType_ID(true);
 			}
+			
+			if(C_Order_ID != 0)
+				payment.setC_Order_ID(C_Order_ID);
+			
 		}
 		else
 			return null;
+		
 		payment.saveEx();
 		
 //		if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))

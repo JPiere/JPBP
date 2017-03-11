@@ -33,7 +33,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170228L;
+	private static final long serialVersionUID = 20170311L;
 
     /** Standard Constructor */
     public X_JP_BankData (Properties ctx, int JP_BankData_ID, String trxName)
@@ -56,6 +56,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 			setNumLines (0);
 // 0
 			setStatementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
 			setStmtAmt (Env.ZERO);
 // 0
 			setTotalAmt (Env.ZERO);
@@ -583,6 +584,20 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime6);
 	}
 
+	/** Set Processed Time.
+		@param JP_ProcessedTime7 Processed Time	  */
+	public void setJP_ProcessedTime7 (Timestamp JP_ProcessedTime7)
+	{
+		set_Value (COLUMNNAME_JP_ProcessedTime7, JP_ProcessedTime7);
+	}
+
+	/** Get Processed Time.
+		@return Processed Time	  */
+	public Timestamp getJP_ProcessedTime7 () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime7);
+	}
+
 	/** Set Process Now.
 		@param JP_Processing1 Process Now	  */
 	public void setJP_Processing1 (String JP_Processing1)
@@ -665,6 +680,20 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	public String getJP_Processing6 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing6);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing7 Process Now	  */
+	public void setJP_Processing7 (String JP_Processing7)
+	{
+		set_Value (COLUMNNAME_JP_Processing7, JP_Processing7);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing7 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing7);
 	}
 
 	/** Set Requester Code.

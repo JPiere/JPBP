@@ -28,13 +28,13 @@ import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 /**
- * JPIERE-00302 : Bank Data match Bill
+ * JPIERE-00302 : Bank Data match Order
  *
  *
  *  @author Hideaki Hagiwara
  *
  */
-public class CallBankDataMatchBill extends SvrProcess {
+public class CallBankDataMatchOrder extends SvrProcess {
 
 	MBankDataSchema m_BankDataSchema = null;
 	MBankData m_BankData = null;
@@ -57,10 +57,10 @@ public class CallBankDataMatchBill extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		if(Util.isEmpty(m_BankDataSchema.getJP_BankDataMatchBillClass()))
-			pi.setClassName("jpiere.base.plugin.org.adempiere.process.DefaultBankDataMatchBill");
+		if(Util.isEmpty(m_BankDataSchema.getJP_BankDataMatchOrderClass()))
+			pi.setClassName("jpiere.base.plugin.org.adempiere.process.DefaultBankDataMatchOrder");
 		else
-			pi.setClassName(m_BankDataSchema.getJP_BankDataMatchBillClass());
+			pi.setClassName(m_BankDataSchema.getJP_BankDataMatchOrderClass());
 		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
@@ -69,8 +69,8 @@ public class CallBankDataMatchBill extends SvrProcess {
 
 		if(isOK)
 		{
-			m_BankData.setJP_Processing4("Y");
-			m_BankData.setJP_ProcessedTime4(new Timestamp(System.currentTimeMillis()));
+			m_BankData.setJP_Processing6("Y");
+			m_BankData.setJP_ProcessedTime6(new Timestamp(System.currentTimeMillis()));
 			m_BankData.saveEx(get_TrxName());
 		}else{
 			throw new AdempiereException(pi.getSummary());

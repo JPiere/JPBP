@@ -32,7 +32,7 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170228L;
+	private static final long serialVersionUID = 20170311L;
 
     /** Standard Constructor */
     public X_JP_BankDataSchema (Properties ctx, int JP_BankDataSchema_ID, String trxName)
@@ -283,6 +283,20 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	public String getJP_BankDataMatchInvClass () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataMatchInvClass);
+	}
+
+	/** Set Class of Bank Data Match Order.
+		@param JP_BankDataMatchOrderClass Class of Bank Data Match Order	  */
+	public void setJP_BankDataMatchOrderClass (String JP_BankDataMatchOrderClass)
+	{
+		set_Value (COLUMNNAME_JP_BankDataMatchOrderClass, JP_BankDataMatchOrderClass);
+	}
+
+	/** Get Class of Bank Data Match Order.
+		@return Class of Bank Data Match Order	  */
+	public String getJP_BankDataMatchOrderClass () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BankDataMatchOrderClass);
 	}
 
 	/** Set Class of Bank Data Match Payment.

@@ -216,6 +216,15 @@ public interface I_JP_BankDataSchema
 	/** Get Class of Bank Data Match Invoice	  */
 	public String getJP_BankDataMatchInvClass();
 
+    /** Column name JP_BankDataMatchOrderClass */
+    public static final String COLUMNNAME_JP_BankDataMatchOrderClass = "JP_BankDataMatchOrderClass";
+
+	/** Set Class of Bank Data Match Order	  */
+	public void setJP_BankDataMatchOrderClass (String JP_BankDataMatchOrderClass);
+
+	/** Get Class of Bank Data Match Order	  */
+	public String getJP_BankDataMatchOrderClass();
+
     /** Column name JP_BankDataMatchPaymentClass */
     public static final String COLUMNNAME_JP_BankDataMatchPaymentClass = "JP_BankDataMatchPaymentClass";
 

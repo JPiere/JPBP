@@ -20,6 +20,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MInvoice;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -77,6 +78,7 @@ public class MBankDataLine extends X_JP_BankDataLine {
 		{
 			setJP_Bill_ID(0);
 			setC_Payment_ID(0);
+			setC_Order_ID(0);
 			MInvoice invoice = new MInvoice(getCtx(), getC_Invoice_ID(), null);
 			if(invoice.isPaid())
 			{
@@ -91,6 +93,7 @@ public class MBankDataLine extends X_JP_BankDataLine {
 		{
 			setC_Invoice_ID(0);
 			setC_Payment_ID(0);
+			setC_Order_ID(0);
 			MBill bill = new MBill(getCtx(), getJP_Bill_ID(), null);
 			BigDecimal currentOpenAmt =  bill.getCurrentOpenAmt();
 			if(!(currentOpenAmt.compareTo(Env.ZERO) > 0))
@@ -106,6 +109,7 @@ public class MBankDataLine extends X_JP_BankDataLine {
 		{
 			setC_Invoice_ID(0);
 			setJP_Bill_ID(0);
+			setC_Order_ID(0);
 			MPayment payment = new MPayment(getCtx(), getC_Payment_ID(), null);
 			if(payment.isReconciled())
 			{
@@ -113,9 +117,23 @@ public class MBankDataLine extends X_JP_BankDataLine {
 				return false;
 			}
 			setC_BPartner_ID(payment.getC_BPartner_ID());
-		}		
+		}	
+		
+		if(is_ValueChanged("C_Order_ID") && getC_Order_ID() > 0)
+		{
+			setC_Invoice_ID(0);
+			setJP_Bill_ID(0);
+			setC_Payment_ID(0);
+			MOrder order = new MOrder(getCtx(), getC_Order_ID(), null);
+			if(order.getC_Payment_ID() > 0)
+			{
+				log.saveError("JP_OrderPaid","");//Order have paid already
+				return false;
+			}
+			setC_BPartner_ID(order.getC_BPartner_ID());
+		}	
 				
-		if(getC_Invoice_ID() > 0 || getJP_Bill_ID() > 0 || getC_Payment_ID() > 0)
+		if(getC_Invoice_ID() > 0 || getJP_Bill_ID() > 0 || getC_Payment_ID() > 0 || getC_Order_ID() > 0)
 			setIsMatchedJP(true);
 		else
 			setIsMatchedJP(false);

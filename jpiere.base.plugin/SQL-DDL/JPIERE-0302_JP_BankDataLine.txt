@@ -10,6 +10,7 @@ CREATE TABLE adempiere.JP_BankDataLine
   C_Tax_ID numeric(10,0),
   C_BPartner_ID numeric(10,0),
   C_Invoice_ID numeric(10,0),
+  C_Order_ID numeric(10,0),
   JP_Bill_ID numeric(10,0),
   C_Payment_ID numeric(10,0),
       

@@ -397,6 +397,15 @@ public interface I_JP_BankData
 	/** Get Processed Time	  */
 	public Timestamp getJP_ProcessedTime6();
 
+    /** Column name JP_ProcessedTime7 */
+    public static final String COLUMNNAME_JP_ProcessedTime7 = "JP_ProcessedTime7";
+
+	/** Set Processed Time	  */
+	public void setJP_ProcessedTime7 (Timestamp JP_ProcessedTime7);
+
+	/** Get Processed Time	  */
+	public Timestamp getJP_ProcessedTime7();
+
     /** Column name JP_Processing1 */
     public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
 
@@ -450,6 +459,15 @@ public interface I_JP_BankData
 
 	/** Get Process Now	  */
 	public String getJP_Processing6();
+
+    /** Column name JP_Processing7 */
+    public static final String COLUMNNAME_JP_Processing7 = "JP_Processing7";
+
+	/** Set Process Now	  */
+	public void setJP_Processing7 (String JP_Processing7);
+
+	/** Get Process Now	  */
+	public String getJP_Processing7();
 
     /** Column name JP_RequesterCode */
     public static final String COLUMNNAME_JP_RequesterCode = "JP_RequesterCode";

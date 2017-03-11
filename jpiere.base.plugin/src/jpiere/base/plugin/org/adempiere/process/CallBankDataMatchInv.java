@@ -57,10 +57,10 @@ public class CallBankDataMatchInv extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		if(Util.isEmpty(m_BankDataSchema.getJP_BankDataImportClass()))
+		if(Util.isEmpty(m_BankDataSchema.getJP_BankDataMatchInvClass()))
 			pi.setClassName("jpiere.base.plugin.org.adempiere.process.DefaultBankDataMatchInv");
 		else
-			pi.setClassName(m_BankDataSchema.getJP_BankDataImportClass());
+			pi.setClassName(m_BankDataSchema.getJP_BankDataMatchInvClass());
 		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
