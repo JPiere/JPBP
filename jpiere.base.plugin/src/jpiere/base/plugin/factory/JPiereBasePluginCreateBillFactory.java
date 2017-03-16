@@ -8,19 +8,27 @@ public class JPiereBasePluginCreateBillFactory implements I_CreateBillFactory {
 	@Override
 	public I_CreateBill getCreateBill(String className) 
 	{
-		Class<?> clazz = null;
-		I_CreateBill createBill = null;
-		try
+		
+		if(className == null || className.equals("jpiere.base.plugin.org.adempiere.process.DefaultCreateBill"))
 		{
-			clazz = Class.forName("jpiere.base.plugin.org.adempiere.process.DefaultCreateBill");
-			if(clazz != null)
-				createBill = (I_CreateBill)clazz.newInstance();
+		
+			Class<?> clazz = null;
+			I_CreateBill createBill = null;
+			try
+			{
+				clazz = Class.forName("jpiere.base.plugin.org.adempiere.process.DefaultCreateBill");
+				if(clazz != null)
+					createBill = (I_CreateBill)clazz.newInstance();
+				
+			}catch (Exception e) {
+				;
+			}
 			
-		}catch (Exception e) {
-			;
+			return createBill;
+		
 		}
 		
-		return createBill;
+		return null;
 	}
 	
 }
