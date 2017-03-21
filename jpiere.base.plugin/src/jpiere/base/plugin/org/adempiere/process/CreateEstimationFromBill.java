@@ -84,6 +84,9 @@ public class CreateEstimationFromBill extends SvrProcess {
 		// Create of line
 		createOfEstimationLine(estimation);
 
+		//Requery
+		estimation = new MEstimation(getCtx(), estimation.getJP_Estimation_ID(), get_TrxName());
+		
 		if(!estimation.processIt(p_DocAction)){
 			throw new Exception(Msg.getMsg(getCtx(), "ProcessRunError"));
 		}
