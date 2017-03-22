@@ -25,6 +25,7 @@ import org.compiere.model.X_C_Order;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
@@ -166,9 +167,15 @@ public class CreateEstimationFromInvoice extends SvrProcess {
 			estimationLines.saveEx(get_TrxName());
 		}
 
-		if(invoiceLines.length > 0)
+		if(invoiceLines.length > 0 && p_DocAction != null) 
 		{
-			estimation.processIt(p_DocAction);
+			
+			//Requery
+			estimation = new MEstimation(getCtx(), estimation.getJP_Estimation_ID(), get_TrxName());
+			
+			if(!estimation.processIt(p_DocAction)){
+				throw new Exception(Msg.getMsg(getCtx(), "ProcessRunError"));
+			}
 			estimation.saveEx(get_TrxName());
 		}
 
