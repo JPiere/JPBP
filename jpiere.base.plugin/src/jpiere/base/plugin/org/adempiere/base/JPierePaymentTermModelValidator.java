@@ -22,6 +22,7 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 public class JPierePaymentTermModelValidator implements ModelValidator {
 
@@ -66,13 +67,13 @@ public class JPierePaymentTermModelValidator implements ModelValidator {
 			}else{
 
 				if(!paymentTerm.isDueFixed()){
-					return "固定日付をOFFにする場合は複数支払条件フィールドを空にして下さい。";//TODO 多言語化
+					return Msg.getMsg(paymentTerm.getCtx(), "JP_PaymentTermsBlank_DueFixedOff");//Please Payment Terms blank when Fixed due date will be off
 				}
 
 				Boolean IsPaymentTerms = (Boolean)paymentTerm.get_Value("IsPaymentTermsJP");
 				if(IsPaymentTerms.booleanValue())
 				{
-					return "複数支払条件フラグをONにする場合は複数支払条件フィールドを空にして下さい。";//TODO 多言語化
+					return Msg.getMsg(paymentTerm.getCtx(), "JP_PaymentTermsBlank_DPaymentTermsOff");//Please Payment Terms blank when Payment Terms will be off
 				}
 
 				MPaymentTerm[] paymentTerms = JPierePaymentTerms.getPaymentTerms(Env.getCtx(), JP_PaymentTerms_ID);
@@ -81,7 +82,7 @@ public class JPierePaymentTermModelValidator implements ModelValidator {
 					if(paymentTerm.getFixMonthCutoff() == paymentTerms[i].getFixMonthCutoff()
 							&& paymentTerm.getC_PaymentTerm_ID() != paymentTerms[i].getC_PaymentTerm_ID())
 					{
-						return "締切日付が同じ支払条件が既に存在します。";//TODO 多言語化
+						return Msg.getMsg(paymentTerm.getCtx(), "JP_SameCondition_SamePaymeTerms");//There are same payment term condition in a Payment Terms
 					}
 
 					;
