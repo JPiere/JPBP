@@ -33,7 +33,7 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170205L;
+	private static final long serialVersionUID = 20170406L;
 
     /** Standard Constructor */
     public X_JP_Bill (Properties ctx, int JP_Bill_ID, String trxName)
@@ -306,6 +306,34 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	public int getC_DocType_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_PaySelection getC_PaySelection() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_PaySelection)MTable.get(getCtx(), org.compiere.model.I_C_PaySelection.Table_Name)
+			.getPO(getC_PaySelection_ID(), get_TrxName());	}
+
+	/** Set Payment Selection.
+		@param C_PaySelection_ID 
+		Payment Selection
+	  */
+	public void setC_PaySelection_ID (int C_PaySelection_ID)
+	{
+		if (C_PaySelection_ID < 1) 
+			set_Value (COLUMNNAME_C_PaySelection_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_PaySelection_ID, Integer.valueOf(C_PaySelection_ID));
+	}
+
+	/** Get Payment Selection.
+		@return Payment Selection
+	  */
+	public int getC_PaySelection_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaySelection_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

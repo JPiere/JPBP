@@ -167,6 +167,21 @@ public interface I_JP_Bill
 
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
 
+    /** Column name C_PaySelection_ID */
+    public static final String COLUMNNAME_C_PaySelection_ID = "C_PaySelection_ID";
+
+	/** Set Payment Selection.
+	  * Payment Selection
+	  */
+	public void setC_PaySelection_ID (int C_PaySelection_ID);
+
+	/** Get Payment Selection.
+	  * Payment Selection
+	  */
+	public int getC_PaySelection_ID();
+
+	public org.compiere.model.I_C_PaySelection getC_PaySelection() throws RuntimeException;
+
     /** Column name C_PaymentTerm_ID */
     public static final String COLUMNNAME_C_PaymentTerm_ID = "C_PaymentTerm_ID";
 
