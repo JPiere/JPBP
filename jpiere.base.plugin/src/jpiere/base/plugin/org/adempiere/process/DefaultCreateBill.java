@@ -85,6 +85,7 @@ public class DefaultCreateBill implements I_CreateBill{
 	SvrProcess process = null;
 	Properties ctx = null;
 	int p_AD_PInstance_ID = 0;
+	String trxName = null;
 	
 	@Override
 	public String createBills(Properties ctx,int AD_PInstance_ID , SvrProcess process, ProcessInfoParameter[] para
@@ -99,6 +100,7 @@ public class DefaultCreateBill implements I_CreateBill{
 		this.m_paymentTerm = paymentTerm;
 		this.p_IsSOTrx = isSOTrx;
 		this.isCalledFromInfoWindow = isCalledInfoWindow;
+		this.trxName = trxName;
 		//Convert to Y/N
 		if(p_IsSOTrx){
 			IsSOTrxString = "'Y'";
@@ -268,8 +270,9 @@ public class DefaultCreateBill implements I_CreateBill{
 			//
 			if(oldInvoice.getC_BPartner_ID() != invoice.getC_BPartner_ID() )
 			{
+				bill.load(trxName);
 				bill.processIt(p_DocAction);
-				bill.saveEx( process.get_TrxName());
+				bill.saveEx(trxName);
 				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 
 				bill = createBillHeader(invoice,m_BillSchema);
@@ -278,8 +281,9 @@ public class DefaultCreateBill implements I_CreateBill{
 			}
 			else if(oldInvoice.getC_Currency_ID() != invoice.getC_Currency_ID())
 			{
+				bill.load(trxName);
 				bill.processIt(p_DocAction);
-				bill.saveEx( process.get_TrxName());
+				bill.saveEx(trxName);
 				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 
 				bill = createBillHeader(invoice,m_BillSchema);
@@ -288,8 +292,9 @@ public class DefaultCreateBill implements I_CreateBill{
 			}
 			else if( !oldInvoice.getPaymentRule().equals(invoice.getPaymentRule()) )
 			{
+				bill.load(trxName);
 				bill.processIt(p_DocAction);
-				bill.saveEx(process.get_TrxName());
+				bill.saveEx(trxName);
 				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 
 				bill = createBillHeader(invoice,m_BillSchema);
@@ -298,8 +303,9 @@ public class DefaultCreateBill implements I_CreateBill{
 			}
 			else if(oldInvoice.getC_BPartner_Location_ID() != invoice.getC_BPartner_Location_ID())
 			{
+				bill.load(trxName);
 				bill.processIt(p_DocAction);
-				bill.saveEx(process.get_TrxName());
+				bill.saveEx(trxName);
 				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 
 				bill = createBillHeader(invoice,m_BillSchema);
@@ -308,8 +314,9 @@ public class DefaultCreateBill implements I_CreateBill{
 			}
 			else if(oldInvoice.getAD_User_ID() != invoice.getAD_User_ID())
 			{
+				bill.load(trxName);
 				bill.processIt(p_DocAction);
-				bill.saveEx(process.get_TrxName());
+				bill.saveEx(trxName);
 				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 
 				bill = createBillHeader(invoice,m_BillSchema);
@@ -320,8 +327,9 @@ public class DefaultCreateBill implements I_CreateBill{
 			{
 				if(oldInvoice.getAD_Org_ID() != invoice.getAD_Org_ID())
 				{
+					bill.load(trxName);
 					bill.processIt(p_DocAction);
-					bill.saveEx(process.get_TrxName());
+					bill.saveEx(trxName);
 					process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ invoice.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 
 					bill = createBillHeader(invoice,m_BillSchema);
@@ -330,13 +338,13 @@ public class DefaultCreateBill implements I_CreateBill{
 				}
 			}
 
-			MBillLine bLine = new MBillLine(ctx, 0, process.get_TrxName());
+			MBillLine bLine = new MBillLine(ctx, 0, trxName);
 			bLine.setJP_Bill_ID(bill.getJP_Bill_ID());
 			lineCounter++;
 			bLine.setLine(lineCounter*10);
 			bLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
 			bLine.setAD_Org_ID(bill.getAD_Org_ID());
-			bLine.saveEx(process.get_TrxName());
+			bLine.saveEx(trxName);
 
 			oldInvoice = invoice;
 
@@ -344,8 +352,9 @@ public class DefaultCreateBill implements I_CreateBill{
 
 		if(bill != null)
 		{
+			bill.load(trxName);
 			bill.processIt(p_DocAction);
-			bill.saveEx(process.get_TrxName());
+			bill.saveEx(trxName);
 			process.addBufferLog(0, null, null, bill.getDocumentNo()+" : "+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 		}
 		
@@ -357,9 +366,9 @@ public class DefaultCreateBill implements I_CreateBill{
 
 		//Get duedate from paymentterm and cutoffdate.
 		String sql = new String("select jp_paymenttermduedate(?,?) from Dual");
-		Timestamp dueDate = DB.getSQLValueTS(process.get_TrxName(), sql, m_paymentTerm.getC_PaymentTerm_ID() ,p_JPCutOffDate);
+		Timestamp dueDate = DB.getSQLValueTS(trxName, sql, m_paymentTerm.getC_PaymentTerm_ID() ,p_JPCutOffDate);
 
-		MBill bill = new MBill(ctx, 0, process.get_TrxName());
+		MBill bill = new MBill(ctx, 0, trxName);
 
 		if(billSchema.isBillOrgJP())
 		{
@@ -387,7 +396,7 @@ public class DefaultCreateBill implements I_CreateBill{
 		
 		bill.setDocStatus(DocAction.STATUS_Drafted);
 		bill.setDocAction(p_DocAction);
-		bill.saveEx(process.get_TrxName());
+		bill.saveEx(trxName);
 
 		return bill;
 	}
