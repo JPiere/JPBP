@@ -316,7 +316,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Payment_Account_Editor.addValueChangeListener(this);
 
 		
-		// 日付けにログイン日付(≒入金日)をセット
+		//
 		Payment_Date_Editor.setValue(Env.getContextAsDate(Env.getCtx(), "#Date"));
 		allocDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Payment_Date_Editor.addValueChangeListener(this);
@@ -336,7 +336,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Payment_Currency_Editor.setValue(new Integer(Invoice_Currency_ID));
 
 
-		//支払(入金)金額の初期化
+		//
 		PayAmt_Editor = new WNumberEditor("Payment_PayAmt", true, false, true, DisplayType.Amount, "payAmt");
 		PayAmt_Editor.setValue(Env.ZERO);
 		PayAmt_Editor.addValueChangeListener(this);
@@ -371,7 +371,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Row row = parameterLayoutRows.newRow();
 			Groupbox invoiceSearchGB = new Groupbox();
 			row.appendCellChild(invoiceSearchGB,8);
-			invoiceSearchGB.appendChild(new Caption("売上請求伝票検索条件"));//TODO 多言語化
+			invoiceSearchGB.appendChild(new Caption(Msg.getMsg(Env.getCtx(),"JP_SearchConditionForInvoice")));
 			Grid invoiceSearch  = new Grid();
 			invoiceSearch.setStyle("background-color: #E9F0FF");
 			invoiceSearch.setStyle("border: none");
@@ -419,7 +419,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		row = parameterLayoutRows.newRow();
 			Groupbox paymentGB = new Groupbox();
 			row.appendCellChild(paymentGB,8);
-			paymentGB.appendChild(new Caption("入金伝票作成情報"));//TODO 多言語化
+			paymentGB.appendChild(new Caption(Msg.getMsg(Env.getCtx(),"JP_CreatePaymentInfo")));
 			Grid paymentCondition  = new Grid();
 			paymentCondition.setStyle("border: none");
 			paymentGB.appendChild(paymentCondition);
@@ -525,7 +525,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		mainLayout.appendChild(south);
 		south.setStyle("border: none");
 
-		//南パネル
+		//South Panel
 		south.appendChild(southPanel);
 
 		southPanel.appendChild(new Separator());
@@ -1301,7 +1301,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			alloc.saveEx();
 		}
 
-		//売上請求伝票の消込 - requires that allocation is posted
+		//Allocation of Invoice - requires that allocation is posted
 		for (int i = 0; i < iRows; i++)
 		{
 			//  Invoice line is selected
