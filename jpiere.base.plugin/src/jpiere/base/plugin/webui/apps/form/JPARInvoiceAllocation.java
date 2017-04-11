@@ -949,8 +949,21 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		if (name.equals("Invoice_Org_ID"))
 		{
 			Invoice_Org_ID = value != null ? ((Integer) value).intValue() : 0;
-			if(Invoice_BP_ID > 0)
+			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
+			{
 				loadBPartner();
+			}else if (Invoice_BP_ID > 0){
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+				
+			}else{
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+			}
 
 			if(Invoice_Org_ID != 0 && Payment_Org_ID == 0)
 			{
@@ -991,8 +1004,22 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			JP_Corporation_ID = 0;
 			mLookup.refresh();
 
-			if(Invoice_BP_ID > 0)
+			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
+			{
 				loadBPartner();
+			}else if (Invoice_BP_ID > 0){
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+				
+			}else{
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+			}
+
 
 		}else if (e.getSource().equals(Payment_BP_Editor) )
 		{
@@ -1002,8 +1029,21 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		else if(name.equals("JP_Corporation_ID"))
 		{
 			JP_Corporation_ID = value != null ? ((Integer) value).intValue() : 0;
-			if(Invoice_BP_ID > 0 && JP_Corporation_ID > 0)
+			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
+			{
 				loadBPartner();
+			}else if (Invoice_BP_ID > 0){
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+				
+			}else{
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+			}
 		}
 		//	Currency
 		else if (name.equals("Invoice_Currency_ID"))
@@ -1016,8 +1056,21 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			Payment_BankAccount_ID = 0;
 			mLookup.refresh();
 			
-			if(Invoice_BP_ID > 0)
+			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
+			{
 				loadBPartner();
+			}else if (Invoice_BP_ID > 0){
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+				
+			}else{
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+			}
 		}
 		else if (name.equals("Payment_Date"))
 		{
@@ -1031,10 +1084,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		else if (name.equals("Payment_BankAccount_ID"))
 		{
 			Payment_BankAccount_ID = value != null ? ((Integer) value).intValue() : 0;
-			int old_Currency = Payment_Currency_ID;
 			Payment_Currency_ID = MBankAccount.get(Env.getCtx(), Payment_BankAccount_ID).getC_Currency_ID();
-			if(old_Currency != Payment_Currency_ID)
-				loadBPartner();
 			Payment_Currency_Editor.setValue(Payment_Currency_ID);
 		}
 		else if (name.equals("Payment_DocType_ID"))
@@ -1042,13 +1092,39 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			Payment_DocType_ID = value != null ? ((Integer) value).intValue() : 0;
 		}else if(name.equals("DateInvoiceFrom")){
 			DateInvoiedFrom = value != null ? ((Timestamp) value) : null;
-			if(Invoice_BP_ID > 0)
+			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
+			{
 				loadBPartner();
+			}else if (Invoice_BP_ID > 0){
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+				
+			}else{
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+			}
 			
 		}else if(name.equals("DateInvoiceTo")){
 			DateInvoiedFrom = value != null ? ((Timestamp) value) : null;
-			if(Invoice_BP_ID > 0)
+			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
+			{
 				loadBPartner();
+			}else if (Invoice_BP_ID > 0){
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+				
+			}else{
+				statusBar.getChildren().clear();
+				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
+				label.setStyle("color: #ff0000");
+				statusBar.appendChild(label);
+			}
 		}
 	}
 
