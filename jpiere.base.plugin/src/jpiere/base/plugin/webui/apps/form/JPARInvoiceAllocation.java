@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -102,18 +103,20 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	/***Binding Variables with component***/
 	//search criteria of AR Invoice
 	private int         Invoice_Org_ID = 0;			//C_Invoice.AD_Org_ID for Search AR Invoices
-	private int         Invoice_Currency_ID = 0;	//C_Invoice.C_Currency_ID for Search AR Invoices
-	private int         Invoice_BP_ID = 0;			//C_Invoice.C_BPartner_ID for Search AR Invoices
-	private int		JP_Corporation_ID= 0;
+	private int         Invoice_Currency_ID = 0;		//C_Invoice.C_Currency_ID for Search AR Invoices
+	private int         Invoice_BP_ID = 0;				//C_Invoice.C_BPartner_ID for Search AR Invoices
+	private int         JP_Corporation_ID= 0;
+	private Timestamp 	 DateInvoiedFrom = null;
+	private Timestamp 	 DateInvoiedTo = null;
 
 
 	//Creating condition of Income Payment
-	private int			Payment_Org_ID = 0;			//C_Payment.AD_Org_ID for Createing Income Payment
-	private int         Payment_BP_ID = 0;			//C_Payment.C_Bpartner_ID for Createing Income Payment
+	private int		 Payment_Org_ID = 0;			//C_Payment.AD_Org_ID for Createing Income Payment
+	private int         Payment_BP_ID = 0;				//C_Payment.C_Bpartner_ID for Createing Income Payment
 	private int         Payment_DocType_ID = 0;		//C_Payment.C_DocType_ID for Createing Income Payment
 	private int         Payment_BankAccount_ID = 0;	//C_Payment.C_BankAccount_ID for Createing Income Payment
-	private int         Payment_Currency_ID = 0;	//C_Payment.C_Currency_ID for Createing Income Payment
-	private BigDecimal   Payment_PayAmt = Env.ZERO;	//C_Payment.PayAmt for Createing Income Payment
+	private int         Payment_Currency_ID = 0;		//C_Payment.C_Currency_ID for Createing Income Payment
+	private BigDecimal  Payment_PayAmt = Env.ZERO;		//C_Payment.PayAmt for Createing Income Payment
 
 	
 	private ArrayList<Integer>	m_bpartnerCheck = new ArrayList<Integer>();
@@ -136,6 +139,9 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	private Grid parameterLayout = GridFactory.newGridLayout();		//パラメータパネルのレイアウト
 	//売上請求伝票検索パネル
 	//1段目
+	private Label DateInvoiceFrom_Label = new Label();					//売上請求伝票検索用日付ラベル
+	private WDateEditor DateInvoiceFrom_Editor = new WDateEditor("DateInvoiceFrom",true,false,true,"");
+	private WDateEditor DateInvoiceTo_Editor = new WDateEditor("DateInvoiceTo",true,false,true,"");
 	private Label Invoice_Org_Label = new Label();					//売上請求伝票検索用組織マスタラベル
 	private WSearchEditor Invoice_Org_Editor;						//売上請求伝票検索用組織マスタ選択リスト
 	private Label Invoice_Currency_Label = new Label();				//入金伝票作成用通貨ラベル
@@ -153,7 +159,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	private Label Payment_DocType_Label = new Label();				//入金伝票作成用伝票タイプラベル
 	private WTableDirEditor Payment_DocType_Editor = null;			//入金伝票作成用伝票タイプ選択リスト
 	private Label Payment_Date_Label = new Label();					//入金伝票作成用日付ラベル
-	private WDateEditor Payment_Date_Editor = new WDateEditor();	//入金伝票作成用日付入力
+	private WDateEditor Payment_Date_Editor = new WDateEditor("Payment_Date",true,false,true,"");
 	//2段目
 	private Label Payment_Account_Label = new Label();				//入金伝票作成用アカウントラベル
 	private WTableDirEditor Payment_Account_Editor = null;			//入金伝票作成用アカウント選択リスト
@@ -229,12 +235,29 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	public void dynInit() throws Exception
 	{
 		Invoice_Currency_ID = Env.getContextAsInt(Env.getCtx(), "$C_Currency_ID");   //  default
+		Env.setContext(Env.getCtx(), form.getWindowNo(), "C_Currency_ID", Invoice_Currency_ID);//for Dynamic Validation
 		//
 		if (log.isLoggable(Level.INFO)) log.info("Currency=" + Invoice_Currency_ID);
 
 		Invoice_Org_ID = Env.getAD_Org_ID(Env.getCtx());
 
 
+		Timestamp dateLogin = Env.getContextAsDate(Env.getCtx(), "#Date");
+		long dateLoginLong = dateLogin.getTime();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(dateLoginLong);
+		
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		calendar.add(Calendar.DATE, -1);
+		DateInvoiceTo_Editor.setValue(new Timestamp(calendar.getTimeInMillis()));
+		DateInvoiceTo_Editor.addValueChangeListener(this);
+		DateInvoiedTo = new Timestamp(calendar.getTimeInMillis());
+		
+		calendar.add(Calendar.DATE, 1);
+		calendar.add(Calendar.MONTH, -1);
+		DateInvoiceFrom_Editor.setValue(new Timestamp(calendar.getTimeInMillis()));
+		DateInvoiceFrom_Editor.addValueChangeListener(this);
+		DateInvoiedFrom = new Timestamp(calendar.getTimeInMillis());
 		
 		int AD_Column_ID = 0;
 
@@ -254,7 +277,8 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		
 		//Initialization of BPartner
 		AD_Column_ID = MColumn.getColumn_ID("C_Invoice","C_BPartner_ID");
-		MLookup lookupBP = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
+		MLookup lookupBP = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), AD_Column_ID
+						, DisplayType.Search,Env.getLanguage(Env.getCtx()), "C_BPartner_ID", 1000018, false, "");
 		Invoice_BP_Editor = new WSearchEditor("Invoice_BPartner_ID", true, false, true, lookupBP);
 		Invoice_BP_Editor.addValueChangeListener(this);
 
@@ -287,7 +311,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		AD_Column_ID = MColumn.getColumn_ID("C_Payment","C_BankAccount_ID");//3880;
 		MLookup lookupAcount = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), AD_Column_ID,
 				DisplayType.TableDir, Env.getLanguage(Env.getCtx()), "C_BankAccount_ID", 0,
-				false, "C_BankAccount.AD_Org_ID = @AD_Org_ID@");
+				false, "C_BankAccount.AD_Org_ID = @AD_Org_ID@ AND C_BankAccount.C_Currency_ID=@C_Currency_ID@");
 		Payment_Account_Editor = new WTableDirEditor("Payment_BankAccount_ID", true, false, true, lookupAcount);
 		Payment_Account_Editor.addValueChangeListener(this);
 
@@ -299,11 +323,14 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 
 		
 		//Initialization of Currency
-		AD_Column_ID = MColumn.getColumn_ID("C_Invoice","C_Currency_ID");
-		MLookup lookupCur = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID,  DisplayType.Search);
+		AD_Column_ID = MColumn.getColumn_ID("C_Invoice","C_Currency_ID");//1000033
+//		MLookup lookupCur = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID,  DisplayType.Search);
+		MLookup lookupCur = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), AD_Column_ID,
+				 DisplayType.Search, Env.getLanguage(Env.getCtx()), "C_Currency_ID", 1000033,false,"");
 		Invoice_Currency_Editor = new WSearchEditor("Invoice_Currency_ID", true, false, true, lookupCur);
 		Invoice_Currency_Editor.setValue(new Integer(Invoice_Currency_ID));
 		Invoice_Currency_Editor.addValueChangeListener(this);
+		Env.setContext(Env.getCtx(), form.getWindowNo(), "C_Currency_ID", Invoice_Currency_ID);//for Dynamic Validation
 
 		Payment_Currency_Editor = new WTableDirEditor("Payment_Currency_ID", true, true, true, lookupCur);
 		Payment_Currency_Editor.setValue(new Integer(Invoice_Currency_ID));
@@ -315,7 +342,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		PayAmt_Editor.addValueChangeListener(this);
 
 		//  Translation
-		statusBar.appendChild(new Label(""));
+		statusBar.appendChild(new Label(Msg.getMsg(Env.getCtx(), "PaymentAllocation")));
 		statusBar.setVflex("min");
 
 	}
@@ -344,24 +371,36 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Row row = parameterLayoutRows.newRow();
 			Groupbox invoiceSearchGB = new Groupbox();
 			row.appendCellChild(invoiceSearchGB,8);
-			invoiceSearchGB.appendChild(new Caption("売上請求伝票検索"));//TODO 多言語化
+			invoiceSearchGB.appendChild(new Caption("売上請求伝票検索条件"));//TODO 多言語化
 			Grid invoiceSearch  = new Grid();
 			invoiceSearch.setStyle("background-color: #E9F0FF");
 			invoiceSearch.setStyle("border: none");
 			invoiceSearchGB.appendChild(invoiceSearch);
 			Rows rows = invoiceSearch.newRows();
 			row = rows.newRow();
+				DateInvoiceFrom_Label.setText(Msg.getElement(Env.getCtx(), "DateInvoiced"));
+				row.appendCellChild(DateInvoiceFrom_Label.rightAlign(),1);
+				ZKUpdateUtil.setHflex(DateInvoiceFrom_Editor.getComponent(), "true");
+				row.appendCellChild(DateInvoiceFrom_Editor.getComponent(),1);
+				row.setStyle("background-color: #ffffff");
+
+				ZKUpdateUtil.setHflex(DateInvoiceTo_Editor.getComponent(), "true");
+				row.appendCellChild(DateInvoiceTo_Editor.getComponent(),1);
+				row.setStyle("background-color: #ffffff");
+				
 				Invoice_Org_Label.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 				row.appendCellChild(Invoice_Org_Label.rightAlign());
 				ZKUpdateUtil.setHflex(Invoice_Org_Editor.getComponent(), "true");
 				row.appendCellChild(Invoice_Org_Editor.getComponent(),1);
 				row.appendCellChild(new Space(),1);
+				
 				Invoice_Currency_Label.setText(Msg.translate(Env.getCtx(), "C_Currency_ID"));
 				row.appendCellChild(Invoice_Currency_Label.rightAlign(),1);
 				ZKUpdateUtil.setHflex(Invoice_Currency_Editor.getComponent(), "true");	
 				row.appendCellChild(Invoice_Currency_Editor.getComponent(),1);
 				row.appendCellChild(new Space(),1);
 				row.setStyle("background-color: #ffffff");
+				
 			row = rows.newRow();
 				Invoice_BP_Label.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
 				row.appendCellChild(Invoice_BP_Label.rightAlign());
@@ -551,7 +590,14 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		
 		sql.append(" AND i.C_Currency_ID=?");                                   //  #3
 		if (Invoice_Org_ID != 0 )
-			sql.append(" AND i.AD_Org_ID=" + Invoice_Org_ID);
+			sql.append(" AND i.AD_Org_ID=?");					//  #4
+		
+		if(DateInvoiedFrom != null)
+			sql.append(" AND i.DateInvoiced >= ?");
+		
+		if(DateInvoiedTo != null)
+			sql.append(" AND i.DateInvoiced <= ?");
+		
 		sql.append(" ORDER BY i.DateInvoiced, i.DocumentNo");
 		if (log.isLoggable(Level.FINE)) log.fine("InvSQL=" + sql.toString());
 
@@ -562,13 +608,23 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		ResultSet rs = null;
 		try
 		{
+			int i = 0;
 			pstmt = DB.prepareStatement(sql.toString(), null);
-			pstmt.setTimestamp(1, (Timestamp)date);
+			pstmt.setTimestamp(++i, (Timestamp)date);
 			if(JP_Corporation_ID == 0)
-				pstmt.setInt(2, Invoice_BP_ID);
+				pstmt.setInt(++i, Invoice_BP_ID);
 			else
-				pstmt.setInt(2, JP_Corporation_ID);
-			pstmt.setInt(3, Invoice_Currency_ID);
+				pstmt.setInt(++i, JP_Corporation_ID);
+			pstmt.setInt(++i, Invoice_Currency_ID);
+			
+			if (Invoice_Org_ID != 0 )
+				pstmt.setInt(++i, Invoice_Org_ID);
+			
+			if(DateInvoiedFrom != null)
+				pstmt.setTimestamp(++i, DateInvoiedFrom);
+			
+			if(DateInvoiedTo != null)
+				pstmt.setTimestamp(++i, DateInvoiedTo);
 			
 			rs = pstmt.executeQuery();
 			while (rs.next())
@@ -893,16 +949,16 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		if (name.equals("Invoice_Org_ID"))
 		{
 			Invoice_Org_ID = value != null ? ((Integer) value).intValue() : 0;
-			loadBPartner();
+			if(Invoice_BP_ID > 0)
+				loadBPartner();
 
-			//入金伝票用の組織マスタのIDが"0(*)"だったら、売上請求伝票の組織を設定する。
 			if(Invoice_Org_ID != 0 && Payment_Org_ID == 0)
 			{
 				Payment_Org_ID = Invoice_Org_ID;
 				Payment_Org_Editor.setValue(value);
 
-				//アカウント情報の初期化
-				Env.setContext(Env.getCtx(), form.getWindowNo(), "AD_Org_ID", Payment_Org_ID);//ダイナミックバリデーションのため
+				//Initialize of Bank Account
+				Env.setContext(Env.getCtx(), form.getWindowNo(), "AD_Org_ID", Payment_Org_ID);//for Dynamic Validation
 				MLookup mLookup = (MLookup)Payment_Account_Editor.getLookup();
 				Payment_Account_Editor.setValue(null);
 				Payment_BankAccount_ID = 0;
@@ -914,8 +970,8 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		{
 			Payment_Org_ID = value != null ? ((Integer) value).intValue() : 0;
 
-			//入金伝票作成用の組織マスタが変更したら、それに結びつくアカウント情報を初期化する。
-			Env.setContext(Env.getCtx(), form.getWindowNo(), "AD_Org_ID", Payment_Org_ID);//ダイナミックバリデーションのため
+			//Initialize of Bank Account
+			Env.setContext(Env.getCtx(), form.getWindowNo(), "AD_Org_ID", Payment_Org_ID);//for Dynamic Validation
 			MLookup mLookup = (MLookup)Payment_Account_Editor.getLookup();
 			Payment_Account_Editor.setValue(null);
 			Payment_BankAccount_ID = 0;
@@ -926,18 +982,17 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		{
 			Invoice_BP_ID = value != null ? ((Integer) value).intValue() : 0;
 
-			if(Payment_BP_ID == 0){
-				Payment_BP_Editor.setValue(value);
-				Payment_BP_ID = Invoice_BP_ID;
-			}
+			Payment_BP_Editor.setValue(value);
+			Payment_BP_ID = Invoice_BP_ID;
 
-			Env.setContext(Env.getCtx(), form.getWindowNo(), "C_BPartner_ID", Invoice_BP_ID);//ダイナミックバリデーションのためにコンテキストに変数追加
+			Env.setContext(Env.getCtx(), form.getWindowNo(), "C_BPartner_ID", Invoice_BP_ID);//for Dynamic Validation
 			MLookup mLookup = (MLookup)Corportion_Editor.getLookup();
 			Corportion_Editor.setValue(null);
 			JP_Corporation_ID = 0;
 			mLookup.refresh();
 
-			loadBPartner();
+			if(Invoice_BP_ID > 0)
+				loadBPartner();
 
 		}else if (e.getSource().equals(Payment_BP_Editor) )
 		{
@@ -947,25 +1002,34 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		else if(name.equals("JP_Corporation_ID"))
 		{
 			JP_Corporation_ID = value != null ? ((Integer) value).intValue() : 0;
-			loadBPartner();
+			if(Invoice_BP_ID > 0 && JP_Corporation_ID > 0)
+				loadBPartner();
 		}
 		//	Currency
 		else if (name.equals("Invoice_Currency_ID"))
 		{
 			Invoice_Currency_ID = value != null ? ((Integer) value).intValue() : 0;
-			loadBPartner();
+			Env.setContext(Env.getCtx(), form.getWindowNo(), "C_Currency_ID", Invoice_Currency_ID);//for Dynamic Validation
+			Payment_Currency_Editor.setValue(null);
+			MLookup mLookup = (MLookup)Payment_Account_Editor.getLookup();
+			Payment_Account_Editor.setValue(null);
+			Payment_BankAccount_ID = 0;
+			mLookup.refresh();
+			
+			if(Invoice_BP_ID > 0)
+				loadBPartner();
 		}
-		else if (name.equals("Date"))
+		else if (name.equals("Payment_Date"))
 		{
 			allocDate = value != null ? ((Timestamp) value) : null;
 		}
-
-		else if (name.equals("Payment_PayAmt")){
+		else if (name.equals("Payment_PayAmt"))
+		{
 			Payment_PayAmt = value != null ? ((BigDecimal) value) : Env.ZERO;
 			calculate(false);
 		}
-
-		else if (name.equals("Payment_BankAccount_ID")){
+		else if (name.equals("Payment_BankAccount_ID"))
+		{
 			Payment_BankAccount_ID = value != null ? ((Integer) value).intValue() : 0;
 			int old_Currency = Payment_Currency_ID;
 			Payment_Currency_ID = MBankAccount.get(Env.getCtx(), Payment_BankAccount_ID).getC_Currency_ID();
@@ -973,9 +1037,18 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				loadBPartner();
 			Payment_Currency_Editor.setValue(Payment_Currency_ID);
 		}
-
-		else if (name.equals("Payment_DocType_ID")){
+		else if (name.equals("Payment_DocType_ID"))
+		{
 			Payment_DocType_ID = value != null ? ((Integer) value).intValue() : 0;
+		}else if(name.equals("DateInvoiceFrom")){
+			DateInvoiedFrom = value != null ? ((Timestamp) value) : null;
+			if(Invoice_BP_ID > 0)
+				loadBPartner();
+			
+		}else if(name.equals("DateInvoiceTo")){
+			DateInvoiedFrom = value != null ? ((Timestamp) value) : null;
+			if(Invoice_BP_ID > 0)
+				loadBPartner();
 		}
 	}
 
