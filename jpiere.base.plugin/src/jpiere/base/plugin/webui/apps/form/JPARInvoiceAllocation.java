@@ -36,6 +36,7 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
+import org.adempiere.webui.component.WAppsAction;
 import org.adempiere.webui.component.WListbox;
 import org.adempiere.webui.editor.WDateEditor;
 import org.adempiere.webui.editor.WNumberEditor;
@@ -96,6 +97,8 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 
 	private boolean     m_calculating = false;
 
+	private static final String SELECT_DESELECT_ALL = "SelectAll";
+	
 	/***Binding Variables with component***/
 	//search criteria of AR Invoice
 	private int         Invoice_Org_ID = 0;			//C_Invoice.AD_Org_ID for Search AR Invoices
@@ -182,6 +185,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	private Textbox differenceField = new Textbox();
 	private Button allocateButton = new Button();
 	private Button refreshButton = new Button();
+	private Button selectAllButton = new Button();
 
 	/*【ステータスバー】*/
 	private Hlayout statusBar = new Hlayout();
@@ -311,7 +315,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		PayAmt_Editor.addValueChangeListener(this);
 
 		//  Translation
-		statusBar.appendChild(new Label(Msg.getMsg(Env.getCtx(), "AllocateStatus")));
+		statusBar.appendChild(new Label(""));
 		statusBar.setVflex("min");
 
 	}
@@ -477,8 +481,6 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		south.appendChild(invoiceInfo.rightAlign());
 
 
-
-
 		//【メインレイアウト(Borderlayout)-南】
 		south = new South();
 		mainLayout.appendChild(south);
@@ -495,6 +497,13 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		ZKUpdateUtil.setHflex(allocationLayout, "min");
 		rows = allocationLayout.newRows();
 		row = rows.newRow();
+		
+		WAppsAction selectAllAction = new WAppsAction (SELECT_DESELECT_ALL, null, null);
+		selectAllButton = selectAllAction.getButton();
+		selectAllButton.setAttribute(SELECT_DESELECT_ALL, Boolean.FALSE);
+		selectAllButton.addActionListener(this);
+		row.appendCellChild(selectAllButton);
+		
 		differenceLabel.setText(Msg.getMsg(Env.getCtx(), "Difference"));
 		row.appendCellChild(differenceLabel.rightAlign());
 		row.appendCellChild(allocCurrencyLabel.rightAlign());
@@ -514,6 +523,8 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		refreshButton.setAutodisable("self");
 		row.appendCellChild(refreshButton);
 
+
+		
 	}
 
 	public Vector<Vector<Object>> getInvoiceData(Object date, IMiniTable invoiceTable)
@@ -1057,6 +1068,21 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		else if (e.getTarget().equals(refreshButton))
 		{
 			loadBPartner();
+		}
+		else if (e.getTarget().getId().equals(SELECT_DESELECT_ALL)) 
+		{
+			ListModelTable model = invoiceTable.getModel();
+			int rows = model.getSize();
+			Button selectAllBtn = (Button)e.getTarget();
+			Boolean selectAll = (Boolean) selectAllBtn.getAttribute(SELECT_DESELECT_ALL);
+			if (selectAll == null)
+				selectAll = Boolean.FALSE;
+			selectAll = !selectAll;
+			for (int i = 0; i < rows; i++) {
+				model.setValueAt(selectAll, i, 0);
+			}
+			invoiceTable.setModel(model);
+			selectAllBtn.setAttribute(SELECT_DESELECT_ALL, selectAll);
 		}
 	}
 
