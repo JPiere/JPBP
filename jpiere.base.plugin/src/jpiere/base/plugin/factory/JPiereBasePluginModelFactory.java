@@ -40,6 +40,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 import jpiere.base.plugin.org.adempiere.model.MInventoryDiffQtyLog;
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
+import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryGLine;
 import jpiere.base.plugin.org.adempiere.model.MProductCategoryL1;
@@ -144,6 +145,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MBankData.class;
 			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
 				return MBankDataLine.class;
+			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
+				return MPhysicalWarehouse.class;
 			}
 
 		}else{
@@ -229,6 +232,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return new MBankData(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
 				return new MBankDataLine(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
+				return new MPhysicalWarehouse(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -314,6 +319,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return new MBankData(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
 				return new MBankDataLine(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
+				return new MPhysicalWarehouse(Env.getCtx(), rs, trxName);
 			}
 
 

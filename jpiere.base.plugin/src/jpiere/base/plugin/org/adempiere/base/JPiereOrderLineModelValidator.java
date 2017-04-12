@@ -189,7 +189,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		}//JPIEERE-0207:Order Re-Activate Check
 
 
-		//JPIERE-0227 Common Warehouse
+		//JPIERE-0227 Common Warehouse & JPIERE-0317 Physical Warehouse
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				( type == ModelValidator.TYPE_BEFORE_CHANGE &&
 					( po.is_ValueChanged("JP_LocatorFrom_ID") || po.is_ValueChanged("JP_LocatorTo_ID") || po.is_ValueChanged("JP_ASI_From_ID") || po.is_ValueChanged("JP_ASI_To_ID") )) )
@@ -211,8 +211,8 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorFrom_ID") ;//Please input a value into the field.
 				if(JP_LocatorFrom_ID == JP_LocatorTo_ID)
 					return Msg.getMsg(Env.getCtx(), "JP_SameLocatorMM");//You are goring to create Inventory Move Doc at same Locator.
-				if(MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).getM_LocatorType_ID() != MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).getM_LocatorType_ID())
-					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffLocatorType");//You can not create Inventory move doc at Sales Order because of different Locator type.
+				if(!MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).get_Value("JP_PhysicalWarehouse_ID").equals(MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).get_Value("JP_PhysicalWarehouse_ID")))
+					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffPhyWH");//You can not create Inventory move doc at Sales Order because of different Physical Warehouse.
 
 			}else{
 
