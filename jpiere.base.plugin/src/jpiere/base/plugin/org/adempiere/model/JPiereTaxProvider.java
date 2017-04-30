@@ -156,6 +156,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		String sql = "UPDATE C_Order i"
 			+ " SET TotalLines="
 				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM C_OrderLine il WHERE i.C_Order_ID=il.C_Order_ID) "
+			    + ", JP_ScheduledCostTotalLines = "
+			    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM C_OrderLine il WHERE i.C_Order_ID=il.C_Order_ID)"
 			+ "WHERE C_Order_ID = ?";
 		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
@@ -991,6 +993,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		String sql = "UPDATE JP_Estimation i"
 			+ " SET TotalLines="
 				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID) "
+			    + ", JP_ScheduledCostTotalLines = "
+			    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID)"
 			+ "WHERE JP_Estimation_ID=?";
 		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)

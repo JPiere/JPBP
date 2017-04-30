@@ -133,6 +133,9 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				else if(config.equals("PO") && !ol.getParent().isSOTrx())
 					ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", cost.multiply(ol.getQtyOrdered()));
 				
+			}else if(ol.getM_Product_ID() == 0){
+				ol.set_ValueNoCheck("JP_ScheduledCost", Env.ZERO);
+				ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", Env.ZERO);
 			}
 			
 		}//JPiere-0202

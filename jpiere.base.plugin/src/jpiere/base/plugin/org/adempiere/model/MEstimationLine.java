@@ -232,7 +232,11 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			else if(config.equals("PO") && !getParent().isSOTrx())
 				setJP_ScheduledCostLineAmt(cost.multiply(getQtyOrdered()));
 			
-		}//JPiere-0202
+		}else if(getM_Product_ID() == 0){
+			setJP_ScheduledCost(Env.ZERO);
+			setJP_ScheduledCostLineAmt(Env.ZERO);
+		}
+		//JPiere-0202
 		
 		
 		//IDEMPIERE-178 Orders and Invoices must disallow amount lines without product/charge
