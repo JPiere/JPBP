@@ -206,20 +206,33 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		
 		
 		//JPIERE-0202:Set Cost to Estimation Line
-		if(getM_Product_ID() != 0 
-				&& ( (newRecord && getPriceCost().compareTo(Env.ZERO) == 0) 
-						|| (!newRecord && is_ValueChanged("QtyOrdered") && !is_ValueChanged("PriceCost")) )
-				&& !MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx())).equals("NO"))
+		String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
+		if(getM_Product_ID() != 0 && !config.equals("NO") 
+				&& (newRecord || is_ValueChanged("M_Product_ID") || is_ValueChanged("QtyOrdered") || !is_ValueChanged("JP_ScheduledCost")) )
 		{
-
-			String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
+			
+			BigDecimal cost = getJP_ScheduledCost();
+			if( (newRecord && cost.compareTo(Env.ZERO)==0)
+					|| (!newRecord && is_ValueChanged("M_Product_ID") && !is_ValueChanged("JP_ScheduledCost") ) )
+			{
+				if(config.equals("BT"))//Both SO and PO
+					setScheduledCost();
+				else if(config.equals("SO") && getParent().isSOTrx())
+					setScheduledCost();
+				else if(config.equals("PO") && !getParent().isSOTrx())
+					setScheduledCost();
+				
+				cost = getJP_ScheduledCost();
+			}
+			
 			if(config.equals("BT"))//Both SO and PO
-				setPriceCost();
+				setJP_ScheduledCostLineAmt(cost.multiply(getQtyOrdered()));
 			else if(config.equals("SO") && getParent().isSOTrx())
-				setPriceCost();
+				setJP_ScheduledCostLineAmt(cost.multiply(getQtyOrdered()));
 			else if(config.equals("PO") && !getParent().isSOTrx())
-				setPriceCost();	
-		}
+				setJP_ScheduledCostLineAmt(cost.multiply(getQtyOrdered()));
+			
+		}//JPiere-0202
 		
 		
 		//IDEMPIERE-178 Orders and Invoices must disallow amount lines without product/charge
@@ -336,18 +349,18 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	
 	
 	//JPIERE-0202
-	private void setPriceCost()
+	private void setScheduledCost()
 	{
 		MAcctSchema as = MAcctSchema.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(), "$C_AcctSchema_ID"));
 		BigDecimal cost = getProductCosts(as, getAD_Org_ID(), true);
-		setPriceCost(cost);
+		setJP_ScheduledCost(cost);
 	}
 	
 	//JPIERE-0202
 	private BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK)
 	{
 		ProductCost pc = new ProductCost (Env.getCtx(), getM_Product_ID(), getM_AttributeSetInstance_ID(), get_TrxName());
-		pc.setQty(getQtyOrdered());
+		pc.setQty(Env.ONE);
 		String costingMethod = null;
 		BigDecimal costs = pc.getProductCosts(as, AD_Org_ID, costingMethod, 0, zeroCostsOK);
 		if (costs != null)

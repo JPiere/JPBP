@@ -34,7 +34,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170308L;
+	private static final long serialVersionUID = 20170430L;
 
     /** Standard Constructor */
     public X_JP_Estimation (Properties ctx, int JP_Estimation_ID, String trxName)
@@ -1767,6 +1767,23 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Scheduled Cost Total Lines.
+		@param JP_ScheduledCostTotalLines Scheduled Cost Total Lines	  */
+	public void setJP_ScheduledCostTotalLines (BigDecimal JP_ScheduledCostTotalLines)
+	{
+		set_Value (COLUMNNAME_JP_ScheduledCostTotalLines, JP_ScheduledCostTotalLines);
+	}
+
+	/** Get Scheduled Cost Total Lines.
+		@return Scheduled Cost Total Lines	  */
+	public BigDecimal getJP_ScheduledCostTotalLines () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ScheduledCostTotalLines);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	public org.compiere.model.I_C_Order getLink_Order() throws RuntimeException

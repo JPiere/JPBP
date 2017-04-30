@@ -33,7 +33,7 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170308L;
+	private static final long serialVersionUID = 20170430L;
 
     /** Standard Constructor */
     public X_JP_EstimationLine (Properties ctx, int JP_EstimationLine_ID, String trxName)
@@ -766,6 +766,40 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Scheduled Cost.
+		@param JP_ScheduledCost Scheduled Cost	  */
+	public void setJP_ScheduledCost (BigDecimal JP_ScheduledCost)
+	{
+		set_Value (COLUMNNAME_JP_ScheduledCost, JP_ScheduledCost);
+	}
+
+	/** Get Scheduled Cost.
+		@return Scheduled Cost	  */
+	public BigDecimal getJP_ScheduledCost () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ScheduledCost);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Scheduled Cost Line Amt.
+		@param JP_ScheduledCostLineAmt Scheduled Cost Line Amt	  */
+	public void setJP_ScheduledCostLineAmt (BigDecimal JP_ScheduledCostLineAmt)
+	{
+		set_Value (COLUMNNAME_JP_ScheduledCostLineAmt, JP_ScheduledCostLineAmt);
+	}
+
+	/** Get Scheduled Cost Line Amt.
+		@return Scheduled Cost Line Amt	  */
+	public BigDecimal getJP_ScheduledCostLineAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ScheduledCostLineAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Tax Amt.

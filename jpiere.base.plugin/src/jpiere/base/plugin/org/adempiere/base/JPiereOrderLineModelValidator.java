@@ -106,22 +106,36 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		//JPIERE-0202:Set cost to OrderLine automatically.
 		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
 		{
+			String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
 			MOrderLine ol = (MOrderLine)po;
-			if(ol.getM_Product_ID() != 0
-					&& ( (type == ModelValidator.TYPE_BEFORE_NEW && ol.getPriceCost().compareTo(Env.ZERO) == 0)
-							|| (type == ModelValidator.TYPE_BEFORE_CHANGE && ol.is_ValueChanged("QtyOrdered") && !ol.is_ValueChanged("PriceCost")) )
-					&& !MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx())).equals("NO"))
+			
+			if(ol.getM_Product_ID() != 0  && !config.equals("NO")
+					&& (type == ModelValidator.TYPE_BEFORE_NEW || ol.is_ValueChanged("M_Product_ID") || ol.is_ValueChanged("QtyOrdered") || ol.is_ValueChanged("JP_ScheduledCost") ) )
 			{
-
-				String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
+				BigDecimal cost = (BigDecimal)ol.get_Value("JP_ScheduledCost");				
+				if( (cost.compareTo(Env.ZERO)==0 && type == ModelValidator.TYPE_BEFORE_NEW)
+						|| (type == ModelValidator.TYPE_BEFORE_CHANGE && ol.is_ValueChanged("M_Product_ID") && !ol.is_ValueChanged("JP_ScheduledCost")) )
+				{
+					if(config.equals("BT"))//Both SO and PO
+						setScheduledCost(ol);
+					else if(config.equals("SO") && ol.getParent().isSOTrx())
+						setScheduledCost(ol);
+					else if(config.equals("PO") && !ol.getParent().isSOTrx())
+						setScheduledCost(ol);
+					
+					cost = (BigDecimal)ol.get_Value("JP_ScheduledCost");
+				}
+				
 				if(config.equals("BT"))//Both SO and PO
-					setPriceCost(ol);
+					ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", cost.multiply(ol.getQtyOrdered()));
 				else if(config.equals("SO") && ol.getParent().isSOTrx())
-					setPriceCost(ol);
+					ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", cost.multiply(ol.getQtyOrdered()));
 				else if(config.equals("PO") && !ol.getParent().isSOTrx())
-					setPriceCost(ol);
+					ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", cost.multiply(ol.getQtyOrdered()));
+				
 			}
-		}
+			
+		}//JPiere-0202
 
 		//JPIEERE-0207:Order Re-Activate Check
 		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
@@ -233,18 +247,18 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 	}
 
 	//JPIERE-0202
-	private void setPriceCost(MOrderLine ol)
+	private void setScheduledCost(MOrderLine ol)
 	{
 		MAcctSchema as = MAcctSchema.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(), "$C_AcctSchema_ID"));
 		BigDecimal cost = getProductCosts(ol, as, ol.getAD_Org_ID(), true);
-		ol.setPriceCost(cost);
+		ol.set_ValueNoCheck("JP_ScheduledCost", cost);
 	}
 
 	//JPIERE-0202
 	private BigDecimal getProductCosts (MOrderLine ol, MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK)
 	{
 		ProductCost pc = getProductCost(ol);
-		pc.setQty(ol.getQtyOrdered());
+		pc.setQty(Env.ONE);
 		int C_OrderLine_ID = ol.getC_OrderLine_ID();
 		String costingMethod = null;
 		BigDecimal costs = pc.getProductCosts(as, AD_Org_ID, costingMethod, C_OrderLine_ID, zeroCostsOK);

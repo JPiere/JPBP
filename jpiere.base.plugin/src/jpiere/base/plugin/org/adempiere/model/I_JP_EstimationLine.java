@@ -459,6 +459,24 @@ public interface I_JP_EstimationLine
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_ScheduledCost */
+    public static final String COLUMNNAME_JP_ScheduledCost = "JP_ScheduledCost";
+
+	/** Set Scheduled Cost	  */
+	public void setJP_ScheduledCost (BigDecimal JP_ScheduledCost);
+
+	/** Get Scheduled Cost	  */
+	public BigDecimal getJP_ScheduledCost();
+
+    /** Column name JP_ScheduledCostLineAmt */
+    public static final String COLUMNNAME_JP_ScheduledCostLineAmt = "JP_ScheduledCostLineAmt";
+
+	/** Set Scheduled Cost Line Amt	  */
+	public void setJP_ScheduledCostLineAmt (BigDecimal JP_ScheduledCostLineAmt);
+
+	/** Get Scheduled Cost Line Amt	  */
+	public BigDecimal getJP_ScheduledCostLineAmt();
+
     /** Column name JP_TaxAmt */
     public static final String COLUMNNAME_JP_TaxAmt = "JP_TaxAmt";
 

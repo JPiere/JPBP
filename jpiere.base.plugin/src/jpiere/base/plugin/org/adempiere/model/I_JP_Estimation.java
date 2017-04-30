@@ -952,6 +952,15 @@ public interface I_JP_Estimation
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_ScheduledCostTotalLines */
+    public static final String COLUMNNAME_JP_ScheduledCostTotalLines = "JP_ScheduledCostTotalLines";
+
+	/** Set Scheduled Cost Total Lines	  */
+	public void setJP_ScheduledCostTotalLines (BigDecimal JP_ScheduledCostTotalLines);
+
+	/** Get Scheduled Cost Total Lines	  */
+	public BigDecimal getJP_ScheduledCostTotalLines();
+
     /** Column name Link_Order_ID */
     public static final String COLUMNNAME_Link_Order_ID = "Link_Order_ID";
 

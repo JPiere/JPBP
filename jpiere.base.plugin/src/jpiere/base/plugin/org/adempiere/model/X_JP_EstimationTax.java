@@ -32,7 +32,7 @@ public class X_JP_EstimationTax extends PO implements I_JP_EstimationTax, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170308L;
+	private static final long serialVersionUID = 20170430L;
 
     /** Standard Constructor */
     public X_JP_EstimationTax (Properties ctx, int JP_EstimationTax_ID, String trxName)
