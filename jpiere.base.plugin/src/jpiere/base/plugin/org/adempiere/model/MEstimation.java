@@ -23,6 +23,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
+import org.compiere.model.MCountry;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
@@ -610,17 +611,49 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			
 			if(Util.isEmpty(getJP_BP_Address()))
 			{
-				MBPartnerLocation[] bpLocations =  bp.getLocations(false);
-				for(int i = 0; i < bpLocations.length; i++)
+				int C_BPartner_Location_ID = getC_BPartner_Location_ID();
+				if(C_BPartner_Location_ID==0)
 				{
-					if(bpLocations[i].isActive())
+					MBPartnerLocation[] bpLocations =  bp.getLocations(false);
+					for(int i = 0; i < bpLocations.length; i++)
 					{
-						MLocation loc = bpLocations[i].getLocation(false);
-						setJP_BP_Address(loc.getAddress1() + loc.getAddress2());
-						break;
+						if(bpLocations[i].isActive())
+						{
+							C_BPartner_Location_ID = bpLocations[i].getC_BPartner_Location_ID();
+						}
 					}
 				}
-			}
+					
+				if(C_BPartner_Location_ID >0)
+				{
+					MBPartnerLocation bpLocation = new MBPartnerLocation(getCtx(),C_BPartner_Location_ID,get_TrxName());
+					MLocation loc = bpLocation.getLocation(false);
+					MCountry country = MCountry.get(getCtx(), loc.getC_Country_ID());
+					String postal = loc.getPostal();
+					if(!Util.isEmpty(postal))
+					{
+						String postalAdd = loc.getPostal_Add();
+						if(!Util.isEmpty(postalAdd))
+						{
+							if(country.getCountryCode().equals("JP"))
+								postal = "〒" + postal + "-" + postalAdd;
+							else
+								postal = postal + "-" + postalAdd;
+							
+						}else{
+							
+							if(country.getCountryCode().equals("JP"))
+								postal = "〒" + postal + "-0000";
+						}
+						
+						setJP_BP_Address(postal + " " + loc.getAddress1() + loc.getAddress2());
+						
+					}else{
+						setJP_BP_Address(loc.getAddress1() + loc.getAddress2());
+					}
+						
+				}
+			}//Address
 			
 			if(Util.isEmpty(getJP_BP_User_Name()))
 			{
