@@ -208,7 +208,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		//JPIERE-0202:Set Cost to Estimation Line
 		String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
 		if(getM_Product_ID() != 0 && !config.equals("NO") 
-				&& (newRecord || is_ValueChanged("M_Product_ID") || is_ValueChanged("QtyOrdered") || !is_ValueChanged("JP_ScheduledCost")) )
+				&& (newRecord || is_ValueChanged("M_Product_ID") || is_ValueChanged("QtyOrdered") || is_ValueChanged("JP_ScheduledCost")) )
 		{
 			
 			BigDecimal cost = getJP_ScheduledCost();
@@ -382,7 +382,8 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			return success;
 		if (   newRecord
 			|| is_ValueChanged(MEstimationLine.COLUMNNAME_C_Tax_ID)
-			|| is_ValueChanged(MEstimationLine.COLUMNNAME_LineNetAmt)) {
+			|| is_ValueChanged(MEstimationLine.COLUMNNAME_LineNetAmt)
+			|| is_ValueChanged(MEstimationLine.COLUMNNAME_JP_ScheduledCostLineAmt)) {
 			MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 			MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());

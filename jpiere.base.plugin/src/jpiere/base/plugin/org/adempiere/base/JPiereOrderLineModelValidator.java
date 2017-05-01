@@ -32,6 +32,7 @@ import org.compiere.model.PO;
 import org.compiere.model.ProductCost;
 import org.compiere.process.DocAction;
 import org.compiere.util.CCache;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -136,6 +137,20 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			}else if(ol.getM_Product_ID() == 0){
 				ol.set_ValueNoCheck("JP_ScheduledCost", Env.ZERO);
 				ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", Env.ZERO);
+			}
+			
+		}else if(type == ModelValidator.TYPE_AFTER_CHANGE){
+			
+			if(po.is_ValueChanged("JP_ScheduledCost"))
+			{
+				MOrderLine ol = (MOrderLine)po;
+				String sql = "UPDATE C_Order i"
+						+ " SET JP_ScheduledCostTotalLines = "
+						    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM C_OrderLine il WHERE i.C_Order_ID=il.C_Order_ID)"
+						+ "WHERE C_Order_ID = ?";
+				int no = DB.executeUpdate(sql, new Object[]{new Integer(ol.getC_Order_ID())}, false, ol.get_TrxName(), 0);
+				if (no != 1)
+					return "Error";
 			}
 			
 		}//JPiere-0202
