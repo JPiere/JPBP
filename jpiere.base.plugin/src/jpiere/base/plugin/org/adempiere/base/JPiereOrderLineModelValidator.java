@@ -24,6 +24,7 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MOrgInfo;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
@@ -228,6 +229,14 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		{
 			MOrderLine oLine = (MOrderLine)po;
 			int JP_LocatorFrom_ID = oLine.get_ValueAsInt("JP_LocatorFrom_ID");
+			MLocator fromLocator =  MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID);
+			MOrgInfo fromLocatorOrgInfo = MOrgInfo.get(oLine.getCtx(), fromLocator.getAD_Org_ID(), oLine.get_TrxName());
+			MOrgInfo lineOrgInfo = MOrgInfo.get(oLine.getCtx(), oLine.getAD_Org_ID(), oLine.get_TrxName());
+			if(fromLocatorOrgInfo.get_ValueAsInt("JP_Corporation_ID") != lineOrgInfo.get_ValueAsInt("JP_Corporation_ID"))
+			{
+				return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMForDiffCorp");//You can not create Material Movement doc. Because of different corporation Locator.
+			}
+			
 			int JP_LocatorTo_ID = oLine.get_ValueAsInt("JP_LocatorTo_ID");
 
 			MDocType docType = MDocType.get(oLine.getCtx(), oLine.getParent().getC_DocTypeTarget_ID());

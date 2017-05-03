@@ -21,6 +21,7 @@ import org.adempiere.base.IColumnCalloutFactory;
 import org.compiere.model.MInOut;
 import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MPayment;
 
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
@@ -34,6 +35,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValAdjustCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValCalCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
@@ -107,7 +109,6 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				}
 			}
 
-
 		}else{
 
 			if(tableName.equals(MPayment.Table_Name))
@@ -126,6 +127,13 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 				if(columnName.equals(MOrder.COLUMNNAME_DropShip_BPartner_ID))
 					list.add(new JPiereDropShipBPartnerCallout());
+			
+			}else if(tableName.equals(MOrderLine.Table_Name)){	//JPIERE-0227
+				
+				if(columnName.equals("JP_LocatorFrom_ID") || columnName.equals("JP_LocatorTo_ID"))
+				{
+					list.add(new JPiereOrderCallout());
+				}			
 
 			}else if(tableName.equals(MInOut.Table_Name)){
 
