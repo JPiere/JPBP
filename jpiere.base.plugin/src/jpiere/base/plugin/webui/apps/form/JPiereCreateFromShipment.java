@@ -52,7 +52,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 
 /**
- *  Create Invoice Transactions from PO Orders or Receipt
+ *  JPIERE-0145:Create Invoice Transactions from PO Orders or Receipt
  *
  *  @author Jorg Janke
  *  @version  $Id: VCreateFromShipment.java,v 1.4 2006/07/30 00:51:28 jjanke Exp $
@@ -212,7 +212,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
 						line.add(pp);                           //  5-Product Name
 						// Add locator
-						line.add(getLocatorKeyNamePair(rs.getInt(5)));// 6-Locator
+						pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
+						line.add(pp);// 6-Locator
 						data.add(line);						
 						
 						break;
@@ -237,7 +238,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
 				line.add(pp);                           //  5-Product Name
 				// Add locator
-				line.add(getLocatorKeyNamePair(rs.getInt(5)));// 6-Locator
+				pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
+				line.add(pp);// 6-Locator
 
 
 
