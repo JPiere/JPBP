@@ -115,6 +115,9 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					&& (type == ModelValidator.TYPE_BEFORE_NEW || ol.is_ValueChanged("M_Product_ID") || ol.is_ValueChanged("QtyOrdered") || ol.is_ValueChanged("JP_ScheduledCost") ) )
 			{
 				BigDecimal cost = (BigDecimal)ol.get_Value("JP_ScheduledCost");				
+				if(cost == null)
+					cost = Env.ZERO;
+				
 				if( (cost.compareTo(Env.ZERO)==0 && type == ModelValidator.TYPE_BEFORE_NEW)
 						|| (type == ModelValidator.TYPE_BEFORE_CHANGE && ol.is_ValueChanged("M_Product_ID") && !ol.is_ValueChanged("JP_ScheduledCost")) )
 				{
