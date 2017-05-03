@@ -26,6 +26,9 @@ import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MDocType;
+import org.compiere.model.MLocator;
+import org.compiere.model.MOrgInfo;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPricing;
@@ -246,6 +249,58 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				return false;
 			}
 		}
+		
+		
+		//JPIERE-0227
+		if(getJP_LocatorFrom_ID() != 0 && (newRecord || is_ValueChanged("JP_LocatorFrom_ID"))) 
+		{
+			MLocator fromLocator =  MLocator.get(getCtx(), getJP_LocatorFrom_ID());
+			MOrgInfo fromLocatorOrgInfo = MOrgInfo.get(getCtx(), fromLocator.getAD_Org_ID(), get_TrxName());
+			MOrgInfo lineOrgInfo = MOrgInfo.get(getCtx(), getAD_Org_ID(), get_TrxName());
+			if(fromLocatorOrgInfo.get_ValueAsInt("JP_Corporation_ID") != lineOrgInfo.get_ValueAsInt("JP_Corporation_ID"))
+			{
+				log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMForDiffCorp"));//You can not create Material Movement doc. Because of different corporation Locator.
+				return false;
+			}
+			
+			MDocType docType = MDocType.get(getCtx(), getParent().getJP_DocTypeSO_ID());
+			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
+			if(JP_DocTypeMM_ID > 0 && (getJP_LocatorFrom_ID() != 0 || getJP_LocatorTo_ID() !=0) )
+			{
+
+				if(getJP_LocatorFrom_ID() > 0 && getJP_LocatorTo_ID()==0)
+				{
+					log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorTo_ID")) ;//Please input a value into the field.
+					return false;
+				}
+				
+				if(getJP_LocatorFrom_ID() == 0 && getJP_LocatorTo_ID() > 0)
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorFrom_ID")) ;//Please input a value into the field.
+					return false;
+				}
+				if(getJP_LocatorFrom_ID() == getJP_LocatorTo_ID())
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_SameLocatorMM"));//You are goring to create Inventory Move Doc at same Locator.
+					return false;
+				}
+				
+				if(!MLocator.get(getCtx(), getJP_LocatorFrom_ID()).get_Value("JP_PhysicalWarehouse_ID").equals(MLocator.get(getCtx(), getJP_LocatorTo_ID()).get_Value("JP_PhysicalWarehouse_ID")))
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffPhyWH"));//You can not create Inventory move doc at Sales Order because of different Physical Warehouse.
+					return false;
+				}
+
+			}else{
+
+				if(getJP_LocatorFrom_ID() != 0 || getJP_LocatorTo_ID() !=0)
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDocType"));//You can not create Inventory move doc because of missing Doc Type setting.
+					return false;
+				}
+			}
+		}
+		
 		
 		
 		return true;

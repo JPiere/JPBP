@@ -22,6 +22,7 @@ import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDocType;
+import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
 import org.compiere.model.X_C_Order;
 import org.compiere.util.DB;
@@ -252,6 +253,26 @@ public class JPiereEstimationCallout implements IColumnCallout {
 				DB.close(rs, pstmt);
 				rs = null; pstmt = null;
 				}
+		}
+		
+		if(mField.getColumnName().equals("JP_LocatorTo_ID"))
+		{
+			if(value != null)
+				mTab.setValue("JP_Locator_ID", value);
+		}
+
+		//JPIERE-0227
+		if(mField.getColumnName().equals("JP_LocatorFrom_ID") && mTab.getValue("JP_Locator_ID") != null && mTab.getValue("JP_LocatorFrom_ID") != null)
+		{
+			Integer JP_Locator_ID = 	(Integer)mTab.getValue("JP_Locator_ID");
+			MLocator shipLocator = MLocator.get(ctx, JP_Locator_ID.intValue());
+		
+			Integer JP_LocatorFrom_ID = 	(Integer)mTab.getValue("JP_LocatorFrom_ID");
+			MLocator fromLocator =  MLocator.get(ctx, JP_LocatorFrom_ID.intValue());
+			if(shipLocator.get_ValueAsInt("JP_PhysicalWarehouse_ID") == fromLocator.get_ValueAsInt("JP_PhysicalWarehouse_ID"))
+			{
+				mTab.setValue("JP_LocatorTo_ID",JP_Locator_ID) ;
+			}
 		}
 
 		return "";
