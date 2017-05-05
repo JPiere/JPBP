@@ -25,6 +25,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrgInfo;
+import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
@@ -228,11 +229,24 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		//JPIERE-0227 Common Warehouse & JPIERE-0317 Physical Warehouse
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				( type == ModelValidator.TYPE_BEFORE_CHANGE &&
-					( po.is_ValueChanged("JP_LocatorFrom_ID") || po.is_ValueChanged("JP_LocatorTo_ID") || po.is_ValueChanged("JP_ASI_From_ID") || po.is_ValueChanged("JP_ASI_To_ID") )) )
+					( po.is_ValueChanged("JP_LocatorFrom_ID") || po.is_ValueChanged("JP_LocatorTo_ID")
+							|| po.is_ValueChanged("JP_ASI_From_ID") || po.is_ValueChanged("JP_ASI_To_ID") || po.is_ValueChanged("M_Product_ID") )) )
 		{
 			MOrderLine oLine = (MOrderLine)po;
+			
+			//Check Stock Item.
+			if(oLine.getM_Product_ID() == 0 || !(oLine.getM_Product().getProductType().equals(MProduct.PRODUCTTYPE_Item) && oLine.getM_Product().isStocked()) )
+			{
+				oLine.set_ValueNoCheck("JP_Locator_ID", null);
+				oLine.set_ValueNoCheck("JP_LocatorFrom_ID", null);
+				oLine.set_ValueNoCheck("JP_LocatorTo_ID", null);
+				oLine.set_ValueNoCheck("JP_ASI_From_ID", null);
+				oLine.set_ValueNoCheck("JP_ASI_To_ID", null);
+			}
+			
 			int JP_LocatorFrom_ID = oLine.get_ValueAsInt("JP_LocatorFrom_ID");
 			
+			//Check Same Corporation Locator.
 			if(oLine.get_ValueAsInt("JP_LocatorFrom_ID") !=0 && (type == ModelValidator.TYPE_BEFORE_NEW ||po.is_ValueChanged("JP_LocatorFrom_ID")) )
 			{
 				
@@ -248,11 +262,15 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			int JP_LocatorTo_ID = oLine.get_ValueAsInt("JP_LocatorTo_ID");
 			MDocType docType = MDocType.get(oLine.getCtx(), oLine.getParent().getC_DocTypeTarget_ID());
 			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
+			
+			//Check to Create MM Doc.
 			if(JP_DocTypeMM_ID > 0 && (JP_LocatorFrom_ID != 0 || JP_LocatorTo_ID !=0) )
 			{
+				//Check Already created.
 				if(oLine.get_ValueAsInt("JP_MovementLine_ID") > 0)
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeMMInfoForMM");//You can not change Inventory Move Info. Because Inventory Move Doc created.
 
+				//lack of Information to create MM Doc
 				if(JP_LocatorFrom_ID > 0 && JP_LocatorTo_ID==0)
 					return Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorTo_ID") ;//Please input a value into the field.
 				if(JP_LocatorFrom_ID == 0 && JP_LocatorTo_ID > 0)
