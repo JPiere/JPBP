@@ -279,6 +279,9 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_SameLocatorMM");//You are goring to create Inventory Move Doc at same Locator.
 				if(!MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).get_Value("JP_PhysicalWarehouse_ID").equals(MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).get_Value("JP_PhysicalWarehouse_ID")))
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffPhyWH");//You can not create Inventory move doc at Sales Order because of different Physical Warehouse.
+				if(!MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).get_Value("M_LocatorType_ID").equals(MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).get_Value("M_LocatorType_ID")))
+					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffLocatorType");//You can not create Inventory move doc at Sales Order because of different Locator Type.
+
 
 			}else{
 
