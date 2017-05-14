@@ -72,7 +72,8 @@ public class JPiereLocatorModelValidator implements ModelValidator {
 			MLocator locator = (MLocator)po;
 			int JP_PhysicalWarehouse_ID = locator.get_ValueAsInt("JP_PhysicalWarehouse_ID");
 			MLocatorType  locatorType =MLocatorType.get(Env.getCtx(), locator.getM_LocatorType_ID());
-			if(locatorType.get_ValueAsInt("JP_PhysicalWarehouse_ID") != JP_PhysicalWarehouse_ID)
+			int LocType_PhyWH_ID =locatorType.get_ValueAsInt("JP_PhysicalWarehouse_ID");
+			if(LocType_PhyWH_ID != 0 && LocType_PhyWH_ID != JP_PhysicalWarehouse_ID)
 			{
 				return Msg.getMsg(Env.getCtx(), "JP_DiffPhyWH");//Different physical warehouse between Locator and Locator Type.
 			}
