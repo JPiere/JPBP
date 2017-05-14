@@ -14,6 +14,8 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Calendar;
 
 import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
@@ -292,6 +294,30 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			}
 		}
 
+		//JPIERE-0334 Locator Level Reserved
+		if( type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("JP_Locator_ID") || po.is_ValueChanged("QtyReserved")) )
+		{
+			MOrderLine oLine = (MOrderLine)po;
+			int now_Locator_ID = oLine.get_ValueAsInt("JP_Locator_ID"); 
+			int old_Locator_ID = oLine.get_ValueOldAsInt("JP_Locator_ID");
+			Timestamp now_DateReserved  = (Timestamp)oLine.get_Value("JP_DateReserved");
+			Timestamp old_DateReserved  = (Timestamp)oLine.get_ValueOld("JP_DateReserved");
+			BigDecimal now_QtyReserved = (BigDecimal)oLine.getQtyReserved();
+			BigDecimal old_QtyReserved = (BigDecimal)oLine.get_ValueOld("QtyReserved");
+			
+			if(now_Locator_ID <= 0)
+			{
+				oLine.set_ValueNoCheck("JP_DateReserved", null);
+				
+			}else if(now_QtyReserved.compareTo(Env.ZERO) > 0) {
+				
+				if(now_DateReserved == null || old_Locator_ID != now_Locator_ID )
+				{
+					oLine.set_ValueNoCheck("JP_DateReserved", new Timestamp(Calendar.getInstance().getTimeInMillis()));
+				}
+			}
+		}//JPIERE-0334
+		
 		return null;
 	}
 
