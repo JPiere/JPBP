@@ -309,7 +309,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			{
 				oLine.set_ValueNoCheck("JP_DateReserved", null);
 				
-			}else if(now_QtyReserved.compareTo(Env.ZERO) > 0) {
+			}else if(now_QtyReserved.compareTo(Env.ZERO) != 0) {
 				
 				if(now_DateReserved == null || old_Locator_ID != now_Locator_ID )
 				{
