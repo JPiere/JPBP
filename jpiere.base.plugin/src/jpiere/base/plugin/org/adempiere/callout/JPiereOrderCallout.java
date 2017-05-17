@@ -42,7 +42,10 @@ public class JPiereOrderCallout implements IColumnCallout {
 		//JPIERE-0227 Common Warehouse & JPIERE-0317 Physical Warehouse
 		if(mField.getColumnName().equals("JP_LocatorTo_ID"))
 		{
-			mTab.setValue("JP_Locator_ID", value);
+			if(mTab.isNew())
+				;
+			else
+				mTab.setValue("JP_Locator_ID", value);
 			
 			return "";
 		}
