@@ -22,6 +22,7 @@ import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDocType;
+import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
 import org.compiere.model.X_C_Order;
 import org.compiere.util.DB;
@@ -253,8 +254,61 @@ public class JPiereEstimationCallout implements IColumnCallout {
 				rs = null; pstmt = null;
 				}
 		}
+		
+		//JPIERE-0227 Common Warehouse & JPIERE-0317 Physical Warehouse
+		if(mField.getColumnName().equals("JP_LocatorTo_ID"))
+		{
+			mTab.setValue("JP_Locator_ID", value);
+			
+			return "";
+		}
+
+		if(mField.getColumnName().equals("JP_LocatorFrom_ID") && mTab.getValue("JP_LocatorFrom_ID") != null)
+		{
+			Integer JP_LocatorFrom_ID = (Integer)value;
+			MLocator fromLocator =  MLocator.get(ctx, JP_LocatorFrom_ID.intValue());
+			MLocator toLocator = getToLocator(ctx, fromLocator, ((Integer)mTab.getValue("M_Warehouse_ID")).intValue());
+			if(toLocator != null)
+			{
+				mTab.setValue("JP_LocatorTo_ID",toLocator.getM_Locator_ID()) ;
+				mTab.setValue("JP_Locator_ID", toLocator.getM_Locator_ID());
+			}
+			
+			return "";
+		}
 
 		return "";
 	}
 
+	private MLocator getToLocator(Properties ctx, MLocator fromLocator, int M_Warehouse_ID)
+	{
+		int JP_PhysicalWarehouse_ID = fromLocator.get_ValueAsInt("JP_PhysicalWarehouse_ID");
+		int M_LocatorType_ID = fromLocator.get_ValueAsInt("M_LocatorType_ID");
+		
+		final String sql = "SELECT * FROM M_Locator WHERE M_Warehouse_ID=? AND JP_PhysicalWarehouse_ID = ? AND M_LocatorType_ID = ? ORDER BY IsDefault DESC, PriorityNo DESC";
+		MLocator toLocator = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, M_Warehouse_ID);
+			pstmt.setInt(2, JP_PhysicalWarehouse_ID);
+			pstmt.setInt(3, M_LocatorType_ID);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+				toLocator= new MLocator (ctx, rs, null);
+		}
+		catch (Exception e)
+		{
+//			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		return toLocator;
+	}
 }

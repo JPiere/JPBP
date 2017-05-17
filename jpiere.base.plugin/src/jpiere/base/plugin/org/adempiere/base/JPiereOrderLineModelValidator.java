@@ -14,6 +14,8 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Calendar;
 
 import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
@@ -25,6 +27,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrgInfo;
+import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
@@ -115,6 +118,9 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					&& (type == ModelValidator.TYPE_BEFORE_NEW || ol.is_ValueChanged("M_Product_ID") || ol.is_ValueChanged("QtyOrdered") || ol.is_ValueChanged("JP_ScheduledCost") ) )
 			{
 				BigDecimal cost = (BigDecimal)ol.get_Value("JP_ScheduledCost");				
+				if(cost == null)
+					cost = Env.ZERO;
+				
 				if( (cost.compareTo(Env.ZERO)==0 && type == ModelValidator.TYPE_BEFORE_NEW)
 						|| (type == ModelValidator.TYPE_BEFORE_CHANGE && ol.is_ValueChanged("M_Product_ID") && !ol.is_ValueChanged("JP_ScheduledCost")) )
 				{
@@ -225,27 +231,48 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		//JPIERE-0227 Common Warehouse & JPIERE-0317 Physical Warehouse
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				( type == ModelValidator.TYPE_BEFORE_CHANGE &&
-					( po.is_ValueChanged("JP_LocatorFrom_ID") || po.is_ValueChanged("JP_LocatorTo_ID") || po.is_ValueChanged("JP_ASI_From_ID") || po.is_ValueChanged("JP_ASI_To_ID") )) )
+					( po.is_ValueChanged("JP_LocatorFrom_ID") || po.is_ValueChanged("JP_LocatorTo_ID")
+							|| po.is_ValueChanged("JP_ASI_From_ID") || po.is_ValueChanged("JP_ASI_To_ID") || po.is_ValueChanged("M_Product_ID") )) )
 		{
 			MOrderLine oLine = (MOrderLine)po;
-			int JP_LocatorFrom_ID = oLine.get_ValueAsInt("JP_LocatorFrom_ID");
-			MLocator fromLocator =  MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID);
-			MOrgInfo fromLocatorOrgInfo = MOrgInfo.get(oLine.getCtx(), fromLocator.getAD_Org_ID(), oLine.get_TrxName());
-			MOrgInfo lineOrgInfo = MOrgInfo.get(oLine.getCtx(), oLine.getAD_Org_ID(), oLine.get_TrxName());
-			if(fromLocatorOrgInfo.get_ValueAsInt("JP_Corporation_ID") != lineOrgInfo.get_ValueAsInt("JP_Corporation_ID"))
+			
+			//Check Stock Item.
+			if(oLine.getM_Product_ID() == 0 || !(oLine.getM_Product().getProductType().equals(MProduct.PRODUCTTYPE_Item) && oLine.getM_Product().isStocked()) )
 			{
-				return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMForDiffCorp");//You can not create Material Movement doc. Because of different corporation Locator.
+				oLine.set_ValueNoCheck("JP_Locator_ID", null);
+				oLine.set_ValueNoCheck("JP_LocatorFrom_ID", null);
+				oLine.set_ValueNoCheck("JP_LocatorTo_ID", null);
+				oLine.set_ValueNoCheck("JP_ASI_From_ID", null);
+				oLine.set_ValueNoCheck("JP_ASI_To_ID", null);
+			}
+			
+			int JP_LocatorFrom_ID = oLine.get_ValueAsInt("JP_LocatorFrom_ID");
+			
+			//Check Same Corporation Locator.
+			if(oLine.get_ValueAsInt("JP_LocatorFrom_ID") !=0 && (type == ModelValidator.TYPE_BEFORE_NEW ||po.is_ValueChanged("JP_LocatorFrom_ID")) )
+			{
+				
+				MLocator fromLocator =  MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID);
+				MOrgInfo fromLocatorOrgInfo = MOrgInfo.get(oLine.getCtx(), fromLocator.getAD_Org_ID(), oLine.get_TrxName());
+				MOrgInfo lineOrgInfo = MOrgInfo.get(oLine.getCtx(), oLine.getAD_Org_ID(), oLine.get_TrxName());
+				if(fromLocatorOrgInfo.get_ValueAsInt("JP_Corporation_ID") != lineOrgInfo.get_ValueAsInt("JP_Corporation_ID"))
+				{
+					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMForDiffCorp");//You can not create Material Movement doc. Because of different corporation Locator.
+				}
 			}
 			
 			int JP_LocatorTo_ID = oLine.get_ValueAsInt("JP_LocatorTo_ID");
-
 			MDocType docType = MDocType.get(oLine.getCtx(), oLine.getParent().getC_DocTypeTarget_ID());
 			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
+			
+			//Check to Create MM Doc.
 			if(JP_DocTypeMM_ID > 0 && (JP_LocatorFrom_ID != 0 || JP_LocatorTo_ID !=0) )
 			{
+				//Check Already created.
 				if(oLine.get_ValueAsInt("JP_MovementLine_ID") > 0)
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeMMInfoForMM");//You can not change Inventory Move Info. Because Inventory Move Doc created.
 
+				//lack of Information to create MM Doc
 				if(JP_LocatorFrom_ID > 0 && JP_LocatorTo_ID==0)
 					return Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorTo_ID") ;//Please input a value into the field.
 				if(JP_LocatorFrom_ID == 0 && JP_LocatorTo_ID > 0)
@@ -254,6 +281,9 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_SameLocatorMM");//You are goring to create Inventory Move Doc at same Locator.
 				if(!MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).get_Value("JP_PhysicalWarehouse_ID").equals(MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).get_Value("JP_PhysicalWarehouse_ID")))
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffPhyWH");//You can not create Inventory move doc at Sales Order because of different Physical Warehouse.
+				if(!MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID).get_Value("M_LocatorType_ID").equals(MLocator.get(oLine.getCtx(), JP_LocatorTo_ID).get_Value("M_LocatorType_ID")))
+					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffLocatorType");//You can not create Inventory move doc at Sales Order because of different Locator Type.
+
 
 			}else{
 
@@ -264,6 +294,30 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			}
 		}
 
+		//JPIERE-0334 Locator Level Reserved
+		if( type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("JP_Locator_ID") || po.is_ValueChanged("QtyReserved")) )
+		{
+			MOrderLine oLine = (MOrderLine)po;
+			int now_Locator_ID = oLine.get_ValueAsInt("JP_Locator_ID"); 
+			int old_Locator_ID = oLine.get_ValueOldAsInt("JP_Locator_ID");
+			Timestamp now_DateReserved  = (Timestamp)oLine.get_Value("JP_DateReserved");
+			Timestamp old_DateReserved  = (Timestamp)oLine.get_ValueOld("JP_DateReserved");
+			BigDecimal now_QtyReserved = (BigDecimal)oLine.getQtyReserved();
+			BigDecimal old_QtyReserved = (BigDecimal)oLine.get_ValueOld("QtyReserved");
+			
+			if(now_Locator_ID <= 0)
+			{
+				oLine.set_ValueNoCheck("JP_DateReserved", null);
+				
+			}else if(now_QtyReserved.compareTo(Env.ZERO) != 0) {
+				
+				if(now_DateReserved == null || old_Locator_ID != now_Locator_ID )
+				{
+					oLine.set_ValueNoCheck("JP_DateReserved", new Timestamp(Calendar.getInstance().getTimeInMillis()));
+				}
+			}
+		}//JPIERE-0334
+		
 		return null;
 	}
 

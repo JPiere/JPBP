@@ -18,6 +18,7 @@ import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
+import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 
 import org.adempiere.util.Callback;
 import org.adempiere.util.IProcessUI;
@@ -141,7 +142,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 	{		
 		MEstimationLine[] eLines = estimation.getLines();
 
-		MOrder order = new MOrder(getCtx(), 0, get_TrxName()) ;
+		MOrderJP order = new MOrderJP(getCtx(), 0, get_TrxName()) ;
 		PO.copyValues(estimation, order);
 		order.setAD_Org_ID(estimation.getAD_Org_ID());
 		order.setDocumentNo(null);
@@ -162,8 +163,11 @@ public class CreateSOfromEstimation extends SvrProcess {
 
 		}//for
 
-		order.processIt(p_DocAction);
-		order.saveEx(get_TrxName());
+		if(!Util.isEmpty(p_DocAction))
+		{
+			order.processIt(p_DocAction);//CO or PR
+			order.saveEx(get_TrxName());
+		}
 
 		if(estimation.getC_Opportunity_ID()!=0)
 		{

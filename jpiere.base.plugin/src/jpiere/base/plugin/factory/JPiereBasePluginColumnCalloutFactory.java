@@ -40,6 +40,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
+import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
@@ -99,6 +100,14 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereEstimationCallout());
 				}
+				
+			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0227
+				
+				if(columnName.equals("JP_LocatorFrom_ID") || columnName.equals("JP_LocatorTo_ID"))
+				{
+					list.add(new JPiereEstimationCallout());
+				}	
+				
 			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
 				if(columnName.equals(MBankDataLine.COLUMNNAME_TrxAmt)
 						|| columnName.equals(MEstimation.COLUMNNAME_C_Invoice_ID)
