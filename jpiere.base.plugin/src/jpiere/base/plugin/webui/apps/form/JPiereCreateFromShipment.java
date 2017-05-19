@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import org.adempiere.webui.window.FDialog;
 import org.compiere.apps.IStatusBar;
 import org.compiere.grid.CreateFrom;
 import org.compiere.minigrid.IMiniTable;
@@ -67,6 +68,7 @@ import org.compiere.util.Msg;
 public abstract class JPiereCreateFromShipment extends CreateFrom
 {
 	protected int shipLocator_ID=0;
+	protected boolean isShipFromScheduledShipLocator=true;
 
 	/**
 	 *  Protected Constructor
@@ -152,17 +154,19 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		p_order = new MOrder (Env.getCtx(), C_Order_ID, null);      //  save
 
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		StringBuilder sql = new StringBuilder("SELECT "
-				+ "l.QtyOrdered - l.QtyDelivered," //1
-				+ " CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END,"	//	2
-				+ " l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name),"			//	3..4
-				+ " l.JP_Locator_ID, loc.Value, " // 5..6
-				+ " COALESCE(l.M_Product_ID,0),COALESCE(p.Name,c.Name), " //	7..8
-				+ " p.Value AS ProductValue, " // 9
-				+ " l.C_OrderLine_ID,l.Line "	//	10..11
+		StringBuilder sql = new StringBuilder("SELECT"
+				+ " l.QtyOrdered - l.QtyDelivered" //1
+				+ " ,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END "	//	2
+				+ " ,l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name)"			//	3..4
+				+ " ,l.JP_Locator_ID, loc.Value " // 5..6
+				+ " ,COALESCE(l.M_Product_ID,0),COALESCE(p.Name,c.Name) " //	7..8
+				+ " ,p.Value AS ProductValue " // 9
+				+ " ,l.C_OrderLine_ID,l.Line "	//	10..11
+				+ " ,loc.JP_PhysicalWarehouse_ID, pwh.name " //12..13
 				+ "FROM C_OrderLine l");
 		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)"
 				+ " LEFT OUTER JOIN M_Locator loc on (l.JP_Locator_ID=loc.M_Locator_ID)"
+				+ " LEFT OUTER JOIN JP_PhysicalWarehouse pwh on (loc.JP_PhysicalWarehouse_ID=pwh.JP_PhysicalWarehouse_ID)"
 				+ " LEFT OUTER JOIN C_Charge c ON (l.C_Charge_ID=c.C_Charge_ID)");
 		if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
 			sql.append(" LEFT OUTER JOIN C_UOM uom ON (l.C_UOM_ID=uom.C_UOM_ID)");
@@ -171,10 +175,11 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 			.append(Env.getAD_Language(Env.getCtx())).append("')");
 		//
 		sql.append(" WHERE l.C_Order_ID=? "			//	#1
-				+ "GROUP BY l.QtyOrdered,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END, "
-				+ "l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name), l.JP_Locator_ID, loc.Value, p.Value, "
-				+ "l.M_Product_ID,COALESCE(p.Name,c.Name), l.Line,l.C_OrderLine_ID "
-				+ "ORDER BY l.Line");
+//				+ "GROUP BY l.QtyOrdered,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END, "
+//				+ "l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name), l.JP_Locator_ID, loc.Value, p.Value, "
+//				+ "l.M_Product_ID,COALESCE(p.Name,c.Name),loc.JP_PhysicalWarehouse_ID, pwh.name , l.Line,l.C_OrderLine_ID "
+				+ "ORDER BY l.Line"
+				);
 		//
 		if (log.isLoggable(Level.FINER)) log.finer(sql.toString());
 		PreparedStatement pstmt = null;
@@ -213,9 +218,12 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						line.add(pp);                           //  5-Product Name
 						// Add locator
 						pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
-						line.add(pp);// 6-Locator
-						data.add(line);						
+						line.add(pp);// 6-Locator				
+						// Add Physical Warehouse
+						pp = new KeyNamePair(rs.getInt(12), rs.getString(13));
+						line.add(pp);// 7-Phsical Warehouse
 						
+						data.add(line);								
 						break;
 					}				
 				}
@@ -241,7 +249,9 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
 				line.add(pp);// 6-Locator
 
-
+				// Add Physical Warehouse
+				pp = new KeyNamePair(rs.getInt(12), rs.getString(13));
+				line.add(pp);// 7-Phsical Warehouse
 
 				data.add(line);
 			}
@@ -333,7 +343,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		miniTable.setColumnClass(4, String.class, true); 		//  Product Value
 		miniTable.setColumnClass(5, String.class, true);   		//  Product Name
 		miniTable.setColumnClass(6, String.class, false); 		 //  Locator
-
+		miniTable.setColumnClass(7, String.class, false); 		 //  Physical Warehouse
+		
 		//  Table UI
 		miniTable.autoSize();
 
@@ -345,24 +356,35 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 	 */
 	public boolean save(IMiniTable miniTable, String trxName)
 	{
-		/*
-		dataTable.stopEditor(true);
-		log.config("");
-		TableModel model = dataTable.getModel();
-		int rows = model.getRowCount();
-		if (rows == 0)
-			return false;
-		//
-		Integer defaultLoc = (Integer) locatorField.getValue();
-		if (defaultLoc == null || defaultLoc.intValue() == 0) {
-			locatorField.setBackground(AdempierePLAF.getFieldBackground_Error());
-			return false;
-		}
-		*/
 		int M_Locator_ID = shipLocator_ID;
-		if (M_Locator_ID == 0) {
+		if (!isShipFromScheduledShipLocator && M_Locator_ID == 0) 	//Check Locator
+		{
+			FDialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID"));
 			return false;
-		}
+			
+		}else{
+			
+			for (int i = 0; i < miniTable.getRowCount(); i++)
+			{
+				if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) 
+				{
+					KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
+					int JP_ScheduledShipLocator＿ID = pp.getKey();
+					if(JP_ScheduledShipLocator＿ID == 0 && M_Locator_ID == 0)
+					{
+						pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
+						
+						FDialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID")
+											+ System.lineSeparator()
+											+ Msg.getElement(Env.getCtx(), "Line") 
+											+ " : " + pp.getName());
+						return false;
+					}
+				}
+			}//for
+			
+		}//if (M_Locator_ID == 0) 	//Check Locator
+			
 		// Get Shipment
 		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
 		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, trxName);
@@ -371,7 +393,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		// Lines
 		for (int i = 0; i < miniTable.getRowCount(); i++)
 		{
-			if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) {
+			if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) 
+			{
 				// variable values
 				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 2); // Qty
 				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 3); // UOM
@@ -379,12 +402,15 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 
 				pp = (KeyNamePair) miniTable.getValueAt(i, 5); // Product
 				int M_Product_ID = pp.getKey();
+				
+				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
+				int JP_ScheduledShipLocator＿ID = pp.getKey();
+				
 				int C_OrderLine_ID = 0;
 				pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
 				if (pp != null)
-					C_OrderLine_ID = pp.getKey();
-
-				//boolean isInvoiced = (C_InvoiceLine_ID != 0);
+					C_OrderLine_ID = pp.getKey();				
+				
 				//	Precision of Qty UOM
 				int precision = 2;
 				if (M_Product_ID != 0)
@@ -439,7 +465,15 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						iol.setC_Charge_ID(ol.getC_Charge_ID());
 				}
 				// Set locator
-				iol.setM_Locator_ID(M_Locator_ID);
+				if(isShipFromScheduledShipLocator && JP_ScheduledShipLocator＿ID > 0)
+				{
+					iol.setM_Locator_ID(JP_ScheduledShipLocator＿ID);
+				}else if(M_Locator_ID > 0){
+					iol.setM_Locator_ID(M_Locator_ID);
+				}else{
+					return false;
+				}
+
 				iol.saveEx();
 
 			}   //   if selected
@@ -478,15 +512,16 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 	protected Vector<String> getOISColumnNames()
 	{
 		//  Header Info
-	    Vector<String> columnNames = new Vector<String>(7);
+	    Vector<String> columnNames = new Vector<String>(8);
 	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "Line", true));
 	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "ProductValue", false));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "JP_Locator_ID"));
-
+	    columnNames.add(Msg.getMsg(Env.getCtx(), "JP_ScheduledShipLocator"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "JP_PhysicalWarehouse_ID"));
+	    
 	    return columnNames;
 	}
 

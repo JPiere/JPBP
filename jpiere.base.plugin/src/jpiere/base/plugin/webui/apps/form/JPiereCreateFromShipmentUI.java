@@ -52,6 +52,7 @@ import org.adempiere.webui.editor.WStringEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridTab;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLocator;
@@ -69,6 +70,8 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Vlayout;
+
+import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 /**
  * JPIERE-0145
@@ -119,8 +122,12 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 	protected Listbox orderField = ListboxFactory.newDropdownListbox();
 
 	protected Checkbox sameWarehouseCb = new Checkbox();
+	
+	protected Checkbox shipFromScheduledShipLocatorCb = new Checkbox();
+	
 	protected Label locatorLabel = new Label();
 	protected WSearchEditor locatorField = null;
+	
 	protected Label upcLabel = new Label();
 	protected WStringEditor upcField = new WStringEditor();
 
@@ -139,21 +146,37 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 
 		sameWarehouseCb.setSelected(true);
 		sameWarehouseCb.addActionListener(this);
+		
+		shipFromScheduledShipLocatorCb.setSelected(true);
+		shipFromScheduledShipLocatorCb.addActionListener(this);
+		
 		//  load Locator
 		int AD_Column_ID = MColumn.getColumn_ID("M_InOutLine", "M_Locator_ID");
 		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
 		locatorField = new WSearchEditor("M_Locator_ID", true, false, true, lookupLocator);
-		MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
-		if (wh != null)
+		int JP_PhysicalWarehouse_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "JP_PhysicalWarehouse_ID");
+		if(JP_PhysicalWarehouse_ID == 0)
 		{
-			MLocator locator = wh.getDefaultLocator();
+			MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
+			if (wh != null)
+			{
+				MLocator locator = wh.getDefaultLocator();
+				if(locator != null)
+				{
+					locatorField.setValue(locator.getM_Locator_ID());
+					shipLocator_ID = locator.getM_Locator_ID();
+				}
+			}
+		}else{
+			MPhysicalWarehouse phyWH = MPhysicalWarehouse.get(Env.getCtx(), JP_PhysicalWarehouse_ID);
+			MLocator locator = phyWH.getDefaultLocator(MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID")) );
 			if(locator != null)
 			{
 				locatorField.setValue(locator.getM_Locator_ID());
 				shipLocator_ID = locator.getM_Locator_ID();
 			}
 		}
-		locatorField.getComponent().addEventListener(Events.ON_CHANGE, this);
+		locatorField.addValueChangeListener(this);
 
 		initBPartner(false);
 		bPartnerField.addValueChangeListener(this);
@@ -171,7 +194,9 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		orderLabel.setText(Msg.getElement(Env.getCtx(), "C_Order_ID", true));
 		locatorLabel.setText(Msg.getMsg(Env.getCtx(), "JP_ShipLocator"));
         sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
-        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "FromSameWarehouseOnly", true));
+        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
+        shipFromScheduledShipLocatorCb.setText(Msg.getMsg(Env.getCtx(), "JP_ShipFromScheduledShipLocator", true));
+        
         upcLabel.setText(Msg.getElement(Env.getCtx(), "UPC", false));
 
 		Vlayout vlayout = new Vlayout();
@@ -185,29 +210,36 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 
 		Rows rows = (Rows) parameterStdLayout.newRows();
 		Row row = rows.newRow();
-		row.appendChild(bPartnerLabel.rightAlign());
-		if (bPartnerField != null) {
-			row.appendChild(bPartnerField.getComponent());
+		row.appendCellChild(bPartnerLabel.rightAlign(),2);			//2
+		if (bPartnerField != null) 
+		{
+			row.appendCellChild(bPartnerField.getComponent(), 10);	//12
 			bPartnerField.fillHorizontal();
 		}
 
 		row = rows.newRow();
-		row.appendChild(new Space());
-		row.appendChild(sameWarehouseCb);
-		
-		row = rows.newRow();
-		row.appendChild(orderLabel.rightAlign());
-		row.appendChild(orderField);
+		row.appendCellChild(new Space(),2);				//2
+		row.appendCellChild(sameWarehouseCb,3);			//5
+		row.appendCellChild(new Space());				//6
+		row.appendCellChild(orderLabel.rightAlign(),2);	//8
+		row.appendCellChild(orderField,4);				//12
 		orderField.setHflex("1");
 		
 		row = rows.newRow();
-		row.appendChild(upcLabel.rightAlign());
-		row.appendChild(upcField.getComponent());
+		row.appendCellChild(new Space(),2);			
+		row.appendCellChild(shipFromScheduledShipLocatorCb,3);
+		row.appendCellChild(new Space());
+		row.appendCellChild(locatorLabel.rightAlign(),2);
+		row.appendCellChild(locatorField.getComponent(),4);
+       	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
+		locatorField.fillHorizontal();
 		
 		row = rows.newRow();
-		row.appendChild(locatorLabel.rightAlign());
-		row.appendChild(locatorField.getComponent());
-		locatorField.fillHorizontal();
+		row.appendCellChild(upcLabel.rightAlign(),2);
+		row.appendCellChild(upcField.getComponent(),3);
+		upcField.fillHorizontal();
+		
+
 
 	}
 
@@ -235,13 +267,16 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 				int C_Order_ID = pp.getKey();
 				loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
 			}
-		}else if(e.getTarget().equals(locatorField.getComponent())){
-			shipLocator_ID = (Integer)locatorField.getValue();
 		}
 		//sameWarehouseCb
         else if (e.getTarget().equals(sameWarehouseCb))
         {
         	initBPOrderDetails(((Integer)bPartnerField.getValue()).intValue(), false);
+        }
+		//shipFromScheduledShipLocatorCb
+        else if (e.getTarget().equals(shipFromScheduledShipLocatorCb))
+        {
+           	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
         }
 		else if (e.getTarget().equals(upcField.getComponent()))
 		{
@@ -315,6 +350,12 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 			}
 
 			initBPOrderDetails (C_BPartner_ID, true);
+		}else if(e.getPropertyName().equals("M_Locator_ID")){
+			if (e.getNewValue() != null){
+				shipLocator_ID = ((Integer)e.getNewValue()).intValue();
+			}else{
+				shipLocator_ID = 0;
+			}
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange
