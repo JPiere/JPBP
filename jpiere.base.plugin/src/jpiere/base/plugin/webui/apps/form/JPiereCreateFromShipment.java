@@ -69,6 +69,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 {
 	protected int shipLocator_ID=0;
 	protected boolean isShipFromScheduledShipLocator=true;
+	protected boolean isSelectPhysicalWarehouse=false;
+	protected int Doc_PhysicalWarehouse_ID = 0;
 
 	/**
 	 *  Protected Constructor
@@ -174,12 +176,10 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 			sql.append(" LEFT OUTER JOIN C_UOM_Trl uom ON (l.C_UOM_ID=uom.C_UOM_ID AND uom.AD_Language='")
 			.append(Env.getAD_Language(Env.getCtx())).append("')");
 		//
-		sql.append(" WHERE l.C_Order_ID=? "			//	#1
-//				+ "GROUP BY l.QtyOrdered,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END, "
-//				+ "l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name), l.JP_Locator_ID, loc.Value, p.Value, "
-//				+ "l.M_Product_ID,COALESCE(p.Name,c.Name),loc.JP_PhysicalWarehouse_ID, pwh.name , l.Line,l.C_OrderLine_ID "
-				+ "ORDER BY l.Line"
-				);
+		sql.append(" WHERE l.C_Order_ID=? ");		//	#1
+		if(isSelectPhysicalWarehouse)
+			sql.append(" AND loc.JP_PhysicalWarehouse_ID=? ");
+		sql.append(" ORDER BY l.Line ");
 		//
 		if (log.isLoggable(Level.FINER)) log.finer(sql.toString());
 		PreparedStatement pstmt = null;
@@ -188,6 +188,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_Order_ID);
+			if(isSelectPhysicalWarehouse)
+				pstmt.setInt(2, Doc_PhysicalWarehouse_ID);
 			rs = pstmt.executeQuery();
 			boolean isContain = false;
 			while (rs.next())

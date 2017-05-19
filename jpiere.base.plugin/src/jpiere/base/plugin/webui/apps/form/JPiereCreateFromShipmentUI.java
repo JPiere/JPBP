@@ -59,6 +59,7 @@ import org.compiere.model.MLocator;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MProduct;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -125,6 +126,8 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 	
 	protected Checkbox shipFromScheduledShipLocatorCb = new Checkbox();
 	
+	protected Checkbox selectPhysicalWarehouseCb = new Checkbox();
+	
 	protected Label locatorLabel = new Label();
 	protected WSearchEditor locatorField = null;
 	
@@ -150,12 +153,17 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		shipFromScheduledShipLocatorCb.setSelected(true);
 		shipFromScheduledShipLocatorCb.addActionListener(this);
 		
+		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_SHIP_SELECT_PHYHW_CHECK", true, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
+		selectPhysicalWarehouseCb.setSelected(checkSelectPhyWH);
+		isSelectPhysicalWarehouse = checkSelectPhyWH;
+		selectPhysicalWarehouseCb.addActionListener(this);
+		
 		//  load Locator
 		int AD_Column_ID = MColumn.getColumn_ID("M_InOutLine", "M_Locator_ID");
 		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
 		locatorField = new WSearchEditor("M_Locator_ID", true, false, true, lookupLocator);
-		int JP_PhysicalWarehouse_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "JP_PhysicalWarehouse_ID");
-		if(JP_PhysicalWarehouse_ID == 0)
+		Doc_PhysicalWarehouse_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "JP_PhysicalWarehouse_ID");
+		if(Doc_PhysicalWarehouse_ID == 0)
 		{
 			MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
 			if (wh != null)
@@ -168,7 +176,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 				}
 			}
 		}else{
-			MPhysicalWarehouse phyWH = MPhysicalWarehouse.get(Env.getCtx(), JP_PhysicalWarehouse_ID);
+			MPhysicalWarehouse phyWH = MPhysicalWarehouse.get(Env.getCtx(), Doc_PhysicalWarehouse_ID);
 			MLocator locator = phyWH.getDefaultLocator(MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID")) );
 			if(locator != null)
 			{
@@ -196,6 +204,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
         sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
         sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
         shipFromScheduledShipLocatorCb.setText(Msg.getMsg(Env.getCtx(), "JP_ShipFromScheduledShipLocator", true));
+        selectPhysicalWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_SelectByPhyWH", true));
         
         upcLabel.setText(Msg.getElement(Env.getCtx(), "UPC", false));
 
@@ -228,18 +237,23 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		row = rows.newRow();
 		row.appendCellChild(new Space(),2);			
 		row.appendCellChild(shipFromScheduledShipLocatorCb,3);
+       	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
 		row.appendCellChild(new Space());
 		row.appendCellChild(locatorLabel.rightAlign(),2);
 		row.appendCellChild(locatorField.getComponent(),4);
-       	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
 		locatorField.fillHorizontal();
 		
 		row = rows.newRow();
+		row.appendCellChild(new Space(),2);	
+		row.appendCellChild(selectPhysicalWarehouseCb,3);
+		isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected();
+		if(Doc_PhysicalWarehouse_ID==0)
+			selectPhysicalWarehouseCb.setVisible(false);
+			
+		row.appendCellChild(new Space());
 		row.appendCellChild(upcLabel.rightAlign(),2);
-		row.appendCellChild(upcField.getComponent(),3);
+		row.appendCellChild(upcField.getComponent(),4);
 		upcField.fillHorizontal();
-		
-
 
 	}
 
@@ -277,6 +291,10 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
         else if (e.getTarget().equals(shipFromScheduledShipLocatorCb))
         {
            	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
+        }
+        else if (e.getTarget().equals(selectPhysicalWarehouseCb)){
+        	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected();
+        	initBPOrderDetails(((Integer)bPartnerField.getValue()).intValue(), false);
         }
 		else if (e.getTarget().equals(upcField.getComponent()))
 		{

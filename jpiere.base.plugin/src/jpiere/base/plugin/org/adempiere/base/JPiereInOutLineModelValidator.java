@@ -18,13 +18,17 @@ import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MLocator;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 public class JPiereInOutLineModelValidator implements ModelValidator {
 
@@ -92,6 +96,25 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					}
 				}
 			}
+			
+			
+			//JPIERE-0317 Physical Warehouse - check same physical warehouse between locator and document.
+			if(MSysConfig.getBooleanValue("JP_INOUT_PHYWH_LOCATOR_CHECK", true, iol.getAD_Client_ID(), iol.getAD_Org_ID()))
+			{
+				if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("M_Locator_ID"))
+				{
+					int io_PhysicalWarehouse_ID = iol.getParent().get_ValueAsInt("JP_PhysicalWarehouse_ID");
+					if(io_PhysicalWarehouse_ID != 0)
+					{
+						MLocator loc = MLocator.get(iol.getCtx(), iol.getM_Locator_ID());
+						int loc_PhysicalWarehouse_ID =  loc.get_ValueAsInt("JP_PhysicalWarehouse_ID");
+						if(loc_PhysicalWarehouse_ID != 0 && loc_PhysicalWarehouse_ID != io_PhysicalWarehouse_ID)
+						{
+							return Msg.getMsg(iol.getCtx(), "JP_PhyWarehouseLocatorConflict");//Conflict Physical Warehouse between document and Locator
+						}
+					}
+				}
+			}//JPIERE-0317 Physical Warehouse
 
 		}
 
