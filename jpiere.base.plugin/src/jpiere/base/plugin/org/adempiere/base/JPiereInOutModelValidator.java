@@ -26,6 +26,7 @@ import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MSysConfig;
@@ -120,6 +121,31 @@ public class JPiereInOutModelValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
+		//JPIERE-0317  Physical Warehouse - check same physical warehouse between locator and document.
+		if(timing == ModelValidator.TIMING_BEFORE_PREPARE
+				&& MSysConfig.getBooleanValue("JP_INOUT_PHYWH_LOCATOR_CHECK", true, po.getAD_Client_ID(), po.getAD_Org_ID()))
+		{
+			MInOut io = (MInOut)po;
+			int io_PhysicalWarehouse_ID = io.get_ValueAsInt("JP_PhysicalWarehouse_ID");
+			if(io_PhysicalWarehouse_ID != 0)
+			{
+				MInOutLine[] ioLines =  io.getLines();
+				MLocator loc = null;
+				int loc_PhysicalWarehouse_ID = 0;
+				for(int i = 0 ; i < ioLines.length; i++)
+				{
+					loc = MLocator.get(io.getCtx(), ioLines[i].getM_Locator_ID());
+					loc_PhysicalWarehouse_ID =  loc.get_ValueAsInt("JP_PhysicalWarehouse_ID");
+					if(loc_PhysicalWarehouse_ID != 0 && loc_PhysicalWarehouse_ID != io_PhysicalWarehouse_ID)
+					{
+							return Msg.getMsg(io.getCtx(), "JP_PhyWarehouseLocatorConflict") //Conflict Physical Warehouse between document and Locator
+									+ Msg.getElement(io.getCtx(), "Line") + " : " +ioLines[i].getLine();
+					}
+				}//for
+			}
+		}//JPIERE-0317  
+		
+		
 		//JPIERE-0229
 		if(timing == ModelValidator.TIMING_BEFORE_COMPLETE)
 		{
