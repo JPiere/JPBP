@@ -120,7 +120,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 
 	protected Checkbox sameWarehouseCb = new Checkbox();
 	protected Label locatorLabel = new Label();
-	protected WTableDirEditor locatorField = null;
+	protected WSearchEditor locatorField = null;
 	protected Label upcLabel = new Label();
 	protected WStringEditor upcField = new WStringEditor();
 
@@ -141,8 +141,8 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		sameWarehouseCb.addActionListener(this);
 		//  load Locator
 		int AD_Column_ID = MColumn.getColumn_ID("M_InOutLine", "M_Locator_ID");
-		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
-		locatorField = new WTableDirEditor("M_Locator_ID", true, false, true, lookupLocator);
+		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
+		locatorField = new WSearchEditor("M_Locator_ID", true, false, true, lookupLocator);
 		MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
 		if (wh != null)
 		{
