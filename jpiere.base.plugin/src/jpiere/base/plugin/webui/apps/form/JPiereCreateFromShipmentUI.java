@@ -40,6 +40,7 @@ import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Label;
+import org.adempiere.webui.component.ListItem;
 import org.adempiere.webui.component.ListModelTable;
 import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.ListboxFactory;
@@ -73,7 +74,8 @@ import org.zkoss.zul.Vlayout;
 import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 /**
- * JPIERE-0145
+ * JPIERE-0145:Create Shipment from Sales Orders
+ * 
  * @author Low Heng Sin
  * @author Hideaki Hagiwara
  *
@@ -290,9 +292,17 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
         {
            	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
         }
-        else if (e.getTarget().equals(selectPhysicalWarehouseCb)){
-        	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected();
-        	initBPOrderDetails(((Integer)bPartnerField.getValue()).intValue(), false);
+        else if (e.getTarget().equals(selectPhysicalWarehouseCb))
+        {
+        	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected(); 
+    		ListItem selectedListItem = orderField.getSelectedItem();
+    		int C_Order_ID = ((Integer)selectedListItem.getValue()).intValue();
+    		if(C_Order_ID > 0)
+    			loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
+    		else if(C_Order_ID <= 0)
+    			orderField.setSelectedIndex(0);
+    		
+    		orderField.addActionListener(this);
         }
 		else if (e.getTarget().equals(upcField.getComponent()))
 		{
