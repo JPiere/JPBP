@@ -53,7 +53,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 
 /**
- *  JPIERE-0343:Create Receipt from PO Orders or AR Invoices
+ *  JPIERE-0343:Create Receipt from PO Orders
  *
  *  @author Jorg Janke
  *  @version  $Id: VCreateFromShipment.java,v 1.4 2006/07/30 00:51:28 jjanke Exp $

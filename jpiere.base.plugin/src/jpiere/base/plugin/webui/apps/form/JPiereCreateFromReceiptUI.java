@@ -74,7 +74,7 @@ import org.zkoss.zul.Vlayout;
 import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 /**
- * JPIERE-0343:Create Receipt from PO Orders or AR Invoices
+ * JPIERE-0343:Create Receipt from PO Orders
  * 
  * @author Low Heng Sin
  * @author Hideaki Hagiwara
