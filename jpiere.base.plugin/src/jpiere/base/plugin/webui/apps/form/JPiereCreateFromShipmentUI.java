@@ -153,7 +153,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		shipFromScheduledShipLocatorCb.setSelected(true);
 		shipFromScheduledShipLocatorCb.addActionListener(this);
 		
-		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_SHIP_SELECT_PHYHW_CHECK", true, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
+		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_SHIP_SELECT_PHYHW_CHECK", false, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
 		selectPhysicalWarehouseCb.setSelected(checkSelectPhyWH);
 		isSelectPhysicalWarehouse = checkSelectPhyWH;
 		selectPhysicalWarehouseCb.addActionListener(this);

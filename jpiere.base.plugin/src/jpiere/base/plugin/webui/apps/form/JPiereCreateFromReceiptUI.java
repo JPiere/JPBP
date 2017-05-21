@@ -40,6 +40,7 @@ import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Label;
+import org.adempiere.webui.component.ListItem;
 import org.adempiere.webui.component.ListModelTable;
 import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.ListboxFactory;
@@ -152,7 +153,7 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 		shipFromScheduledShipLocatorCb.setSelected(true);
 		shipFromScheduledShipLocatorCb.addActionListener(this);
 		
-		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_SHIP_SELECT_PHYHW_CHECK", true, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
+		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_RECEIPT_SELECT_PHYHW_CHECK", false, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
 		selectPhysicalWarehouseCb.setSelected(checkSelectPhyWH);
 		isSelectPhysicalWarehouse = checkSelectPhyWH;
 		selectPhysicalWarehouseCb.addActionListener(this);
@@ -292,8 +293,15 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
            	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
         }
         else if (e.getTarget().equals(selectPhysicalWarehouseCb)){
-        	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected();
-        	initBPOrderDetails(((Integer)bPartnerField.getValue()).intValue(), false);
+        	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected(); 
+    		ListItem selectedListItem = orderField.getSelectedItem();
+    		int C_Order_ID = ((Integer)selectedListItem.getValue()).intValue();
+    		if(C_Order_ID > 0)
+    			loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
+    		else if(C_Order_ID <= 0)
+    			orderField.setSelectedIndex(0);
+    		
+    		orderField.addActionListener(this);
         }
 		else if (e.getTarget().equals(upcField.getComponent()))
 		{

@@ -165,8 +165,10 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 				+ " ,p.Value AS ProductValue " // 9
 				+ " ,l.C_OrderLine_ID,l.Line "	//	10..11
 				+ " ,loc.JP_PhysicalWarehouse_ID, pwh.name " //12..13
+				+ " ,po.VendorProductNo " // 14
 				+ "FROM C_OrderLine l");
 		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)"
+				+ " LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND l.C_BPartner_ID = po.C_BPartner_ID) "
 				+ " LEFT OUTER JOIN M_Locator loc on (l.JP_Locator_ID=loc.M_Locator_ID)"
 				+ " LEFT OUTER JOIN JP_PhysicalWarehouse pwh on (loc.JP_PhysicalWarehouse_ID=pwh.JP_PhysicalWarehouse_ID)"
 				+ " LEFT OUTER JOIN C_Charge c ON (l.C_Charge_ID=c.C_Charge_ID)");
@@ -215,15 +217,16 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 						pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
 						line.add(pp);                           //  3-UOM
 						// Add product
-						line.add(rs.getString(9));				// 4-Product Value
+						line.add(rs.getString(14));				// 4-VendorProductNo
+						line.add(rs.getString(9));				// 5-Product Value
 						pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
-						line.add(pp);                           //  5-Product Name
+						line.add(pp);                           //  6-Product Name
 						// Add locator
 						pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
-						line.add(pp);// 6-Locator				
+						line.add(pp);// 7-Locator				
 						// Add Physical Warehouse
 						pp = new KeyNamePair(rs.getInt(12), rs.getString(13));
-						line.add(pp);// 7-Phsical Warehouse
+						line.add(pp);// 8-Phsical Warehouse
 						
 						data.add(line);								
 						break;
@@ -244,16 +247,17 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 				 pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
 				line.add(pp);                           //  3-UOM
 				// Add product
-				line.add(rs.getString(9));				// 4-Product Value
+				line.add(rs.getString(14));				// 4-VendorProductNo
+				line.add(rs.getString(9));				// 5-Product Value
 				pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
-				line.add(pp);                           //  5-Product Name
+				line.add(pp);                           //  6-Product Name
 				// Add locator
 				pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
-				line.add(pp);// 6-Locator
+				line.add(pp);// 7-Locator
 
 				// Add Physical Warehouse
 				pp = new KeyNamePair(rs.getInt(12), rs.getString(13));
-				line.add(pp);// 7-Phsical Warehouse
+				line.add(pp);// 8-Phsical Warehouse
 
 				data.add(line);
 			}
@@ -338,14 +342,15 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 
 	protected void configureMiniTable (IMiniTable miniTable)
 	{
-		miniTable.setColumnClass(0, Boolean.class, false);    	 //  Selection
-		miniTable.setColumnClass(1, String.class, true);    	 //  Order Line
-		miniTable.setColumnClass(2, BigDecimal.class, false);    //  Qty
-		miniTable.setColumnClass(3, String.class, true);         //  UOM
-		miniTable.setColumnClass(4, String.class, true); 		//  Product Value
-		miniTable.setColumnClass(5, String.class, true);   		//  Product Name
-		miniTable.setColumnClass(6, String.class, false); 		 //  Locator
-		miniTable.setColumnClass(7, String.class, false); 		 //  Physical Warehouse
+		miniTable.setColumnClass(0, Boolean.class, false);		//  Selection
+		miniTable.setColumnClass(1, String.class, true);		//  Order Line
+		miniTable.setColumnClass(2, BigDecimal.class, false);	//  Qty
+		miniTable.setColumnClass(3, String.class, true);		//  UOM
+		miniTable.setColumnClass(4, String.class, true);		//  VendorProductNo
+		miniTable.setColumnClass(5, String.class, true); 		//  Product Value
+		miniTable.setColumnClass(6, String.class, true);   		//  Product Name
+		miniTable.setColumnClass(7, String.class, false); 		//  Locator
+		miniTable.setColumnClass(8, String.class, false); 		//  Physical Warehouse
 		
 		//  Table UI
 		miniTable.autoSize();
@@ -370,7 +375,7 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 			{
 				if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) 
 				{
-					KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
+					KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 7); // Locator
 					int JP_ScheduledShipLocator＿ID = pp.getKey();
 					if(JP_ScheduledShipLocator＿ID == 0 && M_Locator_ID == 0)
 					{
@@ -402,10 +407,10 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 				KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 3); // UOM
 				int C_UOM_ID = pp.getKey();
 
-				pp = (KeyNamePair) miniTable.getValueAt(i, 5); // Product
+				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Product
 				int M_Product_ID = pp.getKey();
 				
-				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
+				pp = (KeyNamePair) miniTable.getValueAt(i, 7); // Locator
 				int JP_ScheduledShipLocator＿ID = pp.getKey();
 				
 				int C_OrderLine_ID = 0;
@@ -514,11 +519,12 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 	protected Vector<String> getOISColumnNames()
 	{
 		//  Header Info
-	    Vector<String> columnNames = new Vector<String>(8);
+	    Vector<String> columnNames = new Vector<String>(9);
 	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "Line", true));
 	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", false));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "ProductValue", false));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.getMsg(Env.getCtx(), "JP_ScheduledReceiptLocator"));
