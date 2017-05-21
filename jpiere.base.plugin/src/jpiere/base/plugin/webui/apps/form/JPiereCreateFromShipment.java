@@ -53,7 +53,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 
 /**
- *  JPIERE-0145:Create Invoice Transactions from PO Orders or Receipt
+ *  JPIERE-0145:Create Shipment from Sales Orders
  *
  *  @author Jorg Janke
  *  @version  $Id: VCreateFromShipment.java,v 1.4 2006/07/30 00:51:28 jjanke Exp $
