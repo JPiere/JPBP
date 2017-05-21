@@ -57,7 +57,7 @@ import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 
 /**
- * JPIERE-0235
+ * JPIERE-0235: Craete From RMA Order
  * 
  * 
  * @author Hideaki Hagiwara
