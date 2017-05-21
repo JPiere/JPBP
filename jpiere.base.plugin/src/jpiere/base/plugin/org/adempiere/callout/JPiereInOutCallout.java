@@ -42,7 +42,7 @@ public class JPiereInOutCallout implements IColumnCallout {
 			return "";
 
 		//Jugement of Shipment2
-		if(!mTab.getValue("MovementType").toString().equals("C-"))
+		if(mTab.getValue("MovementType") == null || !mTab.getValue("MovementType").toString().equals("C-"))
 			return "";
 
 		Integer C_Order_ID = (Integer)value;

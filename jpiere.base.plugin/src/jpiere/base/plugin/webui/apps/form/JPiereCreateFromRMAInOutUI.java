@@ -45,7 +45,6 @@ import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WSearchEditor;
-import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.compiere.model.GridTab;
@@ -61,8 +60,9 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Vlayout;
+
+import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 /**
  * JPIERE-0234
@@ -116,7 +116,7 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 
 	protected Label locatorLabel = new Label();
 	// Locator
-	protected WTableDirEditor locatorField = null;
+	protected WSearchEditor locatorField = null;
 
 	/**
 	 *  Dynamic Init
@@ -133,19 +133,31 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 
 		//  load Locator
 		int AD_Column_ID = MColumn.getColumn_ID("M_InOutLine", "M_Locator_ID");
-		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
-		locatorField = new WTableDirEditor("M_Locator_ID", true, false, true, lookupLocator);
-		MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
-		if (wh != null)
+		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
+		locatorField = new WSearchEditor("M_Locator_ID", true, false, true, lookupLocator);
+		Doc_PhysicalWarehouse_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "JP_PhysicalWarehouse_ID");
+		if(Doc_PhysicalWarehouse_ID == 0)
 		{
-			MLocator locator = wh.getDefaultLocator();
+			MWarehouse wh = MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID"));
+			if (wh != null)
+			{
+				MLocator locator = wh.getDefaultLocator();
+				if(locator != null)
+				{
+					locatorField.setValue(locator.getM_Locator_ID());
+					receiptLocator_ID = locator.getM_Locator_ID();
+				}
+			}
+		}else{
+			MPhysicalWarehouse phyWH = MPhysicalWarehouse.get(Env.getCtx(), Doc_PhysicalWarehouse_ID);
+			MLocator locator = phyWH.getDefaultLocator(MWarehouse.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(),p_WindowNo, "M_Warehouse_ID")) );
 			if(locator != null)
 			{
 				locatorField.setValue(locator.getM_Locator_ID());
 				receiptLocator_ID = locator.getM_Locator_ID();
 			}
 		}
-		locatorField.getComponent().addEventListener(Events.ON_CHANGE, this);
+		locatorField.addValueChangeListener(this);
 
 		initBPartner(false);
 		bPartnerField.addValueChangeListener(this);
@@ -212,9 +224,7 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
                 int M_RMA_ID = pp.getKey();
                 loadRMA(M_RMA_ID, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
             }
-        }else if(e.getTarget().equals(locatorField.getComponent())){
-			receiptLocator_ID = (Integer)locatorField.getValue();
-		}
+        }
 
 		m_actionActive = false;
 	}
@@ -237,6 +247,12 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 			}
 
 			initBPRMADetails (C_BPartner_ID, true);
+		}else if(e.getPropertyName().equals("M_Locator_ID")){
+			if (e.getNewValue() != null){
+				receiptLocator_ID = ((Integer)e.getNewValue()).intValue();
+			}else{
+				receiptLocator_ID = 0;
+			}
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange

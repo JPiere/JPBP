@@ -75,6 +75,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	protected boolean		isSOTrx = true;
 	
 	protected int receiptLocator_ID=0;
+	protected int Doc_PhysicalWarehouse_ID = 0;
 
 	/**
 	 *  Protected Constructor
