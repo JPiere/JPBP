@@ -74,18 +74,18 @@ import org.zkoss.zul.Vlayout;
 import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 /**
- * JPIERE-0145:Create Shipment from Sales Orders
+ * JPIERE-0343:Create Receipt from PO Orders
  * 
  * @author Low Heng Sin
  * @author Hideaki Hagiwara
  *
  */
-public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment implements EventListener<Event>, ValueChangeListener
+public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implements EventListener<Event>, ValueChangeListener
 {
 
 	private WCreateFromWindow window;
 
-	public JPiereCreateFromShipmentUI(GridTab tab)
+	public JPiereCreateFromReceiptUI(GridTab tab)
 	{
 		super(tab);
 		log.info(getGridTab().toString());
@@ -153,7 +153,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		shipFromScheduledShipLocatorCb.setSelected(true);
 		shipFromScheduledShipLocatorCb.addActionListener(this);
 		
-		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_SHIP_SELECT_PHYHW_CHECK", false, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
+		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_RECEIPT_SELECT_PHYHW_CHECK", false, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
 		selectPhysicalWarehouseCb.setSelected(checkSelectPhyWH);
 		isSelectPhysicalWarehouse = checkSelectPhyWH;
 		selectPhysicalWarehouseCb.addActionListener(this);
@@ -199,11 +199,11 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 	protected void zkInit() throws Exception
 	{
        	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
-		orderLabel.setText(Msg.getElement(Env.getCtx(), "C_Order_ID", true));
-		locatorLabel.setText(Msg.getMsg(Env.getCtx(), "JP_ShipLocator"));
-        sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
-        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnly", true));
-        shipFromScheduledShipLocatorCb.setText(Msg.getMsg(Env.getCtx(), "JP_ShipFromScheduledShipLocator", true));
+		orderLabel.setText(Msg.getElement(Env.getCtx(), "C_Order_ID", false));
+		locatorLabel.setText(Msg.getMsg(Env.getCtx(), "JP_ReceiptLocator"));
+        sameWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyPO", true));
+        sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyPO", true));
+        shipFromScheduledShipLocatorCb.setText(Msg.getMsg(Env.getCtx(), "JP_ReceiptAtScheduledReceiptLocator", true));
         selectPhysicalWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_SelectByPhyWH", true));
         
         upcLabel.setText(Msg.getElement(Env.getCtx(), "UPC", false));
@@ -292,8 +292,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
         {
            	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
         }
-        else if (e.getTarget().equals(selectPhysicalWarehouseCb))
-        {
+        else if (e.getTarget().equals(selectPhysicalWarehouseCb)){
         	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected(); 
     		ListItem selectedListItem = orderField.getSelectedItem();
     		int C_Order_ID = ((Integer)selectedListItem.getValue()).intValue();
