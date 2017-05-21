@@ -170,7 +170,10 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 	{
     	bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
         rmaLabel.setText(Msg.getElement(Env.getCtx(), "M_RMA_ID",isSOTrx));
-		locatorLabel.setText(Msg.getElement(Env.getCtx(), "JP_ReturnLocator_ID",isSOTrx));
+        if(isSOTrx)
+        	locatorLabel.setText(Msg.getMsg(Env.getCtx(), "JP_ReceiptLocator"));
+        else
+        	locatorLabel.setText(Msg.getMsg(Env.getCtx(), "JP_ShipLocator"));
 
 		Vlayout vlayout = new Vlayout();
 		vlayout.setVflex("1");
