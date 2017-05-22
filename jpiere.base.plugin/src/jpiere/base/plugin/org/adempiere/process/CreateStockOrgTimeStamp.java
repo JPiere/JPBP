@@ -49,7 +49,7 @@ public class CreateStockOrgTimeStamp extends SvrProcess {
 				;
 			}else if (name.equals("DateValue")){
 				p_DateValue = para[i].getParameterAsTimestamp();
-			}else if (name.equals("isDeleteDataOnlyJP")){
+			}else if (name.equals("IsDeleteDataOnlyJP")){
 				p_isDeleteDataOnlyJP = para[i].getParameterAsBoolean();
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
@@ -92,6 +92,7 @@ public class CreateStockOrgTimeStamp extends SvrProcess {
 			.append("WHERE t.AD_Client_ID=").append(p_AD_Client_ID)
 			.append(" AND t.MovementDate <").append(DateValue_24)
 			.append(" GROUP BY t.AD_Client_ID, l.AD_Org_ID, t.M_Product_ID");
+//			.append(" HAVING SUM(t.MovementQty) <> 0 ");
 			insertedNo = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}
 
