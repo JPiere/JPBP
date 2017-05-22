@@ -49,7 +49,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.ValueNamePair;
 
 /**
- * JPIERE-0235
+ * JPIERE-0235: Craete From RMA Order
  * 
  *  Create Transactions for RMA
  * @author ashley
@@ -235,7 +235,7 @@ public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
 		//  Header Info
         Vector<String> columnNames = new Vector<String>(8);
         columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
-        columnNames.add(Msg.getElement(Env.getCtx(), "JP_ReturnQty"));
+        columnNames.add(Msg.getMsg(Env.getCtx(), "JP_ReturnQty"));
         columnNames.add(Msg.translate(Env.getCtx(), "Line"));
         columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
         columnNames.add(Msg.translate(Env.getCtx(), "SerNo"));
