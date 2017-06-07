@@ -76,7 +76,7 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 	public boolean dynInit() throws Exception
 	{
 		log.config("");
-		setTitle(Msg.getElement(Env.getCtx(), "C_Invoice_ID", false) + " .. " + Msg.translate(Env.getCtx(), "CreateFrom"));
+		setTitle(Msg.getElement(Env.getCtx(), "C_Invoice_ID", isSOTrx) + " .. " + Msg.translate(Env.getCtx(), "CreateFrom"));
 
 		return true;
 	}   //  dynInit
