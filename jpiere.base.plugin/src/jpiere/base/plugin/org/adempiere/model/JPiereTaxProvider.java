@@ -425,7 +425,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 	    		if (!tax.save(tax.get_TrxName()))
 	    			return false;
 	    	} else {
-	    		if (!tax.is_new() && !tax.delete(false, tax.get_TrxName()))
+	    		if (!tax.is_new() && !tax.isProcessed() && !tax.delete(false, tax.get_TrxName()))
 	    			return false;
 	    	}
 		}
