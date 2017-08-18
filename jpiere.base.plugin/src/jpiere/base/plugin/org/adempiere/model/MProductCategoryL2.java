@@ -52,13 +52,13 @@ public class MProductCategoryL2 extends X_JP_ProductCategoryL2 {
 	}	//	get
 	
 	
-	private MProductCategoryL1[] m_ProductCategoryL1 = null;
+	private MProductCategoryL1[] m_ProductCategoryL1s = null;
 	
 	
-	public MProductCategoryL1[] getProductCategoryL (boolean requery)
+	public MProductCategoryL1[] getProductCategoryL1s (boolean requery)
 	{
-		if(m_ProductCategoryL1 != null && !requery)
-			return m_ProductCategoryL1;
+		if(m_ProductCategoryL1s != null && !requery)
+			return m_ProductCategoryL1s;
 
 		ArrayList<MProductCategoryL1> list = new ArrayList<MProductCategoryL1>();
 		final String sql = "SELECT JP_ProductCategoryL2_ID FROM JP_ProductCategoryL1 WHERE JP_ProductCategoryL2_ID=? AND IsActive='Y'";
@@ -82,9 +82,9 @@ public class MProductCategoryL2 extends X_JP_ProductCategoryL2 {
 			rs = null; pstmt = null;
 		}
 
-		m_ProductCategoryL1 = new MProductCategoryL1[list.size()];
-		list.toArray(m_ProductCategoryL1);
-		return m_ProductCategoryL1;
+		m_ProductCategoryL1s = new MProductCategoryL1[list.size()];
+		list.toArray(m_ProductCategoryL1s);
+		return m_ProductCategoryL1s;
 	}
 
 
