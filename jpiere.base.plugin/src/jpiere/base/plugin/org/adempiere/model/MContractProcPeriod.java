@@ -107,7 +107,7 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 			
 			if(!isUnique)
 			{
-				log.saveError("Error", "期間が重複します");//TODO メッセージ化
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapPeriod"));//Overlap Period
 				return false;
 			}
 			
