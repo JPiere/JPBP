@@ -14,10 +14,14 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import org.compiere.util.CCache;
+import org.compiere.util.DB;
+import org.compiere.util.Msg;
 
 
 /** JPIERE-0363
@@ -58,6 +62,60 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 			s_cache.put (JP_ContractProcPeriod_ID, retValue);
 		return retValue;
 	}	//	get
+	
+
+	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		
+		if(newRecord || ( is_ValueChanged("StartDate") || is_ValueChanged("EndDate") ) )
+		{
+			boolean isUnique = true;
+			
+			//Check Overlapping form StartDate to EndDate
+			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod WHERE StartDate <= ? AND EndDate >=? AND JP_ContractCalender_ID=? ";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setTimestamp(1, getEndDate());
+				pstmt.setTimestamp(2, getStartDate());
+				pstmt.setInt(3, getJP_ContractCalender_ID());
+				rs = pstmt.executeQuery();
+				while (rs.next())
+				{
+					int JP_ContractProcPeriod_ID = rs.getInt(1);
+					if(getJP_ContractProcPeriod_ID() == JP_ContractProcPeriod_ID)
+					{
+						isUnique = true;
+					}else{
+						isUnique = false;
+						break;
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null; pstmt = null;
+			}
+			
+			if(!isUnique)
+			{
+				log.saveError("Error", "期間が重複します");//TODO メッセージ化
+				return false;
+			}
+			
+		}
+		
+		
+		return true;
+	}
 
 	@Override
 	public String toString() 

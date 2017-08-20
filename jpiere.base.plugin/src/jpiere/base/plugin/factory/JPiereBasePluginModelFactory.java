@@ -22,6 +22,7 @@ import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MBillLine;
 import jpiere.base.plugin.org.adempiere.model.MBillSchema;
+import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MCorporation;
 import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
@@ -147,6 +148,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return MBankDataLine.class;
 			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
 				return MPhysicalWarehouse.class;
+			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
+				return MContractProcPeriod.class;
 			}
 
 		}else{
@@ -234,6 +237,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return new MBankDataLine(Env.getCtx(), Record_ID, trxName);
 			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
 				return new MPhysicalWarehouse(Env.getCtx(), Record_ID, trxName);
+			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
+				return new MContractProcPeriod(Env.getCtx(), Record_ID, trxName);
 			}
 
 		}else{
@@ -321,7 +326,10 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				return new MBankDataLine(Env.getCtx(), rs, trxName);
 			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
 				return new MPhysicalWarehouse(Env.getCtx(), rs, trxName);
+			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
+				return new MContractProcPeriod(Env.getCtx(), rs, trxName);
 			}
+
 
 
 		}else{
