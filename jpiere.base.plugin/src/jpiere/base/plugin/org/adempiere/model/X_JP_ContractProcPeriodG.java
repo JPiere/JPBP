@@ -21,10 +21,10 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for JP_ContractCategory
+/** Generated Model for JP_ContractProcPeriodG
  *  @author iDempiere (generated) 
  *  @version Release 4.1 - $Id$ */
-public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, I_Persistent 
+public class X_JP_ContractProcPeriodG extends PO implements I_JP_ContractProcPeriodG, I_Persistent 
 {
 
 	/**
@@ -33,19 +33,21 @@ public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, 
 	private static final long serialVersionUID = 20170820L;
 
     /** Standard Constructor */
-    public X_JP_ContractCategory (Properties ctx, int JP_ContractCategory_ID, String trxName)
+    public X_JP_ContractProcPeriodG (Properties ctx, int JP_ContractProcPeriodG_ID, String trxName)
     {
-      super (ctx, JP_ContractCategory_ID, trxName);
-      /** if (JP_ContractCategory_ID == 0)
+      super (ctx, JP_ContractProcPeriodG_ID, trxName);
+      /** if (JP_ContractProcPeriodG_ID == 0)
         {
-			setJP_ContractCategory_ID (0);
+			setJP_ContractCalender_ID (0);
+			setJP_ContractProcPeriodG_ID (0);
 			setName (null);
+			setProcessing (false);
 			setValue (null);
         } */
     }
 
     /** Load Constructor */
-    public X_JP_ContractCategory (Properties ctx, ResultSet rs, String trxName)
+    public X_JP_ContractProcPeriodG (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -67,7 +69,7 @@ public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, 
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractCategory[")
+      StringBuffer sb = new StringBuffer ("X_JP_ContractProcPeriodG[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -89,63 +91,77 @@ public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, 
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	public I_JP_ContractCategoryL1 getJP_ContractCategoryL1() throws RuntimeException
+	public I_JP_ContractCalender getJP_ContractCalender() throws RuntimeException
     {
-		return (I_JP_ContractCategoryL1)MTable.get(getCtx(), I_JP_ContractCategoryL1.Table_Name)
-			.getPO(getJP_ContractCategoryL1_ID(), get_TrxName());	}
+		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
+			.getPO(getJP_ContractCalender_ID(), get_TrxName());	}
 
-	/** Set Contract Category L1.
-		@param JP_ContractCategoryL1_ID Contract Category L1	  */
-	public void setJP_ContractCategoryL1_ID (int JP_ContractCategoryL1_ID)
+	/** Set Contract Calender.
+		@param JP_ContractCalender_ID Contract Calender	  */
+	public void setJP_ContractCalender_ID (int JP_ContractCalender_ID)
 	{
-		if (JP_ContractCategoryL1_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractCategoryL1_ID, null);
+		if (JP_ContractCalender_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCalender_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_ContractCategoryL1_ID, Integer.valueOf(JP_ContractCategoryL1_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCalender_ID, Integer.valueOf(JP_ContractCalender_ID));
 	}
 
-	/** Get Contract Category L1.
-		@return Contract Category L1	  */
-	public int getJP_ContractCategoryL1_ID () 
+	/** Get Contract Calender.
+		@return Contract Calender	  */
+	public int getJP_ContractCalender_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCategoryL1_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Contract Category.
-		@param JP_ContractCategory_ID Contract Category	  */
-	public void setJP_ContractCategory_ID (int JP_ContractCategory_ID)
+	/** Set Contract Process Period Group.
+		@param JP_ContractProcPeriodG_ID Contract Process Period Group	  */
+	public void setJP_ContractProcPeriodG_ID (int JP_ContractProcPeriodG_ID)
 	{
-		if (JP_ContractCategory_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, null);
+		if (JP_ContractProcPeriodG_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriodG_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriodG_ID, Integer.valueOf(JP_ContractProcPeriodG_ID));
 	}
 
-	/** Get Contract Category.
-		@return Contract Category	  */
-	public int getJP_ContractCategory_ID () 
+	/** Get Contract Process Period Group.
+		@return Contract Process Period Group	  */
+	public int getJP_ContractProcPeriodG_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCategory_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPeriodG_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Contract Category(UU).
-		@param JP_ContractCategory_UU Contract Category(UU)	  */
-	public void setJP_ContractCategory_UU (String JP_ContractCategory_UU)
+	/** Set Contract Process Period Group(UU).
+		@param JP_ContractProcPeriodG_UU Contract Process Period Group(UU)	  */
+	public void setJP_ContractProcPeriodG_UU (String JP_ContractProcPeriodG_UU)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_UU, JP_ContractCategory_UU);
+		set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriodG_UU, JP_ContractProcPeriodG_UU);
 	}
 
-	/** Get Contract Category(UU).
-		@return Contract Category(UU)	  */
-	public String getJP_ContractCategory_UU () 
+	/** Get Contract Process Period Group(UU).
+		@return Contract Process Period Group(UU)	  */
+	public String getJP_ContractProcPeriodG_UU () 
 	{
-		return (String)get_Value(COLUMNNAME_JP_ContractCategory_UU);
+		return (String)get_Value(COLUMNNAME_JP_ContractProcPeriodG_UU);
+	}
+
+	/** Set Contract Process Value.
+		@param JP_ContractProcessValue Contract Process Value	  */
+	public void setJP_ContractProcessValue (String JP_ContractProcessValue)
+	{
+		set_Value (COLUMNNAME_JP_ContractProcessValue, JP_ContractProcessValue);
+	}
+
+	/** Get Contract Process Value.
+		@return Contract Process Value	  */
+	public String getJP_ContractProcessValue () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractProcessValue);
 	}
 
 	/** Set Name.
@@ -163,6 +179,27 @@ public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, 
 	public String getName () 
 	{
 		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Set Process Now.
+		@param Processing Process Now	  */
+	public void setProcessing (boolean Processing)
+	{
+		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public boolean isProcessing () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processing);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Search Key.

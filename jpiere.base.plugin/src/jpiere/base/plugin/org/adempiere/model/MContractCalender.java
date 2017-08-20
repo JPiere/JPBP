@@ -19,51 +19,44 @@ import java.util.Properties;
 
 import org.compiere.util.CCache;
 
-
 /**
  * JPIERE-0363
  *
  * @author Hideaki Hagiwara
  *
  */
-public class MContractCategory extends X_JP_ContractCategory {
+public class MContractCalender extends X_JP_ContractCalender {
 	
-	public MContractCategory(Properties ctx, int JP_ContractCategory_ID, String trxName) 
+	public MContractCalender(Properties ctx, int JP_ContractCalender_ID, String trxName) 
 	{
-		super(ctx, JP_ContractCategory_ID, trxName);
+		super(ctx, JP_ContractCalender_ID, trxName);
 	}
 	
-	public MContractCategory(Properties ctx, ResultSet rs, String trxName) 
+	public MContractCalender(Properties ctx, ResultSet rs, String trxName) 
 	{
 		super(ctx, rs, trxName);
-
 	}
 	
-	/**	Categopry Cache				*/
-	private static CCache<Integer,MContractCategory>	s_cache = new CCache<Integer,MContractCategory>(Table_Name, 20);
+	
+	/**	Cache				*/
+	private static CCache<Integer,MContractCalender>	s_cache = new CCache<Integer,MContractCalender>(Table_Name, 20);
 	
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
-	 *	@param JP_ContractCategory_ID id
-	 *	@return Contract Category
+	 *	@param JP_ContractCalender_ID id
+	 *	@return Contract Calender
 	 */
-	public static MContractCategory get (Properties ctx, int JP_ContractCategory_ID)
+	public static MContractCalender get (Properties ctx, int JP_ContractCalender_ID)
 	{
-		Integer ii = new Integer (JP_ContractCategory_ID);
-		MContractCategory retValue = (MContractCategory)s_cache.get(ii);
+		Integer ii = new Integer (JP_ContractCalender_ID);
+		MContractCalender retValue = (MContractCalender)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
-		retValue = new MContractCategory (ctx, JP_ContractCategory_ID, null);
+		retValue = new MContractCalender (ctx, JP_ContractCalender_ID, null);
 		if (retValue.get_ID () != 0)
-			s_cache.put (JP_ContractCategory_ID, retValue);
+			s_cache.put (JP_ContractCalender_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
-	//TODO getContracts()
-	
-	
-	//TODO getContractTemplates()
 	
 }

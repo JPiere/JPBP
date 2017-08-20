@@ -20,50 +20,51 @@ import java.util.Properties;
 import org.compiere.util.CCache;
 
 
-/**
- * JPIERE-0363
- *
- * @author Hideaki Hagiwara
- *
- */
-public class MContractCategory extends X_JP_ContractCategory {
+/** JPIERE-0363
+*
+* @author Hideaki Hagiwara
+*
+*/
+public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 	
-	public MContractCategory(Properties ctx, int JP_ContractCategory_ID, String trxName) 
+	public MContractProcPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName) 
 	{
-		super(ctx, JP_ContractCategory_ID, trxName);
+		super(ctx, JP_ContractProcPeriod_ID, trxName);
 	}
 	
-	public MContractCategory(Properties ctx, ResultSet rs, String trxName) 
+	public MContractProcPeriod(Properties ctx, ResultSet rs, String trxName) 
 	{
 		super(ctx, rs, trxName);
-
 	}
 	
-	/**	Categopry Cache				*/
-	private static CCache<Integer,MContractCategory>	s_cache = new CCache<Integer,MContractCategory>(Table_Name, 20);
+	
+	/**	Cache				*/
+	private static CCache<Integer,MContractProcPeriod>	s_cache = new CCache<Integer,MContractProcPeriod>(Table_Name, 20);
 	
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
-	 *	@param JP_ContractCategory_ID id
-	 *	@return Contract Category
+	 *	@param JP_ContractProcPeriod_ID id
+	 *	@return Contract Process Period
 	 */
-	public static MContractCategory get (Properties ctx, int JP_ContractCategory_ID)
+	public static MContractProcPeriod get (Properties ctx, int JP_ContractProcPeriod_ID)
 	{
-		Integer ii = new Integer (JP_ContractCategory_ID);
-		MContractCategory retValue = (MContractCategory)s_cache.get(ii);
+		Integer ii = new Integer (JP_ContractProcPeriod_ID);
+		MContractProcPeriod retValue = (MContractProcPeriod)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
-		retValue = new MContractCategory (ctx, JP_ContractCategory_ID, null);
+		retValue = new MContractProcPeriod (ctx, JP_ContractProcPeriod_ID, null);
 		if (retValue.get_ID () != 0)
-			s_cache.put (JP_ContractCategory_ID, retValue);
+			s_cache.put (JP_ContractProcPeriod_ID, retValue);
 		return retValue;
 	}	//	get
+
+	@Override
+	public String toString() 
+	{
+		return getName();
+	}
 	
 	
-	//TODO getContracts()
-	
-	
-	//TODO getContractTemplates()
 	
 }

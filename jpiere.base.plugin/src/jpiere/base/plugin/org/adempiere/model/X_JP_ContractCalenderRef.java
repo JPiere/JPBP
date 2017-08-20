@@ -21,10 +21,10 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for JP_ContractCategoryL2
+/** Generated Model for JP_ContractCalenderRef
  *  @author iDempiere (generated) 
  *  @version Release 4.1 - $Id$ */
-public class X_JP_ContractCategoryL2 extends PO implements I_JP_ContractCategoryL2, I_Persistent 
+public class X_JP_ContractCalenderRef extends PO implements I_JP_ContractCalenderRef, I_Persistent 
 {
 
 	/**
@@ -33,19 +33,19 @@ public class X_JP_ContractCategoryL2 extends PO implements I_JP_ContractCategory
 	private static final long serialVersionUID = 20170820L;
 
     /** Standard Constructor */
-    public X_JP_ContractCategoryL2 (Properties ctx, int JP_ContractCategoryL2_ID, String trxName)
+    public X_JP_ContractCalenderRef (Properties ctx, int JP_ContractCalenderRef_ID, String trxName)
     {
-      super (ctx, JP_ContractCategoryL2_ID, trxName);
-      /** if (JP_ContractCategoryL2_ID == 0)
+      super (ctx, JP_ContractCalenderRef_ID, trxName);
+      /** if (JP_ContractCalenderRef_ID == 0)
         {
-			setJP_ContractCategoryL2_ID (0);
+			setJP_ContractCalenderRef_ID (0);
 			setName (null);
 			setValue (null);
         } */
     }
 
     /** Load Constructor */
-    public X_JP_ContractCategoryL2 (Properties ctx, ResultSet rs, String trxName)
+    public X_JP_ContractCalenderRef (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -67,7 +67,7 @@ public class X_JP_ContractCategoryL2 extends PO implements I_JP_ContractCategory
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractCategoryL2[")
+      StringBuffer sb = new StringBuffer ("X_JP_ContractCalenderRef[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -89,38 +89,38 @@ public class X_JP_ContractCategoryL2 extends PO implements I_JP_ContractCategory
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	/** Set Contract Category L2.
-		@param JP_ContractCategoryL2_ID Contract Category L2	  */
-	public void setJP_ContractCategoryL2_ID (int JP_ContractCategoryL2_ID)
+	/** Set Contract Calender Reference.
+		@param JP_ContractCalenderRef_ID Contract Calender Reference	  */
+	public void setJP_ContractCalenderRef_ID (int JP_ContractCalenderRef_ID)
 	{
-		if (JP_ContractCategoryL2_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCategoryL2_ID, null);
+		if (JP_ContractCalenderRef_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderRef_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCategoryL2_ID, Integer.valueOf(JP_ContractCategoryL2_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderRef_ID, Integer.valueOf(JP_ContractCalenderRef_ID));
 	}
 
-	/** Get Contract Category L2.
-		@return Contract Category L2	  */
-	public int getJP_ContractCategoryL2_ID () 
+	/** Get Contract Calender Reference.
+		@return Contract Calender Reference	  */
+	public int getJP_ContractCalenderRef_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCategoryL2_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalenderRef_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Contract Category L2(UU).
-		@param JP_ContractCategoryL2_UU Contract Category L2(UU)	  */
-	public void setJP_ContractCategoryL2_UU (String JP_ContractCategoryL2_UU)
+	/** Set Contract Calender Ref(UU).
+		@param JP_ContractCalenderRef_UU Contract Calender Ref(UU)	  */
+	public void setJP_ContractCalenderRef_UU (String JP_ContractCalenderRef_UU)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_ContractCategoryL2_UU, JP_ContractCategoryL2_UU);
+		set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderRef_UU, JP_ContractCalenderRef_UU);
 	}
 
-	/** Get Contract Category L2(UU).
-		@return Contract Category L2(UU)	  */
-	public String getJP_ContractCategoryL2_UU () 
+	/** Get Contract Calender Ref(UU).
+		@return Contract Calender Ref(UU)	  */
+	public String getJP_ContractCalenderRef_UU () 
 	{
-		return (String)get_Value(COLUMNNAME_JP_ContractCategoryL2_UU);
+		return (String)get_Value(COLUMNNAME_JP_ContractCalenderRef_UU);
 	}
 
 	/** Set Name.

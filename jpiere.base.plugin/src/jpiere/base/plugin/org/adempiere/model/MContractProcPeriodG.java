@@ -12,6 +12,7 @@
  * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
 
+
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
@@ -26,44 +27,37 @@ import org.compiere.util.CCache;
  * @author Hideaki Hagiwara
  *
  */
-public class MContractCategory extends X_JP_ContractCategory {
+public class MContractProcPeriodG extends X_JP_ContractProcPeriodG {
 	
-	public MContractCategory(Properties ctx, int JP_ContractCategory_ID, String trxName) 
+	public MContractProcPeriodG(Properties ctx, int JP_ContractProcPeriodG_ID, String trxName) 
 	{
-		super(ctx, JP_ContractCategory_ID, trxName);
+		super(ctx, JP_ContractProcPeriodG_ID, trxName);
 	}
 	
-	public MContractCategory(Properties ctx, ResultSet rs, String trxName) 
+	public MContractProcPeriodG(Properties ctx, ResultSet rs, String trxName) 
 	{
 		super(ctx, rs, trxName);
-
 	}
 	
-	/**	Categopry Cache				*/
-	private static CCache<Integer,MContractCategory>	s_cache = new CCache<Integer,MContractCategory>(Table_Name, 20);
+	/**	Cache				*/
+	private static CCache<Integer,MContractProcPeriodG>	s_cache = new CCache<Integer,MContractProcPeriodG>(Table_Name, 20);
 	
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
-	 *	@param JP_ContractCategory_ID id
-	 *	@return Contract Category
+	 *	@param JP_ContractProcPeriodG_ID id
+	 *	@return Contract Process Period Group
 	 */
-	public static MContractCategory get (Properties ctx, int JP_ContractCategory_ID)
+	public static MContractProcPeriodG get (Properties ctx, int JP_ContractProcPeriodG_ID)
 	{
-		Integer ii = new Integer (JP_ContractCategory_ID);
-		MContractCategory retValue = (MContractCategory)s_cache.get(ii);
+		Integer ii = new Integer (JP_ContractProcPeriodG_ID);
+		MContractProcPeriodG retValue = (MContractProcPeriodG)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
-		retValue = new MContractCategory (ctx, JP_ContractCategory_ID, null);
+		retValue = new MContractProcPeriodG (ctx, JP_ContractProcPeriodG_ID, null);
 		if (retValue.get_ID () != 0)
-			s_cache.put (JP_ContractCategory_ID, retValue);
+			s_cache.put (JP_ContractProcPeriodG_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
-	//TODO getContracts()
-	
-	
-	//TODO getContractTemplates()
 	
 }
