@@ -30,7 +30,7 @@ public class X_JP_ContractCalenderRef extends PO implements I_JP_ContractCalende
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170820L;
+	private static final long serialVersionUID = 20170823L;
 
     /** Standard Constructor */
     public X_JP_ContractCalenderRef (Properties ctx, int JP_ContractCalenderRef_ID, String trxName)

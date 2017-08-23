@@ -21,10 +21,10 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for JP_ContractCategory
+/** Generated Model for JP_ContractCancelTerm
  *  @author iDempiere (generated) 
  *  @version Release 4.1 - $Id$ */
-public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, I_Persistent 
+public class X_JP_ContractCancelTerm extends PO implements I_JP_ContractCancelTerm, I_Persistent 
 {
 
 	/**
@@ -33,19 +33,27 @@ public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, 
 	private static final long serialVersionUID = 20170823L;
 
     /** Standard Constructor */
-    public X_JP_ContractCategory (Properties ctx, int JP_ContractCategory_ID, String trxName)
+    public X_JP_ContractCancelTerm (Properties ctx, int JP_ContractCancelTerm_ID, String trxName)
     {
-      super (ctx, JP_ContractCategory_ID, trxName);
-      /** if (JP_ContractCategory_ID == 0)
+      super (ctx, JP_ContractCancelTerm_ID, trxName);
+      /** if (JP_ContractCancelTerm_ID == 0)
         {
-			setJP_ContractCategory_ID (0);
+			setIsDueFixed (false);
+// N
+			setJP_ContractCancelTerm_ID (0);
+			setJP_Day (0);
+// 0
+			setJP_Month (0);
+// 0
+			setJP_Year (0);
+// 0
 			setName (null);
 			setValue (null);
         } */
     }
 
     /** Load Constructor */
-    public X_JP_ContractCategory (Properties ctx, ResultSet rs, String trxName)
+    public X_JP_ContractCancelTerm (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -67,7 +75,7 @@ public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, 
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractCategory[")
+      StringBuffer sb = new StringBuffer ("X_JP_ContractCancelTerm[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -89,63 +97,113 @@ public class X_JP_ContractCategory extends PO implements I_JP_ContractCategory, 
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	public I_JP_ContractCategoryL1 getJP_ContractCategoryL1() throws RuntimeException
-    {
-		return (I_JP_ContractCategoryL1)MTable.get(getCtx(), I_JP_ContractCategoryL1.Table_Name)
-			.getPO(getJP_ContractCategoryL1_ID(), get_TrxName());	}
-
-	/** Set Contract Category L1.
-		@param JP_ContractCategoryL1_ID Contract Category L1	  */
-	public void setJP_ContractCategoryL1_ID (int JP_ContractCategoryL1_ID)
+	/** Set Fixed due date.
+		@param IsDueFixed 
+		Payment is due on a fixed date
+	  */
+	public void setIsDueFixed (boolean IsDueFixed)
 	{
-		if (JP_ContractCategoryL1_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractCategoryL1_ID, null);
-		else 
-			set_Value (COLUMNNAME_JP_ContractCategoryL1_ID, Integer.valueOf(JP_ContractCategoryL1_ID));
+		set_Value (COLUMNNAME_IsDueFixed, Boolean.valueOf(IsDueFixed));
 	}
 
-	/** Get Contract Category L1.
-		@return Contract Category L1	  */
-	public int getJP_ContractCategoryL1_ID () 
+	/** Get Fixed due date.
+		@return Payment is due on a fixed date
+	  */
+	public boolean isDueFixed () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCategoryL1_ID);
+		Object oo = get_Value(COLUMNNAME_IsDueFixed);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Contract Cancel Term.
+		@param JP_ContractCancelTerm_ID Contract Cancel Term	  */
+	public void setJP_ContractCancelTerm_ID (int JP_ContractCancelTerm_ID)
+	{
+		if (JP_ContractCancelTerm_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCancelTerm_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCancelTerm_ID, Integer.valueOf(JP_ContractCancelTerm_ID));
+	}
+
+	/** Get Contract Cancel Term.
+		@return Contract Cancel Term	  */
+	public int getJP_ContractCancelTerm_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCancelTerm_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Contract Category.
-		@param JP_ContractCategory_ID Contract Category	  */
-	public void setJP_ContractCategory_ID (int JP_ContractCategory_ID)
+	/** Set Contract Cancel Term(UU).
+		@param JP_ContractCancelTerm_UU Contract Cancel Term(UU)	  */
+	public void setJP_ContractCancelTerm_UU (String JP_ContractCancelTerm_UU)
 	{
-		if (JP_ContractCategory_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
+		set_ValueNoCheck (COLUMNNAME_JP_ContractCancelTerm_UU, JP_ContractCancelTerm_UU);
 	}
 
-	/** Get Contract Category.
-		@return Contract Category	  */
-	public int getJP_ContractCategory_ID () 
+	/** Get Contract Cancel Term(UU).
+		@return Contract Cancel Term(UU)	  */
+	public String getJP_ContractCancelTerm_UU () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCategory_ID);
+		return (String)get_Value(COLUMNNAME_JP_ContractCancelTerm_UU);
+	}
+
+	/** Set Day.
+		@param JP_Day Day	  */
+	public void setJP_Day (int JP_Day)
+	{
+		set_Value (COLUMNNAME_JP_Day, Integer.valueOf(JP_Day));
+	}
+
+	/** Get Day.
+		@return Day	  */
+	public int getJP_Day () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Day);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Contract Category(UU).
-		@param JP_ContractCategory_UU Contract Category(UU)	  */
-	public void setJP_ContractCategory_UU (String JP_ContractCategory_UU)
+	/** Set Month.
+		@param JP_Month Month	  */
+	public void setJP_Month (int JP_Month)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_UU, JP_ContractCategory_UU);
+		set_Value (COLUMNNAME_JP_Month, Integer.valueOf(JP_Month));
 	}
 
-	/** Get Contract Category(UU).
-		@return Contract Category(UU)	  */
-	public String getJP_ContractCategory_UU () 
+	/** Get Month.
+		@return Month	  */
+	public int getJP_Month () 
 	{
-		return (String)get_Value(COLUMNNAME_JP_ContractCategory_UU);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Month);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Year.
+		@param JP_Year Year	  */
+	public void setJP_Year (int JP_Year)
+	{
+		set_Value (COLUMNNAME_JP_Year, Integer.valueOf(JP_Year));
+	}
+
+	/** Get Year.
+		@return Year	  */
+	public int getJP_Year () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Year);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Name.

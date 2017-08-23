@@ -22,10 +22,10 @@ import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for JP_ContractCalenderList
+/** Generated Model for JP_ContractProcessList
  *  @author iDempiere (generated) 
  *  @version Release 4.1 - $Id$ */
-public class X_JP_ContractCalenderList extends PO implements I_JP_ContractCalenderList, I_Persistent 
+public class X_JP_ContractProcessList extends PO implements I_JP_ContractProcessList, I_Persistent 
 {
 
 	/**
@@ -34,19 +34,19 @@ public class X_JP_ContractCalenderList extends PO implements I_JP_ContractCalend
 	private static final long serialVersionUID = 20170823L;
 
     /** Standard Constructor */
-    public X_JP_ContractCalenderList (Properties ctx, int JP_ContractCalenderList_ID, String trxName)
+    public X_JP_ContractProcessList (Properties ctx, int JP_ContractProcessList_ID, String trxName)
     {
-      super (ctx, JP_ContractCalenderList_ID, trxName);
-      /** if (JP_ContractCalenderList_ID == 0)
+      super (ctx, JP_ContractProcessList_ID, trxName);
+      /** if (JP_ContractProcessList_ID == 0)
         {
-			setJP_ContractCalenderList_ID (0);
-			setJP_ContractCalenderRef_ID (0);
-			setJP_ContractCalender_ID (0);
+			setJP_ContractProcessList_ID (0);
+			setJP_ContractProcessRef_ID (0);
+			setJP_ContractProcess_ID (0);
         } */
     }
 
     /** Load Constructor */
-    public X_JP_ContractCalenderList (Properties ctx, ResultSet rs, String trxName)
+    public X_JP_ContractProcessList (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -68,7 +68,7 @@ public class X_JP_ContractCalenderList extends PO implements I_JP_ContractCalend
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractCalenderList[")
+      StringBuffer sb = new StringBuffer ("X_JP_ContractProcessList[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -90,85 +90,85 @@ public class X_JP_ContractCalenderList extends PO implements I_JP_ContractCalend
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	/** Set Contract Calender List.
-		@param JP_ContractCalenderList_ID Contract Calender List	  */
-	public void setJP_ContractCalenderList_ID (int JP_ContractCalenderList_ID)
+	/** Set Contract Process List.
+		@param JP_ContractProcessList_ID Contract Process List	  */
+	public void setJP_ContractProcessList_ID (int JP_ContractProcessList_ID)
 	{
-		if (JP_ContractCalenderList_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderList_ID, null);
+		if (JP_ContractProcessList_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcessList_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderList_ID, Integer.valueOf(JP_ContractCalenderList_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcessList_ID, Integer.valueOf(JP_ContractProcessList_ID));
 	}
 
-	/** Get Contract Calender List.
-		@return Contract Calender List	  */
-	public int getJP_ContractCalenderList_ID () 
+	/** Get Contract Process List.
+		@return Contract Process List	  */
+	public int getJP_ContractProcessList_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalenderList_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcessList_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Contract Calender List(UU).
-		@param JP_ContractCalenderList_UU Contract Calender List(UU)	  */
-	public void setJP_ContractCalenderList_UU (String JP_ContractCalenderList_UU)
+	/** Set Contract Process List(UU).
+		@param JP_ContractProcessList_UU Contract Process List(UU)	  */
+	public void setJP_ContractProcessList_UU (String JP_ContractProcessList_UU)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderList_UU, JP_ContractCalenderList_UU);
+		set_ValueNoCheck (COLUMNNAME_JP_ContractProcessList_UU, JP_ContractProcessList_UU);
 	}
 
-	/** Get Contract Calender List(UU).
-		@return Contract Calender List(UU)	  */
-	public String getJP_ContractCalenderList_UU () 
+	/** Get Contract Process List(UU).
+		@return Contract Process List(UU)	  */
+	public String getJP_ContractProcessList_UU () 
 	{
-		return (String)get_Value(COLUMNNAME_JP_ContractCalenderList_UU);
+		return (String)get_Value(COLUMNNAME_JP_ContractProcessList_UU);
 	}
 
-	public I_JP_ContractCalenderRef getJP_ContractCalenderRef() throws RuntimeException
+	public I_JP_ContractProcessRef getJP_ContractProcessRef() throws RuntimeException
     {
-		return (I_JP_ContractCalenderRef)MTable.get(getCtx(), I_JP_ContractCalenderRef.Table_Name)
-			.getPO(getJP_ContractCalenderRef_ID(), get_TrxName());	}
+		return (I_JP_ContractProcessRef)MTable.get(getCtx(), I_JP_ContractProcessRef.Table_Name)
+			.getPO(getJP_ContractProcessRef_ID(), get_TrxName());	}
 
-	/** Set Contract Calender Reference.
-		@param JP_ContractCalenderRef_ID Contract Calender Reference	  */
-	public void setJP_ContractCalenderRef_ID (int JP_ContractCalenderRef_ID)
+	/** Set Contract Process Reference.
+		@param JP_ContractProcessRef_ID Contract Process Reference	  */
+	public void setJP_ContractProcessRef_ID (int JP_ContractProcessRef_ID)
 	{
-		if (JP_ContractCalenderRef_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderRef_ID, null);
+		if (JP_ContractProcessRef_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcessRef_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCalenderRef_ID, Integer.valueOf(JP_ContractCalenderRef_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcessRef_ID, Integer.valueOf(JP_ContractProcessRef_ID));
 	}
 
-	/** Get Contract Calender Reference.
-		@return Contract Calender Reference	  */
-	public int getJP_ContractCalenderRef_ID () 
+	/** Get Contract Process Reference.
+		@return Contract Process Reference	  */
+	public int getJP_ContractProcessRef_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalenderRef_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcessRef_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	public I_JP_ContractCalender getJP_ContractCalender() throws RuntimeException
+	public I_JP_ContractProcess getJP_ContractProcess() throws RuntimeException
     {
-		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
-			.getPO(getJP_ContractCalender_ID(), get_TrxName());	}
+		return (I_JP_ContractProcess)MTable.get(getCtx(), I_JP_ContractProcess.Table_Name)
+			.getPO(getJP_ContractProcess_ID(), get_TrxName());	}
 
-	/** Set Contract Calender.
-		@param JP_ContractCalender_ID Contract Calender	  */
-	public void setJP_ContractCalender_ID (int JP_ContractCalender_ID)
+	/** Set Contract Process.
+		@param JP_ContractProcess_ID Contract Process	  */
+	public void setJP_ContractProcess_ID (int JP_ContractProcess_ID)
 	{
-		if (JP_ContractCalender_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractCalender_ID, null);
+		if (JP_ContractProcess_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcess_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_ContractCalender_ID, Integer.valueOf(JP_ContractCalender_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcess_ID, Integer.valueOf(JP_ContractProcess_ID));
 	}
 
-	/** Get Contract Calender.
-		@return Contract Calender	  */
-	public int getJP_ContractCalender_ID () 
+	/** Get Contract Process.
+		@return Contract Process	  */
+	public int getJP_ContractProcess_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcess_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
