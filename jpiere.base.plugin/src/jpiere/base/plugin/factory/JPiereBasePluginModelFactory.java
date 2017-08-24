@@ -14,52 +14,24 @@
 
 package jpiere.base.plugin.factory;
 
+import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
+import java.util.Properties;
+import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MBankData;
-import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
-import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
-import jpiere.base.plugin.org.adempiere.model.MBill;
-import jpiere.base.plugin.org.adempiere.model.MBillLine;
-import jpiere.base.plugin.org.adempiere.model.MBillSchema;
-import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
-import jpiere.base.plugin.org.adempiere.model.MCorporation;
-import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
-import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
-import jpiere.base.plugin.org.adempiere.model.MEstimation;
-import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
-import jpiere.base.plugin.org.adempiere.model.MEstimationTax;
-import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
 import jpiere.base.plugin.org.adempiere.model.MInOutConfirmJP;
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
-import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
-import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
-import jpiere.base.plugin.org.adempiere.model.MInventoryDiffQtyLog;
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
-import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
-import jpiere.base.plugin.org.adempiere.model.MProductCategoryG;
-import jpiere.base.plugin.org.adempiere.model.MProductCategoryGLine;
-import jpiere.base.plugin.org.adempiere.model.MProductCategoryL1;
-import jpiere.base.plugin.org.adempiere.model.MProductCategoryL2;
-import jpiere.base.plugin.org.adempiere.model.MProductGroup;
-import jpiere.base.plugin.org.adempiere.model.MProductGroupLine;
-import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
-import jpiere.base.plugin.org.adempiere.model.MSalesRegionG;
-import jpiere.base.plugin.org.adempiere.model.MSalesRegionGLine;
-import jpiere.base.plugin.org.adempiere.model.MSalesRegionL1;
-import jpiere.base.plugin.org.adempiere.model.MSalesRegionL2;
 
 import org.adempiere.base.IModelFactory;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.PO;
+import org.compiere.util.CCache;
+import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *  JPiere Base Plugin Model Factory
@@ -77,80 +49,133 @@ import org.compiere.util.Env;
  */
 public class JPiereBasePluginModelFactory implements IModelFactory {
 
+	private static CCache<String,Class<?>> s_classCache = new CCache<String,Class<?>>(null, "PO_Class", 20, false);
+	private final static CLogger s_log = CLogger.getCLogger(JPiereBasePluginModelFactory.class);
+	
 	@Override
-	public Class<?> getClass(String tableName) {
-
+	public Class<?> getClass(String tableName) 
+	{
 		if(tableName.startsWith("JP"))
 		{
-			if(tableName.equals(MCorporation.Table_Name)){
-				return MCorporation.class;
-			}else if(tableName.equals(MCorporationGroup.Table_Name)){
-				return MCorporationGroup.class;
-			}else if(tableName.equals(MGroupCorporations.Table_Name)){
-				return MGroupCorporations.class;
-			}else if(tableName.equals(MBill.Table_Name)){
-				return MBill.class;
-			}else if(tableName.equals(MBillLine.Table_Name)){
-				return MBillLine.class;
-			}else if(tableName.equals(MReferenceTest.Table_Name)){
-				return MReferenceTest.class;
-			}else if(tableName.equals(MBillSchema.Table_Name)){
-				return MBillSchema.class;
-			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
-				return MProductCategoryL1.class;
-			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
-				return MProductCategoryL2.class;
-			}else if(tableName.equals(MProductCategoryG.Table_Name)){
-				return MProductCategoryG.class;
-			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
-				return MProductCategoryGLine.class;
-			}else if(tableName.equals(MProductGroup.Table_Name)){
-				return MProductGroup.class;
-			}else if(tableName.equals(MProductGroupLine.Table_Name)){
-				return MProductGroupLine.class;
-			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
-				return MSalesRegionL2.class;
-			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
-				return MSalesRegionL1.class;
-			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
-				return MSalesRegionG.class;
-			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
-				return MSalesRegionGLine.class;
-			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
-				return MDeliveryDays.class;
-			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
-				return MInvValProfile.class;
-			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
-				return MInvValProfileOrg.class;
-			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
-				return MInvValCal.class;
-			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
-				return MInvValCalLine.class;
-			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
-				return MInvValCalLog.class;
-			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
-				return MInvValAdjust.class;
-			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
-				return MInvValAdjustLine.class;
-			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
-				return MInventoryDiffQtyLog.class;
-			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
-				return MEstimation.class;
-			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0183
-				return MEstimationLine.class;
-			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
-				return MEstimationTax.class;
-			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
-				return MBankDataSchema.class;
-			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
-				return MBankData.class;
-			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
-				return MBankDataLine.class;
-			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
-				return MPhysicalWarehouse.class;
-			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
-				return MContractProcPeriod.class;
+			if (tableName.endsWith("_Trl"))
+				return null;
+			
+			//check cache
+			Class<?> cache = s_classCache.get(tableName);
+			if (cache != null)
+			{
+				//Object.class indicate no generated PO class for tableName
+				if (cache.equals(Object.class))
+					return null;
+				else
+					return cache;
 			}
+			
+			String className = tableName;
+			int index = className.indexOf('_');
+			if (index > 0)
+			{
+				if (index < 3)		//	AD_, A_
+					 className = className.substring(index+1);
+				/* DELETEME: this part is useless - teo_sarca, [ 1648850 ]
+				else
+				{
+					String prefix = className.substring(0,index);
+					if (prefix.equals("Fact"))		//	keep custom prefix
+						className = className.substring(index+1);
+				}
+				*/
+			}
+			//	Remove underlines
+			className = Util.replace(className, "_", "");
+			
+			//	Search packages
+			StringBuffer name = new StringBuffer("jpiere.base.plugin.org.adempiere.model").append(".M").append(className);
+			Class<?> clazz = getPOclass(name.toString(), tableName);
+			if (clazz != null)
+			{
+				s_classCache.put(tableName, clazz);
+				return clazz;
+			}
+			
+			
+			//	Adempiere Extension
+			clazz = getPOclass("jpiere.base.plugin.org.adempiere.model.X_" + tableName, tableName);
+			if (clazz != null)
+			{
+				s_classCache.put(tableName, clazz);
+				return clazz;
+			}
+			
+//			if(tableName.equals(MCorporation.Table_Name)){
+//				return MCorporation.class;
+//			}else if(tableName.equals(MCorporationGroup.Table_Name)){
+//				return MCorporationGroup.class;
+//			}else if(tableName.equals(MGroupCorporations.Table_Name)){
+//				return MGroupCorporations.class;
+//			}else if(tableName.equals(MBill.Table_Name)){
+//				return MBill.class;
+//			}else if(tableName.equals(MBillLine.Table_Name)){
+//				return MBillLine.class;
+//			}else if(tableName.equals(MReferenceTest.Table_Name)){
+//				return MReferenceTest.class;
+//			}else if(tableName.equals(MBillSchema.Table_Name)){
+//				return MBillSchema.class;
+//			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
+//				return MProductCategoryL1.class;
+//			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
+//				return MProductCategoryL2.class;
+//			}else if(tableName.equals(MProductCategoryG.Table_Name)){
+//				return MProductCategoryG.class;
+//			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
+//				return MProductCategoryGLine.class;
+//			}else if(tableName.equals(MProductGroup.Table_Name)){
+//				return MProductGroup.class;
+//			}else if(tableName.equals(MProductGroupLine.Table_Name)){
+//				return MProductGroupLine.class;
+//			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
+//				return MSalesRegionL2.class;
+//			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
+//				return MSalesRegionL1.class;
+//			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
+//				return MSalesRegionG.class;
+//			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
+//				return MSalesRegionGLine.class;
+//			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
+//				return MDeliveryDays.class;
+//			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
+//				return MInvValProfile.class;
+//			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
+//				return MInvValProfileOrg.class;
+//			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
+//				return MInvValCal.class;
+//			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
+//				return MInvValCalLine.class;
+//			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
+//				return MInvValCalLog.class;
+//			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
+//				return MInvValAdjust.class;
+//			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
+//				return MInvValAdjustLine.class;
+//			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
+//				return MInventoryDiffQtyLog.class;
+//			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
+//				return MEstimation.class;
+//			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0183
+//				return MEstimationLine.class;
+//			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
+//				return MEstimationTax.class;
+//			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
+//				return MBankDataSchema.class;
+//			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
+//				return MBankData.class;
+//			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
+//				return MBankDataLine.class;
+//			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
+//				return MPhysicalWarehouse.class;
+//			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
+//				return MContractProcPeriod.class;
+//			}
 
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
@@ -170,76 +195,125 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 		if(tableName.startsWith("JP"))
 		{
-
-			if(tableName.equals(MCorporation.Table_Name)){
-				return  new MCorporation(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MCorporationGroup.Table_Name)){
-				return  new MCorporationGroup(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MGroupCorporations.Table_Name)){
-				return  new MGroupCorporations(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MBill.Table_Name)){
-				return  new MBill(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MBillLine.Table_Name)){
-				return  new MBillLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MReferenceTest.Table_Name)){
-				return  new MReferenceTest(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MBillSchema.Table_Name)){
-				return  new MBillSchema(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
-				return  new MProductCategoryL1(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
-				return  new MProductCategoryL2(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MProductCategoryG.Table_Name)){
-				return  new MProductCategoryG(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
-				return  new MProductCategoryGLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MProductGroup.Table_Name)){
-				return  new MProductGroup(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MProductGroupLine.Table_Name)){
-				return  new MProductGroupLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
-				return  new MSalesRegionL2(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
-				return  new MSalesRegionL1(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
-				return  new MSalesRegionG(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
-				return  new MSalesRegionGLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
-				return  new MDeliveryDays(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
-				return  new MInvValProfile(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
-				return  new MInvValProfileOrg(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
-				return  new MInvValCal(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
-				return  new MInvValCalLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
-				return  new MInvValCalLog(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
-				return  new MInvValAdjust(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
-				return  new MInvValAdjustLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
-				return  new MInventoryDiffQtyLog(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
-				return  new MEstimation(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0183
-				return  new MEstimationLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
-				return  new MEstimationTax(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
-				return new MBankDataSchema(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
-				return new MBankData(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
-				return new MBankDataLine(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
-				return new MPhysicalWarehouse(Env.getCtx(), Record_ID, trxName);
-			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
-				return new MContractProcPeriod(Env.getCtx(), Record_ID, trxName);
+			Class<?> clazz = getClass(tableName);
+			if (clazz == null)
+			{
+				return null;
 			}
+			
+			boolean errorLogged = false;
+			try
+			{
+				Constructor<?> constructor = null;
+				try
+				{
+					constructor = clazz.getDeclaredConstructor(new Class[]{Properties.class, int.class, String.class});
+				}
+				catch (Exception e)
+				{
+					String msg = e.getMessage();
+					if (msg == null)
+						msg = e.toString();
+					s_log.warning("No transaction Constructor for " + clazz + " (" + msg + ")");
+				}
+
+				PO po = constructor!=null ? (PO)constructor.newInstance(new Object[] {Env.getCtx(), new Integer(Record_ID), trxName}) : null;
+				return po;
+			}
+			catch (Exception e)
+			{
+				if (e.getCause() != null)
+				{
+					Throwable t = e.getCause();
+					s_log.log(Level.SEVERE, "(id) - Table=" + tableName + ",Class=" + clazz, t);
+					errorLogged = true;
+					if (t instanceof Exception)
+						s_log.saveError("Error", (Exception)e.getCause());
+					else
+						s_log.saveError("Error", "Table=" + tableName + ",Class=" + clazz);
+				}
+				else
+				{
+					s_log.log(Level.SEVERE, "(id) - Table=" + tableName + ",Class=" + clazz, e);
+					errorLogged = true;
+					s_log.saveError("Error", "Table=" + tableName + ",Class=" + clazz);
+				}
+			}
+			if (!errorLogged)
+				s_log.log(Level.SEVERE, "(id) - Not found - Table=" + tableName
+					+ ", Record_ID=" + Record_ID);
+			return null;
+			
+//
+//			if(tableName.equals(MCorporation.Table_Name)){
+//				return  new MCorporation(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MCorporationGroup.Table_Name)){
+//				return  new MCorporationGroup(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MGroupCorporations.Table_Name)){
+//				return  new MGroupCorporations(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MBill.Table_Name)){
+//				return  new MBill(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MBillLine.Table_Name)){
+//				return  new MBillLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MReferenceTest.Table_Name)){
+//				return  new MReferenceTest(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MBillSchema.Table_Name)){
+//				return  new MBillSchema(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
+//				return  new MProductCategoryL1(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
+//				return  new MProductCategoryL2(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MProductCategoryG.Table_Name)){
+//				return  new MProductCategoryG(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
+//				return  new MProductCategoryGLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MProductGroup.Table_Name)){
+//				return  new MProductGroup(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MProductGroupLine.Table_Name)){
+//				return  new MProductGroupLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
+//				return  new MSalesRegionL2(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
+//				return  new MSalesRegionL1(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
+//				return  new MSalesRegionG(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
+//				return  new MSalesRegionGLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
+//				return  new MDeliveryDays(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
+//				return  new MInvValProfile(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
+//				return  new MInvValProfileOrg(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
+//				return  new MInvValCal(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
+//				return  new MInvValCalLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
+//				return  new MInvValCalLog(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
+//				return  new MInvValAdjust(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
+//				return  new MInvValAdjustLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
+//				return  new MInventoryDiffQtyLog(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
+//				return  new MEstimation(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0183
+//				return  new MEstimationLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
+//				return  new MEstimationTax(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
+//				return new MBankDataSchema(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
+//				return new MBankData(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
+//				return new MBankDataLine(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
+//				return new MPhysicalWarehouse(Env.getCtx(), Record_ID, trxName);
+//			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
+//				return new MContractProcPeriod(Env.getCtx(), Record_ID, trxName);
+//			}
 
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
@@ -259,76 +333,99 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 		if(tableName.startsWith("JP"))
 		{
-
-			if(tableName.equals(MCorporation.Table_Name)){
-				return  new MCorporation(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MCorporationGroup.Table_Name)){
-				return  new MCorporationGroup(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MGroupCorporations.Table_Name)){
-				return  new MGroupCorporations(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MBill.Table_Name)){
-				return  new MBill(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MBillLine.Table_Name)){
-				return  new MBillLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MReferenceTest.Table_Name)){
-				return  new MReferenceTest(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MBillSchema.Table_Name)){
-				return  new MBillSchema(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
-				return  new MProductCategoryL1(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
-				return  new MProductCategoryL2(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MProductCategoryG.Table_Name)){
-				return  new MProductCategoryG(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
-				return  new MProductCategoryGLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MProductGroup.Table_Name)){
-				return  new MProductGroup(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MProductGroupLine.Table_Name)){
-				return  new MProductGroupLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
-				return  new MSalesRegionL2(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
-				return  new MSalesRegionL1(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
-				return  new MSalesRegionG(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
-				return  new MSalesRegionGLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
-				return  new MDeliveryDays(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
-				return  new MInvValProfile(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
-				return  new MInvValProfileOrg(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
-				return  new MInvValCal(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
-				return  new MInvValCalLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
-				return  new MInvValCalLog(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
-				return  new MInvValAdjust(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
-				return  new MInvValAdjustLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
-				return  new MInventoryDiffQtyLog(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
-				return  new MEstimation(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0183
-				return  new MEstimationLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
-				return  new MEstimationTax(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
-				return new MBankDataSchema(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
-				return new MBankData(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
-				return new MBankDataLine(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
-				return new MPhysicalWarehouse(Env.getCtx(), rs, trxName);
-			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
-				return new MContractProcPeriod(Env.getCtx(), rs, trxName);
+			Class<?> clazz = getClass(tableName);
+			if (clazz == null)
+			{
+				return null;
 			}
+
+			boolean errorLogged = false;
+			try
+			{
+				Constructor<?> constructor = clazz.getDeclaredConstructor(new Class[]{Properties.class, ResultSet.class, String.class});
+				PO po = (PO)constructor.newInstance(new Object[] {Env.getCtx(), rs, trxName});
+				return po;
+			}
+			catch (Exception e)
+			{
+				s_log.log(Level.SEVERE, "(rs) - Table=" + tableName + ",Class=" + clazz, e);
+				errorLogged = true;
+				s_log.saveError("Error", "Table=" + tableName + ",Class=" + clazz);
+			}
+			if (!errorLogged)
+				s_log.log(Level.SEVERE, "(rs) - Not found - Table=" + tableName);
+			return null;
+			
+//			
+//			if(tableName.equals(MCorporation.Table_Name)){
+//				return  new MCorporation(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MCorporationGroup.Table_Name)){
+//				return  new MCorporationGroup(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MGroupCorporations.Table_Name)){
+//				return  new MGroupCorporations(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MBill.Table_Name)){
+//				return  new MBill(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MBillLine.Table_Name)){
+//				return  new MBillLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MReferenceTest.Table_Name)){
+//				return  new MReferenceTest(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MBillSchema.Table_Name)){
+//				return  new MBillSchema(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
+//				return  new MProductCategoryL1(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
+//				return  new MProductCategoryL2(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MProductCategoryG.Table_Name)){
+//				return  new MProductCategoryG(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
+//				return  new MProductCategoryGLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MProductGroup.Table_Name)){
+//				return  new MProductGroup(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MProductGroupLine.Table_Name)){
+//				return  new MProductGroupLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
+//				return  new MSalesRegionL2(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
+//				return  new MSalesRegionL1(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
+//				return  new MSalesRegionG(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
+//				return  new MSalesRegionGLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
+//				return  new MDeliveryDays(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
+//				return  new MInvValProfile(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
+//				return  new MInvValProfileOrg(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
+//				return  new MInvValCal(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
+//				return  new MInvValCalLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
+//				return  new MInvValCalLog(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
+//				return  new MInvValAdjust(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
+//				return  new MInvValAdjustLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
+//				return  new MInventoryDiffQtyLog(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
+//				return  new MEstimation(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0183
+//				return  new MEstimationLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
+//				return  new MEstimationTax(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
+//				return new MBankDataSchema(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
+//				return new MBankData(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
+//				return new MBankDataLine(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
+//				return new MPhysicalWarehouse(Env.getCtx(), rs, trxName);
+//			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
+//				return new MContractProcPeriod(Env.getCtx(), rs, trxName);
+//			}
 
 
 
@@ -345,4 +442,44 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 		return null;
 	}
 
+	
+	/**
+	 * Get PO class
+	 * @param className fully qualified class name
+	 * @param tableName Optional. If specified, the loaded class will be validated for that table name
+	 * @return class or null
+	 */
+	private Class<?> getPOclass (String className, String tableName)
+	{
+		try
+		{
+			Class<?> clazz = Class.forName(className);
+			// Validate if the class is for specified tableName
+			if (tableName != null)
+			{
+				String classTableName = clazz.getField("Table_Name").get(null).toString();
+				if (!tableName.equals(classTableName))
+				{
+					if (s_log.isLoggable(Level.FINEST)) s_log.finest("Invalid class for table: " + className+" (tableName="+tableName+", classTableName="+classTableName+")");
+					return null;
+				}
+			}
+			//	Make sure that it is a PO class
+			Class<?> superClazz = clazz.getSuperclass();
+			while (superClazz != null)
+			{
+				if (superClazz == PO.class)
+				{
+					if (s_log.isLoggable(Level.FINE)) s_log.fine("Use: " + className);
+					return clazz;
+				}
+				superClazz = superClazz.getSuperclass();
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		if (s_log.isLoggable(Level.FINEST)) s_log.finest("Not found: " + className);
+		return null;
+	}	//	getPOclass
 }
