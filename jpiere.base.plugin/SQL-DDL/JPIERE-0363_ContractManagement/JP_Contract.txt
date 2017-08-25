@@ -1,0 +1,64 @@
+CREATE TABLE adempiere.JP_Contract
+(
+  JP_Contract_ID numeric(10,0) NOT NULL,
+  JP_Contract_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  DocumentNo character varying(30) NOT NULL,
+  DocStatus character(2) NOT NULL,
+  DocAction character(2) NOT NULL,
+  Processing character(1),
+  Processed character(1) NOT NULL DEFAULT 'N'::bpchar,
+  Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+  IsApproved character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  ProcessedOn numeric,
+
+  Name character varying(120) NOT NULL,
+  Description character varying(255),
+  help character varying(2000),
+  
+  AD_OrgTrx_ID numeric(10,0),
+  JP_ContractType character(3) NOT NULL,
+  DateAcct timestamp without time zone NOT NULL,
+  JP_ContractCategory_ID  numeric(10,0) NOT NULL,
+  JP_ContractT_ID  numeric(10,0) NOT NULL,
+  JP_Contract_Parent_ID  numeric(10,0),
+  C_DocType_ID  numeric(10,0) NOT NULL,
+
+  C_BPartner_ID numeric(10) NOT NULL,
+  C_BPartner_Location_ID numeric(10),
+  AD_User_ID numeric(10),
+  SalesRep_ID numeric(10),
+
+  JP_ContractStatus character(2) NOT NULL,
+  JP_ContractPeriodDate_From timestamp without time zone NOT NULL,
+  JP_ContractPeriodDate_To timestamp without time zone,
+
+  IsAutomaticUpdateJP character(1) NOT NULL DEFAULT 'N'::bpchar,
+  JP_ContractCancelTerm_ID numeric(10,0),
+  JP_ContractExtendPeriod_ID numeric(10,0),
+  JP_ContractCancelDeadline timestamp without time zone,
+  JP_ContractCancelOfferDate timestamp without time zone,
+  JP_ContractCancelDate timestamp without time zone,
+
+  JP_ContractCancel_SalesRep_ID numeric(10,0),
+  JP_ContractCancel_User_ID numeric(10,0),
+  JP_ContractCancelCause_ID numeric(10,0),
+
+  JP_ContractDocDate timestamp without time zone,
+  JP_ContractDocDate_From timestamp without time zone,
+  JP_ContractDocDate_To timestamp without time zone,
+  JP_ContactMonthlyRevenueAmt numeric DEFAULT 0,
+  JP_ContactMonthlyExpenseAmt numeric DEFAULT 0,
+  C_Currency_ID numeric(10) NOT NULL,
+  GrandTotal numeric NOT NULL DEFAULT 0::numeric,
+
+
+  CONSTRAINT JP_Contract_pkey PRIMARY KEY (JP_Contract_ID)
+)
