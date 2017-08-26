@@ -16,7 +16,11 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Properties;
+
+import org.compiere.util.CCache;
 
 
 /** JPIERE-0363
@@ -34,6 +38,50 @@ public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 	public MContractExtendPeriod(Properties ctx, ResultSet rs, String trxName) 
 	{
 		super(ctx, rs, trxName);
+	}
+	
+	/**	Cache				*/
+	private static CCache<Integer,MContractExtendPeriod>	s_cache = new CCache<Integer,MContractExtendPeriod>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractExxtendPeriod_ID id
+	 *	@return Contract Process Period
+	 */
+	public static MContractExtendPeriod get (Properties ctx, int JP_ContractExxtendPeriod_ID)
+	{
+		Integer ii = new Integer (JP_ContractExxtendPeriod_ID);
+		MContractExtendPeriod retValue = (MContractExtendPeriod)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MContractExtendPeriod (ctx, JP_ContractExxtendPeriod_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_ContractExxtendPeriod_ID, retValue);
+		return retValue;
+	}	//	get
+	
+	
+	public Timestamp calculateNewPeriodEndDate(Timestamp old_PeriodEndDate)
+	{
+		return calculateNewPeriodEndDate(old_PeriodEndDate.toLocalDateTime());
+	}
+	
+	public Timestamp calculateNewPeriodEndDate(LocalDateTime old_PeriodEndDate)
+	{
+		if(isDueFixed())
+		{
+			old_PeriodEndDate = old_PeriodEndDate.plusYears(getJP_Year()).plusMonths(getJP_Month());
+			if(getJP_Day() == 31)
+			{
+				return Timestamp.valueOf(old_PeriodEndDate.plusMonths(1).withDayOfMonth(1).minusDays(1));
+			}else{
+				return Timestamp.valueOf(old_PeriodEndDate.withDayOfMonth(getJP_Day()) );
+			}
+			
+		}else{
+		   return Timestamp.valueOf(old_PeriodEndDate.plusYears(getJP_Year()).plusMonths(getJP_Month()).plusDays(getJP_Day()) );
+		}
 	}
 	
 }
