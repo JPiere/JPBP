@@ -1,0 +1,25 @@
+CREATE TABLE adempiere.JP_ContractProcPeriod
+(
+  JP_ContractProcPeriod_ID numeric(10,0) NOT NULL,
+  JP_ContractProcPeriod_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  JP_ContractCalender_ID  numeric(10,0) NOT NULL,
+  JP_ContractProcPeriodG_ID numeric(10,0) NOT NULL,
+  StartDate timestamp without time zone NOT NULL,
+  Enddate timestamp without time zone NOT NULL,
+  Name character varying(120) NOT NULL,
+  Description character varying(255),
+
+  JP_ContractProcessValue character varying(40),
+  DateDoc timestamp without time zone,
+  DateDoc timestamp without time zone,
+
+  CONSTRAINT JP_ContractProcPeriod_pkey PRIMARY KEY (JP_ContractProcPeriod_ID)
+)

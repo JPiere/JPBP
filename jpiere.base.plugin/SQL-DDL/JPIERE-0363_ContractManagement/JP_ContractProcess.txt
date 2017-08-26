@@ -1,0 +1,21 @@
+CREATE TABLE adempiere.JP_ContractProcess
+(
+  JP_ContractProcess_ID numeric(10,0) NOT NULL,
+  JP_ContractProcess_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  Value character varying(40) NOT NULL,
+  Name character varying(120) NOT NULL,
+  Description character varying(255),
+  IsCreateBaseDocJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  DocBaseType character(3) NOT NULL,
+  Classname character varying(255),
+
+  CONSTRAINT JP_ContractProcess_pkey PRIMARY KEY (JP_ContractProcess_ID)
+)
