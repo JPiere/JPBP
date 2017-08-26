@@ -19,6 +19,7 @@ CREATE TABLE adempiere.JP_ContractProcPeriod
 
   JP_ContractProcessValue character varying(40),
   DateDoc timestamp without time zone,
+  DateDoc timestamp without time zone,
 
   CONSTRAINT JP_ContractProcPeriod_pkey PRIMARY KEY (JP_ContractProcPeriod_ID)
 )

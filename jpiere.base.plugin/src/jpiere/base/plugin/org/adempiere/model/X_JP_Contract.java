@@ -34,7 +34,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170826L;
+	private static final long serialVersionUID = 20170827L;
 
     /** Standard Constructor */
     public X_JP_Contract (Properties ctx, int JP_Contract_ID, String trxName)
@@ -47,6 +47,8 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 // @$C_Currency_ID@
 			setC_DocType_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateDoc (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setDocAction (null);
 // CO
@@ -282,6 +284,23 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public Timestamp getDateAcct () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
+	}
+
+	/** Set Document Date.
+		@param DateDoc 
+		Date of the Document
+	  */
+	public void setDateDoc (Timestamp DateDoc)
+	{
+		set_Value (COLUMNNAME_DateDoc, DateDoc);
+	}
+
+	/** Get Document Date.
+		@return Date of the Document
+	  */
+	public Timestamp getDateDoc () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateDoc);
 	}
 
 	/** Set Description.

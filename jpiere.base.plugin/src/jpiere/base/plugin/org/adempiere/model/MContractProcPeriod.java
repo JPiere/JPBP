@@ -115,12 +115,12 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 		
 		
 		
-		if(newRecord || is_ValueChanged("DateDoc") || ( is_ValueChanged("StartDate") || is_ValueChanged("EndDate") ) )
+		if(newRecord || is_ValueChanged("DateAcct") || ( is_ValueChanged("StartDate") || is_ValueChanged("EndDate") ) )
 		{
-			if(getStartDate().compareTo(getDateDoc()) > 0 || getEndDate().compareTo(getDateDoc()) < 0)
+			if(getStartDate().compareTo(getDateAcct()) > 0 || getEndDate().compareTo(getDateAcct()) < 0)
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_OutsidePperiod") + " : "
-						+ Msg.getElement(getCtx(), "DateDoc"));//outside the specified period
+						+ Msg.getElement(getCtx(), "DateAcct"));//outside the specified period
 				return false;
 			}
 		}

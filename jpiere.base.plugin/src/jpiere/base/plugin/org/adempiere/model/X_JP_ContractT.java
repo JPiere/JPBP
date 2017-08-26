@@ -30,7 +30,7 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170825L;
+	private static final long serialVersionUID = 20170827L;
 
     /** Standard Constructor */
     public X_JP_ContractT (Properties ctx, int JP_ContractT_ID, String trxName)
@@ -219,9 +219,9 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	public void setJP_ContractCategory_ID (int JP_ContractCategory_ID)
 	{
 		if (JP_ContractCategory_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractCategory_ID, null);
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
 	}
 
 	/** Get Contract Category.

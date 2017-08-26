@@ -181,6 +181,19 @@ public interface I_JP_Contract
 	  */
 	public Timestamp getDateAcct();
 
+    /** Column name DateDoc */
+    public static final String COLUMNNAME_DateDoc = "DateDoc";
+
+	/** Set Document Date.
+	  * Date of the Document
+	  */
+	public void setDateDoc (Timestamp DateDoc);
+
+	/** Get Document Date.
+	  * Date of the Document
+	  */
+	public Timestamp getDateDoc();
+
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 

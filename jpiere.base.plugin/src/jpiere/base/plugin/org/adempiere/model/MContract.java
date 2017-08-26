@@ -458,6 +458,25 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		}
 		
 		
+		if(newRecord || is_ValueChanged("JP_ContractType") )
+		{
+			if(getJP_ContractType().equals("STC"))
+			{
+				setIsAutomaticUpdateJP(false);
+				setJP_ContractCancelTerm_ID(0);
+				setJP_ContractExtendPeriod_ID(0);
+				setJP_ContractCancelDeadline(null);
+				setJP_ContractCancelOfferDate(null);
+				setJP_ContractCancelDate(null);
+				setJP_ContractCancel_SalesRep_ID(0);
+				setJP_ContractCancel_User_ID(0);
+				setJP_ContractCancelCause_ID(0);
+			}
+			
+		}
+		
+		
+		
 		if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To") ) && getJP_ContractPeriodDate_To()!=null )
 		{
 			if(getJP_ContractPeriodDate_To().compareTo(getJP_ContractPeriodDate_From()) <= 0 )

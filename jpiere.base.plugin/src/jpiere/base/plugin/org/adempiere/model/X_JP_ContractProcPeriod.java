@@ -31,7 +31,7 @@ public class X_JP_ContractProcPeriod extends PO implements I_JP_ContractProcPeri
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170825L;
+	private static final long serialVersionUID = 20170827L;
 
     /** Standard Constructor */
     public X_JP_ContractProcPeriod (Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
@@ -77,6 +77,23 @@ public class X_JP_ContractProcPeriod extends PO implements I_JP_ContractProcPeri
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set Account Date.
+		@param DateAcct 
+		Accounting Date
+	  */
+	public void setDateAcct (Timestamp DateAcct)
+	{
+		set_Value (COLUMNNAME_DateAcct, DateAcct);
+	}
+
+	/** Get Account Date.
+		@return Accounting Date
+	  */
+	public Timestamp getDateAcct () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
+	}
 
 	/** Set Document Date.
 		@param DateDoc 
