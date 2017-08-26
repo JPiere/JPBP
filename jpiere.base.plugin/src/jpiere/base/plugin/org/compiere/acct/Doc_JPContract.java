@@ -67,8 +67,8 @@ public class Doc_JPContract extends Doc
 		setDateDoc (contract.getDateAcct());
 		setDateAcct (contract.getDateAcct());
 		// Amounts
-		setAmount(AMTTYPE_Gross, contract.getGrandTotal());
-		setAmount(AMTTYPE_Net, contract.getGrandTotal());
+		setAmount(AMTTYPE_Gross, contract.getJP_ContractDocAmt());
+		setAmount(AMTTYPE_Net, contract.getJP_ContractDocAmt());
 
 		// log.fine( "Lines=" + p_lines.length + ", Taxes=" + m_taxes.length);
 		return null;

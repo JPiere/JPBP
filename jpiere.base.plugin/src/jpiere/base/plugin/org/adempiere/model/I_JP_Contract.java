@@ -233,19 +233,6 @@ public interface I_JP_Contract
 	  */
 	public String getDocumentNo();
 
-    /** Column name GrandTotal */
-    public static final String COLUMNNAME_GrandTotal = "GrandTotal";
-
-	/** Set Grand Total.
-	  * Total amount of document
-	  */
-	public void setGrandTotal (BigDecimal GrandTotal);
-
-	/** Get Grand Total.
-	  * Total amount of document
-	  */
-	public BigDecimal getGrandTotal();
-
     /** Column name Help */
     public static final String COLUMNNAME_Help = "Help";
 
@@ -293,24 +280,6 @@ public interface I_JP_Contract
 
 	/** Get Automatic Update	  */
 	public boolean isAutomaticUpdateJP();
-
-    /** Column name JP_ContactMonthlyExpenseAmt */
-    public static final String COLUMNNAME_JP_ContactMonthlyExpenseAmt = "JP_ContactMonthlyExpenseAmt";
-
-	/** Set Monthly Expense Amt	  */
-	public void setJP_ContactMonthlyExpenseAmt (BigDecimal JP_ContactMonthlyExpenseAmt);
-
-	/** Get Monthly Expense Amt	  */
-	public BigDecimal getJP_ContactMonthlyExpenseAmt();
-
-    /** Column name JP_ContactMonthlyRevenueAmt */
-    public static final String COLUMNNAME_JP_ContactMonthlyRevenueAmt = "JP_ContactMonthlyRevenueAmt";
-
-	/** Set Monthly Revenue Amt	  */
-	public void setJP_ContactMonthlyRevenueAmt (BigDecimal JP_ContactMonthlyRevenueAmt);
-
-	/** Get Monthly Revenue Amt	  */
-	public BigDecimal getJP_ContactMonthlyRevenueAmt();
 
     /** Column name JP_ContractCancelCause_ID */
     public static final String COLUMNNAME_JP_ContractCancelCause_ID = "JP_ContractCancelCause_ID";
@@ -394,6 +363,15 @@ public interface I_JP_Contract
 
 	public I_JP_ContractCategory getJP_ContractCategory() throws RuntimeException;
 
+    /** Column name JP_ContractDocAmt */
+    public static final String COLUMNNAME_JP_ContractDocAmt = "JP_ContractDocAmt";
+
+	/** Set Contract Doc Amt	  */
+	public void setJP_ContractDocAmt (BigDecimal JP_ContractDocAmt);
+
+	/** Get Contract Doc Amt	  */
+	public BigDecimal getJP_ContractDocAmt();
+
     /** Column name JP_ContractDocDate */
     public static final String COLUMNNAME_JP_ContractDocDate = "JP_ContractDocDate";
 
@@ -431,6 +409,24 @@ public interface I_JP_Contract
 	public int getJP_ContractExtendPeriod_ID();
 
 	public I_JP_ContractExtendPeriod getJP_ContractExtendPeriod() throws RuntimeException;
+
+    /** Column name JP_ContractMonthlyExpenseAmt */
+    public static final String COLUMNNAME_JP_ContractMonthlyExpenseAmt = "JP_ContractMonthlyExpenseAmt";
+
+	/** Set Monthly Expense Amt	  */
+	public void setJP_ContractMonthlyExpenseAmt (BigDecimal JP_ContractMonthlyExpenseAmt);
+
+	/** Get Monthly Expense Amt	  */
+	public BigDecimal getJP_ContractMonthlyExpenseAmt();
+
+    /** Column name JP_ContractMonthlyRevenueAmt */
+    public static final String COLUMNNAME_JP_ContractMonthlyRevenueAmt = "JP_ContractMonthlyRevenueAmt";
+
+	/** Set Monthly Revenue Amt	  */
+	public void setJP_ContractMonthlyRevenueAmt (BigDecimal JP_ContractMonthlyRevenueAmt);
+
+	/** Get Monthly Revenue Amt	  */
+	public BigDecimal getJP_ContractMonthlyRevenueAmt();
 
     /** Column name JP_ContractPeriodDate_From */
     public static final String COLUMNNAME_JP_ContractPeriodDate_From = "JP_ContractPeriodDate_From";

@@ -66,7 +66,7 @@ public class MContractCategoryL1 extends X_JP_ContractCategoryL1 {
 	
 	private MContractCategory[] m_ContractCategories = null;
 	
-	public MContractCategory[] getProductCategories (boolean requery)
+	public MContractCategory[] getContractCategories (boolean requery)
 	{
 		if(m_ContractCategories != null && !requery)
 			return m_ContractCategories;

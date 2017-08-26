@@ -34,7 +34,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170825L;
+	private static final long serialVersionUID = 20170826L;
 
     /** Standard Constructor */
     public X_JP_Contract (Properties ctx, int JP_Contract_ID, String trxName)
@@ -53,13 +53,13 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 			setDocStatus (null);
 // DR
 			setDocumentNo (null);
-			setGrandTotal (Env.ZERO);
-// 0
 			setIsApproved (false);
 // N
 			setIsAutomaticUpdateJP (false);
 // N
 			setJP_ContractCategory_ID (0);
+			setJP_ContractDocAmt (Env.ZERO);
+// 0
 			setJP_ContractPeriodDate_From (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setJP_ContractStatus (null);
@@ -418,26 +418,6 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
 
-	/** Set Grand Total.
-		@param GrandTotal 
-		Total amount of document
-	  */
-	public void setGrandTotal (BigDecimal GrandTotal)
-	{
-		set_Value (COLUMNNAME_GrandTotal, GrandTotal);
-	}
-
-	/** Get Grand Total.
-		@return Total amount of document
-	  */
-	public BigDecimal getGrandTotal () 
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_GrandTotal);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	/** Set Comment/Help.
 		@param Help 
 		Comment or Hint
@@ -500,40 +480,6 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 		return false;
 	}
 
-	/** Set Monthly Expense Amt.
-		@param JP_ContactMonthlyExpenseAmt Monthly Expense Amt	  */
-	public void setJP_ContactMonthlyExpenseAmt (BigDecimal JP_ContactMonthlyExpenseAmt)
-	{
-		set_Value (COLUMNNAME_JP_ContactMonthlyExpenseAmt, JP_ContactMonthlyExpenseAmt);
-	}
-
-	/** Get Monthly Expense Amt.
-		@return Monthly Expense Amt	  */
-	public BigDecimal getJP_ContactMonthlyExpenseAmt () 
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ContactMonthlyExpenseAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
-	/** Set Monthly Revenue Amt.
-		@param JP_ContactMonthlyRevenueAmt Monthly Revenue Amt	  */
-	public void setJP_ContactMonthlyRevenueAmt (BigDecimal JP_ContactMonthlyRevenueAmt)
-	{
-		set_Value (COLUMNNAME_JP_ContactMonthlyRevenueAmt, JP_ContactMonthlyRevenueAmt);
-	}
-
-	/** Get Monthly Revenue Amt.
-		@return Monthly Revenue Amt	  */
-	public BigDecimal getJP_ContactMonthlyRevenueAmt () 
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ContactMonthlyRevenueAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	public I_JP_ContractCancelCause getJP_ContractCancelCause() throws RuntimeException
     {
 		return (I_JP_ContractCancelCause)MTable.get(getCtx(), I_JP_ContractCancelCause.Table_Name)
@@ -544,9 +490,9 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setJP_ContractCancelCause_ID (int JP_ContractCancelCause_ID)
 	{
 		if (JP_ContractCancelCause_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCancelCause_ID, null);
+			set_Value (COLUMNNAME_JP_ContractCancelCause_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractCancelCause_ID, Integer.valueOf(JP_ContractCancelCause_ID));
+			set_Value (COLUMNNAME_JP_ContractCancelCause_ID, Integer.valueOf(JP_ContractCancelCause_ID));
 	}
 
 	/** Get Contract Cancel Cause.
@@ -701,6 +647,23 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Contract Doc Amt.
+		@param JP_ContractDocAmt Contract Doc Amt	  */
+	public void setJP_ContractDocAmt (BigDecimal JP_ContractDocAmt)
+	{
+		set_Value (COLUMNNAME_JP_ContractDocAmt, JP_ContractDocAmt);
+	}
+
+	/** Get Contract Doc Amt.
+		@return Contract Doc Amt	  */
+	public BigDecimal getJP_ContractDocAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ContractDocAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Contract Doc Date.
 		@param JP_ContractDocDate Contract Doc Date	  */
 	public void setJP_ContractDocDate (Timestamp JP_ContractDocDate)
@@ -768,6 +731,40 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Monthly Expense Amt.
+		@param JP_ContractMonthlyExpenseAmt Monthly Expense Amt	  */
+	public void setJP_ContractMonthlyExpenseAmt (BigDecimal JP_ContractMonthlyExpenseAmt)
+	{
+		set_Value (COLUMNNAME_JP_ContractMonthlyExpenseAmt, JP_ContractMonthlyExpenseAmt);
+	}
+
+	/** Get Monthly Expense Amt.
+		@return Monthly Expense Amt	  */
+	public BigDecimal getJP_ContractMonthlyExpenseAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ContractMonthlyExpenseAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Monthly Revenue Amt.
+		@param JP_ContractMonthlyRevenueAmt Monthly Revenue Amt	  */
+	public void setJP_ContractMonthlyRevenueAmt (BigDecimal JP_ContractMonthlyRevenueAmt)
+	{
+		set_Value (COLUMNNAME_JP_ContractMonthlyRevenueAmt, JP_ContractMonthlyRevenueAmt);
+	}
+
+	/** Get Monthly Revenue Amt.
+		@return Monthly Revenue Amt	  */
+	public BigDecimal getJP_ContractMonthlyRevenueAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ContractMonthlyRevenueAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Contract Period Date(From).
 		@param JP_ContractPeriodDate_From Contract Period Date(From)	  */
 	public void setJP_ContractPeriodDate_From (Timestamp JP_ContractPeriodDate_From)
@@ -823,9 +820,9 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setJP_ContractT_ID (int JP_ContractT_ID)
 	{
 		if (JP_ContractT_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, null);
+			set_Value (COLUMNNAME_JP_ContractT_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, Integer.valueOf(JP_ContractT_ID));
+			set_Value (COLUMNNAME_JP_ContractT_ID, Integer.valueOf(JP_ContractT_ID));
 	}
 
 	/** Get Contract Doc Template.
@@ -849,7 +846,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setJP_ContractType (String JP_ContractType)
 	{
 
-		set_ValueNoCheck (COLUMNNAME_JP_ContractType, JP_ContractType);
+		set_Value (COLUMNNAME_JP_ContractType, JP_ContractType);
 	}
 
 	/** Get Contract Type.

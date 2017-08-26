@@ -54,10 +54,10 @@ CREATE TABLE adempiere.JP_Contract
   JP_ContractDocDate timestamp without time zone,
   JP_ContractDocDate_From timestamp without time zone,
   JP_ContractDocDate_To timestamp without time zone,
-  JP_ContactMonthlyRevenueAmt numeric DEFAULT 0,
-  JP_ContactMonthlyExpenseAmt numeric DEFAULT 0,
+  JP_ContractMonthlyRevenueAmt numeric DEFAULT 0,
+  JP_ContractMonthlyExpenseAmt numeric DEFAULT 0,
   C_Currency_ID numeric(10) NOT NULL,
-  GrandTotal numeric NOT NULL DEFAULT 0::numeric,
+  JP_ContractDocAmt numeric NOT NULL DEFAULT 0::numeric,
 
 
   CONSTRAINT JP_Contract_pkey PRIMARY KEY (JP_Contract_ID)

@@ -17,21 +17,32 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
+import org.compiere.model.MFactAcct;
+import org.compiere.model.MPeriod;
+import org.compiere.model.MQuery;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
+import org.compiere.model.PrintInfo;
+import org.compiere.print.MPrintFormat;
+import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
+import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.process.ProcessInfo;
+import org.compiere.process.ServerProcessCtl;
+import org.compiere.util.DB;
 
 /** JPIERE-0363
 *
 * @author Hideaki Hagiwara
 *
 */
-public class MContract extends X_JP_Contract implements DocAction
+public class MContract extends X_JP_Contract implements DocAction,DocOptions
 {
 	/**
 	 * 
@@ -84,10 +95,44 @@ public class MContract extends X_JP_Contract implements DocAction
 	 */
 	public File createPDF (File file)
 	{
-	//	ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.INVOICE, getC_Invoice_ID());
-	//	if (re == null)
-			return null;
-	//	return re.getPDF(file);
+		// set query to search this document
+		int m_docid = getJP_Contract_ID();
+		MQuery query = new MQuery(Table_Name);
+		query.addRestriction( COLUMNNAME_JP_Contract_ID, MQuery.EQUAL, new Integer(m_docid));
+	
+		// get Print Format
+		//int AD_PrintFormat_ID = 1000133;
+		//System.out.print(getC_DocTypeTarget_ID());
+		int AD_PrintFormat_ID = getC_DocType().getAD_PrintFormat_ID();
+		MPrintFormat pf = new  MPrintFormat(getCtx(), AD_PrintFormat_ID, get_TrxName());
+	
+		// set PrintInfo (temp)
+		PrintInfo info = new PrintInfo("0", 0, 0, 0);
+	
+		// Create ReportEngine
+		//ReportEngine re = ReportEngine.get(getCtx(), ReportEngine.JPE,  getJP_Estimation_ID(), get_TrxName());
+		ReportEngine re = new ReportEngine(getCtx(), pf, query, info);
+	
+		// For JaperReport
+		//System.out.print("PrintFormat: " + re.getPrintFormat().get_ID());
+		//MPrintFormat format = re.getPrintFormat();
+		// We have a Jasper Print Format
+		// ==============================
+		if(pf.getJasperProcess_ID() > 0)
+		{
+			ProcessInfo pi = new ProcessInfo ("", pf.getJasperProcess_ID());
+			pi.setRecord_ID ( getJP_Contract_ID() );
+			pi.setIsBatch(true);
+
+			ServerProcessCtl.process(pi, null);
+
+			return pi.getPDFReport();
+
+		}
+		// Standard Print Format (Non-Jasper)
+		// ==================================
+
+		return re.getPDF(file);
 	}	//	createPDF
 
 	
@@ -115,7 +160,7 @@ public class MContract extends X_JP_Contract implements DocAction
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
-	//	setProcessing(false);
+		setProcessing(false);
 		return true;
 	}	//	unlockIt
 	
@@ -126,7 +171,7 @@ public class MContract extends X_JP_Contract implements DocAction
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("invalidateIt - " + toString());
-	//	setDocAction(DOCACTION_Prepare);
+		setDocAction(DOCACTION_Prepare);
 		return true;
 	}	//	invalidateIt
 	
@@ -140,29 +185,23 @@ public class MContract extends X_JP_Contract implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
-		/**
-		MDocType dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
+		
+		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 
 		//	Std Period open?
-		if (!MPeriod.isOpen(getCtx(), getDateAcct(), dt.getDocBaseType()))
+		if (!MPeriod.isOpen(getCtx(), getDateAcct(), dt.getDocBaseType(), getAD_Org_ID()))
 		{
 			m_processMsg = "@PeriodClosed@";
 			return DocAction.STATUS_Invalid;
 		}
-		MLine[] lines = getLines(false);
-		if (lines.length == 0)
-		{
-			m_processMsg = "@NoLines@";
-			return DocAction.STATUS_Invalid;
-		}
-		**/
+		
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
 		m_justPrepared = true;
-	//	if (!DOCACTION_Complete.equals(getDocAction()))
-	//		setDocAction(DOCACTION_Complete);
+		if (!DOCACTION_Complete.equals(getDocAction()))
+			setDocAction(DOCACTION_Complete);
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
 	
@@ -173,7 +212,7 @@ public class MContract extends X_JP_Contract implements DocAction
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("approveIt - " + toString());
-	//	setIsApproved(true);
+		setIsApproved(true);
 		return true;
 	}	//	approveIt
 	
@@ -184,7 +223,7 @@ public class MContract extends X_JP_Contract implements DocAction
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("rejectIt - " + toString());
-	//	setIsApproved(false);
+		setIsApproved(false);
 		return true;
 	}	//	rejectIt
 	
@@ -203,7 +242,7 @@ public class MContract extends X_JP_Contract implements DocAction
 				return status;
 		}
 
-		// setDefiniteDocumentNo();
+		 setDefiniteDocumentNo();
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)
@@ -231,21 +270,16 @@ public class MContract extends X_JP_Contract implements DocAction
 	/**
 	 * 	Set the definite document number after completed
 	 */
-	/*
 	private void setDefiniteDocumentNo() {
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		if (dt.isOverwriteDateOnComplete()) {
-			setDateInvoiced(new Timestamp (System.currentTimeMillis()));
-			if (getDateAcct().before(getDateInvoiced())) {
-				setDateAcct(getDateInvoiced());
-				MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
-			}
+			setDateAcct(new Timestamp (System.currentTimeMillis()));
+			MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
+			
 		}
 		if (dt.isOverwriteSeqOnComplete()) {
 			String value = null;
 			int index = p_info.getColumnIndex("C_DocType_ID");
-			if (index == -1)
-				index = p_info.getColumnIndex("C_DocTypeTarget_ID");
 			if (index != -1)		//	get based on Doc Type (might return null)
 				value = DB.getDocumentNo(get_ValueAsInt(index), get_TrxName(), true);
 			if (value != null) {
@@ -253,7 +287,7 @@ public class MContract extends X_JP_Contract implements DocAction
 			}
 		}
 	}
-	*/
+	
 
 	/**
 	 * 	Void Document.
@@ -262,8 +296,24 @@ public class MContract extends X_JP_Contract implements DocAction
 	 */
 	public boolean voidIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("voidIt - " + toString());
-		return closeIt();
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		// Before Void
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
+		if (m_processMsg != null)
+			return false;
+
+		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Contract_ID(), get_TrxName());
+		setPosted(true);
+
+		// After Void
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
+		if (m_processMsg != null)
+			return false;
+
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+
+		return true;
 	}	//	voidIt
 	
 	/**
@@ -276,7 +326,7 @@ public class MContract extends X_JP_Contract implements DocAction
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
 
 		//	Close Not delivered Qty
-	//	setDocAction(DOCACTION_None);
+		setDocAction(DOCACTION_None);
 		return true;
 	}	//	closeIt
 	
@@ -306,11 +356,24 @@ public class MContract extends X_JP_Contract implements DocAction
 	 */
 	public boolean reActivateIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("reActivateIt - " + toString());
-	//	setProcessed(false);
-		if (reverseCorrectIt())
-			return true;
-		return false;
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		// Before reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
+		if (m_processMsg != null)
+			return false;
+
+		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Contract_ID(), get_TrxName());
+		setPosted(false);
+
+		// After reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
+		if (m_processMsg != null)
+			return false;
+
+		setDocAction(DOCACTION_Complete);
+		setProcessed(false);
+
+		return true;
 	}	//	reActivateIt
 	
 	
@@ -348,8 +411,34 @@ public class MContract extends X_JP_Contract implements DocAction
 	 */
 	public BigDecimal getApprovalAmt()
 	{
-		return getGrandTotal();
+		return getJP_ContractDocAmt();
 	}	//	getApprovalAmt
+
+	
+	@Override
+	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
+			int AD_Table_ID, String[] docAction, String[] options, int index) 
+	{
+		if(docStatus.equals(DocAction.STATUS_Completed))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Close;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_ReActivate;
+			return index;
+		}
+
+		if(docStatus.equals(DocAction.STATUS_Drafted))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Prepare;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_Complete;
+			return index;
+		}
+
+		return index;
+	}
 
 
 	

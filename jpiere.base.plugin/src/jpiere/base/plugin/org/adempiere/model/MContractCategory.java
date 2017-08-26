@@ -14,10 +14,14 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import org.compiere.util.CCache;
+import org.compiere.util.DB;
 
 
 /**
@@ -61,9 +65,71 @@ public class MContractCategory extends X_JP_ContractCategory {
 	}	//	get
 	
 	
-	//TODO getContracts()
+	private MContract[] m_Contracts = null;
 	
+	public MContract[] getContracts (boolean requery)
+	{
+		if(m_Contracts != null && !requery)
+			return m_Contracts;
+
+		ArrayList<MContract> list = new ArrayList<MContract>();
+		final String sql = "SELECT JP_Contract_ID FROM JP_Contract WHERE JP_ContractCategory_ID=? AND IsActive='Y'";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, get_ID());
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MContract (getCtx(), rs.getInt(1), get_TrxName()));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		m_Contracts = new MContract[list.size()];
+		list.toArray(m_Contracts);
+		return m_Contracts;
+	}
 	
-	//TODO getContractTemplates()
+	private MContractT[] m_ContractTemplates = null;
 	
+	public MContractT[] getContractTemplates (boolean requery)
+	{
+		if(m_ContractTemplates != null && !requery)
+			return m_ContractTemplates;
+
+		ArrayList<MContractT> list = new ArrayList<MContractT>();
+		final String sql = "SELECT JP_ContractT_ID FROM JP_ContractT WHERE JP_ContractCategory_ID=? AND IsActive='Y'";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, get_ID());
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MContractT (getCtx(), rs.getInt(1), get_TrxName()));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		m_ContractTemplates = new MContractT[list.size()];
+		list.toArray(m_ContractTemplates);
+		return m_ContractTemplates;
+	}
 }
