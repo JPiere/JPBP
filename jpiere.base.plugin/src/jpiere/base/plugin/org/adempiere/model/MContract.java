@@ -36,6 +36,7 @@ import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 
 /** JPIERE-0363
 *
@@ -440,13 +441,35 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		return index;
 	}
 
+	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		if(newRecord || (is_ValueChanged("JP_ContractType") || is_ValueChanged("JP_ContractCategory_ID") || is_ValueChanged("JP_ContractT_ID")  ))
+		{
+			MContractT contractTemplate = MContractT.get(getCtx(), getJP_ContractT_ID());
+			if(!contractTemplate.getJP_ContractType().equals(getJP_ContractType())
+					|| contractTemplate.getJP_ContractCategory_ID() != getJP_ContractCategory_ID()
+					|| contractTemplate.getJP_ContractT_ID() != getJP_ContractT_ID() )
+			{
+				//Contract type or Contract category are different from Contract template.
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_DifferentContractTypeOrCategory"));
+				return false;
+			}
+		}
+		
+		
+		if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To") ) && getJP_ContractPeriodDate_To()!=null )
+		{
+			if(getJP_ContractPeriodDate_To().compareTo(getJP_ContractPeriodDate_From()) <= 0 )
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractPeriodDate_To"));
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
 
 	
-	
-	
-	
-
-
-
-
 }	//	DocActionTemplate

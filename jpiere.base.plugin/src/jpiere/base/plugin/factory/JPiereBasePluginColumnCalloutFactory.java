@@ -29,6 +29,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereBankDataCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereEstimationCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
@@ -39,6 +40,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
+import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
@@ -116,8 +118,14 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereBankDataCallout());
 				}
+			}else if(tableName.equals(MContract.Table_Name)){	//JPIERE-0363
+				
+				if(columnName.equals("JP_ContractT_ID"))
+				{
+					list.add(new JPiereContractCallout());
+				}	
 			}
-
+			
 		}else{
 
 			if(tableName.equals(MPayment.Table_Name))
