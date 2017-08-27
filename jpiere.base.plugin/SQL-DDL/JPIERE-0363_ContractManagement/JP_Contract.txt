@@ -58,7 +58,12 @@ CREATE TABLE adempiere.JP_Contract
   JP_ContractMonthlyExpenseAmt numeric DEFAULT 0,
   C_Currency_ID numeric(10) NOT NULL,
   JP_ContractDocAmt numeric NOT NULL DEFAULT 0::numeric,
-  DateDoc timestamp without time zone NOT NULL,
+Å@DateDoc timestamp without time zone NOT NULL,
+
+ Å@JP_ContractNo character varying(30)  DEFAULT NULL::character varying,
+   JP_ContractCancelMemo character varying(2000) 
+   JP_ContractBPNo character varying(30) DEFAULT NULL::character varying,
+   JP_Contract_Link_ID numeric(10) DEFAULT NULL::numeric,
 
   CONSTRAINT JP_Contract_pkey PRIMARY KEY (JP_Contract_ID)
 )

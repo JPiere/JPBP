@@ -499,6 +499,20 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 		return false;
 	}
 
+	/** Set Contract BP No.
+		@param JP_ContractBPNo Contract BP No	  */
+	public void setJP_ContractBPNo (String JP_ContractBPNo)
+	{
+		set_Value (COLUMNNAME_JP_ContractBPNo, JP_ContractBPNo);
+	}
+
+	/** Get Contract BP No.
+		@return Contract BP No	  */
+	public String getJP_ContractBPNo () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractBPNo);
+	}
+
 	public I_JP_ContractCancelCause getJP_ContractCancelCause() throws RuntimeException
     {
 		return (I_JP_ContractCancelCause)MTable.get(getCtx(), I_JP_ContractCancelCause.Table_Name)
@@ -550,6 +564,20 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public Timestamp getJP_ContractCancelDeadline () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ContractCancelDeadline);
+	}
+
+	/** Set Contract Cancel Memo.
+		@param JP_ContractCancelMemo Contract Cancel Memo	  */
+	public void setJP_ContractCancelMemo (String JP_ContractCancelMemo)
+	{
+		set_Value (COLUMNNAME_JP_ContractCancelMemo, JP_ContractCancelMemo);
+	}
+
+	/** Get Contract Cancel Memo.
+		@return Contract Cancel Memo	  */
+	public String getJP_ContractCancelMemo () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractCancelMemo);
 	}
 
 	/** Set Cancel Offer Date.
@@ -784,6 +812,20 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 		return bd;
 	}
 
+	/** Set Contract No.
+		@param JP_ContractNo Contract No	  */
+	public void setJP_ContractNo (String JP_ContractNo)
+	{
+		set_Value (COLUMNNAME_JP_ContractNo, JP_ContractNo);
+	}
+
+	/** Get Contract No.
+		@return Contract No	  */
+	public String getJP_ContractNo () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractNo);
+	}
+
 	/** Set Contract Period Date(From).
 		@param JP_ContractPeriodDate_From Contract Period Date(From)	  */
 	public void setJP_ContractPeriodDate_From (Timestamp JP_ContractPeriodDate_From)
@@ -890,6 +932,26 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public int getJP_Contract_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Linked Contract.
+		@param JP_Contract_Link_ID Linked Contract	  */
+	public void setJP_Contract_Link_ID (int JP_Contract_Link_ID)
+	{
+		if (JP_Contract_Link_ID < 1) 
+			set_Value (COLUMNNAME_JP_Contract_Link_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Contract_Link_ID, Integer.valueOf(JP_Contract_Link_ID));
+	}
+
+	/** Get Linked Contract.
+		@return Linked Contract	  */
+	public int getJP_Contract_Link_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Link_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
