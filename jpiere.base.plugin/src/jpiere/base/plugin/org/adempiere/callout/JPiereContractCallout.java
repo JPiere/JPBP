@@ -80,6 +80,9 @@ public class JPiereContractCallout implements IColumnCallout {
 				mTab.setValue("JP_ContractCancelDeadline", calculateCancelDeadLine(ctx, mTab, (Timestamp)mTab.getValue("JP_ContractPeriodDate_To") ) );
 			}
 			
+		}else if(mField.getColumnName().equals("JP_ContractCancelDate") && value != null){
+
+			mTab.setValue("JP_ContractPeriodDate_To", (Timestamp)value);
 		}
 
 		return "";

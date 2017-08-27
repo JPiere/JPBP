@@ -50,6 +50,9 @@ public class CreateContractProcessPeriod extends SvrProcess {
 	private int p_Day = 0;
 	private String p_DateFormat;
 	private String p_DateDocList = "E";
+	private int p_MonthOffset = 0;
+	private int p_DayOffset = 0;
+	private boolean isDueFixed = true;
 	
 	@Override
 	protected void prepare() 
@@ -73,8 +76,14 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				p_Day = para[i].getParameterAsInt();
 			}else if (name.equals("DateFormat")){
 				p_DateFormat = (String) para[i].getParameter();
-			}else if (name.equals("DateDoc")){
+			}else if (name.equals("DateAcct")){
 				p_DateDocList = (String) para[i].getParameter();
+			}else if (name.equals("JP_MonthOffset")){
+				p_MonthOffset = para[i].getParameterAsInt();
+			}else if (name.equals("DayOffset")){
+				p_DayOffset = para[i].getParameterAsInt();
+			}else if (name.equals("IsDueFixed")){
+				isDueFixed = para[i].getParameterAsBoolean();
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}
@@ -115,6 +124,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 		
 		LocalDateTime startDate= p_DateContract_From.toLocalDateTime();
 		LocalDateTime endDate= startDate.plusYears(p_Year).plusMonths(p_Month).plusDays(p_Day).minusDays(1);
+		LocalDateTime docDate = null; 
 		
 		boolean isBreak = false;
 		IProcessUI processMonitor = Env.getProcessUI(getCtx());
@@ -134,9 +144,40 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			procPeriod.setEndDate(Timestamp.valueOf(endDate));
 			procPeriod.setName(name);
 			if(p_DateDocList.equals("E"))
-				procPeriod.setDateDoc(Timestamp.valueOf(endDate));
-			else if(p_DateDocList.equals("S"))
-				procPeriod.setDateDoc(Timestamp.valueOf(startDate));
+			{
+				procPeriod.setDateAcct(Timestamp.valueOf(endDate));
+				if(isDueFixed)
+				{
+					if(p_DayOffset == 31)
+					{
+						docDate = endDate.plusMonths(p_MonthOffset+1).withDayOfMonth(1).minusDays(1);
+					}else if(p_DayOffset == 0){
+						docDate = endDate.plusMonths(p_MonthOffset);
+					}else{
+						docDate = endDate.plusMonths(p_MonthOffset).withDayOfMonth(p_DayOffset);
+					}
+					
+				}else{
+					docDate = endDate.plusMonths(p_MonthOffset).plusDays(p_DayOffset);
+				}
+				
+			}else if(p_DateDocList.equals("S")){
+				procPeriod.setDateAcct(Timestamp.valueOf(startDate));
+				if(isDueFixed)
+				{
+					if(p_DayOffset == 31)
+					{
+						docDate = startDate.plusMonths(p_MonthOffset+1).withDayOfMonth(1).minusDays(1);
+					}else if(p_DayOffset == 0){
+						docDate = startDate.plusMonths(p_MonthOffset);
+					}else{
+						docDate = startDate.plusMonths(p_MonthOffset).withDayOfMonth(p_DayOffset);
+					}				
+				}else{
+					docDate = startDate.plusMonths(p_MonthOffset).plusDays(p_DayOffset);
+				}
+			}
+			procPeriod.setDateDoc(Timestamp.valueOf(docDate));
 			procPeriod.setJP_ContractProcPeriodG_ID(p_ContractProcPeriodG_ID);
 			procPeriod.setJP_ContractCalender_ID(contractCalender.getJP_ContractCalender_ID());
 			procPeriod.saveEx(get_TrxName());
