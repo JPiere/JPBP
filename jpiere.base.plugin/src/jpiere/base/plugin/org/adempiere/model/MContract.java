@@ -460,7 +460,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		
 		if(newRecord || is_ValueChanged("JP_ContractType") )
 		{
-			if(getJP_ContractType().equals("STC"))
+			if(getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
 			{
 				setIsAutomaticUpdateJP(false);
 				setJP_ContractCancelTerm_ID(0);

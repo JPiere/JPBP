@@ -109,6 +109,54 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** DocAction AD_Reference_ID=135 */
+	public static final int DOCACTION_AD_Reference_ID=135;
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
+	/** Approve = AP */
+	public static final String DOCACTION_Approve = "AP";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
+	/** Close = CL */
+	public static final String DOCACTION_Close = "CL";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Invalidate = IN */
+	public static final String DOCACTION_Invalidate = "IN";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** <None> = -- */
+	public static final String DOCACTION_None = "--";
+	/** Prepare = PR */
+	public static final String DOCACTION_Prepare = "PR";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
+	/** Wait Complete = WC */
+	public static final String DOCACTION_WaitComplete = "WC";
+	/** Set Document Action.
+		@param DocAction 
+		The targeted status of the document
+	  */
+	public void setDocAction (String DocAction)
+	{
+
+		set_Value (COLUMNNAME_DocAction, DocAction);
+	}
+
+	/** Get Document Action.
+		@return The targeted status of the document
+	  */
+	public String getDocAction () 
+	{
+		return (String)get_Value(COLUMNNAME_DocAction);
+	}
+
 	/** AP Invoice = API */
 	public static final String DOCBASETYPE_APInvoice = "API";
 	/** AR Invoice = ARI */

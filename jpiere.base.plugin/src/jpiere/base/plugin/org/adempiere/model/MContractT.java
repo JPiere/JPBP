@@ -66,6 +66,17 @@ public class MContractT extends X_JP_ContractT {
 				
 		}
 		
+		if(newRecord || is_ValueChanged("JP_ContractType"))
+		{
+			if(getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
+			{
+				setIsAutomaticUpdateJP(false);
+				setJP_ContractCancelTerm_ID(0);
+				setJP_ContractExtendPeriod_ID(0);
+			}
+				
+		}
+		
 		
 		return true;
 	}
