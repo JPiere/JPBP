@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Properties;
 
 import org.compiere.util.CCache;
+import org.compiere.util.Msg;
 
 
 /** JPIERE-0363
@@ -39,6 +40,26 @@ public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 	{
 		super(ctx, rs, trxName);
 	}
+	
+	
+	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		if(newRecord || is_ValueChanged("JP_Day") || is_ValueChanged("IsDueFixed"))
+		{
+			if(isDueFixed())
+			{
+				if(getJP_Day() > 31 || getJP_Day() <= 0)
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Day"));
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+	
 	
 	/**	Cache				*/
 	private static CCache<Integer,MContractExtendPeriod>	s_cache = new CCache<Integer,MContractExtendPeriod>(Table_Name, 20);
@@ -75,8 +96,10 @@ public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 			if(getJP_Day() == 31)
 			{
 				return Timestamp.valueOf(old_PeriodEndDate.plusMonths(1).withDayOfMonth(1).minusDays(1));
+			}else if(getJP_Day() == 0){
+				return Timestamp.valueOf(old_PeriodEndDate);
 			}else{
-				return Timestamp.valueOf(old_PeriodEndDate.withDayOfMonth(getJP_Day()) );
+				return Timestamp.valueOf(old_PeriodEndDate.withDayOfMonth(getJP_Day()));
 			}
 			
 		}else{

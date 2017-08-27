@@ -80,7 +80,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				p_DateDocList = (String) para[i].getParameter();
 			}else if (name.equals("JP_MonthOffset")){
 				p_MonthOffset = para[i].getParameterAsInt();
-			}else if (name.equals("DayOffset")){
+			}else if (name.equals("JP_DayOffset")){
 				p_DayOffset = para[i].getParameterAsInt();
 			}else if (name.equals("IsDueFixed")){
 				isDueFixed = para[i].getParameterAsBoolean();
@@ -94,6 +94,15 @@ public class CreateContractProcessPeriod extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception 
 	{
+		if(isDueFixed)
+		{				
+			if( p_DayOffset > 31 || p_DayOffset < 0)
+			{
+				return Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_DayOffset");
+			}
+		}
+		
+		
 		MContractProcPeriodG contractCalender = MContractProcPeriodG.get(getCtx(), p_ContractProcPeriodG_ID);
 		if(p_Year == 0 &&  p_Month == 0 && p_Day == 0)
 		{
