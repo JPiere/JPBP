@@ -98,7 +98,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 		{				
 			if( p_DayOffset > 31 || p_DayOffset < 0)
 			{
-				return Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_DayOffset");
+				throw new Exception(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_DayOffset"));
 			}
 		}
 		
@@ -106,12 +106,12 @@ public class CreateContractProcessPeriod extends SvrProcess {
 		MContractProcPeriodG contractCalender = MContractProcPeriodG.get(getCtx(), p_ContractProcPeriodG_ID);
 		if(p_Year == 0 &&  p_Month == 0 && p_Day == 0)
 		{
-			return Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID");
+			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));
 		}
 		
 		if(p_Year < 0 || p_Month < 0 || p_Day < 0)
 		{
-			return Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID");
+			throw new Exception(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_DayOffset"));
 		}
 		
 		
@@ -163,7 +163,13 @@ public class CreateContractProcessPeriod extends SvrProcess {
 					}else if(p_DayOffset == 0){
 						docDate = endDate.plusMonths(p_MonthOffset);
 					}else{
-						docDate = endDate.plusMonths(p_MonthOffset).withDayOfMonth(p_DayOffset);
+							
+						try {
+							docDate = endDate.plusMonths(p_MonthOffset).withDayOfMonth(p_DayOffset);
+						} catch (Exception e) {
+							throw new Exception(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_DayOffset"));
+						}
+						
 					}
 					
 				}else{
@@ -180,7 +186,13 @@ public class CreateContractProcessPeriod extends SvrProcess {
 					}else if(p_DayOffset == 0){
 						docDate = startDate.plusMonths(p_MonthOffset);
 					}else{
-						docDate = startDate.plusMonths(p_MonthOffset).withDayOfMonth(p_DayOffset);
+						
+						try {
+							docDate = startDate.plusMonths(p_MonthOffset).withDayOfMonth(p_DayOffset);
+						} catch (Exception e) {
+							throw new Exception(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_DayOffset"));
+						}
+					
 					}				
 				}else{
 					docDate = startDate.plusMonths(p_MonthOffset).plusDays(p_DayOffset);
