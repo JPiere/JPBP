@@ -458,6 +458,21 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			}
 		}
 
+		//Refresh Automatic update info
+		if((newRecord || is_ValueChanged("IsAutomaticUpdateJP")) && !isAutomaticUpdateJP())
+		{
+			setJP_ContractCancelTerm_ID(0);
+			setJP_ContractExtendPeriod_ID(0);
+			setJP_ContractCancelDeadline(null);
+			setJP_ContractCancelOfferDate(null);
+			setJP_ContractCancelDate(null);
+			setJP_ContractCancel_SalesRep_ID(0);
+			setJP_ContractCancel_User_ID(0);
+			setJP_ContractCancelCause_ID(0);
+		}
+
+		
+		
 		//Check Mandetory JP_ContractPeriodDate_To
 		if(( newRecord || is_ValueChanged("IsAutomaticUpdateJP")) && isAutomaticUpdateJP() && getJP_ContractPeriodDate_To() == null )
 		{
@@ -476,16 +491,16 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		}
 		
 		//Set JP_ContractPeriodDate_To
-		if(( newRecord || is_ValueChanged("JP_ContractCancelDate") ) && isAutomaticUpdateJP() && getJP_ContractCancelDate()!=null )
+		if(( newRecord || is_ValueChanged("JP_ContractCancelDate") ) && isAutomaticUpdateJP() && getJP_ContractCancelDate() != null )
 		{
 			setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
 		}
 		
-		//Calculate Cancel DeadLine
-		if(( newRecord || is_ValueChanged("JP_ContractCancelDate") ) && isAutomaticUpdateJP() && getJP_ContractCancelDate() ==null )
+		//Set Contract Cancel Deadline
+		if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To")) && isAutomaticUpdateJP() && getJP_ContractCancelDeadline() == null )
 		{
 			MContractCancelTerm m_ContractCancelTerm = MContractCancelTerm.get(getCtx(), getJP_ContractCancelTerm_ID());
-			setJP_ContractCancelDate(m_ContractCancelTerm.calculateCancelDeadLine(getJP_ContractPeriodDate_To()));
+			setJP_ContractCancelDeadline(m_ContractCancelTerm.calculateCancelDeadLine(getJP_ContractPeriodDate_To()));
 		}
 		
 		return true;

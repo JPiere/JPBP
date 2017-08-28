@@ -92,6 +92,8 @@ public class JPiereContractCallout implements IColumnCallout {
 	private void updateContract(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 		MContractT contractTemplate = MContractT.get(ctx, ((Integer)value).intValue());
+		mTab.setValue("JP_ContractType", contractTemplate.getJP_ContractType());
+		mTab.setValue("JP_ContractCategory_ID", contractTemplate.getJP_ContractCategory_ID());
 		mTab.setValue("C_DocType_ID", contractTemplate.getC_DocType_ID());
 		mTab.setValue("Name", contractTemplate.getName());
 		mTab.setValue("Description", contractTemplate.getDescription());

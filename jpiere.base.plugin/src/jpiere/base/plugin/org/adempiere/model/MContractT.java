@@ -56,16 +56,13 @@ public class MContractT extends X_JP_ContractT {
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
-		if(newRecord || is_ValueChanged("IsAutomaticUpdateJP"))
+		//Refresh Automatic update info
+		if((newRecord || is_ValueChanged("IsAutomaticUpdateJP")) && !isAutomaticUpdateJP())
 		{
-			if(!isAutomaticUpdateJP())
-			{
-				setJP_ContractCancelTerm_ID(0);
-				setJP_ContractExtendPeriod_ID(0);
-			}
-				
+			setJP_ContractCancelTerm_ID(0);
+			setJP_ContractExtendPeriod_ID(0);			
 		}
-				
+
 		
 		return true;
 	}
