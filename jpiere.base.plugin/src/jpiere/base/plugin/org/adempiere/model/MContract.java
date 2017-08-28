@@ -458,27 +458,6 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			}
 		}
 
-		//Refresh Automatic update info
-		if((newRecord || is_ValueChanged("IsAutomaticUpdateJP")) && !isAutomaticUpdateJP())
-		{
-			setJP_ContractCancelTerm_ID(0);
-			setJP_ContractExtendPeriod_ID(0);
-			setJP_ContractCancelDeadline(null);
-			setJP_ContractCancelOfferDate(null);
-			setJP_ContractCancelDate(null);
-			setJP_ContractCancel_SalesRep_ID(0);
-			setJP_ContractCancel_User_ID(0);
-			setJP_ContractCancelCause_ID(0);
-		}
-
-		
-		
-		//Check Mandetory JP_ContractPeriodDate_To
-		if(( newRecord || is_ValueChanged("IsAutomaticUpdateJP")) && isAutomaticUpdateJP() && getJP_ContractPeriodDate_To() == null )
-		{
-			log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractPeriodDate_To"));
-			return false;
-		}
 		
 		//Check Valid JP_ContractPeriodDate_To
 		if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To") ) && getJP_ContractPeriodDate_To()!=null )
@@ -490,22 +469,52 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			}
 		}
 		
-		//Set JP_ContractPeriodDate_To
-		if(( newRecord || is_ValueChanged("JP_ContractCancelDate") ) && isAutomaticUpdateJP() && getJP_ContractCancelDate() != null )
+		
+		// Check Automatic Update Info
+		if(isAutomaticUpdateJP())
 		{
-			setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
+			if(getJP_ContractPeriodDate_To() == null)
+				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractPeriodDate_To"));
+			
+			if(getJP_ContractCancelTerm_ID() == 0)
+				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractCancelTerm_ID"));
+			
+			if(getJP_ContractExtendPeriod_ID() == 0)
+				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractExtendPeriod_ID"));
+		
+			//Set JP_ContractPeriodDate_To
+			if(( newRecord || is_ValueChanged("JP_ContractCancelDate") ) && getJP_ContractCancelDate() != null )
+			{
+				setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
+			}
+			
+			//Set Contract Cancel Deadline
+			if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To")) && getJP_ContractCancelDeadline() == null )
+			{
+				MContractCancelTerm m_ContractCancelTerm = MContractCancelTerm.get(getCtx(), getJP_ContractCancelTerm_ID());
+				setJP_ContractCancelDeadline(m_ContractCancelTerm.calculateCancelDeadLine(getJP_ContractPeriodDate_To()));
+			}
+			
+		}else{ 
+			
+			//Refresh Automatic update info
+			setJP_ContractCancelTerm_ID(0);
+			setJP_ContractExtendPeriod_ID(0);
+			setJP_ContractCancelDeadline(null);
+			setJP_ContractCancelOfferDate(null);
+			setJP_ContractCancelDate(null);
+			setJP_ContractCancel_SalesRep_ID(0);
+			setJP_ContractCancel_User_ID(0);
+			setJP_ContractCancelCause_ID(0);
 		}
 		
-		//Set Contract Cancel Deadline
-		if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To")) && isAutomaticUpdateJP() && getJP_ContractCancelDeadline() == null )
-		{
-			MContractCancelTerm m_ContractCancelTerm = MContractCancelTerm.get(getCtx(), getJP_ContractCancelTerm_ID());
-			setJP_ContractCancelDeadline(m_ContractCancelTerm.calculateCancelDeadLine(getJP_ContractPeriodDate_To()));
-		}
+		//TODO:契約ステータスの更新処理
+		//システム日付と契約期間From、契約期間Toをもとに計算
+		
 		
 		return true;
 	}
 
 
 	
-}	//	DocActionTemplate
+}	//	MContract
