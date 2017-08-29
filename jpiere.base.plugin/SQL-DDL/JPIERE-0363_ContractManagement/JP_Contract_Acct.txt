@@ -1,7 +1,7 @@
-CREATE TABLE adempiere.JP_ContractProcess
+CREATE TABLE adempiere.JP_Contract_Acct
 (
-  JP_ContractProcess_ID numeric(10,0) NOT NULL,
-  JP_ContractProcess_uu character varying(36) DEFAULT NULL::character varying,
+  JP_Contract_Acct_ID numeric(10,0) NOT NULL,
+  JP_Contract_Acct_uu character varying(36) DEFAULT NULL::character varying,
   AD_Client_ID numeric(10,0) NOT NULL,
   AD_Org_ID numeric(10,0) NOT NULL,
   IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
@@ -13,11 +13,6 @@ CREATE TABLE adempiere.JP_ContractProcess
   Value character varying(40) NOT NULL,
   Name character varying(120) NOT NULL,
   Description character varying(255),
-  IsCreateBaseDocJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
-  DocBaseType character(3) NOT NULL,
-  Classname character varying(255),
 
-  DocAction character varying(2)  DEFAULT 'CO'::character varying,
-
-  CONSTRAINT JP_ContractProcess_pkey PRIMARY KEY (JP_ContractProcess_ID)
+  CONSTRAINT JP_Contract_Acct_pkey PRIMARY KEY (JP_Contract_Acct_ID)
 )

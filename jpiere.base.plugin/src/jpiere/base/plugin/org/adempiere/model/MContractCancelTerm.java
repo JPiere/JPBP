@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Properties;
 
 import org.compiere.util.CCache;
+import org.compiere.util.Msg;
 
 
 /** JPIERE-0363
@@ -41,6 +42,24 @@ public class MContractCancelTerm extends X_JP_ContractCancelTerm {
 	}
 	
 	
+	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		if(newRecord || is_ValueChanged("JP_Day") || is_ValueChanged("IsDueFixed"))
+		{
+			if(isDueFixed())
+			{
+				if(getJP_Day() > 31 || getJP_Day() <= 0)
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Day"));
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractCancelTerm>	s_cache = new CCache<Integer,MContractCancelTerm>(Table_Name, 20);
 	
@@ -75,6 +94,8 @@ public class MContractCancelTerm extends X_JP_ContractCancelTerm {
 			if(getJP_Day() == 31)
 			{
 				return Timestamp.valueOf(JP_ContractPeriodDate_To.plusMonths(1).withDayOfMonth(1).minusDays(1));
+			}else if(getJP_Day() == 0){
+				return Timestamp.valueOf(JP_ContractPeriodDate_To);
 			}else{
 				return Timestamp.valueOf(JP_ContractPeriodDate_To.withDayOfMonth(getJP_Day()) );
 			}

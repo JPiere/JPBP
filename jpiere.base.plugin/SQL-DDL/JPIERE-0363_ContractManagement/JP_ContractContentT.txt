@@ -1,0 +1,113 @@
+CREATE TABLE adempiere.JP_ContractContentT
+(
+  --Window Mandatory
+  JP_ContractContentT_ID numeric(10,0) NOT NULL,
+  JP_ContractContentT_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+
+  --Contract Content column
+  JP_ContractT_ID numeric(10,0) NOT NULL,
+  JP_Contract_Acct_ID numeric(10,0) NOT NULL,
+  C_DocType_ID numeric(10,0) NOT NULL,
+  DocBaseType character(3) NOT NULL,
+  JP_BaseDocDocType_ID numeric(10,0) NOT NULL,
+  JP_CreateDerivativeDocPolicy character(2),
+  JP_ContractCalenderRef_ID numeric(10,0),
+  JP_ContractProcPOffset numeric(10,0) DEFAULT 0 ,
+  JP_ContractProcPeriodNum numeric(10,0) DEFAULT 0, 
+  JP_ContractProcessRef_ID numeric(10,0) ,
+  DeliveryTime_Promised numeric(10,0) DEFAULT 0,
+  Value character varying(40) NOT NULL,
+  IsSOTrx character(1) NOT NULL DEFAULT 'Y'::bpchar,
+
+  Name character varying(120) NOT NULL,
+  Description character varying(255),
+  SalesRep_ID numeric(10,0),
+
+  --Status
+  TotalLines numeric NOT NULL DEFAULT 0,
+
+  IsAutomaticUpdateJP character(1) NOT NULL DEFAULT 'N'::bpchar, 
+
+  --Order Column
+  C_BPartner_ID numeric(10,0) ,
+
+  C_BPartner_Location_ID numeric(10,0),
+
+  AD_User_ID numeric(10,0),
+
+  M_Warehouse_ID numeric(10,0) NOT NULL,
+
+  JP_Locator_ID numeric(10,0) ,
+  IsDropShip character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  Dropship_BPartner_ID numeric(10,0),
+
+  Dropship_Location_ID numeric(10,0),
+
+  Dropship_User_ID numeric(10,0),
+
+  DeliveryRule character(1) NOT NULL,
+
+  PriorityRule character(1) NOT NULL,
+
+  DeliveryViaRule character(1) NOT NULL,
+
+  M_Shipper_ID numeric(10,0),
+
+  M_FreightCategory_ID numeric(10,0),
+
+  FreightCostRule character(1) NOT NULL,
+
+  FreightAmt numeric DEFAULT 0,
+
+
+  Bill_BPartner_ID numeric(10,0),
+
+  Bill_Location_ID numeric(10,0),
+
+  Bill_User_ID numeric(10,0),
+
+  InvoiceRule character(1) NOT NULL,
+  IsDiscountPrinted character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  M_PriceList_ID numeric(10,0) NOT NULL,
+
+  C_Currency_ID numeric(10,0) NOT NULL,
+
+  C_ConversionType_ID numeric(10,0),
+
+  PaymentRule character(1) NOT NULL,
+  C_PaymentTerm_ID numeric(10,0) NOT NULL,
+
+
+  C_Campaign_ID numeric(10,0),
+
+  C_Project_ID numeric(10,0),
+
+  C_Activity_ID numeric(10,0),
+  AD_OrgTrx_ID numeric(10,0),
+
+  User1_ID numeric(10,0),
+
+  User2_ID numeric(10,0),
+
+
+
+
+  IsTaxIncluded character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  SendeMail character(1) NOT NULL DEFAULT 'N'::bpchar,
+  OrderType character varying(2) ,
+
+ 
+
+  CONSTRAINT JP_ContractContentT_pkey PRIMARY KEY (JP_ContractContentT_ID)
+)

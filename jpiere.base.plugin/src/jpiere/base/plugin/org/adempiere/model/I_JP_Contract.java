@@ -294,6 +294,15 @@ public interface I_JP_Contract
 	/** Get Automatic Update	  */
 	public boolean isAutomaticUpdateJP();
 
+    /** Column name JP_ContractBPNo */
+    public static final String COLUMNNAME_JP_ContractBPNo = "JP_ContractBPNo";
+
+	/** Set Contract BP No	  */
+	public void setJP_ContractBPNo (String JP_ContractBPNo);
+
+	/** Get Contract BP No	  */
+	public String getJP_ContractBPNo();
+
     /** Column name JP_ContractCancelCause_ID */
     public static final String COLUMNNAME_JP_ContractCancelCause_ID = "JP_ContractCancelCause_ID";
 
@@ -322,6 +331,15 @@ public interface I_JP_Contract
 
 	/** Get Cancel Deadline	  */
 	public Timestamp getJP_ContractCancelDeadline();
+
+    /** Column name JP_ContractCancelMemo */
+    public static final String COLUMNNAME_JP_ContractCancelMemo = "JP_ContractCancelMemo";
+
+	/** Set Contract Cancel Memo	  */
+	public void setJP_ContractCancelMemo (String JP_ContractCancelMemo);
+
+	/** Get Contract Cancel Memo	  */
+	public String getJP_ContractCancelMemo();
 
     /** Column name JP_ContractCancelOfferDate */
     public static final String COLUMNNAME_JP_ContractCancelOfferDate = "JP_ContractCancelOfferDate";
@@ -441,6 +459,15 @@ public interface I_JP_Contract
 	/** Get Monthly Revenue Amt	  */
 	public BigDecimal getJP_ContractMonthlyRevenueAmt();
 
+    /** Column name JP_ContractNo */
+    public static final String COLUMNNAME_JP_ContractNo = "JP_ContractNo";
+
+	/** Set Contract No	  */
+	public void setJP_ContractNo (String JP_ContractNo);
+
+	/** Get Contract No	  */
+	public String getJP_ContractNo();
+
     /** Column name JP_ContractPeriodDate_From */
     public static final String COLUMNNAME_JP_ContractPeriodDate_From = "JP_ContractPeriodDate_From";
 
@@ -496,6 +523,15 @@ public interface I_JP_Contract
 
 	/** Get Contract Document	  */
 	public int getJP_Contract_ID();
+
+    /** Column name JP_Contract_Link_ID */
+    public static final String COLUMNNAME_JP_Contract_Link_ID = "JP_Contract_Link_ID";
+
+	/** Set Linked Contract	  */
+	public void setJP_Contract_Link_ID (int JP_Contract_Link_ID);
+
+	/** Get Linked Contract	  */
+	public int getJP_Contract_Link_ID();
 
     /** Column name JP_Contract_Parent_ID */
     public static final String COLUMNNAME_JP_Contract_Parent_ID = "JP_Contract_Parent_ID";

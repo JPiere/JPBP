@@ -1,0 +1,98 @@
+CREATE TABLE adempiere.JP_ContractLine
+(
+  JP_ContractLine_ID numeric(10,0) NOT NULL,
+  JP_ContractLine_uu character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  JP_ContractContent_ID numeric(10,0) NOT NULL,
+  C_BPartner_ID numeric(10,0),
+
+  C_BPartner_Location_ID numeric(10,0),
+
+  Line numeric(10,0) NOT NULL,
+ 
+  JP_ContractLineT_ID numeric(10,0) NOT NULL,
+
+  M_Product_ID numeric(10,0),
+  M_AttributeSetInstance_ID numeric(10,0),
+  S_ResourceAssignment_ID numeric(10,0),
+  JP_Locator_ID numeric(10,0),
+
+  DeliveryTime_Promised numeric(10,0) DEFAULT 0,
+  Description character varying(255),
+
+  IsCreateDocLineJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
+ 
+  Qtyentered numeric NOT NULL,
+ 
+  C_UOM_ID numeric(10,0) NOT NULL,
+
+  QtyOrdered numeric NOT NULL DEFAULT 0,
+
+ 
+  JP_DerivativeDocPolicy_InOut character(2),
+  JP_ContractCalender_Inout_ID numeric(10,0),
+  JP_ContractProcPeriod_InOut_ID  numeric(10,0) ,
+  JP_ContractProcess_Inout_ID numeric(10,0),
+  MovementQty  numeric NOT NULL DEFAULT 0 ,
+
+  JP_DerivativeDocPolicy_Inv character(2),
+  JP_ContractCalender_Inv_ID numeric(10,0),
+  JP_ContractProcPeriod_Inv_ID  numeric(10,0)  ,
+  JP_ContractProcess_Inv_ID numeric(10,0),
+  QtyInvoiced numeric NOT NULL DEFAULT 0 ,
+
+
+  PriceEntered numeric NOT NULL,
+
+  PriceActual numeric NOT NULL DEFAULT 0,
+
+  PriceList numeric NOT NULL DEFAULT 0,
+
+  PriceLimit numeric NOT NULL DEFAULT 0,
+  Discount numeric,
+
+  C_Tax_ID numeric(10,0) NOT NULL,
+
+  JP_LocatorFrom_ID numeric(10,0),
+  JP_LocatorTo_ID numeric(10,0),
+  JP_ASI_From_ID numeric(10,0),
+
+  JP_ASI_To_ID numeric(10,0),
+
+
+  LineNetAmt numeric NOT NULL DEFAULT 0,
+
+  C_Charge_ID numeric(10,0),
+
+
+  IsDescription character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+
+
+  C_Project_ID numeric(10,0),
+
+
+  C_ProjectPhase_ID numeric(10,0),
+
+  C_ProjectTask_ID numeric(10,0),
+
+  C_Campaign_ID numeric(10,0),
+
+  C_Activity_ID numeric(10,0),
+
+  User1_ID numeric(10,0),
+
+  User2_ID numeric(10,0),
+
+  AD_OrgTrx_ID numeric(10,0),
+
+
+  CONSTRAINT JP_ContractLine_pkey PRIMARY KEY (JP_ContractLine_ID)
+)

@@ -21,18 +21,18 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for JP_ContractProcess
+/** Generated Interface for JP_Contract_Acct
  *  @author iDempiere (generated) 
  *  @version Release 4.1
  */
 @SuppressWarnings("all")
-public interface I_JP_ContractProcess 
+public interface I_JP_Contract_Acct 
 {
 
-    /** TableName=JP_ContractProcess */
-    public static final String Table_Name = "JP_ContractProcess";
+    /** TableName=JP_Contract_Acct */
+    public static final String Table_Name = "JP_Contract_Acct";
 
-    /** AD_Table_ID=1000171 */
+    /** AD_Table_ID=1000181 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -64,19 +64,6 @@ public interface I_JP_ContractProcess
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name Classname */
-    public static final String COLUMNNAME_Classname = "Classname";
-
-	/** Set Classname.
-	  * Java Classname
-	  */
-	public void setClassname (String Classname);
-
-	/** Get Classname.
-	  * Java Classname
-	  */
-	public String getClassname();
-
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -106,32 +93,6 @@ public interface I_JP_ContractProcess
 	  */
 	public String getDescription();
 
-    /** Column name DocAction */
-    public static final String COLUMNNAME_DocAction = "DocAction";
-
-	/** Set Document Action.
-	  * The targeted status of the document
-	  */
-	public void setDocAction (String DocAction);
-
-	/** Get Document Action.
-	  * The targeted status of the document
-	  */
-	public String getDocAction();
-
-    /** Column name DocBaseType */
-    public static final String COLUMNNAME_DocBaseType = "DocBaseType";
-
-	/** Set Document BaseType.
-	  * Logical type of document
-	  */
-	public void setDocBaseType (String DocBaseType);
-
-	/** Get Document BaseType.
-	  * Logical type of document
-	  */
-	public String getDocBaseType();
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -145,32 +106,23 @@ public interface I_JP_ContractProcess
 	  */
 	public boolean isActive();
 
-    /** Column name IsCreateBaseDocJP */
-    public static final String COLUMNNAME_IsCreateBaseDocJP = "IsCreateBaseDocJP";
+    /** Column name JP_Contract_Acct_ID */
+    public static final String COLUMNNAME_JP_Contract_Acct_ID = "JP_Contract_Acct_ID";
 
-	/** Set Create Base Doc	  */
-	public void setIsCreateBaseDocJP (boolean IsCreateBaseDocJP);
+	/** Set Contract Acct Info	  */
+	public void setJP_Contract_Acct_ID (int JP_Contract_Acct_ID);
 
-	/** Get Create Base Doc	  */
-	public boolean isCreateBaseDocJP();
+	/** Get Contract Acct Info	  */
+	public int getJP_Contract_Acct_ID();
 
-    /** Column name JP_ContractProcess_ID */
-    public static final String COLUMNNAME_JP_ContractProcess_ID = "JP_ContractProcess_ID";
+    /** Column name JP_Contract_Acct_UU */
+    public static final String COLUMNNAME_JP_Contract_Acct_UU = "JP_Contract_Acct_UU";
 
-	/** Set Contract Process	  */
-	public void setJP_ContractProcess_ID (int JP_ContractProcess_ID);
+	/** Set Contract Acct Info(UU)	  */
+	public void setJP_Contract_Acct_UU (String JP_Contract_Acct_UU);
 
-	/** Get Contract Process	  */
-	public int getJP_ContractProcess_ID();
-
-    /** Column name JP_ContractProcess_UU */
-    public static final String COLUMNNAME_JP_ContractProcess_UU = "JP_ContractProcess_UU";
-
-	/** Set Contract Process(UU)	  */
-	public void setJP_ContractProcess_UU (String JP_ContractProcess_UU);
-
-	/** Get Contract Process(UU)	  */
-	public String getJP_ContractProcess_UU();
+	/** Get Contract Acct Info(UU)	  */
+	public String getJP_Contract_Acct_UU();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
