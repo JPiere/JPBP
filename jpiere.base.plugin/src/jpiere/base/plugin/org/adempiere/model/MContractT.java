@@ -16,9 +16,13 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 
+
+import org.compiere.model.Query;
 import org.compiere.util.CCache;
+import org.compiere.util.Util;
 
 /** JPIERE-0363
 *
@@ -63,10 +67,47 @@ public class MContractT extends X_JP_ContractT {
 			setJP_ContractExtendPeriod_ID(0);			
 		}
 
-		
 		return true;
 	}
 	
 	
+	private MContractContentT[] m_ContractContentTemplates = null;
 	
+	public MContractContentT[] getContractContentTemplates (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractContentT.COLUMNNAME_JP_ContractT_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MContractContentT.COLUMNNAME_JP_ContractContentT_ID;
+		//
+		List<MContractContentT> list = new Query(getCtx(), MContractContentT.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+	
+		return list.toArray(new MContractContentT[list.size()]);		
+
+	}
+	
+	public MContractContentT[] getContractContentTemplates(boolean requery, String orderBy)
+	{
+		if (m_ContractContentTemplates != null && !requery) {
+			set_TrxName(m_ContractContentTemplates, get_TrxName());
+			return m_ContractContentTemplates;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += "JP_ContractContentT_ID";
+		m_ContractContentTemplates = getContractContentTemplates(null, orderClause);
+		return m_ContractContentTemplates;
+	}
+	
+	public MContractContentT[] getContractContentTemplates()
+	{
+		return getContractContentTemplates(false, null);
+	}
 }

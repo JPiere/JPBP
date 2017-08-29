@@ -41,12 +41,14 @@ import org.compiere.util.DB;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+
+
 /** JPIERE-0363
 *
 * @author Hideaki Hagiwara
 *
 */
-public class MContract extends X_JP_Contract implements DocAction,DocOptions
+public class MContractContent extends X_JP_ContractContent implements DocAction,DocOptions
 {
 	/**
 	 * 
@@ -54,12 +56,12 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 	private static final long serialVersionUID = -7588955558162632796L;
 
 
-	public MContract(Properties ctx, int JP_Contract_ID, String trxName) 
+	public MContractContent(Properties ctx, int JP_Contract_ID, String trxName) 
 	{
 		super(ctx, JP_Contract_ID, trxName);
 	}
 	
-	public MContract(Properties ctx, ResultSet rs, String trxName) 
+	public MContractContent(Properties ctx, ResultSet rs, String trxName) 
 	{
 		super(ctx, rs, trxName);
 	}
@@ -315,7 +317,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			return false;
 
 		setProcessed(true);
-		setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Invalid);
+//		setJP_ContractStatus(MContractContent.JP_CONTRACTSTATUS_Invalid); TODO
 		setDocAction(DOCACTION_None);
 
 		return true;
@@ -416,7 +418,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 	 */
 	public BigDecimal getApprovalAmt()
 	{
-		return getJP_ContractDocAmt();
+		return getTotalLines();
 	}	//	getApprovalAmt
 
 	
@@ -448,132 +450,73 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
-		//Check Contract Type and COntract Category
-		if(newRecord || (is_ValueChanged("JP_ContractType") || is_ValueChanged("JP_ContractCategory_ID") || is_ValueChanged("JP_ContractT_ID")  ))
+		if(newRecord)
 		{
-			MContractT contractTemplate = MContractT.get(getCtx(), getJP_ContractT_ID());
-			if(!contractTemplate.getJP_ContractType().equals(getJP_ContractType())
-					|| contractTemplate.getJP_ContractCategory_ID() != getJP_ContractCategory_ID()
-					|| contractTemplate.getJP_ContractT_ID() != getJP_ContractT_ID() )
+			//Check - General Contract can not have Contract Content
+			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_GeneralContract))
 			{
-				//Contract type or Contract category are different from Contract template.
-				log.saveError("Error", Msg.getMsg(getCtx(), "JP_DifferentContractTypeOrCategory"));
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_GeneralContractContent"));
 				return false;
 			}
-		}
-
-		
-		//Check Valid JP_ContractPeriodDate_To
-		if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To") ) && getJP_ContractPeriodDate_To()!=null )
-		{
-			if(getJP_ContractPeriodDate_To().compareTo(getJP_ContractPeriodDate_From()) <= 0 )
-			{
-				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractPeriodDate_To"));
-				return false;
-			}
-		}
-		
-		
-		// Check Automatic Update Info
-		if(isAutomaticUpdateJP())
-		{
-			if(getJP_ContractPeriodDate_To() == null)
-				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractPeriodDate_To"));
 			
-			if(getJP_ContractCancelTerm_ID() == 0)
-				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractCancelTerm_ID"));
-			
-			if(getJP_ContractExtendPeriod_ID() == 0)
-				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractExtendPeriod_ID"));
-		
-			//Set JP_ContractPeriodDate_To
-			if(( newRecord || is_ValueChanged("JP_ContractCancelDate") ) && getJP_ContractCancelDate() != null )
-			{
-				setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
-			}
-			
-			//Set Contract Cancel Deadline
-			if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To")) && getJP_ContractCancelDeadline() == null )
-			{
-				MContractCancelTerm m_ContractCancelTerm = MContractCancelTerm.get(getCtx(), getJP_ContractCancelTerm_ID());
-				setJP_ContractCancelDeadline(m_ContractCancelTerm.calculateCancelDeadLine(getJP_ContractPeriodDate_To()));
-			}
-			
-		}else{ 
-			
-			//Refresh Automatic update info
-			setJP_ContractCancelTerm_ID(0);
-			setJP_ContractExtendPeriod_ID(0);
-			setJP_ContractCancelDeadline(null);
-			setJP_ContractCancelOfferDate(null);
-			setJP_ContractCancelDate(null);
-			setJP_ContractCancel_SalesRep_ID(0);
-			setJP_ContractCancel_User_ID(0);
-			setJP_ContractCancelCause_ID(0);
-		}
-		
-		
-		Timestamp now = new Timestamp(System.currentTimeMillis());
-		if(!getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_Invalid))
-		{
-			if(now.compareTo(getJP_ContractPeriodDate_From()) > 0 )
-			{
-				
-				if(now.compareTo(getJP_ContractPeriodDate_To()) < 0)
-				{
-					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
-				}else{
-					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
-				}
-				
-			}else{
-				setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
-			}
 		}
 		
 		return true;
 	}
+
+	private MContract parent = null;
 	
-	private MContractContent[] m_ContractContents = null;
-	
-	public MContractContent[] getContractContents (String whereClause, String orderClause)
+	public MContract getParent()
 	{
-		StringBuilder whereClauseFinal = new StringBuilder(MContractContent.COLUMNNAME_JP_Contract_ID+"=? ");
+		if(parent == null)
+		{
+			parent = new MContract(getCtx(), getJP_Contract_ID(), null);
+		}
+		
+		return parent;
+	}
+	
+	
+	private MContractLine[] 	m_lines = null;
+	
+	public MContractLine[] getLines (String whereClause, String orderClause)
+	{
+		//red1 - using new Query class from Teo / Victor's MDDOrder.java implementation
+		StringBuilder whereClauseFinal = new StringBuilder(MContractLine.COLUMNNAME_JP_ContractContent_ID+"=? ");
 		if (!Util.isEmpty(whereClause, true))
 			whereClauseFinal.append(whereClause);
 		if (orderClause.length() == 0)
-			orderClause = MContractContent.COLUMNNAME_JP_ContractContent_ID;
+			orderClause = MContractLine.COLUMNNAME_Line;
 		//
-		List<MContractContent> list = new Query(getCtx(), MContractContent.Table_Name, whereClauseFinal.toString(), get_TrxName())
+		List<MContractLine> list = new Query(getCtx(), MContractLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
 										.setParameters(get_ID())
 										.setOrderBy(orderClause)
 										.list();
-	
-		return list.toArray(new MContractContent[list.size()]);		
 
-	}
-	
-	public MContractContent[] getContractContents(boolean requery, String orderBy)
+		//
+		return list.toArray(new MContractLine[list.size()]);		
+	}	//	getLines
+
+	public MContractLine[] getLines (boolean requery, String orderBy)
 	{
-		if (m_ContractContents != null && !requery) {
-			set_TrxName(m_ContractContents, get_TrxName());
-			return m_ContractContents;
+		if (m_lines != null && !requery) {
+			set_TrxName(m_lines, get_TrxName());
+			return m_lines;
 		}
 		//
 		String orderClause = "";
 		if (orderBy != null && orderBy.length() > 0)
 			orderClause += orderBy;
 		else
-			orderClause += "JP_ContractContent_ID";
-		m_ContractContents = getContractContents(null, orderClause);
-		return m_ContractContents;
-	}
-	
-	public MContractContent[] getContractContentTemplates()
+			orderClause += "Line";
+		m_lines = getLines(null, orderClause);
+		return m_lines;
+	}	//	getLines
+
+
+	public MContractLine[] getLines()
 	{
-		return getContractContents(false, null);
-	}
-
-
+		return getLines(false, null);
+	}	//	getLines
 	
-}	//	MContract
+}	//	MContractContent

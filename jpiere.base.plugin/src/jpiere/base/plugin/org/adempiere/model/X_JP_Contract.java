@@ -34,7 +34,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170827L;
+	private static final long serialVersionUID = 20170829L;
 
     /** Standard Constructor */
     public X_JP_Contract (Properties ctx, int JP_Contract_ID, String trxName)
@@ -253,9 +253,9 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setC_DocType_ID (int C_DocType_ID)
 	{
 		if (C_DocType_ID < 0) 
-			set_Value (COLUMNNAME_C_DocType_ID, null);
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
 		else 
-			set_Value (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
 	}
 
 	/** Get Document Type.
@@ -679,9 +679,9 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setJP_ContractCategory_ID (int JP_ContractCategory_ID)
 	{
 		if (JP_ContractCategory_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractCategory_ID, null);
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
 	}
 
 	/** Get Contract Category.
@@ -856,6 +856,12 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 
 	/** Prepare = PR */
 	public static final String JP_CONTRACTSTATUS_Prepare = "PR";
+	/** Under Contract = UC */
+	public static final String JP_CONTRACTSTATUS_UnderContract = "UC";
+	/** Expiration of Contract = EC */
+	public static final String JP_CONTRACTSTATUS_ExpirationOfContract = "EC";
+	/** Invalid = IN */
+	public static final String JP_CONTRACTSTATUS_Invalid = "IN";
 	/** Set Contract Status.
 		@param JP_ContractStatus Contract Status	  */
 	public void setJP_ContractStatus (String JP_ContractStatus)
@@ -881,9 +887,9 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setJP_ContractT_ID (int JP_ContractT_ID)
 	{
 		if (JP_ContractT_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractT_ID, null);
+			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_ContractT_ID, Integer.valueOf(JP_ContractT_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, Integer.valueOf(JP_ContractT_ID));
 	}
 
 	/** Get Contract Doc Template.
@@ -907,7 +913,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setJP_ContractType (String JP_ContractType)
 	{
 
-		set_Value (COLUMNNAME_JP_ContractType, JP_ContractType);
+		set_ValueNoCheck (COLUMNNAME_JP_ContractType, JP_ContractType);
 	}
 
 	/** Get Contract Type.

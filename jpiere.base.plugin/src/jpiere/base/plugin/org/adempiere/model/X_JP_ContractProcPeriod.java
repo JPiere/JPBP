@@ -31,7 +31,7 @@ public class X_JP_ContractProcPeriod extends PO implements I_JP_ContractProcPeri
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170827L;
+	private static final long serialVersionUID = 20170829L;
 
     /** Standard Constructor */
     public X_JP_ContractProcPeriod (Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
@@ -39,6 +39,8 @@ public class X_JP_ContractProcPeriod extends PO implements I_JP_ContractProcPeri
       super (ctx, JP_ContractProcPeriod_ID, trxName);
       /** if (JP_ContractProcPeriod_ID == 0)
         {
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setDateDoc (new Timestamp( System.currentTimeMillis() ));
 			setEndDate (new Timestamp( System.currentTimeMillis() ));
 			setJP_ContractCalender_ID (0);
 // @JP_ContractCalender_ID@
