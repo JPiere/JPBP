@@ -513,21 +513,25 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		}
 		
 		
+		//Check Contract Status
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		if(!getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_Invalid))
 		{
 			if(now.compareTo(getJP_ContractPeriodDate_From()) > 0 )
 			{
 				
-				if(now.compareTo(getJP_ContractPeriodDate_To()) < 0)
+				if(getJP_ContractPeriodDate_To()==null || now.compareTo(getJP_ContractPeriodDate_To()) < 0)
 				{
 					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
+					setProcessed(false);
 				}else{
 					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
+					setProcessed(true);
 				}
 				
 			}else{
 				setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
+				setProcessed(false);
 			}
 		}
 		
