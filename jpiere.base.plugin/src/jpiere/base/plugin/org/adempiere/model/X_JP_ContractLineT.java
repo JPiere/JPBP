@@ -32,7 +32,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170829L;
+	private static final long serialVersionUID = 20170901L;
 
     /** Standard Constructor */
     public X_JP_ContractLineT (Properties ctx, int JP_ContractLineT_ID, String trxName)
@@ -160,9 +160,9 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
 		if (C_BPartner_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
 	/** Get Business Partner .
@@ -188,9 +188,9 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID)
 	{
 		if (C_BPartner_Location_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_Location_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_Location_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
+			set_Value (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
 	}
 
 	/** Get Partner Location.
@@ -502,6 +502,31 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return false;
 	}
 
+	public I_JP_ContractCalenderRef getJP_ContractCalRef_InOut() throws RuntimeException
+    {
+		return (I_JP_ContractCalenderRef)MTable.get(getCtx(), I_JP_ContractCalenderRef.Table_Name)
+			.getPO(getJP_ContractCalRef_InOut_ID(), get_TrxName());	}
+
+	/** Set Contract Calender Ref(In/Out).
+		@param JP_ContractCalRef_InOut_ID Contract Calender Ref(In/Out)	  */
+	public void setJP_ContractCalRef_InOut_ID (int JP_ContractCalRef_InOut_ID)
+	{
+		if (JP_ContractCalRef_InOut_ID < 1) 
+			set_Value (COLUMNNAME_JP_ContractCalRef_InOut_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ContractCalRef_InOut_ID, Integer.valueOf(JP_ContractCalRef_InOut_ID));
+	}
+
+	/** Get Contract Calender Ref(In/Out).
+		@return Contract Calender Ref(In/Out)	  */
+	public int getJP_ContractCalRef_InOut_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalRef_InOut_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_JP_ContractCalenderRef getJP_ContractCalRef_Inv() throws RuntimeException
     {
 		return (I_JP_ContractCalenderRef)MTable.get(getCtx(), I_JP_ContractCalenderRef.Table_Name)
@@ -522,31 +547,6 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public int getJP_ContractCalRef_Inv_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalRef_Inv_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public I_JP_ContractCalenderRef getJP_ContractCalref_InOut() throws RuntimeException
-    {
-		return (I_JP_ContractCalenderRef)MTable.get(getCtx(), I_JP_ContractCalenderRef.Table_Name)
-			.getPO(getJP_ContractCalref_InOut_ID(), get_TrxName());	}
-
-	/** Set Contract Calender Ref(In/Out).
-		@param JP_ContractCalref_InOut_ID Contract Calender Ref(In/Out)	  */
-	public void setJP_ContractCalref_InOut_ID (int JP_ContractCalref_InOut_ID)
-	{
-		if (JP_ContractCalref_InOut_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractCalref_InOut_ID, null);
-		else 
-			set_Value (COLUMNNAME_JP_ContractCalref_InOut_ID, Integer.valueOf(JP_ContractCalref_InOut_ID));
-	}
-
-	/** Get Contract Calender Ref(In/Out).
-		@return Contract Calender Ref(In/Out)	  */
-	public int getJP_ContractCalref_InOut_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalref_InOut_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

@@ -317,6 +317,17 @@ public interface I_JP_ContractLineT
 	  */
 	public boolean isDescription();
 
+    /** Column name JP_ContractCalRef_InOut_ID */
+    public static final String COLUMNNAME_JP_ContractCalRef_InOut_ID = "JP_ContractCalRef_InOut_ID";
+
+	/** Set Contract Calender Ref(In/Out)	  */
+	public void setJP_ContractCalRef_InOut_ID (int JP_ContractCalRef_InOut_ID);
+
+	/** Get Contract Calender Ref(In/Out)	  */
+	public int getJP_ContractCalRef_InOut_ID();
+
+	public I_JP_ContractCalenderRef getJP_ContractCalRef_InOut() throws RuntimeException;
+
     /** Column name JP_ContractCalRef_Inv_ID */
     public static final String COLUMNNAME_JP_ContractCalRef_Inv_ID = "JP_ContractCalRef_Inv_ID";
 
@@ -327,17 +338,6 @@ public interface I_JP_ContractLineT
 	public int getJP_ContractCalRef_Inv_ID();
 
 	public I_JP_ContractCalenderRef getJP_ContractCalRef_Inv() throws RuntimeException;
-
-    /** Column name JP_ContractCalref_InOut_ID */
-    public static final String COLUMNNAME_JP_ContractCalref_InOut_ID = "JP_ContractCalref_InOut_ID";
-
-	/** Set Contract Calender Ref(In/Out)	  */
-	public void setJP_ContractCalref_InOut_ID (int JP_ContractCalref_InOut_ID);
-
-	/** Get Contract Calender Ref(In/Out)	  */
-	public int getJP_ContractCalref_InOut_ID();
-
-	public I_JP_ContractCalenderRef getJP_ContractCalref_InOut() throws RuntimeException;
 
     /** Column name JP_ContractContentT_ID */
     public static final String COLUMNNAME_JP_ContractContentT_ID = "JP_ContractContentT_ID";
