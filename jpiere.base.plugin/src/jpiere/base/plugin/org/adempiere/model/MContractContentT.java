@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MDocType;
 import org.compiere.model.Query;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -57,6 +58,19 @@ public class MContractContentT extends X_JP_ContractContentT {
 					&& getParent().getContractContentTemplates(true, null).length > 0 )
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_SpotContractContentTemplate"));
+				return false;
+			}
+		}
+		
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_C_DocType_ID))
+		{
+			MDocType docType = MDocType.get(getCtx(), getJP_BaseDocDocType_ID());
+			setIsSOTrx(docType.isSOTrx());
+			
+			if(!getDocBaseType().equals(docType.getDocBaseType()))
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID));
 				return false;
 			}
 		}

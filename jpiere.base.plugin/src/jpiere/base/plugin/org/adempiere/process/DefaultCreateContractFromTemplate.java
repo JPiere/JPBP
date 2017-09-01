@@ -131,9 +131,7 @@ public class DefaultCreateContractFromTemplate extends SvrProcess {
 			}
 		}
 		
-		getProcessInfo().setSummary(Msg.getMsg(getCtx(), "OK"));
-		
-		return "";
+		return Msg.getMsg(getCtx(), "OK");
 	}
 	
 }

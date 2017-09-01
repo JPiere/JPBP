@@ -1,17 +1,40 @@
+/******************************************************************************
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
+ *****************************************************************************/
+
+
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MOrder;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 
+
+/** JPIERE-0363
+*
+* @author Hideaki Hagiwara
+*
+*/
 public class CallContractProcessFromDocument extends SvrProcess {
 	
 	MContractContent m_ContractContente = null;
@@ -63,7 +86,13 @@ public class CallContractProcessFromDocument extends SvrProcess {
 			throw new AdempiereException(pi.getSummary());
 		}
 		
-		return pi.getSummary();
+		String document_ID = pi.getSummary();
+		int C_Document_ID = Integer.valueOf(document_ID);
+		MOrder order = new MOrder(getCtx(), C_Document_ID, get_TrxName());
+		addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_Order_ID", m_ContractContente.isSOTrx()) + " : " + order.getDocumentNo()
+		, MOrder.Table_ID, C_Document_ID);//TODO メッセージ化
+		
+		return Msg.getMsg(getCtx(), "OK");
 	}
 	
 }

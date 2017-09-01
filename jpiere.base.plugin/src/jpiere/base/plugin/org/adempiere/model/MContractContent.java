@@ -461,6 +461,19 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			
 		}
 		
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_C_DocType_ID))
+		{
+			MDocType docType = MDocType.get(getCtx(), getJP_BaseDocDocType_ID());
+			setIsSOTrx(docType.isSOTrx());
+			
+			if(!getDocBaseType().equals(docType.getDocBaseType()))
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID));
+				return false;
+			}
+		}
+		
 		return true;
 	}
 
