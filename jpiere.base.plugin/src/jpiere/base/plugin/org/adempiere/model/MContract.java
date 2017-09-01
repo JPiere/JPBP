@@ -199,6 +199,11 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 		
+		//TODO:期間契約の場合は、契約内容と契約内容明細がある事をチェックする
+		
+		//TODO:スポット契約の場合は、契約内容がある事をチェックする。
+		
+		
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -573,7 +578,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		return m_ContractContents;
 	}
 	
-	public MContractContent[] getContractContentTemplates()
+	public MContractContent[] getContractContents()
 	{
 		return getContractContents(false, null);
 	}
