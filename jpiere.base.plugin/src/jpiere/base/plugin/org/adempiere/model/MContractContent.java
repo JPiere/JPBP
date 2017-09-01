@@ -461,8 +461,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			
 		}
 		
+		
+		//Check JP_BaseDocDocType_ID and DocBaseType
 		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
-				|| is_ValueChanged(MContractContentT.COLUMNNAME_C_DocType_ID))
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType))
 		{
 			MDocType docType = MDocType.get(getCtx(), getJP_BaseDocDocType_ID());
 			setIsSOTrx(docType.isSOTrx());
@@ -471,6 +473,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID));
 				return false;
+			}else{
+				
+				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
+				{
+					setOrderType(docType.getDocSubTypeSO());
+				}else{
+					setOrderType(null);
+				}
 			}
 		}
 		
