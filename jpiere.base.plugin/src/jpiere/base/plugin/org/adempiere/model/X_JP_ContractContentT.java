@@ -32,7 +32,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170901L;
+	private static final long serialVersionUID = 20170902L;
 
     /** Standard Constructor */
     public X_JP_ContractContentT (Properties ctx, int JP_ContractContentT_ID, String trxName)
@@ -69,6 +69,8 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 			setJP_Contract_Acct_ID (0);
 			setM_PriceList_ID (0);
 			setName (null);
+			setOrderType (null);
+// --
 			setPaymentRule (null);
 // B
 			setPriorityRule (null);
@@ -1091,6 +1093,12 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 
 	/** Manual = MA */
 	public static final String JP_CREATEDERIVATIVEDOCPOLICY_Manual = "MA";
+	/** Create Ship/Receipt = IO */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt = "IO";
+	/** Create Invoice = IV */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice = "IV";
+	/** Create Ship/Receipt & Invoice = BT */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice = "BT";
 	/** Set Create Derivative Doc Policy.
 		@param JP_CreateDerivativeDocPolicy Create Derivative Doc Policy	  */
 	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy)
@@ -1260,24 +1268,24 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
-	/** OrderType AD_Reference_ID=148 */
-	public static final int ORDERTYPE_AD_Reference_ID=148;
-	/** On Credit Order = WI */
-	public static final String ORDERTYPE_OnCreditOrder = "WI";
-	/** POS Order = WR */
-	public static final String ORDERTYPE_POSOrder = "WR";
-	/** Warehouse Order = WP */
-	public static final String ORDERTYPE_WarehouseOrder = "WP";
-	/** Standard Order = SO */
-	public static final String ORDERTYPE_StandardOrder = "SO";
-	/** Proposal = ON */
-	public static final String ORDERTYPE_Proposal = "ON";
 	/** Quotation = OB */
 	public static final String ORDERTYPE_Quotation = "OB";
-	/** Return Material = RM */
-	public static final String ORDERTYPE_ReturnMaterial = "RM";
+	/** Proposal = ON */
+	public static final String ORDERTYPE_Proposal = "ON";
 	/** Prepay Order = PR */
 	public static final String ORDERTYPE_PrepayOrder = "PR";
+	/** Return Material = RM */
+	public static final String ORDERTYPE_ReturnMaterial = "RM";
+	/** Standard Order = SO */
+	public static final String ORDERTYPE_StandardOrder = "SO";
+	/** On Credit Order = WI */
+	public static final String ORDERTYPE_OnCreditOrder = "WI";
+	/** Warehouse Order = WP */
+	public static final String ORDERTYPE_WarehouseOrder = "WP";
+	/** POS Order = WR */
+	public static final String ORDERTYPE_POSOrder = "WR";
+	/** Other = -- */
+	public static final String ORDERTYPE_Other = "--";
 	/** Set Order Type.
 		@param OrderType 
 		Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)

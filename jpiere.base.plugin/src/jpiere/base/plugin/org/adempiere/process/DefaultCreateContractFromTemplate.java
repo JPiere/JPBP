@@ -25,10 +25,12 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLineT;
+import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractT;
 
 /** JPIERE-0363
@@ -75,48 +77,73 @@ public class DefaultCreateContractFromTemplate extends SvrProcess {
 			throw new Exception("JP_ContractContentCreated");//Contract Content has already been created
 		}
 		
+		//Create Contract Content
 		for(int i = 0 ; i < m_ContractContentTemplates.length; i++)
 		{
-			MContractContent contrctContent = new MContractContent(getCtx(), 0, get_TrxName());
-			PO.copyValues(m_ContractContentTemplates[i], contrctContent);
-			contrctContent.setAD_Org_ID(m_Contract.getAD_Org_ID());
-			contrctContent.setAD_OrgTrx_ID(m_Contract.getAD_OrgTrx_ID());
-			contrctContent.setJP_Contract_ID(m_Contract.get_ID());
-			contrctContent.setJP_ContractContentT_ID(m_ContractContentTemplates[i].get_ID());
-			contrctContent.setJP_Contract_Acct_ID(m_ContractContentTemplates[i].getJP_Contract_Acct_ID());
-			contrctContent.setDateDoc(m_Contract.getDateDoc());
-			contrctContent.setDateAcct(m_Contract.getDateAcct());			
+			MContractContent contractContent = new MContractContent(getCtx(), 0, get_TrxName());
+			PO.copyValues(m_ContractContentTemplates[i], contractContent);
+			contractContent.setAD_Org_ID(m_Contract.getAD_Org_ID());
+			contractContent.setAD_OrgTrx_ID(m_Contract.getAD_OrgTrx_ID());
+			contractContent.setJP_Contract_ID(m_Contract.get_ID());
+			contractContent.setJP_ContractContentT_ID(m_ContractContentTemplates[i].get_ID());
+			contractContent.setJP_Contract_Acct_ID(m_ContractContentTemplates[i].getJP_Contract_Acct_ID());
+			contractContent.setDateDoc(m_Contract.getDateDoc());
+			contractContent.setDateAcct(m_Contract.getDateAcct());			
 			
 			if(m_ContractContentTemplates[i].getC_BPartner_ID()==0)
 			{
-				contrctContent.setC_BPartner_ID(m_Contract.getC_BPartner_ID());
-				contrctContent.setC_BPartner_Location_ID(m_Contract.getC_BPartner_Location_ID());
-				contrctContent.setAD_User_ID(m_Contract.getAD_User_ID());
+				contractContent.setC_BPartner_ID(m_Contract.getC_BPartner_ID());
+				contractContent.setC_BPartner_Location_ID(m_Contract.getC_BPartner_Location_ID());
+				contractContent.setAD_User_ID(m_Contract.getAD_User_ID());
 			}
-			contrctContent.setTotalLines(Env.ZERO);
-			contrctContent.setDocStatus(DocAction.STATUS_Drafted);
-			contrctContent.setDocAction(DocAction.ACTION_Complete);
-			contrctContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
-			if(contrctContent.getM_Warehouse_ID() == 0)
-				contrctContent.setM_Warehouse_ID(MOrgInfo.get(null, contrctContent.getAD_Org_ID(),get_TrxName()).getM_Warehouse_ID());
+			contractContent.setTotalLines(Env.ZERO);
+			contractContent.setDocStatus(DocAction.STATUS_Drafted);
+			contractContent.setDocAction(DocAction.ACTION_Complete);
+			contractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
+			if(contractContent.getM_Warehouse_ID() == 0)
+				contractContent.setM_Warehouse_ID(MOrgInfo.get(null, contractContent.getAD_Org_ID(),get_TrxName()).getM_Warehouse_ID());
 			
-			//TODO 通貨とプライスリストの処理
-			contrctContent.setC_Currency_ID(m_Contract.getC_Currency_ID());
-			contrctContent.saveEx(get_TrxName());
+			contractContent.saveEx(get_TrxName());
 			
-			//TODO 明細の登録処理
+			//Create Contract Content Line
 			MContractLineT[] m_ContractLineTemplates = m_ContractContentTemplates[i].getContractLineTemplates();
 			for(int j = 0; j < m_ContractLineTemplates.length; j++)
 			{
 				MContractLine contrctLine = new MContractLine(getCtx(), 0, get_TrxName());
 				PO.copyValues(m_ContractLineTemplates[j], contrctLine);
-				contrctLine.setAD_Org_ID(contrctContent.getAD_Org_ID());
-				contrctLine.setAD_OrgTrx_ID(contrctContent.getAD_OrgTrx_ID());
-				contrctLine.setJP_ContractContent_ID(contrctContent.getJP_ContractContent_ID());
+				contrctLine.setAD_Org_ID(contractContent.getAD_Org_ID());
+				contrctLine.setAD_OrgTrx_ID(contractContent.getAD_OrgTrx_ID());
+				contrctLine.setJP_ContractContent_ID(contractContent.getJP_ContractContent_ID());
 				contrctLine.setJP_ContractLineT_ID(m_ContractLineTemplates[j].getJP_ContractLineT_ID());
 				contrctLine.saveEx(get_TrxName());
-			}
-		}
+				
+				if(m_ContractLineTemplates[i].getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+				{
+					MContractCalender calender = MContractCalender.get(getCtx(), contrctLine.getJP_ContractCalender_InOut_ID());
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From() 
+													,m_ContractLineTemplates[i].getJP_ContractProcPOffset_InOut());
+					if(period == null)
+					{
+						throw new Exception( Msg.getMsg(getCtx(), "NotFound") +" : " +Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));
+					}
+					
+					contrctLine.setJP_ContractProcPeriod_InOut_ID(period.getJP_ContractProcPeriod_ID());
+				}
+				
+				if(m_ContractLineTemplates[i].getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+				{
+					MContractCalender calender = MContractCalender.get(getCtx(), contrctLine.getJP_ContractCalender_Inv_ID());
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From() 
+													,m_ContractLineTemplates[i].getJP_ContractProcPOffset_Inv());
+					if(period == null)
+					{
+						throw new Exception( Msg.getMsg(getCtx(), "NotFound") +" : " +Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));
+					}
+					
+					contrctLine.setJP_ContractProcPeriod_Inv_ID(period.getJP_ContractProcPeriod_ID());
+				}
+			}//For j
+		}//For i
 		
 		return Msg.getMsg(getCtx(), "OK");
 	}

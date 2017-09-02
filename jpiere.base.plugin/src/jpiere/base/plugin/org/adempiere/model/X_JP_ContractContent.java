@@ -33,7 +33,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170901L;
+	private static final long serialVersionUID = 20170902L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -79,13 +79,13 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			setJP_BaseDocDocType_ID (0);
 			setJP_ContractContentT_ID (0);
 			setJP_ContractContent_ID (0);
-			setJP_ContractProcDate_From (new Timestamp( System.currentTimeMillis() ));
 			setJP_ContractProcStatus (null);
 			setJP_Contract_Acct_ID (0);
 			setJP_Contract_ID (0);
 			setM_PriceList_ID (0);
-			setM_Warehouse_ID (0);
 			setName (null);
+			setOrderType (null);
+// --
 			setPaymentRule (null);
 // B
 			setPosted (false);
@@ -1246,6 +1246,14 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** In Progress = IP */
 	public static final String JP_CONTRACTPROCSTATUS_InProgress = "IP";
+	/** Invalid = IN */
+	public static final String JP_CONTRACTPROCSTATUS_Invalid = "IN";
+	/** Unprocessed = UN */
+	public static final String JP_CONTRACTPROCSTATUS_Unprocessed = "UN";
+	/** Processed = PD */
+	public static final String JP_CONTRACTPROCSTATUS_Processed = "PD";
+	/** Suspend = SD */
+	public static final String JP_CONTRACTPROCSTATUS_Suspend = "SD";
 	/** Set Contract Process Status.
 		@param JP_ContractProcStatus Contract Process Status	  */
 	public void setJP_ContractProcStatus (String JP_ContractProcStatus)
@@ -1338,6 +1346,12 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** Manual = MA */
 	public static final String JP_CREATEDERIVATIVEDOCPOLICY_Manual = "MA";
+	/** Create Ship/Receipt = IO */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt = "IO";
+	/** Create Invoice = IV */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice = "IV";
+	/** Create Ship/Receipt & Invoice = BT */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice = "BT";
 	/** Set Create Derivative Doc Policy.
 		@param JP_CreateDerivativeDocPolicy Create Derivative Doc Policy	  */
 	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy)
