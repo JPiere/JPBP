@@ -14,10 +14,14 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import org.compiere.util.CCache;
+import org.compiere.util.DB;
 
 /**
  * JPIERE-0363
@@ -59,4 +63,128 @@ public class MContractCalender extends X_JP_ContractCalender {
 		return retValue;
 	}	//	get
 	
+	
+	/**
+	 * 
+	 * @param ctx
+	 * @param date_From
+	 * @param processPeriodNum
+	 * @return
+	 */
+	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From, int processPeriodNum)
+	{
+		int JP_ContractProcPeriod_ID = 0;
+		
+		if(processPeriodNum == 0)
+		{			
+			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod "
+												+ "WHERE StartDate <= ? AND EndDate >=? AND JP_ContractCalender_ID=? ";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setTimestamp(1, date_From);
+				pstmt.setTimestamp(2, date_From);
+				pstmt.setInt(3, getJP_ContractCalender_ID());
+				rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					JP_ContractProcPeriod_ID = rs.getInt(1);
+				}
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null; pstmt = null;
+			}
+			
+		}else if (processPeriodNum > 0){
+			
+			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod "
+												+ "WHERE EndDate >=? AND JP_ContractCalender_ID=? "
+												+ " ORDER BY EndDate ASC";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setTimestamp(1, date_From);
+				pstmt.setInt(2, getJP_ContractCalender_ID());
+				pstmt.setMaxRows(processPeriodNum);
+				rs = pstmt.executeQuery();
+				int i = 0;
+				while (rs.next())
+				{
+					if(i == processPeriodNum)
+					{
+						JP_ContractProcPeriod_ID = rs.getInt(1);
+					}
+					i++;
+				}
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null; pstmt = null;
+			}
+
+		}else{
+			
+			processPeriodNum = processPeriodNum *-1;
+			
+			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod "
+											+ "WHERE StartDate <=? AND JP_ContractCalender_ID=? "
+											+ " ORDER BY StartDate DESC ";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setTimestamp(1, date_From);
+				pstmt.setInt(2, getJP_ContractCalender_ID());
+				pstmt.setMaxRows(processPeriodNum);
+				rs = pstmt.executeQuery();
+				int i = 0;
+				while (rs.next())
+				{
+					if(i == processPeriodNum)
+					{
+						JP_ContractProcPeriod_ID = rs.getInt(1);
+					}
+					i++;
+				}
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null; pstmt = null;
+			}
+			
+		}
+		
+		if(JP_ContractProcPeriod_ID == 0)
+		{
+			return null;
+		}else{
+			return new MContractProcPeriod(ctx, JP_ContractProcPeriod_ID, get_TrxName());
+		}
+	}
+	
+	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From)
+	{
+		return getContractProcessPeriod(ctx, date_From, 0);
+	}
 }

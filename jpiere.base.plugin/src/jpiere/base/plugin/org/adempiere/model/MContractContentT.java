@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.compiere.model.MDocType;
 import org.compiere.model.Query;
+import org.compiere.util.CCache;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -80,7 +81,7 @@ public class MContractContentT extends X_JP_ContractContentT {
 				{
 					setOrderType(docType.getDocSubTypeSO());
 				}else{
-					setOrderType(null);
+					setOrderType("--");
 				}
 				
 			}
@@ -142,5 +143,25 @@ public class MContractContentT extends X_JP_ContractContentT {
 		return getContractLineTemplates(false, null);
 	}
 	
+	/**	Cache				*/
+	private static CCache<Integer,MContractContentT>	s_cache = new CCache<Integer,MContractContentT>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractContent_ID id
+	 *	@return Contract Calender
+	 */
+	public static MContractContentT get (Properties ctx, int JP_ContractContentT_ID)
+	{
+		Integer ii = new Integer (JP_ContractContentT_ID);
+		MContractContentT retValue = (MContractContentT)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MContractContentT (ctx, JP_ContractContentT_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_ContractContentT_ID, retValue);
+		return retValue;
+	}	//	get
 
 }

@@ -131,7 +131,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			}else if(tableName.equals(MContractContent.Table_Name)
 					||tableName.equals(MContractContentT.Table_Name) ){	//JPIERE-0363
 				
-				if(columnName.equals("JP_BaseDocDocType_ID"))
+				if(columnName.equals("JP_BaseDocDocType_ID") || columnName.equals("JP_ContractCalender_ID") )
 				{
 					list.add(new JPiereContractContentCallout());
 				}				

@@ -13,13 +13,19 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.callout;
 
+import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDocType;
-import org.compiere.util.Env;
+import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractCalender;
+import jpiere.base.plugin.org.adempiere.model.MContractContentT;
+import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 /**
  *
@@ -40,16 +46,73 @@ public class JPiereContractContentCallout implements IColumnCallout {
 		{
 			if( value == null)
 			{
-				mTab.setValue ("OrderType",  "");
+				mTab.setValue ("OrderType",  "--");
 			}else{
 				Integer JP_BaseDocDocType_ID = (Integer)value;
 				MDocType docType = MDocType.get(ctx, JP_BaseDocDocType_ID.intValue());
 				mTab.setValue("IsSOTrx", docType.isSOTrx());
 				
-				String DocSubTypeSO = docType.getDocSubTypeSO();
-				Env.setContext(ctx, WindowNo, "OrderType", DocSubTypeSO);
-				mTab.setValue ("OrderType", DocSubTypeSO);
+				if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)
+						|| docType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))
+				{
+					String DocSubTypeSO = docType.getDocSubTypeSO();
+					mTab.setValue ("OrderType", DocSubTypeSO);					
+				}else{
+					mTab.setValue ("OrderType", "--");	
+				}
+				
+
 			}
+			
+		}else if(mField.getColumnName().equals("JP_ContractCalender_ID")){
+			
+			if( value != null)
+			{
+				int JP_ContractContentT_ID =  ((Integer)mTab.getValue("JP_ContractContentT_ID")).intValue();
+				MContractContentT contentTemplate= MContractContentT.get(ctx, JP_ContractContentT_ID);
+				int JP_Contract_ID = ((Integer)mTab.getValue("JP_Contract_ID")).intValue();
+				MContract contract = MContract.get(ctx, JP_Contract_ID);
+				
+				//Calculate JP_ContractProcDate_From
+				if(contentTemplate.getJP_ContractProcPOffset()==0)
+				{
+					mTab.setValue ("JP_ContractProcDate_From", contract.getJP_ContractPeriodDate_From());
+					
+				}else{
+					
+					int processPeriodOffset = contentTemplate.getJP_ContractProcPOffset();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+					int JP_ContractCalender_ID = ((Integer)value).intValue();
+					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,contract.getJP_ContractPeriodDate_From() ,processPeriodOffset);
+					if(period == null)
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
+					
+					mTab.setValue ("JP_ContractProcDate_From", period.getStartDate());
+				}
+
+				//Calculate JP_ContractProcDate_To
+				if(contentTemplate.getJP_ContractProcPeriodNum()==0)
+				{
+					mTab.setValue ("JP_ContractProcDate_From", contract.getJP_ContractPeriodDate_To());
+				}else{
+					
+					int JP_ContractCalender_ID = ((Integer)value).intValue();
+					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx, (Timestamp)mTab.getValue("JP_ContractProcDate_From")
+																		,contentTemplate.getJP_ContractProcPeriodNum());	
+					
+					if(period == null)
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
+					
+					mTab.setValue ("JP_ContractProcDate_To", period.getEndDate());
+				}
+			}
+			
 		}
 
 		return "";

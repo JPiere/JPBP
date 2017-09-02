@@ -479,8 +479,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				{
 					setOrderType(docType.getDocSubTypeSO());
 				}else{
-					setOrderType(null);
+					setOrderType("--");
 				}
+				
 			}
 		}
 		

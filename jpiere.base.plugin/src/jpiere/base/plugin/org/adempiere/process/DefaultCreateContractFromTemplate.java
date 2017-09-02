@@ -29,7 +29,6 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLineT;
-import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractT;
 
 /** JPIERE-0363
@@ -86,22 +85,7 @@ public class DefaultCreateContractFromTemplate extends SvrProcess {
 			contrctContent.setJP_ContractContentT_ID(m_ContractContentTemplates[i].get_ID());
 			contrctContent.setJP_Contract_Acct_ID(m_ContractContentTemplates[i].getJP_Contract_Acct_ID());
 			contrctContent.setDateDoc(m_Contract.getDateDoc());
-			contrctContent.setDateAcct(m_Contract.getDateAcct());
-			
-			//TODO 契約処理期間オフセットの処理
-			if(m_ContractContentTemplates[i].getJP_ContractProcPOffset() == 0)
-			{
-				contrctContent.setJP_ContractProcDate_From(m_Contract.getJP_ContractPeriodDate_From());
-			}else{
-				int ContractProcessPeriodOffset = m_ContractContentTemplates[i].getJP_ContractProcPOffset() ;
-			}
-			
-			//TODO 契約処理期間数の処理
-			if(m_ContractContentTemplates[i].getJP_ContractProcPeriodNum() == 0)
-			{
-				contrctContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
-			}//TODO Else文の追加
-			
+			contrctContent.setDateAcct(m_Contract.getDateAcct());			
 			
 			if(m_ContractContentTemplates[i].getC_BPartner_ID()==0)
 			{
