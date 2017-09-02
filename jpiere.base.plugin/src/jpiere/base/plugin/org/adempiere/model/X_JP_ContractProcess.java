@@ -30,7 +30,7 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170829L;
+	private static final long serialVersionUID = 20170902L;
 
     /** Standard Constructor */
     public X_JP_ContractProcess (Properties ctx, int JP_ContractProcess_ID, String trxName)
@@ -165,6 +165,10 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 	public static final String DOCBASETYPE_PurchaseOrder = "POO";
 	/** Sales Order = SOO */
 	public static final String DOCBASETYPE_SalesOrder = "SOO";
+	/** Material Receipt = MMR */
+	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
+	/** Material Delivery = MMS */
+	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document

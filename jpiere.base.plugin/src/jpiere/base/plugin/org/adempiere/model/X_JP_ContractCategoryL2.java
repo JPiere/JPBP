@@ -30,7 +30,7 @@ public class X_JP_ContractCategoryL2 extends PO implements I_JP_ContractCategory
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170829L;
+	private static final long serialVersionUID = 20170902L;
 
     /** Standard Constructor */
     public X_JP_ContractCategoryL2 (Properties ctx, int JP_ContractCategoryL2_ID, String trxName)

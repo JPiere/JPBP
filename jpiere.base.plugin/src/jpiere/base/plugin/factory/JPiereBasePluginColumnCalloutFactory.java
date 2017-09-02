@@ -30,6 +30,9 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractContentCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractLineCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereEstimationCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
@@ -41,6 +44,9 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractContentT;
+import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
@@ -50,7 +56,6 @@ import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 /**
  *  JPiere Base Plugin Callout Factory
  *
- *  JPIERE-0106:JPBP:Bill
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
@@ -125,6 +130,20 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereContractCallout());
 				}	
+			}else if(tableName.equals(MContractContent.Table_Name)
+					||tableName.equals(MContractContentT.Table_Name) ){	//JPIERE-0363
+				
+				if(columnName.equals("JP_BaseDocDocType_ID") || columnName.equals("JP_ContractCalender_ID") )
+				{
+					list.add(new JPiereContractContentCallout());
+				}
+				
+			}else if(tableName.equals(MContractLine.Table_Name)){//JPIERE-0363
+				
+				if(columnName.equals("JP_ContractCalender_InOut_ID") || columnName.equals("JP_ContractCalender_Inv_ID") )
+				{
+					list.add(new JPiereContractLineCallout());
+				}
 			}
 			
 		}else{
@@ -144,7 +163,12 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			}else if(tableName.equals(MOrder.Table_Name)){
 
 				if(columnName.equals(MOrder.COLUMNNAME_DropShip_BPartner_ID))
+				{
 					list.add(new JPiereDropShipBPartnerCallout());
+				}else if(columnName.equals("JP_Contract_ID")) { //JPIERE-0363
+					
+					list.add(new JPiereContractOrderCallout());
+				}
 			
 			}else if(tableName.equals(MOrderLine.Table_Name)){	//JPIERE-0227
 				

@@ -19,6 +19,8 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.Msg;
+
 
 /** JPIERE-0363
 *
@@ -36,5 +38,41 @@ public class MContractProcessRef extends X_JP_ContractProcessRef {
 	{
 		super(ctx, rs, trxName);
 	}
+
+	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		if(newRecord || is_ValueChanged("DocBaseType"))
+		{
+			if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_SalesOrder))
+			{
+				setIsSOTrx(true);
+				setIsCreateBaseDocJP(true);
+			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_MaterialDelivery)){
+				setIsSOTrx(true);
+				setIsCreateBaseDocJP(false);
+			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_ARInvoice)){
+				setIsSOTrx(true);
+			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_PurchaseOrder)){
+				setIsSOTrx(true);
+				setIsCreateBaseDocJP(false);	
+			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_MaterialReceipt)){
+				setIsSOTrx(false);
+				setIsCreateBaseDocJP(false);
+			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_APInvoice)){
+				setIsSOTrx(false);
+			}else{
+				
+				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "DocBaseType") );
+				return false;
+				
+			}
+		}
+		
+		
+		return true;
+	}
+	
+	
 	
 }

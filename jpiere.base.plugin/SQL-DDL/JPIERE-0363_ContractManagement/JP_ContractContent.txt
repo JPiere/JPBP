@@ -34,9 +34,9 @@ CREATE TABLE adempiere.JP_ContractContent
   JP_BaseDocDocType_ID numeric(10,0) NOT NULL,
   JP_CreateDerivativeDocPolicy character(2),
   JP_ContractCalender_ID numeric(10,0),
-  JP_ContractProcDate_From  timestamp without time zone NOT NULL DEFAULT now(),
+  JP_ContractProcDate_From  timestamp without time zone ,
   JP_ContractProcDate_To    timestamp without time zone ,
-  JP_ContractProcess_ID numeric(10,0) ,
+  JP_ContractProcess_ID numeric(10,0) NOT NULL,
   DeliveryTime_Promised numeric(10,0) DEFAULT 0,
   IsSOTrx character(1) NOT NULL DEFAULT 'Y'::bpchar,
 
@@ -59,7 +59,7 @@ CREATE TABLE adempiere.JP_ContractContent
   IsAutomaticUpdateJP character(1) NOT NULL DEFAULT 'N'::bpchar,
 
   --Order Column
-  M_Warehouse_ID numeric(10,0) NOT NULL,
+  M_Warehouse_ID numeric(10,0),
 
   JP_Locator_ID numeric(10,0) ,
   IsDropShip character(1) NOT NULL DEFAULT 'N'::bpchar,
