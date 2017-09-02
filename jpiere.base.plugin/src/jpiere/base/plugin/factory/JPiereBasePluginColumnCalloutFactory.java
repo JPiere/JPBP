@@ -32,6 +32,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractContentCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractLineCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereEstimationCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
@@ -162,7 +163,12 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			}else if(tableName.equals(MOrder.Table_Name)){
 
 				if(columnName.equals(MOrder.COLUMNNAME_DropShip_BPartner_ID))
+				{
 					list.add(new JPiereDropShipBPartnerCallout());
+				}else if(columnName.equals("JP_Contract_ID")) { //JPIERE-0363
+					
+					list.add(new JPiereContractOrderCallout());
+				}
 			
 			}else if(tableName.equals(MOrderLine.Table_Name)){	//JPIERE-0227
 				
