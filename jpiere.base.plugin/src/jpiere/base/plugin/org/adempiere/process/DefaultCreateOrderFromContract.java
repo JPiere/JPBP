@@ -41,13 +41,14 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 */
 public class DefaultCreateOrderFromContract extends SvrProcess {
 	
-	int Record_ID = 0;
-	MContractContent m_ContractContent = null;
+	private int Record_ID = 0;
+	private MContractContent m_ContractContent = null;
 	
-	Timestamp p_DateDoc = null;
-	Timestamp p_DateAcct = null;
-	int JP_ContractCalender_ID = 0;
-	int JP_ContractProcPeriod_ID = 0;
+	private Timestamp p_DateDoc = null;
+	private Timestamp p_DateAcct = null;
+	private int JP_ContractCalender_ID = 0;
+	private int JP_ContractProcPeriod_ID = 0;
+	private String p_DocAction = null;
 	
 	@Override
 	protected void prepare() 
@@ -75,6 +76,8 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 				JP_ContractCalender_ID = para[i].getParameterAsInt();
 			}else if(name.equals("JP_ContractProcPeriod_ID")){	
 				JP_ContractProcPeriod_ID = para[i].getParameterAsInt();
+			}else if(name.equals("DocAction")){	
+				p_DocAction = para[i].getParameterAsString();
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if
@@ -122,8 +125,12 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 		order.saveEx(get_TrxName());
 		
 		MContractLine[] 	m_lines = m_ContractContent.getLines();
+		boolean isCrateDocLine = false;
 		for(int i = 0; i < m_lines.length; i++)
 		{
+			if(!m_lines[i].isCreateDocLineJP())
+				continue;
+			
 			MOrderLine oline = new MOrderLine(getCtx(), 0, get_TrxName());
 			PO.copyValues(m_lines[i], oline);
 			oline.setProcessed(false);
@@ -139,13 +146,16 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 			oline.setDatePromised(Timestamp.valueOf(order.getDateAcct().toLocalDateTime().plusDays(m_lines[i].getDeliveryTime_Promised())));
 			
 			oline.saveEx(get_TrxName());
+			isCrateDocLine = true;
 		}
 		
-		String docAction = m_ContractContent.getJP_ContractProcess().getDocAction();
-		if(docAction != null)
+		if(isCrateDocLine)
 		{
-			order.processIt(docAction);
-			if(!docAction.equals(DocAction.ACTION_Complete))
+			if(p_DocAction==null)
+				p_DocAction = m_ContractContent.getJP_ContractProcess().getDocAction();
+			
+			order.processIt(p_DocAction);
+			if(!p_DocAction.equals(DocAction.ACTION_Complete))
 				order.saveEx(get_TrxName());
 		}
 		
