@@ -25,12 +25,10 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
-import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLineT;
-import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractT;
 
 /** JPIERE-0363
@@ -103,6 +101,7 @@ public class DefaultCreateContractFromTemplate extends SvrProcess {
 			if(contractContent.getM_Warehouse_ID() == 0)
 				contractContent.setM_Warehouse_ID(MOrgInfo.get(null, contractContent.getAD_Org_ID(),get_TrxName()).getM_Warehouse_ID());
 			
+			contractContent.setC_Currency_ID(contractContent.getM_PriceList().getC_Currency_ID());
 			contractContent.saveEx(get_TrxName());
 			
 			//Create Contract Content Line
@@ -116,32 +115,6 @@ public class DefaultCreateContractFromTemplate extends SvrProcess {
 				contrctLine.setJP_ContractContent_ID(contractContent.getJP_ContractContent_ID());
 				contrctLine.setJP_ContractLineT_ID(m_ContractLineTemplates[j].getJP_ContractLineT_ID());
 				contrctLine.saveEx(get_TrxName());
-				
-				if(m_ContractLineTemplates[i].getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
-				{
-					MContractCalender calender = MContractCalender.get(getCtx(), contrctLine.getJP_ContractCalender_InOut_ID());
-					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From() 
-													,m_ContractLineTemplates[i].getJP_ContractProcPOffset_InOut());
-					if(period == null)
-					{
-						throw new Exception( Msg.getMsg(getCtx(), "NotFound") +" : " +Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));
-					}
-					
-					contrctLine.setJP_ContractProcPeriod_InOut_ID(period.getJP_ContractProcPeriod_ID());
-				}
-				
-				if(m_ContractLineTemplates[i].getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
-				{
-					MContractCalender calender = MContractCalender.get(getCtx(), contrctLine.getJP_ContractCalender_Inv_ID());
-					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From() 
-													,m_ContractLineTemplates[i].getJP_ContractProcPOffset_Inv());
-					if(period == null)
-					{
-						throw new Exception( Msg.getMsg(getCtx(), "NotFound") +" : " +Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));
-					}
-					
-					contrctLine.setJP_ContractProcPeriod_Inv_ID(period.getJP_ContractProcPeriod_ID());
-				}
 			}//For j
 		}//For i
 		

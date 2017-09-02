@@ -37,6 +37,7 @@ import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -542,5 +543,27 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	{
 		return getLines(false, null);
 	}	//	getLines
+	
+	
+	/**	Cache				*/
+	private static CCache<Integer,MContractContent>	s_cache = new CCache<Integer,MContractContent>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractContent_ID id
+	 *	@return Contract Calender
+	 */
+	public static MContractContent get (Properties ctx, int JP_ContractContent_ID)
+	{
+		Integer ii = new Integer (JP_ContractContent_ID);
+		MContractContent retValue = (MContractContent)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MContractContent (ctx, JP_ContractContent_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_ContractContent_ID, retValue);
+		return retValue;
+	}	//	get
 	
 }	//	MContractContent

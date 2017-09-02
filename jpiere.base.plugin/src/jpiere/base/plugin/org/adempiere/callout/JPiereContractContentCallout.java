@@ -98,7 +98,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 				//Calculate JP_ContractProcDate_To
 				if(contentTemplate.getJP_ContractProcPeriodNum()==0)
 				{
-					mTab.setValue ("JP_ContractProcDate_From", contract.getJP_ContractPeriodDate_To());
+					mTab.setValue ("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
 				}else{
 					
 					int JP_ContractCalender_ID = ((Integer)value).intValue();

@@ -73,6 +73,9 @@ public class MContractCalender extends X_JP_ContractCalender {
 	 */
 	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From, int processPeriodNum)
 	{
+		if(date_From == null)
+			return null;
+		
 		int JP_ContractProcPeriod_ID = 0;
 		
 		if(processPeriodNum == 0)
@@ -120,11 +123,12 @@ public class MContractCalender extends X_JP_ContractCalender {
 				int i = 0;
 				while (rs.next())
 				{
+					i++;
 					if(i == processPeriodNum)
 					{
 						JP_ContractProcPeriod_ID = rs.getInt(1);
 					}
-					i++;
+
 				}
 			}
 			catch (Exception e)
@@ -156,11 +160,12 @@ public class MContractCalender extends X_JP_ContractCalender {
 				int i = 0;
 				while (rs.next())
 				{
+					i++;
 					if(i == processPeriodNum)
 					{
 						JP_ContractProcPeriod_ID = rs.getInt(1);
 					}
-					i++;
+
 				}
 			}
 			catch (Exception e)
