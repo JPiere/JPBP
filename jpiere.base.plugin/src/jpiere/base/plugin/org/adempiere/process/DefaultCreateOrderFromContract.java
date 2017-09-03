@@ -88,16 +88,17 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception 
 	{
-		//TODO:既に同じ条件の受注伝票/発注伝票が登録されていない事のチェック。※Abstract化できるね
+		//TODO:既に同じ契約処理期間の受注伝票/発注伝票が登録されていない事のチェック。※Abstract化できるね
 		
 		
+		/** Create Order header */
 		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
 		PO.copyValues(m_ContractContent, order);
 		order.setProcessed(false);
 		order.setDocStatus(DocAction.STATUS_Drafted);
 		order.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		order.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
-		order.setDateOrdered(p_DateDoc);//TODO DateOrderedと納品予定日は入力パラメータから算出できるようにする
+		order.setDateOrdered(p_DateDoc);
 		order.setDateAcct(p_DateAcct);
 		
 		//DatePromised
@@ -124,6 +125,7 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 		
 		order.saveEx(get_TrxName());
 		
+		/** Create Order Line */
 		MContractLine[] 	m_lines = m_ContractContent.getLines();
 		boolean isCrateDocLine = false;
 		for(int i = 0; i < m_lines.length; i++)
