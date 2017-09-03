@@ -17,6 +17,7 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
 /**
@@ -36,6 +37,27 @@ public class MContractLine extends X_JP_ContractLine {
 	{
 		super(ctx, rs, trxName);
 	}
+	
+	/**	Cache				*/
+	private static CCache<Integer,MContractLine>	s_cache = new CCache<Integer,MContractLine>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractLine_ID id
+	 *	@return Contract Calender
+	 */
+	public static MContractLine get (Properties ctx, int JP_ContractLine_ID)
+	{
+		Integer ii = new Integer (JP_ContractLine_ID);
+		MContractLine retValue = (MContractLine)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MContractLine (ctx, JP_ContractLine_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_ContractLine_ID, retValue);
+		return retValue;
+	}	//	get
 	
 	
 	/** Parent					*/

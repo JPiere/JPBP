@@ -24,6 +24,12 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
+import org.compiere.util.Env;
+
+import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 
 /**
@@ -80,6 +86,72 @@ public class JPiereContractValidator implements ModelValidator {
 	@Override
 	public String modelChange(PO po, int type) throws Exception
 	{
+		if(po.get_TableName().equals(MOrder.Table_Name))
+		{
+			if(type == ModelValidator.TYPE_BEFORE_NEW)
+			{
+				MOrder order = (MOrder)po;
+				int JP_Contract_ID = order.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);
+				if(JP_Contract_ID > 0)
+				{
+					MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+					if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+					{
+						int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
+						if(JP_ContractContent_ID <= 0)
+						{
+							return "契約書の契約区分が期間契約の場合は、契約内容は必須です。";//TODO メッセージ化
+						}	
+						
+						int JP_ContractProcPeriod_ID = order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
+						if(JP_ContractProcPeriod_ID <= 0)
+						{
+							return "契約書の契約区分が期間契約の場合は、契約処理期間は必須です。";//TODO メッセージ化
+						}
+					
+					}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
+						int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
+						if(JP_ContractContent_ID <= 0)
+						{
+							return "契約書の契約区分がスポット契約の場合は、契約内容は必須です。";//TODO メッセージ化
+						}
+						
+						int JP_ContractProcPeriod_ID = order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
+						if(JP_ContractProcPeriod_ID <= 0)
+						{
+							order.set_ValueOfColumn("JP_ContractProcPeriod_ID", null);
+							return null;
+						}
+					}
+				}
+			
+			}
+			
+		}else if(po.get_TableName().equals(MOrderLine.Table_Name)){
+			
+			if(type == ModelValidator.TYPE_BEFORE_NEW)
+			{
+				MOrderLine oLine = (MOrderLine)po;
+				int JP_ContractLine_ID = oLine.get_ValueAsInt(MContractLine.COLUMNNAME_JP_ContractLine_ID);
+				if(JP_ContractLine_ID > 0)
+				{
+					MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
+					MContract contract = contractLine.getParent().getParent();
+					if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+					{
+						int JP_ContractProcPeriod_ID = oLine.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
+						if(JP_ContractProcPeriod_ID <= 0)
+						{
+							oLine.set_ValueOfColumn(JP_ContractProcPeriod_ID, contractLine.getParent().get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID));
+							return null;
+						}
+						
+					}
+				}
+			}
+		}
+		
+		
 		return null;
 	}
 

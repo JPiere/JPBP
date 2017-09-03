@@ -146,41 +146,68 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 		
 		MContractContent content = MContractContent.get(ctx, JP_ContractContent_ID);
 		
-		mTab.setValue("C_Opportunity_ID", content.getC_Opportunity_ID());
+		if(content.getC_Opportunity_ID() > 0)
+			mTab.setValue("C_Opportunity_ID", content.getC_Opportunity_ID());
+		
 		mTab.setValue("POReference", content.getPOReference());
-		mTab.setValue("SalesRep_ID", content.getSalesRep_ID());
+		
+		if(content.getSalesRep_ID() > 0)
+			mTab.setValue("SalesRep_ID", content.getSalesRep_ID());
 		
 		mTab.setValue("IsDropShip", content.isDropShip());
 		if(content.isDropShip())
 		{
-			mTab.setValue("DropShip_BPartner_ID", content.getDropShip_BPartner_ID());
-			mTab.setValue("DropShip_Location_ID", content.getDropShip_Location_ID());
-			mTab.setValue("DropShip_User_ID", content.getDropShip_User_ID());
+			if(content.getDropShip_BPartner_ID() > 0)
+				mTab.setValue("DropShip_BPartner_ID", content.getDropShip_BPartner_ID());
+			if(content.getDropShip_Location_ID() > 0)
+				mTab.setValue("DropShip_Location_ID", content.getDropShip_Location_ID());
+			if(content.getDropShip_User_ID() > 0)
+				mTab.setValue("DropShip_User_ID", content.getDropShip_User_ID());
 		}else{
 			mTab.setValue("DropShip_BPartner_ID", null);
 			mTab.setValue("DropShip_Location_ID", null);
 			mTab.setValue("DropShip_User_ID", null);
 		}
+		
 		mTab.setValue("DeliveryRule", content.getDeliveryRule());
 		mTab.setValue("PriorityRule", content.getPriorityRule());
 		mTab.setValue("DeliveryViaRule", content.getDeliveryViaRule());
-		mTab.setValue("M_Shipper_ID", content.getM_Shipper_ID());
-		mTab.setValue("M_FreightCategory_ID", content.getM_FreightCategory_ID());
+		
+		if(content.getM_Shipper_ID() > 0)
+			mTab.setValue("M_Shipper_ID", content.getM_Shipper_ID());
+		
+		if(content.getM_FreightCategory_ID() > 0)
+			mTab.setValue("M_FreightCategory_ID", content.getM_FreightCategory_ID());
+		
 		mTab.setValue("FreightCostRule", content.getFreightCostRule());
 		mTab.setValue("FreightAmt", content.getFreightAmt());
 		
-		mTab.setValue("Bill_BPartner_ID", content.getBill_BPartner_ID());
-		mTab.setValue("Bill_Location_ID", content.getBill_Location_ID());
-		mTab.setValue("Bill_User_ID", content.getBill_User_ID());
+		if(content.getBill_BPartner_ID() > 0)
+			mTab.setValue("Bill_BPartner_ID", content.getBill_BPartner_ID());
+		
+		if(content.getBill_Location_ID() > 0)
+			mTab.setValue("Bill_Location_ID", content.getBill_Location_ID());
+		
+		if(content.getBill_User_ID() > 0)
+			mTab.setValue("Bill_User_ID", content.getBill_User_ID());
+		
 		mTab.setValue("InvoiceRule", content.getInvoiceRule());
 		mTab.setValue("IsDiscountPrinted", content.isDiscountPrinted());
-		mTab.setValue("M_PriceList_ID", content.getM_PriceList_ID());
-		mTab.setValue("M_PriceList_ID", content.getM_PriceList_ID());
-		mTab.setValue("C_Currency_ID", content.getC_Currency_ID());
-		mTab.setValue("C_ConversionType_ID", content.getC_ConversionType_ID());
+		
+		if(content.getM_PriceList_ID() > 0)
+			mTab.setValue("M_PriceList_ID", content.getM_PriceList_ID());
+		
+		if(content.getC_Currency_ID() > 0)
+			mTab.setValue("C_Currency_ID", content.getC_Currency_ID());
+		
+		if(content.getC_ConversionType_ID() > 0)
+			mTab.setValue("C_ConversionType_ID", content.getC_ConversionType_ID());
+		
 		mTab.setValue("IsTaxIncluded", content.isTaxIncluded());
 		mTab.setValue("PaymentRule", content.getPaymentRule());
-		mTab.setValue("C_PaymentTerm_ID", content.getC_PaymentTerm_ID());
+		
+		if(content.getC_PaymentTerm_ID() > 0)
+			mTab.setValue("C_PaymentTerm_ID", content.getC_PaymentTerm_ID());
 	}
 	
 }
