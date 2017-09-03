@@ -94,6 +94,9 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing) 
 	{
+		
+		//TODO 伝票の明細行作成対象の契約内容明細がある場合、その全ての明細行が含まれているかどうかのチェック。
+		
 		return null;
 	}
 	
@@ -119,6 +122,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");//Contract Info cannot be changed because the Document have lines
 			}
 			
+			//Check JP_Contract_ID
 			int JP_Contract_ID = order.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);
 			if(JP_Contract_ID > 0)
 			{
@@ -126,6 +130,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				//Period Contract
 				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 				{
+					//Check JP_ContractContent_ID
 					int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
 					if(JP_ContractContent_ID <= 0)
 					{
@@ -138,16 +143,39 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						{
 							return "契約内容の取引先と異なります。";//TODO メッセージ化
 						}
-					}	
-					
-					int JP_ContractProcPeriod_ID = order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
-					if(JP_ContractProcPeriod_ID <= 0)
-					{
-						return "契約書の契約区分が期間契約の場合は、契約処理期間は必須です。";//TODO メッセージ化
 						
-					}else{
+						if(contract.getJP_Contract_ID() != content.getJP_Contract_ID())
+						{
+							return "契約書と契約内容が一致しません。。";//TODO メッセージ化;
+						}
 						
-						//TODO 同じ契約処理期間が登録されていない事のチェック。
+						//Check JP_ContractProcPeriod_ID 
+						int JP_ContractProcPeriod_ID = order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
+						if(JP_ContractProcPeriod_ID <= 0)
+						{
+							return "契約書の契約区分が期間契約の場合は、契約処理期間は必須です。";//TODO メッセージ化
+							
+						}else{
+
+							MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
+							if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID() )
+							{
+								return "契約内容の契約カレンダーと選択した契約処理期間の契約カレンダーが一致しません。。";//TODO メッセージ化
+							}
+							
+							
+							int C_Order_ID = content.getActiveOrderIdByPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
+							if(C_Order_ID == 0 || C_Order_ID == order.getC_Order_ID())
+							{
+								;//Noting to do
+							}else{
+								
+								//TODO 途中でクローズした際のリカバリー方法の検討
+								MOrder orderRef = new MOrder(Env.getCtx(), C_Order_ID, order.get_TrxName());
+								return "契約内容に同じ契約処理期間が登録されています。 " + orderRef.getDocumentInfo();//TODO メッセージ化								
+							}
+						
+						}
 					}
 				
 				//Spot Contract
@@ -168,7 +196,6 @@ public class JPiereContractOrderValidator implements ModelValidator {
 					}
 					
 					order.set_ValueOfColumn("JP_ContractProcPeriod_ID", null);
-					return null;
 				
 				//General Contract
 				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
