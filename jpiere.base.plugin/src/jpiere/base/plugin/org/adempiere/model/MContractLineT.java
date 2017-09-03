@@ -66,7 +66,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 //		if (getParent().isProcessed())
 //			return success;
 		
-		if(!newRecord && is_ValueChanged(MContractLineT.COLUMNNAME_LineNetAmt))
+		if(newRecord || is_ValueChanged(MContractLineT.COLUMNNAME_LineNetAmt))
 		{
 			String sql = "UPDATE JP_ContractContentT cct"
 					+ " SET TotalLines = "
