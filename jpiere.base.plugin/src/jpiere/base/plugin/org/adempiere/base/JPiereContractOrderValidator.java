@@ -14,10 +14,6 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import org.compiere.model.MClient;
-import org.compiere.model.MInOut;
-import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoice;
-import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.ModelValidationEngine;
@@ -130,7 +126,10 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				//Period Contract
 				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 				{
-					//Check JP_ContractContent_ID
+					/**Check JP_ContractContent_ID 
+					 * Mandetory Period Contract AND Spot Contract.
+					 * In case of General Contract, JP_ContractContent_ID should be null;
+					 */
 					int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
 					if(JP_ContractContent_ID <= 0)
 					{
@@ -149,7 +148,10 @@ public class JPiereContractOrderValidator implements ModelValidator {
 							return "契約書と契約内容が一致しません。。";//TODO メッセージ化;
 						}
 						
-						//Check JP_ContractProcPeriod_ID 
+						/** Check JP_ContractProcPeriod_ID
+						 *  Mandetory Period Contract 
+						 *  In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null;
+						 */
 						int JP_ContractProcPeriod_ID = order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
 						if(JP_ContractProcPeriod_ID <= 0)
 						{
@@ -164,13 +166,15 @@ public class JPiereContractOrderValidator implements ModelValidator {
 							}
 							
 							
+							//
 							int C_Order_ID = content.getActiveOrderIdByPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
 							if(C_Order_ID == 0 || C_Order_ID == order.getC_Order_ID())
 							{
-								;//Noting to do
+								//TODO クローズの処理 -> クローズで契約内容の明細に出荷残的なものがあったとすると・・・明細でチェックする内容な気がするな!!
+								;
 							}else{
 								
-								//TODO 途中でクローズした際のリカバリー方法の検討
+								//TODO 途中でクローズした際のリカバリー方法の検討。ヘッダーの伝票ステータスがクローズであれば同じ契約処理期間の伝票が複数枚あっても良いかも・・・。
 								MOrder orderRef = new MOrder(Env.getCtx(), C_Order_ID, order.get_TrxName());
 								return "契約内容に同じ契約処理期間が登録されています。 " + orderRef.getDocumentInfo();//TODO メッセージ化								
 							}
@@ -181,6 +185,10 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				//Spot Contract
 				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 					
+					/**Check JP_ContractContent_ID 
+					 * Mandetory Period Contract AND Spot Contract.
+					 * In case of General Contract, JP_ContractContent_ID should be null;
+					 */
 					int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
 					if(JP_ContractContent_ID <= 0)
 					{
@@ -195,6 +203,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						}
 					}
 					
+					/** In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null; */
 					order.set_ValueOfColumn("JP_ContractProcPeriod_ID", null);
 				
 				//General Contract
@@ -205,6 +214,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						return "契約書の取引先と異なります。";//TODO メッセージ化
 					}
 					
+					/** In case of General Contract, JP_ContractContent_ID AND JP_ContractProcPeriod_ID should be null;*/
 					order.set_ValueOfColumn("JP_ContractContent_ID", null);
 					order.set_ValueOfColumn("JP_ContractProcPeriod_ID", null);						
 				}
@@ -231,7 +241,9 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	 */
 	private String orderLineValidate(PO po, int type)
 	{
-		if(type == ModelValidator.TYPE_BEFORE_NEW)
+		if(type == ModelValidator.TYPE_BEFORE_NEW
+				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
+						||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID) ) ))
 		{
 			MOrderLine oLine = (MOrderLine)po;
 			int JP_ContractLine_ID = oLine.get_ValueAsInt(MContractLine.COLUMNNAME_JP_ContractLine_ID);
@@ -239,16 +251,35 @@ public class JPiereContractOrderValidator implements ModelValidator {
 			{
 				MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
 				MContract contract = contractLine.getParent().getParent();
+				
+				//TODO ヘッダーの契約内容に属する、契約内容明細である事のチェック
+				
+				//Spot Period Contract
 				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 				{
 					int JP_ContractProcPeriod_ID = oLine.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
 					if(JP_ContractProcPeriod_ID <= 0)
 					{
-						oLine.set_ValueOfColumn(JP_ContractProcPeriod_ID, contractLine.getParent().get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID));
-						return null;
+						oLine.set_ValueOfColumn(JP_ContractProcPeriod_ID, oLine.getParent().get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID));
 					}
 					
+					//TODO 契約内容明細×契約処理期間が2重登録されていない事のチェック.でもクローズやボイド、キャンセルの場合はOKでも・・・
+				
+				//Check Spot Contract
+				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
+					
+					oLine.set_ValueOfColumn("JP_ContractProcPeriod_ID", null);
+				
+				//Check General Contract
+				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
+					
+					oLine.set_ValueOfColumn("JP_ContractLine_ID", null);
+					oLine.set_ValueOfColumn("JP_ContractProcPeriod_ID", null);
 				}
+				
+			}else{
+				
+				oLine.set_ValueOfColumn("JP_ContractProcPeriod_ID", null);
 			}
 		}
 		return null;
