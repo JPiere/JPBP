@@ -86,7 +86,22 @@ public class DefaultCreateContractFromTemplate extends SvrProcess {
 			contractContent.setJP_ContractContentT_ID(m_ContractContentTemplates[i].get_ID());
 			contractContent.setJP_Contract_Acct_ID(m_ContractContentTemplates[i].getJP_Contract_Acct_ID());
 			contractContent.setDateDoc(m_Contract.getDateDoc());
-			contractContent.setDateAcct(m_Contract.getDateAcct());			
+			contractContent.setDateAcct(m_Contract.getDateAcct());
+			
+			if(m_ContractContentTemplates[i].getJP_ContractProcPOffset()==0)
+			{
+				contractContent.setJP_ContractProcDate_From(m_Contract.getJP_ContractPeriodDate_From());
+				
+			}else{
+				//TODO 日付の計算処理
+			}
+			
+			if(m_ContractContentTemplates[i].getJP_ContractProcPOffset()==0)
+			{
+				contractContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
+			}else{
+				;//TODO 日付の計算式処理
+			}
 			
 			if(m_ContractContentTemplates[i].getC_BPartner_ID()==0)
 			{

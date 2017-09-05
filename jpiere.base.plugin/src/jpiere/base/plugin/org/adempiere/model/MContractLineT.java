@@ -19,6 +19,9 @@ import java.util.Properties;
 
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 
 
@@ -39,13 +42,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 	{
 		super(ctx, rs, trxName);
 	}
-
-	@Override
-	protected boolean beforeSave(boolean newRecord)
-	{
-		return true;
-	}
-	
 	
 	/** Parent					*/
 	protected MContractContentT			m_parent = null;
@@ -57,6 +53,146 @@ public class MContractLineT extends X_JP_ContractLineT {
 		return m_parent;
 	}	//	getParent
 	
+	
+	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{		
+		//TODO:契約内容テンプレートのの派生伝票作成方針の変更とテンプレート明細の各種設定の矛盾をどうするか・・・(+o+)・。
+		
+		
+		//Check Period Contract - Derivative Doc Policy
+		if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			if(Util.isEmpty(getParent().getJP_CreateDerivativeDocPolicy()))
+			{
+				//Check JP_CreateDerivativeDocPolicy
+				if(getParent().getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder))
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")};
+					String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+				
+			}else{
+			
+				if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+				{
+					//Ship & Receipt
+					setJP_DerivativeDocPolicy_InOut(null);
+					setJP_ContractCalRef_InOut_ID(0);
+					setJP_ContractProcRef_InOut_ID(0);
+					setJP_ContractProcPOffset_InOut(0);	
+					
+					//Invoice
+					setJP_DerivativeDocPolicy_Inv(null);
+					setJP_ContractCalRef_Inv_ID(0);
+					setJP_ContractProcRef_Inv_ID(0);
+					setJP_ContractProcPOffset_Inv(0);
+					
+				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)){
+					
+					//Ship & Receipt
+					if(Util.isEmpty(getJP_DerivativeDocPolicy_InOut()))
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));return false;}
+					if(getJP_ContractCalRef_InOut_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_InOut_ID")}));return false;}
+					if(getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+					{
+						if(getJP_ContractProcRef_InOut_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_InOut_ID")}));return false;}
+					}else{
+						setJP_ContractProcRef_InOut_ID(0);
+					}
+					
+					//Invoice
+					if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));return false;}
+					if(getJP_ContractCalRef_Inv_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_Inv_ID")}));return false;}		
+					if(getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+					{
+						if(getJP_ContractProcRef_Inv_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));return false;}
+					}else{
+						setJP_ContractProcRef_Inv_ID(0);
+					}
+					
+					
+				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)){
+					
+					//Ship & Receipt
+					if(Util.isEmpty(getJP_DerivativeDocPolicy_InOut()))
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));return false;}
+					if(getJP_ContractCalRef_InOut_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_InOut_ID")}));return false;}
+					if(getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+					{
+						if(getJP_ContractProcRef_InOut_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_InOut_ID")}));return false;}
+					}else{
+						setJP_ContractProcRef_InOut_ID(0);
+					}
+					
+					
+					//Invoice
+					setJP_DerivativeDocPolicy_Inv(null);
+					setJP_ContractCalRef_Inv_ID(0);
+					setJP_ContractProcRef_Inv_ID(0);
+					setJP_ContractProcPOffset_Inv(0);
+					
+				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)){
+					
+					//Ship & Receipt
+					setJP_DerivativeDocPolicy_InOut(null);
+					setJP_ContractCalRef_InOut_ID(0);
+					setJP_ContractProcRef_InOut_ID(0);
+					setJP_ContractProcPOffset_InOut(0);	
+					
+					//Invoice
+					if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));return false;}
+					if(getJP_ContractCalRef_Inv_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_Inv_ID")}));return false;}		
+					if(getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+					{
+						if(getJP_ContractProcRef_Inv_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));return false;}
+					}else{
+						setJP_ContractProcRef_Inv_ID(0);
+					}
+					
+				}else{
+					
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractDerivativeDocPolicy_ID")};
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+
+				}//if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+			
+			}//if(Util.isEmpty(getParent().getJP_CreateDerivativeDocPolicy()))
+			
+		}//if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		
+		//Check Spot Contract - Derivative Doc Policy
+		if(getParent().getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
+		{
+			//Ship & Receipt
+			setJP_DerivativeDocPolicy_InOut(null);
+			setJP_ContractCalRef_InOut_ID(0);
+			setJP_ContractProcRef_InOut_ID(0);
+			setJP_ContractProcPOffset_InOut(0);	
+			
+			//Invoice
+			setJP_DerivativeDocPolicy_Inv(null);
+			setJP_ContractCalRef_Inv_ID(0);
+			setJP_ContractProcRef_Inv_ID(0);
+			setJP_ContractProcPOffset_Inv(0);
+		}		
+		
+		return true;
+	}
 	
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) 

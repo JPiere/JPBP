@@ -504,10 +504,124 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 		}
 		
-		//Check Period Contract
+		
+		//Check JP_CreateDerivativeDocPolicy
+		if(newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
+		{
+			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder))
+			{
+				if(Util.isEmpty(getJP_CreateDerivativeDocPolicy()))
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")};
+					String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+					
+			}else{
+				setJP_CreateDerivativeDocPolicy(null);
+			}
+			
+		}
+		
+		
+		//Check JP_ContractCalender_ID
+		if(newRecord)
+		{
+			;//We can not check. because Create Contract content from template process can not set JP_ContractCalender_ID automatically.
+		}else{
+			
+			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+			{
+				if(getJP_ContractCalender_ID() == 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID")};
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+				
+			}else{
+				setJP_ContractProcess_ID(0);
+			}
+			
+		}
+		
+		
+		//Check Contract Process Period and Automatic Update
 		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
 		{
-			if(!newRecord)
+			//Check JP_ContractProcDate_From
+			if(getJP_ContractProcDate_From() == null)
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcDate_From")};
+				String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+				log.saveError("Error",msg);
+				return false;
+				
+			}else{
+				
+				if(getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 )
+				{
+					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
+					return false;
+				}
+				
+			}
+			
+			
+			//JP_ContractProcDate_To and isAutomaticUpdateJP())
+			if(getParent().isAutomaticUpdateJP())
+			{
+				if(getJP_ContractProcDate_To() == null)
+				{
+					log.saveError("Error","契約書が自動更新のため、契約処理期間(TO)は必須入力です。");//TODO メッセージ化
+					return false;
+				}
+				
+				
+			}else{
+				
+				if(getParent().getJP_ContractPeriodDate_To() == null)
+				{
+					if(isAutomaticUpdateJP())
+					{
+						log.saveError("Error","契約書に期間の定めが無いため、自動更新にはできません。");//TODO メッセージ化
+						return false;
+					}
+				}
+			}
+			
+			
+			if(getJP_ContractProcDate_To() != null)
+			{
+				if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
+				{
+					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
+					return false;
+				}
+			}else{
+				
+				if(isAutomaticUpdateJP())
+				{
+					log.saveError("Error","自動更新の場合は、契約処理期間(TO)は必須入力です。");//TODO メッセージ化;
+					return false;
+				}
+			}
+			
+		}else{
+			setJP_ContractProcDate_From(null);
+			setJP_ContractProcDate_To(null);
+		}
+		
+		
+		//Check JP_ContractProcess_ID()
+		if(newRecord)
+		{
+			;//We can not check. because Create Contract content from template process can not set JP_ContractProcess_ID automatically.
+		}else{
+			
+			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
 			{
 				if(getJP_ContractProcess_ID() == 0)
 				{
@@ -516,75 +630,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					log.saveError("Error",msg);
 					return false;
 				}
-			}
-			
-			
-			//Check Automatic Update & Process Period
-			//TODO　自動更新なら契約処理期間(To)を入れるべき！！ ↓のロジックは間違あり、要見直し!!
-			//自動更新であれば、契約処理の日付と合わせるようにすべきな気がする…。
-			if(getParent().isAutomaticUpdateJP())
-			{
-				if(getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 )
-				{
-					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
-					return false;
-				}
-				
-				if(getParent().getJP_ContractPeriodDate_To() != null)
-				{
-					if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
-					{
-						log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
-						return false;
-					}
-				}
 				
 			}else{
-				
-				if(getJP_ContractProcDate_From() == null
-						|| getJP_ContractProcDate_To() == null)
-				{
-					log.saveError("Error","自動更新ではないため、契約期間を入力して下さい。");//TODO メッセージ化;
-					return false;
-				}
-				
-				if(getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 
-						|| getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
-				{
-					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
-					return false;
-				}
-				
-			}
-		}
-		
-		//Check Spot Contract
-		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
-		{
-			if(getJP_ContractCalender_ID() > 0)
-				setJP_ContractCalender_ID(0);
-			
-			if(!newRecord)
-			{
-				if(getJP_ContractProcess_ID() == 0)
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_ID")};
-					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-					log.saveError("Error",msg);
-					return false;
-				}
+				;//Noting to do.
 			}
 			
-			setJP_ContractProcDate_From(null);
-			setJP_ContractProcDate_To(null);
-			
-			//Check Automatic Update
-			if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP())
-			{
-				log.saveError("Error","契約書が自動更新ではないため、契約内容を自動更新にする事はできません。");//TODO メッセージ化
-				return false;
-			}
-		}		
+		}	
 		
 		return true;
 	}
