@@ -72,6 +72,15 @@ public class MContractLine extends X_JP_ContractLine {
 	
 	
 	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
+		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
+		
+		return true;
+	}
+
+	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) 
 	{
 		if (!success)

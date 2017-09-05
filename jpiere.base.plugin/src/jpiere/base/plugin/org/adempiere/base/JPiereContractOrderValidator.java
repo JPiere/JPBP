@@ -30,10 +30,10 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 
 /**
- *  JPiere Payment Model Validator
+ *  JPIERE-0363: Contract Management
+ *  JPiere Contract Order Validator
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
- *  @version  $Id: JPierePaymentModelValidator.java,v 1.0 2015/04/29
  *
  */
 public class JPiereContractOrderValidator implements ModelValidator {
@@ -138,11 +138,14 @@ public class JPiereContractOrderValidator implements ModelValidator {
 					}else{
 						
 						MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+						
+						//Check BP
 						if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
 						{
 							return "契約内容の取引先と異なります。";//TODO メッセージ化
 						}
 						
+						//Check Contract
 						if(contract.getJP_Contract_ID() != content.getJP_Contract_ID())
 						{
 							return "契約書と契約内容が一致しません。。";//TODO メッセージ化;
@@ -160,14 +163,20 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						}else{
 
 							MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
+							
+							//Check Calender
 							if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID() )
 							{
 								return "契約内容の契約カレンダーと選択した契約処理期間の契約カレンダーが一致しません。。";//TODO メッセージ化
 							}
 							
 							
+							//TODO 受注伝票の契約処理期間が、契約期間に含まれている事の確認
+							
 							//
 							int C_Order_ID = content.getActiveOrderIdByPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
+							
+							//TODO:Check
 							if(C_Order_ID == 0 || C_Order_ID == order.getC_Order_ID())
 							{
 								//TODO クローズの処理 -> クローズで契約内容の明細に出荷残的なものがあったとすると・・・明細でチェックする内容な気がするな!!
@@ -197,6 +206,8 @@ public class JPiereContractOrderValidator implements ModelValidator {
 					}else{
 						
 						MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+						
+						//Check BP
 						if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
 						{
 							return "契約内容の取引先と異なります。";//TODO メッセージ化
@@ -209,6 +220,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				//General Contract
 				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
 					
+					//Check BP
 					if(contract.getC_BPartner_ID() != order.getC_BPartner_ID())
 					{
 						return "契約書の取引先と異なります。";//TODO メッセージ化
@@ -252,9 +264,14 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
 				MContract contract = contractLine.getParent().getParent();
 				
-				//TODO ヘッダーの契約内容に属する、契約内容明細である事のチェック
+				//Check Contract Cotent
+				if(contractLine.getJP_ContractContent_ID() == oLine.get_ValueAsInt("JP_ContractContent_ID"))
+				{
+					return "ヘッダーの契約内容に所属する契約内容明細だけを選択する事ができます。";//TODO メッセージ化
+				}
 				
-				//Spot Period Contract
+				
+				//Check Period Contract
 				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 				{
 					int JP_ContractProcPeriod_ID = oLine.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
@@ -263,7 +280,13 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						oLine.set_ValueOfColumn(JP_ContractProcPeriod_ID, oLine.getParent().get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID));
 					}
 					
+					//TODO 品目マスタチェック -- 契約内容明細の品目マスタと同じかどうかのチェック(品目マスタがnullではない場合)
+
+					//TODO 料金タイプマスタチェック -- 契約内容明細の料金タイプと同じかどうかのチェック(品目マスタがnullの場合)
+					
 					//TODO 契約内容明細×契約処理期間が2重登録されていない事のチェック.でもクローズやボイド、キャンセルの場合はOKでも・・・
+					
+					//TODO 受注伝票の契約処理期間が、契約期間に含まれている事の確認
 				
 				//Check Spot Contract
 				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){

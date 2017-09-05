@@ -452,6 +452,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
+		
+		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
+		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
+		
 		if(newRecord)
 		{
 			//Check - General Contract can not have Contract Content
