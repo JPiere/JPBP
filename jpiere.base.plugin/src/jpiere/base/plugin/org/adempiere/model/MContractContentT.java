@@ -19,8 +19,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.compiere.model.MDocType;
+import org.compiere.model.MPriceList;
 import org.compiere.model.Query;
 import org.compiere.util.CCache;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -84,6 +86,98 @@ public class MContractContentT extends X_JP_ContractContentT {
 					setOrderType("--");
 				}
 				
+			}
+		}
+		
+		//Check JP_CreateDerivativeDocPolicy
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_CreateDerivativeDocPolicy))
+		{
+			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract) && getOrderType().equals(MContractContentT.ORDERTYPE_StandardOrder))
+			{
+				if(Util.isEmpty(getJP_CreateDerivativeDocPolicy()))
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")};
+					String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+					
+			}else{
+				setJP_CreateDerivativeDocPolicy(null);
+			}
+			
+		}
+		
+		//Check JP_ContractCalenderRef_ID
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractCalenderRef_ID))
+		{
+			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+			{
+				if(getJP_ContractCalenderRef_ID() == 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalenderRef_ID")};
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+			}else{
+				
+				setJP_ContractCalenderRef_ID(0);
+				
+			}
+		}
+		
+		//Check JP_ContractProcessRef_ID
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID))
+		{
+			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+			{
+				if(getJP_ContractProcessRef_ID() == 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcessRef_ID")};
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+			}
+		}
+		
+
+		//Check IsAutomaticUpdateJP
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_IsAutomaticUpdateJP))
+		{
+			if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP())
+			{
+				//You can not tick Automatic Update, Because Contract document template is not Automatic Update.
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_CheckIsAutomaticUpdateJP"));
+				return false ;
+			}
+		}
+		
+		//Check Price List and IsTaxIncluded
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_M_PriceList_ID))
+		{
+			if(getM_PriceList_ID() > 0)
+			{
+				MPriceList  priceList = MPriceList.get(getCtx(), getM_PriceList_ID(), get_TrxName());
+				setIsTaxIncluded(priceList.isTaxIncluded());
+			}else{
+				setIsTaxIncluded(false);
+			}
+		}
+		
+		//Check OrderType
+		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_OrderType))
+		{
+			MDocType docType = MDocType.get(getCtx(), getJP_BaseDocDocType_ID());
+			setIsSOTrx(docType.isSOTrx());
+			if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)
+						|| docType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))
+			{
+	
+					setOrderType (docType.getDocSubTypeSO());					
+			}else{
+					setOrderType(MContractContentT.ORDERTYPE_Other);	
 			}
 		}
 		

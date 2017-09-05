@@ -19,6 +19,8 @@ import java.util.Properties;
 
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  * JPIERE-0363
@@ -76,6 +78,139 @@ public class MContractLine extends X_JP_ContractLine {
 	{
 		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
 		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
+		if(!getParent().getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
+		{
+			if(is_ValueChanged(MContractLine.COLUMNNAME_M_Product_ID) 
+					|| is_ValueChanged(MContractLine.COLUMNNAME_QtyEntered)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcPeriod_InOut_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcPeriod_Inv_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID)
+					)
+			{
+				log.saveError("Error", "契約処理ステータスが未処理ではないため変更できません。");//TODO メッセージ化
+				return false;
+			}
+		}
+		
+		//TODO -> 契約内容の派生伝票作成方針の変更をいつまで許可するか・・・。
+		
+		//Check Period Contract
+		if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			if(!newRecord && getParent().getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
+			{
+				//TODO
+				if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+				{
+					setJP_ContractProcess_InOut_ID(0);
+					setJP_ContractProcess_Inv_ID(0);
+					setJP_ContractCalender_InOut_ID(0);
+					setJP_ContractCalender_Inv_ID(0);
+					setJP_ContractProcPeriod_InOut_ID(0);
+					setJP_ContractProcPeriod_Inv_ID(0);
+					
+				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)){
+					
+					if(getJP_ContractProcess_InOut_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_InOut_ID")}));return false;}
+					
+					if(getJP_ContractProcess_Inv_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_Inv_ID")}));return false;}
+					
+					if(getJP_ContractCalender_InOut_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID")}));return false;}
+					
+					if(getJP_ContractCalender_Inv_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")}));return false;}		
+					
+					if(getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+					{
+						if(getJP_ContractProcPeriod_InOut_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_InOut_ID")}));return false;}
+					}else{
+						setJP_ContractProcPeriod_InOut_ID(0);
+					}
+					
+					if(getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+					{
+						if(getJP_ContractProcPeriod_Inv_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_Inv_ID")}));return false;}
+					}else{
+						setJP_ContractProcPeriod_Inv_ID(0);
+					}
+					
+				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)){
+					
+					if(getJP_ContractProcess_InOut_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_InOut_ID")})); return false;}
+					
+					setJP_ContractProcess_Inv_ID(0);
+					
+					if(getJP_ContractCalender_InOut_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID")}));return false;}		
+					
+					setJP_ContractCalender_Inv_ID(0);
+					
+					if(getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+					{
+						if(getJP_ContractProcPeriod_InOut_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_InOut_ID")}));return false;}
+					}else{
+						setJP_ContractProcPeriod_InOut_ID(0);
+					}
+					
+					setJP_ContractProcPeriod_Inv_ID(0);
+					
+				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)){
+					
+					setJP_ContractProcess_InOut_ID(0);
+					
+					if(getJP_ContractProcess_Inv_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_Inv_ID")}));return false;}
+					
+					setJP_ContractCalender_InOut_ID(0);
+					
+					if(getJP_ContractCalender_Inv_ID() == 0)
+						{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")}));return false;}		
+					
+					setJP_ContractProcPeriod_InOut_ID(0);
+					
+					if(getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+					{
+						if(getJP_ContractProcPeriod_Inv_ID() == 0)
+							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_Inv_ID")}));return false;}
+					}else{
+						setJP_ContractProcPeriod_Inv_ID(0);
+					}
+					
+				}else{
+					
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractDerivativeDocPolicy_ID")};
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+
+				}
+				
+
+			}
+		}
+		
+		//Check Spot Contract
+		if(getParent().getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
+		{
+			setJP_ContractProcess_InOut_ID(0);
+			setJP_ContractProcess_Inv_ID(0);
+			setJP_ContractCalender_InOut_ID(0);
+			setJP_ContractCalender_Inv_ID(0);
+			setJP_ContractProcPeriod_InOut_ID(0);
+			setJP_ContractProcPeriod_Inv_ID(0);
+		}		
 		
 		return true;
 	}

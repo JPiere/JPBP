@@ -60,8 +60,6 @@ public class JPiereContractContentCallout implements IColumnCallout {
 				}else{
 					mTab.setValue ("OrderType", "--");	
 				}
-				
-
 			}
 			
 		}else if(mField.getColumnName().equals("JP_ContractCalender_ID")){

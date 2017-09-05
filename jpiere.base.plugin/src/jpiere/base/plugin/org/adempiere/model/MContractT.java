@@ -22,6 +22,8 @@ import java.util.Properties;
 
 import org.compiere.model.Query;
 import org.compiere.util.CCache;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /** JPIERE-0363
@@ -60,11 +62,34 @@ public class MContractT extends X_JP_ContractT {
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
-		//Refresh Automatic update info
-		if((newRecord || is_ValueChanged("IsAutomaticUpdateJP")) && !isAutomaticUpdateJP())
+		//Check Automatic update info
+		if((newRecord || is_ValueChanged("IsAutomaticUpdateJP")))
 		{
-			setJP_ContractCancelTerm_ID(0);
-			setJP_ContractExtendPeriod_ID(0);			
+			if(isAutomaticUpdateJP())
+			{
+				
+				if(getJP_ContractCancelTerm_ID() == 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCancelTerm_ID")};
+					String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+				
+				if(getJP_ContractExtendPeriod_ID() == 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractExtendPeriod_ID")};
+					String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+				
+			}else{
+
+				setJP_ContractCancelTerm_ID(0);
+				setJP_ContractExtendPeriod_ID(0);
+				
+			}
 		}
 
 		return true;

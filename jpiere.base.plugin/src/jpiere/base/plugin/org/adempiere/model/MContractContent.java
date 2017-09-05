@@ -40,6 +40,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -452,19 +453,31 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
-		
-		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
-		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
-		
+		//Check - General Contract can not have Contract Content
 		if(newRecord)
 		{
-			//Check - General Contract can not have Contract Content
 			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_GeneralContract))
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_GeneralContractContent"));
 				return false;
 			}
 			
+		}
+		
+		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
+		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
+		if(!getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
+		{
+			if(is_ValueChanged(MContractContent.COLUMNNAME_DocBaseType) 
+					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_BaseDocDocType_ID)
+					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy)
+					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractCalender_ID)
+					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcess_ID)
+					|| is_ValueChanged(MContractContent.COLUMNNAME_C_BPartner_ID))
+			{
+				log.saveError("Error", "契約処理ステータスが未処理ではないため変更できません。");//TODO メッセージ化
+				return false;
+			}
 		}
 		
 		
@@ -490,6 +503,88 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				
 			}
 		}
+		
+		//Check Period Contract
+		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+		{
+			if(!newRecord)
+			{
+				if(getJP_ContractProcess_ID() == 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_ID")};
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+			}
+			
+			
+			//Check Automatic Update & Process Period
+			//TODO　自動更新なら契約処理期間(To)を入れるべき！！ ↓のロジックは間違あり、要見直し!!
+			//自動更新であれば、契約処理の日付と合わせるようにすべきな気がする…。
+			if(getParent().isAutomaticUpdateJP())
+			{
+				if(getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 )
+				{
+					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
+					return false;
+				}
+				
+				if(getParent().getJP_ContractPeriodDate_To() != null)
+				{
+					if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
+					{
+						log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
+						return false;
+					}
+				}
+				
+			}else{
+				
+				if(getJP_ContractProcDate_From() == null
+						|| getJP_ContractProcDate_To() == null)
+				{
+					log.saveError("Error","自動更新ではないため、契約期間を入力して下さい。");//TODO メッセージ化;
+					return false;
+				}
+				
+				if(getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 
+						|| getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
+				{
+					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
+					return false;
+				}
+				
+			}
+		}
+		
+		//Check Spot Contract
+		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
+		{
+			if(getJP_ContractCalender_ID() > 0)
+				setJP_ContractCalender_ID(0);
+			
+			if(!newRecord)
+			{
+				if(getJP_ContractProcess_ID() == 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_ID")};
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
+			}
+			
+			setJP_ContractProcDate_From(null);
+			setJP_ContractProcDate_To(null);
+			
+			//Check Automatic Update
+			if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP())
+			{
+				log.saveError("Error","契約書が自動更新ではないため、契約内容を自動更新にする事はできません。");//TODO メッセージ化
+				return false;
+			}
+		}		
 		
 		return true;
 	}

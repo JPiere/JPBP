@@ -22,7 +22,7 @@ CREATE TABLE adempiere.JP_ContractContentT
   JP_ContractCalenderRef_ID numeric(10,0),
   JP_ContractProcPOffset numeric(10,0) DEFAULT 0 ,
   JP_ContractProcPeriodNum numeric(10,0) DEFAULT 0, 
-  JP_ContractProcessRef_ID numeric(10,0) NOT NULL,
+  JP_ContractProcessRef_ID numeric(10,0) ,
   DeliveryTime_Promised numeric(10,0) DEFAULT 0,
   Value character varying(40) NOT NULL,
   IsSOTrx character(1) NOT NULL DEFAULT 'Y'::bpchar,
