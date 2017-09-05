@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.List;
@@ -451,6 +452,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
+		
+		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
+		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
+		
 		if(newRecord)
 		{
 			//Check - General Contract can not have Contract Content
@@ -565,5 +570,42 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			s_cache.put (JP_ContractContent_ID, retValue);
 		return retValue;
 	}	//	get
+	
+	
+	/**
+	 * 
+	 * @param ctx
+	 * @param JP_ContractProcPeriod_ID
+	 * @return
+	 */
+	public int getActiveOrderIdByPeriod(Properties ctx, int JP_ContractProcPeriod_ID)
+	{
+		int record_ID = 0;
+		final String sql = "SELECT C_Order_ID FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE','CL')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				record_ID = rs.getInt(1);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		return record_ID;
+	}
 	
 }	//	MContractContent

@@ -165,7 +165,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				if(columnName.equals(MOrder.COLUMNNAME_DropShip_BPartner_ID))
 				{
 					list.add(new JPiereDropShipBPartnerCallout());
-				}else if(columnName.equals("JP_Contract_ID")) { //JPIERE-0363
+				}else if(columnName.equals("JP_Contract_ID") || columnName.equals("JP_ContractContent_ID")) { //JPIERE-0363
 					
 					list.add(new JPiereContractOrderCallout());
 				}

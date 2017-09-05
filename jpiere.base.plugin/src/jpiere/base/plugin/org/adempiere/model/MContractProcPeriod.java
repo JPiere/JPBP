@@ -135,6 +135,20 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 		return getName();
 	}
 	
+	public boolean isContainedBaseDocContractProcPeriod(int BaseDoc_ContractProcPeriod_ID)
+	{		
+		return isContainedBaseDocContractProcPeriod(MContractProcPeriod.get(getCtx(), BaseDoc_ContractProcPeriod_ID));
+	}
 	
 	
+	public boolean isContainedBaseDocContractProcPeriod(MContractProcPeriod BaseDoc_ContractProcPeriod)
+	{
+		if(getStartDate().compareTo(BaseDoc_ContractProcPeriod.getStartDate()) >= 0
+				&& getEndDate().compareTo(BaseDoc_ContractProcPeriod.getEndDate())<= 0 )
+		{
+			return true;
+		}else{
+			return false;
+		}
+	}
 }

@@ -17,6 +17,7 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
 /**
@@ -37,6 +38,27 @@ public class MContractLine extends X_JP_ContractLine {
 		super(ctx, rs, trxName);
 	}
 	
+	/**	Cache				*/
+	private static CCache<Integer,MContractLine>	s_cache = new CCache<Integer,MContractLine>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractLine_ID id
+	 *	@return Contract Calender
+	 */
+	public static MContractLine get (Properties ctx, int JP_ContractLine_ID)
+	{
+		Integer ii = new Integer (JP_ContractLine_ID);
+		MContractLine retValue = (MContractLine)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MContractLine (ctx, JP_ContractLine_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_ContractLine_ID, retValue);
+		return retValue;
+	}	//	get
+	
 	
 	/** Parent					*/
 	protected MContractContent			m_parent = null;
@@ -50,6 +72,15 @@ public class MContractLine extends X_JP_ContractLine {
 	
 	
 	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
+		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
+		
+		return true;
+	}
+
+	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) 
 	{
 		if (!success)
@@ -57,7 +88,7 @@ public class MContractLine extends X_JP_ContractLine {
 		if (getParent().isProcessed())
 			return success;
 		
-		if(!newRecord && is_ValueChanged(MContractLine.COLUMNNAME_LineNetAmt))
+		if(newRecord || is_ValueChanged(MContractLine.COLUMNNAME_LineNetAmt))
 		{
 			String sql = "UPDATE JP_ContractContent cc"
 					+ " SET TotalLines = "

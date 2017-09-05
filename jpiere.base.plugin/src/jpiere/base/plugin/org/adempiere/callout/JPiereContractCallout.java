@@ -46,7 +46,7 @@ public class JPiereContractCallout implements IColumnCallout {
 		if(mField.getColumnName().equals("JP_ContractT_ID") && value != null)
 		{
 
-			FDialog.ask(WindowNo, null, Msg.getMsg(ctx, "JP_UpdateContractByTemplate"), new Callback<Boolean>() //Would you like to update contract document by template?
+			FDialog.ask(WindowNo, null, "JP_UpdateContractByTemplate", new Callback<Boolean>() //Would you like to update contract document by template?
 			{
 
 				@Override
