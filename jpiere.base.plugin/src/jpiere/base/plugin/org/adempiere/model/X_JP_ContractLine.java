@@ -19,6 +19,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
@@ -56,6 +57,8 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 			setPriceEntered (Env.ZERO);
 			setPriceLimit (Env.ZERO);
 			setPriceList (Env.ZERO);
+			setProcessed (false);
+// N
 			setQtyEntered (Env.ZERO);
 // 1
 			setQtyInvoiced (Env.ZERO);
@@ -393,6 +396,40 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Date Ordered.
+		@param DateOrdered 
+		Date of Order
+	  */
+	public void setDateOrdered (Timestamp DateOrdered)
+	{
+		set_ValueNoCheck (COLUMNNAME_DateOrdered, DateOrdered);
+	}
+
+	/** Get Date Ordered.
+		@return Date of Order
+	  */
+	public Timestamp getDateOrdered () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
+	}
+
+	/** Set Date Promised.
+		@param DatePromised 
+		Date Order was promised
+	  */
+	public void setDatePromised (Timestamp DatePromised)
+	{
+		set_Value (COLUMNNAME_DatePromised, DatePromised);
+	}
+
+	/** Get Date Promised.
+		@return Date Order was promised
+	  */
+	public Timestamp getDatePromised () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DatePromised);
 	}
 
 	/** Set Promised Delivery Time.
@@ -1096,6 +1133,30 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Processed.
+		@param Processed 
+		The document has been processed
+	  */
+	public void setProcessed (boolean Processed)
+	{
+		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
+	}
+
+	/** Get Processed.
+		@return The document has been processed
+	  */
+	public boolean isProcessed () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processed);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Quantity.

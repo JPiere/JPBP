@@ -297,6 +297,21 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 	}
 	
+	public void setProcessed (boolean processed)
+	{
+		super.setProcessed (processed);
+		if (get_ID() == 0)
+			return;
+		StringBuilder set = new StringBuilder("SET Processed='")
+		.append((processed ? "Y" : "N"))
+		.append("' WHERE JP_ContractContent_ID=").append(getJP_ContractContent_ID());
+		
+		StringBuilder msgdb = new StringBuilder("UPDATE JP_ContractLine ").append(set);
+		int noLine = DB.executeUpdate(msgdb.toString(), get_TrxName());
+		m_lines = null;
+
+		if (log.isLoggable(Level.FINE)) log.fine(processed + " - Lines=" + noLine);
+	}	//	setProcessed
 
 	/**
 	 * 	Void Document.
@@ -486,6 +501,20 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		//派生伝票作成方針
 		//契約カレンダー選択リスト
 		//契約処理マスタ選択リスト
+		
+		
+		//TODO 契約会計情報の選択制御ロジック
+		
+		//Check DateOrdered
+		if(!newRecord && is_ValueChanged(MContractContent.COLUMNNAME_DateOrdered) && getDateOrdered() != null)
+		{
+			MContractLine[] line =  getLines();
+			for(int i = 0; i < line.length; i++)
+			{
+				line[i].setDateOrdered(getDateOrdered());
+				line[i].saveEx(get_TrxName());
+			}
+		}
 		
 		
 		//Check JP_BaseDocDocType_ID and DocBaseType

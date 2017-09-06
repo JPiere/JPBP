@@ -122,7 +122,9 @@ CREATE TABLE adempiere.JP_ContractContent
 
   SendeMail character(1) NOT NULL DEFAULT 'N'::bpchar,
   OrderType character varying(2) ,
- JP_Estimation_ID numeric(10) DEFAULT NULL::numeric,
+  JP_Estimation_ID numeric(10) DEFAULT NULL::numeric,
+  DateOrdered timestamp without time zone,
+  DatePromised timestamp without time zone,
  
 
   CONSTRAINT JP_ContractContent_pkey PRIMARY KEY (JP_ContractContent_ID)

@@ -574,6 +574,40 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return (Timestamp)get_Value(COLUMNNAME_DateDoc);
 	}
 
+	/** Set Date Ordered.
+		@param DateOrdered 
+		Date of Order
+	  */
+	public void setDateOrdered (Timestamp DateOrdered)
+	{
+		set_Value (COLUMNNAME_DateOrdered, DateOrdered);
+	}
+
+	/** Get Date Ordered.
+		@return Date of Order
+	  */
+	public Timestamp getDateOrdered () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
+	}
+
+	/** Set Date Promised.
+		@param DatePromised 
+		Date Order was promised
+	  */
+	public void setDatePromised (Timestamp DatePromised)
+	{
+		set_Value (COLUMNNAME_DatePromised, DatePromised);
+	}
+
+	/** Get Date Promised.
+		@return Date Order was promised
+	  */
+	public Timestamp getDatePromised () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DatePromised);
+	}
+
 	/** DeliveryRule AD_Reference_ID=151 */
 	public static final int DELIVERYRULE_AD_Reference_ID=151;
 	/** After Receipt = R */

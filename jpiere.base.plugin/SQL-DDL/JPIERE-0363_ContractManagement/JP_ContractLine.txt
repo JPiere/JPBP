@@ -95,6 +95,7 @@ CREATE TABLE adempiere.JP_ContractLine
 
   DatePromised timestamp without time zone,
   DateOrdered timestamp without time zone,
+  Processed character(1) COLLATE NOT NULL DEFAULT 'N'::bpchar,
 
   CONSTRAINT JP_ContractLine_pkey PRIMARY KEY (JP_ContractLine_ID)
 )

@@ -325,6 +325,32 @@ public interface I_JP_ContractContent
 	  */
 	public Timestamp getDateDoc();
 
+    /** Column name DateOrdered */
+    public static final String COLUMNNAME_DateOrdered = "DateOrdered";
+
+	/** Set Date Ordered.
+	  * Date of Order
+	  */
+	public void setDateOrdered (Timestamp DateOrdered);
+
+	/** Get Date Ordered.
+	  * Date of Order
+	  */
+	public Timestamp getDateOrdered();
+
+    /** Column name DatePromised */
+    public static final String COLUMNNAME_DatePromised = "DatePromised";
+
+	/** Set Date Promised.
+	  * Date Order was promised
+	  */
+	public void setDatePromised (Timestamp DatePromised);
+
+	/** Get Date Promised.
+	  * Date Order was promised
+	  */
+	public Timestamp getDatePromised();
+
     /** Column name DeliveryRule */
     public static final String COLUMNNAME_DeliveryRule = "DeliveryRule";
 

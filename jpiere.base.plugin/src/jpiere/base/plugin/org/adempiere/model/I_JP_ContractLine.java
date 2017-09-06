@@ -243,6 +243,32 @@ public interface I_JP_ContractLine
 	  */
 	public int getCreatedBy();
 
+    /** Column name DateOrdered */
+    public static final String COLUMNNAME_DateOrdered = "DateOrdered";
+
+	/** Set Date Ordered.
+	  * Date of Order
+	  */
+	public void setDateOrdered (Timestamp DateOrdered);
+
+	/** Get Date Ordered.
+	  * Date of Order
+	  */
+	public Timestamp getDateOrdered();
+
+    /** Column name DatePromised */
+    public static final String COLUMNNAME_DatePromised = "DatePromised";
+
+	/** Set Date Promised.
+	  * Date Order was promised
+	  */
+	public void setDatePromised (Timestamp DatePromised);
+
+	/** Get Date Promised.
+	  * Date Order was promised
+	  */
+	public Timestamp getDatePromised();
+
     /** Column name DeliveryTime_Promised */
     public static final String COLUMNNAME_DeliveryTime_Promised = "DeliveryTime_Promised";
 
@@ -616,6 +642,19 @@ public interface I_JP_ContractLine
 	  * List Price
 	  */
 	public BigDecimal getPriceList();
+
+    /** Column name Processed */
+    public static final String COLUMNNAME_Processed = "Processed";
+
+	/** Set Processed.
+	  * The document has been processed
+	  */
+	public void setProcessed (boolean Processed);
+
+	/** Get Processed.
+	  * The document has been processed
+	  */
+	public boolean isProcessed();
 
     /** Column name QtyEntered */
     public static final String COLUMNNAME_QtyEntered = "QtyEntered";
