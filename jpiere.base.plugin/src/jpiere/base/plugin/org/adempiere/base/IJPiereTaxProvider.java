@@ -18,9 +18,9 @@ import java.math.RoundingMode;
 
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
-import org.compiere.model.MOrder;
-import org.compiere.model.MOrderLine;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxProvider;
 
@@ -41,5 +41,14 @@ public interface IJPiereTaxProvider {
 	public boolean updateEstimationTax(MTaxProvider provider, MEstimationLine line);
 	
 	public boolean updateHeaderTax(MTaxProvider provider, MEstimationLine line);
+	
+	
+	public boolean calculateEstimationTaxTotal(MTaxProvider provider, MRecognition estimation);
+	
+	public boolean recalculateTax(MTaxProvider provider, MRecognitionLine line, boolean newRecord);
+	
+	public boolean updateEstimationTax(MTaxProvider provider, MRecognitionLine line);
+	
+	public boolean updateHeaderTax(MTaxProvider provider, MRecognitionLine line);
 
 }
