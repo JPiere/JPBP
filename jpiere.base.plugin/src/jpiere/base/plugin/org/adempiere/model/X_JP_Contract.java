@@ -34,7 +34,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170902L;
+	private static final long serialVersionUID = 20170906L;
 
     /** Standard Constructor */
     public X_JP_Contract (Properties ctx, int JP_Contract_ID, String trxName)
@@ -943,6 +943,11 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 		return ii.intValue();
 	}
 
+	public I_JP_Contract getJP_Contract_Link() throws RuntimeException
+    {
+		return (I_JP_Contract)MTable.get(getCtx(), I_JP_Contract.Table_Name)
+			.getPO(getJP_Contract_Link_ID(), get_TrxName());	}
+
 	/** Set Linked Contract.
 		@param JP_Contract_Link_ID Linked Contract	  */
 	public void setJP_Contract_Link_ID (int JP_Contract_Link_ID)
@@ -962,6 +967,11 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 			 return 0;
 		return ii.intValue();
 	}
+
+	public I_JP_Contract getJP_Contract_Parent() throws RuntimeException
+    {
+		return (I_JP_Contract)MTable.get(getCtx(), I_JP_Contract.Table_Name)
+			.getPO(getJP_Contract_Parent_ID(), get_TrxName());	}
 
 	/** Set Parent Contract Doc.
 		@param JP_Contract_Parent_ID Parent Contract Doc	  */
@@ -995,6 +1005,31 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public String getJP_Contract_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Contract_UU);
+	}
+
+	public I_JP_Estimation getJP_Estimation() throws RuntimeException
+    {
+		return (I_JP_Estimation)MTable.get(getCtx(), I_JP_Estimation.Table_Name)
+			.getPO(getJP_Estimation_ID(), get_TrxName());	}
+
+	/** Set Estimation & Handwritten.
+		@param JP_Estimation_ID Estimation & Handwritten	  */
+	public void setJP_Estimation_ID (int JP_Estimation_ID)
+	{
+		if (JP_Estimation_ID < 1) 
+			set_Value (COLUMNNAME_JP_Estimation_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Estimation_ID, Integer.valueOf(JP_Estimation_ID));
+	}
+
+	/** Get Estimation & Handwritten.
+		@return Estimation & Handwritten	  */
+	public int getJP_Estimation_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Estimation_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Name.

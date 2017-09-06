@@ -64,6 +64,7 @@ CREATE TABLE adempiere.JP_Contract
    JP_ContractCancelMemo character varying(2000) 
    JP_ContractBPNo character varying(30) DEFAULT NULL::character varying,
    JP_Contract_Link_ID numeric(10) DEFAULT NULL::numeric,
+   JP_Estimation_ID numeric(10) DEFAULT NULL::numeric,
 
   CONSTRAINT JP_Contract_pkey PRIMARY KEY (JP_Contract_ID)
 )

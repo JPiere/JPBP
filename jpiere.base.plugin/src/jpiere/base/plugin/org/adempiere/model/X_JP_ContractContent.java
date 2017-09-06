@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractContent
  *  @author iDempiere (generated) 
@@ -33,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170902L;
+	private static final long serialVersionUID = 20170906L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -80,6 +81,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			setJP_ContractContentT_ID (0);
 			setJP_ContractContent_ID (0);
 			setJP_ContractProcStatus (null);
+// UN
 			setJP_Contract_Acct_ID (0);
 			setJP_Contract_ID (0);
 			setM_PriceList_ID (0);
@@ -806,6 +808,14 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
 
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), getDocumentNo());
+    }
+
 	public org.compiere.model.I_C_BPartner getDropShip_BPartner() throws RuntimeException
     {
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
@@ -1365,6 +1375,31 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getJP_CreateDerivativeDocPolicy () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_CreateDerivativeDocPolicy);
+	}
+
+	public I_JP_Estimation getJP_Estimation() throws RuntimeException
+    {
+		return (I_JP_Estimation)MTable.get(getCtx(), I_JP_Estimation.Table_Name)
+			.getPO(getJP_Estimation_ID(), get_TrxName());	}
+
+	/** Set Estimation & Handwritten.
+		@param JP_Estimation_ID Estimation & Handwritten	  */
+	public void setJP_Estimation_ID (int JP_Estimation_ID)
+	{
+		if (JP_Estimation_ID < 1) 
+			set_Value (COLUMNNAME_JP_Estimation_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Estimation_ID, Integer.valueOf(JP_Estimation_ID));
+	}
+
+	/** Get Estimation & Handwritten.
+		@return Estimation & Handwritten	  */
+	public int getJP_Estimation_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Estimation_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException

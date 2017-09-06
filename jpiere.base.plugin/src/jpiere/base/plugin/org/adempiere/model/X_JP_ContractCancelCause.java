@@ -30,7 +30,7 @@ public class X_JP_ContractCancelCause extends PO implements I_JP_ContractCancelC
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170902L;
+	private static final long serialVersionUID = 20170906L;
 
     /** Standard Constructor */
     public X_JP_ContractCancelCause (Properties ctx, int JP_ContractCancelCause_ID, String trxName)

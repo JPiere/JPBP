@@ -93,6 +93,8 @@ CREATE TABLE adempiere.JP_ContractLine
 
   AD_OrgTrx_ID numeric(10,0),
 
+  DatePromised timestamp without time zone,
+  DateOrdered timestamp without time zone,
 
   CONSTRAINT JP_ContractLine_pkey PRIMARY KEY (JP_ContractLine_ID)
 )

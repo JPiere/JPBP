@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractLine
  *  @author iDempiere (generated) 
@@ -32,7 +33,7 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170902L;
+	private static final long serialVersionUID = 20170906L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -46,7 +47,6 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 // Y
 			setIsDescription (false);
 			setJP_ContractContent_ID (0);
-			setJP_ContractLineT_ID (0);
 			setJP_ContractLine_ID (0);
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_ContractLine WHERE JP_ContractContent_ID=@JP_ContractContent_ID@
@@ -621,6 +621,14 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 			 return 0;
 		return ii.intValue();
 	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getJP_ContractContent_ID()));
+    }
 
 	public I_JP_ContractLineT getJP_ContractLineT() throws RuntimeException
     {

@@ -30,7 +30,7 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170902L;
+	private static final long serialVersionUID = 20170906L;
 
     /** Standard Constructor */
     public X_JP_ContractProcess (Properties ctx, int JP_ContractProcess_ID, String trxName)

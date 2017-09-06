@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractLineT
  *  @author iDempiere (generated) 
@@ -32,7 +33,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170902L;
+	private static final long serialVersionUID = 20170906L;
 
     /** Standard Constructor */
     public X_JP_ContractLineT (Properties ctx, int JP_ContractLineT_ID, String trxName)
@@ -576,6 +577,14 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 			 return 0;
 		return ii.intValue();
 	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getJP_ContractContentT_ID()));
+    }
 
 	/** Set Contract Content Line Template.
 		@param JP_ContractLineT_ID Contract Content Line Template	  */

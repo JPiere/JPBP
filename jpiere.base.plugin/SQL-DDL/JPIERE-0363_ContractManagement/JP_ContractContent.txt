@@ -122,7 +122,7 @@ CREATE TABLE adempiere.JP_ContractContent
 
   SendeMail character(1) NOT NULL DEFAULT 'N'::bpchar,
   OrderType character varying(2) ,
-
+ JP_Estimation_ID numeric(10) DEFAULT NULL::numeric,
  
 
   CONSTRAINT JP_ContractContent_pkey PRIMARY KEY (JP_ContractContent_ID)

@@ -66,6 +66,14 @@ public class MContractContentT extends X_JP_ContractContentT {
 		}
 		
 		
+		
+		//TODO 下のフィールドの更新制御 - 明細が登録されていたら変更できなくする。
+		//基点となる伝票
+		//基点となる伝票の伝票タイプ
+		//派生伝票作成方針
+		//契約カレンダー選択リスト
+		//契約処理マスタ選択リスト
+		
 		//Check JP_BaseDocDocType_ID and DocBaseType
 		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
 				|| is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType))

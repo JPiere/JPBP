@@ -533,6 +533,8 @@ public interface I_JP_Contract
 	/** Get Linked Contract	  */
 	public int getJP_Contract_Link_ID();
 
+	public I_JP_Contract getJP_Contract_Link() throws RuntimeException;
+
     /** Column name JP_Contract_Parent_ID */
     public static final String COLUMNNAME_JP_Contract_Parent_ID = "JP_Contract_Parent_ID";
 
@@ -542,6 +544,8 @@ public interface I_JP_Contract
 	/** Get Parent Contract Doc	  */
 	public int getJP_Contract_Parent_ID();
 
+	public I_JP_Contract getJP_Contract_Parent() throws RuntimeException;
+
     /** Column name JP_Contract_UU */
     public static final String COLUMNNAME_JP_Contract_UU = "JP_Contract_UU";
 
@@ -550,6 +554,17 @@ public interface I_JP_Contract
 
 	/** Get Contract Doc(UU)	  */
 	public String getJP_Contract_UU();
+
+    /** Column name JP_Estimation_ID */
+    public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
+
+	/** Set Estimation & Handwritten	  */
+	public void setJP_Estimation_ID (int JP_Estimation_ID);
+
+	/** Get Estimation & Handwritten	  */
+	public int getJP_Estimation_ID();
+
+	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
