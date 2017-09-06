@@ -272,7 +272,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 		
-		setProcessed(false);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
+		setProcessed(true);
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
@@ -529,15 +529,12 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 				if(getJP_ContractPeriodDate_To()==null || now.compareTo(getJP_ContractPeriodDate_To()) < 0)
 				{
 					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
-					setProcessed(false);
 				}else{
 					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
-					setProcessed(true);
 				}
 				
 			}else{
 				setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
-				setProcessed(false);
 			}
 		}
 		

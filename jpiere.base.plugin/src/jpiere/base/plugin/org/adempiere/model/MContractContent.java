@@ -271,7 +271,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return DocAction.STATUS_Invalid;
 		}
 		
-		setProcessed(false);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
+		setProcessed(true);
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt

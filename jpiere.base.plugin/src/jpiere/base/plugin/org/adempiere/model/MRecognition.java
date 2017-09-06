@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.adempiere.base.Core;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.BPartnerNoAddressException;
 import org.adempiere.exceptions.PeriodClosedException;
@@ -37,8 +36,6 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoiceBatch;
-import org.compiere.model.MInvoiceBatchLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrg;
@@ -100,8 +97,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	}	//	getOfBPartner
 
 	/**
-	 * 	Create new Invoice by copying
-	 * 	@param from invoice
+	 * 	Create new Recognition by copying
+	 * 	@param from Recognition
 	 * 	@param dateDoc date of the document date
 	 *  @param acctDate original account date 
 	 * 	@param C_DocTypeTarget_ID target doc type
@@ -109,7 +106,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	 * 	@param counter create counter links
 	 * 	@param trxName trx
 	 * 	@param setOrder set Order links
-	 *	@return Invoice
+	 *	@return Recognition
 	 */
 	public static MRecognition copyFrom (MRecognition from, Timestamp dateDoc, Timestamp dateAcct,
 		int C_DocTypeTarget_ID, boolean isSOTrx, boolean counter,
@@ -121,7 +118,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	}
 
 	/**
-	 * 	Create new Invoice by copying
+	 * 	Create new Recognition by copying
 	 * 	@param from invoice
 	 * 	@param dateDoc date of the document date
 	 *  @param acctDate original account date 
@@ -131,7 +128,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	 * 	@param trxName trx
 	 * 	@param setOrder set Order links
 	 *  @param Document Number for reversed invoices
-	 *	@return Invoice
+	 *	@return Recognition
 	 */
 	public static MRecognition copyFrom (MRecognition from, Timestamp dateDoc, Timestamp dateAcct,
 		int C_DocTypeTarget_ID, boolean isSOTrx, boolean counter,
@@ -139,7 +136,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	{
 		MRecognition to = new MRecognition (from.getCtx(), 0, trxName);
 		PO.copyValues (from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
-		to.set_ValueNoCheck ("C_Invoice_ID", I_ZERO);
+		to.set_ValueNoCheck ("JP_Recognition_ID", I_ZERO);
 		to.set_ValueNoCheck ("DocumentNo", documentNo);
 		//
 		to.setDocStatus (DOCSTATUS_Drafted);		//	Draft
@@ -201,14 +198,14 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 
 		//	Lines
 		if (to.copyLinesFrom(from, counter, setOrder) == 0)
-			throw new IllegalStateException("Could not create Invoice Lines");
+			throw new IllegalStateException("Could not create Recognition Lines");
 
 		return to;
 	}
 	
 	/** 
 	 *  @deprecated
-	 * 	Create new Invoice by copying
+	 * 	Create new Recognition by copying
 	 * 	@param from invoice
 	 * 	@param dateDoc date of the document date
 	 * 	@param C_DocTypeTarget_ID target doc type
@@ -216,7 +213,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	 * 	@param counter create counter links
 	 * 	@param trxName trx
 	 * 	@param setOrder set Order links
-	 *	@return Invoice
+	 *	@return Recognition
 	 */
 	public static MRecognition copyFrom (MRecognition from, Timestamp dateDoc,
 		int C_DocTypeTarget_ID, boolean isSOTrx, boolean counter,
@@ -231,36 +228,36 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	/**
 	 * 	Get PDF File Name
 	 *	@param documentDir directory
-	 * 	@param C_Invoice_ID invoice
+	 * 	@param JP_Recognition_ID invoice
 	 *	@return file name
 	 */
-	public static String getPDFFileName (String documentDir, int C_Invoice_ID)
+	public static String getPDFFileName (String documentDir, int JP_Recognition_ID)
 	{
 		StringBuilder sb = new StringBuilder (documentDir);
 		if (sb.length() == 0)
 			sb.append(".");
 		if (!sb.toString().endsWith(File.separator))
 			sb.append(File.separator);
-		sb.append("C_Invoice_ID_")
-			.append(C_Invoice_ID)
+		sb.append("JP_Recognition_ID_")
+			.append(JP_Recognition_ID)
 			.append(".pdf");
 		return sb.toString();
 	}	//	getPDFFileName
 
 
 	/**
-	 * 	Get MInvoice from Cache
+	 * 	Get MRecognition from Cache
 	 *	@param ctx context
-	 *	@param C_Invoice_ID id
-	 *	@return MInvoice
+	 *	@param JP_Recognition_ID id
+	 *	@return MRecognition
 	 */
-	public static MRecognition get (Properties ctx, int C_Invoice_ID)
+	public static MRecognition get (Properties ctx, int JP_Recognition_ID)
 	{
-		Integer key = new Integer (C_Invoice_ID);
+		Integer key = new Integer (JP_Recognition_ID);
 		MRecognition retValue = (MRecognition) s_cache.get (key);
 		if (retValue != null)
 			return retValue;
-		retValue = new MRecognition (ctx, C_Invoice_ID, null);
+		retValue = new MRecognition (ctx, JP_Recognition_ID, null);
 		if (retValue.get_ID () != 0)
 			s_cache.put (key, retValue);
 		return retValue;
@@ -271,15 +268,15 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 
 
 	/**************************************************************************
-	 * 	Invoice Constructor
+	 * 	Recognition Constructor
 	 * 	@param ctx context
-	 * 	@param C_Invoice_ID invoice or 0 for new
+	 * 	@param JP_Recognition_ID invoice or 0 for new
 	 * 	@param trxName trx name
 	 */
-	public MRecognition (Properties ctx, int C_Invoice_ID, String trxName)
+	public MRecognition (Properties ctx, int JP_Recognition_ID, String trxName)
 	{
-		super (ctx, C_Invoice_ID, trxName);
-		if (C_Invoice_ID == 0)
+		super (ctx, JP_Recognition_ID, trxName);
+		if (JP_Recognition_ID == 0)
 		{
 			setDocStatus (DOCSTATUS_Drafted);		//	Draft
 			setDocAction (DOCACTION_Complete);
@@ -302,7 +299,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			super.setProcessed (false);
 			setProcessing(false);
 		}
-	}	//	MInvoice
+	}	//	MRecognition
 
 	/**
 	 *  Load Constructor
@@ -313,10 +310,11 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	public MRecognition (Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
-	}	//	MInvoice
+	}	//	MRecognition
 
-	/**
-	 * 	Create Invoice from Order
+	/** TODO なんだこのメソッドは?? どんな使い道があるのか？　いらないんじゃない？
+	 * 
+	 * 	Create Recognition from Order
 	 *	@param order order
 	 *	@param C_DocTypeTarget_ID target document type
 	 *	@param invoiceDate date or null
@@ -347,73 +345,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		setC_BPartner_ID(order.getBill_BPartner_ID());
 		setC_BPartner_Location_ID(order.getBill_Location_ID());
 		setAD_User_ID(order.getBill_User_ID());
-	}	//	MInvoice
+	}	//	MRecognition
 
-	/** TODO このメソッドはいらいない気がする
-	 * 	Create Invoice from Shipment
-	 *	@param ship shipment
-	 *	@param invoiceDate date or null
-	 */
-	public MRecognition (MInOut ship, Timestamp invoiceDate)
-	{
-		this (ship.getCtx(), 0, ship.get_TrxName());
-		setClientOrg(ship);
-		setShipment(ship);	//	set base settings
-		//
-		setC_DocTypeTarget_ID();
-		if (invoiceDate != null)
-			setDateInvoiced(invoiceDate);
-		setDateAcct(getDateInvoiced());
-		//
-		setSalesRep_ID(ship.getSalesRep_ID());
-	}	//	MInvoice
-
-	/** TODO このメソッドはいらない気がする
-	 * 	Create Invoice from Batch Line
-	 *	@param batch batch
-	 *	@param line batch line
-	 */
-	public MRecognition (MInvoiceBatch batch, MInvoiceBatchLine line)
-	{
-		this (line.getCtx(), 0, line.get_TrxName());
-		setClientOrg(line);
-		setDocumentNo(line.getDocumentNo());
-		//
-		setIsSOTrx(batch.isSOTrx());
-		MBPartner bp = new MBPartner (line.getCtx(), line.getC_BPartner_ID(), line.get_TrxName());
-		setBPartner(bp);	//	defaults
-		//
-		setIsTaxIncluded(line.isTaxIncluded());
-		//	May conflict with default price list
-		setC_Currency_ID(batch.getC_Currency_ID());
-		setC_ConversionType_ID(batch.getC_ConversionType_ID());
-		//
-	//	setPaymentRule(order.getPaymentRule());
-	//	setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
-	//	setPOReference("");
-		setDescription(batch.getDescription());
-	//	setDateOrdered(order.getDateOrdered());
-		//
-		setAD_OrgTrx_ID(line.getAD_OrgTrx_ID());
-		setC_Project_ID(line.getC_Project_ID());
-	//	setC_Campaign_ID(line.getC_Campaign_ID());
-		setC_Activity_ID(line.getC_Activity_ID());
-		setUser1_ID(line.getUser1_ID());
-		setUser2_ID(line.getUser2_ID());
-		//
-		setC_DocTypeTarget_ID(line.getC_DocType_ID());
-		setDateInvoiced(line.getDateInvoiced());
-		setDateAcct(line.getDateAcct());
-		//
-		setSalesRep_ID(batch.getSalesRep_ID());
-		//
-		setC_BPartner_ID(line.getC_BPartner_ID());
-		setC_BPartner_Location_ID(line.getC_BPartner_Location_ID());
-		setAD_User_ID(line.getAD_User_ID());
-	}	//	MInvoice
-
-	/**	Open Amount				*/
-	private BigDecimal 		m_openAmt = null;
 
 	/**	Invoice Lines			*/
 	private MRecognitionLine[]	m_lines;
@@ -451,10 +384,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			ii = bp.getPO_PriceList_ID();
 		if (ii != 0)
 			setM_PriceList_ID(ii);
-		//
-		String ss = bp.getPaymentRule();
-
-
 
 		//	Set Locations
 		MBPartnerLocation[] locs = bp.getLocations(false);
@@ -553,9 +482,9 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			MDocType dt = MDocType.get(getCtx(), order.getC_DocType_ID());
 			if (dt.getC_DocTypeInvoice_ID() != 0)
 				setC_DocTypeTarget_ID(dt.getC_DocTypeInvoice_ID());
-			// Overwrite Invoice BPartner
+			// Overwrite Recognition BPartner
 			setC_BPartner_ID(order.getBill_BPartner_ID());
-			// Overwrite Invoice Address
+			// Overwrite Recognition Address
 			setC_BPartner_Location_ID(order.getBill_Location_ID());
 			// Overwrite Contact
 			setAD_User_ID(order.getBill_User_ID());
@@ -586,44 +515,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction
         }
 
 	}	//	setShipment
-
-	/**
-	 * 	Set Target Document Type
-	 * 	@param DocBaseType doc type MDocType.DOCBASETYPE_
-	 */
-	public void setC_DocTypeTarget_ID (String DocBaseType)
-	{
-		String sql = "SELECT C_DocType_ID FROM C_DocType "
-			+ "WHERE AD_Client_ID=? AND AD_Org_ID in (0,?) AND DocBaseType=?"
-			+ " AND IsActive='Y' "
-			+ "ORDER BY IsDefault DESC, AD_Org_ID DESC";
-		int C_DocType_ID = DB.getSQLValueEx(null, sql, getAD_Client_ID(), getAD_Org_ID(), DocBaseType);
-		if (C_DocType_ID <= 0)
-			log.log(Level.SEVERE, "Not found for AD_Client_ID="
-				+ getAD_Client_ID() + " - " + DocBaseType);
-		else
-		{
-			log.fine(DocBaseType);
-			setC_DocTypeTarget_ID (C_DocType_ID);
-			boolean isSOTrx = MDocType.DOCBASETYPE_ARInvoice.equals(DocBaseType)
-				|| MDocType.DOCBASETYPE_ARCreditMemo.equals(DocBaseType);
-			setIsSOTrx (isSOTrx);
-		}
-	}	//	setC_DocTypeTarget_ID
-
-	/**
-	 * 	Set Target Document Type.
-	 * 	Based on SO flag AP/AP Invoice
-	 */
-	public void setC_DocTypeTarget_ID ()
-	{
-		if (getC_DocTypeTarget_ID() > 0)
-			return;
-		if (isSOTrx())
-			setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_ARInvoice);
-		else
-			setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_APInvoice);
-	}	//	setC_DocTypeTarget_ID
 
 
 	/**
@@ -665,7 +556,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	 */
 	private MRecognitionLine[] getLines (String whereClause)
 	{
-		String whereClauseFinal = "C_Invoice_ID=? ";
+		String whereClauseFinal = "JP_Recognition_ID=? ";
 		if (whereClause != null)
 			whereClauseFinal += whereClause;
 		List<MRecognitionLine> list = new Query(getCtx(), I_JP_RecognitionLine.Table_Name, whereClauseFinal, get_TrxName())
@@ -739,7 +630,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 				PO.copyValues (fromLine, line, fromLine.getAD_Client_ID(), fromLine.getAD_Org_ID());
 			line.setJP_Recognition_ID(getJP_Recognition_ID());
 			line.setRecognition(this);
-			line.set_ValueNoCheck ("C_InvoiceLine_ID", I_ZERO);	// new
+			line.set_ValueNoCheck ("JP_RecognitionLine_ID", I_ZERO);	// new
 			//	Reset
 			if (!setOrder)
 				line.setC_OrderLine_ID(0);
@@ -864,11 +755,11 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			return;
 		StringBuilder set = new StringBuilder("SET Processed='")
 		.append((processed ? "Y" : "N"))
-		.append("' WHERE JP_RecognitionLine_ID=").append(getJP_Recognition_ID());
+		.append("' WHERE JP_Recognition_ID=").append(getJP_Recognition_ID());
 		
 		StringBuilder msgdb = new StringBuilder("UPDATE JP_RecognitionLine ").append(set);
 		int noLine = DB.executeUpdate(msgdb.toString(), get_TrxName());
-		msgdb = new StringBuilder("UPDATE JP_RecognitionLineTax ").append(set);
+		msgdb = new StringBuilder("UPDATE JP_RecognitionTax ").append(set);
 		int noTax = DB.executeUpdate(msgdb.toString(), get_TrxName());
 		m_lines = null;
 		m_taxes = null;
@@ -877,7 +768,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 
 
 
-	private volatile static boolean recursiveCall = false;
+
 	/**************************************************************************
 	 * 	Before Save
 	 *	@param newRecord new
@@ -932,11 +823,10 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		}
 
 		//	Document Type
-		if (getC_DocType_ID() == 0)
-			setC_DocType_ID (0);	//	make sure it's set to 0
-		if (getC_DocTypeTarget_ID() == 0)
-			setC_DocTypeTarget_ID(isSOTrx() ? MDocType.DOCBASETYPE_ARInvoice : MDocType.DOCBASETYPE_APInvoice);
-
+		if(!newRecord || is_ValueChanged("C_DocTypeTarget_ID"))
+		{
+			setC_DocType_ID(getC_DocTypeTarget_ID());
+		}
 
 		// IDEMPIERE-1597 Price List and Date must be not-updateable
 		if (!newRecord && (is_ValueChanged(COLUMNNAME_M_PriceList_ID) || is_ValueChanged(COLUMNNAME_DateInvoiced))) {
@@ -1005,7 +895,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	 */
 	public String toString ()
 	{
-		StringBuilder sb = new StringBuilder ("MInvoice[")
+		StringBuilder sb = new StringBuilder ("MRecognition[")
 			.append(get_ID()).append("-").append(getDocumentNo())
 			.append(",GrandTotal=").append(getGrandTotal());
 		if (m_lines != null)
@@ -1212,49 +1102,14 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			m_processMsg = "@NoLines@";
 			return DocAction.STATUS_Invalid;
 		}
-		//	No Cash Book // deprecated with IDEMPIERE-170 Complete Cash as Payment functionality 
-//		if (PAYMENTRULE_Cash.equals(getPaymentRule())
-//			&& MCashBook.get(getCtx(), getAD_Org_ID(), getC_Currency_ID()) == null)
-//		{
-//			m_processMsg = "@NoCashBook@";
-//			return DocAction.STATUS_Invalid;
-//		}
-
-		//	Convert/Check DocType
-		if (getC_DocType_ID() != getC_DocTypeTarget_ID() )
-			setC_DocType_ID(getC_DocTypeTarget_ID());
-		if (getC_DocType_ID() == 0)
-		{
-			m_processMsg = "No Document Type";
-			return DocAction.STATUS_Invalid;
-		}
 
 		
-		if (!calculateTaxTotal())	//	setTotals
-		{
-			m_processMsg = "Error calculating Tax";
-			return DocAction.STATUS_Invalid;
-		}
-
-		//	Credit Status
-		if (isSOTrx())
-		{
-			MDocType doc = (MDocType) getC_DocTypeTarget();
-			// IDEMPIERE-365 - just check credit if is going to increase the debt
-			if ( (doc.getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo) && getGrandTotal().signum() < 0 ) ||
-				(doc.getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice) && getGrandTotal().signum() > 0 )
-			   )
-			{	
-				MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), null);
-				if ( MBPartner.SOCREDITSTATUS_CreditStop.equals(bp.getSOCreditStatus()) )
-				{
-					m_processMsg = "@BPartnerCreditStop@ - @TotalOpenBalance@="
-							+ bp.getTotalOpenBalance()
-							+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
-					return DocAction.STATUS_Invalid;
-				}
-			}  
-		}
+		//TODO この下のチェックメソッドはいらないよね？
+//		if (!calculateTaxTotal())	//	setTotals
+//		{
+//			m_processMsg = "Error calculating Tax";
+//			return DocAction.STATUS_Invalid;
+//		}
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -1277,11 +1132,12 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	{
 		log.fine("");
 		//	Delete Taxes
-		StringBuilder msgdb = new StringBuilder("DELETE C_InvoiceTax WHERE C_Invoice_ID=").append(getJP_Recognition_ID());
+		StringBuilder msgdb = new StringBuilder("DELETE JP_RecognitionTax WHERE JP_Recognition_ID=").append(getJP_Recognition_ID());
 		DB.executeUpdateEx(msgdb.toString(), get_TrxName());
 		m_taxes = null;
 
 		//TODO 税金処理　とりあえずエラー回避のためコメントアウト
+		
 		
 //		MTaxProvider[] providers = getTaxProviders();
 //		for (MTaxProvider provider : providers)
@@ -1349,43 +1205,11 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		StringBuilder info = new StringBuilder();
 		
-		// POS supports multiple payments
-		boolean fromPOS = false;
-		if ( getC_Order_ID() > 0 )
-		{
-			fromPOS = getC_Order().getC_POS_ID() > 0;
-		}
-
-
-		//	Update Order & Match
-		int matchInv = 0;
-		int matchPO = 0;
+		//	Update Order
 		MRecognitionLine[] lines = getLines(false);
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRecognitionLine line = lines[i];
-
-			//	Matching - Inv-Shipment
-			if (!isSOTrx()
-				&& line.getM_InOutLine_ID() != 0
-				&& line.getM_Product_ID() != 0
-				&& !isReversal())
-			{
-				MInOutLine receiptLine = new MInOutLine (getCtx(),line.getM_InOutLine_ID(), get_TrxName());
-				BigDecimal matchQty = line.getQtyInvoiced();
-
-				if (receiptLine.getMovementQty().compareTo(matchQty) < 0)
-					matchQty = receiptLine.getMovementQty();
-
-//				MMatchInv inv = new MMatchInv(line, getDateInvoiced(), matchQty);
-//				if (!inv.save(get_TrxName()))
-//				{
-//					m_processMsg = CLogger.retrieveErrorString("Could not create Invoice Matching");
-//					return DocAction.STATUS_Invalid;
-//				}
-//				matchInv++;
-//				addDocsPostProcess(inv);
-			}
 					
 			//	Update Order Line
 			MOrderLine ol = null;
@@ -1430,130 +1254,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			}
 			//			
 		}	//	for all lines
-		if (matchInv > 0)
-			info.append(" @M_MatchInv_ID@#").append(matchInv).append(" ");
-		if (matchPO > 0)
-			info.append(" @M_MatchPO_ID@#").append(matchPO).append(" ");
 
-
-
-		//	Update BP Statistics
-		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
-		DB.getDatabase().forUpdate(bp, 0);
-		//	Update total revenue and balance / credit limit (reversed on AllocationLine.processIt)
-		BigDecimal invAmt = MConversionRate.convertBase(getCtx(), getGrandTotal(true),	//	CM adjusted
-			getC_Currency_ID(), getDateAcct(), getC_ConversionType_ID(), getAD_Client_ID(), getAD_Org_ID());
-		if (invAmt == null)
-		{
-			m_processMsg = MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
-					getC_Currency_ID(), MClient.get(getCtx()).getC_Currency_ID(), getC_ConversionType_ID(), getDateAcct(), get_TrxName());
-			return DocAction.STATUS_Invalid;
-		}
-		//	Total Balance
-		BigDecimal newBalance = bp.getTotalOpenBalance();
-		if (newBalance == null)
-			newBalance = Env.ZERO;
-		if (isSOTrx())
-		{
-			newBalance = newBalance.add(invAmt);
-			//
-			if (bp.getFirstSale() == null)
-				bp.setFirstSale(getDateInvoiced());
-			BigDecimal newLifeAmt = bp.getActualLifeTimeValue();
-			if (newLifeAmt == null)
-				newLifeAmt = invAmt;
-			else
-				newLifeAmt = newLifeAmt.add(invAmt);
-			BigDecimal newCreditAmt = bp.getSO_CreditUsed();
-			if (newCreditAmt == null)
-				newCreditAmt = invAmt;
-			else
-				newCreditAmt = newCreditAmt.add(invAmt);
-			//
-			if (log.isLoggable(Level.FINE)) log.fine("GrandTotal=" + getGrandTotal(true) + "(" + invAmt
-				+ ") BP Life=" + bp.getActualLifeTimeValue() + "->" + newLifeAmt
-				+ ", Credit=" + bp.getSO_CreditUsed() + "->" + newCreditAmt
-				+ ", Balance=" + bp.getTotalOpenBalance() + " -> " + newBalance);
-			bp.setActualLifeTimeValue(newLifeAmt);
-			bp.setSO_CreditUsed(newCreditAmt);
-		}	//	SO
-		else
-		{
-			newBalance = newBalance.subtract(invAmt);
-			if (log.isLoggable(Level.FINE)) log.fine("GrandTotal=" + getGrandTotal(true) + "(" + invAmt
-				+ ") Balance=" + bp.getTotalOpenBalance() + " -> " + newBalance);
-		}
-		bp.setTotalOpenBalance(newBalance);
-		bp.setSOCreditStatus();
-		if (!bp.save(get_TrxName()))
-		{
-			m_processMsg = "Could not update Business Partner";
-			return DocAction.STATUS_Invalid;
-		}
-
-		//	User - Last Result/Contact
-		if (getAD_User_ID() != 0)
-		{
-			MUser user = new MUser (getCtx(), getAD_User_ID(), get_TrxName());
-			user.setLastContact(new Timestamp(System.currentTimeMillis()));
-			StringBuilder msgset = new StringBuilder().append(Msg.translate(getCtx(), "C_Invoice_ID")).append(": ").append(getDocumentNo());
-			user.setLastResult(msgset.toString());
-			if (!user.save(get_TrxName()))
-			{
-				m_processMsg = "Could not update Business Partner User";
-				return DocAction.STATUS_Invalid;
-			}
-		}	//	user
-
-		//	Update Project
-		if (isSOTrx() && getC_Project_ID() != 0)
-		{
-			MProject project = new MProject (getCtx(), getC_Project_ID(), get_TrxName());
-			BigDecimal amt = getGrandTotal(true);
-			int C_CurrencyTo_ID = project.getC_Currency_ID();
-			if (C_CurrencyTo_ID != getC_Currency_ID())
-				amt = MConversionRate.convert(getCtx(), amt, getC_Currency_ID(), C_CurrencyTo_ID,
-					getDateAcct(), 0, getAD_Client_ID(), getAD_Org_ID());
-			if (amt == null)
-			{
-				m_processMsg = MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToProjectCurrency",
-						getC_Currency_ID(), C_CurrencyTo_ID, 0, getDateAcct(), get_TrxName());
-				return DocAction.STATUS_Invalid;
-			}
-			BigDecimal newAmt = project.getInvoicedAmt();
-			if (newAmt == null)
-				newAmt = amt;
-			else
-				newAmt = newAmt.add(amt);
-			if (log.isLoggable(Level.FINE)) log.fine("GrandTotal=" + getGrandTotal(true) + "(" + amt
-				+ ") Project " + project.getName()
-				+ " - Invoiced=" + project.getInvoicedAmt() + "->" + newAmt);
-			project.setInvoicedAmt(newAmt);
-			if (!project.save(get_TrxName()))
-			{
-				m_processMsg = "Could not update Project";
-				return DocAction.STATUS_Invalid;
-			}
-		}	//	project
-		
-		// auto delay capture authorization payment
-		if (isSOTrx() && !isReversal())
-		{
-			StringBuilder whereClause = new StringBuilder();
-			whereClause.append("C_Order_ID IN (");
-			whereClause.append("SELECT C_Order_ID ");
-			whereClause.append("FROM C_OrderLine ");
-			whereClause.append("WHERE C_OrderLine_ID IN (");
-			whereClause.append("SELECT C_OrderLine_ID ");
-			whereClause.append("FROM C_InvoiceLine ");
-			whereClause.append("WHERE C_Invoice_ID = ");
-			whereClause.append(getJP_Recognition_ID()).append("))");
-			int[] orderIDList = MOrder.getAllIDs(MOrder.Table_Name, whereClause.toString(), get_TrxName());
-			
-
-		}
-
-		
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (valid != null)
@@ -1822,7 +1523,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		setDocAction(DOCACTION_None);
 
 		//	Create Allocation
-		StringBuilder msgall = new StringBuilder().append(Msg.translate(getCtx(), "C_Invoice_ID")).append(": ").append(getDocumentNo()).append("/").append(reversal.getDocumentNo());
+		StringBuilder msgall = new StringBuilder().append(Msg.translate(getCtx(), "JP_Recognition_ID")).append(": ").append(getDocumentNo()).append("/").append(reversal.getDocumentNo());
 
 		//	Amount
 		BigDecimal gt = getGrandTotal(true);
@@ -2038,4 +1739,4 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		return getC_DocType_ID() > 0 ? getC_DocType_ID() : getC_DocTypeTarget_ID();
 	}
 
-}	//	MInvoice
+}	//	MRecognition
