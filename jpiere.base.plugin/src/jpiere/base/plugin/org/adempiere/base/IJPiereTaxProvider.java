@@ -43,11 +43,11 @@ public interface IJPiereTaxProvider {
 	public boolean updateHeaderTax(MTaxProvider provider, MEstimationLine line);
 	
 	
-	public boolean calculateEstimationTaxTotal(MTaxProvider provider, MRecognition estimation);
+	public boolean calculateRecognitionTaxTotal(MTaxProvider provider, MRecognition estimation);
 	
 	public boolean recalculateTax(MTaxProvider provider, MRecognitionLine line, boolean newRecord);
 	
-	public boolean updateEstimationTax(MTaxProvider provider, MRecognitionLine line);
+	public boolean updateRecognitionTax(MTaxProvider provider, MRecognitionLine line);
 	
 	public boolean updateHeaderTax(MTaxProvider provider, MRecognitionLine line);
 

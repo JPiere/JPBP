@@ -443,7 +443,9 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
 			if (taxCalculater == null)
 				throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-	    	return taxCalculater.recalculateTax(provider, this, newRecord);
+	    	success = taxCalculater.recalculateTax(provider, this, newRecord);
+	    	if(!success)
+	    		return false;
 		}
 		
 		if(!newRecord && is_ValueChanged(MEstimationLine.COLUMNNAME_JP_ScheduledCost))

@@ -28,6 +28,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.ITaxProvider;
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.MCharge;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MLandedCost;
 import org.compiere.model.MOrderLine;
@@ -923,6 +924,38 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			}
 		}
 		
+		//Tax Calculation
+		if(newRecord || is_ValueChanged("LineNetAmt") || is_ValueChanged("C_Tax_ID"))
+		{
+			BigDecimal taxAmt = Env.ZERO;
+			MTax m_tax = MTax.get(Env.getCtx(), getC_Tax_ID());
+			if(m_tax == null)
+			{
+				;//Nothing to do;
+			}else{
+
+				IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+				if(taxCalculater != null)
+				{
+					taxAmt = taxCalculater.calculateTax(m_tax, getLineNetAmt(), isTaxIncluded()
+							, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID())
+							, JPiereTaxProvider.getRoundingMode(getParent().getC_BPartner_ID(), getParent().isSOTrx(), m_tax.getC_TaxProvider()));
+				}else{
+					taxAmt = m_tax.calculateTax(getLineNetAmt(), isTaxIncluded(), MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID()));
+				}
+	
+				if(isTaxIncluded())
+				{
+					set_ValueNoCheck("JP_TaxBaseAmt",  getLineNetAmt().subtract(taxAmt));
+				}else{
+					set_ValueNoCheck("JP_TaxBaseAmt",  getLineNetAmt());
+				}
+	
+				set_ValueOfColumn("JP_TaxAmt", taxAmt);
+				
+			}
+		}//Tax Calculation
+		
 		return true;
 	}	//	beforeSave
 
@@ -960,28 +993,21 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 */
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
-//		if (!success)
-//			return success;
-//		MTax tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
-//        MTaxProvider provider = new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName());
-//		ITaxProvider calculator = Core.getTaxProvider(provider);
-//		if (calculator == null)
-//			throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-//    	return calculator.recalculateTax(provider, this, newRecord);
-		
 		if (!success)
 			return success;
 		if (getParent().isProcessed())
 			return success;
-		if (   newRecord
-			|| is_ValueChanged(MEstimationLine.COLUMNNAME_C_Tax_ID)
-			|| is_ValueChanged(MEstimationLine.COLUMNNAME_LineNetAmt)) {
+		if (newRecord
+			|| is_ValueChanged(MRecognitionLine.COLUMNNAME_C_Tax_ID)
+			|| is_ValueChanged(MRecognitionLine.COLUMNNAME_LineNetAmt)) {
 			MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 			MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
 			if (taxCalculater == null)
 				throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-	    	return taxCalculater.recalculateTax(provider, this, newRecord);
+			success = taxCalculater.recalculateTax(provider, this, newRecord);
+	    	if(!success)
+	    		return false;
 		}
 		
 		return success;

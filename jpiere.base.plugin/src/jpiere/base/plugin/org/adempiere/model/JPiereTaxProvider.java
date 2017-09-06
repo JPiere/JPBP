@@ -1036,11 +1036,11 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 	 * @param m_oderTax
 	 * @return
 	 */
-	public boolean calculateEstimationTaxTotal(MTaxProvider provider, MRecognition estimation){
+	public boolean calculateRecognitionTaxTotal(MTaxProvider provider, MRecognition recognition){
 		
 		BigDecimal totalLines = Env.ZERO;
 		ArrayList<Integer> taxList = new ArrayList<Integer>();
-		MRecognitionLine[] lines = estimation.getLines();
+		MRecognitionLine[] lines = recognition.getLines();
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRecognitionLine line = lines[i];
@@ -1048,14 +1048,14 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			Integer taxID = new Integer(line.getC_Tax_ID());
 			if (!taxList.contains(taxID))
 			{
-				MTax tax = new MTax(estimation.getCtx(), taxID, estimation.get_TrxName());
+				MTax tax = new MTax(recognition.getCtx(), taxID, recognition.get_TrxName());
 				if (tax.getC_TaxProvider_ID() == 0)
 					continue;
-				MRecognitionTax oTax = MRecognitionTax.get (line, estimation.getPrecision(), false, estimation.get_TrxName());	//	current Tax
-				oTax.setIsTaxIncluded(estimation.isTaxIncluded());
-				if (!calculateTaxFromEstimationLines(line, oTax))
+				MRecognitionTax oTax = MRecognitionTax.get (line, recognition.getPrecision(), false, recognition.get_TrxName());	//	current Tax
+				oTax.setIsTaxIncluded(recognition.isTaxIncluded());
+				if (!calculateTaxFromRecognitionLines(line, oTax))
 					return false;
-				if (!oTax.save(estimation.get_TrxName()))
+				if (!oTax.save(recognition.get_TrxName()))
 					return false;
 				taxList.add(taxID);
 			}
@@ -1063,7 +1063,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 		//	Taxes
 		BigDecimal grandTotal = totalLines;
-		MRecognitionTax[] taxes = estimation.getTaxes(true);
+		MRecognitionTax[] taxes = recognition.getTaxes(true);
 
 		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(lines[0].getParent().getC_BPartner_ID(), lines[0].getParent().isSOTrx(), provider);
 
@@ -1071,7 +1071,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			MRecognitionTax oTax = taxes[i];
 			if (oTax.getC_TaxProvider_ID() == 0) {
-				if (!estimation.isTaxIncluded())
+				if (!recognition.isTaxIncluded())
 					grandTotal = grandTotal.add(oTax.getTaxAmt());
 				continue;
 			}
@@ -1082,42 +1082,42 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				for (int j = 0; j < cTaxes.length; j++)
 				{
 					MTax cTax = cTaxes[j];
-					BigDecimal taxAmt = calculateTax(cTax, oTax.getTaxBaseAmt(), estimation.isTaxIncluded(), estimation.getPrecision(), roundingMode);
+					BigDecimal taxAmt = calculateTax(cTax, oTax.getTaxBaseAmt(), recognition.isTaxIncluded(), recognition.getPrecision(), roundingMode);
 					//
-					MRecognitionTax newOTax = new MRecognitionTax(estimation.getCtx(), 0, estimation.get_TrxName());
-					newOTax.set_ValueOfColumn("AD_Client_ID", estimation.getAD_Client_ID());
-					newOTax.setAD_Org_ID(estimation.getAD_Org_ID());
-					newOTax.setJP_Recognition_ID(estimation.getJP_Recognition_ID());
+					MRecognitionTax newOTax = new MRecognitionTax(recognition.getCtx(), 0, recognition.get_TrxName());
+					newOTax.set_ValueOfColumn("AD_Client_ID", recognition.getAD_Client_ID());
+					newOTax.setAD_Org_ID(recognition.getAD_Org_ID());
+					newOTax.setJP_Recognition_ID(recognition.getJP_Recognition_ID());
 					newOTax.setC_Tax_ID(cTax.getC_Tax_ID());
 //					newOTax.setPrecision(order.getPrecision());
-					newOTax.setIsTaxIncluded(estimation.isTaxIncluded());
+					newOTax.setIsTaxIncluded(recognition.isTaxIncluded());
 					newOTax.setTaxBaseAmt(oTax.getTaxBaseAmt());
 					newOTax.setTaxAmt(taxAmt);
-					if (!newOTax.save(estimation.get_TrxName()))
+					if (!newOTax.save(recognition.get_TrxName()))
 						return false;
 					//
-					if (!estimation.isTaxIncluded())
+					if (!recognition.isTaxIncluded())
 						grandTotal = grandTotal.add(taxAmt);
 				}
-				if (!oTax.delete(true, estimation.get_TrxName()))
+				if (!oTax.delete(true, recognition.get_TrxName()))
 					return false;
-				if (!oTax.save(estimation.get_TrxName()))
+				if (!oTax.save(recognition.get_TrxName()))
 					return false;
 			}
 			else
 			{
-				if (!estimation.isTaxIncluded())
+				if (!recognition.isTaxIncluded())
 					grandTotal = grandTotal.add(oTax.getTaxAmt());
 			}
 		}
 		//
-		estimation.setTotalLines(totalLines);
-		estimation.setGrandTotal(grandTotal);
+		recognition.setTotalLines(totalLines);
+		recognition.setGrandTotal(grandTotal);
 		return true;
 	}
 	
 	
-	private boolean calculateTaxFromEstimationLines (MRecognitionLine line, MRecognitionTax m_oderTax)
+	private boolean calculateTaxFromRecognitionLines (MRecognitionLine line, MRecognitionTax m_oderTax)
 	{
 		BigDecimal taxBaseAmt = Env.ZERO;
 		BigDecimal taxAmt = Env.ZERO;
@@ -1128,7 +1128,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
 
 		//
-		String sql = "SELECT LineNetAmt FROM JP_EstimationLine WHERE JP_Estimation_ID=? AND C_Tax_ID=?";
+		String sql = "SELECT LineNetAmt FROM JP_RecognitionLine WHERE JP_Recognition_ID=? AND C_Tax_ID=?";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -1181,26 +1181,26 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 	{
 		if (!newRecord && line.is_ValueChanged(MRecognitionLine.COLUMNNAME_C_Tax_ID) && !line.getParent().isProcessed())
 		{
-    		if (!updateEstimationTax(line, true))
+    		if (!updateRecognitionTax(line, true))
 				return false;
 		}
 
-		if(!updateEstimationTax(line, false))
+		if(!updateRecognitionTax(line, false))
 			return false;
 
 		return updateHeaderTax(provider, line);
 	}
 	
-	public boolean updateEstimationTax(MTaxProvider provider, MRecognitionLine line)
+	public boolean updateRecognitionTax(MTaxProvider provider, MRecognitionLine line)
 	{
-		return  updateEstimationTax(line, false);
+		return  updateRecognitionTax(line, false);
 	}
 	
-	private boolean updateEstimationTax(MRecognitionLine line, boolean oldTax)
+	private boolean updateRecognitionTax(MRecognitionLine line, boolean oldTax)
 	{
 		MRecognitionTax tax = MRecognitionTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
 		if (tax != null) {
-			if (!calculateTaxFromEstimationLines(line,tax))
+			if (!calculateTaxFromRecognitionLines(line,tax))
 				return false;
 			if (tax.getTaxAmt().signum() != 0) {
 				if (!tax.save(line.get_TrxName()))
@@ -1216,25 +1216,23 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 	public boolean updateHeaderTax(MTaxProvider provider, MRecognitionLine line)
 	{
 //		Update Order Header
-		String sql = "UPDATE JP_Estimation i"
+		String sql = "UPDATE JP_Recognition r"
 			+ " SET TotalLines="
-				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID) "
-			    + ", JP_ScheduledCostTotalLines = "
-			    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID)"
-			+ "WHERE JP_Estimation_ID=?";
+				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_RecognitionLine rl WHERE r.JP_Recognition_ID=rl.JP_Recognition_ID) "
+			+ "WHERE JP_Recognition_ID=?";
 		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Recognition_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(1) #" + no);
 
 		if (line.isTaxIncluded())
-			sql = "UPDATE JP_Estimation i "
+			sql = "UPDATE JP_Recognition r "
 				+ " SET GrandTotal=TotalLines "
-				+ "WHERE JP_Estimation_ID=?";
+				+ "WHERE JP_Recognition_ID=?";
 		else
-			sql = "UPDATE JP_Estimation i "
+			sql = "UPDATE JP_Recognition r "
 				+ " SET GrandTotal=TotalLines+"
-					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_EstimationTax it WHERE i.JP_Estimation_ID=it.JP_Estimation_ID) "
-					+ "WHERE JP_Estimation_ID=?";
+					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_RecognitionTax rt WHERE r.JP_Recognition_ID=rt.JP_Recognition_ID) "
+					+ "WHERE JP_Recognition_ID=?";
 		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Recognition_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(2) #" + no);
