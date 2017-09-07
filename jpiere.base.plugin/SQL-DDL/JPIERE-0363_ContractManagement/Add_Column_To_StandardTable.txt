@@ -13,6 +13,7 @@ JP_Contract_ID
 JP_ContractContent_ID
 JP_ContractProcPeriod_ID
 
+
 [M_InOutLine]
 JP_ContractLine_ID
 JP_ContractProcPeriod_ID
@@ -28,6 +29,8 @@ JP_ContractLine_ID
 JP_ContractProcPeriod_ID
 
 
+[C_DocType]
+IsCreateRecognitionJP
 
 
 
