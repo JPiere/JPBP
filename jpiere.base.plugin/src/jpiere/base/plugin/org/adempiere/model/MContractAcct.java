@@ -36,5 +36,22 @@ public class MContractAcct extends X_JP_Contract_Acct {
 	{
 		super(ctx, rs, trxName);
 	}
+
+	@Override
+	protected boolean beforeSave(boolean newRecord) 
+	{
+		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingContractAcctJP))
+		{
+			if(!get_ValueAsBoolean(MContractAcct.COLUMNNAME_IsPostingContractAcctJP))
+			{
+				setIsPostingRecognitionDocJP(false);
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	
 	
 }

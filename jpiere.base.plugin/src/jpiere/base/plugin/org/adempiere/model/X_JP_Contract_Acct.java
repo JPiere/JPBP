@@ -30,7 +30,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170906L;
+	private static final long serialVersionUID = 20170908L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -38,6 +38,14 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
       super (ctx, JP_Contract_Acct_ID, trxName);
       /** if (JP_Contract_Acct_ID == 0)
         {
+			setIsOrderInfoMandatoryJP (false);
+// N
+			setIsPostingContractAcctJP (false);
+// N
+			setIsPostingRecognitionDocJP (false);
+// N
+			setIsSOTrx (true);
+// Y
 			setJP_Contract_Acct_ID (0);
 			setName (null);
 			setValue (null);
@@ -87,6 +95,93 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** Set Order Info Mandatory.
+		@param IsOrderInfoMandatoryJP Order Info Mandatory	  */
+	public void setIsOrderInfoMandatoryJP (boolean IsOrderInfoMandatoryJP)
+	{
+		set_Value (COLUMNNAME_IsOrderInfoMandatoryJP, Boolean.valueOf(IsOrderInfoMandatoryJP));
+	}
+
+	/** Get Order Info Mandatory.
+		@return Order Info Mandatory	  */
+	public boolean isOrderInfoMandatoryJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsOrderInfoMandatoryJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Posting by Contract Acct.
+		@param IsPostingContractAcctJP Posting by Contract Acct	  */
+	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP)
+	{
+		set_Value (COLUMNNAME_IsPostingContractAcctJP, Boolean.valueOf(IsPostingContractAcctJP));
+	}
+
+	/** Get Posting by Contract Acct.
+		@return Posting by Contract Acct	  */
+	public boolean isPostingContractAcctJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsPostingContractAcctJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Posting at Recognition Doc.
+		@param IsPostingRecognitionDocJP Posting at Recognition Doc	  */
+	public void setIsPostingRecognitionDocJP (boolean IsPostingRecognitionDocJP)
+	{
+		set_Value (COLUMNNAME_IsPostingRecognitionDocJP, Boolean.valueOf(IsPostingRecognitionDocJP));
+	}
+
+	/** Get Posting at Recognition Doc.
+		@return Posting at Recognition Doc	  */
+	public boolean isPostingRecognitionDocJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsPostingRecognitionDocJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Sales Transaction.
+		@param IsSOTrx 
+		This is a Sales Transaction
+	  */
+	public void setIsSOTrx (boolean IsSOTrx)
+	{
+		set_ValueNoCheck (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+	}
+
+	/** Get Sales Transaction.
+		@return This is a Sales Transaction
+	  */
+	public boolean isSOTrx () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSOTrx);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Contract Acct Info.

@@ -1,0 +1,17 @@
+CREATE TABLE adempiere.JP_Contract_BP_Acct
+(
+    AD_Client_ID numeric(10) NOT NULL,
+    AD_Org_ID numeric(10) NOT NULL,
+    IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+    Created timestamp without time zone NOT NULL DEFAULT now(),
+    CreatedBy numeric(10) NOT NULL,
+    Updated timestamp without time zone NOT NULL DEFAULT now(),
+    Updatedby numeric(10) NOT NULL,
+    JP_Contract_BP_Acct_UU character varying(36) DEFAULT NULL::character varying,
+
+    C_AcctSchema_ID numeric(10) NOT NULL,
+    JP_Contract_Acct_ID numeric(10) NOT NULL,
+ 
+    V_Liability_Acct numeric(10),
+    C_Receivable_Acct numeric(10)
+)

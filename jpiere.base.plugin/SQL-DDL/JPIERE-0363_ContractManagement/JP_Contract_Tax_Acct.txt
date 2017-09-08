@@ -1,0 +1,23 @@
+CREATE TABLE adempiere.JP_Contract_Tax_Acct
+(
+    AD_Client_ID numeric(10) NOT NULL,
+    AD_Org_ID numeric(10) NOT NULL,
+    IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+    Created timestamp without time zone NOT NULL DEFAULT now(),
+    CreatedBy numeric(10) NOT NULL,
+    Updated timestamp without time zone NOT NULL DEFAULT now(),
+    Updatedby numeric(10) NOT NULL,
+    JP_Contract_Tax_Acct_UU character varying(36) DEFAULT NULL::character varying,
+
+    C_AcctSchema_ID numeric(10) NOT NULL,
+    JP_Contract_Acct_ID numeric(10) NOT NULL,
+    C_Tax_ID numeric(10) NOT NULL,
+ 
+    T_Due_Acct numeric(10),
+    T_Credit_Acct numeric(10), 
+    T_Expense_Acct  numeric(10), 
+
+    JP_TaxDue_Acct  numeric(10), 
+    JP_TaxCredit_Acct  numeric(10), 
+    JP_TaxExpense_Acct  numeric(10)
+);
