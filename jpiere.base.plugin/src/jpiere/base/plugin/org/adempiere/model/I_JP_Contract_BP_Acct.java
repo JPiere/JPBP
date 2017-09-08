@@ -134,6 +134,15 @@ public interface I_JP_Contract_BP_Acct
 
 	public I_JP_Contract_Acct getJP_Contract_Acct() throws RuntimeException;
 
+    /** Column name JP_Contract_BP_Acct_ID */
+    public static final String COLUMNNAME_JP_Contract_BP_Acct_ID = "JP_Contract_BP_Acct_ID";
+
+	/** Set BP Contract Account	  */
+	public void setJP_Contract_BP_Acct_ID (int JP_Contract_BP_Acct_ID);
+
+	/** Get BP Contract Account	  */
+	public int getJP_Contract_BP_Acct_ID();
+
     /** Column name JP_Contract_BP_Acct_UU */
     public static final String COLUMNNAME_JP_Contract_BP_Acct_UU = "JP_Contract_BP_Acct_UU";
 

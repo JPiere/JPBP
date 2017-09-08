@@ -1,5 +1,6 @@
 CREATE TABLE adempiere.JP_Contract_Product_Acct
 (
+    JP_Contract_Product_Acct_ID  numeric(10) NOT NULL,
     AD_Client_ID numeric(10) NOT NULL,
     AD_Org_ID numeric(10) NOT NULL,
     IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
@@ -18,6 +19,7 @@ CREATE TABLE adempiere.JP_Contract_Product_Acct
     P_Expense_Acct  numeric(10), 
     P_Revenue_Acct  numeric(10), 
     JP_Expense_Acct  numeric(10), 
-    JP_Revenue_Acct  numeric(10)
+    JP_Revenue_Acct  numeric(10),
+    CONSTRAINT JP_Contract_Product_Acct_pkey PRIMARY KEY (JP_Contract_Product_Acct_ID)
 
 );

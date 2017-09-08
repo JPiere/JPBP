@@ -40,6 +40,7 @@ public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, 
         {
 			setC_AcctSchema_ID (0);
 			setJP_Contract_Acct_ID (0);
+			setJP_Contract_BP_Acct_ID (0);
         } */
     }
 
@@ -144,6 +145,26 @@ public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, 
 	public int getJP_Contract_Acct_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Acct_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set BP Contract Account.
+		@param JP_Contract_BP_Acct_ID BP Contract Account	  */
+	public void setJP_Contract_BP_Acct_ID (int JP_Contract_BP_Acct_ID)
+	{
+		if (JP_Contract_BP_Acct_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_BP_Acct_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_BP_Acct_ID, Integer.valueOf(JP_Contract_BP_Acct_ID));
+	}
+
+	/** Get BP Contract Account.
+		@return BP Contract Account	  */
+	public int getJP_Contract_BP_Acct_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_BP_Acct_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

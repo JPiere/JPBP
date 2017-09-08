@@ -130,6 +130,15 @@ public interface I_JP_Contract_Product_Acct
 
 	public I_JP_Contract_Acct getJP_Contract_Acct() throws RuntimeException;
 
+    /** Column name JP_Contract_Product_Acct_ID */
+    public static final String COLUMNNAME_JP_Contract_Product_Acct_ID = "JP_Contract_Product_Acct_ID";
+
+	/** Set Product Contract Acct	  */
+	public void setJP_Contract_Product_Acct_ID (int JP_Contract_Product_Acct_ID);
+
+	/** Get Product Contract Acct	  */
+	public int getJP_Contract_Product_Acct_ID();
+
     /** Column name JP_Contract_Product_Acct_UU */
     public static final String COLUMNNAME_JP_Contract_Product_Acct_UU = "JP_Contract_Product_Acct_UU";
 

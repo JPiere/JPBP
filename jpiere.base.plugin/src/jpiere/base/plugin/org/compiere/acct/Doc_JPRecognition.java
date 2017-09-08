@@ -20,6 +20,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
@@ -166,8 +168,8 @@ public class Doc_JPRecognition extends Doc
 			DocLine docLine = new DocLine(line, this);
 			//	Qty
 			BigDecimal Qty = line.getQtyInvoiced();
-			boolean cm = getDocumentType().equals(DOCTYPE_ARCredit)
-				|| getDocumentType().equals(DOCTYPE_APCredit);
+			boolean cm = getDocumentType().equals("ARS")//Recognition Revenu Credit memo
+				|| getDocumentType().equals("ARY");//Recognition Expense Credit memo
 			docLine.setQty(cm ? Qty.negate() : Qty, recognition.isSOTrx());
 			//
 			BigDecimal LineNetAmt = line.getLineNetAmt();
@@ -313,8 +315,24 @@ public class Doc_JPRecognition extends Doc
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
+		
+		MRecognition recog = (MRecognition)getPO();
+		
+		if(recog.getJP_ContractContent_ID()==0)
+			return facts;
+		
+		MContractContent contractContent = MContractContent.get(Env.getCtx(),recog.getJP_ContractContent_ID());
+		if(contractContent.getJP_Contract_Acct_ID() == 0)
+			return facts;
+		
+		MContractAcct contractAcct = MContractAcct.get(Env.getCtx(),contractContent.getJP_Contract_Acct_ID());
+		
+		if( !(contractAcct.isPostingContractAcctJP() && contractAcct.isPostingRecognitionDocJP()) )
+			return facts;
+		
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
+		
 
 		//  Cash based accounting
 		if (!as.isAccrual())
@@ -337,7 +355,7 @@ public class Doc_JPRecognition extends Doc
 				amt = m_taxes[i].getAmount();
 				if (amt != null && amt.signum() != 0)
 				{
-					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
+					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),//TODO getAccount
 						getC_Currency_ID(), null, amt);
 					if (tl != null)
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
@@ -363,7 +381,7 @@ public class Doc_JPRecognition extends Doc
 					}
 				}
 				fact.createLine (p_lines[i],
-					p_lines[i].getAccount(ProductCost.ACCTTYPE_P_Revenue, as),
+					p_lines[i].getAccount(ProductCost.ACCTTYPE_P_Revenue, as),//TODO getAccount
 					getC_Currency_ID(), null, amt);
 				if (!p_lines[i].isItem())
 				{
@@ -383,7 +401,7 @@ public class Doc_JPRecognition extends Doc
 			}
 
 			//  Receivables     DR
-			int receivables_ID = getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as);
+			int receivables_ID = getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as);//TODO getAccount
 			int receivablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable_Services, as);
 			if (m_allLinesItem || !as.isPostServices()
 				|| receivables_ID == receivablesServices_ID)
@@ -420,7 +438,7 @@ public class Doc_JPRecognition extends Doc
 				amt = m_taxes[i].getAmount();
 				if (amt != null && amt.signum() != 0)
 				{
-					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
+					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),//TODO getAccount
 						getC_Currency_ID(), amt, null);
 					if (tl != null)
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
@@ -444,7 +462,7 @@ public class Doc_JPRecognition extends Doc
 					}
 				}
 				fact.createLine (p_lines[i],
-					p_lines[i].getAccount (ProductCost.ACCTTYPE_P_Revenue, as),
+					p_lines[i].getAccount (ProductCost.ACCTTYPE_P_Revenue, as),//TODO getAccount
 					getC_Currency_ID(), amt, null);
 				if (!p_lines[i].isItem())
 				{
@@ -463,7 +481,7 @@ public class Doc_JPRecognition extends Doc
 				}
 			}
 			//  Receivables             CR
-			int receivables_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable, as);
+			int receivables_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable, as);//TODO getAccount
 			int receivablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable_Services, as);
 			if (m_allLinesItem || !as.isPostServices()
 				|| receivables_ID == receivablesServices_ID)
@@ -496,7 +514,7 @@ public class Doc_JPRecognition extends Doc
 			//  TaxCredit       DR
 			for (int i = 0; i < m_taxes.length; i++)
 			{
-				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
+				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),//TODO getAccount
 					getC_Currency_ID(), m_taxes[i].getAmount(), null);
 				if (tl != null)
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
@@ -506,25 +524,25 @@ public class Doc_JPRecognition extends Doc
 			{
 				DocLine line = p_lines[i];
 				boolean landedCost = false;
-				if (landedCost && as.isExplicitCostAdjustment())
-				{
-					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
-						getC_Currency_ID(), line.getAmtSource(), null);
-					//
-					FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
-						getC_Currency_ID(), null, line.getAmtSource());
-					String desc = line.getDescription();
-					if (desc == null)
-						desc = "100%";
-					else
-						desc += " 100%";
-					fl.setDescription(desc);
-				}
+//				if (landedCost && as.isExplicitCostAdjustment())
+//				{
+//					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+//						getC_Currency_ID(), line.getAmtSource(), null);
+//					//
+//					FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+//						getC_Currency_ID(), null, line.getAmtSource());
+//					String desc = line.getDescription();
+//					if (desc == null)
+//						desc = "100%";
+//					else
+//						desc += " 100%";
+//					fl.setDescription(desc);
+//				}
 				if (!landedCost)
 				{
-					MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+					MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);//TODO getAccount
 					if (line.isItem())
-						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
+						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);//TODO アイテムなら何もしない―――消費税どうする？？
 					BigDecimal amt = line.getAmtSource();
 					BigDecimal dAmt = null;
 					if (as.isTradeDiscountPosted() && !line.isItem())
@@ -568,7 +586,7 @@ public class Doc_JPRecognition extends Doc
 			}
 
 			//  Liability               CR
-			int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
+			int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);//TODO getAccount
 			int payablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability_Services, as);
 			if (m_allLinesItem || !as.isPostServices()
 				|| payables_ID == payablesServices_ID)

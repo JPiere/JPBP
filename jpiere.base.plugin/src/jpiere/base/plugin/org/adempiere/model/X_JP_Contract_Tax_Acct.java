@@ -41,6 +41,7 @@ public class X_JP_Contract_Tax_Acct extends PO implements I_JP_Contract_Tax_Acct
 			setC_AcctSchema_ID (0);
 			setC_Tax_ID (0);
 			setJP_Contract_Acct_ID (0);
+			setJP_Contract_Tax_Acct_ID (0);
         } */
     }
 
@@ -148,6 +149,26 @@ public class X_JP_Contract_Tax_Acct extends PO implements I_JP_Contract_Tax_Acct
 	public int getJP_Contract_Acct_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Acct_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Tax Contract Acct.
+		@param JP_Contract_Tax_Acct_ID Tax Contract Acct	  */
+	public void setJP_Contract_Tax_Acct_ID (int JP_Contract_Tax_Acct_ID)
+	{
+		if (JP_Contract_Tax_Acct_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_Tax_Acct_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_Tax_Acct_ID, Integer.valueOf(JP_Contract_Tax_Acct_ID));
+	}
+
+	/** Get Tax Contract Acct.
+		@return Tax Contract Acct	  */
+	public int getJP_Contract_Tax_Acct_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Tax_Acct_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

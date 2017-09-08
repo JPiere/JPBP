@@ -40,6 +40,7 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
         {
 			setC_AcctSchema_ID (0);
 			setJP_Contract_Acct_ID (0);
+			setJP_Contract_Product_Acct_ID (0);
 			setM_Product_Category_ID (0);
         } */
     }
@@ -142,6 +143,26 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	public int getJP_Contract_Acct_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Acct_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Product Contract Acct.
+		@param JP_Contract_Product_Acct_ID Product Contract Acct	  */
+	public void setJP_Contract_Product_Acct_ID (int JP_Contract_Product_Acct_ID)
+	{
+		if (JP_Contract_Product_Acct_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_Product_Acct_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_Product_Acct_ID, Integer.valueOf(JP_Contract_Product_Acct_ID));
+	}
+
+	/** Get Product Contract Acct.
+		@return Product Contract Acct	  */
+	public int getJP_Contract_Product_Acct_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Product_Acct_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
