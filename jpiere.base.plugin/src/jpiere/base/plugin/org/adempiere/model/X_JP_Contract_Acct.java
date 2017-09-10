@@ -30,7 +30,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170908L;
+	private static final long serialVersionUID = 20170910L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -38,6 +38,8 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
       super (ctx, JP_Contract_Acct_ID, trxName);
       /** if (JP_Contract_Acct_ID == 0)
         {
+			setDocBaseType (null);
+// SOO
 			setIsOrderInfoMandatoryJP (false);
 // N
 			setIsPostingContractAcctJP (false);
@@ -46,6 +48,8 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 // N
 			setIsSOTrx (true);
 // Y
+			setIsScheduledCostPostingJP (false);
+// N
 			setJP_Contract_Acct_ID (0);
 			setName (null);
 			setValue (null);
@@ -97,6 +101,36 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** AP Invoice = API */
+	public static final String DOCBASETYPE_APInvoice = "API";
+	/** AR Invoice = ARI */
+	public static final String DOCBASETYPE_ARInvoice = "ARI";
+	/** Purchase Order = POO */
+	public static final String DOCBASETYPE_PurchaseOrder = "POO";
+	/** Sales Order = SOO */
+	public static final String DOCBASETYPE_SalesOrder = "SOO";
+	/** Material Receipt = MMR */
+	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
+	/** Material Delivery = MMS */
+	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Set Document BaseType.
+		@param DocBaseType 
+		Logical type of document
+	  */
+	public void setDocBaseType (String DocBaseType)
+	{
+
+		set_Value (COLUMNNAME_DocBaseType, DocBaseType);
+	}
+
+	/** Get Document BaseType.
+		@return Logical type of document
+	  */
+	public String getDocBaseType () 
+	{
+		return (String)get_Value(COLUMNNAME_DocBaseType);
+	}
+
 	/** Set Order Info Mandatory.
 		@param IsOrderInfoMandatoryJP Order Info Mandatory	  */
 	public void setIsOrderInfoMandatoryJP (boolean IsOrderInfoMandatoryJP)
@@ -118,15 +152,15 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return false;
 	}
 
-	/** Set Posting by Contract Acct.
-		@param IsPostingContractAcctJP Posting by Contract Acct	  */
+	/** Set Contract Acct Posting.
+		@param IsPostingContractAcctJP Contract Acct Posting	  */
 	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP)
 	{
 		set_Value (COLUMNNAME_IsPostingContractAcctJP, Boolean.valueOf(IsPostingContractAcctJP));
 	}
 
-	/** Get Posting by Contract Acct.
-		@return Posting by Contract Acct	  */
+	/** Get Contract Acct Posting.
+		@return Contract Acct Posting	  */
 	public boolean isPostingContractAcctJP () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsPostingContractAcctJP);
@@ -175,6 +209,27 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public boolean isSOTrx () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Scheduled Cost Posting.
+		@param IsScheduledCostPostingJP Scheduled Cost Posting	  */
+	public void setIsScheduledCostPostingJP (boolean IsScheduledCostPostingJP)
+	{
+		set_Value (COLUMNNAME_IsScheduledCostPostingJP, Boolean.valueOf(IsScheduledCostPostingJP));
+	}
+
+	/** Get Scheduled Cost Posting.
+		@return Scheduled Cost Posting	  */
+	public boolean isScheduledCostPostingJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsScheduledCostPostingJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

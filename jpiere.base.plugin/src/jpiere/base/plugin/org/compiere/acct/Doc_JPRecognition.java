@@ -352,7 +352,6 @@ public class Doc_JPRecognition extends Doc
 				taxAcct = contractAcct.getContracTaxAcct(m_taxes[i].getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
 				if (amt != null && amt.signum() != 0)
 				{
-
 					//DR
 					FactLine taxLineDR = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getT_Due_Acct()), getC_Currency_ID(), amt, null);
 					if (taxLineDR != null)
@@ -361,18 +360,15 @@ public class Doc_JPRecognition extends Doc
 					//CR
 					FactLine taxLineCR = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getJP_TaxDue_Acct()), getC_Currency_ID(), null, amt);
 					if (taxLineCR != null)
-						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-					
+						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	
 				}
-				
-			}
+			}//for
+			
 			//DR:  Invoice Revenue / CR: Recognition Revenue  
-			MContractProductAcct productAcct = null;
 			for (int i = 0; i < p_lines.length; i++)
 			{
 				amt = p_lines[i].getAmtSource();
 				BigDecimal dAmt = null;
-				productAcct = contractAcct.getContractProductAcct(MProduct.get(getCtx(), p_lines[i].getM_Product_ID()).getM_Product_Category_ID(), as.getC_AcctSchema_ID(),false);
 				if (as.isTradeDiscountPosted())
 				{
 					BigDecimal discount = p_lines[i].getDiscount();
@@ -380,16 +376,19 @@ public class Doc_JPRecognition extends Doc
 					{
 						amt = amt.add(discount);
 						dAmt = discount;
-						fact.createLine (p_lines[i],
-								p_lines[i].getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as),
-								getC_Currency_ID(), null, dAmt);
+						//DR  - Invoice Trade Deiscount Acct
+						fact.createLine (p_lines[i], MAccount.get(getCtx(), getInvoiceTDiscountGrantValidCombinationID(p_lines[i], contractAcct,  as.getC_AcctSchema_ID())), getC_Currency_ID(), null, dAmt);
+						
+						//CR  - Recognition Trade Deiscount Acct
+						fact.createLine (p_lines[i], MAccount.get(getCtx(), getRecognitionTDiscountGrantValidCombinationID(p_lines[i], contractAcct,  as.getC_AcctSchema_ID())), getC_Currency_ID(), null, dAmt);
 					}
 				}
 				
-				//TODO
-				fact.createLine (p_lines[i],  MAccount.get(getCtx(), productAcct.getP_Revenue_Acct()), getC_Currency_ID(), amt, null);
+				//DR - Invoice Revenue Acct
+				fact.createLine (p_lines[i], MAccount.get(getCtx(), getInvoiceRevenueValidCombinationID(p_lines[i], contractAcct,  as.getC_AcctSchema_ID())), getC_Currency_ID(), amt, null);
 				
-				fact.createLine (p_lines[i],  MAccount.get(getCtx(), productAcct.getJP_Revenue_Acct()), getC_Currency_ID(), null, amt);
+				//CR - Recognition Revenue Acct
+				fact.createLine (p_lines[i], MAccount.get(getCtx(), getRecognitionRevenueValidCombinationID(p_lines[i], contractAcct,  as.getC_AcctSchema_ID())), getC_Currency_ID(), null, amt);
 			}
 			
 			//  Set Locations And Order Info
@@ -704,4 +703,61 @@ public class Doc_JPRecognition extends Doc
 		facts.add(fact);
 		return facts;
 	} // createFact
+	
+	
+	/**
+	 * 
+	 * @param docLine
+	 * @param contractAcct
+	 * @param C_AcctSchema_ID
+	 * @return
+	 */
+	private int getRecognitionRevenueValidCombinationID(DocLine docLine, MContractAcct contractAcct,  int C_AcctSchema_ID)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		//	Charge Account
+		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
+		{
+			return contractAcct.getContracChargeAcct(line.getC_Charge_ID(), C_AcctSchema_ID, false).getJP_Ch_Expense_Acct() ;
+		
+		}else if(line.getM_Product_ID() > 0){
+			
+			return contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), C_AcctSchema_ID, false).getJP_Revenue_Acct() ;
+		}
+		
+		return 0;
+	}
+	
+	private int getInvoiceRevenueValidCombinationID(DocLine docLine, MContractAcct contractAcct,  int C_AcctSchema_ID)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		//	Charge Account
+		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
+		{
+			return contractAcct.getContracChargeAcct(
+					line.getC_Charge_ID(), C_AcctSchema_ID, false).getCh_Expense_Acct() ;
+		
+		}else if(line.getM_Product_ID() > 0){
+			
+			return contractAcct.getContractProductAcct(
+					line.getM_Product().getM_Product_Category_ID(), C_AcctSchema_ID, false).getP_Revenue_Acct() ;
+		}
+		
+		return 0;
+	}
+	
+	private int getRecognitionTDiscountGrantValidCombinationID(DocLine docLine, MContractAcct contractAcct,  int C_AcctSchema_ID)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		return contractAcct.getContractProductAcct(
+				line.getM_Product().getM_Product_Category_ID(), C_AcctSchema_ID, false).getJP_TradeDiscountGrant_Acct() ;
+	}
+	
+	private int getInvoiceTDiscountGrantValidCombinationID(DocLine docLine, MContractAcct contractAcct,  int C_AcctSchema_ID)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		return contractAcct.getContractProductAcct(
+				line.getM_Product().getM_Product_Category_ID(), C_AcctSchema_ID, false).getP_TradeDiscountGrant_Acct() ;
+	}
+	
 } //

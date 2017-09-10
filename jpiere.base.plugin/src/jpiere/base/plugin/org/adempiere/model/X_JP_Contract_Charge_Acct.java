@@ -21,10 +21,10 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for JP_Contract_BP_Acct
+/** Generated Model for JP_Contract_Charge_Acct
  *  @author iDempiere (generated) 
  *  @version Release 4.1 - $Id$ */
-public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, I_Persistent 
+public class X_JP_Contract_Charge_Acct extends PO implements I_JP_Contract_Charge_Acct, I_Persistent 
 {
 
 	/**
@@ -33,19 +33,20 @@ public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, 
 	private static final long serialVersionUID = 20170910L;
 
     /** Standard Constructor */
-    public X_JP_Contract_BP_Acct (Properties ctx, int JP_Contract_BP_Acct_ID, String trxName)
+    public X_JP_Contract_Charge_Acct (Properties ctx, int JP_Contract_Charge_Acct_ID, String trxName)
     {
-      super (ctx, JP_Contract_BP_Acct_ID, trxName);
-      /** if (JP_Contract_BP_Acct_ID == 0)
+      super (ctx, JP_Contract_Charge_Acct_ID, trxName);
+      /** if (JP_Contract_Charge_Acct_ID == 0)
         {
 			setC_AcctSchema_ID (0);
+			setC_Charge_ID (0);
 			setJP_Contract_Acct_ID (0);
-			setJP_Contract_BP_Acct_ID (0);
+			setJP_Contract_Charge_Acct_ID (0);
         } */
     }
 
     /** Load Constructor */
-    public X_JP_Contract_BP_Acct (Properties ctx, ResultSet rs, String trxName)
+    public X_JP_Contract_Charge_Acct (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -67,7 +68,7 @@ public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, 
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Contract_BP_Acct[")
+      StringBuffer sb = new StringBuffer ("X_JP_Contract_Charge_Acct[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -100,26 +101,76 @@ public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, 
 		return ii.intValue();
 	}
 
-	public I_C_ValidCombination getC_Receivable_A() throws RuntimeException
+	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
     {
-		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
-			.getPO(getC_Receivable_Acct(), get_TrxName());	}
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
+			.getPO(getC_Charge_ID(), get_TrxName());	}
 
-	/** Set Customer Receivables.
-		@param C_Receivable_Acct 
-		Account for Customer Receivables
+	/** Set Charge.
+		@param C_Charge_ID 
+		Additional document charges
 	  */
-	public void setC_Receivable_Acct (int C_Receivable_Acct)
+	public void setC_Charge_ID (int C_Charge_ID)
 	{
-		set_Value (COLUMNNAME_C_Receivable_Acct, Integer.valueOf(C_Receivable_Acct));
+		if (C_Charge_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
 	}
 
-	/** Get Customer Receivables.
-		@return Account for Customer Receivables
+	/** Get Charge.
+		@return Additional document charges
 	  */
-	public int getC_Receivable_Acct () 
+	public int getC_Charge_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Receivable_Acct);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getCh_Expense_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getCh_Expense_Acct(), get_TrxName());	}
+
+	/** Set Charge Account.
+		@param Ch_Expense_Acct 
+		Charge Account
+	  */
+	public void setCh_Expense_Acct (int Ch_Expense_Acct)
+	{
+		set_Value (COLUMNNAME_Ch_Expense_Acct, Integer.valueOf(Ch_Expense_Acct));
+	}
+
+	/** Get Charge Account.
+		@return Charge Account
+	  */
+	public int getCh_Expense_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Ch_Expense_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_Ch_Expense_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_Ch_Expense_Acct(), get_TrxName());	}
+
+	/** Set Charge(Recognition Doc).
+		@param JP_Ch_Expense_Acct Charge(Recognition Doc)	  */
+	public void setJP_Ch_Expense_Acct (int JP_Ch_Expense_Acct)
+	{
+		set_Value (COLUMNNAME_JP_Ch_Expense_Acct, Integer.valueOf(JP_Ch_Expense_Acct));
+	}
+
+	/** Get Charge(Recognition Doc).
+		@return Charge(Recognition Doc)	  */
+	public int getJP_Ch_Expense_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Ch_Expense_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -150,62 +201,37 @@ public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, 
 		return ii.intValue();
 	}
 
-	/** Set BP Contract Account.
-		@param JP_Contract_BP_Acct_ID BP Contract Account	  */
-	public void setJP_Contract_BP_Acct_ID (int JP_Contract_BP_Acct_ID)
+	/** Set JP_Contract_Charge_Acct.
+		@param JP_Contract_Charge_Acct_ID JP_Contract_Charge_Acct	  */
+	public void setJP_Contract_Charge_Acct_ID (int JP_Contract_Charge_Acct_ID)
 	{
-		if (JP_Contract_BP_Acct_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_Contract_BP_Acct_ID, null);
+		if (JP_Contract_Charge_Acct_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_Charge_Acct_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_Contract_BP_Acct_ID, Integer.valueOf(JP_Contract_BP_Acct_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_Charge_Acct_ID, Integer.valueOf(JP_Contract_Charge_Acct_ID));
 	}
 
-	/** Get BP Contract Account.
-		@return BP Contract Account	  */
-	public int getJP_Contract_BP_Acct_ID () 
+	/** Get JP_Contract_Charge_Acct.
+		@return JP_Contract_Charge_Acct	  */
+	public int getJP_Contract_Charge_Acct_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_BP_Acct_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Charge_Acct_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set JP_Contract_BP_Acct_UU.
-		@param JP_Contract_BP_Acct_UU JP_Contract_BP_Acct_UU	  */
-	public void setJP_Contract_BP_Acct_UU (String JP_Contract_BP_Acct_UU)
+	/** Set JP_Contract_Charge_Acct_UU.
+		@param JP_Contract_Charge_Acct_UU JP_Contract_Charge_Acct_UU	  */
+	public void setJP_Contract_Charge_Acct_UU (String JP_Contract_Charge_Acct_UU)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_Contract_BP_Acct_UU, JP_Contract_BP_Acct_UU);
+		set_ValueNoCheck (COLUMNNAME_JP_Contract_Charge_Acct_UU, JP_Contract_Charge_Acct_UU);
 	}
 
-	/** Get JP_Contract_BP_Acct_UU.
-		@return JP_Contract_BP_Acct_UU	  */
-	public String getJP_Contract_BP_Acct_UU () 
+	/** Get JP_Contract_Charge_Acct_UU.
+		@return JP_Contract_Charge_Acct_UU	  */
+	public String getJP_Contract_Charge_Acct_UU () 
 	{
-		return (String)get_Value(COLUMNNAME_JP_Contract_BP_Acct_UU);
-	}
-
-	public I_C_ValidCombination getV_Liability_A() throws RuntimeException
-    {
-		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
-			.getPO(getV_Liability_Acct(), get_TrxName());	}
-
-	/** Set Vendor Liability.
-		@param V_Liability_Acct 
-		Account for Vendor Liability
-	  */
-	public void setV_Liability_Acct (int V_Liability_Acct)
-	{
-		set_Value (COLUMNNAME_V_Liability_Acct, Integer.valueOf(V_Liability_Acct));
-	}
-
-	/** Get Vendor Liability.
-		@return Account for Vendor Liability
-	  */
-	public int getV_Liability_Acct () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_V_Liability_Acct);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		return (String)get_Value(COLUMNNAME_JP_Contract_Charge_Acct_UU);
 	}
 }

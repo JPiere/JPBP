@@ -20,6 +20,13 @@ CREATE TABLE adempiere.JP_Contract_Product_Acct
     P_Revenue_Acct  numeric(10), 
     JP_Expense_Acct  numeric(10), 
     JP_Revenue_Acct  numeric(10),
+    p_tradediscountrec_acct numeric(10) DEFAULT NULL::numeric,
+    jp_tradediscountrec_acct numeric(10) DEFAULT NULL::numeric,
+    p_tradediscountgrant_acct numeric(10) DEFAULT NULL::numeric,
+    jp_tradediscountgrant_acct numeric(10) DEFAULT NULL::numeric,
+    jp_purchase_acct numeric(10) DEFAULT NULL::numeric,
+    jp_purchaseoffset_acct numeric(10) DEFAULT NULL::numeric,
+
     CONSTRAINT JP_Contract_Product_Acct_pkey PRIMARY KEY (JP_Contract_Product_Acct_ID)
 
 );

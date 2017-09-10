@@ -93,6 +93,19 @@ public interface I_JP_Contract_Acct
 	  */
 	public String getDescription();
 
+    /** Column name DocBaseType */
+    public static final String COLUMNNAME_DocBaseType = "DocBaseType";
+
+	/** Set Document BaseType.
+	  * Logical type of document
+	  */
+	public void setDocBaseType (String DocBaseType);
+
+	/** Get Document BaseType.
+	  * Logical type of document
+	  */
+	public String getDocBaseType();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -118,10 +131,10 @@ public interface I_JP_Contract_Acct
     /** Column name IsPostingContractAcctJP */
     public static final String COLUMNNAME_IsPostingContractAcctJP = "IsPostingContractAcctJP";
 
-	/** Set Posting by Contract Acct	  */
+	/** Set Contract Acct Posting	  */
 	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP);
 
-	/** Get Posting by Contract Acct	  */
+	/** Get Contract Acct Posting	  */
 	public boolean isPostingContractAcctJP();
 
     /** Column name IsPostingRecognitionDocJP */
@@ -145,6 +158,15 @@ public interface I_JP_Contract_Acct
 	  * This is a Sales Transaction
 	  */
 	public boolean isSOTrx();
+
+    /** Column name IsScheduledCostPostingJP */
+    public static final String COLUMNNAME_IsScheduledCostPostingJP = "IsScheduledCostPostingJP";
+
+	/** Set Scheduled Cost Posting	  */
+	public void setIsScheduledCostPostingJP (boolean IsScheduledCostPostingJP);
+
+	/** Get Scheduled Cost Posting	  */
+	public boolean isScheduledCostPostingJP();
 
     /** Column name JP_Contract_Acct_ID */
     public static final String COLUMNNAME_JP_Contract_Acct_ID = "JP_Contract_Acct_ID";

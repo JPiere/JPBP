@@ -17,12 +17,10 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.compiere.model.MBPartnerLocation;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
@@ -47,6 +45,45 @@ public class MContractAcct extends X_JP_Contract_Acct {
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
+		//Check Base Doc Type
+		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_DocBaseType))
+		{
+			if(getDocBaseType().equals("SOO")
+					|| getDocBaseType().equals("ARI"))
+			{
+				setIsSOTrx(true);
+				
+			}else if(getDocBaseType().equals("POO")
+					|| getDocBaseType().equals("API"))
+			{
+				setIsSOTrx(false);
+			}
+			
+		}
+		
+		//Check isOrderInfoMandetoryJP
+		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_DocBaseType))
+		{
+			if(getDocBaseType().equals("ARI")
+					|| getDocBaseType().equals("API"))
+			{
+				setIsOrderInfoMandatoryJP(false);
+				setIsScheduledCostPostingJP(false);
+			}
+		}
+		
+		
+		//Check IsScheduledCostPostingJP
+		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsOrderInfoMandatoryJP))
+		{
+			if(!isOrderInfoMandatoryJP())
+			{
+				setIsScheduledCostPostingJP(false);
+			}
+				
+		}
+		
+		//Check IsPostingContractAcctJP and IsPostingContractAcctJP
 		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingContractAcctJP))
 		{
 			if(!get_ValueAsBoolean(MContractAcct.COLUMNNAME_IsPostingContractAcctJP))
@@ -264,6 +301,71 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		}
 
 		return contractTaxAcct;
+	}	
+
+	
+	//C_Charge_ID and C_AcctSchema_ID
+	HashMap<Integer, HashMap<Integer, MContractChargeAcct>> contractChargeAcct = null;
+	
+	
+	public MContractChargeAcct getContracChargeAcct(int C_Charge_ID,  int C_AcctSchema_ID, boolean reload)
+	{
+		if (reload || contractChargeAcct == null || contractChargeAcct.size() == 0)
+			getAllContractChargeAccts (reload);
+		
+		if(contractChargeAcct == null || contractChargeAcct.size() == 0)
+			return null;
+		
+		if(contractChargeAcct.containsKey(C_Charge_ID))
+		{
+			if(contractChargeAcct.get(C_Charge_ID).containsKey(C_AcctSchema_ID))
+			{
+				return contractChargeAcct.get(C_Charge_ID).get(C_AcctSchema_ID);
+			}else{
+				return null;
+			}
+				
+		}else{
+			return null;
+		}
+	}
+	
+	
+	public HashMap<Integer, HashMap<Integer, MContractChargeAcct>> getAllContractChargeAccts (boolean reload)
+	{
+		if (reload || contractChargeAcct == null || contractChargeAcct.size() == 0)
+			;
+		else
+			return contractChargeAcct;
+
+		contractChargeAcct = new HashMap<Integer, HashMap<Integer, MContractChargeAcct>>();
+		final String sql = "SELECT * FROM JP_Contract_Charge_Acct WHERE JP_Contract_Acct_ID=? AND IsActive='Y'";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, getJP_Contract_Acct_ID());
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				MContractChargeAcct chargeAcct =  new MContractChargeAcct (getCtx(), rs, get_TrxName());
+				HashMap<Integer, MContractChargeAcct> innerMap = new HashMap<Integer, MContractChargeAcct>();
+				innerMap.put(chargeAcct.getC_AcctSchema_ID(), chargeAcct);
+				contractChargeAcct.put(chargeAcct.getC_Charge_ID(), innerMap);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		return contractChargeAcct;
 	}	
 	
 }

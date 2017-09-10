@@ -159,6 +159,28 @@ public interface I_JP_Contract_Product_Acct
 
 	public I_C_ValidCombination getJP_Expense_A() throws RuntimeException;
 
+    /** Column name JP_PurchaseOffset_Acct */
+    public static final String COLUMNNAME_JP_PurchaseOffset_Acct = "JP_PurchaseOffset_Acct";
+
+	/** Set Purchase Offset Acct	  */
+	public void setJP_PurchaseOffset_Acct (int JP_PurchaseOffset_Acct);
+
+	/** Get Purchase Offset Acct	  */
+	public int getJP_PurchaseOffset_Acct();
+
+	public I_C_ValidCombination getJP_PurchaseOffset_A() throws RuntimeException;
+
+    /** Column name JP_Purchase_Acct */
+    public static final String COLUMNNAME_JP_Purchase_Acct = "JP_Purchase_Acct";
+
+	/** Set Purchase Acct	  */
+	public void setJP_Purchase_Acct (int JP_Purchase_Acct);
+
+	/** Get Purchase Acct	  */
+	public int getJP_Purchase_Acct();
+
+	public I_C_ValidCombination getJP_Purchase_A() throws RuntimeException;
+
     /** Column name JP_Revenue_Acct */
     public static final String COLUMNNAME_JP_Revenue_Acct = "JP_Revenue_Acct";
 
@@ -169,6 +191,36 @@ public interface I_JP_Contract_Product_Acct
 	public int getJP_Revenue_Acct();
 
 	public I_C_ValidCombination getJP_Revenue_A() throws RuntimeException;
+
+    /** Column name JP_TradeDiscountGrant_Acct */
+    public static final String COLUMNNAME_JP_TradeDiscountGrant_Acct = "JP_TradeDiscountGrant_Acct";
+
+	/** Set Trade Discount Granted(Recognition Doc).
+	  * Trade Discount Granted Account
+	  */
+	public void setJP_TradeDiscountGrant_Acct (int JP_TradeDiscountGrant_Acct);
+
+	/** Get Trade Discount Granted(Recognition Doc).
+	  * Trade Discount Granted Account
+	  */
+	public int getJP_TradeDiscountGrant_Acct();
+
+	public I_C_ValidCombination getJP_TradeDiscountGrant_A() throws RuntimeException;
+
+    /** Column name JP_TradeDiscountRec_Acct */
+    public static final String COLUMNNAME_JP_TradeDiscountRec_Acct = "JP_TradeDiscountRec_Acct";
+
+	/** Set Trade Discount Received(Recognition).
+	  * Trade Discount Receivable Account
+	  */
+	public void setJP_TradeDiscountRec_Acct (int JP_TradeDiscountRec_Acct);
+
+	/** Get Trade Discount Received(Recognition).
+	  * Trade Discount Receivable Account
+	  */
+	public int getJP_TradeDiscountRec_Acct();
+
+	public I_C_ValidCombination getJP_TradeDiscountRec_A() throws RuntimeException;
 
     /** Column name M_Product_Category_ID */
     public static final String COLUMNNAME_M_Product_Category_ID = "M_Product_Category_ID";
@@ -229,6 +281,36 @@ public interface I_JP_Contract_Product_Acct
 	public int getP_Revenue_Acct();
 
 	public I_C_ValidCombination getP_Revenue_A() throws RuntimeException;
+
+    /** Column name P_TradeDiscountGrant_Acct */
+    public static final String COLUMNNAME_P_TradeDiscountGrant_Acct = "P_TradeDiscountGrant_Acct";
+
+	/** Set Trade Discount Granted.
+	  * Trade Discount Granted Account
+	  */
+	public void setP_TradeDiscountGrant_Acct (int P_TradeDiscountGrant_Acct);
+
+	/** Get Trade Discount Granted.
+	  * Trade Discount Granted Account
+	  */
+	public int getP_TradeDiscountGrant_Acct();
+
+	public I_C_ValidCombination getP_TradeDiscountGrant_A() throws RuntimeException;
+
+    /** Column name P_TradeDiscountRec_Acct */
+    public static final String COLUMNNAME_P_TradeDiscountRec_Acct = "P_TradeDiscountRec_Acct";
+
+	/** Set Trade Discount Received.
+	  * Trade Discount Receivable Account
+	  */
+	public void setP_TradeDiscountRec_Acct (int P_TradeDiscountRec_Acct);
+
+	/** Get Trade Discount Received.
+	  * Trade Discount Receivable Account
+	  */
+	public int getP_TradeDiscountRec_Acct();
+
+	public I_C_ValidCombination getP_TradeDiscountRec_A() throws RuntimeException;
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

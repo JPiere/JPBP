@@ -30,7 +30,7 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170908L;
+	private static final long serialVersionUID = 20170910L;
 
     /** Standard Constructor */
     public X_JP_Contract_Product_Acct (Properties ctx, int JP_Contract_Product_Acct_ID, String trxName)
@@ -204,6 +204,50 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 		return ii.intValue();
 	}
 
+	public I_C_ValidCombination getJP_PurchaseOffset_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_PurchaseOffset_Acct(), get_TrxName());	}
+
+	/** Set Purchase Offset Acct.
+		@param JP_PurchaseOffset_Acct Purchase Offset Acct	  */
+	public void setJP_PurchaseOffset_Acct (int JP_PurchaseOffset_Acct)
+	{
+		set_Value (COLUMNNAME_JP_PurchaseOffset_Acct, Integer.valueOf(JP_PurchaseOffset_Acct));
+	}
+
+	/** Get Purchase Offset Acct.
+		@return Purchase Offset Acct	  */
+	public int getJP_PurchaseOffset_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_PurchaseOffset_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_Purchase_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_Purchase_Acct(), get_TrxName());	}
+
+	/** Set Purchase Acct.
+		@param JP_Purchase_Acct Purchase Acct	  */
+	public void setJP_Purchase_Acct (int JP_Purchase_Acct)
+	{
+		set_Value (COLUMNNAME_JP_Purchase_Acct, Integer.valueOf(JP_Purchase_Acct));
+	}
+
+	/** Get Purchase Acct.
+		@return Purchase Acct	  */
+	public int getJP_Purchase_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Purchase_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_C_ValidCombination getJP_Revenue_A() throws RuntimeException
     {
 		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
@@ -221,6 +265,56 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	public int getJP_Revenue_Acct () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Revenue_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_TradeDiscountGrant_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_TradeDiscountGrant_Acct(), get_TrxName());	}
+
+	/** Set Trade Discount Granted(Recognition Doc).
+		@param JP_TradeDiscountGrant_Acct 
+		Trade Discount Granted Account
+	  */
+	public void setJP_TradeDiscountGrant_Acct (int JP_TradeDiscountGrant_Acct)
+	{
+		set_Value (COLUMNNAME_JP_TradeDiscountGrant_Acct, Integer.valueOf(JP_TradeDiscountGrant_Acct));
+	}
+
+	/** Get Trade Discount Granted(Recognition Doc).
+		@return Trade Discount Granted Account
+	  */
+	public int getJP_TradeDiscountGrant_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TradeDiscountGrant_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_TradeDiscountRec_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_TradeDiscountRec_Acct(), get_TrxName());	}
+
+	/** Set Trade Discount Received(Recognition).
+		@param JP_TradeDiscountRec_Acct 
+		Trade Discount Receivable Account
+	  */
+	public void setJP_TradeDiscountRec_Acct (int JP_TradeDiscountRec_Acct)
+	{
+		set_Value (COLUMNNAME_JP_TradeDiscountRec_Acct, Integer.valueOf(JP_TradeDiscountRec_Acct));
+	}
+
+	/** Get Trade Discount Received(Recognition).
+		@return Trade Discount Receivable Account
+	  */
+	public int getJP_TradeDiscountRec_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TradeDiscountRec_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -324,6 +418,56 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	public int getP_Revenue_Acct () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_P_Revenue_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getP_TradeDiscountGrant_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getP_TradeDiscountGrant_Acct(), get_TrxName());	}
+
+	/** Set Trade Discount Granted.
+		@param P_TradeDiscountGrant_Acct 
+		Trade Discount Granted Account
+	  */
+	public void setP_TradeDiscountGrant_Acct (int P_TradeDiscountGrant_Acct)
+	{
+		set_Value (COLUMNNAME_P_TradeDiscountGrant_Acct, Integer.valueOf(P_TradeDiscountGrant_Acct));
+	}
+
+	/** Get Trade Discount Granted.
+		@return Trade Discount Granted Account
+	  */
+	public int getP_TradeDiscountGrant_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_P_TradeDiscountGrant_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getP_TradeDiscountRec_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getP_TradeDiscountRec_Acct(), get_TrxName());	}
+
+	/** Set Trade Discount Received.
+		@param P_TradeDiscountRec_Acct 
+		Trade Discount Receivable Account
+	  */
+	public void setP_TradeDiscountRec_Acct (int P_TradeDiscountRec_Acct)
+	{
+		set_Value (COLUMNNAME_P_TradeDiscountRec_Acct, Integer.valueOf(P_TradeDiscountRec_Acct));
+	}
+
+	/** Get Trade Discount Received.
+		@return Trade Discount Receivable Account
+	  */
+	public int getP_TradeDiscountRec_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_P_TradeDiscountRec_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
