@@ -1,0 +1,32 @@
+CREATE TABLE adempiere.JP_Contract_Product_Acct
+(
+    JP_Contract_Product_Acct_ID  numeric(10) NOT NULL,
+    AD_Client_ID numeric(10) NOT NULL,
+    AD_Org_ID numeric(10) NOT NULL,
+    IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+    Created timestamp without time zone NOT NULL DEFAULT now(),
+    CreatedBy numeric(10) NOT NULL,
+    Updated timestamp without time zone NOT NULL DEFAULT now(),
+    Updatedby numeric(10) NOT NULL,
+    JP_Contract_Product_Acct_UU character varying(36) DEFAULT NULL::character varying,
+
+    C_AcctSchema_ID numeric(10) NOT NULL,
+    JP_Contract_Acct_ID numeric(10) NOT NULL,
+    M_Product_Category_ID numeric(10) NOT NULL,
+ 
+    P_COGS_Acct numeric(10),
+    JP_COGS_Clearing_Acct numeric(10), 
+    P_Expense_Acct  numeric(10), 
+    P_Revenue_Acct  numeric(10), 
+    JP_Expense_Acct  numeric(10), 
+    JP_Revenue_Acct  numeric(10),
+    p_tradediscountrec_acct numeric(10) DEFAULT NULL::numeric,
+    jp_tradediscountrec_acct numeric(10) DEFAULT NULL::numeric,
+    p_tradediscountgrant_acct numeric(10) DEFAULT NULL::numeric,
+    jp_tradediscountgrant_acct numeric(10) DEFAULT NULL::numeric,
+    jp_purchase_acct numeric(10) DEFAULT NULL::numeric,
+    jp_purchaseoffset_acct numeric(10) DEFAULT NULL::numeric,
+
+    CONSTRAINT JP_Contract_Product_Acct_pkey PRIMARY KEY (JP_Contract_Product_Acct_ID)
+
+);

@@ -30,7 +30,7 @@ public class X_JP_ContractCancelTerm extends PO implements I_JP_ContractCancelTe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170906L;
+	private static final long serialVersionUID = 20170908L;
 
     /** Standard Constructor */
     public X_JP_ContractCancelTerm (Properties ctx, int JP_ContractCancelTerm_ID, String trxName)

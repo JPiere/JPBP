@@ -1,0 +1,21 @@
+CREATE TABLE adempiere.JP_Contract_Charge_Acct
+(
+    JP_Contract_Charge_Acct_ID numeric(10) NOT NULL,
+    AD_Client_ID numeric(10) NOT NULL,
+    AD_Org_ID numeric(10) NOT NULL,
+    IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+    Created timestamp without time zone NOT NULL DEFAULT now(),
+    CreatedBy numeric(10) NOT NULL,
+    Updated timestamp without time zone NOT NULL DEFAULT now(),
+    Updatedby numeric(10) NOT NULL,
+    JP_Contract_Charge_Acct_UU character varying(36) DEFAULT NULL::character varying,
+
+    C_AcctSchema_ID numeric(10) NOT NULL,
+    JP_Contract_Acct_ID numeric(10) NOT NULL,
+    C_Charge_ID numeric(10) NOT NULL,
+ 
+    CH_Expense_Acct numeric(10),
+    JP_CH_Expense_Acct numeric(10),
+
+    CONSTRAINT JP_Contract_Charge_Acct_pkey PRIMARY KEY (JP_Contract_Charge_Acct_ID )
+)

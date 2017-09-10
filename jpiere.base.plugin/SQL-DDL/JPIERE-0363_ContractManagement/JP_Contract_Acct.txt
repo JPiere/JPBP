@@ -13,6 +13,9 @@ CREATE TABLE adempiere.JP_Contract_Acct
   Value character varying(40) NOT NULL,
   Name character varying(120) NOT NULL,
   Description character varying(255),
+  Processing character(1),
+  IsScheduledCostPostingJP character(1) NOT NULL DEFAULT 'N'::bpchar,
+  DocBaseType character varying(3) COLLATE NOT NULL DEFAULT 'SOO'::character varying,
 
   CONSTRAINT JP_Contract_Acct_pkey PRIMARY KEY (JP_Contract_Acct_ID)
 )

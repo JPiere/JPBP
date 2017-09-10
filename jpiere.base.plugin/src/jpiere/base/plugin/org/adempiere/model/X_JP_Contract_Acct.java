@@ -30,7 +30,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170906L;
+	private static final long serialVersionUID = 20170910L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -38,6 +38,18 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
       super (ctx, JP_Contract_Acct_ID, trxName);
       /** if (JP_Contract_Acct_ID == 0)
         {
+			setDocBaseType (null);
+// SOO
+			setIsOrderInfoMandatoryJP (false);
+// N
+			setIsPostingContractAcctJP (false);
+// N
+			setIsPostingRecognitionDocJP (false);
+// N
+			setIsSOTrx (true);
+// Y
+			setIsScheduledCostPostingJP (false);
+// N
 			setJP_Contract_Acct_ID (0);
 			setName (null);
 			setValue (null);
@@ -89,6 +101,144 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** AP Invoice = API */
+	public static final String DOCBASETYPE_APInvoice = "API";
+	/** AR Invoice = ARI */
+	public static final String DOCBASETYPE_ARInvoice = "ARI";
+	/** Purchase Order = POO */
+	public static final String DOCBASETYPE_PurchaseOrder = "POO";
+	/** Sales Order = SOO */
+	public static final String DOCBASETYPE_SalesOrder = "SOO";
+	/** Material Receipt = MMR */
+	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
+	/** Material Delivery = MMS */
+	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Set Document BaseType.
+		@param DocBaseType 
+		Logical type of document
+	  */
+	public void setDocBaseType (String DocBaseType)
+	{
+
+		set_Value (COLUMNNAME_DocBaseType, DocBaseType);
+	}
+
+	/** Get Document BaseType.
+		@return Logical type of document
+	  */
+	public String getDocBaseType () 
+	{
+		return (String)get_Value(COLUMNNAME_DocBaseType);
+	}
+
+	/** Set Order Info Mandatory.
+		@param IsOrderInfoMandatoryJP Order Info Mandatory	  */
+	public void setIsOrderInfoMandatoryJP (boolean IsOrderInfoMandatoryJP)
+	{
+		set_Value (COLUMNNAME_IsOrderInfoMandatoryJP, Boolean.valueOf(IsOrderInfoMandatoryJP));
+	}
+
+	/** Get Order Info Mandatory.
+		@return Order Info Mandatory	  */
+	public boolean isOrderInfoMandatoryJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsOrderInfoMandatoryJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Contract Acct Posting.
+		@param IsPostingContractAcctJP Contract Acct Posting	  */
+	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP)
+	{
+		set_Value (COLUMNNAME_IsPostingContractAcctJP, Boolean.valueOf(IsPostingContractAcctJP));
+	}
+
+	/** Get Contract Acct Posting.
+		@return Contract Acct Posting	  */
+	public boolean isPostingContractAcctJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsPostingContractAcctJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Posting at Recognition Doc.
+		@param IsPostingRecognitionDocJP Posting at Recognition Doc	  */
+	public void setIsPostingRecognitionDocJP (boolean IsPostingRecognitionDocJP)
+	{
+		set_Value (COLUMNNAME_IsPostingRecognitionDocJP, Boolean.valueOf(IsPostingRecognitionDocJP));
+	}
+
+	/** Get Posting at Recognition Doc.
+		@return Posting at Recognition Doc	  */
+	public boolean isPostingRecognitionDocJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsPostingRecognitionDocJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Sales Transaction.
+		@param IsSOTrx 
+		This is a Sales Transaction
+	  */
+	public void setIsSOTrx (boolean IsSOTrx)
+	{
+		set_ValueNoCheck (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+	}
+
+	/** Get Sales Transaction.
+		@return This is a Sales Transaction
+	  */
+	public boolean isSOTrx () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSOTrx);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Scheduled Cost Posting.
+		@param IsScheduledCostPostingJP Scheduled Cost Posting	  */
+	public void setIsScheduledCostPostingJP (boolean IsScheduledCostPostingJP)
+	{
+		set_Value (COLUMNNAME_IsScheduledCostPostingJP, Boolean.valueOf(IsScheduledCostPostingJP));
+	}
+
+	/** Get Scheduled Cost Posting.
+		@return Scheduled Cost Posting	  */
+	public boolean isScheduledCostPostingJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsScheduledCostPostingJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Contract Acct Info.
 		@param JP_Contract_Acct_ID Contract Acct Info	  */
 	public void setJP_Contract_Acct_ID (int JP_Contract_Acct_ID)
@@ -138,6 +288,27 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public String getName () 
 	{
 		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Set Process Now.
+		@param Processing Process Now	  */
+	public void setProcessing (boolean Processing)
+	{
+		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public boolean isProcessing () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processing);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Search Key.

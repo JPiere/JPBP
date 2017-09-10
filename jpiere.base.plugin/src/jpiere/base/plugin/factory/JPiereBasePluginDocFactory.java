@@ -30,8 +30,11 @@ import org.adempiere.base.IDocFactory;
 import org.compiere.acct.Doc;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBankStatement;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 
 /**
@@ -49,69 +52,19 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			String trxName) {
 
 		Doc doc = null;
-		if(AD_Table_ID==MBankStatement.Table_ID){//392
+		if(	       AD_Table_ID==MInvoice.Table_ID //318
+				|| AD_Table_ID==MBankStatement.Table_ID //392
+				|| AD_Table_ID==MRecognition.Table_ID //1000188
+				|| AD_Table_ID==MEstimation.Table_ID //1000080
+				|| AD_Table_ID==MBill.Table_ID //1000032
+				|| AD_Table_ID==MContract.Table_ID //1000180
+				|| AD_Table_ID==MContractContent.Table_ID //1000186
+				|| AD_Table_ID==MInvValCal.Table_ID //1000067
+				|| AD_Table_ID==MInvValAdjust.Table_ID//1000071
+			)
+		{
 
-			String tableName = MBankStatement.Table_Name;
-			StringBuffer sql = new StringBuffer("SELECT * FROM ")
-				.append(tableName)
-				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement (sql.toString(), trxName);
-				pstmt.setInt (1, Record_ID);
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					doc = getDocument(as, AD_Table_ID, rs, trxName);
-				}
-				else
-					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-		}else if(AD_Table_ID==MBill.Table_ID){//1000032
-
-			String tableName = MBill.Table_Name;
-			StringBuffer sql = new StringBuffer("SELECT * FROM ")
-				.append(tableName)
-				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement (sql.toString(), trxName);
-				pstmt.setInt (1, Record_ID);
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					doc = getDocument(as, AD_Table_ID, rs, trxName);
-				}
-				else
-					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-		}else if(AD_Table_ID==MInvValCal.Table_ID){//1000067
-
-			String tableName = MInvValCal.Table_Name;
+			String tableName = MTable.get(Env.getCtx(), AD_Table_ID).get_TableName();
 			StringBuffer sql = new StringBuffer("SELECT * FROM ")
 				.append(tableName)
 				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
@@ -140,159 +93,6 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 				pstmt = null;
 			}
 			
-		}else if(AD_Table_ID==MInvValAdjust.Table_ID){//1000071
-
-			String tableName = MInvValCal.Table_Name;
-			StringBuffer sql = new StringBuffer("SELECT * FROM ")
-				.append(tableName)
-				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement (sql.toString(), trxName);
-				pstmt.setInt (1, Record_ID);
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					doc = getDocument(as, AD_Table_ID, rs, trxName);
-				}
-				else
-					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-		}else if(AD_Table_ID==MEstimation.Table_ID){//1000080
-
-			String tableName = MEstimation.Table_Name;
-			StringBuffer sql = new StringBuffer("SELECT * FROM ")
-				.append(tableName)
-				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement (sql.toString(), trxName);
-				pstmt.setInt (1, Record_ID);
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					doc = getDocument(as, AD_Table_ID, rs, trxName);
-				}
-				else
-					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-			
-		}else if(AD_Table_ID==MContract.Table_ID){//1000180
-
-			String tableName = MContract.Table_Name;
-			StringBuffer sql = new StringBuffer("SELECT * FROM ")
-				.append(tableName)
-				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement (sql.toString(), trxName);
-				pstmt.setInt (1, Record_ID);
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					doc = getDocument(as, AD_Table_ID, rs, trxName);
-				}
-				else
-					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-
-		}else if(AD_Table_ID==MContractContent.Table_ID){//1000186
-
-			String tableName = MContract.Table_Name;
-			StringBuffer sql = new StringBuffer("SELECT * FROM ")
-				.append(tableName)
-				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement (sql.toString(), trxName);
-				pstmt.setInt (1, Record_ID);
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					doc = getDocument(as, AD_Table_ID, rs, trxName);
-				}
-				else
-					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-
-		}else if(AD_Table_ID==MRecognition.Table_ID){//1000188
-
-			String tableName = MContract.Table_Name;
-			StringBuffer sql = new StringBuffer("SELECT * FROM ")
-				.append(tableName)
-				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement (sql.toString(), trxName);
-				pstmt.setInt (1, Record_ID);
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					doc = getDocument(as, AD_Table_ID, rs, trxName);
-				}
-				else
-					s_log.severe("Not Found: " + tableName + "_ID=" + Record_ID);
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql.toString(), e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
 
 		}
 		
@@ -305,7 +105,9 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 
 		String className = null;
 
-		if(AD_Table_ID == MBankStatement.Table_ID){//392
+		if(AD_Table_ID == MInvoice.Table_ID){
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_InvoiceJP";
+		}else if(AD_Table_ID == MBankStatement.Table_ID){//392
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_BankStatementJP";
 		}else if(AD_Table_ID == MBill.Table_ID){
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPBill";

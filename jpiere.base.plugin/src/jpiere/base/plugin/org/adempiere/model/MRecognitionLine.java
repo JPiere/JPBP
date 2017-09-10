@@ -848,6 +848,11 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
+		//TODO ヘッダ情報に出荷納品伝票が場合には、他の出荷納品伝票の明細が入力されないように制御する。
+		
+		//
+		setJP_QtyRecognized(getQtyInvoiced());
+		
 		if (log.isLoggable(Level.FINE)) log.fine("New=" + newRecord);
 		if (newRecord && getParent().isComplete()) {
 			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_InvoiceLine"));

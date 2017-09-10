@@ -24,7 +24,6 @@ import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
@@ -40,6 +39,8 @@ import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 public class JPiereInOutModelValidator implements ModelValidator {
 
@@ -121,6 +122,11 @@ public class JPiereInOutModelValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
+		
+		if(!po.get_TableName().equals(MInOut.Table_Name))
+			return null;
+		
+		
 		//JPIERE-0317  Physical Warehouse - check same physical warehouse between locator and document.
 		if(timing == ModelValidator.TIMING_BEFORE_PREPARE
 				&& MSysConfig.getBooleanValue("JP_INOUT_PHYWH_LOCATOR_CHECK", true, po.getAD_Client_ID(), po.getAD_Org_ID()))
@@ -176,7 +182,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 		}//JPiere-0229
 
 
-		//JPIERE-0219:Create Invoice When Ship/Receipt
+		//JPIERE-0219:Create Invoice When Ship/Receipt Complete
 		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
 		{
 			MInOut io = (MInOut)po;
@@ -193,18 +199,145 @@ public class JPiereInOutModelValidator implements ModelValidator {
 				if(orderDocType.equals(MOrder.DocSubTypeSO_OnCredit)
 						|| orderDocType.equals(MOrder.DocSubTypeSO_POS)
 						|| orderDocType.equals(MOrder.DocSubTypeSO_Prepay))
-				{
-					return null;
-				}
+				{					
+					
+					;//Noting to DO
+					
+				}else{//Create invoice
+					
+				
 
-				if(orderDocType.getC_DocTypeInvoice_ID() == 0)
+					if(orderDocType.getC_DocTypeInvoice_ID() == 0)
+						return null;
+	
+					MInvoiceJP invoice = new MInvoiceJP (order, orderDocType.getC_DocTypeInvoice_ID(), io.getDateAcct());//JPIERE-0295
+					if (!invoice.save(trxName))
+					{
+						log.warning("Could not create Invoice: "+ io.getDocumentInfo());
+						return null;
+					}
+	
+					MInOutLine[] sLines = io.getLines(false);
+					for (int i = 0; i < sLines.length; i++)
+					{
+						MInOutLine sLine = sLines[i];
+						//
+						MInvoiceLine iLine = new MInvoiceLine(invoice);
+						iLine.setShipLine(sLine);
+						iLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+						//	Qty = Delivered
+						if (sLine.sameOrderLineUOM())
+							iLine.setQtyEntered(sLine.getQtyEntered());
+						else
+							iLine.setQtyEntered(sLine.getMovementQty());
+						iLine.setQtyInvoiced(sLine.getMovementQty());
+						if (!iLine.save(io.get_TrxName()))
+						{
+							log.warning("Could not create Invoice Line from Shipment Line: "+ invoice.getDocumentInfo());
+							return null;
+						}
+						//
+						sLine.setIsInvoiced(true);
+						if (!sLine.save(trxName))
+						{
+							log.warning("Could not update Shipment line: " + sLine);
+						}
+					}//for
+	
+					if (!invoice.processIt(DocAction.ACTION_Complete))
+						throw new AdempiereException("Failed when processing document - " + invoice.getProcessMsg());
+	
+					invoice.saveEx(trxName);
+					if (!invoice.getDocStatus().equals(DocAction.STATUS_Completed))
+					{
+						log.warning("Could not Completed Invoice: "+ invoice.getDocumentInfo());
+						return null;
+					}
+	
+					//Allocation
+					if(!isReversal && order.getC_Payment_ID() > 0)
+					{
+	
+						MPayment payment = new MPayment(io.getCtx(),order.getC_Payment_ID(), trxName);
+						if(!payment.isAllocated() && payment.getC_Order_ID()== order.getC_Order_ID() && payment.isPrepayment()
+								&& (payment.getDocStatus().equals(DocAction.STATUS_Completed) || payment.getDocStatus().equals(DocAction.STATUS_Closed))
+								&& (invoice.getC_Currency_ID() == payment.getC_Currency_ID()) )
+						{
+							BigDecimal payAmt = payment.getPayAmt();
+							BigDecimal allocatedAmt = payment.getAllocatedAmt();
+							BigDecimal allocatAmt = payAmt;
+							if(allocatedAmt == null)
+								allocatedAmt = Env.ZERO;
+	
+							if(payment.isReceipt()){
+								allocatAmt = payAmt.subtract(allocatedAmt);
+								allocatAmt = invoice.getGrandTotal().compareTo(allocatAmt) > 0 ? allocatAmt : invoice.getGrandTotal();
+							}else if(!payment.isReceipt()){
+								allocatAmt = payAmt.add(allocatedAmt);
+								allocatAmt = invoice.getGrandTotal().compareTo(allocatAmt) > 0 ? allocatAmt : invoice.getGrandTotal();
+								allocatAmt = allocatAmt.negate();
+							}
+	
+							if((payment.isReceipt() && allocatAmt.compareTo(Env.ZERO) > 0)
+									|| (!payment.isReceipt() && allocatAmt.compareTo(Env.ZERO) < 0) )
+							{
+								MAllocationHdr alloc = new MAllocationHdr(io.getCtx(), false, invoice.getDateAcct(), invoice.getC_Currency_ID(),
+											Msg.translate(io.getCtx(), "C_Payment_ID")	+ ": " + payment.getDocumentNo(), trxName);
+								alloc.setAD_Org_ID(invoice.getAD_Org_ID());
+								alloc.setDateAcct(invoice.getDateAcct()); // in case date acct is different from datetrx in payment; IDEMPIERE-1532 tbayen
+								if (!alloc.save(trxName))
+								{
+									log.severe("Allocations not created");
+									return null;
+								}
+	
+								MAllocationLine aLine = new MAllocationLine (alloc, allocatAmt, Env.ZERO, Env.ZERO, Env.ZERO);
+								aLine.setDocInfo(invoice.getC_BPartner_ID(), order.getC_Order_ID(), invoice.getC_Invoice_ID());
+								aLine.setPaymentInfo(payment.getC_Payment_ID(), 0);
+								if (!aLine.save(trxName))
+									log.warning("P.Allocations - line not saved");
+	
+								if (!alloc.processIt(DocAction.ACTION_Complete))
+									throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
+								if (!alloc.save(trxName))
+								{
+									log.severe("Allocation not Save after Complete");
+									return null;
+								}
+							}
+						}
+	
+					}//Allocation
+					
+				}//Create invoice
+
+			}//if(ioDocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
+
+		}//JPiere-0219
+
+		//JPIERE-0364:Create Recognition When Ship/Receipt Complete
+		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
+		{
+			MInOut io = (MInOut)po;
+			String trxName = po.get_TrxName();
+			boolean isReversal = io.isReversal();//TODO 出荷納品伝票がリバースされる際に、出荷納品伝票もリバースする必要がある。
+			MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
+			if(ioDocType.get_ValueAsBoolean("IsCreateRecognitionJP"))
+			{
+				if(io.getC_Order_ID()==0)
 					return null;
 
-				MInvoiceJP invoice = new MInvoiceJP (order, orderDocType.getC_DocTypeInvoice_ID(), io.getDateAcct());//JPIERE-0295
-				if (!invoice.save(trxName))
-				{
-					log.warning("Could not create Invoice: "+ io.getDocumentInfo());
+				MOrder order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
+				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+
+				if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
 					return null;
+
+				MRecognition recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+				recognition.setJP_DateRecognized(io.getDateAcct());
+				if (!recognition.save(trxName))
+				{
+					return "Could not create Invoice: "+ io.getDocumentInfo();//TODO
 				}
 
 				MInOutLine[] sLines = io.getLines(false);
@@ -212,18 +345,19 @@ public class JPiereInOutModelValidator implements ModelValidator {
 				{
 					MInOutLine sLine = sLines[i];
 					//
-					MInvoiceLine iLine = new MInvoiceLine(invoice);
-					iLine.setShipLine(sLine);
-					iLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+					MRecognitionLine rcogLine = new MRecognitionLine(recognition);
+					rcogLine.setShipLine(sLine);
+					rcogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
 					//	Qty = Delivered
 					if (sLine.sameOrderLineUOM())
-						iLine.setQtyEntered(sLine.getQtyEntered());
+						rcogLine.setQtyEntered(sLine.getQtyEntered());
 					else
-						iLine.setQtyEntered(sLine.getMovementQty());
-					iLine.setQtyInvoiced(sLine.getMovementQty());
-					if (!iLine.save(io.get_TrxName()))
+						rcogLine.setQtyEntered(sLine.getMovementQty());
+					rcogLine.setQtyInvoiced(sLine.getMovementQty());
+					rcogLine.setJP_QtyRecognized(sLine.getMovementQty());
+					if (!rcogLine.save(io.get_TrxName()))
 					{
-						log.warning("Could not create Invoice Line from Shipment Line: "+ invoice.getDocumentInfo());
+						log.warning("Could not create Invoice Line from Shipment Line: "+ recognition.getDocumentInfo());
 						return null;
 					}
 					//
@@ -234,76 +368,21 @@ public class JPiereInOutModelValidator implements ModelValidator {
 					}
 				}//for
 
-				if (!invoice.processIt(DocAction.ACTION_Complete))
-					throw new AdempiereException("Failed when processing document - " + invoice.getProcessMsg());
+				if (!recognition.processIt(DocAction.ACTION_Complete))
+					throw new AdempiereException("Failed when processing document - " + recognition.getProcessMsg());
 
-				invoice.saveEx(trxName);
-				if (!invoice.getDocStatus().equals(DocAction.STATUS_Completed))
+				recognition.saveEx(trxName);
+				if (!recognition.getDocStatus().equals(DocAction.STATUS_Completed))
 				{
-					log.warning("Could not Completed Invoice: "+ invoice.getDocumentInfo());
+					log.warning("Could not Completed Invoice: "+ recognition.getDocumentInfo());
 					return null;
 				}
 
-				//Allocation
-				if(!isReversal && order.getC_Payment_ID() > 0)
-				{
-
-					MPayment payment = new MPayment(io.getCtx(),order.getC_Payment_ID(), trxName);
-					if(!payment.isAllocated() && payment.getC_Order_ID()== order.getC_Order_ID() && payment.isPrepayment()
-							&& (payment.getDocStatus().equals(DocAction.STATUS_Completed) || payment.getDocStatus().equals(DocAction.STATUS_Closed))
-							&& (invoice.getC_Currency_ID() == payment.getC_Currency_ID()) )
-					{
-						BigDecimal payAmt = payment.getPayAmt();
-						BigDecimal allocatedAmt = payment.getAllocatedAmt();
-						BigDecimal allocatAmt = payAmt;
-						if(allocatedAmt == null)
-							allocatedAmt = Env.ZERO;
-
-						if(payment.isReceipt()){
-							allocatAmt = payAmt.subtract(allocatedAmt);
-							allocatAmt = invoice.getGrandTotal().compareTo(allocatAmt) > 0 ? allocatAmt : invoice.getGrandTotal();
-						}else if(!payment.isReceipt()){
-							allocatAmt = payAmt.add(allocatedAmt);
-							allocatAmt = invoice.getGrandTotal().compareTo(allocatAmt) > 0 ? allocatAmt : invoice.getGrandTotal();
-							allocatAmt = allocatAmt.negate();
-						}
-
-						if((payment.isReceipt() && allocatAmt.compareTo(Env.ZERO) > 0)
-								|| (!payment.isReceipt() && allocatAmt.compareTo(Env.ZERO) < 0) )
-						{
-							MAllocationHdr alloc = new MAllocationHdr(io.getCtx(), false, invoice.getDateAcct(), invoice.getC_Currency_ID(),
-										Msg.translate(io.getCtx(), "C_Payment_ID")	+ ": " + payment.getDocumentNo(), trxName);
-							alloc.setAD_Org_ID(invoice.getAD_Org_ID());
-							alloc.setDateAcct(invoice.getDateAcct()); // in case date acct is different from datetrx in payment; IDEMPIERE-1532 tbayen
-							if (!alloc.save(trxName))
-							{
-								log.severe("Allocations not created");
-								return null;
-							}
-
-							MAllocationLine aLine = new MAllocationLine (alloc, allocatAmt, Env.ZERO, Env.ZERO, Env.ZERO);
-							aLine.setDocInfo(invoice.getC_BPartner_ID(), order.getC_Order_ID(), invoice.getC_Invoice_ID());
-							aLine.setPaymentInfo(payment.getC_Payment_ID(), 0);
-							if (!aLine.save(trxName))
-								log.warning("P.Allocations - line not saved");
-
-							if (!alloc.processIt(DocAction.ACTION_Complete))
-								throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
-							if (!alloc.save(trxName))
-							{
-								log.severe("Allocation not Save after Complete");
-								return null;
-							}
-						}
-					}
-
-				}//Allocation
-
-
 			}//if(ioDocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
 
-		}//JPiere-0219
-
+		}//JPiere-0364
+		
+		
 		return null;
 	}
 

@@ -21,18 +21,18 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for JP_Contract_Acct
+/** Generated Interface for JP_Contract_BP_Acct
  *  @author iDempiere (generated) 
  *  @version Release 4.1
  */
 @SuppressWarnings("all")
-public interface I_JP_Contract_Acct 
+public interface I_JP_Contract_BP_Acct 
 {
 
-    /** TableName=JP_Contract_Acct */
-    public static final String Table_Name = "JP_Contract_Acct";
+    /** TableName=JP_Contract_BP_Acct */
+    public static final String Table_Name = "JP_Contract_BP_Acct";
 
-    /** AD_Table_ID=1000181 */
+    /** AD_Table_ID=1000191 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -64,6 +64,36 @@ public interface I_JP_Contract_Acct
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name C_AcctSchema_ID */
+    public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
+
+	/** Set Accounting Schema.
+	  * Rules for accounting
+	  */
+	public void setC_AcctSchema_ID (int C_AcctSchema_ID);
+
+	/** Get Accounting Schema.
+	  * Rules for accounting
+	  */
+	public int getC_AcctSchema_ID();
+
+	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException;
+
+    /** Column name C_Receivable_Acct */
+    public static final String COLUMNNAME_C_Receivable_Acct = "C_Receivable_Acct";
+
+	/** Set Customer Receivables.
+	  * Account for Customer Receivables
+	  */
+	public void setC_Receivable_Acct (int C_Receivable_Acct);
+
+	/** Get Customer Receivables.
+	  * Account for Customer Receivables
+	  */
+	public int getC_Receivable_Acct();
+
+	public I_C_ValidCombination getC_Receivable_A() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -80,32 +110,6 @@ public interface I_JP_Contract_Acct
 	  */
 	public int getCreatedBy();
 
-    /** Column name Description */
-    public static final String COLUMNNAME_Description = "Description";
-
-	/** Set Description.
-	  * Optional short description of the record
-	  */
-	public void setDescription (String Description);
-
-	/** Get Description.
-	  * Optional short description of the record
-	  */
-	public String getDescription();
-
-    /** Column name DocBaseType */
-    public static final String COLUMNNAME_DocBaseType = "DocBaseType";
-
-	/** Set Document BaseType.
-	  * Logical type of document
-	  */
-	public void setDocBaseType (String DocBaseType);
-
-	/** Get Document BaseType.
-	  * Logical type of document
-	  */
-	public String getDocBaseType();
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -119,55 +123,6 @@ public interface I_JP_Contract_Acct
 	  */
 	public boolean isActive();
 
-    /** Column name IsOrderInfoMandatoryJP */
-    public static final String COLUMNNAME_IsOrderInfoMandatoryJP = "IsOrderInfoMandatoryJP";
-
-	/** Set Order Info Mandatory	  */
-	public void setIsOrderInfoMandatoryJP (boolean IsOrderInfoMandatoryJP);
-
-	/** Get Order Info Mandatory	  */
-	public boolean isOrderInfoMandatoryJP();
-
-    /** Column name IsPostingContractAcctJP */
-    public static final String COLUMNNAME_IsPostingContractAcctJP = "IsPostingContractAcctJP";
-
-	/** Set Contract Acct Posting	  */
-	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP);
-
-	/** Get Contract Acct Posting	  */
-	public boolean isPostingContractAcctJP();
-
-    /** Column name IsPostingRecognitionDocJP */
-    public static final String COLUMNNAME_IsPostingRecognitionDocJP = "IsPostingRecognitionDocJP";
-
-	/** Set Posting at Recognition Doc	  */
-	public void setIsPostingRecognitionDocJP (boolean IsPostingRecognitionDocJP);
-
-	/** Get Posting at Recognition Doc	  */
-	public boolean isPostingRecognitionDocJP();
-
-    /** Column name IsSOTrx */
-    public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
-
-	/** Set Sales Transaction.
-	  * This is a Sales Transaction
-	  */
-	public void setIsSOTrx (boolean IsSOTrx);
-
-	/** Get Sales Transaction.
-	  * This is a Sales Transaction
-	  */
-	public boolean isSOTrx();
-
-    /** Column name IsScheduledCostPostingJP */
-    public static final String COLUMNNAME_IsScheduledCostPostingJP = "IsScheduledCostPostingJP";
-
-	/** Set Scheduled Cost Posting	  */
-	public void setIsScheduledCostPostingJP (boolean IsScheduledCostPostingJP);
-
-	/** Get Scheduled Cost Posting	  */
-	public boolean isScheduledCostPostingJP();
-
     /** Column name JP_Contract_Acct_ID */
     public static final String COLUMNNAME_JP_Contract_Acct_ID = "JP_Contract_Acct_ID";
 
@@ -177,36 +132,25 @@ public interface I_JP_Contract_Acct
 	/** Get Contract Acct Info	  */
 	public int getJP_Contract_Acct_ID();
 
-    /** Column name JP_Contract_Acct_UU */
-    public static final String COLUMNNAME_JP_Contract_Acct_UU = "JP_Contract_Acct_UU";
+	public I_JP_Contract_Acct getJP_Contract_Acct() throws RuntimeException;
 
-	/** Set Contract Acct Info(UU)	  */
-	public void setJP_Contract_Acct_UU (String JP_Contract_Acct_UU);
+    /** Column name JP_Contract_BP_Acct_ID */
+    public static final String COLUMNNAME_JP_Contract_BP_Acct_ID = "JP_Contract_BP_Acct_ID";
 
-	/** Get Contract Acct Info(UU)	  */
-	public String getJP_Contract_Acct_UU();
+	/** Set BP Contract Account	  */
+	public void setJP_Contract_BP_Acct_ID (int JP_Contract_BP_Acct_ID);
 
-    /** Column name Name */
-    public static final String COLUMNNAME_Name = "Name";
+	/** Get BP Contract Account	  */
+	public int getJP_Contract_BP_Acct_ID();
 
-	/** Set Name.
-	  * Alphanumeric identifier of the entity
-	  */
-	public void setName (String Name);
+    /** Column name JP_Contract_BP_Acct_UU */
+    public static final String COLUMNNAME_JP_Contract_BP_Acct_UU = "JP_Contract_BP_Acct_UU";
 
-	/** Get Name.
-	  * Alphanumeric identifier of the entity
-	  */
-	public String getName();
+	/** Set JP_Contract_BP_Acct_UU	  */
+	public void setJP_Contract_BP_Acct_UU (String JP_Contract_BP_Acct_UU);
 
-    /** Column name Processing */
-    public static final String COLUMNNAME_Processing = "Processing";
-
-	/** Set Process Now	  */
-	public void setProcessing (boolean Processing);
-
-	/** Get Process Now	  */
-	public boolean isProcessing();
+	/** Get JP_Contract_BP_Acct_UU	  */
+	public String getJP_Contract_BP_Acct_UU();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
@@ -224,16 +168,18 @@ public interface I_JP_Contract_Acct
 	  */
 	public int getUpdatedBy();
 
-    /** Column name Value */
-    public static final String COLUMNNAME_Value = "Value";
+    /** Column name V_Liability_Acct */
+    public static final String COLUMNNAME_V_Liability_Acct = "V_Liability_Acct";
 
-	/** Set Search Key.
-	  * Search key for the record in the format required - must be unique
+	/** Set Vendor Liability.
+	  * Account for Vendor Liability
 	  */
-	public void setValue (String Value);
+	public void setV_Liability_Acct (int V_Liability_Acct);
 
-	/** Get Search Key.
-	  * Search key for the record in the format required - must be unique
+	/** Get Vendor Liability.
+	  * Account for Vendor Liability
 	  */
-	public String getValue();
+	public int getV_Liability_Acct();
+
+	public I_C_ValidCombination getV_Liability_A() throws RuntimeException;
 }
