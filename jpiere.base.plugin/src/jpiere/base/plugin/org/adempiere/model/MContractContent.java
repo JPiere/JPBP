@@ -763,7 +763,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	public int getActiveOrderIdByPeriod(Properties ctx, int JP_ContractProcPeriod_ID)
 	{
 		int record_ID = 0;
-		final String sql = "SELECT C_Order_ID FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE','CL')";
+		final String sql = "SELECT C_Order_ID FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

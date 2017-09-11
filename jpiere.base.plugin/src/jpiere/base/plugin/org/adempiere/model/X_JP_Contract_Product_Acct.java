@@ -30,7 +30,7 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170910L;
+	private static final long serialVersionUID = 20170911L;
 
     /** Standard Constructor */
     public X_JP_Contract_Product_Acct (Properties ctx, int JP_Contract_Product_Acct_ID, String trxName)
@@ -265,6 +265,31 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	public int getJP_Revenue_Acct () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Revenue_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_Shipped_Asset_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_Shipped_Asset_Acct(), get_TrxName());	}
+
+	/** Set Shipped Product Asset.
+		@param JP_Shipped_Asset_Acct 
+		Account for Shipped Product Asset (Inventory)
+	  */
+	public void setJP_Shipped_Asset_Acct (int JP_Shipped_Asset_Acct)
+	{
+		set_Value (COLUMNNAME_JP_Shipped_Asset_Acct, Integer.valueOf(JP_Shipped_Asset_Acct));
+	}
+
+	/** Get Shipped Product Asset.
+		@return Account for Shipped Product Asset (Inventory)
+	  */
+	public int getJP_Shipped_Asset_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Shipped_Asset_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

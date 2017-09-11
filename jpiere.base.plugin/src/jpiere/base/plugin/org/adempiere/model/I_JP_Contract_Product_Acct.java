@@ -192,6 +192,21 @@ public interface I_JP_Contract_Product_Acct
 
 	public I_C_ValidCombination getJP_Revenue_A() throws RuntimeException;
 
+    /** Column name JP_Shipped_Asset_Acct */
+    public static final String COLUMNNAME_JP_Shipped_Asset_Acct = "JP_Shipped_Asset_Acct";
+
+	/** Set Shipped Product Asset.
+	  * Account for Shipped Product Asset (Inventory)
+	  */
+	public void setJP_Shipped_Asset_Acct (int JP_Shipped_Asset_Acct);
+
+	/** Get Shipped Product Asset.
+	  * Account for Shipped Product Asset (Inventory)
+	  */
+	public int getJP_Shipped_Asset_Acct();
+
+	public I_C_ValidCombination getJP_Shipped_Asset_A() throws RuntimeException;
+
     /** Column name JP_TradeDiscountGrant_Acct */
     public static final String COLUMNNAME_JP_TradeDiscountGrant_Acct = "JP_TradeDiscountGrant_Acct";
 

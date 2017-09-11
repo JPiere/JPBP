@@ -14,11 +14,17 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import org.compiere.model.MClient;
+import org.compiere.model.MInOut;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
@@ -31,7 +37,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
-public class JPiereContractRecognitionValidator implements ModelValidator {
+public class JPiereContractRecognitionValidator extends AbstractContractValidator  implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereContractRecognitionValidator.class);
 	private int AD_Client_ID = -1;
@@ -99,9 +105,39 @@ public class JPiereContractRecognitionValidator implements ModelValidator {
 	 */
 	private String recognitionValidate(PO po, int type)
 	{
+		derivativeDocHeaderBaseCheck(po, type);	
+		
+		if( type == ModelValidator.TYPE_BEFORE_NEW
+				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
+						||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
+						||   po.is_ValueChanged("C_Order_ID") ) ) )
+		{
+			
+			String returnValue = checkHeaderContractInfoUpdate(po, type);
+			
+			if(!Util.isEmpty(returnValue))
+				return returnValue;
+		}//Type
+		
 		return null;
 	}
 
+	
+	@Override
+	protected String checkHeaderContractInfoUpdate(PO po, int type) 
+	{
+		MRecognition recog = (MRecognition)po;			
+		
+		//Prohibit update
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
+		{
+			if(recog.getLines().length > 0)
+				return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");//Contract Info cannot be changed because the Document have lines
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Recognition Line Validate
 	 * 
@@ -111,6 +147,10 @@ public class JPiereContractRecognitionValidator implements ModelValidator {
 	 */
 	private String recognitionLineValidate(PO po, int type)
 	{
+		derivativeDocLineBaseCheck(po, type);
+		
 		return null;
 	}
+
+
 }

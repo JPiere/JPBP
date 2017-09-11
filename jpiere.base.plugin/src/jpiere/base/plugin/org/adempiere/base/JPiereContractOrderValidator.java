@@ -175,21 +175,6 @@ public class JPiereContractOrderValidator implements ModelValidator {
 							
 							
 							//TODO 受注伝票の契約処理期間が、契約期間に含まれている事の確認
-							
-							//
-							int C_Order_ID = content.getActiveOrderIdByPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
-							
-							//TODO:Check
-							if(C_Order_ID == 0 || C_Order_ID == order.getC_Order_ID())
-							{
-								//TODO クローズの処理 -> クローズで契約内容の明細に出荷残的なものがあったとすると・・・明細でチェックする内容な気がするな!!
-								;
-							}else{
-								
-								//TODO 途中でクローズした際のリカバリー方法の検討。ヘッダーの伝票ステータスがクローズであれば同じ契約処理期間の伝票が複数枚あっても良いかも・・・。
-								MOrder orderRef = new MOrder(Env.getCtx(), C_Order_ID, order.get_TrxName());
-								return "契約内容に同じ契約処理期間が登録されています。 " + orderRef.getDocumentInfo();//TODO メッセージ化								
-							}
 						
 						}
 					}

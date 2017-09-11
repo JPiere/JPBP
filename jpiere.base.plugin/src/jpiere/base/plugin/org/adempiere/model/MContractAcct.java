@@ -83,10 +83,13 @@ public class MContractAcct extends X_JP_Contract_Acct {
 				
 		}
 		
-		//Check IsPostingContractAcctJP and IsPostingContractAcctJP
-		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingContractAcctJP))
+		//Check IsPostingContractAcctJP and IsPostingRecognitionDocJP
+		if(newRecord ||( is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingContractAcctJP)
+						|| is_ValueChanged(MContractAcct.COLUMNNAME_DocBaseType) ))
 		{
-			if(!get_ValueAsBoolean(MContractAcct.COLUMNNAME_IsPostingContractAcctJP))
+			if(getDocBaseType().equals(MContractAcct.DOCBASETYPE_ARInvoice)
+					|| getDocBaseType().equals(MContractAcct.DOCBASETYPE_APInvoice)
+					|| !isPostingContractAcctJP())
 			{
 				setIsPostingRecognitionDocJP(false);
 			}

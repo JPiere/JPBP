@@ -26,6 +26,7 @@ CREATE TABLE adempiere.JP_Contract_Product_Acct
     jp_tradediscountgrant_acct numeric(10) DEFAULT NULL::numeric,
     jp_purchase_acct numeric(10) DEFAULT NULL::numeric,
     jp_purchaseoffset_acct numeric(10) DEFAULT NULL::numeric,
+    jp_shipped_asset_acct numeric(10) DEFAULT NULL::numeric,
 
     CONSTRAINT JP_Contract_Product_Acct_pkey PRIMARY KEY (JP_Contract_Product_Acct_ID)
 

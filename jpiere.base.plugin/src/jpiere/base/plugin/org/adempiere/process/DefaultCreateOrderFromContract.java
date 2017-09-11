@@ -25,6 +25,7 @@ import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
@@ -90,6 +91,11 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 	{
 		//TODO:既に同じ契約処理期間の受注伝票/発注伝票が登録されていない事のチェック。※Abstract化できるね
 		
+		int C_Order_ID = m_ContractContent.getActiveOrderIdByPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
+		if(C_Order_ID != 0)
+		{
+			return "契約内容に同じ契約処理期間が登録されています。 ";
+		}
 		
 		/** Create Order header */
 		MOrder order = new MOrder(getCtx(), 0, get_TrxName());

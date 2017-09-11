@@ -17,11 +17,12 @@ package jpiere.base.plugin.org.compiere.acct;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 import org.compiere.acct.Doc_InOut;
 import org.compiere.acct.Fact;
 import org.compiere.model.MAcctSchema;
-import org.compiere.model.MInvoice;
+import org.compiere.model.MInOut;
 import org.compiere.util.Env;
 
 import jpiere.base.plugin.org.adempiere.model.MContractAcct;
@@ -39,8 +40,7 @@ public class Doc_InOutJP extends Doc_InOut {
 	{
 		super(as, rs, trxName);
 	}
-	
-	
+
 	@Override
 	public ArrayList<Fact> createFacts(MAcctSchema as) 
 	{
@@ -48,11 +48,11 @@ public class Doc_InOutJP extends Doc_InOut {
 			return super.createFacts(as);
 		
 		
-		MInvoice invoice = (MInvoice)getPO();
+		MInOut inOut = (MInOut)getPO();
 		
 		
 		/**iDempiere Standard Posting*/
-		int JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
+		int JP_ContractContent_ID = inOut.get_ValueAsInt("JP_ContractContent_ID");
 		if(JP_ContractContent_ID == 0)
 		{
 			return super.createFacts(as);
@@ -70,7 +70,33 @@ public class Doc_InOutJP extends Doc_InOut {
 			return super.createFacts(as);
 		}
 		
-		return null;
+		
+
+		if (getDocumentType().equals(DOCTYPE_MatShipment) && isSOTrx()) //Sales - Shipment
+		{
+			;//Posting at Recognition Doc
+			
+		}else if ( getDocumentType().equals(DOCTYPE_MatReceipt) && isSOTrx() ){//Sales - Return
+			
+			;//Posting at Recognition Doc
+			
+		}else if (getDocumentType().equals(DOCTYPE_MatReceipt) && !isSOTrx()){//Purchasing - Receipt
+			
+			return super.createFacts(as);
+			
+		}else if (getDocumentType().equals(DOCTYPE_MatShipment) && !isSOTrx()){ //Purchasing - return
+		
+			return super.createFacts(as)
+					;
+		}else{
+			p_Error = "DocumentType unknown: " + getDocumentType();
+			log.log(Level.SEVERE, p_Error);
+			return null;
+		}
+		
+		ArrayList<Fact> facts = new ArrayList<Fact>();
+		facts.add(new Fact(this, as, Fact.POST_Actual));
+		return facts;
 	}
 	
 }
