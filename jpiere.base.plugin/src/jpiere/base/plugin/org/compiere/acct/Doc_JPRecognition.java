@@ -404,9 +404,13 @@ public class Doc_JPRecognition extends Doc
 					costs  = (BigDecimal)oLine.get_Value("JP_ScheduledCostLineAmt");
 				}
 				
+				
+				// getCOGSValidCombination(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
+				
 				//  CoGS            DR
 				dr = fact.createLine(line,
-					line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),
+					getCOGSValidCombination(line, contractAcct, as),
+//					line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),	//TODO 品目原価の勘定科目は設定できる必要がある。
 					as.getC_Currency_ID(), costs, null);
 				if (dr == null)
 				{
@@ -579,12 +583,10 @@ public class Doc_JPRecognition extends Doc
 			if(pAcct == null || pAcct.getP_COGS_Acct() == 0)
 			{
 				return docLine.getAccount(ProductCost.ACCTTYPE_P_Cogs, as);
+				
 			}else{
 				
-				if(contractAcct.isPostingRecognitionDocJP())
-					return MAccount.get(getCtx(),pAcct.getJP_COGS_Clearing_Acct()) ;
-				else				
-					return MAccount.get(getCtx(),pAcct.getP_COGS_Acct()) ;
+				return MAccount.get(getCtx(),pAcct.getP_COGS_Acct()) ;
 			}
 			
 		}
