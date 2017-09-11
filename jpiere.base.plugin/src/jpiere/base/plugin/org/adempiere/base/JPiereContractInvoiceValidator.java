@@ -20,11 +20,8 @@ import org.compiere.acct.FactLine;
 import org.compiere.model.FactsValidator;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
-import org.compiere.model.MInOut;
-import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
-import org.compiere.model.MOrder;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -33,6 +30,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
@@ -167,24 +165,40 @@ public class JPiereContractInvoiceValidator implements ModelValidator,FactsValid
 	@Override
 	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po) 
 	{
-		
-		int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
-		if(JP_ContractContent_ID > 0)
-		{
-			MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-	
-		
-			for(Fact fact : facts)
+		if(po.get_TableName().equals(MInvoice.Table_Name))
+		{		
+			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
+			if(JP_ContractContent_ID > 0)
 			{
-				FactLine[]  factLine = fact.getLines();
-				for(int i = 0; i < factLine.length; i++)
+				MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+				MContractAcct contractAcct = MContractAcct.get(Env.getCtx(), content.getJP_Contract_Acct_ID());
+				MInvoice invoice = (MInvoice)po;
+				
+				//Set Order Info
+				if(contractAcct.isOrderInfoMandatoryJP())
 				{
-					int aaa = factLine[i].getAccount_ID();
-	//				factLine[i].setAccount_ID(1000045);
-	//				factLine[i].set_ValueNoCheck("C_Order_ID", 1000376);
-				}
-			}
-		}//if(JP_ContractContent_ID > 0)
+					for(Fact fact : facts)
+					{
+						FactLine[]  factLine = fact.getLines();
+						for(int i = 0; i < factLine.length; i++)
+						{
+							if(invoice.isSOTrx())
+							{
+								factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order_ID());
+							}else{
+								factLine[i].set_ValueNoCheck("JP_PurchaseOrder_ID", invoice.getC_Order_ID());
+								//Because Order is Mandetory, Relation between order doc and Invoice doc is  1: N , not permitted N : 1.
+								factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order().getLink_Order_ID());
+							}
+						}//for
+						
+					}//for
+					
+				}//if(contractAcct.isOrderInfoMandatoryJP())
+				
+			}//if(JP_ContractContent_ID > 0)
+		
+		}//if(po.get_TableName().equals(MInvoice.Table_Name))
 		
 		return null;
 	}
