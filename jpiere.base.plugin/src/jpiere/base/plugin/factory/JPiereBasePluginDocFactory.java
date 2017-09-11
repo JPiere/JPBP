@@ -30,6 +30,7 @@ import org.adempiere.base.IDocFactory;
 import org.compiere.acct.Doc;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBankStatement;
+import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
@@ -53,6 +54,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 
 		Doc doc = null;
 		if(	       AD_Table_ID==MInvoice.Table_ID //318
+				|| AD_Table_ID==MInOut.Table_ID //319
 				|| AD_Table_ID==MBankStatement.Table_ID //392
 				|| AD_Table_ID==MRecognition.Table_ID //1000188
 				|| AD_Table_ID==MEstimation.Table_ID //1000080
@@ -107,6 +109,8 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 
 		if(AD_Table_ID == MInvoice.Table_ID){
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_InvoiceJP";
+		}else if(AD_Table_ID == MInOut.Table_ID){//319
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_InOutJP";
 		}else if(AD_Table_ID == MBankStatement.Table_ID){//392
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_BankStatementJP";
 		}else if(AD_Table_ID == MBill.Table_ID){

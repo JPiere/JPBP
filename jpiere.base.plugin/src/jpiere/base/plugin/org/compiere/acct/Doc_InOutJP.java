@@ -11,51 +11,66 @@
  * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
  * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
+
+
 package jpiere.base.plugin.org.compiere.acct;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-import jpiere.base.plugin.org.adempiere.model.MContractContent;
-
-import org.compiere.acct.Doc;
+import org.compiere.acct.Doc_InOut;
 import org.compiere.acct.Fact;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MInvoice;
 import org.compiere.util.Env;
 
-/**
- * Post Contract Content.
- *
- *
- * JPIERE-0363: Contract Document
- *
- *   Table:              JP_ContractContent
- *   Document Types:     JPT
- *
- * @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
- */
-public class Doc_JPContractContent extends Doc
-{
-	public Doc_JPContractContent (MAcctSchema as, ResultSet rs, String trxName)
-	{
-		super (as, MContractContent.class, rs, "JPT", trxName);
-	}
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
 
-	protected String loadDocumentDetails ()
+/**
+*  JPIERE-0363
+*
+* @author Hideaki Hagiwara
+*
+*/
+public class Doc_InOutJP extends Doc_InOut {
+	
+	public Doc_InOutJP(MAcctSchema as, ResultSet rs, String trxName) 
 	{
+		super(as, rs, trxName);
+	}
+	
+	
+	@Override
+	public ArrayList<Fact> createFacts(MAcctSchema as) 
+	{
+		if (!as.isAccrual())
+			return super.createFacts(as);
+		
+		
+		MInvoice invoice = (MInvoice)getPO();
+		
+		
+		/**iDempiere Standard Posting*/
+		int JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
+		if(JP_ContractContent_ID == 0)
+		{
+			return super.createFacts(as);
+		}
+		
+		MContractContent contractContent = MContractContent.get(getCtx(), JP_ContractContent_ID);
+		if(contractContent.getJP_Contract_Acct_ID() == 0)
+		{
+			return super.createFacts(as);
+		}
+		
+		MContractAcct contractAcct = MContractAcct.get(Env.getCtx(),contractContent.getJP_Contract_Acct_ID());
+		if(!contractAcct.isPostingContractAcctJP())
+		{
+			return super.createFacts(as);
+		}
+		
 		return null;
 	}
-
-	public BigDecimal getBalance ()
-	{
-		return Env.ZERO;
-	}	// getBalance
-
-	public ArrayList<Fact> createFacts (MAcctSchema as)
-	{
-		ArrayList<Fact> facts = new ArrayList<Fact>();
-
-		return facts;
-	}
+	
 }
