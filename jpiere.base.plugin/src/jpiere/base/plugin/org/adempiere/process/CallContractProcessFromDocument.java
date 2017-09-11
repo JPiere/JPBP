@@ -19,6 +19,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
@@ -88,9 +89,21 @@ public class CallContractProcessFromDocument extends SvrProcess {
 		
 		String document_ID = pi.getSummary();
 		int C_Document_ID = Integer.valueOf(document_ID);
-		MOrder order = new MOrder(getCtx(), C_Document_ID, get_TrxName());
-		addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_Order_ID", m_ContractContente.isSOTrx()) + " : " + order.getDocumentNo()
-		, MOrder.Table_ID, C_Document_ID);//TODO メッセージ化
+		
+		if(m_ContractContente.getDocBaseType().equals("SOO")
+				|| m_ContractContente.getDocBaseType().equals("POO"))
+		{
+			MOrder order = new MOrder(getCtx(), C_Document_ID, get_TrxName());
+			addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_Order_ID", m_ContractContente.isSOTrx()) + " : " + order.getDocumentNo()
+			, MOrder.Table_ID, C_Document_ID);//TODO メッセージ化
+			
+		}else if(m_ContractContente.getDocBaseType().equals("ARI")
+				|| m_ContractContente.getDocBaseType().equals("API"))
+		{
+			MInvoice invoice = new MInvoice(getCtx(), C_Document_ID, get_TrxName());
+			addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_Invoice_ID", m_ContractContente.isSOTrx()) + " : " + invoice.getDocumentNo()
+			, MInvoice.Table_ID, C_Document_ID);//TODO メッセージ化
+		}
 		
 		return Msg.getMsg(getCtx(), "OK");
 	}
