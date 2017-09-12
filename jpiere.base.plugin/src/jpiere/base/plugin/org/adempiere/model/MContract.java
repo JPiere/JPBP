@@ -274,6 +274,8 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
+		contractStatusUpdate();
+		
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 	
@@ -520,6 +522,14 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		
 		
 		//Check Contract Status
+		if(getDocStatus().equals(DocAction.STATUS_Completed))
+			contractStatusUpdate();
+		
+		return true;
+	}
+	
+	private void contractStatusUpdate()
+	{
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		if(!getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_Invalid))
 		{
@@ -538,8 +548,9 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			}
 		}
 		
-		return true;
 	}
+	
+	
 	
 	private MContractContent[] m_ContractContents = null;
 	

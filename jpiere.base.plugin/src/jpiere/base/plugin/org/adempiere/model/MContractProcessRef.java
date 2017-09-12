@@ -54,8 +54,8 @@ public class MContractProcessRef extends X_JP_ContractProcessRef {
 			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_ARInvoice)){
 				setIsSOTrx(true);
 			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_PurchaseOrder)){
-				setIsSOTrx(true);
-				setIsCreateBaseDocJP(false);	
+				setIsSOTrx(false);
+				setIsCreateBaseDocJP(true);	
 			}else if(getDocBaseType().equals(MContractProcessRef.DOCBASETYPE_MaterialReceipt)){
 				setIsSOTrx(false);
 				setIsCreateBaseDocJP(false);

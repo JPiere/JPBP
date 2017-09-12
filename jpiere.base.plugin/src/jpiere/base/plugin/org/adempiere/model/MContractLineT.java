@@ -102,7 +102,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 						if(getJP_ContractProcRef_InOut_ID() == 0)
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_InOut_ID")}));return false;}
 					}else{
-						setJP_ContractProcRef_InOut_ID(0);
+						setJP_ContractProcPOffset_InOut(0);
 					}
 					
 					//Invoice
@@ -115,7 +115,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 						if(getJP_ContractProcRef_Inv_ID() == 0)
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));return false;}
 					}else{
-						setJP_ContractProcRef_Inv_ID(0);
+						setJP_ContractProcPOffset_Inv(0);
 					}
 					
 					

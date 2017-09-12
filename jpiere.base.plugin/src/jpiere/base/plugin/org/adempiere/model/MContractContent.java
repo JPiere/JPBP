@@ -258,9 +258,16 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
 		
-		//	Implicit Approval
-	//	if (!isApproved())
+		
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		
+		
+		//Implicit Approval
+		if (!isApproved())
 			approveIt();
+		
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
 		
