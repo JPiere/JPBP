@@ -77,6 +77,14 @@ public class MContractLine extends X_JP_ContractLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
+		if(newRecord)
+		{
+			setC_BPartner_ID(getParent().getC_BPartner_ID());
+			setC_BPartner_Location_ID(getParent().getC_BPartner_Location_ID());
+		}
+		
+		
+		
 		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
 		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
 		if(!getParent().getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))

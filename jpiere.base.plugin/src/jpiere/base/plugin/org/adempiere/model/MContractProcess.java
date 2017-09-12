@@ -19,6 +19,8 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CCache;
+
 
 /** JPIERE-0363
 *
@@ -36,5 +38,26 @@ public class MContractProcess extends X_JP_ContractProcess {
 	{
 		super(ctx, rs, trxName);
 	}
+
+	/**	Cache				*/
+	private static CCache<Integer,MContractProcess>	s_cache = new CCache<Integer,MContractProcess>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractProcess_ID id
+	 *	@return Contract Calender
+	 */
+	public static MContractProcess get (Properties ctx, int JP_ContractProcess_ID)
+	{
+		Integer ii = new Integer (JP_ContractProcess_ID);
+		MContractProcess retValue = (MContractProcess)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MContractProcess (ctx, JP_ContractProcess_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_ContractProcess_ID, retValue);
+		return retValue;
+	}	//	get
 	
 }

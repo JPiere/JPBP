@@ -89,16 +89,25 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception 
 	{
+		if(p_DateAcct==null)
+			p_DateAcct = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID).getDateAcct();
+		
+		if(p_DateDoc ==null)
+			p_DateAcct = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID).getDateDoc();
+		
+		
+		
 		//TODO:既に同じ契約処理期間の受注伝票/発注伝票が登録されていない事のチェック。※Abstract化できるね
 		
-		int C_Order_ID = m_ContractContent.getActiveOrderIdByPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
-		if(C_Order_ID != 0)
+		
+		MOrder order = m_ContractContent.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
+		if(order != null)
 		{
-			return "契約内容に同じ契約処理期間が登録されています。 ";
+			return "選択した契約処理期間には伝票が既に登録されています。 " + order.getDocumentInfo();//TODO メッセージ化
 		}
 		
 		/** Create Order header */
-		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
+		order = new MOrder(getCtx(), 0, get_TrxName());
 		PO.copyValues(m_ContractContent, order);
 		order.setProcessed(false);
 		order.setDocStatus(DocAction.STATUS_Drafted);
@@ -106,6 +115,7 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 		order.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
 		order.setDateOrdered(p_DateDoc);
 		order.setDateAcct(p_DateAcct);
+	
 		
 		//DatePromised
 		LocalDateTime dateAcctLocal = p_DateAcct.toLocalDateTime();

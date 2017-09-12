@@ -29,6 +29,7 @@ import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
 
 /** JPIERE-0363
@@ -57,7 +58,7 @@ public class CallContractProcessFromDocument extends SvrProcess {
 	protected String doIt() throws Exception 
 	{
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		if(Util.isEmpty(m_ContractContente.getJP_ContractProcess().getClassname()))
+		if(Util.isEmpty(MContractProcess.get(getCtx(), m_ContractContente.getJP_ContractProcess_ID()).getClassname()))
 		{
 			if(m_ContractContente.getDocBaseType().equals("SOO")
 					|| m_ContractContente.getDocBaseType().equals("POO"))

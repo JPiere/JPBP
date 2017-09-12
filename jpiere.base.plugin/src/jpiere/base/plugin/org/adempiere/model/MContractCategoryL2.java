@@ -77,7 +77,7 @@ public class MContractCategoryL2 extends X_JP_ContractCategoryL2 {
 			return m_ContractCategoryL1s;
 
 		ArrayList<MContractCategoryL1> list = new ArrayList<MContractCategoryL1>();
-		final String sql = "SELECT JP_ContractCategoryL2_ID FROM JP_ContractCategoryL1 WHERE JP_ContractCategoryL2_ID=? AND IsActive='Y'";
+		final String sql = "SELECT * FROM JP_ContractCategoryL1 WHERE JP_ContractCategoryL2_ID=? AND IsActive='Y'";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -86,7 +86,7 @@ public class MContractCategoryL2 extends X_JP_ContractCategoryL2 {
 			pstmt.setInt(1, get_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MContractCategoryL1 (getCtx(), rs.getInt(1), get_TrxName()));
+				list.add(new MContractCategoryL1 (getCtx(), rs, get_TrxName()));
 		}
 		catch (Exception e)
 		{

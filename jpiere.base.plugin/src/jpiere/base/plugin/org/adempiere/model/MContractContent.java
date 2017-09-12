@@ -25,6 +25,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MQuery;
 import org.compiere.model.ModelValidationEngine;
@@ -479,6 +480,66 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			
 		}
 		
+		//Check overlap of Contract process date in Same contract content tempalete
+		MContract contract = getParent();
+		if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && 
+				( newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_From) ||  is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_To)))
+		{
+			MContractContent[] contractContents = contract.getContractContents();
+			for(int i = 0; i < contractContents.length; i++)
+			{
+				//Self
+				if(contractContents[i].getJP_ContractContent_ID() == getJP_ContractContent_ID())
+					continue;
+				
+				//Diff Template
+				if(contractContents[i].getJP_ContractContentT_ID() != getJP_ContractContentT_ID())
+					continue;
+				
+				//Invalid status
+				if(contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid))
+					continue;
+				
+				//Check
+				if(contractContents[i].getJP_ContractProcDate_To() != null &&  getJP_ContractProcDate_To() != null)
+				{
+					if(contractContents[i].getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) <= 0
+							&& contractContents[i].getJP_ContractProcDate_To().compareTo(getJP_ContractProcDate_From()) >= 0 )
+					{
+						//Overlap of Contract process date in same contract content template.
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
+						return false;
+					}		
+				
+				}else if(contractContents[i].getJP_ContractProcDate_To() != null){
+					
+					if(contractContents[i].getJP_ContractProcDate_To().compareTo(getJP_ContractProcDate_From()) >= 0)
+					{
+						//overlap of Contract process date in Same contract content template
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
+						return false;
+					}		
+						
+				}else if(getJP_ContractProcDate_To() != null){
+					
+					if(contractContents[i].getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) <= 0)
+					{
+						//overlap of Contract process date in Same contract content template
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
+						return false;
+					}
+					
+				}else{ //contractContents[i].getJP_ContractProcDate_To() == null && getJP_ContractProcDate_To() == null
+					
+					//overlap of Contract process date in Same contract content template
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
+					return false;
+					
+				}
+				
+			}
+		}//Check overlap of Contract process date in Same contract content tempalete
+		
 		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
 		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
 		if(!getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
@@ -675,6 +736,41 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		
 		return true;
 	}
+	
+	
+	
+	
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success) 
+	{
+		//	Sync Lines
+		if (   is_ValueChanged("AD_Org_ID")
+		    || is_ValueChanged(MOrder.COLUMNNAME_C_BPartner_ID)
+		    || is_ValueChanged(MOrder.COLUMNNAME_C_BPartner_Location_ID)
+		    || is_ValueChanged(MOrder.COLUMNNAME_DateOrdered)
+		    || is_ValueChanged(MOrder.COLUMNNAME_DatePromised)
+		    || is_ValueChanged(MOrder.COLUMNNAME_M_Warehouse_ID)
+		    || is_ValueChanged(MOrder.COLUMNNAME_M_Shipper_ID)
+		    || is_ValueChanged(MOrder.COLUMNNAME_C_Currency_ID)) {
+			MContractLine[] lines = getLines();
+			for (MContractLine line : lines) {
+				if (is_ValueChanged("AD_Org_ID"))
+					line.setAD_Org_ID(getAD_Org_ID());
+				if (is_ValueChanged(MOrder.COLUMNNAME_C_BPartner_ID))
+					line.setC_BPartner_ID(getC_BPartner_ID());
+				if (is_ValueChanged(MOrder.COLUMNNAME_C_BPartner_Location_ID))
+					line.setC_BPartner_Location_ID(getC_BPartner_Location_ID());
+				if (is_ValueChanged(MOrder.COLUMNNAME_DateOrdered))
+					line.setDateOrdered(getDateOrdered());
+				if (is_ValueChanged(MOrder.COLUMNNAME_DatePromised))
+					line.setDatePromised(getDatePromised());
+				line.saveEx();
+			}
+		}
+		
+		return true;
+	}
 
 	private MContract parent = null;
 	
@@ -760,7 +856,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	 * @param JP_ContractProcPeriod_ID
 	 * @return
 	 */
-	public int getActiveOrderIdByPeriod(Properties ctx, int JP_ContractProcPeriod_ID)
+	public MOrder getOrderByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID)
 	{
 		int record_ID = 0;
 		final String sql = "SELECT C_Order_ID FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
@@ -787,7 +883,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			rs = null; pstmt = null;
 		}
 		
-		return record_ID;
+		if(record_ID == 0)
+			return null;
+		else
+			return new MOrder(getCtx(), record_ID, get_TrxName());
+		
+	
 	}
 	
 }	//	MContractContent
