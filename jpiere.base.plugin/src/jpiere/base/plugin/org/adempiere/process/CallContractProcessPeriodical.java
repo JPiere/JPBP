@@ -147,11 +147,14 @@ public class CallContractProcessPeriodical extends SvrProcess {
 				list.toArray(pars);
 				pi.setParameter(pars);
 				boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+				String msg = pi.getSummary();
 
 				if(isOK)
 				{
 					;
 				}else{
+					
+					//TODO ログの記録
 					throw new AdempiereException(pi.getSummary());
 				}
 				

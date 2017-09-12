@@ -76,7 +76,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	 */
 	public String getDocumentInfo()
 	{
-		MDocType dt = MDocType.get(getCtx(), 0);
+		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		return dt.getNameTrl() + " " + getDocumentNo();
 	}	//	getDocumentInfo
 

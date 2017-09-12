@@ -26,6 +26,7 @@ import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
@@ -96,14 +97,15 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 			p_DateAcct = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID).getDateDoc();
 		
 		
-		
-		//TODO:既に同じ契約処理期間の受注伝票/発注伝票が登録されていない事のチェック。※Abstract化できるね
-		
-		
+		//Check Overlap
 		MOrder order = m_ContractContent.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID);
 		if(order != null)
 		{
-			return "選択した契約処理期間には伝票が既に登録されています。 " + order.getDocumentInfo();//TODO メッセージ化
+			String msg = "選択した契約処理期間の伝票は既に作成されています。" 
+					 + "  " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " : " + MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID).toString()
+					 + "  " + m_ContractContent.getDocumentInfo()
+					 + "  --> " + order.getDocumentInfo();//TODO メッセージ化
+			throw new Exception(msg);
 		}
 		
 		/** Create Order header */
@@ -183,9 +185,7 @@ public class DefaultCreateOrderFromContract extends SvrProcess {
 			m_ContractContent.saveEx(get_TrxName());
 		}
 		
-		//TODO リターン句でIDを返すのはAbstractにしても良いかも
-		
-		return String.valueOf(order.get_ID());
+		return String.valueOf(order.get_ID());//Return ID;
 	}
 	
 }
