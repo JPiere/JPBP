@@ -645,10 +645,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					return false;
 				}
 				
-			}else{
-				setJP_ContractProcess_ID(0);
 			}
-			
 		}
 		
 		

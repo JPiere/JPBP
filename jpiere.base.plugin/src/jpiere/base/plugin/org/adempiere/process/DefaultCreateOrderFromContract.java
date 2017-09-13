@@ -15,18 +15,15 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
-import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
@@ -37,14 +34,33 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 * @author Hideaki Hagiwara
 *
 */
-public class DefaultCreateOrderFromContract extends AbstractContractProcess {
+public class DefaultCreateOrderFromContract extends AbstractContractProcess 
+{
 	
+	/** Abstract variables*/
+//	protected int Record_ID = 0;
+//	protected MContractContent contractContent = null;
+//		
+//	protected String p_JP_ContractProcessUnit = null;
+//	protected int p_JP_ContractCalender_ID = 0;
+//	protected int p_JP_ContractProcPeriodG_ID = 0;
+//	protected int p_JP_ContractProcPeriod_ID = 0;
+//	protected String p_JP_ContractProcessValue = null;
+//	protected Timestamp p_DateAcct = null;
+//	protected Timestamp p_DateDoc = null;
+//	protected Timestamp p_DateOrdered = null;
+//	protected Timestamp p_DatePromised = null;
+//	protected String p_DocAction = null;
+//	protected int p_AD_Org_ID = 0;
+//	protected int p_JP_ContractCategory_ID = 0;
+//	protected int p_C_DocType_ID = 0;
+//	protected String p_DocBaseType = null;
+//	protected boolean p_IsCreateBaseDocJP = false;
 	
 	@Override
 	protected void prepare() 
 	{		
 		super.prepare();
-		
 	}
 	
 	@Override
@@ -52,41 +68,39 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess {
 	{
 		super.doIt();		
 		
-		MContractContent m_ContractContent = getMContractContent();
-		
 		//Check Overlap
-		MOrder order = m_ContractContent.getOrderByContractPeriod(Env.getCtx(), getJP_ContractProcPeriod_ID());
-		if(order != null)
+		if(p_JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			String msg = "選択した契約処理期間の伝票は既に作成されています。" 
-					 + "  " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " : " + MContractProcPeriod.get(getCtx(), getJP_ContractProcPeriod_ID()).toString()
-					 + "  " + m_ContractContent.getDocumentInfo()
-					 + "  --> " + order.getDocumentInfo();//TODO メッセージ化
-			throw new Exception(msg);
+			MOrder overlapOrder = m_ContractContent.getOrderByContractPeriod(Env.getCtx(), p_JP_ContractProcPeriod_ID);
+			if(overlapOrder != null)
+			{
+				String msg = Msg.getMsg(getCtx(), "JP_OverlapPeriod") //Overlap Period
+						 + "  " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " : " + MContractProcPeriod.get(getCtx(), p_JP_ContractProcPeriod_ID).toString()
+						 + "  " + m_ContractContent.getDocumentInfo()
+						 + "  --> " + overlapOrder.getDocumentInfo();
+				
+				createLog(overlapOrder, msg, true);
+				
+				return msg;
+			}
 		}
 		
 		/** Create Order header */
-		order = new MOrder(getCtx(), 0, get_TrxName());
+		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
 		PO.copyValues(m_ContractContent, order);
 		order.setProcessed(false);
 		order.setDocStatus(DocAction.STATUS_Drafted);
 		order.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		order.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
-		order.setDateOrdered(getDateDoc());
+		order.setDateOrdered(getDateOrdered());
 		order.setDateAcct(getDateAcct());
-	
-		
-		//DatePromised
-		LocalDateTime dateAcctLocal = getDateAcct().toLocalDateTime();
-		dateAcctLocal = dateAcctLocal.plusDays(m_ContractContent.getDeliveryTime_Promised());
-		order.setDatePromised(Timestamp.valueOf(dateAcctLocal));
-		
+		order.setDatePromised(getOrderHeaderDatePromised(p_DateAcct)); //DateAcct is basis.
 		order.setDocumentNo(""); //Reset Document No
 		order.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
 		order.set_ValueOfColumn("JP_Contract_ID", m_ContractContent.getParent().getJP_Contract_ID());
 		order.set_ValueOfColumn("JP_ContractContent_ID", m_ContractContent.getJP_ContractContent_ID());
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			order.set_ValueOfColumn("JP_ContractProcPeriod_ID", getJP_ContractProcPeriod_ID());
+			order.set_ValueOfColumn("JP_ContractProcPeriod_ID", p_JP_ContractProcPeriod_ID);
 		
 		order.saveEx(get_TrxName());
 		
@@ -106,37 +120,32 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess {
 			oline.setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
 			oline.set_ValueNoCheck("JP_ContractLine_ID", m_lines[i].getJP_ContractLine_ID());
 			if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				oline.set_ValueOfColumn("JP_ContractProcPeriod_ID", getJP_ContractProcPeriod_ID());
-			oline.setDatePromised(Timestamp.valueOf(order.getDateAcct().toLocalDateTime().plusDays(m_lines[i].getDeliveryTime_Promised())));
+				oline.set_ValueOfColumn("JP_ContractProcPeriod_ID", p_JP_ContractProcPeriod_ID);
+			oline.setDatePromised(getOrderLineDatePromised(m_lines[i]));
 			
 			oline.saveEx(get_TrxName());
 			isCrateDocLine = true;
 		}
 		
 		
-		String docAction = null;
 		if(isCrateDocLine)
 		{
-			if(getDocAction()==null)
-				docAction = m_ContractContent.getJP_ContractProcess().getDocAction();
-			else
-				docAction = getDocAction();
-			
-			//TODO DocActionの取得ロジックの見直し
-			if(getDocAction()!=null)
-			{order.processIt(docAction);
+			String docAction = getDocAction();
+			if(!Util.isEmpty(docAction))
+			{
+				order.processIt(docAction);
 				if(!docAction.equals(DocAction.ACTION_Complete))
 					order.saveEx(get_TrxName());
+			}else{
+				order.saveEx(get_TrxName());//DocStatus is Draft
 			}
 		}
 		
-		if(!m_ContractContent.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))
-		{
-			m_ContractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
-			m_ContractContent.saveEx(get_TrxName());
-		}
+		createLog(order, order.getDocumentInfo(), true);
 		
-		return String.valueOf(order.get_ID());//Return ID;
+//		return "Success";
+		
+		return "";
 	}
 	
 }
