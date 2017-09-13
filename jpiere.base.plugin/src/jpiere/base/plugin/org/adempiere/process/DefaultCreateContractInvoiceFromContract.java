@@ -32,7 +32,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractLine;
 * @author Hideaki Hagiwara
 *
 */
-public class DefaultCreateBaseInvoiceFromContract extends AbstractContractProcess {
+public class DefaultCreateContractInvoiceFromContract extends AbstractContractProcess {
 	
 	
 	@Override

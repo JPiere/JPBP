@@ -60,6 +60,8 @@ public class AbstractContractProcess extends SvrProcess
 	protected boolean p_IsCreateBaseDocJP = false;
 	protected boolean p_IsRecordCommitJP = false;
 	protected String p_JP_ContractProcessTraceLevel = null;
+	
+	protected int p_JP_ContractProcess_ID = 0; //use derivative Doc Only
 
 	/** JP_ContractProcessUnit */
 	public static final String JP_ContractProcessUnit_ContractProcessPeriod  = "CPP";
@@ -131,6 +133,9 @@ public class AbstractContractProcess extends SvrProcess
 				p_IsRecordCommitJP = para[i].getParameterAsBoolean();	
 			}else if (name.equals("JP_ContractProcessTraceLevel")){
 				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();	
+				
+			}else if (name.equals("JP_ContractProcess_ID")){				
+				p_JP_ContractProcess_ID = para[i].getParameterAsInt();
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if

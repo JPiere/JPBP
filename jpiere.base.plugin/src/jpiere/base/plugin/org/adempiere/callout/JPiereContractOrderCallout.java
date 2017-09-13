@@ -14,7 +14,6 @@
 package jpiere.base.plugin.org.adempiere.callout;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Properties;
 
 import org.adempiere.base.IColumnCallout;
@@ -23,13 +22,11 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.util.DB;
-import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
-import jpiere.base.plugin.org.adempiere.model.MContractT;
 
 /**
  *

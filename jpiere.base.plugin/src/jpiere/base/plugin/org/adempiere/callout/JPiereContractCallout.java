@@ -22,7 +22,6 @@ import org.adempiere.util.Callback;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
-import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContractCancelTerm;
 import jpiere.base.plugin.org.adempiere.model.MContractExtendPeriod;

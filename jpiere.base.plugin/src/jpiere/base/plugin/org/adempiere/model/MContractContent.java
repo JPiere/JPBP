@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -793,13 +794,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	
 	public MContractLine[] getLines (String whereClause, String orderClause)
 	{
-		//red1 - using new Query class from Teo / Victor's MDDOrder.java implementation
 		StringBuilder whereClauseFinal = new StringBuilder(MContractLine.COLUMNNAME_JP_ContractContent_ID+"=? ");
 		if (!Util.isEmpty(whereClause, true))
 			whereClauseFinal.append(whereClause);
 		if (orderClause.length() == 0)
 			orderClause = MContractLine.COLUMNNAME_Line;
-		//
+		
 		List<MContractLine> list = new Query(getCtx(), MContractLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
 										.setParameters(get_ID())
 										.setOrderBy(orderClause)
@@ -889,6 +889,68 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		
 		
 		return order;
+	}
+	
+	
+	public MContractProcess[] getCreateInOutFromOrderProcessByCalender(int JP_ContractCalender_ID)
+	{
+		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
+		final String sql = "SELECT DISTINCT JP_ContractProcess_InOut_ID FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND JP_ContractCalender_InOut_ID = ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractCalender_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(MContractProcess.get(getCtx(), rs.getInt(1)));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		MContractProcess[] 	processes = new MContractProcess[list.size()];
+		list.toArray(processes);
+		return processes;
+	}
+	
+	
+	public MContractProcess[] getCreateInvoiceFromOrderProcessByCalender(int JP_ContractCalender_ID)
+	{
+		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
+		final String sql = "SELECT DISTINCT JP_ContractProcess_Inv_ID FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND JP_ContractCalender_Inv_ID = ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractCalender_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(MContractProcess.get(getCtx(), rs.getInt(1)));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		MContractProcess[] 	processes = new MContractProcess[list.size()];
+		list.toArray(processes);
+		return processes;
 	}
 	
 }	//	MContractContent

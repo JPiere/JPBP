@@ -29,12 +29,13 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 
 
-/** JPIERE-0363
+/** 
+* JPIERE-0363
 *
 * @author Hideaki Hagiwara
 *
 */
-public class DefaultCreateOrderFromContract extends AbstractContractProcess 
+public class DefaultCreateContractOrderFromContract extends AbstractContractProcess 
 {
 	
 	/** Abstract variables*/
