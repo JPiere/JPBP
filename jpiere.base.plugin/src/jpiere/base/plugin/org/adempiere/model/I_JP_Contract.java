@@ -152,6 +152,17 @@ public interface I_JP_Contract
 
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
 
+    /** Column name C_Opportunity_ID */
+    public static final String COLUMNNAME_C_Opportunity_ID = "C_Opportunity_ID";
+
+	/** Set Sales Opportunity	  */
+	public void setC_Opportunity_ID (int C_Opportunity_ID);
+
+	/** Get Sales Opportunity	  */
+	public int getC_Opportunity_ID();
+
+	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -495,6 +506,33 @@ public interface I_JP_Contract
 	/** Get Contract Status	  */
 	public String getJP_ContractStatus();
 
+    /** Column name JP_ContractStatus_EC_Date */
+    public static final String COLUMNNAME_JP_ContractStatus_EC_Date = "JP_ContractStatus_EC_Date";
+
+	/** Set Updated date to Expiration of contract	  */
+	public void setJP_ContractStatus_EC_Date (Timestamp JP_ContractStatus_EC_Date);
+
+	/** Get Updated date to Expiration of contract	  */
+	public Timestamp getJP_ContractStatus_EC_Date();
+
+    /** Column name JP_ContractStatus_IN_Date */
+    public static final String COLUMNNAME_JP_ContractStatus_IN_Date = "JP_ContractStatus_IN_Date";
+
+	/** Set Updated date to Invalid	  */
+	public void setJP_ContractStatus_IN_Date (Timestamp JP_ContractStatus_IN_Date);
+
+	/** Get Updated date to Invalid	  */
+	public Timestamp getJP_ContractStatus_IN_Date();
+
+    /** Column name JP_ContractStatus_UC_Date */
+    public static final String COLUMNNAME_JP_ContractStatus_UC_Date = "JP_ContractStatus_UC_Date";
+
+	/** Set Updated date to Under Contract	  */
+	public void setJP_ContractStatus_UC_Date (Timestamp JP_ContractStatus_UC_Date);
+
+	/** Get Updated date to Under Contract	  */
+	public Timestamp getJP_ContractStatus_UC_Date();
+
     /** Column name JP_ContractT_ID */
     public static final String COLUMNNAME_JP_ContractT_ID = "JP_ContractT_ID";
 
@@ -578,6 +616,19 @@ public interface I_JP_Contract
 	  * Alphanumeric identifier of the entity
 	  */
 	public String getName();
+
+    /** Column name POReference */
+    public static final String COLUMNNAME_POReference = "POReference";
+
+	/** Set Order Reference.
+	  * Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public void setPOReference (String POReference);
+
+	/** Get Order Reference.
+	  * Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getPOReference();
 
     /** Column name Posted */
     public static final String COLUMNNAME_Posted = "Posted";

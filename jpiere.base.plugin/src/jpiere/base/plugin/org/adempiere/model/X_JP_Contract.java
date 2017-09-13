@@ -34,7 +34,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170906L;
+	private static final long serialVersionUID = 20170913L;
 
     /** Standard Constructor */
     public X_JP_Contract (Properties ctx, int JP_Contract_ID, String trxName)
@@ -253,9 +253,9 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public void setC_DocType_ID (int C_DocType_ID)
 	{
 		if (C_DocType_ID < 0) 
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
+			set_Value (COLUMNNAME_C_DocType_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+			set_Value (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
 	}
 
 	/** Get Document Type.
@@ -264,6 +264,31 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public int getC_DocType_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Opportunity)MTable.get(getCtx(), org.compiere.model.I_C_Opportunity.Table_Name)
+			.getPO(getC_Opportunity_ID(), get_TrxName());	}
+
+	/** Set Sales Opportunity.
+		@param C_Opportunity_ID Sales Opportunity	  */
+	public void setC_Opportunity_ID (int C_Opportunity_ID)
+	{
+		if (C_Opportunity_ID < 1) 
+			set_Value (COLUMNNAME_C_Opportunity_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Opportunity_ID, Integer.valueOf(C_Opportunity_ID));
+	}
+
+	/** Get Sales Opportunity.
+		@return Sales Opportunity	  */
+	public int getC_Opportunity_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Opportunity_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -877,6 +902,48 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_ContractStatus);
 	}
 
+	/** Set Updated date to Expiration of contract.
+		@param JP_ContractStatus_EC_Date Updated date to Expiration of contract	  */
+	public void setJP_ContractStatus_EC_Date (Timestamp JP_ContractStatus_EC_Date)
+	{
+		set_Value (COLUMNNAME_JP_ContractStatus_EC_Date, JP_ContractStatus_EC_Date);
+	}
+
+	/** Get Updated date to Expiration of contract.
+		@return Updated date to Expiration of contract	  */
+	public Timestamp getJP_ContractStatus_EC_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ContractStatus_EC_Date);
+	}
+
+	/** Set Updated date to Invalid.
+		@param JP_ContractStatus_IN_Date Updated date to Invalid	  */
+	public void setJP_ContractStatus_IN_Date (Timestamp JP_ContractStatus_IN_Date)
+	{
+		set_Value (COLUMNNAME_JP_ContractStatus_IN_Date, JP_ContractStatus_IN_Date);
+	}
+
+	/** Get Updated date to Invalid.
+		@return Updated date to Invalid	  */
+	public Timestamp getJP_ContractStatus_IN_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ContractStatus_IN_Date);
+	}
+
+	/** Set Updated date to Under Contract.
+		@param JP_ContractStatus_UC_Date Updated date to Under Contract	  */
+	public void setJP_ContractStatus_UC_Date (Timestamp JP_ContractStatus_UC_Date)
+	{
+		set_Value (COLUMNNAME_JP_ContractStatus_UC_Date, JP_ContractStatus_UC_Date);
+	}
+
+	/** Get Updated date to Under Contract.
+		@return Updated date to Under Contract	  */
+	public Timestamp getJP_ContractStatus_UC_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ContractStatus_UC_Date);
+	}
+
 	public I_JP_ContractT getJP_ContractT() throws RuntimeException
     {
 		return (I_JP_ContractT)MTable.get(getCtx(), I_JP_ContractT.Table_Name)
@@ -1047,6 +1114,23 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public String getName () 
 	{
 		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Set Order Reference.
+		@param POReference 
+		Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public void setPOReference (String POReference)
+	{
+		set_Value (COLUMNNAME_POReference, POReference);
+	}
+
+	/** Get Order Reference.
+		@return Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getPOReference () 
+	{
+		return (String)get_Value(COLUMNNAME_POReference);
 	}
 
 	/** Set Posted.

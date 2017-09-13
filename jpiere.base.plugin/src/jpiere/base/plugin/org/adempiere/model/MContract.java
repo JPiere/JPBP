@@ -274,7 +274,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
-		contractStatusUpdate();
+		updateContractStatus(DOCACTION_Complete);
 		
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
@@ -323,7 +323,9 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			return false;
 
 		setProcessed(true);
-		setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Invalid);
+		
+		updateContractStatus(DOCACTION_Void);
+		
 		setDocAction(DOCACTION_None);
 
 		return true;
@@ -340,6 +342,8 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 
 		setProcessed(true);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
 		setDocAction(DOCACTION_None);
+		updateContractStatus(DOCACTION_Close);
+		
 		return true;
 	}	//	closeIt
 	
@@ -510,45 +514,62 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		}else{ 
 			
 			//Refresh Automatic update info
-			setJP_ContractCancelTerm_ID(0);
 			setJP_ContractExtendPeriod_ID(0);
 			setJP_ContractCancelDeadline(null);
-			setJP_ContractCancelOfferDate(null);
-			setJP_ContractCancelDate(null);
-			setJP_ContractCancel_SalesRep_ID(0);
-			setJP_ContractCancel_User_ID(0);
-			setJP_ContractCancelCause_ID(0);
 		}
 		
 		
 		//Check Contract Status
-		if(getDocStatus().equals(DocAction.STATUS_Completed))
-			contractStatusUpdate();
+		updateContractStatus(DocAction.ACTION_None);
 		
 		return true;
 	}
 	
-	private void contractStatusUpdate()
+	private void updateContractStatus(String docAction)
 	{
-		Timestamp now = new Timestamp(System.currentTimeMillis());
-		if(!getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_Invalid))
+		if(getDocStatus().equals(DocAction.STATUS_Closed)
+				|| getDocStatus().equals(DocAction.STATUS_Voided))
+			return ;
+		
+		if(docAction.equals(DocAction.ACTION_Complete) || docAction.equals(DocAction.ACTION_None))
 		{
+			Timestamp now = new Timestamp(System.currentTimeMillis());
+			
 			if(now.compareTo(getJP_ContractPeriodDate_From()) > 0 )
 			{
 				
 				if(getJP_ContractPeriodDate_To()==null || now.compareTo(getJP_ContractPeriodDate_To()) < 0)
 				{
-					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
+					if(getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_Prepare))
+					{
+						setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
+						setJP_ContractStatus_UC_Date(now);
+					}
+					setJP_ContractStatus_EC_Date(null);
+
 				}else{
 					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
+					setJP_ContractStatus_EC_Date(now);
 				}
 				
 			}else{
 				setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
+				setJP_ContractStatus_UC_Date(null);
+				setJP_ContractStatus_EC_Date(null);
 			}
+			
+		}else if(docAction.equals(DocAction.ACTION_Close)) {
+			
+			setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
+			setJP_ContractStatus_IN_Date(new Timestamp (System.currentTimeMillis()));
+			
+		}else if(docAction.equals(DocAction.ACTION_Void)) {
+			
+			setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Invalid);
+			setJP_ContractStatus_IN_Date(new Timestamp (System.currentTimeMillis()));
 		}
 		
-	}
+	}//contractStatusUpdate
 	
 	
 	

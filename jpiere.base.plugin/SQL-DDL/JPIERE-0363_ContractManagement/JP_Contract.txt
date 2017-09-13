@@ -68,5 +68,9 @@ CREATE TABLE adempiere.JP_Contract
    C_Opportunity_id numeric(10) DEFAULT NULL::numeric,
    POReference character varying(20) DEFAULT NULL::character varying,
 
+   JP_ContractStatus_EC_Date timestamp without time zone,
+   JP_ContractStatus_UC_Date timestamp without time zone,
+   JP_ContractStatus_IN_Date timestamp without time zone,
+
   CONSTRAINT JP_Contract_pkey PRIMARY KEY (JP_Contract_ID)
 )

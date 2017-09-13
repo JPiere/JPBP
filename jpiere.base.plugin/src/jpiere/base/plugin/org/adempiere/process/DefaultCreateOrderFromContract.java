@@ -122,10 +122,12 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess {
 			else
 				docAction = getDocAction();
 			
-			
-			order.processIt(docAction);
-			if(!docAction.equals(DocAction.ACTION_Complete))
-				order.saveEx(get_TrxName());
+			//TODO DocActionの取得ロジックの見直し
+			if(getDocAction()!=null)
+			{order.processIt(docAction);
+				if(!docAction.equals(DocAction.ACTION_Complete))
+					order.saveEx(get_TrxName());
+			}
 		}
 		
 		if(!m_ContractContent.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))

@@ -32,6 +32,8 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcess;
@@ -42,7 +44,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 * @author Hideaki Hagiwara
 *
 */
-public class CallContractProcessPeriodical extends SvrProcess {
+public class CallContractProcess extends SvrProcess {
 	
 	private String p_JP_ContractProcessUnit = null;
 	private int p_JP_ContractCalender_ID = 0;
@@ -112,55 +114,55 @@ public class CallContractProcessPeriodical extends SvrProcess {
 		}
 		
 		
-		//Get Contract Process Period
-		ArrayList<MContractProcPeriod> contractProcPeriodList = getContractProcPeriodList();//TODO エラー処理＆ログの処理
-		
-		for(MContractProcPeriod procPeriod : contractProcPeriodList)
-		{	
-			//Get Contract Content from Contract Process Period
-			ArrayList<MContractContent> contractContentList = getContractContentList(procPeriod);//TODO エラー処理 &　ログの処理
-			
-			//Do contract process
-			for(MContractContent contractContent : contractContentList)
+		if(p_JP_ContractProcessUnit.equals("PCC"))//Per Contract Content is to kick process from Window.
+		{
+			int Record_ID = getRecord_ID();
+			if(Record_ID > 0)
 			{
-				ProcessInfo pi = new ProcessInfo("CreateDoc", 0);
-				pi.setClassName(getProcessClassName(contractContent));				
-				pi.setAD_Client_ID(getAD_Client_ID());
-				pi.setAD_User_ID(getAD_User_ID());
-				pi.setAD_PInstance_ID(getAD_PInstance_ID());
-				pi.setRecord_ID(contractContent.getJP_ContractContent_ID());
-				
-				ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
-				list.add (new ProcessInfoParameter("JP_ContractProcessUnit", p_JP_ContractProcessUnit, null, null, null));
-				list.add (new ProcessInfoParameter("JP_ContractCalender_ID", procPeriod.getJP_ContractCalender_ID(), null, null, null));//Modify by Calender of Process Period.
-				list.add (new ProcessInfoParameter("JP_ContractProcPeriodG_ID", p_JP_ContractProcPeriodG_ID, null, null, null));
-				list.add (new ProcessInfoParameter("JP_ContractProcPeriod_ID", procPeriod.getJP_ContractProcPeriod_ID(), null, null, null));//Modify by Process Period.
-				list.add (new ProcessInfoParameter("JP_ContractProcessValue", p_JP_ContractProcessValue, null, null, null));
-				list.add (new ProcessInfoParameter("DateAcct", p_DateAcct, null, null, null));
-				list.add (new ProcessInfoParameter("DateDoc", p_DateDoc, null, null, null));
-				list.add (new ProcessInfoParameter("DocAction", p_DocAction, null, null, null));
-				list.add (new ProcessInfoParameter("AD_Org_ID", p_AD_Org_ID, null, null, null));
-				list.add (new ProcessInfoParameter("JP_ContractCategory_ID", p_JP_ContractCategory_ID, null, null, null));
-				list.add (new ProcessInfoParameter("C_DocType_ID", p_C_DocType_ID, null, null, null));
-				
-				ProcessInfoParameter[] pars = new ProcessInfoParameter[list.size()];
-				list.toArray(pars);
-				pi.setParameter(pars);
-				boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
-				String msg = pi.getSummary();
-
-				if(isOK)
+				MContractContent contractContente = new MContractContent(getCtx(),Record_ID, get_TrxName());
+				if(contractContente.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 				{
-					;
-				}else{
+					callProcess(contractContente, null);
 					
-					//TODO ログの記録
-					throw new AdempiereException(pi.getSummary());
+				}if(contractContente.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)){
+				
+					MContractProcPeriod period = null;
+					if(p_JP_ContractProcPeriod_ID==0)
+					{
+						MContractCalender calender = MContractCalender.get(getCtx(), contractContente.getJP_ContractCalender_ID());
+						period = calender.getContractProcessPeriod(getCtx(), p_DateAcct);
+						p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+					}else{
+						
+						period = MContractProcPeriod.get(getCtx(), p_JP_ContractProcPeriod_ID);
+					}
+					
+					callProcess(contractContente, period);
 				}
 				
-			}//for(MContractContent contractContent : contractContentList)
+			}else{
+				log.log(Level.SEVERE, "Record_ID <= 0 ");
+			}
+			
+		}else{
+			
+			//Get Contract Process Period
+			ArrayList<MContractProcPeriod> contractProcPeriodList = getContractProcPeriodList();//TODO エラー処理＆ログの処理
+			
+			for(MContractProcPeriod procPeriod : contractProcPeriodList)
+			{	
+				//Get Contract Content from Contract Process Period
+				ArrayList<MContractContent> contractContentList = getContractContentList(procPeriod);//TODO エラー処理 &　ログの処理
+				
+				//Do contract process
+				for(MContractContent contractContent : contractContentList)
+					callProcess(contractContent, procPeriod);				
 
-		}//for(MContractProcPeriod procPeriod : contractProcPeriodList)
+			}//for
+			
+		}//if
+		
+
 		
 		return "";//TODO
 		
@@ -413,6 +415,56 @@ public class CallContractProcessPeriodical extends SvrProcess {
 		
 		return contractContentList;
 	}
+	
+	
+	private void callProcess(MContractContent contractContent, MContractProcPeriod procPeriod)
+	{
+		ProcessInfo pi = new ProcessInfo("CreateDoc", 0);
+		pi.setClassName(getProcessClassName(contractContent));				
+		pi.setAD_Client_ID(getAD_Client_ID());
+		pi.setAD_User_ID(getAD_User_ID());
+		pi.setAD_PInstance_ID(getAD_PInstance_ID());
+		pi.setRecord_ID(contractContent.getJP_ContractContent_ID());
+		
+		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
+		list.add (new ProcessInfoParameter("JP_ContractProcessUnit", p_JP_ContractProcessUnit, null, null, null));
+		if(procPeriod == null)
+		{
+			list.add (new ProcessInfoParameter("JP_ContractCalender_ID", 0, null, null, null));
+		}else{
+			list.add (new ProcessInfoParameter("JP_ContractCalender_ID", procPeriod.getJP_ContractCalender_ID(), null, null, null));//Modify by Calender of Process Period.
+		}
+		list.add (new ProcessInfoParameter("JP_ContractProcPeriodG_ID", p_JP_ContractProcPeriodG_ID, null, null, null));
+		if(procPeriod == null)
+		{
+			list.add (new ProcessInfoParameter("JP_ContractProcPeriod_ID", 0, null, null, null));//Modify by Process Period.;
+		}else{
+			list.add (new ProcessInfoParameter("JP_ContractProcPeriod_ID", procPeriod.getJP_ContractProcPeriod_ID(), null, null, null));//Modify by Process Period.
+		}
+		list.add (new ProcessInfoParameter("JP_ContractProcessValue", p_JP_ContractProcessValue, null, null, null));
+		list.add (new ProcessInfoParameter("DateAcct", p_DateAcct, null, null, null));
+		list.add (new ProcessInfoParameter("DateDoc", p_DateDoc, null, null, null));
+		list.add (new ProcessInfoParameter("DocAction", p_DocAction, null, null, null));
+		list.add (new ProcessInfoParameter("AD_Org_ID", p_AD_Org_ID, null, null, null));
+		list.add (new ProcessInfoParameter("JP_ContractCategory_ID", p_JP_ContractCategory_ID, null, null, null));
+		list.add (new ProcessInfoParameter("C_DocType_ID", p_C_DocType_ID, null, null, null));
+		
+		ProcessInfoParameter[] pars = new ProcessInfoParameter[list.size()];
+		list.toArray(pars);
+		pi.setParameter(pars);
+		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+		String msg = pi.getSummary();
+
+		if(isOK)
+		{
+			;
+		}else{
+			
+			//TODO ログの記録
+			throw new AdempiereException(pi.getSummary());
+		}
+	}
+	
 	
 	private String getProcessClassName(MContractContent contractContent)
 	{

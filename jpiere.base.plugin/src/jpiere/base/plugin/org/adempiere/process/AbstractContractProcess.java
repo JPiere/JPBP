@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 
+import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -110,13 +111,16 @@ public class AbstractContractProcess extends SvrProcess
 			p_DateAcct = MContractProcPeriod.get(getCtx(), getJP_ContractProcPeriod_ID()).getDateAcct();
 		
 		if(p_DateDoc ==null)
-			p_DateAcct = MContractProcPeriod.get(getCtx(), getJP_ContractProcPeriod_ID()).getDateDoc();
+			p_DateDoc = MContractProcPeriod.get(getCtx(), getJP_ContractProcPeriod_ID()).getDateDoc();
 		
-		if(getJP_ContractProcPeriod_ID() == 0)
+		if(contractContent.getParent().getJP_ContractT().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MContractCalender calender = MContractCalender.get(getCtx(), getJP_ContractCalender_ID());
-			MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), getDateAcct());
-			p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+			if(getJP_ContractProcPeriod_ID() == 0)
+			{
+				MContractCalender calender = MContractCalender.get(getCtx(), getJP_ContractCalender_ID());
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), getDateAcct());
+				p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+			}
 		}
 		
 		
