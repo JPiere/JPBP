@@ -19,12 +19,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
-import org.compiere.model.Query;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -37,12 +35,12 @@ import org.compiere.util.Util;
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
-import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
 
-/** JPIERE-0363
+/**
+*  JPIERE-0363
 *
 * @author Hideaki Hagiwara
 *
@@ -119,7 +117,8 @@ public class CallContractProcess extends SvrProcess {
 			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcessUnit"));
 		}
 		
-		if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_PerContractContent))//Per Contract Content is to kick process from Window.
+		//Process is kicked from the window by Per Contract Content.
+		if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_PerContractContent))
 		{
 			int Record_ID = getRecord_ID();
 			if(Record_ID > 0)
@@ -127,16 +126,17 @@ public class CallContractProcess extends SvrProcess {
 				MContractContent contractContent = new MContractContent(getCtx(),Record_ID, get_TrxName());
 				if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 				{
-					callCreateBaseDocFromContract(contractContent, null);
+					callCreateBaseDoc(contractContent, null);
 					
 				}if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)){
 				
 					MContractProcPeriod period = null;
-					if(p_JP_ContractProcPeriod_ID==0)
+					if(p_JP_ContractProcPeriod_ID == 0)
 					{
 						MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
 						period = calender.getContractProcessPeriod(getCtx(), p_DateAcct);
 						p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+						
 					}else{
 						
 						period = MContractProcPeriod.get(getCtx(), p_JP_ContractProcPeriod_ID);
@@ -145,34 +145,30 @@ public class CallContractProcess extends SvrProcess {
 					//Create Base Doc contract process
 					if(p_IsCreateBaseDocJP)
 					{
-						callCreateBaseDocFromContract(contractContent, period);
+						callCreateBaseDoc(contractContent, period);
 						
 					//Create Derivative Doc Contract process	
 					}else{
 						
-						if(p_DocBaseType.equals("MMS")|| p_DocBaseType.equals("MMR"))
-						{
-							callCreateInOutFromOrder(contractContent, period);//TODO
-							
-						}else if(p_DocBaseType.equals("ARI")|| p_DocBaseType.equals("API")){
-							;//TODO
-						}
+						callCreateDerivativeDoc(contractContent, period);
+						
 					}
 				}
 				
 			}else{
-				log.log(Level.SEVERE, "Record_ID <= 0 ");
+				log.log(Level.SEVERE, "Record_ID <= 0 ");//TODO エラー処理
 			}
-			
+		
+		//Process is kicked from periodical contract process.
 		}else{
 			
 			//Get Contract Process Period
-			ArrayList<MContractProcPeriod> contractProcPeriodList = getContractProcPeriodList();//TODO エラー処理＆ログの処理
+			ArrayList<MContractProcPeriod> contractProcPeriodList = getContractProcPeriodList();
 			
 			for(MContractProcPeriod procPeriod : contractProcPeriodList)
 			{	
 				//Get Contract Content from Contract Process Period
-				ArrayList<MContractContent> contractContentList = getContractContentList(procPeriod);//TODO エラー処理 &　ログの処理
+				ArrayList<MContractContent> contractContentList = getContractContentList(procPeriod);
 				
 				//Create Base Doc contract process
 				if(p_IsCreateBaseDocJP)
@@ -180,37 +176,27 @@ public class CallContractProcess extends SvrProcess {
 					
 					for(MContractContent contractContent : contractContentList)
 					{
-						callCreateBaseDocFromContract(contractContent, procPeriod);
+						callCreateBaseDoc(contractContent, procPeriod);
 					}
 				
 				//Create Derivative Doc Contract process
 				}else{
 					
-					if(p_DocBaseType.equals("MMS")|| p_DocBaseType.equals("MMR"))
+					for(MContractContent contractContent : contractContentList)
 					{
-						for(MContractContent contractContent : contractContentList)
-						{
-							callCreateInOutFromOrder(contractContent, procPeriod);
-						}
-						
-					}else if(p_DocBaseType.equals("ARI")|| p_DocBaseType.equals("API")){
-						
-						for(MContractContent contractContent : contractContentList)
-						{
-							callCreateInvoiceFromOrder(contractContent, procPeriod);
-						}
+						callCreateDerivativeDoc(contractContent, procPeriod);
 					}
+						
 				}
 
 			}//for
 			
 		}//if
 		
-
-		
-		return Msg.getMsg(getCtx(), "Success");
+		return Msg.getMsg(getCtx(), "Success");//TODO リターンメッセージ ---> 処理契約期間数、処理契約内容件数、伝票作成件数、警告件数、エラー件数  くらいかな？
 		
 	}//doIt()
+	
 	
 	private ArrayList<MContractProcPeriod> getContractProcPeriodList() throws Exception
 	{
@@ -331,7 +317,7 @@ public class CallContractProcess extends SvrProcess {
 		}else if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_ContractProcessValueofContractProcessPeriodGroup)){
 			
 			String getProcPeriodSql = "SELECT c.* FROM JP_ContractProcPeriod c INNER JOIN JP_ContractProcPeriodG g ON (c.JP_ContractProcPeriodG_ID = g.JP_ContractProcPeriodG_ID) "
-																									+ " WHERE c.AD_Client_ID = ? AND g.JP_ContractProcessValue = ? AND c.IsActive='Y' AND g.IsActive='Y' ";//1,2
+												+ " WHERE c.AD_Client_ID = ? AND g.JP_ContractProcessValue = ? AND c.IsActive='Y' AND g.IsActive='Y' ";//1,2
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			try
@@ -363,7 +349,7 @@ public class CallContractProcess extends SvrProcess {
 	{
 		StringBuilder getContractContentSQL = new StringBuilder("");
 		
-		//Base Doc Order and Invoice
+		//Get Contract Content that create Base Doc(Order and Invoice).
 		if(p_IsCreateBaseDocJP)
 		{
 			getContractContentSQL.append("SELECT cc.* FROM JP_ContractContent cc "
@@ -376,7 +362,7 @@ public class CallContractProcess extends SvrProcess {
 				+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
 				+ " ");
 		
-		//Derivative InOut Doc
+		//Get Contract Content that create Derivative InOut Doc from Order
 		}else if( p_DocBaseType.equals("MMS") || p_DocBaseType.equals("MMR") ){
 	
 			getContractContentSQL.append("SELECT DISTINCT cc.* FROM JP_ContractContent cc "
@@ -390,7 +376,7 @@ public class CallContractProcess extends SvrProcess {
 					+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
 					+ " AND cc.JP_CreateDerivativeDocPolicy IN ('BT','IO') ");
 			
-		//Derivative Invoice Doc
+		//Get Contract Content that create Derivative Invoice Doc from Order
 		}else if( p_DocBaseType.equals("ARI") || p_DocBaseType.equals("API") ){
 			
 			getContractContentSQL.append("SELECT DISTINCT cc.* FROM JP_ContractContent cc "
@@ -465,15 +451,15 @@ public class CallContractProcess extends SvrProcess {
 	}
 	
 	
-	private boolean callCreateBaseDocFromContract(MContractContent contractContent, MContractProcPeriod procPeriod)
+	private void callCreateBaseDoc(MContractContent contractContent, MContractProcPeriod procPeriod)
 	{
-		ProcessInfo pi = new ProcessInfo("CreateDoc", 0);
+		ProcessInfo pi = new ProcessInfo("CreateBaseDoc", 0);
 		String className = null;
 		if(p_DocBaseType.equals("SOO") || p_DocBaseType.equals("POO"))
 		{
 			if(Util.isEmpty(MContractProcess.get(getCtx(), contractContent.getJP_ContractProcess_ID()).getClassname()))
 			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultCreateContractOrderFromContract";
+				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseOrder";
 				
 			}else{
 				className = contractContent.getJP_ContractProcess().getClassname();
@@ -484,7 +470,7 @@ public class CallContractProcess extends SvrProcess {
 		{
 			if(Util.isEmpty(MContractProcess.get(getCtx(), contractContent.getJP_ContractProcess_ID()).getClassname()))
 			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultCreateContractInvoiceFromContract";
+				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseInvoice";
 				
 			}else{
 				className = contractContent.getJP_ContractProcess().getClassname();
@@ -500,53 +486,45 @@ public class CallContractProcess extends SvrProcess {
 		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
 		setProcessInfoParameter(pi, list, procPeriod);
 		
-		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
-		if(isOK)
+		startProcess(pi);
+		
+	}
+	
+	
+	private void callCreateDerivativeDoc(MContractContent contractContent, MContractProcPeriod procPeriod)
+	{
+		MContractProcess[] contractProcesses =  null;
+
+		if(p_DocBaseType.equals("MMS")|| p_DocBaseType.equals("MMR"))
 		{
-			if(contractContent.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
-			{
-				contractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
-				contractContent.saveEx(get_TrxName());
-			}
+			 contractProcesses =  contractContent.getCreateInOutFromOrderProcessByCalender(procPeriod.getJP_ContractCalender_ID()); 
+			 
+		}else if(p_DocBaseType.equals("ARI")|| p_DocBaseType.equals("API")){
 			
-			if(p_IsRecordCommitJP)
-			{
-				try 
-				{
-					commitEx();
-				} catch (SQLException e) {
-					
-					e.printStackTrace();// TODO ログに書き込む!?
-				}
-			}
-			
-		}else{
-			
-			if(!p_IsRecordCommitJP)
-			{
-				throw new AdempiereException(pi.getSummary());
-			}
+			contractProcesses =  contractContent.getCreateInvoiceFromOrderProcessByCalender(procPeriod.getJP_ContractCalender_ID());//TODO 実装;
 		}
 		
-		return isOK;
-	}
-	
-	
-	private boolean callCreateInOutFromOrder(MContractContent contractContent, MContractProcPeriod procPeriod)
-	{
 		
-		MContractProcess[] contractProcs =  contractContent.getCreateInOutFromOrderProcessByCalender(procPeriod.getJP_ContractCalender_ID());
-		for(int i = 0; i < contractProcs.length; i++)
+		for(int i = 0; i < contractProcesses.length; i++)
 		{
 			String className = null;
-			if(Util.isEmpty(contractProcs[i].getClassname()))
+			if(Util.isEmpty(contractProcesses[i].getClassname()))
 			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultCreateContractInOutFromOrder";
+				
+				if(p_DocBaseType.equals("MMS")|| p_DocBaseType.equals("MMR"))
+				{
+					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateDerivativeInOut";
+					
+				}else if(p_DocBaseType.equals("ARI")|| p_DocBaseType.equals("API")){
+					
+					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateDerivativeInvoice";
+				}
+					
 			}else{
-				className = contractProcs[i].getClassname();
+				className = contractProcesses[i].getClassname();
 			}
 			
-			ProcessInfo pi = new ProcessInfo("CreateDoc", 0);
+			ProcessInfo pi = new ProcessInfo("CreateDerivativeDoc", 0);
 			pi.setClassName(className);				
 			pi.setAD_Client_ID(getAD_Client_ID());
 			pi.setAD_User_ID(getAD_User_ID());
@@ -554,98 +532,13 @@ public class CallContractProcess extends SvrProcess {
 			pi.setRecord_ID(contractContent.getJP_ContractContent_ID());
 			
 			ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
-			list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractProcs[i].getJP_ContractProcess_ID(), null, null, null ));
+			list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractProcesses[i].getJP_ContractProcess_ID(), null, null, null ));
 			setProcessInfoParameter(pi, list, procPeriod);
 			
-			boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
-			if(isOK)
-			{
-				if(contractContent.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
-				{
-					contractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
-					contractContent.saveEx(get_TrxName());
-				}
-				
-				if(p_IsRecordCommitJP)
-				{
-					try 
-					{
-						commitEx();
-					} catch (SQLException e) {
-						
-						e.printStackTrace();// TODO ログに書き込む!?
-					}
-				}
-				
-			}else{
-				
-				if(!p_IsRecordCommitJP)
-				{
-					throw new AdempiereException(pi.getSummary());
-				}
-			}
+			startProcess(pi);
 			
 		}//for
 		
-		return false;
-	}
-	
-	//TODO 実装
-	private boolean callCreateInvoiceFromOrder(MContractContent contractContent, MContractProcPeriod procPeriod)
-	{
-		MContractProcess[] contractProcs =  contractContent.getCreateInvoiceFromOrderProcessByCalender(procPeriod.getJP_ContractCalender_ID());//TODO 実装
-		for(int i = 0; i < contractProcs.length; i++)
-		{
-			String className = null;
-			if(Util.isEmpty(contractProcs[i].getClassname()))
-			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultCreateContractInvoiceFromOrder";
-			}else{
-				className = contractProcs[i].getClassname();
-			}
-			
-			ProcessInfo pi = new ProcessInfo("CreateDoc", 0);
-			pi.setClassName(className);				
-			pi.setAD_Client_ID(getAD_Client_ID());
-			pi.setAD_User_ID(getAD_User_ID());
-			pi.setAD_PInstance_ID(getAD_PInstance_ID());
-			pi.setRecord_ID(contractContent.getJP_ContractContent_ID());
-			
-			ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
-			list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractProcs[i].getJP_ContractProcess_ID(), null, null, null ));
-			setProcessInfoParameter(pi, list, procPeriod);
-			
-			boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
-			if(isOK)
-			{
-				if(contractContent.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
-				{
-					contractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
-					contractContent.saveEx(get_TrxName());
-				}
-				
-				if(p_IsRecordCommitJP)
-				{
-					try 
-					{
-						commitEx();
-					} catch (SQLException e) {
-						
-						e.printStackTrace();// TODO ログに書き込む!?
-					}
-				}
-				
-			}else{
-				
-				if(!p_IsRecordCommitJP)
-				{
-					throw new AdempiereException(pi.getSummary());
-				}
-			}
-			
-		}//for
-		
-		return false;
 	}
 	
 	private void setProcessInfoParameter(ProcessInfo pi, ArrayList<ProcessInfoParameter> list ,MContractProcPeriod procPeriod)
@@ -679,5 +572,31 @@ public class CallContractProcess extends SvrProcess {
 		ProcessInfoParameter[] pars = new ProcessInfoParameter[list.size()];
 		list.toArray(pars);
 		pi.setParameter(pars);	
+	}
+	
+	private void startProcess(ProcessInfo pi)
+	{
+		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+		if(isOK)
+		{				
+			if(p_IsRecordCommitJP)
+			{
+				try 
+				{
+					commitEx();
+				} catch (SQLException e) {
+					
+					e.printStackTrace();// TODO ログに書き込む!?
+				}
+			}
+			
+		}else{
+			
+			if(!p_IsRecordCommitJP)
+			{
+				throw new AdempiereException(pi.getSummary());
+			}
+		}
+		
 	}
 }

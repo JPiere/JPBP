@@ -21,7 +21,7 @@ package jpiere.base.plugin.org.adempiere.process;
 * @author Hideaki Hagiwara
 *
 */
-public class DefaultCreateContractInOutFromOrder extends AbstractContractProcess {
+public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContractProcess {
 
 	@Override
 	protected void prepare() 
