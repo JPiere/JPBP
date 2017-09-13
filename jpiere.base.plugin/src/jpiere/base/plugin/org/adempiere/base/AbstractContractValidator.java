@@ -19,6 +19,12 @@ public abstract class AbstractContractValidator {
 	
 	protected String derivativeDocHeaderBaseCheck(PO po, int type)
 	{
+		
+		//TODO 期間契約の場合、転記日付が契約処理期間内にあるかどうかのチェック!!
+		//TODO ヘッダーの処理期間と明細の処理期間があるので注意すること
+		
+		
+		
 		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
 						||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)

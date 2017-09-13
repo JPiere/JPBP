@@ -860,21 +860,21 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	 * @param JP_ContractProcPeriod_ID
 	 * @return
 	 */
-	public MOrder getOrderByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID)
+	public MOrder getOrderByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
 	{
-		int record_ID = 0;
-		final String sql = "SELECT C_Order_ID FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
+		MOrder order = null;
+		final String sql = "SELECT * FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt = DB.prepareStatement(sql, trxName);
 			pstmt.setInt(1, get_ID());
 			pstmt.setInt(2, JP_ContractProcPeriod_ID);
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				record_ID = rs.getInt(1);
+				order = new MOrder(getCtx(), rs, trxName);
 			}
 		}
 		catch (Exception e)
@@ -887,12 +887,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			rs = null; pstmt = null;
 		}
 		
-		if(record_ID == 0)
-			return null;
-		else
-			return new MOrder(getCtx(), record_ID, get_TrxName());
 		
-	
+		return order;
 	}
 	
 }	//	MContractContent

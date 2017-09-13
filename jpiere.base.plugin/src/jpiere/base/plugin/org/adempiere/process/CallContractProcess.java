@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -58,6 +59,7 @@ public class CallContractProcess extends SvrProcess {
 	private int p_C_DocType_ID = 0;
 	private String p_DocBaseType = null;
 	boolean p_IsCreateBaseDocJP = false;
+	protected boolean p_IsRecordCommitJP = false;
 	
 	@Override
 	protected void prepare() 
@@ -95,7 +97,9 @@ public class CallContractProcess extends SvrProcess {
 			}else if (name.equals("DocBaseType")){
 				p_DocBaseType = para[i].getParameterAsString();
 			}else if (name.equals("IsCreateBaseDocJP")){
-				p_IsCreateBaseDocJP = para[i].getParameterAsBoolean();				
+				p_IsCreateBaseDocJP = para[i].getParameterAsBoolean();
+			}else if (name.equals("IsRecordCommitJP")){
+				p_IsRecordCommitJP = para[i].getParameterAsBoolean();	
 			}else{
 //				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if
@@ -164,7 +168,7 @@ public class CallContractProcess extends SvrProcess {
 		
 
 		
-		return "";//TODO
+		return Msg.getMsg(getCtx(), "Success");
 		
 	}//doIt()
 	
@@ -471,12 +475,23 @@ public class CallContractProcess extends SvrProcess {
 				contractContent.saveEx(get_TrxName());
 			}
 			
-			//TODO コミットの判定処理
+			if(p_IsRecordCommitJP)
+			{
+				try 
+				{
+					commitEx();
+				} catch (SQLException e) {
+					
+					e.printStackTrace();// TODO ログに書き込む!?
+				}
+			}
 			
 		}else{
 			
-			//TODO 1件毎のコミットでなければエラーにする。
-			throw new AdempiereException(pi.getSummary());
+			if(!p_IsRecordCommitJP)
+			{
+				throw new AdempiereException(pi.getSummary());
+			}
 		}
 		
 		return isOK;

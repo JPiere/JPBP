@@ -14,9 +14,12 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
+import java.util.logging.Level;
 
+import org.compiere.model.MOrderLine;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -280,5 +283,37 @@ public class MContractLine extends X_JP_ContractLine {
 		return success;
 	}
 	
+	
+	public MOrderLine getOrderLineByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		MOrderLine oLine = null;
+		final String sql = "SELECT ol.* FROM C_OrderLine ol  INNER JOIN  C_Order o ON(o.C_Order_ID = ol.C_Order_ID) "
+					+ " WHERE ol.JP_ContractLine_ID=? AND ol.JP_ContractProcPeriod_ID=? AND o.DocStatus NOT IN ('VO','RE')";
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				oLine = new MOrderLine(getCtx(), rs, trxName);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		return oLine;	
+	}
 	
 }

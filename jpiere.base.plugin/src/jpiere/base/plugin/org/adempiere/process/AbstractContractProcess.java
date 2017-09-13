@@ -19,13 +19,14 @@ import java.time.LocalDateTime;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
-import org.compiere.process.DocAction;
+import org.compiere.model.PO;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -73,8 +74,8 @@ public class AbstractContractProcess extends SvrProcess
 	public static final String JP_ContractProcessTraceLevel_ALL  = "ALL";
 	public static final String JP_ContractProcessTraceLevel_ErrorOnly  = "ERR";
 	public static final String JP_ContractProcessTraceLevel_NoLog  = "NON";
-	public static final String JP_ContractProcessTraceLevel_ErrorandWarning  = "WAR";
-	
+	public static final String JP_ContractProcessTraceLevel_Warning  = "WAR";
+	public static final String JP_ContractProcessTraceLevel_Fine  = "FIN";
 	
 	
 	@Override
@@ -273,14 +274,43 @@ public class AbstractContractProcess extends SvrProcess
 		return null;
 	}
 	
-	//TODO
-	protected void createLog(DocAction doc, String msg, boolean success)//TODO
+	
+	protected int getJP_ContractProctPeriod_ID()
 	{
-		addBufferLog(0, null, null, doc.getDocumentInfo(), MOrder.Table_ID, doc.get_ID()); //TODO メッセージ変更
+		if(p_JP_ContractProcPeriod_ID > 0)
+			return p_JP_ContractProcPeriod_ID;
+		
+		if(p_JP_ContractCalender_ID > 0)
+		{
+			MContractCalender cal = MContractCalender.get(getCtx(), p_JP_ContractCalender_ID);
+			MContractProcPeriod period = cal.getContractProcessPeriod(getCtx(), getDateAcct());
+			return period.getJP_ContractProcPeriod_ID();
+		}
+		
+		if(m_ContractContent != null && m_ContractContent.getJP_ContractCalender_ID() > 0)
+		{
+			MContractCalender cal = MContractCalender.get(getCtx(), m_ContractContent.getJP_ContractCalender_ID() );
+			MContractProcPeriod period = cal.getContractProcessPeriod(getCtx(), getDateAcct());
+			return period.getJP_ContractProcPeriod_ID();
+		}
+		
+		return 0;
+	}
+	
+	
+	//TODO
+	protected void createLog(PO po, String msg, MContractLine contraceLine, String TraceLevel, boolean success)//TODO
+	{
+		addBufferLog(0, null, null, msg, po.get_Table_ID(), po.get_ID() ); //TODO メッセージ変更
+		
+		if(po.get_TableName().equals(MOrder.Table_Name))
+		{
+			;
+		}
 		
 		if(Env.getProcessUI(getCtx()) != null && !p_JP_ContractProcessUnit.equals("PCC"))
 		{
-			Env.getProcessUI(getCtx()).statusUpdate(doc.getDocumentInfo()); //TODO メッセージ変更
+			Env.getProcessUI(getCtx()).statusUpdate(po.toString()); //TODO メッセージ変更
 		}
 		
 		if(!success)
@@ -290,4 +320,5 @@ public class AbstractContractProcess extends SvrProcess
 		
 		//TODO 契約管理ログテーブルへのログの記録
 	}
+	
 }

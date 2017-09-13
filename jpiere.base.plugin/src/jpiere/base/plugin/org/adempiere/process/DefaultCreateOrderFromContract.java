@@ -71,7 +71,7 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess
 		//Check Overlap
 		if(p_JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MOrder overlapOrder = m_ContractContent.getOrderByContractPeriod(Env.getCtx(), p_JP_ContractProcPeriod_ID);
+			MOrder overlapOrder = m_ContractContent.getOrderByContractPeriod(Env.getCtx(), p_JP_ContractProcPeriod_ID, get_TrxName());
 			if(overlapOrder != null)
 			{
 				String msg = Msg.getMsg(getCtx(), "JP_OverlapPeriod") //Overlap Period
@@ -79,7 +79,7 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess
 						 + "  " + m_ContractContent.getDocumentInfo()
 						 + "  --> " + overlapOrder.getDocumentInfo();
 				
-				createLog(overlapOrder, msg, true);
+				createLog(overlapOrder, msg, null, JP_ContractProcessTraceLevel_Warning, true);//TODO log
 				
 				return msg;
 			}
@@ -87,6 +87,10 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess
 		
 		/** Create Order header */
 		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
+		int JP_ContractProctPeriod_ID = 0;
+		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			JP_ContractProctPeriod_ID = getJP_ContractProctPeriod_ID();
+		
 		PO.copyValues(m_ContractContent, order);
 		order.setProcessed(false);
 		order.setDocStatus(DocAction.STATUS_Drafted);
@@ -100,17 +104,33 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess
 		order.set_ValueOfColumn("JP_Contract_ID", m_ContractContent.getParent().getJP_Contract_ID());
 		order.set_ValueOfColumn("JP_ContractContent_ID", m_ContractContent.getJP_ContractContent_ID());
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			order.set_ValueOfColumn("JP_ContractProcPeriod_ID", p_JP_ContractProcPeriod_ID);
+			order.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProctPeriod_ID);
 		
 		order.saveEx(get_TrxName());
 		
 		/** Create Order Line */
 		MContractLine[] 	m_lines = m_ContractContent.getLines();
 		boolean isCrateDocLine = false;
+		MOrderLine overlapLine = null;
 		for(int i = 0; i < m_lines.length; i++)
 		{
 			if(!m_lines[i].isCreateDocLineJP())
 				continue;
+			
+			//Check Overlap
+			overlapLine = m_lines[i].getOrderLineByContractPeriod(getCtx(), JP_ContractProctPeriod_ID, get_TrxName());
+			if(overlapLine != null)
+			{
+				String msg = Msg.getMsg(getCtx(), "JP_OverlapPeriod") //Overlap Period
+						 + "  " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " : " + MContractProcPeriod.get(getCtx(), p_JP_ContractProcPeriod_ID).toString()
+						 + "  " + m_ContractContent.getDocumentInfo()
+						 + "  --> " + overlapLine.toString();
+				
+				createLog(overlapLine, msg, m_lines[i],  JP_ContractProcessTraceLevel_Warning, true);//TODO log
+				
+				continue;
+			}
+
 			
 			MOrderLine oline = new MOrderLine(getCtx(), 0, get_TrxName());
 			PO.copyValues(m_lines[i], oline);
@@ -120,7 +140,7 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess
 			oline.setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
 			oline.set_ValueNoCheck("JP_ContractLine_ID", m_lines[i].getJP_ContractLine_ID());
 			if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				oline.set_ValueOfColumn("JP_ContractProcPeriod_ID", p_JP_ContractProcPeriod_ID);
+				oline.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProctPeriod_ID);
 			oline.setDatePromised(getOrderLineDatePromised(m_lines[i]));
 			
 			oline.saveEx(get_TrxName());
@@ -139,11 +159,14 @@ public class DefaultCreateOrderFromContract extends AbstractContractProcess
 			}else{
 				order.saveEx(get_TrxName());//DocStatus is Draft
 			}
+			
+		}else{
+			
+			order.deleteEx(true, get_TrxName());
+//			createLog(invoice, invoice.getDocumentInfo(), true); TODO createLog()を書く
 		}
 		
-		createLog(order, order.getDocumentInfo(), true);
-		
-//		return "Success";
+		createLog(order, order.getDocumentInfo(), null, JP_ContractProcessTraceLevel_Fine ,true);
 		
 		return "";
 	}
