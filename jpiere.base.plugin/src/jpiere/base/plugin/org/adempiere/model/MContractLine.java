@@ -89,12 +89,18 @@ public class MContractLine extends X_JP_ContractLine {
 			setC_BPartner_Location_ID(getParent().getC_BPartner_Location_ID());
 		}
 		
-		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
-		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
-		if(!getParent().getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
+		
+		//Check update.
+		if(getParent().getParent().getJP_ContractT().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				&& !getParent().getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
 		{
 			if(is_ValueChanged(MContractLine.COLUMNNAME_M_Product_ID) 
+					|| is_ValueChanged(MContractLine.COLUMNNAME_IsCreateDocLineJP)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_QtyEntered)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_C_UOM_ID)//IsUpdatable = 'N'
+					|| is_ValueChanged(MContractLine.COLUMNNAME_QtyOrdered)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_MovementQty)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_QtyInvoiced)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID)
@@ -104,15 +110,42 @@ public class MContractLine extends X_JP_ContractLine {
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID)
 					)
-			{
-				log.saveError("Error", "契約処理ステータスが未処理ではないため変更できません。");//TODO メッセージ化
+			{				
+				StringBuilder msg = new StringBuilder(Msg.getMsg(getCtx(), "JP_ContractLineUpdate_PeriodContract"));
+				if(is_ValueChanged(MContractLine.COLUMNNAME_IsCreateDocLineJP))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_IsCreateDocLineJP));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_QtyEntered))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_QtyEntered));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_C_UOM_ID))//IsUpdatable = 'N'
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_C_UOM_ID));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_QtyOrdered))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_QtyOrdered));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_MovementQty))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_MovementQty));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_QtyInvoiced))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_QtyInvoiced));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcPeriod_InOut_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_InOut_ID));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcPeriod_Inv_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_Inv_ID));
+				else if( is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID));
+				else if( is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID));
+				
+				log.saveError("Error", msg.toString());
 				return false;
 			}
 			
-		}
-		
-		//TODO -> 契約内容の派生伝票作成方針の変更をいつまで許可するか・・・。
-		
+		}		
 		
 		//Check Period Contract - Derivative Doc Policy
 		if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
