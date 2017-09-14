@@ -20,6 +20,8 @@ import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProduct;
+import org.compiere.model.MUOM;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
@@ -110,12 +112,23 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 					continue;
 				
 				MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
+				if(!contractLine.isCreateDocLineJP())
+					continue;
+					
 				//Check Overlap
 				if(isOverlapPeriodInOutLine(contractLine, JP_ContractProcPeriod_ID))
 				{
 					//TODO ログは欲しい。
 					continue;
 				}
+				
+				//check Lump or Divide
+				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+				{
+					if(contractLine.getJP_ContractProcPeriod_InOut_ID() != JP_ContractProcPeriod_ID)
+						continue;
+				}
+				
 				
 				BigDecimal movementQty = contractLine.getMovementQty();
 				BigDecimal qtyToDeliver = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyDelivered());
@@ -128,20 +141,31 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 					ioLine.setM_InOut_ID(inout.getM_InOut_ID());
 					ioLine.setAD_Org_ID(inout.getAD_Org_ID());
 					ioLine.setAD_OrgTrx_ID(inout.getAD_OrgTrx_ID());
-					
-					//TODO 保管場所の設定はどうする？？？
 					int M_Locator_ID = orderLines[j].get_ValueAsInt("JP_Locator_ID");
 					if(M_Locator_ID > 0)
 					{
 						ioLine.setM_Locator_ID(M_Locator_ID);
+					
+					}else if(contractLine.getJP_Locator().getM_Warehouse_ID() == orderLines[j].getM_Warehouse_ID()) {
+					
+						ioLine.setM_Locator_ID(contractLine.getJP_Locator_ID());
+						
+					}else if(MWarehouse.get(getCtx(), inout.getM_Warehouse_ID()).getDefaultLocator().getM_Locator_ID() > 0){
+						
+						ioLine.setM_Locator_ID(MWarehouse.get(getCtx(), inout.getM_Warehouse_ID()).getDefaultLocator().getM_Locator_ID());
+						
 					}else{
 						
-						MWarehouse wh = MWarehouse.get(getCtx(), ioLine.getM_Warehouse_ID());
-						ioLine.setM_Locator_ID(wh.getDefaultLocator().getM_Locator_ID());
-						
+						;//TODO Erroe 保管場所が見つかりません。
 					}
 					
-					//TODO 残り出荷数量と、出荷すべき数量を比較して、出荷すべき数量を算出した方がよいね。
+					
+					if(ioLine.getM_Product_ID() > 0)
+						ioLine.setC_UOM_ID(MProduct.get(getCtx(), ioLine.getM_Product_ID()).getC_UOM_ID());
+					else
+						ioLine.setC_UOM_ID(MUOM.getDefault_UOM_ID(getCtx()));
+					
+					ioLine.setQtyEntered(contractLine.getMovementQty());
 					ioLine.setMovementQty(contractLine.getMovementQty());
 					ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 					

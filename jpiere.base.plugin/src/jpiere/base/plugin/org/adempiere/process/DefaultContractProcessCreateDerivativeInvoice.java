@@ -106,6 +106,9 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 					continue;
 				
 				MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
+				if(!contractLine.isCreateDocLineJP())
+					continue;
+				
 				//Check Overlap
 				if(isOverlapPeriodInvoiceLine(contractLine, JP_ContractProcPeriod_ID))
 				{
@@ -113,10 +116,18 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 					continue;
 				}
 				
+				//check Lump or Divide
+				if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+				{
+					if(contractLine.getJP_ContractProcPeriod_Inv_ID() != JP_ContractProcPeriod_ID)
+						continue;
+				}
+				
 				BigDecimal qtyInvoiced = contractLine.getQtyInvoiced();
 				BigDecimal qtyToInvoice = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyInvoiced());
 				if(qtyToInvoice.compareTo(qtyInvoiced) >= 0)
 				{
+					
 					MInvoiceLine iLine = new MInvoiceLine(getCtx(), 0, get_TrxName());
 					PO.copyValues(orderLines[j], iLine);
 					iLine.setC_OrderLine_ID(orderLines[j].getC_OrderLine_ID());
@@ -124,8 +135,6 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 					iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
 					iLine.setAD_Org_ID(invoice.getAD_Org_ID());
 					iLine.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
-					
-					//TODO: 請求すべき数量と、残り請求数量を比較してから代入した方が良いね。ログもね。
 					iLine.setQtyEntered(contractLine.getQtyInvoiced());
 					if(iLine.getM_Product_ID() > 0)
 						iLine.setC_UOM_ID(MProduct.get(getCtx(), iLine.getM_Product_ID()).getC_UOM_ID());
@@ -139,7 +148,9 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 					
 					
 				}else{
+					
 					;//TODO 数量が足りないのでエラー。ログは欲しい
+					
 				}
 				
 				
