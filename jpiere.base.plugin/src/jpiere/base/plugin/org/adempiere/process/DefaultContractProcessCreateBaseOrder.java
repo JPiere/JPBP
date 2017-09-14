@@ -19,6 +19,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
+import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -100,10 +101,13 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			
 			MOrderLine oline = new MOrderLine(getCtx(), 0, get_TrxName());
 			PO.copyValues(m_lines[i], oline);
-			oline.setProcessed(false);
 			oline.setC_Order_ID(order.getC_Order_ID());
 			oline.setAD_Org_ID(order.getAD_Org_ID());
 			oline.setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
+			oline.setProcessed(false);
+			oline.setQtyReserved(Env.ZERO);
+			oline.setQtyDelivered(Env.ZERO);
+			oline.setQtyInvoiced(Env.ZERO);
 			oline.set_ValueNoCheck("JP_ContractLine_ID", m_lines[i].getJP_ContractLine_ID());
 			if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 				oline.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);

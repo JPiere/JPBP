@@ -18,8 +18,6 @@ import java.math.BigDecimal;
 
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoice;
-import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MWarehouse;
@@ -78,7 +76,10 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		MOrder[] orders = m_ContractContent.getOrderByContractPeriod(getCtx(), orderProcPeriod.getJP_ContractProcPeriod_ID(), get_TrxName());
 		for(int i = 0; i < orders.length; i++)
 		{
-			/** Create Order header */
+			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
+				continue;
+			
+			/** Create InOut header */
 			MInOut inout = new MInOut(getCtx(), 0, get_TrxName());
 			PO.copyValues(orders[i], inout);
 			inout.setC_Order_ID(orders[i].getC_Order_ID());
@@ -97,8 +98,6 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				inout.setMovementType(MInOut.MOVEMENTTYPE_VendorReceipts);
 			
 			inout.saveEx(get_TrxName());
-			
-			addBufferLog(0, null, null, inout.getDocumentInfo(), MInOut.Table_ID, inout.get_ID());//TODO 仮メッセージ
 			
 			
 			orders[i].set_TrxName(get_TrxName());
@@ -142,6 +141,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 						
 					}
 					
+					//TODO 残り出荷数量と、出荷すべき数量を比較して、出荷すべき数量を算出した方がよいね。
 					ioLine.setMovementQty(contractLine.getMovementQty());
 					ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 					

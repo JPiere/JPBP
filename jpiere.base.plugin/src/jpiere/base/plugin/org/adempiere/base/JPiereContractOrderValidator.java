@@ -262,10 +262,10 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				MContract contract = contractLine.getParent().getParent();
 				
 				//Check Contract Content
-				if(contractLine.getJP_ContractContent_ID() != oLine.get_ValueAsInt("JP_ContractContent_ID"))
+				if(contractLine.getJP_ContractContent_ID() != oLine.getParent().get_ValueAsInt("JP_ContractContent_ID"))
 				{
 					//You can select Contract Content Line that is belong to Contract content
-					return Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") + Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");
+					return Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" : "+ Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");
 				}
 				
 				

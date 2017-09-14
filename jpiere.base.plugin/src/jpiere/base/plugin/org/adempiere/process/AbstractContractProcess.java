@@ -101,45 +101,81 @@ public class AbstractContractProcess extends SvrProcess
 		{
 			String name = para[i].getParameterName();
 
-			if (para[i].getParameter() == null){
+			if (para[i].getParameter() == null)
+			{
 				;
+				
 			}else if (name.equals("JP_ContractProcessUnit")){
+				
 				p_JP_ContractProcessUnit = para[i].getParameterAsString();
+				
 			}else if (name.equals("JP_ContractCalender_ID")){
-				p_JP_ContractCalender_ID = para[i].getParameterAsInt();		
+				
+				p_JP_ContractCalender_ID = para[i].getParameterAsInt();	
+				
 			}else if (name.equals("JP_ContractProcPeriodG_ID")){
-				p_JP_ContractProcPeriodG_ID = para[i].getParameterAsInt();						
+				
+				p_JP_ContractProcPeriodG_ID = para[i].getParameterAsInt();	
+				
 			}else if (name.equals("JP_ContractProcPeriod_ID")){
-				p_JP_ContractProcPeriod_ID = para[i].getParameterAsInt();					
+				
+				p_JP_ContractProcPeriod_ID = para[i].getParameterAsInt();
+				
 			}else if (name.equals("JP_ContractProcessValue")){
+				
 				p_JP_ContractProcessValue = para[i].getParameterAsString();
+				
 			}else if (name.equals("DateAcct")){
+				
 				p_DateAcct = para[i].getParameterAsTimestamp();
+				
 			}else if (name.equals("DateDoc")){
+				
 				p_DateDoc = para[i].getParameterAsTimestamp();
+				
 			}else if (name.equals("DatePromised")){
+				
 				p_DatePromised = para[i].getParameterAsTimestamp();
+				
 			}else if (name.equals("DateOrdered")){
+				
 				p_DateOrdered = para[i].getParameterAsTimestamp();
+				
 			}else if (name.equals("DocAction")){
+
 				p_DocAction = para[i].getParameterAsString();
+				
 			}else if (name.equals("AD_Org_ID")){
+				
 				p_AD_Org_ID = para[i].getParameterAsInt();
+					
 			}else if (name.equals("JP_ContractCategory_ID")){
+				
 				p_JP_ContractCategory_ID = para[i].getParameterAsInt();
+			
 			}else if (name.equals("C_DocType_ID")){
+				
 				p_C_DocType_ID = para[i].getParameterAsInt();
-				p_JP_ContractCategory_ID = para[i].getParameterAsInt();
+
 			}else if (name.equals("DocBaseType")){
+				
 				p_DocBaseType = para[i].getParameterAsString();
 			}else if (name.equals("IsCreateBaseDocJP")){
+				
 				p_IsCreateBaseDocJP = para[i].getParameterAsBoolean();	
+				
 			}else if (name.equals("IsRecordCommitJP")){
+				
 				p_IsRecordCommitJP = para[i].getParameterAsBoolean();	
-			}else if (name.equals("JP_ContractProcessTraceLevel")){
-				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();	
-			}else if (name.equals("JP_ContractProcess_ID")){				
+				
+			}else if (name.equals("JP_ContractProcessTraceLevel")){			
+				
+				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();
+				
+			}else if (name.equals("JP_ContractProcess_ID")){	
+				
 				p_JP_ContractProcess_ID = para[i].getParameterAsInt();
+				
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if

@@ -484,7 +484,7 @@ public class CallContractProcess extends SvrProcess {
 		
 		//Update ProcessInfoParameter
 		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
-		list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractContent.getJP_ContractProcess(), null, null, null ));
+		list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractContent.getJP_ContractProcess_ID(), null, null, null ));
 		setProcessInfoParameter(pi, list, procPeriod);
 		
 		startProcess(pi);
