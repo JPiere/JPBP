@@ -208,6 +208,17 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return DocAction.STATUS_Invalid;
 		}
 		
+		//Lines
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MContractLine[] lines = getLines();
+			if (lines.length == 0)
+			{
+				m_processMsg = "@NoLines@";
+				return DocAction.STATUS_Invalid;
+			}
+		}
+		
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -284,6 +295,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
+		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend))
+			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
+		
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 	
@@ -346,7 +360,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return false;
 
 		setProcessed(true);
-//		setJP_ContractStatus(MContractContent.JP_CONTRACTSTATUS_Invalid); TODO
+		setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Invalid);
 		setDocAction(DOCACTION_None);
 
 		return true;
@@ -362,6 +376,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
 
 		setProcessed(true);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
+		setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 		setDocAction(DOCACTION_None);
 		return true;
 	}	//	closeIt
@@ -408,6 +423,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		setDocAction(DOCACTION_Complete);
 		setProcessed(false);
+		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))
+			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Suspend);
 
 		return true;
 	}	//	reActivateIt
