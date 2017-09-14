@@ -18,7 +18,12 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
 
+import org.compiere.model.MInOut;
+import org.compiere.model.MInOutLine;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -61,7 +66,7 @@ public class AbstractContractProcess extends SvrProcess
 	protected boolean p_IsRecordCommitJP = false;
 	protected String p_JP_ContractProcessTraceLevel = null;
 	
-	protected int p_JP_ContractProcess_ID = 0; //use derivative Doc Only
+	protected int p_JP_ContractProcess_ID = 0; //use to create derivative Doc
 
 	/** JP_ContractProcessUnit */
 	public static final String JP_ContractProcessUnit_ContractProcessPeriod  = "CPP";
@@ -133,7 +138,6 @@ public class AbstractContractProcess extends SvrProcess
 				p_IsRecordCommitJP = para[i].getParameterAsBoolean();	
 			}else if (name.equals("JP_ContractProcessTraceLevel")){
 				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();	
-				
 			}else if (name.equals("JP_ContractProcess_ID")){				
 				p_JP_ContractProcess_ID = para[i].getParameterAsInt();
 			}else{
@@ -292,14 +296,123 @@ public class AbstractContractProcess extends SvrProcess
 			return period.getJP_ContractProcPeriod_ID();
 		}
 		
-		if(m_ContractContent != null && m_ContractContent.getJP_ContractCalender_ID() > 0)
+		
+		if(p_DocBaseType.equals("SOO") || p_DocBaseType.equals("POO"))
 		{
-			MContractCalender cal = MContractCalender.get(getCtx(), m_ContractContent.getJP_ContractCalender_ID() );
-			MContractProcPeriod period = cal.getContractProcessPeriod(getCtx(), getDateAcct());
-			return period.getJP_ContractProcPeriod_ID();
+			if(m_ContractContent != null && m_ContractContent.getJP_ContractCalender_ID() > 0)
+			{
+				MContractCalender cal = MContractCalender.get(getCtx(), m_ContractContent.getJP_ContractCalender_ID() );
+				MContractProcPeriod period = cal.getContractProcessPeriod(getCtx(), getDateAcct());
+				return period.getJP_ContractProcPeriod_ID();
+			}
 		}
 		
 		return 0;
+	}
+	
+	protected MContractProcPeriod getBaseDocContractProcPeriodFromDerivativeDocContractProcPeriod(int Derivative_ContractProcPeriod_ID)
+	{
+		MContractCalender calender = MContractCalender.get(getCtx(), m_ContractContent.getJP_ContractCalender_ID());
+		if(calender == null)
+			return null;
+		
+		MContractProcPeriod  derivativeDocContractProcPeriod = MContractProcPeriod.get(getCtx(), Derivative_ContractProcPeriod_ID);
+		if(derivativeDocContractProcPeriod == null)
+			return null;
+		
+		
+		return calender.getContractProcessPeriod(getCtx(), derivativeDocContractProcPeriod.getStartDate(), derivativeDocContractProcPeriod.getEndDate());
+	}
+	
+	protected int getJP_ContractProcess_ID()
+	{
+		return p_JP_ContractProcess_ID;
+	}
+	
+	
+	protected boolean isOverlapPeriodOrder(int JP_ContractProcPeriod_ID)
+	{
+		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MOrder[] orders= m_ContractContent.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(orders.length > 0)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean isOverlapPeriodOrderLine(MContractLine line, int JP_ContractProcPeriod_ID)
+	{
+		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MOrderLine[] oLines = line.getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(oLines.length > 0)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean isOverlapPeriodInOut(int JP_ContractProcPeriod_ID)
+	{
+		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MInOut[] inOuts = m_ContractContent.getInOutByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(inOuts.length> 0 )
+			{				
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean isOverlapPeriodInOutLine(MContractLine line, int JP_ContractProcPeriod_ID)
+	{
+		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MInOutLine[] oLines = line.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(oLines.length > 0)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean isOverlapPeriodInvoice(int JP_ContractProcPeriod_ID)
+	{
+		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MInvoice[] invoices = m_ContractContent.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(invoices.length> 0 )
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	protected boolean isOverlapPeriodInvoiceLine(MContractLine line, int JP_ContractProcPeriod_ID)
+	{
+		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MInvoiceLine[] iLines = line.getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(iLines.length> 0)
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	

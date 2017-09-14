@@ -46,7 +46,22 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 	{
 		super.doIt();
 		
-		//TODO:既に同じ契約処理期間の売上請求伝票/仕入請求伝票が登録されていない事のチェック。※Abstract化できるね
+		int JP_ContractProcPeriod_ID = 0;
+		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			JP_ContractProcPeriod_ID = getJP_ContractProctPeriod_ID();
+		
+		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				|| JP_ContractProcPeriod_ID == 0)
+		{
+			;//TODO エラー処理
+		}
+		
+		//Check Overlap
+		if(isOverlapPeriodInvoice(JP_ContractProcPeriod_ID))
+		{
+			//ログは欲しい
+			return "";
+		}
 		
 		
 		/** Create Invoice header */
@@ -62,7 +77,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		invoice.set_ValueOfColumn("JP_Contract_ID", m_ContractContent.getParent().getJP_Contract_ID());
 		invoice.set_ValueOfColumn("JP_ContractContent_ID", m_ContractContent.getJP_ContractContent_ID());
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			invoice.set_ValueOfColumn("JP_ContractProcPeriod_ID", getJP_ContractProctPeriod_ID());
+			invoice.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 	
 		invoice.saveEx(get_TrxName());
 		
@@ -74,7 +89,12 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 			if(!m_lines[i].isCreateDocLineJP())
 				continue;
 			
-			//TODO 明細単位で、契約処理期間に登録されていないかどうかのチェック。
+			//Check Overlap
+			if(isOverlapPeriodInvoiceLine(m_lines[i],JP_ContractProcPeriod_ID))
+			{
+				//TODO ログは欲しい。
+				continue;
+			}
 			
 			MInvoiceLine iline = new MInvoiceLine(getCtx(), 0, get_TrxName());
 			PO.copyValues(m_lines[i], iline);

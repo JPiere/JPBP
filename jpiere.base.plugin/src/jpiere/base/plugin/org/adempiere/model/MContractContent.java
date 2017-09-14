@@ -26,6 +26,8 @@ import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
+import org.compiere.model.MInOut;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MQuery;
@@ -860,9 +862,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	 * @param JP_ContractProcPeriod_ID
 	 * @return
 	 */
-	public MOrder getOrderByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	public MOrder[] getOrderByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
 	{
-		MOrder order = null;
+		ArrayList<MOrder> list = new ArrayList<MOrder>();
 		final String sql = "SELECT * FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -872,10 +874,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			pstmt.setInt(1, get_ID());
 			pstmt.setInt(2, JP_ContractProcPeriod_ID);
 			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				order = new MOrder(getCtx(), rs, trxName);
-			}
+			while(rs.next())
+				list.add(new MOrder(getCtx(), rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -888,11 +888,75 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 		
 		
-		return order;
+		MOrder[] orderes = new MOrder[list.size()];
+		list.toArray(orderes);
+		return orderes;
+	}
+	
+	public MInvoice[] getInvoiceByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		ArrayList<MInvoice> list = new ArrayList<MInvoice>();
+		final String sql = "SELECT * FROM C_Invoice WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			while(rs.next())
+				list.add(new MInvoice(getCtx(), rs, trxName));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		
+		MInvoice[] invoices = new MInvoice[list.size()];
+		list.toArray(invoices);
+		return invoices;
+	}
+	
+	public MInOut[] getInOutByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		ArrayList<MInOut> list = new ArrayList<MInOut>();
+		final String sql = "SELECT * FROM M_InOut WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MInOut(getCtx(), rs, trxName));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		
+		MInOut[] inOuts = new MInOut[list.size()];
+		list.toArray(inOuts);
+		return inOuts;
 	}
 	
 	
-	public MContractProcess[] getCreateInOutFromOrderProcessByCalender(int JP_ContractCalender_ID)
+	public MContractProcess[] getContractProcessDerivativeInOutByCalender(int JP_ContractCalender_ID)
 	{
 		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
 		final String sql = "SELECT DISTINCT JP_ContractProcess_InOut_ID FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND JP_ContractCalender_InOut_ID = ?";
@@ -923,7 +987,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	}
 	
 	
-	public MContractProcess[] getCreateInvoiceFromOrderProcessByCalender(int JP_ContractCalender_ID)
+	public MContractProcess[] getContractProcessDerivativeInvoiceByCalender(int JP_ContractCalender_ID)
 	{
 		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
 		final String sql = "SELECT DISTINCT JP_ContractProcess_Inv_ID FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND JP_ContractCalender_Inv_ID = ?";

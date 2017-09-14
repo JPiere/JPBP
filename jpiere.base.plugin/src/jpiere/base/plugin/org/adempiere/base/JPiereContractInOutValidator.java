@@ -170,7 +170,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			MContractAcct contractAcct = MContractAcct.get(Env.getCtx(), contractLine.getParent().getJP_Contract_Acct_ID());
 			
 			//Check Relation of Contract Cotent
-			if(contractLine.getJP_ContractContent_ID() == ioLine.getParent().get_ValueAsInt("JP_ContractContent_ID"))
+			if(contractLine.getJP_ContractContent_ID() != ioLine.getParent().get_ValueAsInt("JP_ContractContent_ID"))
 			{
 				//You can select Contract Content Line that is belong to Contract content
 				return Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") + Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");

@@ -484,6 +484,7 @@ public class CallContractProcess extends SvrProcess {
 		
 		//Update ProcessInfoParameter
 		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
+		list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractContent.getJP_ContractProcess(), null, null, null ));
 		setProcessInfoParameter(pi, list, procPeriod);
 		
 		startProcess(pi);
@@ -497,11 +498,11 @@ public class CallContractProcess extends SvrProcess {
 
 		if(p_DocBaseType.equals("MMS")|| p_DocBaseType.equals("MMR"))
 		{
-			 contractProcesses =  contractContent.getCreateInOutFromOrderProcessByCalender(procPeriod.getJP_ContractCalender_ID()); 
-			 
+			contractProcesses =  contractContent.getContractProcessDerivativeInOutByCalender(procPeriod.getJP_ContractCalender_ID()); 
+			
 		}else if(p_DocBaseType.equals("ARI")|| p_DocBaseType.equals("API")){
 			
-			contractProcesses =  contractContent.getCreateInvoiceFromOrderProcessByCalender(procPeriod.getJP_ContractCalender_ID());//TODO 実装;
+			contractProcesses =  contractContent.getContractProcessDerivativeInvoiceByCalender(procPeriod.getJP_ContractCalender_ID());
 		}
 		
 		
@@ -510,7 +511,6 @@ public class CallContractProcess extends SvrProcess {
 			String className = null;
 			if(Util.isEmpty(contractProcesses[i].getClassname()))
 			{
-				
 				if(p_DocBaseType.equals("MMS")|| p_DocBaseType.equals("MMR"))
 				{
 					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateDerivativeInOut";
@@ -546,20 +546,22 @@ public class CallContractProcess extends SvrProcess {
 		ProcessInfoParameter[] para = getParameter();
 		for(int i = 0; i < para.length; i++)
 		{
-			if(para[i].getParameterName ().equals(MContractProcPeriod.COLUMNNAME_JP_ContractCalender_ID))//Modify by Calender of Process Period.
+			//Modify by Calender of Process Period.
+			if(para[i].getParameterName ().equals(MContractProcPeriod.COLUMNNAME_JP_ContractCalender_ID))
 			{
 				if(procPeriod == null)
 				{
-					list.add (new ProcessInfoParameter("JP_ContractCalender_ID", null, null, para[i].getInfo(), para[i].getInfo_To() ));
+					list.add (new ProcessInfoParameter("JP_ContractCalender_ID", para[i].getParameter(), para[i].getParameter_To(), para[i].getInfo(), para[i].getInfo_To() ));
 				}else{
 					list.add (new ProcessInfoParameter("JP_ContractCalender_ID", procPeriod.getJP_ContractCalender_ID(), null, para[i].getInfo(), para[i].getInfo_To() ));
 				}
-				
-			}else if (para[i].getParameterName ().equals(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)){//Modify by Process Period.
+			
+			//Modify by Process Period.
+			}else if (para[i].getParameterName ().equals(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)){
 				
 				if(procPeriod == null)
 				{
-					list.add (new ProcessInfoParameter("JP_ContractProcPeriod_ID", null, null, para[i].getInfo(), para[i].getInfo_To() ));
+					list.add (new ProcessInfoParameter("JP_ContractProcPeriod_ID", para[i].getParameter(), para[i].getParameter_To(), para[i].getInfo(), para[i].getInfo_To() ));
 				}else{
 					list.add (new ProcessInfoParameter("JP_ContractProcPeriod_ID", procPeriod.getJP_ContractProcPeriod_ID(), null, para[i].getInfo(), para[i].getInfo_To() ));
 				}
