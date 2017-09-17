@@ -158,7 +158,22 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 			}else{
 				MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
 				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From(), null, m_ContractContentTemplates[i].getJP_ContractProcPeriodNum());
-				contractContent.setJP_ContractProcDate_To(period.getStartDate());
+				if(m_Contract.getJP_ContractPeriodDate_To() == null)
+				{
+					contractContent.setJP_ContractProcDate_To(period.getEndDate());
+					
+				}else{
+					
+					if(m_Contract.getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+					{
+						contractContent.setJP_ContractProcDate_To(period.getEndDate());
+						
+					}else{
+						
+						contractContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
+					}
+					
+				}
 			}
 			
 			if(m_ContractContentTemplates[i].getC_BPartner_ID()==0)
