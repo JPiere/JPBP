@@ -1,0 +1,34 @@
+CREATE OR REPLACE VIEW adempiere.JP_Contract_OrderLine AS
+SELECT 
+     ol.AD_Client_ID AS AD_Client_ID 
+    ,ol.AD_Org_ID AS AD_Org_ID
+    ,ol.JP_ContractLine_ID AS JP_ContractLine_ID
+    ,ol.JP_ContractProcPeriod_ID AS JP_ContractProcPeriod_ID
+    ,ol.C_Order_ID AS C_Order_ID 
+    ,ol.C_OrderLine_ID AS C_OrderLine_ID 
+    ,ol.M_Product_ID AS M_Product_ID
+    ,ol.C_Charge_ID AS C_Charge_ID
+    ,ol.QtyOrdered AS QtyOrdered
+    ,ol.QtyReserved AS QtyReserved
+    ,ol.QtyDelivered AS QtyDelivered
+    ,ol.QtyInvoiced AS QtyInvoiced
+    ,ol.PriceActual AS PriceActual
+    ,ol.LineNetAmt AS LineNetAmt
+    ,ol.Line AS Line
+    ,ol.CreatedBy AS CreatedBy
+    ,ol.UpdatedBy AS UpdatedBy
+    ,ol.DateOrdered AS DateOrdered
+    ,ol.Updated AS Updated
+    ,ol.Created AS Created
+    ,ol.IsActive AS IsActive
+
+    ,o.DocumentNo AS DocumentNo
+    ,o.IsTaxIncluded AS IsTaxIncluded
+    ,o.DocStatus AS DocStatus
+    ,o.JP_Contract_ID AS JP_Contract_ID
+    ,o.JP_ContractContent_ID AS JP_ContractContent_ID
+    ,o.C_Currency_ID
+    ,o.DateAcct AS DateAcct
+
+FROM adempiere.C_OrderLine ol
+	INNER JOIN adempiere.C_Order o ON (ol.C_Order_ID = o.C_Order_ID)

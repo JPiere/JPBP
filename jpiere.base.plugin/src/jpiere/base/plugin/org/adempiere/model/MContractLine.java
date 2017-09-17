@@ -189,7 +189,7 @@ public class MContractLine extends X_JP_ContractLine {
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));return false;}
 						if(getJP_ContractCalender_InOut_ID() == 0)
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID")}));return false;}
-						if(getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+						if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 						{
 							if(getJP_ContractProcPeriod_InOut_ID() == 0)
 							{
@@ -220,7 +220,7 @@ public class MContractLine extends X_JP_ContractLine {
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));return false;}
 						if(getJP_ContractCalender_Inv_ID() == 0)
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")}));return false;}		
-						if(getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+						if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
 						{
 							if(getJP_ContractProcPeriod_Inv_ID() == 0)
 							{
@@ -255,7 +255,7 @@ public class MContractLine extends X_JP_ContractLine {
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));return false;}
 						if(getJP_ContractCalender_InOut_ID() == 0)
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID")}));return false;}
-						if(getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+						if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 						{
 							if(getJP_ContractProcPeriod_InOut_ID() == 0)
 							{
@@ -303,7 +303,7 @@ public class MContractLine extends X_JP_ContractLine {
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));return false;}
 						if(getJP_ContractCalender_Inv_ID() == 0)
 							{log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")}));return false;}		
-						if(getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+						if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
 						{
 							if(getJP_ContractProcPeriod_Inv_ID() == 0)
 							{

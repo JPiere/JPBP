@@ -123,7 +123,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				}
 				
 				//check Lump or Divide
-				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("LP"))
 				{
 					if(contractLine.getJP_ContractProcPeriod_InOut_ID() != JP_ContractProcPeriod_ID)
 						continue;

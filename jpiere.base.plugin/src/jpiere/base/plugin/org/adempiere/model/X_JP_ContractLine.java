@@ -34,7 +34,7 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170908L;
+	private static final long serialVersionUID = 20170915L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -826,10 +826,10 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
-	/** Divide = DD */
-	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_Divide = "DD";
-	/** Lump = LP */
-	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_Lump = "LP";
+	/** Divide into Contract process period = DD */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_DivideIntoContractProcessPeriod = "DD";
+	/** Lump on a certain point of Contract process period = LP */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod = "LP";
 	/** Set Derivative Doc Policy(In/Out).
 		@param JP_DerivativeDocPolicy_InOut Derivative Doc Policy(In/Out)	  */
 	public void setJP_DerivativeDocPolicy_InOut (String JP_DerivativeDocPolicy_InOut)
@@ -845,10 +845,10 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return (String)get_Value(COLUMNNAME_JP_DerivativeDocPolicy_InOut);
 	}
 
-	/** Divide = DD */
-	public static final String JP_DERIVATIVEDOCPOLICY_INV_Divide = "DD";
-	/** Lump = LP */
-	public static final String JP_DERIVATIVEDOCPOLICY_INV_Lump = "LP";
+	/** Divide into Contract process period = DD */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_DivideIntoContractProcessPeriod = "DD";
+	/** Lump on a certain point of Contract process period = LP */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod = "LP";
 	/** Set Derivative Doc Policy(Invoice).
 		@param JP_DerivativeDocPolicy_Inv Derivative Doc Policy(Invoice)	  */
 	public void setJP_DerivativeDocPolicy_Inv (String JP_DerivativeDocPolicy_Inv)

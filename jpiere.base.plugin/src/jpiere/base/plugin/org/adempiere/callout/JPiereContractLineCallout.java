@@ -22,7 +22,6 @@ import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
-import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLineT;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
@@ -43,7 +42,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 
 		if(mField.getColumnName().equals("JP_ContractCalender_InOut_ID"))
 		{
-			if( value != null && mTab.getValue("JP_DerivativeDocPolicy_InOut").equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_Lump))
+			if( value != null && mTab.getValue("JP_DerivativeDocPolicy_InOut").equals("LP"))
 			{
 				int JP_ContractContent_ID =  ((Integer)mTab.getValue("JP_ContractContent_ID")).intValue();
 				int JP_ContractLineT_ID = ((Integer)mTab.getValue("JP_ContractLineT_ID")).intValue();
@@ -72,7 +71,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			
 		}else if(mField.getColumnName().equals("JP_ContractCalender_Inv_ID")){
 			
-			if( value != null && mTab.getValue("JP_DerivativeDocPolicy_Inv").equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_Lump))
+			if( value != null && mTab.getValue("JP_DerivativeDocPolicy_Inv").equals("LP"))
 			{
 				int JP_ContractContent_ID =  ((Integer)mTab.getValue("JP_ContractContent_ID")).intValue();
 				int JP_ContractLineT_ID = ((Integer)mTab.getValue("JP_ContractLineT_ID")).intValue();

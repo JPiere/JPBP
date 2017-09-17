@@ -30,7 +30,7 @@ public class X_JP_Contract_Tax_Acct extends PO implements I_JP_Contract_Tax_Acct
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170910L;
+	private static final long serialVersionUID = 20170915L;
 
     /** Standard Constructor */
     public X_JP_Contract_Tax_Acct (Properties ctx, int JP_Contract_Tax_Acct_ID, String trxName)
