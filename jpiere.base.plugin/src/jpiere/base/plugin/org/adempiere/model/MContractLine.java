@@ -205,7 +205,7 @@ public class MContractLine extends X_JP_ContractLine {
 								
 								MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ContractProcPeriod_InOut_ID());
 								if(getParent().getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0
-										|| getParent().getJP_ContractProcDate_To().compareTo(period.getStartDate()) < 0)
+										|| (getParent().getJP_ContractProcDate_To() != null && getParent().getJP_ContractProcDate_To().compareTo(period.getEndDate()) < 0) )
 								{
 									//Outside the Contract Process Period
 									log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_InOut_ID"));
@@ -236,7 +236,7 @@ public class MContractLine extends X_JP_ContractLine {
 								
 								MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ContractProcPeriod_Inv_ID());
 								if(getParent().getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0
-										|| getParent().getJP_ContractProcDate_To().compareTo(period.getStartDate()) < 0)
+										|| (getParent().getJP_ContractProcDate_To() != null && getParent().getJP_ContractProcDate_To().compareTo(period.getEndDate()) < 0))
 								{
 									//Outside the Contract Process Period
 									log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_Inv_ID"));

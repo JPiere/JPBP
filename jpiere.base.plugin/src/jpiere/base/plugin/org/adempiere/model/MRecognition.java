@@ -1211,46 +1211,46 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		{
 			MRecognitionLine line = lines[i];
 					
-			//	Update Order Line
+			//TODO	Update Order Line --- 受注伝票明細の数量の更新ロジックは要修正
 			MOrderLine ol = null;
 			if (line.getC_OrderLine_ID() != 0)
 			{
-				if (isSOTrx()
-					|| line.getM_Product_ID() == 0)
-				{
-					ol = new MOrderLine (getCtx(), line.getC_OrderLine_ID(), get_TrxName());
-					if (line.getQtyInvoiced() != null)
-						ol.setQtyInvoiced(ol.getQtyInvoiced().add(line.getQtyInvoiced()));
-					if (!ol.save(get_TrxName()))
-					{
-						m_processMsg = "Could not update Order Line";
-						return DocAction.STATUS_Invalid;
-					}
-				}
-				//	Order Invoiced Qty updated via Matching Inv-PO
-				else if (!isSOTrx()
-					&& line.getM_Product_ID() != 0
-					&& !isReversal())
-				{
-					//	MatchPO is created also from MInOut when Invoice exists before Shipment
-//					BigDecimal matchQty = line.getQtyInvoiced();
-					
-				}
+//				if (isSOTrx()
+//					|| line.getM_Product_ID() == 0)
+//				{
+//					ol = new MOrderLine (getCtx(), line.getC_OrderLine_ID(), get_TrxName());
+//					if (line.getQtyInvoiced() != null)
+//						ol.setQtyInvoiced(ol.getQtyInvoiced().add(line.getQtyInvoiced()));
+//					if (!ol.save(get_TrxName()))
+//					{
+//						m_processMsg = "Could not update Order Line";
+//						return DocAction.STATUS_Invalid;
+//					}
+//				}
+//				//	Order Invoiced Qty updated via Matching Inv-PO
+//				else if (!isSOTrx()
+//					&& line.getM_Product_ID() != 0
+//					&& !isReversal())
+//				{
+//					//	MatchPO is created also from MInOut when Invoice exists before Shipment
+////					BigDecimal matchQty = line.getQtyInvoiced();
+//					
+//				}
 			}
 
-			//Update QtyInvoiced RMA Line
+			//TODO Update QtyInvoiced RMA Line --- 受注伝票明細の数量の更新ロジックは要修正
 			if (line.getM_RMALine_ID() != 0)
 			{
-				MRMALine rmaLine = new MRMALine (getCtx(),line.getM_RMALine_ID(), get_TrxName());
-				if (rmaLine.getQtyInvoiced() != null)
-					rmaLine.setQtyInvoiced(rmaLine.getQtyInvoiced().add(line.getQtyInvoiced()));
-				else
-					rmaLine.setQtyInvoiced(line.getQtyInvoiced());
-				if (!rmaLine.save(get_TrxName()))
-				{
-					m_processMsg = "Could not update RMA Line";
-					return DocAction.STATUS_Invalid;
-				}
+//				MRMALine rmaLine = new MRMALine (getCtx(),line.getM_RMALine_ID(), get_TrxName());
+//				if (rmaLine.getQtyInvoiced() != null)
+//					rmaLine.setQtyInvoiced(rmaLine.getQtyInvoiced().add(line.getQtyInvoiced()));
+//				else
+//					rmaLine.setQtyInvoiced(line.getQtyInvoiced());
+//				if (!rmaLine.save(get_TrxName()))
+//				{
+//					m_processMsg = "Could not update RMA Line";
+//					return DocAction.STATUS_Invalid;
+//				}
 			}
 			//			
 		}	//	for all lines

@@ -208,7 +208,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return DocAction.STATUS_Invalid;
 		}
 		
-		//Lines
+		//Check Lines
 		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
 			MContractLine[] lines = getLines();
@@ -216,6 +216,83 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			{
 				m_processMsg = "@NoLines@";
 				return DocAction.STATUS_Invalid;
+			}
+			
+			if( (getDocBaseType().equals("SOO") || getDocBaseType().equals("POO"))
+					&& getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder) 
+					&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+			{
+				for(int i = 0; i < lines.length; i++)
+				{
+					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice))
+					{
+						if(lines[i].getJP_DerivativeDocPolicy_InOut() == null)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+						
+						if(lines[i].getJP_ContractCalender_InOut_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}						
+						
+						if(lines[i].getJP_ContractProcess_InOut_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}							
+						
+						if(lines[i].getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod)
+								&& lines[i].getJP_ContractProcPeriod_InOut_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_InOut_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+					}
+					
+					
+					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt))
+					{
+						if(lines[i].getJP_DerivativeDocPolicy_Inv() == null)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+						
+						
+						
+						if(lines[i].getJP_ContractCalender_Inv_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}	
+						
+						if(lines[i].getJP_ContractProcess_Inv_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}	
+						
+						if(lines[i].getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod)
+							&&	lines[i].getJP_ContractProcPeriod_Inv_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_Inv_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+					}
+					
+					
+				}//for i
 			}
 		}
 		
@@ -273,14 +350,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return DocAction.STATUS_Invalid;
 		
 		
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		
-		
 		//Implicit Approval
 		if (!isApproved())
 			approveIt();
+		
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		
 		
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//

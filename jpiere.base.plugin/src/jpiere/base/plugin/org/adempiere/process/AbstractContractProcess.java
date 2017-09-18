@@ -451,11 +451,24 @@ public class AbstractContractProcess extends SvrProcess
 		return false;
 	}
 	
+	protected void updateContractProcStatus()
+	{
+		if(p_IsCreateBaseDocJP)
+		{
+			if(m_ContractContent.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
+			{
+				m_ContractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
+				m_ContractContent.saveEx(get_TrxName());
+			}
+		}
+	}
+	
 	
 	//TODO
 	protected void createLog(PO po, String msg, MContractLine contraceLine, String TraceLevel, boolean success)//TODO
 	{
-		addBufferLog(0, null, null, msg, po.get_Table_ID(), po.get_ID() ); //TODO メッセージ変更
+		 //TODO メッセージ変更
+		addBufferLog(0, null, null, msg, po.get_Table_ID(), po.get_ID() );
 		
 		if(po.get_TableName().equals(MOrder.Table_Name))
 		{

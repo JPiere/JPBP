@@ -114,6 +114,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		if(isCrateDocLine)
 		{
 			String docAction = getDocAction();
+			updateContractProcStatus();
 			if(!Util.isEmpty(docAction))
 			{
 				invoice.processIt(docAction);

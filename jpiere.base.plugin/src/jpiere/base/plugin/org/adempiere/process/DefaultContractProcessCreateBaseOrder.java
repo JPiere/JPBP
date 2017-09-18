@@ -121,6 +121,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 		if(isCrateDocLine)
 		{
 			String docAction = getDocAction();
+			updateContractProcStatus();
 			if(!Util.isEmpty(docAction))
 			{
 				order.processIt(docAction);

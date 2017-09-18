@@ -371,7 +371,7 @@ public class CallContractProcess extends SvrProcess {
 					+ " WHERE cc.AD_Client_ID = ?"	//1
 					+ " AND c.JP_ContractType = 'PDC'"
 					+ " AND c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR','UC')"//Contract Status in 'Prepare' and 'Under Contract'
-					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus IN ('UN','IP')" //Contract Process Status in 'Unprocessed' and 'In Progress'
+					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'Unprocessed' and 'In Progress'
 					+ " AND cl.JP_ContractCalender_InOut_ID = ?" //2
 					+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
 					+ " AND cc.JP_CreateDerivativeDocPolicy IN ('BT','IO') ");
@@ -385,7 +385,7 @@ public class CallContractProcess extends SvrProcess {
 					+ " WHERE cc.AD_Client_ID = ?"	//1
 					+ " AND c.JP_ContractType = 'PDC'"
 					+ " AND c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR','UC')"//Contract Status in 'Prepare' and 'Under Contract'
-					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus IN ('UN','IP')" //Contract Process Status in 'Unprocessed' and 'In Progress'
+					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'Unprocessed' and 'In Progress'
 					+ " AND cl.JP_ContractCalender_Inv_ID = ?" //2
 					+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
 					+ " AND cc.JP_CreateDerivativeDocPolicy IN ('BT','IV') ");	

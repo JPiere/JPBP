@@ -198,7 +198,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 //				createLog(invoice, invoice.getDocumentInfo(), true); TODO createLog()を書く
 			}
 			
-			createLog(inout, inout.getDocumentInfo(), null, JP_ContractProcessTraceLevel_Fine ,true);
+			createLog(inout, inout.getDocumentNo(), null, JP_ContractProcessTraceLevel_Fine ,true);
 			
 			
 		}//for i
