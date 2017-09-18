@@ -591,7 +591,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		}else if(docAction.equals(DocAction.ACTION_Close)) {
 			
 			setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
-			setJP_ContractStatus_IN_Date(new Timestamp (System.currentTimeMillis()));
+			setJP_ContractStatus_EC_Date(new Timestamp (System.currentTimeMillis()));
 			
 		}else if(docAction.equals(DocAction.ACTION_Void)) {
 			

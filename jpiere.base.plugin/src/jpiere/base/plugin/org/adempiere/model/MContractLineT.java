@@ -189,7 +189,16 @@ public class MContractLineT extends X_JP_ContractLineT {
 			setJP_ContractCalRef_Inv_ID(0);
 			setJP_ContractProcRef_Inv_ID(0);
 			setJP_ContractProcPOffset_Inv(0);
-		}		
+		}
+		
+		
+		//	Charge
+		if (getC_Charge_ID() != 0)
+		{
+			if (getM_Product_ID() != 0)
+				setM_Product_ID(0);
+		}
+	
 		
 		return true;
 	}

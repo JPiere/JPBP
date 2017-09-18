@@ -95,6 +95,7 @@ public class MContractLine extends X_JP_ContractLine {
 				&& !getParent().getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
 		{
 			if(is_ValueChanged(MContractLine.COLUMNNAME_M_Product_ID) 
+					|| is_ValueChanged(MContractLine.COLUMNNAME_C_Charge_ID)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_IsCreateDocLineJP)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_QtyEntered)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_C_UOM_ID)//IsUpdatable = 'N'
@@ -112,7 +113,11 @@ public class MContractLine extends X_JP_ContractLine {
 					)
 			{				
 				StringBuilder msg = new StringBuilder(Msg.getMsg(getCtx(), "JP_ContractLineUpdate_PeriodContract"));
-				if(is_ValueChanged(MContractLine.COLUMNNAME_IsCreateDocLineJP))
+				if(is_ValueChanged(MContractLine.COLUMNNAME_M_Product_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_M_Product_ID));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_C_Charge_ID))
+					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_C_Charge_ID));
+				else if(is_ValueChanged(MContractLine.COLUMNNAME_IsCreateDocLineJP))
 					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_IsCreateDocLineJP));
 				else if(is_ValueChanged(MContractLine.COLUMNNAME_QtyEntered))
 					msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_QtyEntered));
@@ -373,6 +378,14 @@ public class MContractLine extends X_JP_ContractLine {
 			setJP_ContractProcPeriod_Inv_ID(0);
 			setJP_ContractProcess_Inv_ID(0);
 		}		
+		
+		
+		//	Charge
+		if (getC_Charge_ID() != 0)
+		{
+			if (getM_Product_ID() != 0)
+				setM_Product_ID(0);
+		}
 		
 		return true;
 	}
