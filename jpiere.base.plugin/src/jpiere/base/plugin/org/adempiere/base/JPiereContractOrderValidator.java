@@ -112,129 +112,132 @@ public class JPiereContractOrderValidator implements ModelValidator {
 																	||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID) ) ) )
 		{
 			MOrder order = (MOrder)po;
-			if(type == ModelValidator.TYPE_BEFORE_CHANGE)
-			{
-				if(order.getLines().length > 0)
-					return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");//Contract Info cannot be changed because the Document have lines
-			}
 			
 			//Check JP_Contract_ID
 			int JP_Contract_ID = order.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);
-			if(JP_Contract_ID > 0)
+			if(JP_Contract_ID <= 0)
 			{
-				MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
-				//Period Contract
-				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				{
-					/**Check JP_ContractContent_ID 
-					 * Mandetory Period Contract AND Spot Contract.
-					 * In case of General Contract, JP_ContractContent_ID should be null;
-					 */
-					int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
-					if(JP_ContractContent_ID <= 0)
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractContent_ID")};
-						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory", objs);
-						
-					}else{
-						
-						MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-						
-						//Check BP
-						if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
-						{
-							return "契約内容の取引先と異なります。";//TODO メッセージ化
-						}
-						
-						//Check Contract
-						if(contract.getJP_Contract_ID() != content.getJP_Contract_ID())
-						{
-							//You selected different contract Document.
-							return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
-						}
-						
-						/** Check JP_ContractProcPeriod_ID
-						 *  Mandetory Period Contract 
-						 *  In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null;
-						 */
-						int JP_ContractProcPeriod_ID = order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
-						if(JP_ContractProcPeriod_ID <= 0)
-						{
-							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-							return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory", objs);
-							
-						}else{
-
-							MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
-							
-							//Check Calender
-							if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID() )
-							{
-								return "契約内容の契約カレンダーと選択した契約処理期間の契約カレンダーが一致しません。。";//TODO メッセージ化
-							}
-							
-							
-							//TODO 受注伝票の契約処理期間が、契約期間に含まれている事の確認
-						
-						}
-					}
-				
-				//Spot Contract
-				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
-					
-					/**Check JP_ContractContent_ID 
-					 * Mandetory Period Contract AND Spot Contract.
-					 * In case of General Contract, JP_ContractContent_ID should be null;
-					 */
-					int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
-					if(JP_ContractContent_ID <= 0)
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractContent_ID")};
-						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory", objs);
-						
-					}else{
-						
-						MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-						
-						//Check BP
-						if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
-						{
-							return "契約内容の取引先と異なります。";//TODO メッセージ化
-						}
-						
-						//Check Contract
-						if(contract.getJP_Contract_ID() != content.getJP_Contract_ID())
-						{
-							//You selected different contract Document.
-							return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
-						}
-						
-					}
-					
-					/** In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null; */
-					order.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
-				//General Contract
-				}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
-					
-					//Check BP
-					if(contract.getC_BPartner_ID() != order.getC_BPartner_ID())
-					{
-						return "契約書の取引先と異なります。";//TODO メッセージ化
-					}
-					
-					/** In case of General Contract, JP_ContractContent_ID AND JP_ContractProcPeriod_ID should be null;*/
-					order.set_ValueNoCheck("JP_ContractContent_ID", null);
-					order.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);						
-				}
-				
-			}else{//JP_Contract_ID <= 0
-			
 				order.set_ValueNoCheck("JP_Contract_ID", null);
 				order.set_ValueNoCheck("JP_ContractContent_ID", null);
 				order.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				return null;
+			}
+			
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{				
+				if(order.getLines().length > 0)
+				{
+					//In case of Period contract, + Contract Info cannot be changed because the Document have lines
+					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");
+					return msg;
+				}
+			}
+			
+			//Period Contract
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				/**Check JP_ContractContent_ID 
+				 * Mandetory Period Contract AND Spot Contract.
+				 * In case of General Contract, JP_ContractContent_ID should be null;
+				 */
+				int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
+				if(JP_ContractContent_ID <= 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractContent_ID")};
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory", objs);
+					
+				}else{
+					
+					MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+					
+					//Check BP
+					if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
+					{
+						return "契約内容の取引先と異なります。";//TODO メッセージ化
+					}
+					
+					//Check Contract
+					if(contract.getJP_Contract_ID() != content.getJP_Contract_ID())
+					{
+						//You selected different contract Document.
+						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
+					}
+					
+					/** Check JP_ContractProcPeriod_ID
+					 *  Mandetory Period Contract 
+					 *  In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null;
+					 */
+					int JP_ContractProcPeriod_ID = order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
+					if(JP_ContractProcPeriod_ID <= 0)
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory", objs);
+						
+					}else{
+
+						MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
+						
+						//Check Calender
+						if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID() )
+						{
+							return "契約内容の契約カレンダーと選択した契約処理期間の契約カレンダーが一致しません。。";//TODO メッセージ化
+						}
+						
+						
+						//TODO 受注伝票の契約処理期間が、契約期間に含まれている事の確認
+					
+					}
+				}
+			
+			//Spot Contract
+			}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 				
-			}//if(JP_Contract_ID > 0)
+				/**Check JP_ContractContent_ID 
+				 * Mandetory Period Contract AND Spot Contract.
+				 * In case of General Contract, JP_ContractContent_ID should be null;
+				 */
+				int JP_ContractContent_ID = order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
+				if(JP_ContractContent_ID <= 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractContent_ID")};
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory", objs);
+					
+				}else{
+					
+					MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+					
+					//Check BP
+					if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
+					{
+						return "契約内容の取引先と異なります。";//TODO メッセージ化
+					}
+					
+					//Check Contract
+					if(contract.getJP_Contract_ID() != content.getJP_Contract_ID())
+					{
+						//You selected different contract Document.
+						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
+					}
+					
+				}
+				
+				/** In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null; */
+				order.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+			
+			//General Contract
+			}else if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
+				
+				//Check BP
+				if(contract.getC_BPartner_ID() != order.getC_BPartner_ID())
+				{
+					return "契約書の取引先と異なります。";//TODO メッセージ化
+				}
+				
+				/** In case of General Contract, JP_ContractContent_ID AND JP_ContractProcPeriod_ID should be null;*/
+				order.set_ValueNoCheck("JP_ContractContent_ID", null);
+				order.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);						
+			}
 		
 		}
 
