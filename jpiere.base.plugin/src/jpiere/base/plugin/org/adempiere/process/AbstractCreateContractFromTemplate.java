@@ -126,7 +126,7 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 		MContractContent[]  m_ContractContents = m_Contract.getContractContents();
 		if(m_ContractContents.length > 0)
 		{
-			throw new Exception("JP_ContractContentCreated");//Contract Content has already been created
+			throw new Exception(Msg.getMsg(getCtx(), "JP_ContractContentCreated"));//Contract Content has already been created
 		}
 		
 		//Create Contract Content
@@ -195,11 +195,18 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 			
 		}//For i
 		
-	}
+	}//createContractContent
 	
 		
-	protected void createContractLine(MContractContent contractContent, MContractContentT template)
+	protected void createContractLine(MContractContent contractContent, MContractContentT template) throws Exception 
 	{
+		MContractLine[] m_ContractLine = contractContent.getLines();
+		if(m_ContractLine.length > 0) 
+		{
+			throw new Exception(Msg.getMsg(getCtx(), "JP_ContractContentLineCreated"));//Contract Content Line has already been created
+		}
+		
+		
 		//Create Contract Content Line
 		MContractLineT[] m_ContractLineTemplates = template.getContractLineTemplates();
 		for(int i = 0; i < m_ContractLineTemplates.length; i++)

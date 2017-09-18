@@ -125,7 +125,7 @@ CREATE TABLE adempiere.JP_ContractContent
   JP_Estimation_ID numeric(10) DEFAULT NULL::numeric,
   DateOrdered timestamp without time zone,
   DatePromised timestamp without time zone,
- 
+  jp_processing1 character(1) DEFAULT NULL::bpchar,
 
   CONSTRAINT JP_ContractContent_pkey PRIMARY KEY (JP_ContractContent_ID)
 )
