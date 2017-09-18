@@ -86,7 +86,6 @@ public class MContractT extends X_JP_ContractT {
 				
 			}else{
 
-				setJP_ContractCancelTerm_ID(0);
 				setJP_ContractExtendPeriod_ID(0);
 				
 			}

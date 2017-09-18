@@ -1,0 +1,38 @@
+CREATE OR REPLACE VIEW adempiere.JP_Contract_RecognitionLine AS
+SELECT 
+     rl.AD_Client_ID AS AD_Client_ID 
+    ,rl.AD_Org_ID AS AD_Org_ID
+    ,rl.JP_ContractLine_ID AS JP_ContractLine_ID
+    ,rl.JP_ContractProcPeriod_ID AS JP_ContractProcPeriod_ID
+
+    ,rl.JP_Recognition_ID AS JP_Recognition_ID 
+    ,rl.JP_RecognitionLine_ID AS JP_RecognitionLine_ID 
+    ,rl.M_InOutLine_ID AS M_InOutLine_ID 
+    ,rl.C_OrderLine_ID AS C_OrderLine_ID
+    ,rl.M_RMALine_ID AS M_RMALine_ID
+    ,rl.M_Product_ID AS M_Product_ID
+    ,rl.C_Charge_ID AS C_Charge_ID
+    ,rl.QtyInvoiced AS QtyInvoiced
+    ,rl.Line AS Line
+    ,rl.LineNetAmt AS LineNetAmt
+    ,rl.PriceActual
+
+    ,rl.CreatedBy AS CreatedBy
+    ,rl.UpdatedBy AS UpdatedBy
+    ,rl.Updated AS Updated
+    ,rl.Created AS Created
+    ,rl.IsActive AS IsActive
+
+    ,r.DocumentNo AS DocumentNo
+    ,r.IsTaxIncluded
+    ,r.DocStatus AS DocStatus
+    ,r.JP_Contract_ID AS JP_Contract_ID
+    ,r.JP_ContractContent_ID AS JP_ContractContent_ID
+    ,r.C_Order_ID AS C_Order_ID
+    ,r.C_Currency_ID
+    ,r.M_RMA_ID
+    ,r.DateAcct AS DateAcct
+    ,r.JP_DateRecognized AS JP_DateRecognized
+
+FROM adempiere.JP_RecognitionLine rl
+	INNER JOIN adempiere.JP_Recognition r ON (rl.JP_Recognition_ID = r.JP_Recognition_ID)

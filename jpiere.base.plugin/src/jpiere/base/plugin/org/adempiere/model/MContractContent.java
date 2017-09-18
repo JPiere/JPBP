@@ -26,6 +26,8 @@ import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
+import org.compiere.model.MInOut;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MQuery;
@@ -206,6 +208,94 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return DocAction.STATUS_Invalid;
 		}
 		
+		//Check Lines
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MContractLine[] lines = getLines();
+			if (lines.length == 0)
+			{
+				m_processMsg = "@NoLines@";
+				return DocAction.STATUS_Invalid;
+			}
+			
+			if( (getDocBaseType().equals("SOO") || getDocBaseType().equals("POO"))
+					&& getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder) 
+					&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+			{
+				for(int i = 0; i < lines.length; i++)
+				{
+					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice))
+					{
+						if(lines[i].getJP_DerivativeDocPolicy_InOut() == null)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+						
+						if(lines[i].getJP_ContractCalender_InOut_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}						
+						
+						if(lines[i].getJP_ContractProcess_InOut_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}							
+						
+						if(lines[i].getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod)
+								&& lines[i].getJP_ContractProcPeriod_InOut_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_InOut_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+					}
+					
+					
+					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt))
+					{
+						if(lines[i].getJP_DerivativeDocPolicy_Inv() == null)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+						
+						
+						
+						if(lines[i].getJP_ContractCalender_Inv_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}	
+						
+						if(lines[i].getJP_ContractProcess_Inv_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}	
+						
+						if(lines[i].getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod)
+							&&	lines[i].getJP_ContractProcPeriod_Inv_ID() == 0)
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_Inv_ID)
+												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+							return DocAction.STATUS_Invalid;
+						}
+					}
+					
+					
+				}//for i
+			}
+		}
+		
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -260,14 +350,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return DocAction.STATUS_Invalid;
 		
 		
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		
-		
 		//Implicit Approval
 		if (!isApproved())
 			approveIt();
+		
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
+		
 		
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
@@ -282,6 +372,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
+		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend))
+			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
+		
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 	
@@ -344,7 +437,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return false;
 
 		setProcessed(true);
-//		setJP_ContractStatus(MContractContent.JP_CONTRACTSTATUS_Invalid); TODO
+		setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Invalid);
 		setDocAction(DOCACTION_None);
 
 		return true;
@@ -360,6 +453,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
 
 		setProcessed(true);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
+		setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 		setDocAction(DOCACTION_None);
 		return true;
 	}	//	closeIt
@@ -406,6 +500,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		setDocAction(DOCACTION_Complete);
 		setProcessed(false);
+		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))
+			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Suspend);
 
 		return true;
 	}	//	reActivateIt
@@ -860,9 +956,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	 * @param JP_ContractProcPeriod_ID
 	 * @return
 	 */
-	public MOrder getOrderByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	public MOrder[] getOrderByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
 	{
-		MOrder order = null;
+		ArrayList<MOrder> list = new ArrayList<MOrder>();
 		final String sql = "SELECT * FROM C_Order WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -872,10 +968,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			pstmt.setInt(1, get_ID());
 			pstmt.setInt(2, JP_ContractProcPeriod_ID);
 			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				order = new MOrder(getCtx(), rs, trxName);
-			}
+			while(rs.next())
+				list.add(new MOrder(getCtx(), rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -888,11 +982,75 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 		
 		
-		return order;
+		MOrder[] orderes = new MOrder[list.size()];
+		list.toArray(orderes);
+		return orderes;
+	}
+	
+	public MInvoice[] getInvoiceByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		ArrayList<MInvoice> list = new ArrayList<MInvoice>();
+		final String sql = "SELECT * FROM C_Invoice WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			while(rs.next())
+				list.add(new MInvoice(getCtx(), rs, trxName));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		
+		MInvoice[] invoices = new MInvoice[list.size()];
+		list.toArray(invoices);
+		return invoices;
+	}
+	
+	public MInOut[] getInOutByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		ArrayList<MInOut> list = new ArrayList<MInOut>();
+		final String sql = "SELECT * FROM M_InOut WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MInOut(getCtx(), rs, trxName));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		
+		MInOut[] inOuts = new MInOut[list.size()];
+		list.toArray(inOuts);
+		return inOuts;
 	}
 	
 	
-	public MContractProcess[] getCreateInOutFromOrderProcessByCalender(int JP_ContractCalender_ID)
+	public MContractProcess[] getContractProcessDerivativeInOutByCalender(int JP_ContractCalender_ID)
 	{
 		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
 		final String sql = "SELECT DISTINCT JP_ContractProcess_InOut_ID FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND JP_ContractCalender_InOut_ID = ?";
@@ -923,7 +1081,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	}
 	
 	
-	public MContractProcess[] getCreateInvoiceFromOrderProcessByCalender(int JP_ContractCalender_ID)
+	public MContractProcess[] getContractProcessDerivativeInvoiceByCalender(int JP_ContractCalender_ID)
 	{
 		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
 		final String sql = "SELECT DISTINCT JP_ContractProcess_Inv_ID FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND JP_ContractCalender_Inv_ID = ?";

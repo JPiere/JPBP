@@ -441,6 +441,15 @@ public interface I_JP_Contract
 	/** Get Contract Doc Date(To)	  */
 	public Timestamp getJP_ContractDocDate_To();
 
+    /** Column name JP_ContractDocLocator */
+    public static final String COLUMNNAME_JP_ContractDocLocator = "JP_ContractDocLocator";
+
+	/** Set Contract Document Locator	  */
+	public void setJP_ContractDocLocator (String JP_ContractDocLocator);
+
+	/** Get Contract Document Locator	  */
+	public String getJP_ContractDocLocator();
+
     /** Column name JP_ContractExtendPeriod_ID */
     public static final String COLUMNNAME_JP_ContractExtendPeriod_ID = "JP_ContractExtendPeriod_ID";
 

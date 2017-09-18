@@ -200,9 +200,38 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 		
-		//TODO:期間契約の場合は、契約内容と契約内容明細がある事をチェックする
+		//Check Lines
+		if(getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			MContractContent[] contents = getContractContents();
+			if(contents.length == 0)
+			{
+				m_processMsg = "@NoLines@";
+				return DocAction.STATUS_Invalid;
+			}
+			
+			for(int i = 0; i < contents.length; i++)
+			{
+				MContractLine[] lines = contents[i].getLines();
+				if (lines.length == 0)
+				{
+					m_processMsg = "@NoLines@";
+					return DocAction.STATUS_Invalid;
+				}
+			}
+			
+		}else if(getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
+			
+			MContractContent[] contents = getContractContents();
+			if(contents.length == 0)
+			{
+				m_processMsg = "@NoLines@";
+				return DocAction.STATUS_Invalid;
+			}
+			
+		}
 		
-		//TODO:スポット契約の場合は、契約内容がある事をチェックする。
+
 		
 		
 		//	Add up Amounts
@@ -531,7 +560,8 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 				|| getDocStatus().equals(DocAction.STATUS_Voided))
 			return ;
 		
-		if(docAction.equals(DocAction.ACTION_Complete) || docAction.equals(DocAction.ACTION_None))
+		if(docAction.equals(DocAction.ACTION_Complete) || 
+				(docAction.equals(DocAction.ACTION_None) && getDocStatus().equals(DocAction.STATUS_Completed)) )
 		{
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 			
@@ -561,7 +591,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		}else if(docAction.equals(DocAction.ACTION_Close)) {
 			
 			setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
-			setJP_ContractStatus_IN_Date(new Timestamp (System.currentTimeMillis()));
+			setJP_ContractStatus_EC_Date(new Timestamp (System.currentTimeMillis()));
 			
 		}else if(docAction.equals(DocAction.ACTION_Void)) {
 			

@@ -86,7 +86,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 					
 					int JP_ContractCalender_ID = ((Integer)value).intValue();
 					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
-					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,contract.getJP_ContractPeriodDate_From() ,processPeriodOffset);
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx, contract.getJP_ContractPeriodDate_From(), null ,processPeriodOffset);
 					if(period == null)
 						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
 					
@@ -101,7 +101,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 					
 					int JP_ContractCalender_ID = ((Integer)value).intValue();
 					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
-					MContractProcPeriod period = calender.getContractProcessPeriod(ctx, (Timestamp)mTab.getValue("JP_ContractProcDate_From")
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx, (Timestamp)mTab.getValue("JP_ContractProcDate_From"), null
 																		,contentTemplate.getJP_ContractProcPeriodNum());	
 					
 					if(period == null)

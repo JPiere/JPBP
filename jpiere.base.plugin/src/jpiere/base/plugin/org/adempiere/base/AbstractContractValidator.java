@@ -17,7 +17,7 @@ public abstract class AbstractContractValidator {
 	protected abstract String checkHeaderContractInfoUpdate(PO po, int type);
 	
 	
-	protected String derivativeDocHeaderBaseCheck(PO po, int type)
+	protected String derivativeDocHeaderCommonCheck(PO po, int type)
 	{
 		
 		//TODO 期間契約の場合、転記日付が契約処理期間内にあるかどうかのチェック!!
@@ -77,7 +77,7 @@ public abstract class AbstractContractValidator {
 		return null;
 	}
 	
-	protected String derivativeDocLineBaseCheck(PO po, int type)
+	protected String derivativeDocLineCommonCheck(PO po, int type)
 	{
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
@@ -112,12 +112,14 @@ public abstract class AbstractContractValidator {
 
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
+				/** In case of Period Contract, order Line has JP_ContractLine_ID and JP_ContractProcPeriod_ID always*/
 				po.set_ValueNoCheck("JP_ContractLine_ID", orderLine.get_ValueAsInt("JP_ContractLine_ID"));
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", orderLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 				
-				po.set_ValueNoCheck("JP_ContractLine_ID", null);
+				/** In case of Spot Contract, order has JP_ContractLine_ID sometimes*/
+				po.set_ValueNoCheck("JP_ContractLine_ID", orderLine.get_ValueAsInt("JP_ContractLine_ID"));
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){

@@ -110,7 +110,9 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 	private String inOutValidate(PO po, int type)
 	{
 		
-		derivativeDocHeaderBaseCheck(po, type);	
+		String msg = derivativeDocHeaderCommonCheck(po, type);	
+		if(!Util.isEmpty(msg))
+			return msg;
 		
 		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
@@ -153,7 +155,9 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 	private String inOutLineValidate(PO po, int type)
 	{		
 		
-		derivativeDocLineBaseCheck(po, type);	
+		String msg = derivativeDocLineCommonCheck(po, type);	
+		if(!Util.isEmpty(msg))
+			return msg;
 		
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
@@ -170,7 +174,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			MContractAcct contractAcct = MContractAcct.get(Env.getCtx(), contractLine.getParent().getJP_Contract_Acct_ID());
 			
 			//Check Relation of Contract Cotent
-			if(contractLine.getJP_ContractContent_ID() == ioLine.getParent().get_ValueAsInt("JP_ContractContent_ID"))
+			if(contractLine.getJP_ContractContent_ID() != ioLine.getParent().get_ValueAsInt("JP_ContractContent_ID"))
 			{
 				//You can select Contract Content Line that is belong to Contract content
 				return Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") + Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");

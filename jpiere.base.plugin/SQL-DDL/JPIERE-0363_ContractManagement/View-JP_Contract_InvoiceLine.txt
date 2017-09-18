@@ -1,0 +1,40 @@
+CREATE OR REPLACE VIEW adempiere.JP_Contract_InvoiceLine AS
+SELECT 
+     il.AD_Client_ID AS AD_Client_ID 
+    ,il.AD_Org_ID AS AD_Org_ID
+    ,il.JP_ContractLine_ID AS JP_ContractLine_ID
+    ,il.JP_ContractProcPeriod_ID AS JP_ContractProcPeriod_ID
+
+    ,il.C_invoice_ID AS C_invoice_ID 
+    ,il.C_InvoiceLine_ID AS C_InvoiceLine_ID 
+    ,il.M_InOutLine_ID AS M_InOutLine_ID 
+    ,il.C_OrderLine_ID AS C_OrderLine_ID
+    ,il.M_RMALine_ID AS M_RMALine_ID
+    ,il.M_Product_ID AS M_Product_ID
+    ,il.C_Charge_ID AS C_Charge_ID
+    ,il.QtyInvoiced AS QtyInvoiced
+    ,il.Line AS Line
+    ,il.LineNetAmt AS LineNetAmt
+    ,il.PriceActual
+
+    ,il.CreatedBy AS CreatedBy
+    ,il.UpdatedBy AS UpdatedBy
+    ,il.Updated AS Updated
+    ,il.Created AS Created
+    ,il.IsActive AS IsActive
+
+    ,i.DocumentNo AS DocumentNo
+    ,i.IsTaxIncluded
+    ,i.IsPaid
+    ,i.DocStatus AS DocStatus
+    ,i.JP_Contract_ID AS JP_Contract_ID
+    ,i.JP_ContractContent_ID AS JP_ContractContent_ID
+    ,i.C_Order_ID AS C_Order_ID
+    ,i.C_Currency_ID
+    ,i.M_RMA_ID
+    ,i.JP_Bill_ID
+    ,i.DateAcct AS DateAcct
+    ,i.DateInvoiced AS DateInvoiced
+
+FROM adempiere.C_InvoiceLine il
+	INNER JOIN adempiere.C_Invoice i ON (il.C_Invoice_ID = i.C_Invoice_ID)

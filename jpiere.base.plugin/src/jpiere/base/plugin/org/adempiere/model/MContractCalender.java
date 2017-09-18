@@ -71,7 +71,7 @@ public class MContractCalender extends X_JP_ContractCalender {
 	 * @param processPeriodNum
 	 * @return
 	 */
-	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From, int processPeriodNum)
+	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From, Timestamp date_To, int processPeriodNum)
 	{
 		if(date_From == null)
 			return null;
@@ -88,7 +88,10 @@ public class MContractCalender extends X_JP_ContractCalender {
 			{
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				pstmt.setTimestamp(1, date_From);
-				pstmt.setTimestamp(2, date_From);
+				if(date_To==null)
+					pstmt.setTimestamp(2, date_From);
+				else
+					pstmt.setTimestamp(2, date_To);
 				pstmt.setInt(3, getJP_ContractCalender_ID());
 				rs = pstmt.executeQuery();
 				if (rs.next())
@@ -188,8 +191,13 @@ public class MContractCalender extends X_JP_ContractCalender {
 		}
 	}
 	
+	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From, Timestamp date_To)
+	{
+		return getContractProcessPeriod(ctx, date_From,  date_To, 0);
+	}
+	
 	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From)
 	{
-		return getContractProcessPeriod(ctx, date_From, 0);
+		return getContractProcessPeriod(ctx, date_From, null, 0);
 	}
 }

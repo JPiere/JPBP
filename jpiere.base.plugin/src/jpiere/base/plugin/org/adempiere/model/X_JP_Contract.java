@@ -34,7 +34,7 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170913L;
+	private static final long serialVersionUID = 20170915L;
 
     /** Standard Constructor */
     public X_JP_Contract (Properties ctx, int JP_Contract_ID, String trxName)
@@ -776,6 +776,20 @@ public class X_JP_Contract extends PO implements I_JP_Contract, I_Persistent
 	public Timestamp getJP_ContractDocDate_To () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ContractDocDate_To);
+	}
+
+	/** Set Contract Document Locator.
+		@param JP_ContractDocLocator Contract Document Locator	  */
+	public void setJP_ContractDocLocator (String JP_ContractDocLocator)
+	{
+		set_Value (COLUMNNAME_JP_ContractDocLocator, JP_ContractDocLocator);
+	}
+
+	/** Get Contract Document Locator.
+		@return Contract Document Locator	  */
+	public String getJP_ContractDocLocator () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractDocLocator);
 	}
 
 	public I_JP_ContractExtendPeriod getJP_ContractExtendPeriod() throws RuntimeException

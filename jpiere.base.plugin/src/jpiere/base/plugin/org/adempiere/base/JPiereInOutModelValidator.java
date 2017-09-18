@@ -335,6 +335,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 				MRecognition recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
 				recognition.setJP_DateRecognized(io.getDateAcct());
+				recognition.setM_InOut_ID(io.getM_InOut_ID());
 				if (!recognition.save(trxName))
 				{
 					return "Could not create Invoice: "+ io.getDocumentInfo();//TODO
@@ -360,8 +361,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 						log.warning("Could not create Invoice Line from Shipment Line: "+ recognition.getDocumentInfo());
 						return null;
 					}
-					//
-					sLine.setIsInvoiced(true);
+
 					if (!sLine.save(trxName))
 					{
 						log.warning("Could not update Shipment line: " + sLine);

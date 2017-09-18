@@ -34,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170908L;
+	private static final long serialVersionUID = 20170915L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)

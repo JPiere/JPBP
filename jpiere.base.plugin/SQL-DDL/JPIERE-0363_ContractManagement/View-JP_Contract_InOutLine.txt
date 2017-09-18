@@ -1,0 +1,37 @@
+CREATE OR REPLACE VIEW adempiere.JP_Contract_InOutLine AS
+SELECT 
+     iol.AD_Client_ID AS AD_Client_ID 
+    ,iol.AD_Org_ID AS AD_Org_ID
+    ,iol.JP_ContractLine_ID AS JP_ContractLine_ID
+    ,iol.JP_ContractProcPeriod_ID AS JP_ContractProcPeriod_ID
+
+    ,iol.M_InOut_ID AS M_InOut_ID 
+    ,iol.M_InOutLine_ID AS M_InOutLine_ID 
+    ,iol.C_OrderLine_ID AS C_OrderLine_ID
+    ,iol.M_RMALine_ID AS M_RMALine_ID
+    ,iol.M_Product_ID AS M_Product_ID
+    ,iol.C_Charge_ID AS C_Charge_ID
+    ,iol.M_Locator_ID AS M_Locator_ID
+    ,iol.MovementQty AS MovementQty
+    ,iol.Line AS Line
+
+    ,iol.CreatedBy AS CreatedBy
+    ,iol.UpdatedBy AS UpdatedBy
+    ,iol.Updated AS Updated
+    ,iol.Created AS Created
+    ,iol.IsActive AS IsActive
+
+    ,io.DocumentNo AS DocumentNo
+    ,io.DocStatus AS DocStatus
+    ,io.JP_Contract_ID AS JP_Contract_ID
+    ,io.JP_ContractContent_ID AS JP_ContractContent_ID
+    ,io.C_Order_ID AS C_Order_ID
+    ,io.M_RMA_ID
+    ,io.M_Warehouse_ID AS M_Warehouse_ID
+    ,io.JP_PhysicalWarehouse_ID AS JP_PhysicalWarehouse_ID
+    ,io.JP_ScheduledInOutdate AS JP_ScheduledInOutdate
+    ,io.DateAcct AS DateAcct
+    ,io.MovementDate AS MovementDate
+
+FROM adempiere.M_InOutLine iol
+	INNER JOIN adempiere.M_InOut io ON (iol.M_InOut_ID = io.M_InOut_ID)
