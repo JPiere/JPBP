@@ -110,7 +110,9 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 	private String inOutValidate(PO po, int type)
 	{
 		
-		derivativeDocHeaderBaseCheck(po, type);	
+		String msg = derivativeDocHeaderCommonCheck(po, type);	
+		if(!Util.isEmpty(msg))
+			return msg;
 		
 		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
@@ -153,7 +155,9 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 	private String inOutLineValidate(PO po, int type)
 	{		
 		
-		derivativeDocLineBaseCheck(po, type);	
+		String msg = derivativeDocLineCommonCheck(po, type);	
+		if(!Util.isEmpty(msg))
+			return msg;
 		
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)

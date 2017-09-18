@@ -17,7 +17,7 @@ public abstract class AbstractContractValidator {
 	protected abstract String checkHeaderContractInfoUpdate(PO po, int type);
 	
 	
-	protected String derivativeDocHeaderBaseCheck(PO po, int type)
+	protected String derivativeDocHeaderCommonCheck(PO po, int type)
 	{
 		
 		//TODO 期間契約の場合、転記日付が契約処理期間内にあるかどうかのチェック!!
@@ -77,7 +77,7 @@ public abstract class AbstractContractValidator {
 		return null;
 	}
 	
-	protected String derivativeDocLineBaseCheck(PO po, int type)
+	protected String derivativeDocLineCommonCheck(PO po, int type)
 	{
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)

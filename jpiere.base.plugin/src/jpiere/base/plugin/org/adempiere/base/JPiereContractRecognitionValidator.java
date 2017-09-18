@@ -14,7 +14,6 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import org.compiere.model.MClient;
-import org.compiere.model.MInOut;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -105,7 +104,9 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 	 */
 	private String recognitionValidate(PO po, int type)
 	{
-		derivativeDocHeaderBaseCheck(po, type);	
+		String msg = derivativeDocHeaderCommonCheck(po, type);
+		if(!Util.isEmpty(msg))
+			return msg;
 		
 		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
@@ -125,12 +126,11 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 	
 	@Override
 	protected String checkHeaderContractInfoUpdate(PO po, int type) 
-	{
-		MRecognition recog = (MRecognition)po;			
-		
-		//Prohibit update
+	{		
+		//Prohibit Contract info update
 		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
 		{
+			MRecognition recog = (MRecognition)po;
 			if(recog.getLines().length > 0)
 				return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");//Contract Info cannot be changed because the Document have lines
 		}
@@ -147,7 +147,9 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 	 */
 	private String recognitionLineValidate(PO po, int type)
 	{
-		derivativeDocLineBaseCheck(po, type);
+		String msg = derivativeDocLineCommonCheck(po, type);
+		if(!Util.isEmpty(msg))
+			return msg;
 		
 		return null;
 	}
