@@ -78,7 +78,7 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 				}else{
 					log.log(Level.SEVERE, "Unknown Parameter: " + name);
 				}//if
-			}
+			}//for
 			
 			
 			if(p_JP_ContractTabLevel.equals(JP_ContractTabLevel_Document))

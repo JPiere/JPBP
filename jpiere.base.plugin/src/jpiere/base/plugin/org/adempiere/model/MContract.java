@@ -349,7 +349,9 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		MContractContent[] contents = getContractContents();
 		for(int i = 0; i <contents.length; i++)
 		{
-			contents[i].processIt(DocAction.ACTION_Void);
+			boolean isOK = contents[i].processIt(DocAction.ACTION_Void);
+			if(isOK)
+				contents[i].saveEx(get_TrxName());
 		}
 
 		// After Void
@@ -375,6 +377,15 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 	{
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
 
+		
+		MContractContent[] contents = getContractContents();
+		for(int i = 0; i <contents.length; i++)
+		{
+			boolean isOK = contents[i].processIt(DocAction.ACTION_Close);
+			if(isOK)
+				contents[i].saveEx(get_TrxName());
+		}
+		
 		setProcessed(true);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
 		setDocAction(DOCACTION_None);
 		updateContractStatus(DOCACTION_Close);

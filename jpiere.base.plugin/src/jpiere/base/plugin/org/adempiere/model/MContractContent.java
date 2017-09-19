@@ -582,6 +582,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				return false;
 			}
 			
+			if(getParent().getDocStatus().equals(DocAction.STATUS_Closed) || getParent().getDocStatus().equals(DocAction.STATUS_Voided)
+					|| getParent().getDocStatus().equals(DocAction.STATUS_Reversed))
+			{
+				log.saveError("Error", "契約書の伝票ステータスにより、契約内容が作成できません。");//TODO メッセージ化
+				return false;
+			}
 		}
 		
 		//Check overlap of Contract process date in Same contract content tempalete

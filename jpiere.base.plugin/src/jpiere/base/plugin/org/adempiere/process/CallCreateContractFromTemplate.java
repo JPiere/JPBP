@@ -19,12 +19,14 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
+import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractT;
 
 
@@ -37,19 +39,49 @@ import jpiere.base.plugin.org.adempiere.model.MContractT;
 */
 public class CallCreateContractFromTemplate extends SvrProcess {
 	
-	MContract m_Contract = null;
 	MContractT m_ContractTemplate = null;
 	int Record_ID = 0;
+	
+	private  String p_JP_ContractTabLevel = null;
+	private  static final String JP_ContractTabLevel_Document  = "CD";
+	private  static final String JP_ContractTabLevel_Content  = "CC";
 	
 	
 	@Override
 	protected void prepare() 
 	{
+		ProcessInfoParameter[] para = getParameter();
+		for (int i = 0; i < para.length; i++)
+		{
+			String name = para[i].getParameterName();
+
+			if (para[i].getParameter() == null)
+			{
+				;
+				
+			}else if (name.equals("JP_ContractTabLevel")){
+				
+				p_JP_ContractTabLevel = para[i].getParameterAsString();
+				
+			}else{
+				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+			}//if
+		}
+		
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-			m_Contract = new MContract(getCtx(), Record_ID, get_TrxName());
-			m_ContractTemplate = new MContractT(getCtx(),m_Contract.getJP_ContractT_ID(), get_TrxName());
+			if(p_JP_ContractTabLevel.equals(JP_ContractTabLevel_Document))
+			{
+				MContract m_Contract = new MContract(getCtx(), Record_ID, get_TrxName());
+				m_ContractTemplate = new MContractT(getCtx(),m_Contract.getJP_ContractT_ID(), get_TrxName());
+			
+			}else if(p_JP_ContractTabLevel.equals(JP_ContractTabLevel_Content)){
+				
+				MContractContent m_ContractContent = new MContractContent(getCtx(), Record_ID, get_TrxName());
+				m_ContractTemplate = new MContractT(getCtx(), m_ContractContent.getParent().getJP_ContractT_ID(), get_TrxName());
+			}
+			
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
