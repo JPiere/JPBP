@@ -88,8 +88,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			inout.setProcessed(false);
 			inout.setDocStatus(DocAction.STATUS_Drafted);
 			inout.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
-			inout.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
-			inout.setDateAcct(getDateAcct());		
+			inout.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());	
 			inout.setDocumentNo(""); //Reset Document No
 			inout.setC_DocType_ID(orders[i].getC_DocTypeTarget().getC_DocTypeShipment_ID());
 			inout.setMovementDate(getDateAcct());

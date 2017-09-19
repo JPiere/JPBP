@@ -79,7 +79,7 @@ public class ContractStatusUpdate extends SvrProcess {
 		//Adjust time because of reference time do not have hh:mm info
 		now_LocalDateTime = new Timestamp(System.currentTimeMillis()).toLocalDateTime();
 		now_LocalDateTime = now_LocalDateTime.minusDays(1);
-		 now_Timestamp = Timestamp.valueOf(now_LocalDateTime);
+		now_Timestamp = Timestamp.valueOf(now_LocalDateTime);
 		
 		MContract[] contracts = getContracts();
 		MContract contract = null;

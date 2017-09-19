@@ -1,17 +1,3 @@
-/******************************************************************************
- * Product: JPiere                                                            *
- * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
- *                                                                            *
- * This program is free software, you can redistribute it and/or modify it    *
- * under the terms version 2 of the GNU General Public License as published   *
- * by the Free Software Foundation. This program is distributed in the hope   *
- * that it will be useful, but WITHOUT ANY WARRANTY.                          *
- * See the GNU General Public License for more details.                       *
- *                                                                            *
- * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
- * (http://www.oss-erp.co.jp)                                                 *
- *****************************************************************************/
-
 package jpiere.base.plugin.org.adempiere.base;
 
 import org.adempiere.util.Callback;
@@ -21,21 +7,14 @@ import org.adempiere.webui.adwindow.validator.WindowValidatorEventType;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridTab;
-import org.compiere.model.MOrder;
+import org.compiere.model.MInvoice;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 
-
-/** 
-* JPIERE-0363
-*
-* @author Hideaki Hagiwara
-*
-*/
-public class JPiereContractOrderWindowValidator implements WindowValidator {
+public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 	
 	@Override
 	public void onWindowEvent(WindowValidatorEvent event, Callback<Boolean> callback) 
@@ -57,17 +36,17 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 					int Record_ID =((Integer)gridTab.getRecord_ID()).intValue();
 					int JP_ContractContent_ID = ((Integer)gridTab.getValue("JP_ContractContent_ID")).intValue();
 					MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-					MOrder[] orderes = content.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, null);
-					for(int i = 0; i < orderes.length; i++)
+					MInvoice[] invoices = content.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, null);
+					for(int i = 0; i < invoices.length; i++)
 					{
-						if(orderes[i].getC_Order_ID() == Record_ID)
+						if(invoices[i].getC_Invoice_ID() == Record_ID)
 						{
 							continue;
 						}else{
 								
-							String docInfo = Msg.getElement(Env.getCtx(), "DocumentNo") + " : " + orderes[i].getDocumentNo();
+							String docInfo = Msg.getElement(Env.getCtx(), "DocumentNo") + " : " + invoices[i].getDocumentNo();
 							String msg = docInfo + " " + Msg.getMsg(Env.getCtx(),"JP_DoYouConfirmIt");//Do you confirm it?
-							final MOrder order = orderes[i];
+							final MInvoice invoice = invoices[i];
 							Callback<Boolean> isZoom = new Callback<Boolean>()
 							{
 									@Override
@@ -75,7 +54,7 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 									{
 										if(result)
 										{
-											AEnv.zoom(MOrder.Table_ID, order.getC_Order_ID());
+											AEnv.zoom(MInvoice.Table_ID, invoice.getC_Invoice_ID());
 										}
 									}
 								
@@ -86,8 +65,10 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 					}//for
 				}
 			}//if(obj == null)
+			
 			callback.onCallback(true);
-		}////BEFORE_SAVE
+			
+		}//BEFORE_SAVE
 		
 		callback.onCallback(true);
 	}

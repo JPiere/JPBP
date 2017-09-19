@@ -188,8 +188,8 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						}
 						
 						//Check Contract Period
-						if(content.getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0
-								|| content.getJP_ContractProcDate_To().compareTo(period.getEndDate()) < 0 )
+						if(content.getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0 
+								|| (content.getJP_ContractProcDate_To() != null && content.getJP_ContractProcDate_To().compareTo(period.getEndDate()) < 0) )
 						{
 							//Outside the Contract Process Period.
 							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");

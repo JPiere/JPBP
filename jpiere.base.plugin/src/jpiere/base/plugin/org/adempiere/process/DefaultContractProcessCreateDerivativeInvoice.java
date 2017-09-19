@@ -88,7 +88,7 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			invoice.setDocStatus(DocAction.STATUS_Drafted);
 			invoice.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 			invoice.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
-			invoice.setDateAcct(getDateAcct());		
+			invoice.setDateInvoiced(getDateDoc());		
 			invoice.setDocumentNo(""); //Reset Document No
 			invoice.setC_DocTypeTarget_ID(orders[i].getC_DocTypeTarget().getC_DocTypeInvoice_ID());
 			invoice.setDateAcct(getDateAcct());
