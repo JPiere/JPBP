@@ -159,14 +159,14 @@ public class ContractStatusUpdate extends SvrProcess {
 		ArrayList<MContract> list = new ArrayList<MContract>();
 		final StringBuilder sql = new StringBuilder("SELECT * FROM JP_Contract c WHERE c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR' ,'UC')");
 		if(p_AD_Org_ID > 0)
-			sql.append(" c.AD_Org_ID = ? ");
+			sql.append(" AND c.AD_Org_ID = ? ");
 		
 		if(p_JP_ContractCategory_ID > 0)
-			sql.append(" c.JP_ContractCategory_ID  = ? ");
+			sql.append(" AND c.JP_ContractCategory_ID  = ? ");
 		else if(p_JP_ContractCategoryL1_ID > 0)
-			sql.append(" c.JP_ContractCategoryL1_ID  = ? ");
+			sql.append(" AND c.JP_ContractCategoryL1_ID  = ? ");
 		else if(p_JP_ContractCategoryL2_ID > 0)
-			sql.append(" c.JP_ContractCategoryL2_ID  = ? ");
+			sql.append(" AND c.JP_ContractCategoryL2_ID  = ? ");
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
