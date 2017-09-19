@@ -130,7 +130,6 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 	}
 	
 	
-	@Override
 	protected String checkHeaderContractInfoUpdate(PO po, int type) 
 	{
 		MInOut io = (MInOut)po;			

@@ -124,7 +124,6 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 	}
 
 	
-	@Override
 	protected String checkHeaderContractInfoUpdate(PO po, int type) 
 	{		
 		//Prohibit Contract info update

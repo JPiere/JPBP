@@ -124,7 +124,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{	
-				MOrderLine[] contractOrderLines = order.getLines(" JP_ContractLines IS NOT NULL ", " Line ");
+				MOrderLine[] contractOrderLines = order.getLines(" JP_ContractLine_ID IS NOT NULL ", " Line ");
 				if(contractOrderLines.length > 0)
 				{
 					//Contract Info can not be changed because the document contains contract Info lines.

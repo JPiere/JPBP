@@ -87,7 +87,7 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 				}
 			}//if(obj == null)
 			callback.onCallback(true);
-		}////BEFORE_SAVE
+		}//BEFORE_SAVE
 		
 		callback.onCallback(true);
 	}
