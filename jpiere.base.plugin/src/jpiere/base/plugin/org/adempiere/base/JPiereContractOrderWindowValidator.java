@@ -1,7 +1,6 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import org.adempiere.util.Callback;
-import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.adwindow.validator.WindowValidator;
 import org.adempiere.webui.adwindow.validator.WindowValidatorEvent;
 import org.adempiere.webui.adwindow.validator.WindowValidatorEventType;
@@ -11,8 +10,7 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MOrder;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.zkoss.zk.ui.Component;
-import org.zkoss.zul.Html;
+
 
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 

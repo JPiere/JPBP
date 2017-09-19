@@ -30,7 +30,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractTaxAcct;
 
 
-/** JPIERE-0363
+/** 
+* JPIERE-0363
 *
 * @author Hideaki Hagiwara
 *

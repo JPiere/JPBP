@@ -345,6 +345,12 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 
 		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Contract_ID(), get_TrxName());
 		setPosted(true);
+		
+		MContractContent[] contents = getContractContents();
+		for(int i = 0; i <contents.length; i++)
+		{
+			contents[i].processIt(DocAction.ACTION_Void);
+		}
 
 		// After Void
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
@@ -534,10 +540,19 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			}
 			
 			//Set Contract Cancel Deadline
-			if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To")) && getJP_ContractCancelDeadline() == null )
+			if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To")) || getJP_ContractCancelDeadline() == null )
 			{
 				MContractCancelTerm m_ContractCancelTerm = MContractCancelTerm.get(getCtx(), getJP_ContractCancelTerm_ID());
 				setJP_ContractCancelDeadline(m_ContractCancelTerm.calculateCancelDeadLine(getJP_ContractPeriodDate_To()));
+			}
+			
+			if(newRecord || is_ValueChanged("JP_ContractPeriodDate_To") || is_ValueChanged("JP_ContractCancelDeadline"))
+			{
+				if(getJP_ContractPeriodDate_To().compareTo(getJP_ContractCancelDeadline()) < 0)
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractCancelDeadline"));
+					return false;
+				}
 			}
 			
 		}else{ 

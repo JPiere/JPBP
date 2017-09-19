@@ -780,14 +780,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				
 			}else{
 				
-				if(getParent().getJP_ContractPeriodDate_To() == null)
+				if(isAutomaticUpdateJP())
 				{
-					if(isAutomaticUpdateJP())
-					{
-						log.saveError("Error","契約書に期間の定めが無いため、自動更新にはできません。");//TODO メッセージ化
-						return false;
-					}
+					log.saveError("Error","契約書が自動更新ではないため、契約内容を自動更新にはできません。");//TODO メッセージ化
+					return false;
 				}
+				
 			}
 			
 			
