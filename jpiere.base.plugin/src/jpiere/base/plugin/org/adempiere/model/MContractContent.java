@@ -767,7 +767,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				
 				if(getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 )
 				{
-					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
+					log.saveError("Error",Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
 					return false;
 				}
 				
@@ -799,7 +799,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			{
 				if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
 				{
-					log.saveError("Error","契約処理期間が契約期間内ではありません。");//TODO メッセージ化;
+					log.saveError("Error",Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
 					return false;
 				}
 			}else{

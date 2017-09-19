@@ -135,7 +135,7 @@ public class ContractStatusUpdate extends SvrProcess {
 			}//if(contract.isAutomaticUpdateJP())
 		}//for i
 		
-		return null;
+		return "OK";
 	}
 	
 	private MContract[] getContracts()
