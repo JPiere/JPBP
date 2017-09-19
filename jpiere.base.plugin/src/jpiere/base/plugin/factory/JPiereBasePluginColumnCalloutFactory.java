@@ -175,6 +175,10 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				if(columnName.equals("JP_LocatorFrom_ID") || columnName.equals("JP_LocatorTo_ID"))
 				{
 					list.add(new JPiereOrderCallout());
+					
+				}else if(columnName.equals("JP_ContractLine_ID")) { //JPIERE-0363
+					
+					list.add(new JPiereContractOrderCallout());
 				}			
 
 			}else if(tableName.equals(MInOut.Table_Name)){

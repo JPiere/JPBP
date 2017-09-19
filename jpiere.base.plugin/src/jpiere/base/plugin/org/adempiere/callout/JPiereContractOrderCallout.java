@@ -22,10 +22,12 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 /**
@@ -41,6 +43,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 
 	
 	private int	JP_ContractContent_ID = 0;
+	private int JP_ContractLine_ID = 0;
 	
 	@Override
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
@@ -82,7 +85,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 						{
 							if(result)
 							{
-								updateByContract(ctx, WindowNo, mTab, mField, value, oldValue) ;
+								updateByContractContent(ctx, WindowNo, mTab, mField, value, oldValue) ;
 							}else{
 								;//Noting to do
 							}
@@ -119,7 +122,36 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 					{
 						if(result)
 						{
-							updateByContract(ctx, WindowNo, mTab, mField, value, oldValue) ;
+							updateByContractContent(ctx, WindowNo, mTab, mField, value, oldValue) ;
+						}else{
+							;//Noting to do
+						}
+			        }
+
+				});//FDialog.
+				
+			}else{
+				mTab.setValue("JP_ContractProcPeriod_ID", null);
+			}
+			
+		}else if(mField.getColumnName().equals("JP_ContractLine_ID")){
+			if( value != null)
+			{
+				JP_ContractLine_ID =  ((Integer)value).intValue();
+				int JP_ContractProcPeriod_ID = Env.getContextAsInt(ctx, WindowNo, "JP_ContractProcPeriod_ID");
+				
+				if(JP_ContractProcPeriod_ID > 0)
+					mTab.setValue("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+				
+				FDialog.ask(WindowNo, null, "JP_UpdateDocumentInContract", new Callback<Boolean>() //Would you like to update document in Contract content?
+				{
+
+					@Override
+					public void onCallback(Boolean result)
+					{
+						if(result)
+						{
+							updateByContractLine(ctx, WindowNo, mTab, mField, value, oldValue) ;
 						}else{
 							;//Noting to do
 						}
@@ -136,7 +168,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 	}
 	
 	
-	private void updateByContract(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	private void updateByContractContent(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 		if(JP_ContractContent_ID == 0)
 				return ;
@@ -205,6 +237,86 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 		
 		if(content.getC_PaymentTerm_ID() > 0)
 			mTab.setValue("C_PaymentTerm_ID", content.getC_PaymentTerm_ID());
+		
+		//Reference info
+		if(content.getC_Project_ID() > 0)
+			mTab.setValue("C_Project_ID", content.getC_Project_ID());
+		
+		
+		if(content.getC_Campaign_ID() > 0)
+			mTab.setValue("C_Campaign_ID", content.getC_Campaign_ID());
+		
+		if(content.getC_Activity_ID() > 0)
+			mTab.setValue("C_Activity_ID", content.getC_Activity_ID());
+		
+		if(content.getUser1_ID() > 0)
+			mTab.setValue("User1_ID", content.getUser1_ID());
+		
+		if(content.getUser2_ID() > 0)
+			mTab.setValue("User2_ID", content.getUser2_ID());
 	}
 	
+	
+	private void updateByContractLine(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		if(JP_ContractLine_ID == 0)
+			return ;
+	
+		MContractLine contractLine = MContractLine.get(ctx, JP_ContractLine_ID);
+		mTab.setValue("QtyEntered", contractLine.getQtyEntered());
+		mTab.setValue("C_UOM_ID", contractLine.getC_UOM_ID());
+		mTab.setValue("QtyOrdered", contractLine.getQtyOrdered());
+		mTab.setValue("PriceEntered", contractLine.getPriceEntered());
+		mTab.setValue("PriceActual", contractLine.getPriceActual());
+		mTab.setValue("PriceLimit", contractLine.getPriceLimit());
+		mTab.setValue("C_Tax_ID", contractLine.getC_Tax_ID());
+		mTab.setValue("Discount", contractLine.getDiscount());
+		mTab.setValue("PriceList", contractLine.getPriceList());
+		mTab.setValue("LineNetAmt", contractLine.getLineNetAmt());
+		mTab.setValue("IsDescription", contractLine.isDescription());
+		
+		if(contractLine.getJP_LocatorFrom_ID() > 0)
+		{
+			mTab.setValue("JP_LocatorFrom_ID", contractLine.getJP_LocatorFrom_ID());
+			mTab.setValue("JP_LocatorTo_ID", contractLine.getJP_LocatorTo_ID());
+		}
+		
+		if(contractLine.getJP_ASI_From_ID() > 0)
+		{
+			mTab.setValue("JP_ASI_From_ID", contractLine.getJP_ASI_From_ID());
+			mTab.setValue("JP_ASI_To_ID", contractLine.getJP_ASI_To_ID());
+		}
+		
+		if(contractLine.getJP_Locator_ID() > 0)
+			mTab.setValue("JP_Locator_ID", contractLine.getJP_Locator_ID());
+		
+		if(contractLine.getS_ResourceAssignment_ID() > 0)
+			mTab.setValue("S_ResourceAssignment_ID", contractLine.getS_ResourceAssignment_ID());
+		
+		if(contractLine.getM_AttributeSetInstance_ID() > 0)
+			mTab.setValue("M_AttributeSetInstance_ID", contractLine.getM_AttributeSetInstance_ID());
+		
+		//Reference Info
+		if(contractLine.getC_Project_ID() > 0)
+			mTab.setValue("C_Project_ID", contractLine.getC_Project_ID());
+		
+		if(contractLine.getC_ProjectPhase_ID() > 0)
+			mTab.setValue("C_ProjectPhase_ID", contractLine.getC_ProjectPhase_ID());
+		
+		if(contractLine.getC_ProjectTask_ID() > 0)
+			mTab.setValue("C_ProjectTask_ID", contractLine.getC_ProjectTask_ID());
+		
+		if(contractLine.getC_Campaign_ID() > 0)
+			mTab.setValue("C_Campaign_ID", contractLine.getC_Campaign_ID());
+		
+		if(contractLine.getC_Activity_ID() > 0)
+			mTab.setValue("C_Activity_ID", contractLine.getC_Activity_ID());
+		
+		if(contractLine.getUser1_ID() > 0)
+			mTab.setValue("User1_ID", contractLine.getUser1_ID());
+		
+		if(contractLine.getUser2_ID() > 0)
+			mTab.setValue("User2_ID", contractLine.getUser2_ID());
+		
+	}
 }
