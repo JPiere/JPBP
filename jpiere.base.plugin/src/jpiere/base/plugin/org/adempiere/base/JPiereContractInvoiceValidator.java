@@ -193,6 +193,12 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
 					}
 					
+					//Check kind of Base Doc
+					if(!content.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice) && !content.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice))
+					{
+						return "選択した契約内容は、基点となる伝票の種類が異なります。";//TODO メッセージ化
+					}
+					
 					/** 
 					 * Check JP_ContractProcPeriod_ID
 					 *  Mandetory Period Contract 
@@ -336,7 +342,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 	private MInvoiceLine[] getInvoiceLines(MInvoice invoice, String whereClause)
 	{
-		String whereClauseFinal = "C_Invoice_ID=? ";
+		String whereClauseFinal = "C_Invoice_ID=? AND ";
 		if (whereClause != null)
 			whereClauseFinal += whereClause;
 		List<MInvoiceLine> list = new Query(Env.getCtx(), I_C_InvoiceLine.Table_Name, whereClauseFinal, invoice.get_TrxName())

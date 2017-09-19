@@ -23,46 +23,53 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 		if(event.getName().equals(WindowValidatorEventType.BEFORE_SAVE.getName()))
 		{
 			GridTab gridTab =event.getWindow().getADWindowContent().getActiveGridTab();
-			Object obj = gridTab.getValue("JP_ContractProcPeriod_ID");
-			if(obj == null)
+			Object obj_ContractProcPeriod_ID = gridTab.getValue("JP_ContractProcPeriod_ID");
+			if(obj_ContractProcPeriod_ID == null)
 			{
 				;//Notihg to do
 				
 			}else{	
 				
-				int JP_ContractProcPeriod_ID = ((Integer)obj).intValue();
+				int JP_ContractProcPeriod_ID = ((Integer)obj_ContractProcPeriod_ID).intValue();
 				if(JP_ContractProcPeriod_ID > 0)
 				{
 					int Record_ID =((Integer)gridTab.getRecord_ID()).intValue();
-					int JP_ContractContent_ID = ((Integer)gridTab.getValue("JP_ContractContent_ID")).intValue();
-					MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-					MInvoice[] invoices = content.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, null);
-					for(int i = 0; i < invoices.length; i++)
+					Object obj_ContracContent_ID = gridTab.getValue("JP_ContractContent_ID");
+					if(obj_ContracContent_ID == null)
 					{
-						if(invoices[i].getC_Invoice_ID() == Record_ID)
+						;//Nothing to do
+					}else{
+						
+						int JP_ContractContent_ID = ((Integer)obj_ContracContent_ID).intValue();
+						MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+						MInvoice[] invoices = content.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, null);
+						for(int i = 0; i < invoices.length; i++)
 						{
-							continue;
-						}else{
-								
-							String docInfo = Msg.getElement(Env.getCtx(), "DocumentNo") + " : " + invoices[i].getDocumentNo();
-							String msg = docInfo + " " + Msg.getMsg(Env.getCtx(),"JP_DoYouConfirmIt");//Do you confirm it?
-							final MInvoice invoice = invoices[i];
-							Callback<Boolean> isZoom = new Callback<Boolean>()
+							if(invoices[i].getC_Invoice_ID() == Record_ID)
 							{
-									@Override
-									public void onCallback(Boolean result)
-									{
-										if(result)
+								continue;
+							}else{
+									
+								String docInfo = Msg.getElement(Env.getCtx(), "DocumentNo") + " : " + invoices[i].getDocumentNo();
+								String msg = docInfo + " " + Msg.getMsg(Env.getCtx(),"JP_DoYouConfirmIt");//Do you confirm it?
+								final MInvoice invoice = invoices[i];
+								Callback<Boolean> isZoom = new Callback<Boolean>()
+								{
+										@Override
+										public void onCallback(Boolean result)
 										{
-											AEnv.zoom(MInvoice.Table_ID, invoice.getC_Invoice_ID());
+											if(result)
+											{
+												AEnv.zoom(MInvoice.Table_ID, invoice.getC_Invoice_ID());
+											}
 										}
-									}
-								
-							};
-							FDialog.ask( event.getWindow().getADWindowContent().getWindowNo(), event.getWindow().getComponent(),Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID"), "JP_OverlapPeriod", msg, isZoom);
-							break;
-						}
-					}//for
+									
+								};
+								FDialog.ask( event.getWindow().getADWindowContent().getWindowNo(), event.getWindow().getComponent(),Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID"), "JP_OverlapPeriod", msg, isZoom);
+								break;
+							}
+						}//for
+					}
 				}
 			}//if(obj == null)
 			

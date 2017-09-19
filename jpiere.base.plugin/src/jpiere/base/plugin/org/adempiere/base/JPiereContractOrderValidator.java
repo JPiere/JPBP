@@ -165,6 +165,14 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
 					}
 					
+					
+					//Check kind of Base Doc
+					if(!content.getDocBaseType().equals(MContractContent.DOCBASETYPE_SalesOrder) && !content.getDocBaseType().equals(MContractContent.DOCBASETYPE_PurchaseOrder))
+					{
+						return "選択した契約内容は、基点となる伝票の種類が異なります。";//TODO メッセージ化 
+					}
+					
+					
 					/** 
 					 * Check JP_ContractProcPeriod_ID
 					 *  Mandetory Period Contract 
