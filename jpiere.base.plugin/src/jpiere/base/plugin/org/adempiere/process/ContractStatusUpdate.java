@@ -81,15 +81,30 @@ public class ContractStatusUpdate extends SvrProcess {
 		now_LocalDateTime = now_LocalDateTime.minusDays(1);
 		now_Timestamp = Timestamp.valueOf(now_LocalDateTime);
 		
+		
 		MContract[] contracts = getContracts();
 		MContract contract = null;
 		for(int i = 0; i < contracts.length; i++)
 		{
 			contract = contracts[i];
+			
+			//Check from Prepare to Under Contract
+			if(contract.getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_Prepare))
+			{
+				if(contract.getJP_ContractPeriodDate_From().compareTo(now_Timestamp) >= 0)
+				{
+					contract.setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
+					contract.saveEx(get_TrxName());
+					continue;
+				}
+			}
+			
+			
+			//Check an indefinite period Contract
 			if(contract.getJP_ContractPeriodDate_To() == null)
 				continue;
 			
-			//Auto update Contract
+			//Check Auto update Contract
 			if(contract.isAutomaticUpdateJP())
 			{
 				//Auto update Contract
@@ -111,6 +126,7 @@ public class ContractStatusUpdate extends SvrProcess {
 						cancelContract(contract);
 						
 					}else{
+						
 						checkContractProcStatus(contract);
 					}
 					
@@ -173,7 +189,7 @@ public class ContractStatusUpdate extends SvrProcess {
 		}
 		catch (Exception e)
 		{
-//			log.log(Level.SEVERE, sql, e);
+			log.log(Level.SEVERE, e.toString());
 		}
 		finally
 		{
