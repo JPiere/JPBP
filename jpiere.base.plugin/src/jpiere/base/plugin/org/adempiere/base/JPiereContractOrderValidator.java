@@ -288,6 +288,8 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	 */
 	private String orderLineValidate(PO po, int type)
 	{
+		
+		/** Ref:JPiereContractInvoiceValidator */
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
 						||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID) ) ))

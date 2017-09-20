@@ -1,5 +1,6 @@
 package jpiere.base.plugin.org.adempiere.base;
 
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
@@ -191,5 +192,6 @@ public abstract class AbstractContractValidator {
 		return null;
 		
 	}
+	
 	
 }

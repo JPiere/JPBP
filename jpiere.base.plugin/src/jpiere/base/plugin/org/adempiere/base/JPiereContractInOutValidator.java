@@ -31,6 +31,7 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -188,6 +189,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 		if(!Util.isEmpty(msg))
 			return msg;
 		
+		/** Ref:JPiereContractInvoiceValidator */
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
 						||   po.is_ValueChanged("C_OrderLine_ID") ||   po.is_ValueChanged("M_RMALine_ID") ) ))
@@ -195,6 +197,9 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			MInOutLine ioLine = (MInOutLine)po;			
 			int C_OrderLine_ID = ioLine.getC_OrderLine_ID();
 			int M_RMALine_ID = ioLine.getM_RMALine_ID();
+			
+			if(C_OrderLine_ID <= 0 && M_RMALine_ID <= 0)
+				return null;
 			
 			PO baseDoc = null;
 			if(C_OrderLine_ID > 0)
@@ -204,6 +209,8 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 
 				
 			int JP_ContractLine_ID = baseDoc.get_ValueAsInt("JP_ContractLine_ID");
+			if(JP_ContractLine_ID <=0)
+				return null;
 				
 			MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
 			MContractAcct contractAcct = MContractAcct.get(Env.getCtx(), contractLine.getParent().getJP_Contract_Acct_ID());
@@ -215,7 +222,25 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				return Msg.getMsg(Env.getCtx(), "Invalid") +" - " +Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") + Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");
 			}
 			
+			//Check PeriodContract
+			if(contractLine.getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				int ioLine_ContractProcPeriod_ID = ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
+				if(ioLine_ContractProcPeriod_ID <= 0)
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+				}
+				
+				MContractCalender ioLine_PeriodCalender = MContractCalender.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);				
+				if(ioLine_PeriodCalender.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
+				{
+					return "契約書の契約カレンダーの契約処理期間を選択して下さい。";//TODO メッセージ化
+				}
+				
+			}
 			
+			//TODO 自動仕訳の制御と一緒に要見直し
 			//Check Order Info Mandetory
 			if(contractAcct.isOrderInfoMandatoryJP())
 			{
