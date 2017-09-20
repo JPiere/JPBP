@@ -23,8 +23,6 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
-import org.compiere.model.MOrder;
-import org.compiere.model.MOrderLine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -102,7 +100,35 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 	@Override
 	public String docValidate(PO po, int timing) 
 	{
-		
+		if(timing == ModelValidator.TIMING_BEFORE_PREPARE)
+		{
+			MInvoice invoice = (MInvoice)po;
+			int JP_Contract_ID = invoice.get_ValueAsInt("JP_Contract_ID");
+			if(JP_Contract_ID <= 0)
+				return null;
+			
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				
+				//Check Mandetory - JP_ContractProcPeriod_ID
+				MInvoiceLine[] lines = invoice.getLines();
+				int JP_ContractLine_ID = 0;
+				int JP_ContractProcPeriod_ID = 0;
+				for(int i = 0; i < lines.length; i++)
+				{
+					JP_ContractLine_ID = lines[i].get_ValueAsInt("JP_ContractLine_ID");
+					JP_ContractProcPeriod_ID = lines[i].get_ValueAsInt("JP_ContractProcPeriod_ID");
+					if(JP_ContractLine_ID > 0 && JP_ContractProcPeriod_ID <= 0)
+					{
+						return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+													+ " - " + Msg.getElement(Env.getCtx(),  MInvoiceLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+					}
+				}
+				
+			}
+			
+		}//TIMING_BEFORE_PREPARE
 		
 		return null;
 	}
@@ -152,7 +178,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{	
-				MInvoiceLine[] contractInvoiceLines = getInvoiceLines(invoice, " JP_ContractLine_ID IS NOT NULL ");
+				MInvoiceLine[] contractInvoiceLines = getInvoiceLinesWithContractLine(invoice);
 				if(contractInvoiceLines.length > 0)
 				{
 					//Contract Info can not be changed because the document contains contract Info lines.
@@ -341,11 +367,9 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		return null;
 	}
 
-	private MInvoiceLine[] getInvoiceLines(MInvoice invoice, String whereClause)
+	private MInvoiceLine[] getInvoiceLinesWithContractLine(MInvoice invoice)
 	{
-		String whereClauseFinal = "C_Invoice_ID=? AND ";
-		if (whereClause != null)
-			whereClauseFinal += whereClause;
+		String whereClauseFinal = "C_Invoice_ID=? AND JP_ContractLine_ID IS NOT NULL ";
 		List<MInvoiceLine> list = new Query(Env.getCtx(), I_C_InvoiceLine.Table_Name, whereClauseFinal, invoice.get_TrxName())
 										.setParameters(invoice.getC_Invoice_ID())
 										.setOrderBy(I_C_InvoiceLine.COLUMNNAME_Line)

@@ -13,10 +13,15 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.util.List;
+
 import org.compiere.model.MClient;
+import org.compiere.model.MInOut;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -24,6 +29,7 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
@@ -89,6 +95,35 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 	@Override
 	public String docValidate(PO po, int timing) 
 	{
+		if(timing == ModelValidator.TIMING_BEFORE_PREPARE)
+		{
+			MRecognition recog = (MRecognition)po;
+			int JP_Contract_ID = recog.get_ValueAsInt("JP_Contract_ID");
+			if(JP_Contract_ID <= 0)
+				return null;
+			
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				
+				//Check Mandetory - JP_ContractProcPeriod_ID
+				MRecognitionLine[] lines = recog.getLines();
+				int JP_ContractLine_ID = 0;
+				int JP_ContractProcPeriod_ID = 0;
+				for(int i = 0; i < lines.length; i++)
+				{
+					JP_ContractLine_ID = lines[i].get_ValueAsInt("JP_ContractLine_ID");
+					JP_ContractProcPeriod_ID = lines[i].get_ValueAsInt("JP_ContractProcPeriod_ID");
+					if(JP_ContractLine_ID > 0 && JP_ContractProcPeriod_ID <= 0)
+					{
+						return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+													+ " - " + Msg.getElement(Env.getCtx(),  MRecognitionLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+					}
+				}
+				
+			}
+			
+		}//TIMING_BEFORE_PREPARE
 		
 		return null;
 	}
@@ -112,25 +147,26 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 						||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
 						||   po.is_ValueChanged("C_Order_ID") ) ) )
 		{
+			MRecognition recog = (MRecognition)po;
+			int JP_Contract_ID = recog.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);	
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			//Check to Change Contract Info		
+			if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{	
+				MRecognitionLine[] contractInvoiceLines = getRecognitionLinesWithContractLine(recog);
+				if(contractInvoiceLines.length > 0)
+				{
+					//Contract Info can not be changed because the document contains contract Info lines.
+					return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");
+				}
+			}
 			
-			String returnValue = checkHeaderContractInfoUpdate(po, type);
-			
-			if(!Util.isEmpty(returnValue))
-				return returnValue;
 		}//Type
 		
 		return null;
 	}
 
 	
-	protected String checkHeaderContractInfoUpdate(PO po, int type) 
-	{		
-		String msg = derivativeDocLineCommonCheck(po, type);	
-		if(!Util.isEmpty(msg))
-			return msg;
-		
-		return null;
-	}
 	
 	/**
 	 * Recognition Line Validate
@@ -148,5 +184,15 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 		return null;
 	}
 
+	
+	private MRecognitionLine[] getRecognitionLinesWithContractLine(MRecognition recog)
+	{
+		String whereClauseFinal = "JP_Recognition_ID=? AND JP_ContractLine_ID IS NOT NULL ";
+		List<MRecognitionLine> list = new Query(Env.getCtx(), MRecognitionLine.Table_Name, whereClauseFinal, recog.get_TrxName())
+										.setParameters(recog.getM_InOut_ID())
+										.setOrderBy(MRecognitionLine.COLUMNNAME_Line)
+										.list();
+		return list.toArray(new MRecognitionLine[list.size()]);
+	}
 
 }

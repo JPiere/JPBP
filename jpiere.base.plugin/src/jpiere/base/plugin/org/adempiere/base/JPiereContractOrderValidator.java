@@ -90,6 +90,36 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing) 
 	{
+		if(timing == ModelValidator.TIMING_BEFORE_PREPARE)
+		{
+			MOrder order = (MOrder)po;
+			int JP_Contract_ID = order.get_ValueAsInt("JP_Contract_ID");
+			if(JP_Contract_ID <= 0)
+				return null;
+			
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				
+				//Check Mandetory - JP_ContractProcPeriod_ID
+				MOrderLine[] lines = order.getLines();
+				int JP_ContractLine_ID = 0;
+				int JP_ContractProcPeriod_ID = 0;
+				for(int i = 0; i < lines.length; i++)
+				{
+					JP_ContractLine_ID = lines[i].get_ValueAsInt("JP_ContractLine_ID");
+					JP_ContractProcPeriod_ID = lines[i].get_ValueAsInt("JP_ContractProcPeriod_ID");
+					if(JP_ContractLine_ID > 0 && JP_ContractProcPeriod_ID <= 0)
+					{
+						return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+													+ " - " + Msg.getElement(Env.getCtx(),  MOrderLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+					}
+				}
+				
+			}
+			
+		}//TIMING_BEFORE_PREPARE
+		
 		return null;
 	}
 	

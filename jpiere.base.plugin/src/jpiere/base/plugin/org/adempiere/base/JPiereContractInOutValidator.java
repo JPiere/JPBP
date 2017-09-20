@@ -13,15 +13,17 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.util.List;
+
 import org.compiere.model.MClient;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -96,6 +98,36 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 	public String docValidate(PO po, int timing) 
 	{
 		
+		if(timing == ModelValidator.TIMING_BEFORE_PREPARE)
+		{
+			MInOut io = (MInOut)po;
+			int JP_Contract_ID = io.get_ValueAsInt("JP_Contract_ID");
+			if(JP_Contract_ID <= 0)
+				return null;
+			
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				
+				//Check Mandetory - JP_ContractProcPeriod_ID
+				MInOutLine[] lines = io.getLines();
+				int JP_ContractLine_ID = 0;
+				int JP_ContractProcPeriod_ID = 0;
+				for(int i = 0; i < lines.length; i++)
+				{
+					JP_ContractLine_ID = lines[i].get_ValueAsInt("JP_ContractLine_ID");
+					JP_ContractProcPeriod_ID = lines[i].get_ValueAsInt("JP_ContractProcPeriod_ID");
+					if(JP_ContractLine_ID > 0 && JP_ContractProcPeriod_ID <= 0)
+					{
+						return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+													+ " - " + Msg.getElement(Env.getCtx(),  MInOutLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+					}
+				}
+				
+			}
+			
+		}//TIMING_BEFORE_PREPARE
+		
 		return null;
 	}
 	
@@ -117,32 +149,30 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
 						||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
-						||   po.is_ValueChanged("C_Order_ID") ) ) )
+						||   po.is_ValueChanged("C_Order_ID") 
+						||   po.is_ValueChanged("M_RMA_ID") ) ) )
 		{
 			
-			String returnValue = checkHeaderContractInfoUpdate(po, type);
+			MInOut io = (MInOut)po;
+			int JP_Contract_ID = io.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);	
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			//Check to Change Contract Info		
+			if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{	
+				MInOutLine[] contractInvoiceLines = getInOutLinesWithContractLine(io);
+				if(contractInvoiceLines.length > 0)
+				{
+					//Contract Info can not be changed because the document contains contract Info lines.
+					return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");
+				}
+			}
 			
-			if(!Util.isEmpty(returnValue))
-				return returnValue;
 		}//Type
 		
 		return null;
 	}
+
 	
-	
-	protected String checkHeaderContractInfoUpdate(PO po, int type) 
-	{
-		MInOut io = (MInOut)po;			
-		
-		//Prohibit update
-		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
-		{
-			if(io.getLines().length > 0)
-				return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");//Contract Info cannot be changed because the Document have lines
-		}
-		
-		return null;
-	}
 
 	/**
 	 * Order Line Validate
@@ -199,4 +229,13 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 		return null;
 	}
 
+	private MInOutLine[] getInOutLinesWithContractLine(MInOut io)
+	{
+		String whereClauseFinal = "M_InOut_ID=? AND JP_ContractLine_ID IS NOT NULL ";
+		List<MInOutLine> list = new Query(Env.getCtx(), MInOutLine.Table_Name, whereClauseFinal, io.get_TrxName())
+										.setParameters(io.getM_InOut_ID())
+										.setOrderBy(MInOutLine.COLUMNNAME_Line)
+										.list();
+		return list.toArray(new MInOutLine[list.size()]);
+	}
 }

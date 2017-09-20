@@ -23,6 +23,7 @@ SELECT
 
     ,io.DocumentNo AS DocumentNo
     ,io.DocStatus AS DocStatus
+    ,io.MovementType AS MovementType
     ,io.JP_Contract_ID AS JP_Contract_ID
     ,io.JP_ContractContent_ID AS JP_ContractContent_ID
     ,io.C_Order_ID AS C_Order_ID
