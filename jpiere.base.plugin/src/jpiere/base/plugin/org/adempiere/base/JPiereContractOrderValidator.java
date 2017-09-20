@@ -105,8 +105,8 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	{
 		if( type == ModelValidator.TYPE_BEFORE_NEW 
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
-																	||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
-																	||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID) ) ) )
+												||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
+												||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID) ) ) )
 		{
 			MOrder order = (MOrder)po;
 			

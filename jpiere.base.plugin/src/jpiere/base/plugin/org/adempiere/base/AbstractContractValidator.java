@@ -124,6 +124,8 @@ public abstract class AbstractContractValidator {
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
 				po.set_ValueNoCheck("JP_ContractLine_ID", baseDocLine.get_ValueAsInt("JP_ContractLine_ID"));
+				if(M_RMALine_ID > 0)
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 				

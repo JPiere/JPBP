@@ -65,7 +65,6 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		engine.addModelChange(MInvoice.Table_Name, this);
 		engine.addModelChange(MInvoiceLine.Table_Name, this);
 		engine.addDocValidate(MInvoice.Table_Name, this);
-		engine.addDocValidate(MInvoiceLine.Table_Name, this);
 		engine.addFactsValidate(MInvoice.Table_Name, this);
 
 	}
@@ -196,7 +195,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}
 					
 					//Check kind of Base Doc
-					if(!content.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice) && !content.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice))
+					if(!content.getDocBaseType().equals(MContractContent.DOCBASETYPE_ARInvoice) && !content.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice))
 					{
 						return "選択した契約内容は、基点となる伝票の種類が異なります。";//TODO メッセージ化
 					}

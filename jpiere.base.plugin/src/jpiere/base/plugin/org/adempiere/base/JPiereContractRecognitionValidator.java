@@ -31,7 +31,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
  *  JPIERE-0363: Contract Management
- *  JPiere Contract Invoice Validator
+ *  JPiere Contract Recognition Validator
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -52,7 +52,6 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MRecognition.Table_Name, this);
 		engine.addModelChange(MRecognitionLine.Table_Name, this);
-		engine.addDocValidate(MRecognition.Table_Name, this);
 		engine.addDocValidate(MRecognition.Table_Name, this);
 
 	}
@@ -126,13 +125,9 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 	
 	protected String checkHeaderContractInfoUpdate(PO po, int type) 
 	{		
-		//Prohibit Contract info update
-		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
-		{
-			MRecognition recog = (MRecognition)po;
-			if(recog.getLines().length > 0)
-				return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");//Contract Info cannot be changed because the Document have lines
-		}
+		String msg = derivativeDocLineCommonCheck(po, type);	
+		if(!Util.isEmpty(msg))
+			return msg;
 		
 		return null;
 	}

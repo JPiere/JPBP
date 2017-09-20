@@ -320,7 +320,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 		{
 			MInOut io = (MInOut)po;
 			String trxName = po.get_TrxName();
-			boolean isReversal = io.isReversal();//TODO 出荷納品伝票がリバースされる際に、出荷納品伝票もリバースする必要がある。
+			boolean isReversal = io.isReversal();//TODO 出荷納品伝票がリバースされる際に、売上計上伝票もリバースする必要がある。
 			MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
 			if(ioDocType.get_ValueAsBoolean("IsCreateRecognitionJP"))
 			{
@@ -356,6 +356,8 @@ public class JPiereInOutModelValidator implements ModelValidator {
 						rcogLine.setQtyEntered(sLine.getMovementQty());
 					rcogLine.setQtyInvoiced(sLine.getMovementQty());
 					rcogLine.setJP_QtyRecognized(sLine.getMovementQty());
+					rcogLine.setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID"));
+					rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
 					if (!rcogLine.save(io.get_TrxName()))
 					{
 						log.warning("Could not create Invoice Line from Shipment Line: "+ recognition.getDocumentInfo());

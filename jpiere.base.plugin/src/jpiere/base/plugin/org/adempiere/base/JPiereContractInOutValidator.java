@@ -18,6 +18,7 @@ import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -58,7 +59,6 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 		engine.addModelChange(MInOut.Table_Name, this);
 		engine.addModelChange(MInOutLine.Table_Name, this);
 		engine.addDocValidate(MInOut.Table_Name, this);
-		engine.addDocValidate(MInOutLine.Table_Name, this);
 
 	}
 
@@ -160,14 +160,20 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 		
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
-						||   po.is_ValueChanged("C_OrderLine_ID")) ))
+						||   po.is_ValueChanged("C_OrderLine_ID") ||   po.is_ValueChanged("M_RMALine_ID") ) ))
 		{
 			MInOutLine ioLine = (MInOutLine)po;			
 			int C_OrderLine_ID = ioLine.getC_OrderLine_ID();
+			int M_RMALine_ID = ioLine.getM_RMALine_ID();
 			
+			PO baseDoc = null;
+			if(C_OrderLine_ID > 0)
+				baseDoc = new MOrderLine(Env.getCtx(), C_OrderLine_ID, ioLine.get_TrxName());
+			else
+				baseDoc = new MRMALine(Env.getCtx(), M_RMALine_ID, ioLine.get_TrxName());
+
 				
-			MOrderLine orderLine = new MOrderLine(Env.getCtx(), C_OrderLine_ID, ioLine.get_TrxName());
-			int JP_ContractLine_ID = orderLine.get_ValueAsInt("JP_ContractLine_ID");
+			int JP_ContractLine_ID = baseDoc.get_ValueAsInt("JP_ContractLine_ID");
 				
 			MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
 			MContractAcct contractAcct = MContractAcct.get(Env.getCtx(), contractLine.getParent().getJP_Contract_Acct_ID());
@@ -176,7 +182,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			if(contractLine.getJP_ContractContent_ID() != ioLine.getParent().get_ValueAsInt("JP_ContractContent_ID"))
 			{
 				//You can select Contract Content Line that is belong to Contract content
-				return Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") + Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");
+				return Msg.getMsg(Env.getCtx(), "Invalid") +" - " +Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") + Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");
 			}
 			
 			

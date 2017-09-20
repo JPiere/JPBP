@@ -1,0 +1,30 @@
+CREATE OR REPLACE VIEW adempiere.JP_Contract_RMALine AS
+SELECT 
+     rl.AD_Client_ID AS AD_Client_ID 
+    ,rl.AD_Org_ID AS AD_Org_ID
+    ,rl.JP_ContractLine_ID AS JP_ContractLine_ID
+    ,rl.JP_ContractProcPeriod_ID AS JP_ContractProcPeriod_ID
+    ,rl.M_RMA_ID AS M_RMA_ID 
+    ,rl.M_RMALine_ID AS M_RMALine_ID 
+    ,rl.M_Product_ID AS M_Product_ID
+    ,rl.C_Charge_ID AS C_Charge_ID
+    ,rl.Qty AS Qty
+    ,rl.QtyDelivered AS QtyDelivered
+    ,rl.QtyInvoiced AS QtyInvoiced
+    ,rl.Amt AS Amt
+    ,rl.LineNetAmt AS LineNetAmt
+    ,rl.Line AS Line
+    ,rl.CreatedBy AS CreatedBy
+    ,rl.UpdatedBy AS UpdatedBy
+    ,rl.Updated AS Updated
+    ,rl.Created AS Created
+    ,rl.IsActive AS IsActive
+
+    ,r.DocumentNo AS DocumentNo
+    ,r.DocStatus AS DocStatus
+    ,r.JP_Contract_ID AS JP_Contract_ID
+    ,r.JP_ContractContent_ID AS JP_ContractContent_ID
+
+
+FROM adempiere.M_RMALine rl
+	INNER JOIN adempiere.M_RMA r ON (rl.M_RMA_ID = r.M_RMA_ID)
