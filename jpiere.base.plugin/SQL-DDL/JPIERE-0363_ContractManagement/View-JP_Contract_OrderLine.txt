@@ -27,6 +27,7 @@ SELECT
     ,o.DocStatus AS DocStatus
     ,o.JP_Contract_ID AS JP_Contract_ID
     ,o.JP_ContractContent_ID AS JP_ContractContent_ID
+    ,o.C_DocTypeTarget_ID AS C_DocTypeTarget_ID
     ,o.C_Currency_ID
     ,o.DateAcct AS DateAcct
 

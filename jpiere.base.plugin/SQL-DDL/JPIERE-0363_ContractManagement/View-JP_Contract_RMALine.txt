@@ -24,6 +24,7 @@ SELECT
     ,r.DocStatus AS DocStatus
     ,r.JP_Contract_ID AS JP_Contract_ID
     ,r.JP_ContractContent_ID AS JP_ContractContent_ID
+    ,r.C_DocType_ID AS C_DocType_ID
 
 
 FROM adempiere.M_RMALine rl

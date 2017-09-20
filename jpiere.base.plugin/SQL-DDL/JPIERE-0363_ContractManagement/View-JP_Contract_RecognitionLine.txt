@@ -29,6 +29,7 @@ SELECT
     ,r.JP_Contract_ID AS JP_Contract_ID
     ,r.JP_ContractContent_ID AS JP_ContractContent_ID
     ,r.C_Order_ID AS C_Order_ID
+    ,r.C_DocTypeTarget_ID AS C_DocTypeTarget_ID
     ,r.C_Currency_ID
     ,r.M_RMA_ID
     ,r.DateAcct AS DateAcct

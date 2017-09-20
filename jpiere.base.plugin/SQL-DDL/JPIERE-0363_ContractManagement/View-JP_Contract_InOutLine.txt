@@ -28,6 +28,7 @@ SELECT
     ,io.JP_ContractContent_ID AS JP_ContractContent_ID
     ,io.C_Order_ID AS C_Order_ID
     ,io.M_RMA_ID
+    ,io.C_DocType_ID AS C_DocType_ID
     ,io.M_Warehouse_ID AS M_Warehouse_ID
     ,io.JP_PhysicalWarehouse_ID AS JP_PhysicalWarehouse_ID
     ,io.JP_ScheduledInOutdate AS JP_ScheduledInOutdate
