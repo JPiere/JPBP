@@ -338,11 +338,12 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					return null;
 				
 				MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
-				if(!contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+				if(!contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+						&& !contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 					return null;
 				
 				
-				//Check PeriodContract
+				//Check Period Contract & Spot Contract fron now on
 				int C_OrderLine_ID = invoiceLine.getC_OrderLine_ID();
 				int M_RMALine_ID = invoiceLine.getM_RMALine_ID();
 				if(C_OrderLine_ID <= 0 && M_RMALine_ID <= 0)
@@ -352,15 +353,15 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				if(invoiceLine.getParent().getC_Order_ID() > 0 && invoiceLine.getC_OrderLine_ID() > 0)
 				{
 					if(invoiceLine.getC_OrderLine().getC_Order_ID() != invoiceLine.getParent().getC_Order_ID())
-						return "期間契約の場合、異なる受発注伝票の明細を含める事はできません。";//TODO メッセージ化
+						return "期間契約とスポット契約の場合、異なる受発注伝票の明細を含める事はできません。";//TODO メッセージ化
 					
 				}else if(invoiceLine.getParent().getM_RMA_ID() > 0 && invoiceLine.getM_RMALine_ID() > 0){
 					
 					if(invoiceLine.getM_RMALine().getM_RMA_ID() != invoiceLine.getParent().getM_RMA_ID())
-						return "期間契約の場合、期間契約の場合、異なる返品受付依頼伝票の明細を含める事はできません。";//TODO メッセージ化
+						return "期間契約とスポット契約の場合、異なる返品受付依頼伝票の明細を含める事はできません。";//TODO メッセージ化
 				}
 				
-				if(JP_ContractLine_ID > 0)
+				if(JP_ContractLine_ID <= 0)
 					return null;
 				
 				MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
@@ -375,17 +376,22 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				
 				//Check Contract Process Period - Mandetory
 				int ioLine_ContractProcPeriod_ID = invoiceLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
-				if(ioLine_ContractProcPeriod_ID <= 0)
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-				}
+				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
+				{ 
+					if(ioLine_ContractProcPeriod_ID <= 0)
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+						
+					}else{
 				
-				//Check Contract Process Period - Calender
-				MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);				
-				if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
-				{
-					return "契約書の契約カレンダーの契約処理期間を選択して下さい。";//TODO メッセージ化
+						//Check Contract Process Period - Calender
+						MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);				
+						if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
+						{
+							return "契約書の契約カレンダーの契約処理期間を選択して下さい。";//TODO メッセージ化
+						}
+					}
 				}
 				
 			}//if(type == ModelValidator.TYPE_BEFORE_NEW)
