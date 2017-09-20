@@ -1,6 +1,5 @@
 package jpiere.base.plugin.org.adempiere.base;
 
-import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
@@ -17,6 +16,15 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 public abstract class AbstractContractValidator {	
 	
+	
+	/**
+	 * Use M_InOut AND C_Invoice AND JP_Recognition
+	 * 
+	 * 
+	 * @param po
+	 * @param type
+	 * @return
+	 */
 	protected String derivativeDocHeaderCommonCheck(PO po, int type)
 	{
 
@@ -60,6 +68,11 @@ public abstract class AbstractContractValidator {
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
+				if(po.get_ValueAsInt("C_Order_ID") == 0 && po.get_ValueAsInt("M_RMA_ID")  == 0)
+				{
+					return "期間契約の場合、受発注伝票もしくは返品受付依頼伝票の入力は必須です。";//TODO:メッセージ化
+				}
+				
 				/** In case of Period Contract, order has JP_ContractContent_ID and JP_ContractProcPeriod_ID always*/
 				po.set_ValueNoCheck("JP_ContractContent_ID", baseDoc.get_ValueAsInt("JP_ContractContent_ID"));
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDoc.get_ValueAsInt("JP_ContractProcPeriod_ID"));
@@ -80,6 +93,15 @@ public abstract class AbstractContractValidator {
 		return null;
 	}
 	
+	
+	/**
+	 * 
+	 * Use M_InOutLine AND C_InvoiceLine AND AND JP_Recognition
+	 * 
+	 * @param po
+	 * @param type
+	 * @return
+	 */
 	protected String derivativeDocLineCommonCheck(PO po, int type)
 	{
 		if(type == ModelValidator.TYPE_BEFORE_NEW
