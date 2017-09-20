@@ -28,6 +28,8 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
+import org.compiere.model.MRMA;
+import org.compiere.model.MRMALine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -315,25 +317,47 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 		}//JPiere-0219
 
+		
 		//JPIERE-0364:Create Recognition When Ship/Receipt Complete
-		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
+		if(timing == ModelValidator.TIMING_AFTER_COMPLETE
+				&& (po.get_ValueAsInt("C_Order_ID") != 0 || po.get_ValueAsInt("M_RMA_ID") != 0) )
 		{
-			MInOut io = (MInOut)po;
+			MInOut io = (MInOut)po;			
 			String trxName = po.get_TrxName();
 			boolean isReversal = io.isReversal();//TODO 出荷納品伝票がリバースされる際に、売上計上伝票もリバースする必要がある。
 			MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
 			if(ioDocType.get_ValueAsBoolean("IsCreateRecognitionJP"))
-			{
-				if(io.getC_Order_ID()==0)
-					return null;
-
-				MOrder order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
-				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
-
-				if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
-					return null;
-
-				MRecognition recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+			{				
+				MOrder order = null;
+				MRecognition recognition = null;
+				boolean isRMA = false;
+				if(io.getC_Order_ID() > 0)
+				{
+					order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
+					MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+					if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
+						return null;
+					
+					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+					
+				}else if(io.getM_RMA_ID() > 0){
+				
+					isRMA = true;
+					MRMA rma = new MRMA(Env.getCtx(),io.getM_RMA_ID(),io.get_TrxName());
+					int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+					if(JP_Order_ID == 0)
+						return null;
+					
+					order = new MOrder(po.getCtx(), JP_Order_ID, trxName);
+					MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+					if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
+						return null;
+					
+					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+					recognition.setM_RMA_ID(io.getM_RMA_ID());
+				}
+				
+				
 				recognition.setJP_DateRecognized(io.getDateAcct());
 				recognition.setM_InOut_ID(io.getM_InOut_ID());
 				if (!recognition.save(trxName))
@@ -348,6 +372,13 @@ public class JPiereInOutModelValidator implements ModelValidator {
 					//
 					MRecognitionLine rcogLine = new MRecognitionLine(recognition);
 					rcogLine.setShipLine(sLine);
+					if(isRMA)
+					{
+						int M_RMALine_ID = rcogLine.getM_RMALine_ID();
+						MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, io.get_TrxName());
+						int JP_OrderLine_ID = rmaLine.get_ValueAsInt("JP_OrderLine_ID");
+						rcogLine.setC_OrderLine_ID(JP_OrderLine_ID);
+					}
 					rcogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
 					//	Qty = Delivered
 					if (sLine.sameOrderLineUOM())

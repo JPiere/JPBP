@@ -24,10 +24,6 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 
-import jpiere.base.plugin.org.adempiere.model.MContract;
-import jpiere.base.plugin.org.adempiere.model.MContractContent;
-import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
-
 
 
 
@@ -136,6 +132,8 @@ public class JPiereContractRMAValidator implements ModelValidator {
 				po.set_ValueNoCheck("JP_ContractContent_ID", io.get_ValueAsInt("JP_ContractContent_ID"));
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", io.get_ValueAsInt("JP_ContractProcPeriod_ID"));
 				
+				po.set_ValueNoCheck("JP_Order_ID", io.getC_Order_ID());
+				
 			}
 		}
 		
@@ -178,6 +176,8 @@ public class JPiereContractRMAValidator implements ModelValidator {
 				
 				po.set_ValueNoCheck("JP_ContractLine_ID", ioLine.get_ValueAsInt("JP_ContractLine_ID"));
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+				
+				po.set_ValueNoCheck("JP_OrderLine_ID", ioLine.getC_OrderLine_ID());
 				
 			}
 		}
