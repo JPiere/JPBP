@@ -120,11 +120,13 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 	{
 		
 		//Check Derivative Doc
-		if(po.get_ValueAsInt("C_Order_ID") > 0 )
+		if(po.get_ValueAsInt("C_Order_ID") > 0 || po.get_ValueAsInt("M_RMA_ID") > 0 )
 		{
 			String msg = derivativeDocHeaderCommonCheck(po, type);
 			if(!Util.isEmpty(msg))
 				return msg;
+			
+			return null;
 		}
 			
 		

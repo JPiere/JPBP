@@ -123,13 +123,10 @@ public abstract class AbstractContractValidator {
 
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
-				/** In case of Period Contract, order Line has JP_ContractLine_ID and JP_ContractProcPeriod_ID always*/
 				po.set_ValueNoCheck("JP_ContractLine_ID", baseDocLine.get_ValueAsInt("JP_ContractLine_ID"));
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 				
-				/** In case of Spot Contract, order has JP_ContractLine_ID sometimes*/
 				po.set_ValueNoCheck("JP_ContractLine_ID", baseDocLine.get_ValueAsInt("JP_ContractLine_ID"));
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 				

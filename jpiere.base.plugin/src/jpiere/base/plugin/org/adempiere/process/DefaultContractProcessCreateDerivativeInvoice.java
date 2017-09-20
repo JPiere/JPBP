@@ -69,9 +69,9 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			return "";
 		}
 		
-		//Check Overlap
-		if(isOverlapPeriodInvoice(orderProcPeriod.getJP_ContractProcPeriod_ID()))
-			return "";
+		//Check Header Overlap -> Unnecessary. because order : invoice = 1 : N. need overlap. 
+//		if(isOverlapPeriodInvoice(orderProcPeriod.getJP_ContractProcPeriod_ID()))
+//			return "";
 		
 		
 		MOrder[] orders = m_ContractContent.getOrderByContractPeriod(getCtx(), orderProcPeriod.getJP_ContractProcPeriod_ID(), get_TrxName());

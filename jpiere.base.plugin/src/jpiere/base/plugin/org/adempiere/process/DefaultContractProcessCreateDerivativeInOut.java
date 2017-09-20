@@ -70,9 +70,9 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			return "";
 		}
 		
-		//Check Overlap
-		if(isOverlapPeriodInOut(orderProcPeriod.getJP_ContractProcPeriod_ID()))
-			return "";
+		//Check header Overlap -> Unnecessary. because order : invoice = 1 : N. need overlap. 
+//		if(isOverlapPeriodInOut(orderProcPeriod.getJP_ContractProcPeriod_ID()))
+//			return "";
 		
 		
 		MOrder[] orders = m_ContractContent.getOrderByContractPeriod(getCtx(), orderProcPeriod.getJP_ContractProcPeriod_ID(), get_TrxName());
@@ -80,6 +80,11 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		{
 			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
 				continue;
+			
+			
+			//TODO ヘッダーを作る前に、処理対象となる明細があるかどうかのチェク。あればヘッダーを作成する
+			
+			
 			
 			/** Create InOut header */
 			MInOut inout = new MInOut(getCtx(), 0, get_TrxName());
@@ -114,7 +119,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				if(!contractLine.isCreateDocLineJP())
 					continue;
 					
-				//Check Overlap
+				//Check Overlap Line
 				if(isOverlapPeriodInOutLine(contractLine, JP_ContractProcPeriod_ID))
 				{
 					//TODO ログは欲しい。
