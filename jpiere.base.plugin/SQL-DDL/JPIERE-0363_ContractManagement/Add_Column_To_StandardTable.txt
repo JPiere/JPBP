@@ -32,14 +32,21 @@ JP_ContractProcPeriod_ID
 JP_Contract_ID
 JP_ContractContent_ID
 JP_ContractProcPeriod_ID
+JP_Order_ID
 
 [M_RMALine]
 JP_ContractLine_ID
 JP_ContractProcPeriod_ID
+JP_OrderLine_ID
 
 [C_DocType]
 IsCreateRecognitionJP
 JP_DocTypeRecognition_ID
+
+
+[JP_Estimation]
+JP_Contract_ID
+JP_ContractContent_ID
 
 
 [FACT_ACCT]

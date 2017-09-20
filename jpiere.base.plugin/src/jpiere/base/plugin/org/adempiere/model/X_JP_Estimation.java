@@ -34,7 +34,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170430L;
+	private static final long serialVersionUID = 20170920L;
 
     /** Standard Constructor */
     public X_JP_Estimation (Properties ctx, int JP_Estimation_ID, String trxName)
@@ -94,7 +94,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			setM_Warehouse_ID (0);
 			setOrderType (null);
 			setPaymentRule (null);
-// B
+// P
 			setPosted (false);
 // N
 			setPriorityRule (null);
@@ -559,7 +559,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
 			.getPO(getC_DocTypeTarget_ID(), get_TrxName());	}
 
-	/** Set Target Document Type.
+	/** Set Target Doc Type.
 		@param C_DocTypeTarget_ID 
 		Target document type for conversing documents
 	  */
@@ -571,7 +571,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			set_Value (COLUMNNAME_C_DocTypeTarget_ID, Integer.valueOf(C_DocTypeTarget_ID));
 	}
 
-	/** Get Target Document Type.
+	/** Get Target Doc Type.
 		@return Target document type for conversing documents
 	  */
 	public int getC_DocTypeTarget_ID () 
@@ -1671,6 +1671,56 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return ii.intValue();
 	}
 
+	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException
+    {
+		return (I_JP_ContractContent)MTable.get(getCtx(), I_JP_ContractContent.Table_Name)
+			.getPO(getJP_ContractContent_ID(), get_TrxName());	}
+
+	/** Set Contract Content.
+		@param JP_ContractContent_ID Contract Content	  */
+	public void setJP_ContractContent_ID (int JP_ContractContent_ID)
+	{
+		if (JP_ContractContent_ID < 1) 
+			set_Value (COLUMNNAME_JP_ContractContent_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
+	}
+
+	/** Get Contract Content.
+		@return Contract Content	  */
+	public int getJP_ContractContent_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractContent_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_Contract getJP_Contract() throws RuntimeException
+    {
+		return (I_JP_Contract)MTable.get(getCtx(), I_JP_Contract.Table_Name)
+			.getPO(getJP_Contract_ID(), get_TrxName());	}
+
+	/** Set Contract Document.
+		@param JP_Contract_ID Contract Document	  */
+	public void setJP_Contract_ID (int JP_Contract_ID)
+	{
+		if (JP_Contract_ID < 1) 
+			set_Value (COLUMNNAME_JP_Contract_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
+	}
+
+	/** Get Contract Document.
+		@return Contract Document	  */
+	public int getJP_Contract_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_DocType getJP_DocTypeSO() throws RuntimeException
     {
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
@@ -1769,15 +1819,15 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Scheduled Cost Total Lines.
-		@param JP_ScheduledCostTotalLines Scheduled Cost Total Lines	  */
+	/** Set Total Scheduled Cost.
+		@param JP_ScheduledCostTotalLines Total Scheduled Cost	  */
 	public void setJP_ScheduledCostTotalLines (BigDecimal JP_ScheduledCostTotalLines)
 	{
 		set_Value (COLUMNNAME_JP_ScheduledCostTotalLines, JP_ScheduledCostTotalLines);
 	}
 
-	/** Get Scheduled Cost Total Lines.
-		@return Scheduled Cost Total Lines	  */
+	/** Get Total Scheduled Cost.
+		@return Total Scheduled Cost	  */
 	public BigDecimal getJP_ScheduledCostTotalLines () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ScheduledCostTotalLines);
@@ -1959,7 +2009,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
 			.getPO(getM_Warehouse_ID(), get_TrxName());	}
 
-	/** Set Warehouse.
+	/** Set Org Warehouse.
 		@param M_Warehouse_ID 
 		Storage Warehouse and Service Point
 	  */
@@ -1971,7 +2021,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
 	}
 
-	/** Get Warehouse.
+	/** Get Org Warehouse.
 		@return Storage Warehouse and Service Point
 	  */
 	public int getM_Warehouse_ID () 
@@ -2284,7 +2334,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_Name)
 			.getPO(getRef_Order_ID(), get_TrxName());	}
 
-	/** Set Referenced Order.
+	/** Set Ref Order.
 		@param Ref_Order_ID 
 		Reference to corresponding Sales/Purchase Order
 	  */
@@ -2296,7 +2346,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			set_Value (COLUMNNAME_Ref_Order_ID, Integer.valueOf(Ref_Order_ID));
 	}
 
-	/** Get Referenced Order.
+	/** Get Ref Order.
 		@return Reference to corresponding Sales/Purchase Order
 	  */
 	public int getRef_Order_ID () 
@@ -2312,7 +2362,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
 			.getPO(getSalesRep_ID(), get_TrxName());	}
 
-	/** Set Sales Representative.
+	/** Set Sales Rep.
 		@param SalesRep_ID 
 		Sales Representative or Company Agent
 	  */
@@ -2324,7 +2374,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
 	}
 
-	/** Get Sales Representative.
+	/** Get Sales Rep.
 		@return Sales Representative or Company Agent
 	  */
 	public int getSalesRep_ID () 

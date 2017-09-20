@@ -289,12 +289,12 @@ public interface I_JP_Estimation
     /** Column name C_DocTypeTarget_ID */
     public static final String COLUMNNAME_C_DocTypeTarget_ID = "C_DocTypeTarget_ID";
 
-	/** Set Target Document Type.
+	/** Set Target Doc Type.
 	  * Target document type for conversing documents
 	  */
 	public void setC_DocTypeTarget_ID (int C_DocTypeTarget_ID);
 
-	/** Get Target Document Type.
+	/** Get Target Doc Type.
 	  * Target document type for conversing documents
 	  */
 	public int getC_DocTypeTarget_ID();
@@ -903,6 +903,28 @@ public interface I_JP_Estimation
 
 	public I_JP_Bill getJP_Bill() throws RuntimeException;
 
+    /** Column name JP_ContractContent_ID */
+    public static final String COLUMNNAME_JP_ContractContent_ID = "JP_ContractContent_ID";
+
+	/** Set Contract Content	  */
+	public void setJP_ContractContent_ID (int JP_ContractContent_ID);
+
+	/** Get Contract Content	  */
+	public int getJP_ContractContent_ID();
+
+	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException;
+
+    /** Column name JP_Contract_ID */
+    public static final String COLUMNNAME_JP_Contract_ID = "JP_Contract_ID";
+
+	/** Set Contract Document	  */
+	public void setJP_Contract_ID (int JP_Contract_ID);
+
+	/** Get Contract Document	  */
+	public int getJP_Contract_ID();
+
+	public I_JP_Contract getJP_Contract() throws RuntimeException;
+
     /** Column name JP_DocTypeSO_ID */
     public static final String COLUMNNAME_JP_DocTypeSO_ID = "JP_DocTypeSO_ID";
 
@@ -955,10 +977,10 @@ public interface I_JP_Estimation
     /** Column name JP_ScheduledCostTotalLines */
     public static final String COLUMNNAME_JP_ScheduledCostTotalLines = "JP_ScheduledCostTotalLines";
 
-	/** Set Scheduled Cost Total Lines	  */
+	/** Set Total Scheduled Cost	  */
 	public void setJP_ScheduledCostTotalLines (BigDecimal JP_ScheduledCostTotalLines);
 
-	/** Get Scheduled Cost Total Lines	  */
+	/** Get Total Scheduled Cost	  */
 	public BigDecimal getJP_ScheduledCostTotalLines();
 
     /** Column name Link_Order_ID */
@@ -1054,12 +1076,12 @@ public interface I_JP_Estimation
     /** Column name M_Warehouse_ID */
     public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
 
-	/** Set Warehouse.
+	/** Set Org Warehouse.
 	  * Storage Warehouse and Service Point
 	  */
 	public void setM_Warehouse_ID (int M_Warehouse_ID);
 
-	/** Get Warehouse.
+	/** Get Org Warehouse.
 	  * Storage Warehouse and Service Point
 	  */
 	public int getM_Warehouse_ID();
@@ -1223,12 +1245,12 @@ public interface I_JP_Estimation
     /** Column name Ref_Order_ID */
     public static final String COLUMNNAME_Ref_Order_ID = "Ref_Order_ID";
 
-	/** Set Referenced Order.
+	/** Set Ref Order.
 	  * Reference to corresponding Sales/Purchase Order
 	  */
 	public void setRef_Order_ID (int Ref_Order_ID);
 
-	/** Get Referenced Order.
+	/** Get Ref Order.
 	  * Reference to corresponding Sales/Purchase Order
 	  */
 	public int getRef_Order_ID();
@@ -1238,12 +1260,12 @@ public interface I_JP_Estimation
     /** Column name SalesRep_ID */
     public static final String COLUMNNAME_SalesRep_ID = "SalesRep_ID";
 
-	/** Set Sales Representative.
+	/** Set Sales Rep.
 	  * Sales Representative or Company Agent
 	  */
 	public void setSalesRep_ID (int SalesRep_ID);
 
-	/** Get Sales Representative.
+	/** Get Sales Rep.
 	  * Sales Representative or Company Agent
 	  */
 	public int getSalesRep_ID();
