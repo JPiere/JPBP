@@ -376,10 +376,10 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				
 				
 				//Check Contract Process Period - Mandetory
-				int ioLine_ContractProcPeriod_ID = invoiceLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
+				int invoiceLine_ContractProcPeriod_ID = invoiceLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
 				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
 				{ 
-					if(ioLine_ContractProcPeriod_ID <= 0)
+					if(invoiceLine_ContractProcPeriod_ID <= 0)
 					{
 						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
 						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
@@ -387,8 +387,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}else{
 				
 						//Check Contract Process Period - Calender
-						MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);				
-						if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
+						MContractProcPeriod invoiceLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), invoiceLine_ContractProcPeriod_ID);				
+						if(invoiceLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
 						{
 							return "契約書の契約カレンダーの契約処理期間を選択して下さい。";//TODO メッセージ化
 						}
