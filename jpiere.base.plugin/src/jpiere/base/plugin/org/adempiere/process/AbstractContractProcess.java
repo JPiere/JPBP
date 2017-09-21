@@ -387,18 +387,14 @@ public class AbstractContractProcess extends SvrProcess
 		return null;
 	}
 	
-	protected boolean isOverlapPeriodInOut(int JP_ContractProcPeriod_ID)
+	protected MInOut[] getOverlapPeriodInOut(int JP_ContractProcPeriod_ID)
 	{
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MInOut[] inOuts = m_ContractContent.getInOutByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-			if(inOuts.length> 0 )
-			{				
-				return true;
-			}
+			return  m_ContractContent.getInOutByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 		}
 		
-		return false;
+		return null;
 	}
 	
 	protected MInOutLine[] getOverlapPeriodInOutLine(MContractLine line, int JP_ContractProcPeriod_ID)
