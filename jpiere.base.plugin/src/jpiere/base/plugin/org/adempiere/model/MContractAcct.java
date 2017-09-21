@@ -61,27 +61,6 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			
 		}
 		
-		//Check isOrderInfoMandetoryJP
-		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_DocBaseType))
-		{
-			if(getDocBaseType().equals("ARI")
-					|| getDocBaseType().equals("API"))
-			{
-				setIsOrderInfoMandatoryJP(false);
-				setIsScheduledCostPostingJP(false);
-			}
-		}
-		
-		
-		//Check IsScheduledCostPostingJP
-		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsOrderInfoMandatoryJP))
-		{
-			if(!isOrderInfoMandatoryJP())
-			{
-				setIsScheduledCostPostingJP(false);
-			}
-				
-		}
 		
 		//Check IsPostingContractAcctJP and IsPostingRecognitionDocJP
 		if(newRecord ||( is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingContractAcctJP)

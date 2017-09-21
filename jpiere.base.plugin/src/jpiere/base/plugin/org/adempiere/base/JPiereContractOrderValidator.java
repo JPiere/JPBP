@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.math.BigDecimal;
+
 import org.compiere.model.MClient;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
@@ -288,6 +290,29 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	 */
 	private String orderLineValidate(PO po, int type)
 	{
+		
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged(MOrderLine.COLUMNNAME_QtyInvoiced))
+		{
+			MOrderLine oLine = (MOrderLine)po;
+			
+			int JP_ContractContent_ID = oLine.getParent().get_ValueAsInt("JP_ContractContent_ID");
+			if(JP_ContractContent_ID == 0)
+			{
+				oLine.set_ValueNoCheck("JP_QtyRecognized", oLine.getQtyInvoiced());
+			
+			}else{
+				
+				MContractContent contractContent = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+				if(!contractContent.getJP_Contract_Acct().isPostingRecognitionDocJP())
+				{
+					oLine.set_ValueNoCheck("JP_QtyRecognized", oLine.getQtyInvoiced());
+				}
+				
+			}
+			
+			return null;	
+		}
+		
 		
 		/** Ref:JPiereContractInvoiceValidator */
 		if(type == ModelValidator.TYPE_BEFORE_NEW

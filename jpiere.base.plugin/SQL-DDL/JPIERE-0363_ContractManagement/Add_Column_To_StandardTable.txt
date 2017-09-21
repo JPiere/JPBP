@@ -6,7 +6,7 @@ JP_ContractProcPeriod_ID
 [C_OrderLine]
 JP_ContractLine_ID
 JP_ContractProcPeriod_ID
-
+JP_QtyRecognized
 
 [M_InOut]
 JP_Contract_ID
@@ -38,9 +38,10 @@ JP_Order_ID
 JP_ContractLine_ID
 JP_ContractProcPeriod_ID
 JP_OrderLine_ID
+JP_QtyRecognized
+
 
 [C_DocType]
-IsCreateRecognitionJP
 JP_DocTypeRecognition_ID
 
 

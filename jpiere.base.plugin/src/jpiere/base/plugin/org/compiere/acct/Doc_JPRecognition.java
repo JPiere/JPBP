@@ -472,8 +472,7 @@ public class Doc_JPRecognition extends Doc
 				{
 					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
 					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-					if(contractAcct.isOrderInfoMandatoryJP())
-						fLines[i].set_ValueNoCheck("JP_SalesOrder_ID", recog.getC_Order_ID());
+					fLines[i].set_ValueNoCheck("JP_SalesOrder_ID", recog.getC_Order_ID());
 				}
 			}//for
 
@@ -611,21 +610,22 @@ public class Doc_JPRecognition extends Doc
 			
 		
 		}else{
-			
-			MContractProductAcct pAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
-			if(pAcct == null || pAcct.getJP_Shipped_Asset_Acct() == 0)
-			{
-				return docLine.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
-			}else{
-				
-				if(contractAcct.isPostingRecognitionDocJP())
-					return MAccount.get(getCtx(),pAcct.getJP_Shipped_Asset_Acct()) ;
-				else				
-					return docLine.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
-			}
+			;
+//			MContractProductAcct pAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+//			if(pAcct == null || pAcct.getJP_Shipped_Asset_Acct() == 0)
+//			{
+//				return docLine.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
+//			}else{
+//				
+//				if(contractAcct.isPostingRecognitionDocJP())
+//					return MAccount.get(getCtx(),pAcct.getJP_Shipped_Asset_Acct()) ;
+//				else				
+//					return docLine.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
+//			}
 			
 		}
 		
+		return null;
 	}
 	
 	private int				m_Reversal_ID = 0;

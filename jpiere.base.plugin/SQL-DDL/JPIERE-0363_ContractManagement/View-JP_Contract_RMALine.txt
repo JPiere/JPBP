@@ -11,6 +11,7 @@ SELECT
     ,rl.Qty AS Qty
     ,rl.QtyDelivered AS QtyDelivered
     ,rl.QtyInvoiced AS QtyInvoiced
+    ,rl.JP_QtyRecognized AS JP_QtyRecognized
     ,rl.Amt AS Amt
     ,rl.LineNetAmt AS LineNetAmt
     ,rl.Line AS Line

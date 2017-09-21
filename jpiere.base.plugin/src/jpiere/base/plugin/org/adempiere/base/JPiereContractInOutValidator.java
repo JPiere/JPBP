@@ -15,15 +15,20 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.util.List;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -35,6 +40,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 
 
@@ -101,16 +108,15 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 		
 		if(timing == ModelValidator.TIMING_BEFORE_PREPARE)
 		{
-			MInOut io = (MInOut)po;
-			int JP_Contract_ID = io.get_ValueAsInt("JP_Contract_ID");
+			int JP_Contract_ID = po.get_ValueAsInt("JP_Contract_ID");
 			if(JP_Contract_ID <= 0)
 				return null;
 			
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
-				
 				//Check Mandetory - JP_ContractProcPeriod_ID
+				MInOut io = (MInOut)po;
 				MInOutLine[] lines = io.getLines();
 				int JP_ContractLine_ID = 0;
 				int JP_ContractProcPeriod_ID = 0;
@@ -128,6 +134,121 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			}
 			
 		}//TIMING_BEFORE_PREPARE
+		
+		
+		
+		//Create Recognition When Ship/Receipt Complete
+		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
+		{
+			int JP_Contract_ID = po.get_ValueAsInt("JP_Contract_ID");
+			if(JP_Contract_ID <= 0)
+				return null;			
+			
+			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+			if(!contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+					&& !contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
+				return null;		
+			
+			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
+			if(JP_ContractContent_ID <= 0)
+				return null;
+			
+			MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+			if(!content.getJP_Contract_Acct().isPostingRecognitionDocJP())
+				return null;
+			
+
+			/** Create Recognition*/
+			MInOut io = (MInOut)po;			
+			String trxName = po.get_TrxName();
+			boolean isReversal = io.isReversal();//TODO 出荷納品伝票がリバースされる際に、売上計上伝票もリバースする必要がある。
+			MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
+			
+			MOrder order = null;
+			MRecognition recognition = null;
+			boolean isRMA = false;
+			if(io.getC_Order_ID() > 0)
+			{
+				order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
+				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+				if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
+					return null;
+				
+				recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+				
+			}else if(io.getM_RMA_ID() > 0){
+			
+				isRMA = true;
+				MRMA rma = new MRMA(Env.getCtx(),io.getM_RMA_ID(),io.get_TrxName());
+				int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+				if(JP_Order_ID == 0)
+					return null;
+				
+				order = new MOrder(po.getCtx(), JP_Order_ID, trxName);
+				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+				if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
+					return null;
+				
+				recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+				recognition.setM_RMA_ID(io.getM_RMA_ID());
+			}
+			
+			
+			recognition.setJP_DateRecognized(io.getDateAcct());
+			recognition.setM_InOut_ID(io.getM_InOut_ID());
+			if (!recognition.save(trxName))
+			{
+				return "Could not create Invoice: "+ io.getDocumentInfo();//TODO
+			}
+
+			MInOutLine[] sLines = io.getLines(false);
+			for (int i = 0; i < sLines.length; i++)
+			{
+				MInOutLine sLine = sLines[i];
+				//
+				MRecognitionLine rcogLine = new MRecognitionLine(recognition);
+				rcogLine.setShipLine(sLine);
+				if(isRMA)
+				{
+					int M_RMALine_ID = rcogLine.getM_RMALine_ID();
+					MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, io.get_TrxName());
+					int JP_OrderLine_ID = rmaLine.get_ValueAsInt("JP_OrderLine_ID");
+					rcogLine.setC_OrderLine_ID(JP_OrderLine_ID);
+				}
+				rcogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+				//	Qty = Delivered
+				if (sLine.sameOrderLineUOM())
+					rcogLine.setQtyEntered(sLine.getQtyEntered());
+				else
+					rcogLine.setQtyEntered(sLine.getMovementQty());
+				rcogLine.setQtyInvoiced(sLine.getMovementQty());
+				rcogLine.setJP_QtyRecognized(sLine.getMovementQty());
+				rcogLine.setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID"));
+				rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+				if (!rcogLine.save(io.get_TrxName()))
+				{
+					log.warning("Could not create Invoice Line from Shipment Line: "+ recognition.getDocumentInfo());
+					return null;
+				}
+
+				if (!sLine.save(trxName))
+				{
+					log.warning("Could not update Shipment line: " + sLine);
+				}
+			}//for
+
+			if (!recognition.processIt(DocAction.ACTION_Complete))
+				throw new AdempiereException("Failed when processing document - " + recognition.getProcessMsg());
+
+			recognition.saveEx(trxName);
+			if (!recognition.getDocStatus().equals(DocAction.STATUS_Completed))
+			{
+				log.warning("Could not Completed Recognition: "+ recognition.getDocumentInfo());
+				return null;
+			}
+
+		}
+
 		
 		return null;
 	}

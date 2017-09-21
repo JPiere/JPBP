@@ -119,15 +119,6 @@ public interface I_JP_Contract_Acct
 	  */
 	public boolean isActive();
 
-    /** Column name IsOrderInfoMandatoryJP */
-    public static final String COLUMNNAME_IsOrderInfoMandatoryJP = "IsOrderInfoMandatoryJP";
-
-	/** Set Order Info Mandatory	  */
-	public void setIsOrderInfoMandatoryJP (boolean IsOrderInfoMandatoryJP);
-
-	/** Get Order Info Mandatory	  */
-	public boolean isOrderInfoMandatoryJP();
-
     /** Column name IsPostingContractAcctJP */
     public static final String COLUMNNAME_IsPostingContractAcctJP = "IsPostingContractAcctJP";
 
@@ -158,15 +149,6 @@ public interface I_JP_Contract_Acct
 	  * This is a Sales Transaction
 	  */
 	public boolean isSOTrx();
-
-    /** Column name IsScheduledCostPostingJP */
-    public static final String COLUMNNAME_IsScheduledCostPostingJP = "IsScheduledCostPostingJP";
-
-	/** Set Scheduled Cost Posting	  */
-	public void setIsScheduledCostPostingJP (boolean IsScheduledCostPostingJP);
-
-	/** Get Scheduled Cost Posting	  */
-	public boolean isScheduledCostPostingJP();
 
     /** Column name JP_Contract_Acct_ID */
     public static final String COLUMNNAME_JP_Contract_Acct_ID = "JP_Contract_Acct_ID";

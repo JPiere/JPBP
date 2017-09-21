@@ -14,8 +14,7 @@ CREATE TABLE adempiere.JP_Contract_Product_Acct
     JP_Contract_Acct_ID numeric(10) NOT NULL,
     M_Product_Category_ID numeric(10) NOT NULL,
  
-    P_COGS_Acct numeric(10),
-    JP_COGS_Clearing_Acct numeric(10), 
+    P_COGS_Acct numeric(10), 
     P_Expense_Acct  numeric(10), 
     P_Revenue_Acct  numeric(10), 
     JP_Expense_Acct  numeric(10), 
@@ -26,7 +25,6 @@ CREATE TABLE adempiere.JP_Contract_Product_Acct
     jp_tradediscountgrant_acct numeric(10) DEFAULT NULL::numeric,
     jp_purchase_acct numeric(10) DEFAULT NULL::numeric,
     jp_purchaseoffset_acct numeric(10) DEFAULT NULL::numeric,
-    jp_shipped_asset_acct numeric(10) DEFAULT NULL::numeric,
 
     CONSTRAINT JP_Contract_Product_Acct_pkey PRIMARY KEY (JP_Contract_Product_Acct_ID)
 

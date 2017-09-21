@@ -34,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170915L;
+	private static final long serialVersionUID = 20170921L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -1486,6 +1486,20 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return ii.intValue();
 	}
 
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
 	public org.compiere.model.I_M_FreightCategory getM_FreightCategory() throws RuntimeException
     {
 		return (org.compiere.model.I_M_FreightCategory)MTable.get(getCtx(), org.compiere.model.I_M_FreightCategory.Table_Name)
@@ -1615,24 +1629,24 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
-	/** OrderType AD_Reference_ID=148 */
-	public static final int ORDERTYPE_AD_Reference_ID=148;
-	/** On Credit Order = WI */
-	public static final String ORDERTYPE_OnCreditOrder = "WI";
-	/** POS Order = WR */
-	public static final String ORDERTYPE_POSOrder = "WR";
-	/** Warehouse Order = WP */
-	public static final String ORDERTYPE_WarehouseOrder = "WP";
-	/** Standard Order = SO */
-	public static final String ORDERTYPE_StandardOrder = "SO";
-	/** Proposal = ON */
-	public static final String ORDERTYPE_Proposal = "ON";
 	/** Quotation = OB */
 	public static final String ORDERTYPE_Quotation = "OB";
-	/** Return Material = RM */
-	public static final String ORDERTYPE_ReturnMaterial = "RM";
+	/** Proposal = ON */
+	public static final String ORDERTYPE_Proposal = "ON";
 	/** Prepay Order = PR */
 	public static final String ORDERTYPE_PrepayOrder = "PR";
+	/** Return Material = RM */
+	public static final String ORDERTYPE_ReturnMaterial = "RM";
+	/** Standard Order = SO */
+	public static final String ORDERTYPE_StandardOrder = "SO";
+	/** On Credit Order = WI */
+	public static final String ORDERTYPE_OnCreditOrder = "WI";
+	/** Warehouse Order = WP */
+	public static final String ORDERTYPE_WarehouseOrder = "WP";
+	/** POS Order = WR */
+	public static final String ORDERTYPE_POSOrder = "WR";
+	/** Other = -- */
+	public static final String ORDERTYPE_Other = "--";
 	/** Set Order Type.
 		@param OrderType 
 		Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)

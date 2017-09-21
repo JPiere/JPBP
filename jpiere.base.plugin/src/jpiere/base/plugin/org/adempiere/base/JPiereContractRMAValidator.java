@@ -24,6 +24,8 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
+
 
 
 
@@ -150,6 +152,29 @@ public class JPiereContractRMAValidator implements ModelValidator {
 	 */
 	private String rmaLineValidate(PO po, int type)
 	{
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged(MRMALine.COLUMNNAME_QtyInvoiced))
+		{
+			MRMALine rmaLine = (MRMALine)po;
+			
+			int JP_ContractContent_ID = rmaLine.getParent().get_ValueAsInt("JP_ContractContent_ID");
+			if(JP_ContractContent_ID == 0)
+			{
+				rmaLine.set_ValueNoCheck("JP_QtyRecognized", rmaLine.getQtyInvoiced());
+			
+			}else{
+				
+				MContractContent contractContent = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+				if(!contractContent.getJP_Contract_Acct().isPostingRecognitionDocJP())
+				{
+					rmaLine.set_ValueNoCheck("JP_QtyRecognized", rmaLine.getQtyInvoiced());
+				}
+				
+			}
+			
+			return null;	
+		}
+		
+		
 		if( type == ModelValidator.TYPE_BEFORE_NEW 
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged(MRMALine.COLUMNNAME_M_InOutLine_ID) ) )
 		{

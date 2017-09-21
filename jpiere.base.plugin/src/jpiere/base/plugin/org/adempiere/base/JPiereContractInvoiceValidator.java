@@ -472,27 +472,23 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				MInvoice invoice = (MInvoice)po;
 				
 				//Set Order Info
-				if(contractAcct.isOrderInfoMandatoryJP())
+				for(Fact fact : facts)
 				{
-					for(Fact fact : facts)
+					FactLine[]  factLine = fact.getLines();
+					for(int i = 0; i < factLine.length; i++)
 					{
-						FactLine[]  factLine = fact.getLines();
-						for(int i = 0; i < factLine.length; i++)
+						if(invoice.isSOTrx())
 						{
-							if(invoice.isSOTrx())
-							{
-								factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order_ID());
-							}else{
-								factLine[i].set_ValueNoCheck("JP_PurchaseOrder_ID", invoice.getC_Order_ID());
-								//Because Order is Mandetory, Relation between order doc and Invoice doc is  1: N , not permitted N : 1.
-								factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order().getLink_Order_ID());
-							}
-						}//for
-						
+							factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order_ID());
+						}else{
+							factLine[i].set_ValueNoCheck("JP_PurchaseOrder_ID", invoice.getC_Order_ID());
+							//Because Order is Mandetory, Relation between order doc and Invoice doc is  1: N , not permitted N : 1.
+							factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order().getLink_Order_ID());
+						}
 					}//for
 					
-				}//if(contractAcct.isOrderInfoMandatoryJP())
-				
+				}//for
+					
 			}//if(JP_ContractContent_ID > 0)
 		
 		}//if(po.get_TableName().equals(MInvoice.Table_Name))

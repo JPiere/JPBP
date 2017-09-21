@@ -12,6 +12,8 @@ SELECT
     ,ol.QtyReserved AS QtyReserved
     ,ol.QtyDelivered AS QtyDelivered
     ,ol.QtyInvoiced AS QtyInvoiced
+    ,ol.JP_QtyRecognized AS JP_QtyRecognized
+    ,ol.QtyLostSales AS QtyLostSales
     ,ol.PriceActual AS PriceActual
     ,ol.LineNetAmt AS LineNetAmt
     ,ol.Line AS Line

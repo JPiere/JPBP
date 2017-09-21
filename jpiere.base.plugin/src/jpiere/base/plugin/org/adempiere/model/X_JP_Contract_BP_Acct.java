@@ -30,7 +30,7 @@ public class X_JP_Contract_BP_Acct extends PO implements I_JP_Contract_BP_Acct, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170915L;
+	private static final long serialVersionUID = 20170921L;
 
     /** Standard Constructor */
     public X_JP_Contract_BP_Acct (Properties ctx, int JP_Contract_BP_Acct_ID, String trxName)

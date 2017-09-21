@@ -30,7 +30,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170915L;
+	private static final long serialVersionUID = 20170921L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -40,16 +40,12 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
         {
 			setDocBaseType (null);
 // SOO
-			setIsOrderInfoMandatoryJP (false);
-// N
 			setIsPostingContractAcctJP (false);
 // N
 			setIsPostingRecognitionDocJP (false);
 // N
 			setIsSOTrx (true);
 // Y
-			setIsScheduledCostPostingJP (false);
-// N
 			setJP_Contract_Acct_ID (0);
 			setName (null);
 			setValue (null);
@@ -131,27 +127,6 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return (String)get_Value(COLUMNNAME_DocBaseType);
 	}
 
-	/** Set Order Info Mandatory.
-		@param IsOrderInfoMandatoryJP Order Info Mandatory	  */
-	public void setIsOrderInfoMandatoryJP (boolean IsOrderInfoMandatoryJP)
-	{
-		set_Value (COLUMNNAME_IsOrderInfoMandatoryJP, Boolean.valueOf(IsOrderInfoMandatoryJP));
-	}
-
-	/** Get Order Info Mandatory.
-		@return Order Info Mandatory	  */
-	public boolean isOrderInfoMandatoryJP () 
-	{
-		Object oo = get_Value(COLUMNNAME_IsOrderInfoMandatoryJP);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
 	/** Set Contract Acct Posting.
 		@param IsPostingContractAcctJP Contract Acct Posting	  */
 	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP)
@@ -209,27 +184,6 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public boolean isSOTrx () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Scheduled Cost Posting.
-		@param IsScheduledCostPostingJP Scheduled Cost Posting	  */
-	public void setIsScheduledCostPostingJP (boolean IsScheduledCostPostingJP)
-	{
-		set_Value (COLUMNNAME_IsScheduledCostPostingJP, Boolean.valueOf(IsScheduledCostPostingJP));
-	}
-
-	/** Get Scheduled Cost Posting.
-		@return Scheduled Cost Posting	  */
-	public boolean isScheduledCostPostingJP () 
-	{
-		Object oo = get_Value(COLUMNNAME_IsScheduledCostPostingJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

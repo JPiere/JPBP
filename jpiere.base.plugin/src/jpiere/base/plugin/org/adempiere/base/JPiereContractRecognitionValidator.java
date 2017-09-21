@@ -143,6 +143,27 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 	 */
 	private String recognitionValidate(PO po, int type)
 	{
+		if(type == ModelValidator.TYPE_BEFORE_NEW )
+		{
+			//JP_Contract_ID is Mandetory field in Recognition doc
+			MContract contract = MContract.get(Env.getCtx(), po.get_ValueAsInt("JP_Contract_ID"));	
+			if(!contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+					&& !contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
+				return "計上伝票の契約書フィールドには、期間契約やスポット契約の契約書を入力する事ができます。";//TODO メッセージ化		
+			
+			//JP_ContractContent_ID is Mandetory field in Recognition doc.
+			MContractContent content = MContractContent.get(Env.getCtx(), po.get_ValueAsInt("JP_ContractContent_ID"));
+			if(!content.getJP_Contract_Acct().isPostingRecognitionDocJP())
+				return "入力されている契約内容は計上伝票を使用する事はできません。";//TODO メッセージ化	
+			
+			if(po.get_ValueAsInt("C_Order_ID") == 0 && po.get_ValueAsInt("M_RMA_ID")  == 0)
+			{
+				return "期間契約とスポット契約の場合、受注伝票、発注伝票、得意先返品受付伝票、仕入先返品依頼伝票のいずれかの入力が必要です。";//TODO:メッセージ化
+			}
+		
+		}//BEFORE_NEW
+		
+		
 		String msg = derivativeDocHeaderCommonCheck(po, type);
 		if(!Util.isEmpty(msg))
 			return msg;

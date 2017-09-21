@@ -30,7 +30,7 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170915L;
+	private static final long serialVersionUID = 20170921L;
 
     /** Standard Constructor */
     public X_JP_Contract_Product_Acct (Properties ctx, int JP_Contract_Product_Acct_ID, String trxName)
@@ -96,28 +96,6 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	public int getC_AcctSchema_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_AcctSchema_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public I_C_ValidCombination getJP_COGS_Clearing_A() throws RuntimeException
-    {
-		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
-			.getPO(getJP_COGS_Clearing_Acct(), get_TrxName());	}
-
-	/** Set Product COGS Clearing.
-		@param JP_COGS_Clearing_Acct Product COGS Clearing	  */
-	public void setJP_COGS_Clearing_Acct (int JP_COGS_Clearing_Acct)
-	{
-		set_Value (COLUMNNAME_JP_COGS_Clearing_Acct, Integer.valueOf(JP_COGS_Clearing_Acct));
-	}
-
-	/** Get Product COGS Clearing.
-		@return Product COGS Clearing	  */
-	public int getJP_COGS_Clearing_Acct () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_COGS_Clearing_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -265,31 +243,6 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	public int getJP_Revenue_Acct () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Revenue_Acct);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public I_C_ValidCombination getJP_Shipped_Asset_A() throws RuntimeException
-    {
-		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
-			.getPO(getJP_Shipped_Asset_Acct(), get_TrxName());	}
-
-	/** Set Shipped Product Asset.
-		@param JP_Shipped_Asset_Acct 
-		Account for Shipped Product Asset (Inventory)
-	  */
-	public void setJP_Shipped_Asset_Acct (int JP_Shipped_Asset_Acct)
-	{
-		set_Value (COLUMNNAME_JP_Shipped_Asset_Acct, Integer.valueOf(JP_Shipped_Asset_Acct));
-	}
-
-	/** Get Shipped Product Asset.
-		@return Account for Shipped Product Asset (Inventory)
-	  */
-	public int getJP_Shipped_Asset_Acct () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Shipped_Asset_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

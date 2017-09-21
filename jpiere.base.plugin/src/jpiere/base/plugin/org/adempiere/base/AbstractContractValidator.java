@@ -66,11 +66,12 @@ public abstract class AbstractContractValidator {
 			
 			po.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
-			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+					|| contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 			{
 				if(po.get_ValueAsInt("C_Order_ID") == 0 && po.get_ValueAsInt("M_RMA_ID")  == 0)
 				{
-					return "期間契約の場合、受発注伝票もしくは返品受付依頼伝票の入力は必須です。";//TODO:メッセージ化
+					return "期間契約とスポット契約の場合、受注伝票、発注伝票、得意先返品受付伝票、仕入先返品依頼伝票のいずれかの入力が必要です。";//TODO:メッセージ化
 				}
 				
 				/** In case of Period Contract, order has JP_ContractContent_ID and JP_ContractProcPeriod_ID always*/
