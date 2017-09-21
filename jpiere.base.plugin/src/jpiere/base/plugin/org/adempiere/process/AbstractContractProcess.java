@@ -34,6 +34,7 @@ import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractLog;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
@@ -47,6 +48,7 @@ public class AbstractContractProcess extends SvrProcess
 {
 	protected int Record_ID = 0;
 	protected MContractContent m_ContractContent = null;
+	protected MContractLog m_ContractLog = null;
 		
 	protected String p_JP_ContractProcessUnit = null;
 	protected int p_JP_ContractCalender_ID = 0;
@@ -66,6 +68,7 @@ public class AbstractContractProcess extends SvrProcess
 	protected boolean p_IsRecordCommitJP = false;
 	protected String p_JP_ContractProcessTraceLevel = null;
 	
+	
 	protected int p_JP_ContractProcess_ID = 0; //use to create derivative Doc
 
 	/** JP_ContractProcessUnit */
@@ -75,15 +78,7 @@ public class AbstractContractProcess extends SvrProcess
 	public static final String JP_ContractProcessUnit_DocumentDate  = "DDT";
 	public static final String JP_ContractProcessUnit_ContractProcessPeriodGroup  = "GPP";
 	public static final String JP_ContractProcessUnit_ContractProcessValueofContractProcessPeriodGroup  = "GPV";
-	public static final String JP_ContractProcessUnit_PerContractContent  = "PCC";
-
-	/** JP_ContractProcessTraceLevel */
-	public static final String JP_ContractProcessTraceLevel_ALL  = "ALL";
-	public static final String JP_ContractProcessTraceLevel_ErrorOnly  = "ERR";
-	public static final String JP_ContractProcessTraceLevel_NoLog  = "NON";
-	public static final String JP_ContractProcessTraceLevel_Warning  = "WAR";
-	public static final String JP_ContractProcessTraceLevel_Fine  = "FIN";
-	
+	public static final String JP_ContractProcessUnit_PerContractContent  = "PCC";	
 	
 	@Override
 	protected void prepare() 
@@ -171,6 +166,10 @@ public class AbstractContractProcess extends SvrProcess
 			}else if (name.equals("JP_ContractProcessTraceLevel")){			
 				
 				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();
+				
+			}else if (name.equals("JP_ContractLog")){
+				
+				m_ContractLog = (MContractLog)para[i].getParameter();
 				
 			}else if (name.equals("JP_ContractProcess_ID")){	
 				
@@ -366,32 +365,28 @@ public class AbstractContractProcess extends SvrProcess
 	}
 	
 	
-	protected boolean isOverlapPeriodOrder(int JP_ContractProcPeriod_ID)
+	protected MOrder[] getOverlapPeriodOrder(int JP_ContractProcPeriod_ID)
 	{
+		MOrder[] orders = null;
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MOrder[] orders= m_ContractContent.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-			if(orders.length > 0)
-			{
-				return true;
-			}
+			return m_ContractContent.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+	
 		}
 		
-		return false;
+		return orders;
 	}
 	
-	protected boolean isOverlapPeriodOrderLine(MContractLine line, int JP_ContractProcPeriod_ID)
+	protected MOrderLine[] getOverlapPeriodOrderLine(MContractLine line, int JP_ContractProcPeriod_ID)
 	{
+		MOrderLine[] oLines = null;
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MOrderLine[] oLines = line.getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-			if(oLines.length > 0)
-			{
-				return true;
-			}
+			return line.getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+	
 		}
 		
-		return false;
+		return oLines;
 	}
 	
 	protected boolean isOverlapPeriodInOut(int JP_ContractProcPeriod_ID)

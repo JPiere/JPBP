@@ -24,6 +24,7 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractLog;
 
 
 
@@ -130,7 +131,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 //			createLog(invoice, invoice.getDocumentInfo(), true); TODO createLog()を書く
 		}
 		
-		createLog(invoice, invoice.getDocumentInfo(), null, JP_ContractProcessTraceLevel_Fine, true);//TODO log
+		createLog(invoice, invoice.getDocumentInfo(), null, "FIN", true);//TODO log
 		
 		return "";
 	}

@@ -35,6 +35,7 @@ import org.compiere.util.Util;
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractLog;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
@@ -59,8 +60,16 @@ public class CallContractProcess extends SvrProcess {
 	private int p_JP_ContractCategory_ID = 0;
 	private int p_C_DocType_ID = 0;
 	private String p_DocBaseType = null;
-	boolean p_IsCreateBaseDocJP = false;
-	protected boolean p_IsRecordCommitJP = false;
+	private boolean p_IsCreateBaseDocJP = false;
+	private boolean p_IsRecordCommitJP = false;
+	private String p_JP_ContractProcessTraceLevel = "WAR";
+
+	private MContractLog m_ContractLog = null;
+	
+	private int successNum = 0;
+	private int failureNum = 0;
+	private int processContractContentNum = 0;
+	private int processContractLineNum = 0;
 	
 	@Override
 	protected void prepare() 
@@ -100,7 +109,9 @@ public class CallContractProcess extends SvrProcess {
 			}else if (name.equals("IsCreateBaseDocJP")){
 				p_IsCreateBaseDocJP = para[i].getParameterAsBoolean();
 			}else if (name.equals("IsRecordCommitJP")){
-				p_IsRecordCommitJP = para[i].getParameterAsBoolean();	
+				p_IsRecordCommitJP = para[i].getParameterAsBoolean();
+			}else if (name.equals("JP_ContractProcessTraceLevel")){
+				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();
 			}else{
 //				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if
@@ -112,21 +123,50 @@ public class CallContractProcess extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception 
 	{
+		//Create Contract Management Log
+		Trx conractLogTrx = null;
+		if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
+		{
+			String trxName = Trx.createTrxName("Contract");
+			conractLogTrx = Trx.get(trxName, false);
+			m_ContractLog = new MContractLog(getCtx(), 0, conractLogTrx.getTrxName());
+			m_ContractLog.setJP_ContractProcessTraceLevel(p_JP_ContractProcessTraceLevel);
+			m_ContractLog.setAD_PInstance_ID(getAD_PInstance_ID());
+			m_ContractLog.setJP_ContractProcessUnit(p_JP_ContractProcessUnit);
+			m_ContractLog.saveEx(conractLogTrx.getTrxName());
+			int JP_ContractLog_ID = m_ContractLog.getJP_ContractLog_ID();
+			addBufferLog(0, null, null, Msg.getMsg(getCtx(), "JP_DetailLog")+" -> " + Msg.getElement(getCtx(), "JP_ContractLog_ID"), MContractLog.Table_ID, JP_ContractLog_ID);
+			conractLogTrx.commit();
+		}
+		
+		
 		if(p_JP_ContractProcessUnit == null)
 		{
-			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcessUnit"));
+			String msg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcessUnit");
+			if(conractLogTrx !=null)
+			{
+				m_ContractLog.setDescription(msg);
+				conractLogTrx.commit();
+			}
+			
+			throw new Exception(msg);
 		}
+		
 		
 		//Process is kicked from the window by Per Contract Content.
 		if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_PerContractContent))
 		{
 			int Record_ID = getRecord_ID();
+			processContractContentNum = 1;
 			if(Record_ID > 0)
 			{
 				MContractContent contractContent = new MContractContent(getCtx(),Record_ID, get_TrxName());
 				if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 				{
-					callCreateBaseDoc(contractContent, null);
+					if(callCreateBaseDoc(contractContent, null))
+						successNum++;
+					else
+						failureNum++;
 					
 				}if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)){
 				
@@ -145,7 +185,10 @@ public class CallContractProcess extends SvrProcess {
 					//Create Base Doc contract process
 					if(p_IsCreateBaseDocJP)
 					{
-						callCreateBaseDoc(contractContent, period);
+						if(callCreateBaseDoc(contractContent, period))
+							successNum++;
+						else
+							failureNum++;
 						
 					//Create Derivative Doc Contract process	
 					}else{
@@ -156,7 +199,7 @@ public class CallContractProcess extends SvrProcess {
 				}
 				
 			}else{
-				log.log(Level.SEVERE, "Record_ID <= 0 ");//TODO エラー処理
+				log.log(Level.SEVERE, "Record_ID <= 0 ");
 			}
 		
 		//Process is kicked from periodical contract process.
@@ -169,6 +212,7 @@ public class CallContractProcess extends SvrProcess {
 			{	
 				//Get Contract Content from Contract Process Period
 				ArrayList<MContractContent> contractContentList = getContractContentList(procPeriod);
+				processContractContentNum = processContractContentNum + contractContentList.size();
 				
 				//Create Base Doc contract process
 				if(p_IsCreateBaseDocJP)
@@ -176,7 +220,10 @@ public class CallContractProcess extends SvrProcess {
 					
 					for(MContractContent contractContent : contractContentList)
 					{
-						callCreateBaseDoc(contractContent, procPeriod);
+						if(callCreateBaseDoc(contractContent, procPeriod))
+							successNum++;
+						else
+							failureNum++;
 					}
 				
 				//Create Derivative Doc Contract process
@@ -193,7 +240,41 @@ public class CallContractProcess extends SvrProcess {
 			
 		}//if
 		
-		return Msg.getMsg(getCtx(), "Success");//TODO リターンメッセージ ---> 処理契約期間数、処理契約内容件数、伝票作成件数、警告件数、エラー件数  くらいかな？
+		StringBuilder returnMsg = new StringBuilder("");
+		returnMsg.append("伝票作成件数").append(":").append(m_ContractLog.createDocNum).append(" / ");				   //TODO メッセージ化
+		returnMsg.append("スキップ件数(契約内容)").append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //TODO メッセージ化
+		returnMsg.append("スキップ件数(契約内容明細)").append(":").append(m_ContractLog.skipContractLineNum).append(" / ");  //TODO メッセージ化
+		returnMsg.append("エラー件数").append(":").append(m_ContractLog.errorNum).append("  ");	
+		
+		StringBuilder contractLogDescription = new StringBuilder("");
+		if(p_IsCreateBaseDocJP)
+		{
+			contractLogDescription.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
+			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
+			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append(" / ");
+			
+		}else{
+			
+			contractLogDescription.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
+			contractLogDescription.append(Msg.getElement(getCtx(), "JP_ContractLine_ID")).append(":").append(processContractLineNum).append(" / ");
+			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
+			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append(" / ");
+		}
+		
+
+		if(conractLogTrx !=null)
+		{
+			if(Util.isEmpty(m_ContractLog.getDescription()))
+				m_ContractLog.setDescription(returnMsg.toString() + " [ " + contractLogDescription.toString() + " ]");
+			else
+				m_ContractLog.setDescription(m_ContractLog.getDescription() +"   "+ returnMsg.toString() + " [ " + contractLogDescription.toString()+ " ]");
+			
+			m_ContractLog.save(conractLogTrx.getTrxName());
+			conractLogTrx.commit();
+			conractLogTrx.close();
+		}
+		
+		return returnMsg.toString();
 		
 	}//doIt()
 	
@@ -451,7 +532,7 @@ public class CallContractProcess extends SvrProcess {
 	}
 	
 	
-	private void callCreateBaseDoc(MContractContent contractContent, MContractProcPeriod procPeriod)
+	private boolean callCreateBaseDoc(MContractContent contractContent, MContractProcPeriod procPeriod)
 	{
 		ProcessInfo pi = new ProcessInfo("CreateBaseDoc", 0);
 		String className = null;
@@ -485,10 +566,10 @@ public class CallContractProcess extends SvrProcess {
 		//Update ProcessInfoParameter
 		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
 		list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractContent.getJP_ContractProcess_ID(), null, null, null ));
+		list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
 		setProcessInfoParameter(pi, list, procPeriod);
 		
-		startProcess(pi);
-		
+		return startProcess(pi);	
 	}
 	
 	
@@ -505,7 +586,7 @@ public class CallContractProcess extends SvrProcess {
 			contractProcesses =  contractContent.getContractProcessDerivativeInvoiceByCalender(procPeriod.getJP_ContractCalender_ID());
 		}
 		
-		
+		processContractLineNum = processContractLineNum + contractProcesses.length;
 		for(int i = 0; i < contractProcesses.length; i++)
 		{
 			String className = null;
@@ -533,9 +614,13 @@ public class CallContractProcess extends SvrProcess {
 			
 			ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
 			list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractProcesses[i].getJP_ContractProcess_ID(), null, null, null ));
+			list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
 			setProcessInfoParameter(pi, list, procPeriod);
 			
-			startProcess(pi);
+			if(startProcess(pi))
+				successNum++;
+			else
+				failureNum++;
 			
 		}//for
 		
@@ -576,10 +661,10 @@ public class CallContractProcess extends SvrProcess {
 		pi.setParameter(pars);	
 	}
 	
-	private void startProcess(ProcessInfo pi)
+	private boolean startProcess(ProcessInfo pi)
 	{
-		boolean isOK = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
-		if(isOK)
+		boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+		if(success)
 		{				
 			if(p_IsRecordCommitJP)
 			{
@@ -588,7 +673,8 @@ public class CallContractProcess extends SvrProcess {
 					commitEx();
 				} catch (SQLException e) {
 					
-					e.printStackTrace();// TODO ログに書き込む!?
+					e.printStackTrace();
+					
 				}
 			}
 			
@@ -600,5 +686,6 @@ public class CallContractProcess extends SvrProcess {
 			}
 		}
 		
+		return success;
 	}
 }
