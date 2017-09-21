@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
@@ -29,6 +31,8 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractLog;
+import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 /** 
@@ -58,17 +62,55 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
 				&& JP_ContractProcPeriod_ID == 0)
 		{
-			;//TODO エラー処理
+			m_ContractLog.errorNum++;
+			if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine)
+					|| p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning)
+					|| p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error))
+			{
+				MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+				logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+				logDetail.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError);
+				
+				logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
+				logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+				
+				logDetail.setJP_ContractProcPeriod_ID(JP_ContractProcPeriod_ID);
+				logDetail.setJP_ContractProcess_ID(m_ContractContent.getJP_ContractProcess_ID());
+				
+				logDetail.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
+				logDetail.saveEx();
+			}
+			
 			return "";
 		}
+		
 		
 		MContractProcPeriod orderProcPeriod = getBaseDocContractProcPeriodFromDerivativeDocContractProcPeriod(JP_ContractProcPeriod_ID);
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
 				&& orderProcPeriod == null)
 		{
-			;//TODO エラー処理
+			m_ContractLog.errorNum++;
+			if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine)
+					|| p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning)
+					|| p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error))
+			{
+				MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+				logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+				logDetail.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError);
+				
+				logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
+				logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+				
+				logDetail.setJP_ContractProcPeriod_ID(JP_ContractProcPeriod_ID);
+				logDetail.setJP_ContractProcess_ID(m_ContractContent.getJP_ContractProcess_ID());
+				
+				logDetail.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
+				logDetail.saveEx();
+			}
+			
 			return "";
 		}
+		
 		
 		//Check header Overlap -> Unnecessary. because order : invoice = 1 : N. need overlap. 
 //		if(isOverlapPeriodInOut(orderProcPeriod.getJP_ContractProcPeriod_ID()))
@@ -80,10 +122,6 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		{
 			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
 				continue;
-			
-			
-			//TODO ヘッダーを作る前に、処理対象となる明細があるかどうかのチェク。あればヘッダーを作成する
-			
 			
 			
 			/** Create InOut header */
@@ -118,13 +156,37 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
 				if(!contractLine.isCreateDocLineJP())
 					continue;
-					
-				//Check Overlap Line
-				if(isOverlapPeriodInOutLine(contractLine, JP_ContractProcPeriod_ID))
+				
+				//Check Overlap
+				MInOutLine[] ioLines = getOverlapPeriodInOutLine(contractLine,JP_ContractProcPeriod_ID);
+				if(ioLines != null && ioLines.length > 0)
 				{
-					//TODO ログは欲しい。
+					m_ContractLog.skipContractLineNum++;
+					if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning)
+							|| p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error))
+					{
+						MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+						logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+						logDetail.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod);
+						
+						logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
+						logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+						logDetail.setJP_ContractLine_ID(contractLine.getJP_ContractLine_ID());
+						
+						logDetail.setJP_ContractProcPeriod_ID(JP_ContractProcPeriod_ID);
+						logDetail.setJP_ContractProcess_ID(m_ContractContent.getJP_ContractProcess_ID());
+						
+						logDetail.setM_InOut_ID(ioLines[0].getM_InOut_ID());
+						logDetail.setM_InOutLine_ID(ioLines[0].getM_InOutLine_ID());
+						
+						logDetail.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning);
+						logDetail.saveEx();
+					}
+					
 					continue;
-				}
+					
+				}//Check Overlap
+				
 				
 				//check Lump or Divide
 				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("LP"))
@@ -199,16 +261,47 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			}else{
 				
 				inout.deleteEx(true, get_TrxName());
-//				createLog(invoice, invoice.getDocumentInfo(), true); TODO createLog()を書く
+				m_ContractLog.skipContractContentNum++;
+				if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning)
+						|| p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error))
+				{
+					MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+					logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+					logDetail.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped);
+					
+					logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
+					logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+					
+					logDetail.setJP_ContractProcPeriod_ID(JP_ContractProcPeriod_ID);
+					logDetail.setJP_ContractProcess_ID(m_ContractContent.getJP_ContractProcess_ID());
+					
+					logDetail.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning);
+					logDetail.saveEx();
+				}
+				
+				continue;
 			}
 			
-			createLog(inout, inout.getDocumentNo(), null, "FIN" ,true);
+			addBufferLog(0, null, null, inout.getDocumentNo(), MInOut.Table_ID, inout.getM_InOut_ID());
+			m_ContractLog.createDocNum++;
+			if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine))
+			{
+				MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+				logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+				logDetail.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument);
+				
+				logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
+				logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+				logDetail.setJP_ContractProcPeriod_ID(JP_ContractProcPeriod_ID);
+				logDetail.setJP_ContractProcess_ID(m_ContractContent.getJP_ContractProcess_ID());
+				
+				logDetail.setM_InOut_ID(inout.getM_InOut_ID());
+				logDetail.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine);
+				logDetail.saveEx();
+			}
 			
 			
 		}//for i
-		
-
-		
 
 		
 		return "";

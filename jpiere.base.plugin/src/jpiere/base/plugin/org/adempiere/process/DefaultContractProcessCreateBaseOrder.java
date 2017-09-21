@@ -53,7 +53,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			JP_ContractProcPeriod_ID = getJP_ContractProctPeriod_ID();
 		
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
-				|| JP_ContractProcPeriod_ID == 0)
+				&& JP_ContractProcPeriod_ID == 0)
 		{
 			m_ContractLog.errorNum++;
 			if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine)
@@ -150,6 +150,9 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 					
 					logDetail.setJP_ContractProcPeriod_ID(JP_ContractProcPeriod_ID);
 					logDetail.setJP_ContractProcess_ID(m_ContractContent.getJP_ContractProcess_ID());
+					
+					logDetail.setC_Order_ID(oLines[0].getC_Order_ID());
+					logDetail.setC_OrderLine_ID(oLines[0].getC_OrderLine_ID());
 					
 					logDetail.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning);
 					logDetail.saveEx();

@@ -367,26 +367,24 @@ public class AbstractContractProcess extends SvrProcess
 	
 	protected MOrder[] getOverlapPeriodOrder(int JP_ContractProcPeriod_ID)
 	{
-		MOrder[] orders = null;
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
 			return m_ContractContent.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 	
 		}
 		
-		return orders;
+		return null;
 	}
 	
 	protected MOrderLine[] getOverlapPeriodOrderLine(MContractLine line, int JP_ContractProcPeriod_ID)
 	{
-		MOrderLine[] oLines = null;
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
 			return line.getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 	
 		}
 		
-		return oLines;
+		return null;
 	}
 	
 	protected boolean isOverlapPeriodInOut(int JP_ContractProcPeriod_ID)
@@ -403,47 +401,36 @@ public class AbstractContractProcess extends SvrProcess
 		return false;
 	}
 	
-	protected boolean isOverlapPeriodInOutLine(MContractLine line, int JP_ContractProcPeriod_ID)
+	protected MInOutLine[] getOverlapPeriodInOutLine(MContractLine line, int JP_ContractProcPeriod_ID)
 	{
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MInOutLine[] oLines = line.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-			if(oLines.length > 0)
-			{
-				return true;
-			}
+			return line.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 		}
 		
-		return false;
+		return null;
 	}
 	
-	protected boolean isOverlapPeriodInvoice(int JP_ContractProcPeriod_ID)
+	protected MInvoice[]  getOverlapPeriodInvoice(int JP_ContractProcPeriod_ID)
 	{
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MInvoice[] invoices = m_ContractContent.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-			if(invoices.length> 0 )
-			{
-				return true;
-			}
+			return m_ContractContent.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+
 		}
 		
-		return false;
+		return null;
 	}
 	
 	
-	protected boolean isOverlapPeriodInvoiceLine(MContractLine line, int JP_ContractProcPeriod_ID)
+	protected MInvoiceLine[]  getOverlapPeriodInvoiceLine(MContractLine line, int JP_ContractProcPeriod_ID)
 	{
 		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MInvoiceLine[] iLines = line.getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-			if(iLines.length> 0)
-			{
-				return true;
-			}
+			return line.getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 		}
 		
-		return false;
+		return null;
 	}
 	
 	protected void updateContractProcStatus()
