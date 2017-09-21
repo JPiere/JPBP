@@ -29,9 +29,6 @@ import org.adempiere.exceptions.BPartnerNoAddressException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
-import org.compiere.model.MClient;
-import org.compiere.model.MConversionRate;
-import org.compiere.model.MConversionRateUtil;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
@@ -42,8 +39,6 @@ import org.compiere.model.MOrg;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
-import org.compiere.model.MProduct;
-import org.compiere.model.MProject;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MRefList;
@@ -345,6 +340,12 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		setC_BPartner_ID(order.getBill_BPartner_ID());
 		setC_BPartner_Location_ID(order.getBill_Location_ID());
 		setAD_User_ID(order.getBill_User_ID());
+		
+		//Contract Info
+		setJP_Contract_ID(order.get_ValueAsInt("JP_Contract_ID"));
+		setJP_ContractContent_ID(order.get_ValueAsInt("JP_ContractContent_ID"));
+		setJP_ContractProcPeriod_ID(order.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+		
 	}	//	MRecognition
 
 
@@ -1205,55 +1206,54 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		StringBuilder info = new StringBuilder();
 		
-		//	Update Order
+		//	Update Order Lines or RMA Lines
 		MRecognitionLine[] lines = getLines(false);
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRecognitionLine line = lines[i];
 					
-			//TODO	Update Order Line --- 受注伝票明細の数量の更新ロジックは要修正
+			//Update JP_QtyRecognized Order Line
 			MOrderLine ol = null;
 			if (line.getC_OrderLine_ID() != 0)
 			{
-//				if (isSOTrx()
-//					|| line.getM_Product_ID() == 0)
-//				{
-//					ol = new MOrderLine (getCtx(), line.getC_OrderLine_ID(), get_TrxName());
-//					if (line.getQtyInvoiced() != null)
-//						ol.setQtyInvoiced(ol.getQtyInvoiced().add(line.getQtyInvoiced()));
-//					if (!ol.save(get_TrxName()))
-//					{
-//						m_processMsg = "Could not update Order Line";
-//						return DocAction.STATUS_Invalid;
-//					}
-//				}
-//				//	Order Invoiced Qty updated via Matching Inv-PO
-//				else if (!isSOTrx()
-//					&& line.getM_Product_ID() != 0
-//					&& !isReversal())
-//				{
-//					//	MatchPO is created also from MInOut when Invoice exists before Shipment
-////					BigDecimal matchQty = line.getQtyInvoiced();
-//					
-//				}
+				ol = new MOrderLine (getCtx(), line.getC_OrderLine_ID(), get_TrxName());
+				BigDecimal JP_QtyRecognized = (BigDecimal)ol.get_Value("JP_QtyRecognized");
+				if(JP_QtyRecognized == null)
+					JP_QtyRecognized = Env.ZERO;
+				
+				if (line.getJP_QtyRecognized() != null)
+				{
+					ol.set_ValueNoCheck("JP_QtyRecognized", JP_QtyRecognized.add(line.getJP_QtyRecognized() ));
+				}
+				
+				if (!ol.save(get_TrxName()))
+				{
+					m_processMsg = "Could not update Order Line";
+					return DocAction.STATUS_Invalid;
+				}
 			}
 
-			//TODO Update QtyInvoiced RMA Line --- 受注伝票明細の数量の更新ロジックは要修正
+			//Update JP_QtyRecognized RMA Line
 			if (line.getM_RMALine_ID() != 0)
 			{
-//				MRMALine rmaLine = new MRMALine (getCtx(),line.getM_RMALine_ID(), get_TrxName());
-//				if (rmaLine.getQtyInvoiced() != null)
-//					rmaLine.setQtyInvoiced(rmaLine.getQtyInvoiced().add(line.getQtyInvoiced()));
-//				else
-//					rmaLine.setQtyInvoiced(line.getQtyInvoiced());
-//				if (!rmaLine.save(get_TrxName()))
-//				{
-//					m_processMsg = "Could not update RMA Line";
-//					return DocAction.STATUS_Invalid;
-//				}
+				MRMALine rmaLine = new MRMALine (getCtx(),line.getM_RMALine_ID(), get_TrxName());
+				BigDecimal JP_QtyRecognized = (BigDecimal)rmaLine.get_Value("JP_QtyRecognized");
+				if(JP_QtyRecognized == null)
+					JP_QtyRecognized = Env.ZERO;
+				
+				if (line.getQtyInvoiced() != null)
+				{
+					rmaLine.set_ValueNoCheck("JP_QtyRecognized", JP_QtyRecognized.add(line.getJP_QtyRecognized() ));
+				}
+				
+				if (!rmaLine.save(get_TrxName()))
+				{
+					m_processMsg = "Could not update RMA Line";
+					return DocAction.STATUS_Invalid;
+				}
 			}
-			//			
-		}	//	for all lines
+					
+		}//	for i
 
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
