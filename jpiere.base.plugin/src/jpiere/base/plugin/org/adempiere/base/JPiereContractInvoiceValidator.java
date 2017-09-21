@@ -25,6 +25,7 @@ import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -467,24 +468,25 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
 			if(JP_ContractContent_ID > 0)
 			{
-				MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-				MContractAcct contractAcct = MContractAcct.get(Env.getCtx(), content.getJP_Contract_Acct_ID());
 				MInvoice invoice = (MInvoice)po;
-				
 				//Set Order Info
 				for(Fact fact : facts)
 				{
 					FactLine[]  factLine = fact.getLines();
 					for(int i = 0; i < factLine.length; i++)
 					{
-						if(invoice.isSOTrx())
+						if(invoice.getC_Order_ID() > 0)
 						{
-							factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order_ID());
-						}else{
-							factLine[i].set_ValueNoCheck("JP_PurchaseOrder_ID", invoice.getC_Order_ID());
-							//Because Order is Mandetory, Relation between order doc and Invoice doc is  1: N , not permitted N : 1.
-							factLine[i].set_ValueNoCheck("JP_SalesOrder_ID", invoice.getC_Order().getLink_Order_ID());
+							factLine[i].set_ValueNoCheck("JP_Order_ID", invoice.getC_Order_ID());
+						}else if(invoice.getM_RMA_ID() > 0){
+							int M_RMA_ID = invoice.getM_RMA_ID();
+							MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID,po.get_TrxName());
+							int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+							if(JP_Order_ID > 0)
+								factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
 						}
+						
+						factLine[i].set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
 					}//for
 					
 				}//for

@@ -190,6 +190,15 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 					return null;
 				
 				recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+				MDocType odt = MDocType.get(order.getCtx(), rma.getC_DocType_ID());
+				if (odt != null)
+				{
+					int C_DocTypeTarget_ID = odt.get_ValueAsInt("JP_DocTypeRecognition_ID");
+					if (C_DocTypeTarget_ID <= 0)
+						throw new AdempiereException("@NotFound@ @C_DocTypeInvoice_ID@ - @C_DocType_ID@:"+odt.get_Translation(MDocType.COLUMNNAME_Name));
+					
+					recognition.setC_DocTypeTarget_ID(C_DocTypeTarget_ID);
+				}
 				recognition.setM_RMA_ID(io.getM_RMA_ID());
 			}
 			

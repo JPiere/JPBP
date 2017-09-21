@@ -51,7 +51,7 @@ JP_ContractContent_ID
 
 
 [FACT_ACCT]
-JP_SalesOrder_ID
-JP_PurchaseOrder_ID
+JP_Order_ID
+JP_ContractContent_ID
 
 

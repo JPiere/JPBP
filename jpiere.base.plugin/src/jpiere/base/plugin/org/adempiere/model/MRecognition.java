@@ -325,7 +325,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			MDocType odt = MDocType.get(order.getCtx(), order.getC_DocType_ID());
 			if (odt != null)
 			{
-				C_DocTypeTarget_ID = odt.getC_DocTypeInvoice_ID();
+				C_DocTypeTarget_ID = odt.get_ValueAsInt("JP_DocTypeRecognition_ID");
 				if (C_DocTypeTarget_ID <= 0)
 					throw new AdempiereException("@NotFound@ @C_DocTypeInvoice_ID@ - @C_DocType_ID@:"+odt.get_Translation(MDocType.COLUMNNAME_Name));
 			}
@@ -1214,7 +1214,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 					
 			//Update JP_QtyRecognized Order Line
 			MOrderLine ol = null;
-			if (line.getC_OrderLine_ID() != 0)
+			if (line.getC_OrderLine_ID() != 0 && line.getM_RMALine_ID() == 0)
 			{
 				ol = new MOrderLine (getCtx(), line.getC_OrderLine_ID(), get_TrxName());
 				BigDecimal JP_QtyRecognized = (BigDecimal)ol.get_Value("JP_QtyRecognized");

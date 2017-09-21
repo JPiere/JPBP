@@ -472,7 +472,7 @@ public class Doc_JPRecognition extends Doc
 				{
 					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
 					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-					fLines[i].set_ValueNoCheck("JP_SalesOrder_ID", recog.getC_Order_ID());
+					fLines[i].set_ValueNoCheck("JP_Order_ID", recog.getC_Order_ID());
 				}
 			}//for
 
