@@ -207,7 +207,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			recognition.setM_InOut_ID(io.getM_InOut_ID());
 			if (!recognition.save(trxName))
 			{
-				return "Could not create Invoice: "+ io.getDocumentInfo();//TODO
+				return "Could not create Recognition: "+ io.getDocumentInfo();//TODO
 			}
 
 			MInOutLine[] sLines = io.getLines(false);
@@ -219,7 +219,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				rcogLine.setShipLine(sLine);
 				if(isRMA)
 				{
-					int M_RMALine_ID = rcogLine.getM_RMALine_ID();
+					int M_RMALine_ID = sLine.getM_RMALine_ID();
 					MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, io.get_TrxName());
 					int JP_OrderLine_ID = rmaLine.get_ValueAsInt("JP_OrderLine_ID");
 					rcogLine.setC_OrderLine_ID(JP_OrderLine_ID);
@@ -242,7 +242,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 
 				if (!sLine.save(trxName))
 				{
-					log.warning("Could not update Shipment line: " + sLine);
+					log.warning("Could not update Shipment line: " + sLine);//TODO
 				}
 			}//for
 

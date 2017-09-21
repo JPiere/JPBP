@@ -124,7 +124,7 @@ public abstract class AbstractContractValidator {
 			
 			PO baseDocLine = null;
 			
-			if(C_OrderLine_ID > 0)
+			if(C_OrderLine_ID > 0 && M_RMALine_ID == 0)
 				baseDocLine  = new MOrderLine(Env.getCtx(), C_OrderLine_ID, po.get_TrxName());
 			else
 				baseDocLine  = new MRMALine(Env.getCtx(), M_RMALine_ID, po.get_TrxName());
