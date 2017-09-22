@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
 
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
@@ -73,6 +74,8 @@ public class AbstractContractProcess extends SvrProcess
 	
 	
 	protected int p_JP_ContractProcess_ID = 0; //use to create derivative Doc
+	
+	protected IProcessUI processUI = null;
 
 	/** JP_ContractProcessUnit */
 	public static final String JP_ContractProcessUnit_ContractProcessPeriod  = "CPP";
@@ -93,6 +96,8 @@ public class AbstractContractProcess extends SvrProcess
 		}else{
 			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
+		
+		processUI = Env.getProcessUI(getCtx());
 		
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
@@ -391,6 +396,9 @@ public class AbstractContractProcess extends SvrProcess
 			DocAction doc = (DocAction)po;
 			addBufferLog(0, null, null, Msg.getMsg(getCtx(), "DocumentNo") +" : "+ doc.getDocumentNo(), po.get_Table_ID(), po.get_ID());
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Fine;
+			
+			if(processUI != null)
+				processUI.statusUpdate(Msg.getMsg(getCtx(), "JP_CreateDocNum") + " : " + (m_ContractLog.createDocNum));
 		
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod)){//B1
 			if(ContractLine == null)

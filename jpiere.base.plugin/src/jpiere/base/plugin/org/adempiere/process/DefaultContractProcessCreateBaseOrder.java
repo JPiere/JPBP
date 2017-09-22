@@ -15,7 +15,6 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
-import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;

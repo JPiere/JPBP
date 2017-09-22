@@ -19,10 +19,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MClient;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -64,12 +66,17 @@ public class CallContractProcess extends SvrProcess {
 	private boolean p_IsRecordCommitJP = false;
 	private String p_JP_ContractProcessTraceLevel = "WAR";
 
+	//COntract Log
+	private Trx conractLogTrx = null;
 	private MContractLog m_ContractLog = null;
 	
 	private int successNum = 0;
 	private int failureNum = 0;
 	private int processContractContentNum = 0;
 	private int processContractLineNum = 0;
+	
+	
+	volatile static HashMap<Integer, Boolean> processingNow = null;
 	
 	@Override
 	protected void prepare() 
@@ -123,8 +130,61 @@ public class CallContractProcess extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception 
 	{
+		if(processingNow == null)
+		{
+			processingNow = new HashMap<Integer, Boolean>();
+			MClient[] clients = MClient.getAll(getCtx());
+			for(int i = 0; i < clients.length; i++)
+			{
+				processingNow.put(clients[i].getAD_Client_ID(), false);
+			}
+		}
+		
+		
+		String msg = "";
+		try 
+		{
+			if(processingNow.get(getAD_Client_ID()))
+				throw new Exception(Msg.getMsg(getCtx(), "JP_Contract ProcessRunningNow"));//Contract process is running now by other user.
+			else
+				processingNow.put(getAD_Client_ID(), true);
+
+			msg = doContractProcess();
+			
+		} catch (Exception e) {
+			
+			if(conractLogTrx != null)
+			{
+				if(p_IsRecordCommitJP)
+					msg = "--Rollback--";
+				else
+					msg = "";
+				
+				m_ContractLog.setDescription( msg + " Error : " +  e.getMessage( ) );
+				m_ContractLog.saveEx(conractLogTrx.getTrxName());
+				conractLogTrx.commit();
+			}
+			
+			throw e;
+			
+		} finally {
+			
+			processingNow.put(getAD_Client_ID(), false);
+			if(conractLogTrx != null)
+			{
+				conractLogTrx.close();
+				conractLogTrx = null;
+			}
+		}
+		
+		return  msg;
+	}
+	
+	
+	private String doContractProcess() throws Exception 
+	{
+		
 		//Create Contract Management Log
-		Trx conractLogTrx = null;
 		if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
 		{
 			String trxName = Trx.createTrxName("Contract");
@@ -146,6 +206,7 @@ public class CallContractProcess extends SvrProcess {
 			if(conractLogTrx !=null)
 			{
 				m_ContractLog.setDescription(msg);
+				m_ContractLog.saveEx(conractLogTrx.getTrxName());
 				conractLogTrx.commit();
 			}
 			
@@ -241,10 +302,11 @@ public class CallContractProcess extends SvrProcess {
 		}//if
 		
 		StringBuilder returnMsg = new StringBuilder("");
-		returnMsg.append("伝票作成件数").append(":").append(m_ContractLog.createDocNum).append(" / ");				   //TODO メッセージ化
-		returnMsg.append("スキップ件数(契約内容)").append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //TODO メッセージ化
-		returnMsg.append("スキップ件数(契約内容明細)").append(":").append(m_ContractLog.skipContractLineNum).append(" / ");  //TODO メッセージ化
-		returnMsg.append("エラー件数").append(":").append(m_ContractLog.errorNum).append("  ");	
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_CreateDocNum")).append(":").append(m_ContractLog.createDocNum).append(" / ");//Number of documents to create
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractContent")).append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //Number of skips(Contract Content)
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractLine")).append(":").append(m_ContractLog.skipContractLineNum).append(" / ");  //Number of skips(Contract Content Line)
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append("  ");//Number of errors
 		
 		StringBuilder systemProcessLog = new StringBuilder("");
 		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine))
@@ -271,11 +333,12 @@ public class CallContractProcess extends SvrProcess {
 			m_ContractLog.save(conractLogTrx.getTrxName());
 			conractLogTrx.commit();
 			conractLogTrx.close();
+			conractLogTrx = null;
 		}
 		
 		return returnMsg.toString();
 		
-	}//doIt()
+	}//doContractProcess
 	
 	
 	private ArrayList<MContractProcPeriod> getContractProcPeriodList() throws Exception
@@ -531,7 +594,7 @@ public class CallContractProcess extends SvrProcess {
 	}
 	
 	
-	private boolean callCreateBaseDoc(MContractContent contractContent, MContractProcPeriod procPeriod)
+	private boolean callCreateBaseDoc(MContractContent contractContent, MContractProcPeriod procPeriod) throws Exception
 	{
 		ProcessInfo pi = new ProcessInfo("CreateBaseDoc", 0);
 		String className = null;
@@ -572,7 +635,7 @@ public class CallContractProcess extends SvrProcess {
 	}
 	
 	
-	private void callCreateDerivativeDoc(MContractContent contractContent, MContractProcPeriod procPeriod)
+	private void callCreateDerivativeDoc(MContractContent contractContent, MContractProcPeriod procPeriod) throws Exception
 	{
 		MContractProcess[] contractProcesses =  null;
 
@@ -625,7 +688,7 @@ public class CallContractProcess extends SvrProcess {
 		
 	}
 	
-	private void setProcessInfoParameter(ProcessInfo pi, ArrayList<ProcessInfoParameter> list ,MContractProcPeriod procPeriod)
+	private void setProcessInfoParameter(ProcessInfo pi, ArrayList<ProcessInfoParameter> list ,MContractProcPeriod procPeriod) throws Exception
 	{
 		ProcessInfoParameter[] para = getParameter();
 		for(int i = 0; i < para.length; i++)
@@ -660,7 +723,7 @@ public class CallContractProcess extends SvrProcess {
 		pi.setParameter(pars);	
 	}
 	
-	private boolean startProcess(ProcessInfo pi)
+	private boolean startProcess(ProcessInfo pi) throws Exception
 	{
 		boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
 		if(success)
@@ -670,11 +733,23 @@ public class CallContractProcess extends SvrProcess {
 				try 
 				{
 					commitEx();
+					if(conractLogTrx != null)
+					{
+						conractLogTrx.commit();
+					}
+					
 				} catch (SQLException e) {
 					
-					e.printStackTrace();
-					
+					throw e;					
 				}
+				
+			}else{
+				
+				if(conractLogTrx != null)
+				{
+					conractLogTrx.commit();
+				}
+				
 			}
 			
 		}else{
