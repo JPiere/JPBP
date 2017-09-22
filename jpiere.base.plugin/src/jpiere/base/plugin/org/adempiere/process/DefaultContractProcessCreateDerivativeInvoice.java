@@ -15,6 +15,7 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
@@ -84,7 +85,60 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
 				continue;
 			
+			/** Pre check - Pre judgment create Document or not. */
+			MOrderLine[] orderLines = orders[i].getLines(true, "");
+			boolean isCreateDocLine = false;
+			boolean isOverQtyOrdered = false;
+			ArrayList<MOrderLine> overQtyOrderedLineList = new ArrayList<MOrderLine>();
+			for(int j = 0; j < orderLines.length; j++)
+			{
+				int JP_ContractLine_ID = orderLines[j].get_ValueAsInt("JP_ContractLine_ID");
+				if(JP_ContractLine_ID == 0)
+					continue;
+				
+				MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
+				if(!contractLine.isCreateDocLineJP())
+					continue;
+				
+				//Check Overlap
+				MInvoiceLine[] iLines = contractLine.getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
+				if(iLines != null && iLines.length > 0)
+					continue;
+				
+				//check Lump or Divide
+				if(contractLine.getJP_DerivativeDocPolicy_Inv().equals("LP"))
+				{
+					if(contractLine.getJP_ContractProcPeriod_Inv_ID() != JP_ContractProcPeriod_ID)
+						continue;
+				}
+				
+				BigDecimal qtyInvoiced = contractLine.getQtyInvoiced();
+				BigDecimal qtyToInvoice = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyInvoiced());
+				if(qtyToInvoice.compareTo(qtyInvoiced) >= 0)
+				{
+					isCreateDocLine = true;
+					break;
+				}else{
+					isOverQtyOrdered = true;
+					overQtyOrderedLineList.add(orderLines[j]);
+				}
+			}
+			
+			if(!isCreateDocLine)
+			{
+				if(isOverQtyOrdered)
+				{
+					for(MOrderLine oLine : overQtyOrderedLineList)
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, null, oLine, null);	
+				}else{				
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, orders[i], null);	
+				}
+				continue;
+			}
+				
+			
 			/** Create Invoice header */
+			isCreateDocLine = false; //Reset
 			MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
 			PO.copyValues(orders[i], invoice);
 			invoice.setC_Order_ID(orders[i].getC_Order_ID());
@@ -100,8 +154,7 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			
 			
 			orders[i].set_TrxName(get_TrxName());
-			MOrderLine[] orderLines = orders[i].getLines(true, "");
-			boolean isCrateDocLine = false;
+			isCreateDocLine = false; //Reset
 			for(int j = 0; j < orderLines.length; j++)
 			{
 				int JP_ContractLine_ID = orderLines[j].get_ValueAsInt("JP_ContractLine_ID");
@@ -127,6 +180,7 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 						continue;
 				}
 				
+				//Check over ordered qty
 				BigDecimal qtyInvoiced = contractLine.getQtyInvoiced();
 				BigDecimal qtyToInvoice = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyInvoiced());
 				if(qtyToInvoice.compareTo(qtyInvoiced) >= 0)
@@ -148,19 +202,18 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 					iLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 					
 					iLine.saveEx(get_TrxName());
-					isCrateDocLine = true;
-					
+					isCreateDocLine = true;
 					
 				}else{
 					
-					;//TODO 数量が足りないのでエラー。ログは欲しい
-					
+					//Over Ordered Quantity
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, contractLine, orderLines[j], null);	
 				}
 				
 				
 			}//for J
 			
-			if(isCrateDocLine)
+			if(isCreateDocLine)
 			{
 				String docAction = getDocAction();
 				if(!Util.isEmpty(docAction))
@@ -174,8 +227,9 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				
 			}else{
 				
+				//if by any chance
 				invoice.deleteEx(true, get_TrxName());
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);				
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, orders[i], null);				
 				continue;
 			}
 			

@@ -72,6 +72,29 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		}//Check Overlap
 		
 		
+		/** Pre check - Pre judgment create Document or not. */
+		MContractLine[] 	m_lines = m_ContractContent.getLines();
+		boolean isCreateDocLine = false;
+		for(int i = 0; i < m_lines.length; i++)
+		{
+			if(!m_lines[i].isCreateDocLineJP())
+				continue;
+			
+			//Check Overlap
+			MInvoiceLine[] iLines = m_lines[i].getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(iLines != null && iLines.length > 0)
+				continue;
+			
+			isCreateDocLine = true;
+			break;
+		}
+		
+		if(!isCreateDocLine)
+		{
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);	
+			return "";
+		}
+		
 		
 		/** Create Invoice header */
 		MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
@@ -91,8 +114,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		invoice.saveEx(get_TrxName());
 		
 		/** Create Invoice Line */
-		MContractLine[] 	m_lines = m_ContractContent.getLines();
-		boolean isCrateDocLine = false;
+		isCreateDocLine = false; //Reset
 		for(int i = 0; i < m_lines.length; i++)
 		{
 			if(!m_lines[i].isCreateDocLineJP())
@@ -118,10 +140,10 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 				iline.set_ValueOfColumn("JP_ContractProcPeriod_ID", getJP_ContractProctPeriod_ID());
 			
 			iline.saveEx(get_TrxName());
-			isCrateDocLine = true;
+			isCreateDocLine = true;
 		}
 		
-		if(isCrateDocLine)
+		if(isCreateDocLine)
 		{
 			String docAction = getDocAction();
 			updateContractProcStatus();
@@ -136,6 +158,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 			
 		}else{
 			
+			//if by any chance
 			invoice.deleteEx(true, get_TrxName());
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);	
 			return "";

@@ -6,12 +6,17 @@ import java.util.Properties;
 
 public class MContractLog extends X_JP_ContractLog {
 	
+	//fine
 	public int createDocNum = 0;
-	
-	public int errorNum = 0;
-	
 	public int skipContractContentNum = 0;
 	public int skipContractLineNum = 0;
+	
+	//Not fine
+	public int warnNum = 0;
+	public int errorNum = 0;
+
+	
+
 	
 	public MContractLog(Properties ctx, int JP_ContractLog_ID, String trxName) 
 	{

@@ -15,6 +15,7 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
@@ -88,6 +89,56 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
 				continue;
 			
+			/** Pre check - Pre judgment create Document or not. */
+			MOrderLine[] orderLines = orders[i].getLines(true, "");
+			boolean isCreateDocLine = false;
+			boolean isOverQtyOrdered = false;
+			ArrayList<MOrderLine> overQtyOrderedLineList = new ArrayList<MOrderLine>();
+			for(int j = 0; j < orderLines.length; j++)
+			{
+				int JP_ContractLine_ID = orderLines[j].get_ValueAsInt("JP_ContractLine_ID");
+				if(JP_ContractLine_ID == 0)
+					continue;
+				
+				MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
+				if(!contractLine.isCreateDocLineJP())
+					continue;
+				
+				//Check Overlap
+				MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
+				if(ioLines != null && ioLines.length > 0)					
+					continue;
+				
+				//check Lump or Divide
+				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("LP"))
+				{
+					if(contractLine.getJP_ContractProcPeriod_InOut_ID() != JP_ContractProcPeriod_ID)
+						continue;
+				}
+				
+				BigDecimal movementQty = contractLine.getMovementQty();
+				BigDecimal qtyToDeliver = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyDelivered());
+				if(qtyToDeliver.compareTo(movementQty) >= 0)
+				{
+					isCreateDocLine = true;
+					break;
+				}else{
+					isOverQtyOrdered = true;
+					overQtyOrderedLineList.add(orderLines[j]);
+				}
+			}
+			
+			if(!isCreateDocLine)
+			{
+				if(isOverQtyOrdered)
+				{
+					for(MOrderLine oLine : overQtyOrderedLineList)
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, null, oLine, null);	
+				}else{				
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, orders[i], null);	
+				}
+				continue;
+			}
 			
 			/** Create InOut header */
 			MInOut inout = new MInOut(getCtx(), 0, get_TrxName());
@@ -110,8 +161,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			
 			
 			orders[i].set_TrxName(get_TrxName());
-			MOrderLine[] orderLines = orders[i].getLines(true, "");
-			boolean isCrateDocLine = false;
+			isCreateDocLine = false; //Reset
 			for(int j = 0; j < orderLines.length; j++)
 			{
 				int JP_ContractLine_ID = orderLines[j].get_ValueAsInt("JP_ContractLine_ID");
@@ -165,7 +215,10 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 						
 					}else{
 						
-						;//TODO Erroe 保管場所が見つかりません。 -> 警告
+						//Not Found Locator
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator, contractLine, orderLines[j], null);
+						continue;
+						
 					}
 					
 					
@@ -179,17 +232,19 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 					ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 					
 					ioLine.saveEx(get_TrxName());
-					isCrateDocLine = true;
+					isCreateDocLine = true;
 					
 					
 				}else{
-					;//TODO 数量が足りないのでエラー。ログは欲しい -> 警告
+					
+					//Over Ordered Quantity
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, contractLine, orderLines[j], null);
 				}
 				
 				
 			}//for J
 			
-			if(isCrateDocLine)
+			if(isCreateDocLine)
 			{
 				String docAction = getDocAction();
 				if(!Util.isEmpty(docAction))
@@ -203,6 +258,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				
 			}else{
 				
+				//if by any chance
 				inout.deleteEx(true, get_TrxName());
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);	
 				continue;

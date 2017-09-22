@@ -15,6 +15,7 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;
@@ -68,6 +69,31 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			return "";
 		}//Check Overlap
 		
+		
+		/** Pre check - Pre judgment create Document or not. */
+		MContractLine[] 	m_lines = m_ContractContent.getLines();
+		boolean isCreateDocLine = false;
+		for(int i = 0; i < m_lines.length; i++)
+		{
+			if(!m_lines[i].isCreateDocLineJP())
+				continue;
+			
+			//Check Overlap
+			MOrderLine[] oLines = m_lines[i].getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+			if(oLines != null && oLines.length > 0)
+				continue;
+			
+			isCreateDocLine = true;
+			break;
+		}
+		
+		if(!isCreateDocLine)
+		{
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);	
+			return "";
+		}
+		
+		
 		/** Create Order header */
 		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
 
@@ -90,8 +116,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 		order.saveEx(get_TrxName());
 		
 		/** Create Order Line */
-		MContractLine[] 	m_lines = m_ContractContent.getLines();
-		boolean isCrateDocLine = false;
+		isCreateDocLine = false; //Reset
 		for(int i = 0; i < m_lines.length; i++)
 		{
 			if(!m_lines[i].isCreateDocLineJP())
@@ -121,11 +146,11 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			oline.setDatePromised(getOrderLineDatePromised(m_lines[i]));
 			
 			oline.saveEx(get_TrxName());
-			isCrateDocLine = true;
+			isCreateDocLine = true;
 		}
 		
 		
-		if(isCrateDocLine)
+		if(isCreateDocLine)
 		{
 			String docAction = getDocAction();
 			updateContractProcStatus();
@@ -140,6 +165,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			
 		}else{
 			
+			//if by any chance
 			order.deleteEx(true, get_TrxName());
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);			
 			return "";

@@ -405,7 +405,18 @@ public class AbstractContractProcess extends SvrProcess
 			m_ContractLog.skipContractContentNum++;
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Fine;
 			
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator)){ //W1
+			
+			m_ContractLog.warnNum++;
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning;
+			
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity)){ //W2
+			
+			m_ContractLog.warnNum++;
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning;
+			
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError)){ //ZZ
+			
 			m_ContractLog.errorNum++;
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Error;
 		}

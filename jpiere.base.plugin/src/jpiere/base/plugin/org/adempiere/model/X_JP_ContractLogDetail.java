@@ -30,7 +30,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170921L;
+	private static final long serialVersionUID = 20170922L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -69,6 +69,34 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Table)MTable.get(getCtx(), org.compiere.model.I_AD_Table.Table_Name)
+			.getPO(getAD_Table_ID(), get_TrxName());	}
+
+	/** Set Table.
+		@param AD_Table_ID 
+		Database Table information
+	  */
+	public void setAD_Table_ID (int AD_Table_ID)
+	{
+		if (AD_Table_ID < 1) 
+			set_Value (COLUMNNAME_AD_Table_ID, null);
+		else 
+			set_Value (COLUMNNAME_AD_Table_ID, Integer.valueOf(AD_Table_ID));
+	}
+
+	/** Get Table.
+		@return Database Table information
+	  */
+	public int getAD_Table_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Table_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException
     {
@@ -293,6 +321,10 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_UnexpectedError = "ZZ";
 	/** All Contract content line was Skipped = B2 */
 	public static final String JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped = "B2";
+	/** Not Found Locator = W1 */
+	public static final String JP_CONTRACTLOGMSG_NotFoundLocator = "W1";
+	/** Over Ordered Quantity = W2 */
+	public static final String JP_CONTRACTLOGMSG_OverOrderedQuantity = "W2";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)
@@ -482,6 +514,29 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public int getM_InOut_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOut_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Record ID.
+		@param Record_ID 
+		Direct internal record ID
+	  */
+	public void setRecord_ID (int Record_ID)
+	{
+		if (Record_ID < 0) 
+			set_Value (COLUMNNAME_Record_ID, null);
+		else 
+			set_Value (COLUMNNAME_Record_ID, Integer.valueOf(Record_ID));
+	}
+
+	/** Get Record ID.
+		@return Direct internal record ID
+	  */
+	public int getRecord_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Record_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
