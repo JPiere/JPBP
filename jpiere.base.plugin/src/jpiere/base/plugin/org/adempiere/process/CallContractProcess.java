@@ -246,28 +246,28 @@ public class CallContractProcess extends SvrProcess {
 		returnMsg.append("スキップ件数(契約内容明細)").append(":").append(m_ContractLog.skipContractLineNum).append(" / ");  //TODO メッセージ化
 		returnMsg.append("エラー件数").append(":").append(m_ContractLog.errorNum).append("  ");	
 		
-		StringBuilder contractLogDescription = new StringBuilder("");
+		StringBuilder systemProcessLog = new StringBuilder("");
 		if(p_IsCreateBaseDocJP)
 		{
-			contractLogDescription.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
-			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
-			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append(" / ");
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  ( ");
+			systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" ) ");
 			
 		}else{
-			
-			contractLogDescription.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
-			contractLogDescription.append(Msg.getElement(getCtx(), "JP_ContractLine_ID")).append(":").append(processContractLineNum).append(" / ");
-			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
-			contractLogDescription.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append(" / ");
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  ( ");	
+			systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
+			systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractLine_ID")).append(":").append(processContractLineNum).append(" ) ");
+
 		}
 		
 
 		if(conractLogTrx !=null)
 		{
 			if(Util.isEmpty(m_ContractLog.getDescription()))
-				m_ContractLog.setDescription(returnMsg.toString() + " [ " + contractLogDescription.toString() + " ]");
+				m_ContractLog.setDescription(returnMsg.toString() + " [ --System Process Log-- " + systemProcessLog.toString() + " ]");
 			else
-				m_ContractLog.setDescription(m_ContractLog.getDescription() +"   "+ returnMsg.toString() + " [ " + contractLogDescription.toString()+ " ]");
+				m_ContractLog.setDescription(m_ContractLog.getDescription() +"   "+ returnMsg.toString() + " [ " + systemProcessLog.toString()+ " ]");
 			
 			m_ContractLog.save(conractLogTrx.getTrxName());
 			conractLogTrx.commit();

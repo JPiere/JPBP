@@ -25,9 +25,11 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -35,6 +37,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLog;
+import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
@@ -364,71 +367,6 @@ public class AbstractContractProcess extends SvrProcess
 		return p_JP_ContractProcess_ID;
 	}
 	
-	
-	protected MOrder[] getOverlapPeriodOrder(int JP_ContractProcPeriod_ID)
-	{
-		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			return m_ContractContent.getOrderByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-	
-		}
-		
-		return null;
-	}
-	
-	protected MOrderLine[] getOverlapPeriodOrderLine(MContractLine line, int JP_ContractProcPeriod_ID)
-	{
-		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			return line.getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-	
-		}
-		
-		return null;
-	}
-	
-	protected MInOut[] getOverlapPeriodInOut(int JP_ContractProcPeriod_ID)
-	{
-		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			return  m_ContractContent.getInOutByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-		}
-		
-		return null;
-	}
-	
-	protected MInOutLine[] getOverlapPeriodInOutLine(MContractLine line, int JP_ContractProcPeriod_ID)
-	{
-		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			return line.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-		}
-		
-		return null;
-	}
-	
-	protected MInvoice[]  getOverlapPeriodInvoice(int JP_ContractProcPeriod_ID)
-	{
-		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			return m_ContractContent.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-
-		}
-		
-		return null;
-	}
-	
-	
-	protected MInvoiceLine[]  getOverlapPeriodInvoiceLine(MContractLine line, int JP_ContractProcPeriod_ID)
-	{
-		if(JP_ContractProcPeriod_ID > 0 && m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			return line.getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-		}
-		
-		return null;
-	}
-	
 	protected void updateContractProcStatus()
 	{
 		if(p_IsCreateBaseDocJP)
@@ -442,28 +380,128 @@ public class AbstractContractProcess extends SvrProcess
 	}
 	
 	
-	//TODO
-	protected void createLog(PO po, String msg, MContractLine contraceLine, String TraceLevel, boolean success)//TODO
+	protected void createContractLogDetail(String ContractLogMsg, MContractLine ContractLine, PO po, String descriptionMsg)
 	{
-		 //TODO メッセージ変更
-		addBufferLog(0, null, null, msg, po.get_Table_ID(), po.get_ID() );
+		String TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Fine;
+		
+		/** Count up of counter */
+		if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument)){ //A1
+	
+			m_ContractLog.createDocNum++;
+			DocAction doc = (DocAction)po;
+			addBufferLog(0, null, null, Msg.getMsg(getCtx(), "DocumentNo") +" : "+ doc.getDocumentNo(), po.get_Table_ID(), po.get_ID());
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Fine;
+		
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod)){//B1
+			if(ContractLine == null)
+				m_ContractLog.skipContractContentNum++;
+			else
+				m_ContractLog.skipContractLineNum++;
+			
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Fine;
+			
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped)){ //B2
+			
+			m_ContractLog.skipContractContentNum++;
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Fine;
+			
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError)){ //ZZ
+			m_ContractLog.errorNum++;
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Error;
+		}
+		
+		
+		/** Check traceLevel */
+		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine))
+		{
+			;//Noting to do. All create contract log.
+			
+		}if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning)){
+			
+			if(TraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine))
+				return ;	
+		}if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error)){
+			
+			if(TraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine)
+					|| TraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning))
+				return ;	
+			
+		}if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog)){
+			
+			return ;
+		}
+		
+		
+		/** Create contract Log Detail */
+		MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+		logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+		logDetail.setJP_ContractLogMsg(ContractLogMsg);
+		if(descriptionMsg != null)
+			logDetail.setDescription(descriptionMsg);
+		
+		//Set Contract Info
+		logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
+		logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+		if(ContractLine != null)
+			logDetail.setJP_ContractLine_ID(ContractLine.getJP_ContractLine_ID());
+		
+		//Set Process Info
+		logDetail.setJP_ContractProcPeriod_ID(getJP_ContractProctPeriod_ID());
+		logDetail.setJP_ContractProcess_ID(getJP_ContractProcess_ID());
+		logDetail.setJP_ContractProcessTraceLevel(TraceLevel);
+		
+		//Set Reference Info
+		if(po != null)
+		{
+			logDetail.set_ValueNoCheck("AD_Table_ID", po.get_Table_ID());
+			logDetail.set_ValueNoCheck("Record_ID", po.get_ID());
+			
+		}else{
+			
+			return ;
+		}
 		
 		if(po.get_TableName().equals(MOrder.Table_Name))
 		{
-			;
+			MOrder order = (MOrder)po;
+			logDetail.setC_Order_ID(order.getC_Order_ID());
+			
+		}else if(po.get_TableName().equals(MOrderLine.Table_Name)){
+			
+			MOrderLine orderLine = (MOrderLine)po;
+			logDetail.setC_Order_ID(orderLine.getC_Order_ID());	
+			logDetail.setC_OrderLine_ID(orderLine.getC_OrderLine_ID());	
+		
+		}else if(po.get_TableName().equals(MInOut.Table_Name)){
+			
+			MInOut inout = (MInOut)po;
+			logDetail.setC_Order_ID(inout.getC_Order_ID());	
+			logDetail.setM_InOut_ID(inout.getM_InOut_ID());		
+			
+		}else if(po.get_TableName().equals(MInOutLine.Table_Name)){
+			
+			MInOutLine ioLine = (MInOutLine)po;
+			logDetail.setC_OrderLine_ID(ioLine.getC_OrderLine_ID());	
+			logDetail.setM_InOut_ID(ioLine.getM_InOut_ID());	
+			logDetail.setM_InOutLine_ID(ioLine.getM_InOutLine_ID());
+			
+		}else if(po.get_TableName().equals(MInvoice.Table_Name)){
+			
+			MInvoice invoice = (MInvoice)po;
+			logDetail.setC_Order_ID(invoice.getC_Order_ID());	
+			logDetail.setC_Invoice_ID(invoice.getC_Invoice_ID());		
+			
+		}else if(po.get_TableName().equals(MInvoiceLine.Table_Name)){
+			
+			MInvoiceLine invoiceLine = (MInvoiceLine)po;
+			logDetail.setC_OrderLine_ID(invoiceLine.getC_OrderLine_ID());	
+			logDetail.setC_Invoice_ID(invoiceLine.getC_Invoice_ID());	
+			logDetail.setC_InvoiceLine_ID(invoiceLine.getC_Invoice_ID());
+			
 		}
 		
-		if(Env.getProcessUI(getCtx()) != null && !p_JP_ContractProcessUnit.equals("PCC"))
-		{
-			Env.getProcessUI(getCtx()).statusUpdate(po.toString()); //TODO メッセージ変更
-		}
+		logDetail.saveEx();
 		
-		if(!success)
-		{
-			;//TODO 例外を投げる!!
-		}
-		
-		//TODO 契約管理ログテーブルへのログの記録
-	}
+	}//createContractLogDetail
 	
 }
