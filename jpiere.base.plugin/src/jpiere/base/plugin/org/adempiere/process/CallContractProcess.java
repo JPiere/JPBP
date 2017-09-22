@@ -110,7 +110,6 @@ public class CallContractProcess extends SvrProcess {
 				p_JP_ContractCategory_ID = para[i].getParameterAsInt();
 			}else if (name.equals("C_DocType_ID")){
 				p_C_DocType_ID = para[i].getParameterAsInt();
-				p_JP_ContractCategory_ID = para[i].getParameterAsInt();
 			}else if (name.equals("DocBaseType")){
 				p_DocBaseType = para[i].getParameterAsString();
 			}else if (name.equals("IsCreateBaseDocJP")){
@@ -407,7 +406,7 @@ public class CallContractProcess extends SvrProcess {
 		//4 - Contract Process Value of Contract Process Period
 		}else if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_ContractProcessValueofContractProcessPeriod)){ 
 			
-			String getProcPeriodSql = "SELECT * FROM JP_ContractProcPeriod WHERE AD_Client_ID = ? AND JP_ContractProcessValue = ? AND IsActive='Y' ";//1,2
+			String getProcPeriodSql = "SELECT * FROM JP_ContractProcPeriod WHERE AD_Client_ID = ? AND JP_ContractProcessValue = ? AND IsActive='Y' ORDER BY StartDate ASC, DateAcct ASC ";//1,2
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			try
@@ -433,7 +432,7 @@ public class CallContractProcess extends SvrProcess {
 		//5 - Contract Process Period Group
 		}else if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_ContractProcessPeriodGroup)){ 
 			
-			String getProcPeriodSql = "SELECT * FROM JP_ContractProcPeriod WHERE AD_Client_ID = ? AND JP_ContractProcPeriodG_ID = ? AND IsActive='Y' ";//1,2
+			String getProcPeriodSql = "SELECT * FROM JP_ContractProcPeriod WHERE AD_Client_ID = ? AND JP_ContractProcPeriodG_ID = ? AND IsActive='Y' ORDER BY StartDate ASC, DateAcct ASC  ";//1,2
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			try
@@ -460,7 +459,7 @@ public class CallContractProcess extends SvrProcess {
 		}else if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_ContractProcessValueofContractProcessPeriodGroup)){
 			
 			String getProcPeriodSql = "SELECT c.* FROM JP_ContractProcPeriod c INNER JOIN JP_ContractProcPeriodG g ON (c.JP_ContractProcPeriodG_ID = g.JP_ContractProcPeriodG_ID) "
-												+ " WHERE c.AD_Client_ID = ? AND g.JP_ContractProcessValue = ? AND c.IsActive='Y' AND g.IsActive='Y' ";//1,2
+												+ " WHERE c.AD_Client_ID = ? AND g.JP_ContractProcessValue = ? AND c.IsActive='Y' AND g.IsActive='Y' ORDER BY c.StartDate ASC , c.DateAcct ASC ";//1,2
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			try

@@ -157,8 +157,12 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			{
 				order.processIt(docAction);
 				if(!docAction.equals(DocAction.ACTION_Complete))
+				{
+					order.setDocAction(DocAction.ACTION_Complete);
 					order.saveEx(get_TrxName());
+				}
 			}else{
+				order.setDocAction(DocAction.ACTION_Complete);
 				order.saveEx(get_TrxName());//DocStatus is Draft
 			}
 			
