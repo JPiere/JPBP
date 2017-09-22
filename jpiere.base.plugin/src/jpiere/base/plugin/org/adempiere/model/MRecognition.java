@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrg;
@@ -1737,6 +1739,36 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 	public int getDocTypeID()
 	{
 		return getC_DocType_ID() > 0 ? getC_DocType_ID() : getC_DocTypeTarget_ID();
+	}
+	
+	static public MRecognition[] getRecognitionsByInOut(Properties ctx, int M_InOut_ID, String trxName)
+	{
+		ArrayList<MRecognition> list = new ArrayList<MRecognition>();
+		final String sql = "SELECT * FROM JP_Recognition WHERE M_InOut_ID=? AND DocStatus NOT IN ('VO','RE','CL')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, M_InOut_ID);
+			rs = pstmt.executeQuery();
+			while(rs.next())
+				list.add(new MRecognition(ctx, rs, trxName));
+		}
+		catch (Exception e)
+		{
+//			Log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		
+		MRecognition[] recogs = new MRecognition[list.size()];
+		list.toArray(recogs);
+		return recogs;
 	}
 
 }	//	MRecognition

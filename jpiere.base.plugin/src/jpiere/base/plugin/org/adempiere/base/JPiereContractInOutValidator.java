@@ -246,18 +246,62 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				}
 			}//for
 
-			if (!recognition.processIt(DocAction.ACTION_Complete))
-				throw new AdempiereException("Failed when processing document - " + recognition.getProcessMsg());
+			
+			String docAction = content.getJP_Contract_Acct().getDocAction();
+			if(docAction == null)
+			{
+				;//Noting to do. DocStatus is Draft
+			}else{
+			
+				if (!recognition.processIt(docAction))
+					throw new AdempiereException("Failed when processing document - " + recognition.getProcessMsg());
 
-			recognition.saveEx(trxName);
+			}
+			
 			if (!recognition.getDocStatus().equals(DocAction.STATUS_Completed))
 			{
-				log.warning("Could not Completed Recognition: "+ recognition.getDocumentInfo());
-				return null;
+				recognition.saveEx(trxName);
 			}
 
-		}
+		}//if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
 
+		
+		if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL
+				|| timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL 
+				|| timing == ModelValidator.TIMING_AFTER_VOID )
+		{
+			MInOut io = (MInOut)po;
+			String trxName = io.get_TrxName();
+			MRecognition[] recogs = MRecognition.getRecognitionsByInOut(Env.getCtx(), io.getM_InOut_ID(), trxName);
+			for(int i = 0; i < recogs.length; i++)
+			{
+				MRecognition recog = recogs[i];
+				if(recog.getDocStatus().equals(DocAction.STATUS_Completed))
+				{
+					if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL)
+					{
+						recog.processIt(DocAction.ACTION_Reverse_Accrual);
+					
+					}else if(timing == ModelValidator.TIMING_AFTER_REVERSECORRECT){
+						
+						recog.processIt(DocAction.ACTION_Reverse_Correct);
+						
+					}else{
+						
+						recog.processIt(DocAction.ACTION_Reverse_Accrual);
+						
+					}
+					
+				}else{
+					
+					recog.processIt(DocAction.ACTION_Void);
+				}
+				
+				recog.saveEx(trxName);
+				
+			}//for i
+			
+		}//if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL
 		
 		return null;
 	}
@@ -370,21 +414,24 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			}
 			
 			//Check Contract Process Period - Mandetory
-			int ioLine_ContractProcPeriod_ID = ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
-			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
-			{ 
-				if(ioLine_ContractProcPeriod_ID <= 0)
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-					
-				}else{
-			
-					//Check Contract Process Period - Calender
-					MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);				
-					if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
+			if(type == ModelValidator.TYPE_BEFORE_CHANGE)
+			{
+				int ioLine_ContractProcPeriod_ID = ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
+				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
+				{ 
+					if(ioLine_ContractProcPeriod_ID <= 0)
 					{
-						return "契約書の契約カレンダーの契約処理期間を選択して下さい。";//TODO メッセージ化
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+						
+					}else{
+				
+						//Check Contract Process Period - Calender
+						MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);				
+						if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
+						{
+							return "契約書の契約カレンダーの契約処理期間を選択して下さい。";//TODO メッセージ化
+						}
 					}
 				}
 			}

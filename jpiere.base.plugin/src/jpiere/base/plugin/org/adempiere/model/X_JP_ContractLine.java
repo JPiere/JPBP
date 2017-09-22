@@ -34,7 +34,7 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170921L;
+	private static final long serialVersionUID = 20170922L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -937,6 +937,34 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
 	}
 
 	/** Set Line No.

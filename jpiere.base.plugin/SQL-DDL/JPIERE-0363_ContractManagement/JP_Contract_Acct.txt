@@ -19,7 +19,7 @@ CREATE TABLE adempiere.JP_Contract_Acct
   ispostingcontractacctjp character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
   ispostingrecognitiondocjp character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
   issotrx character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'Y'::bpchar,
-
+  docaction character varying(2)  DEFAULT NULL::character varying,
 
   CONSTRAINT JP_Contract_Acct_pkey PRIMARY KEY (JP_Contract_Acct_ID)
 )

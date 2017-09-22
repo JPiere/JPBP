@@ -522,6 +522,24 @@ public interface I_JP_ContractLine
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_Processing1 */
+    public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
+
+	/** Set Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1);
+
+	/** Get Process Now	  */
+	public String getJP_Processing1();
+
+    /** Column name JP_Processing2 */
+    public static final String COLUMNNAME_JP_Processing2 = "JP_Processing2";
+
+	/** Set Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2);
+
+	/** Get Process Now	  */
+	public String getJP_Processing2();
+
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";
 
