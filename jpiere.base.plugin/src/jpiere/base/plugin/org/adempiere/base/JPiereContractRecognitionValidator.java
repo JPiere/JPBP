@@ -230,7 +230,9 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 			int C_OrderLine_ID = recogLine.getC_OrderLine_ID();
 			int M_RMALine_ID = recogLine.getM_RMALine_ID();
 			if(C_OrderLine_ID <= 0 && M_RMALine_ID <= 0)
-				return null;
+			{
+				return "期間契約とスポット契約の場合、受発注伝票明細か返品受付依頼伝票明細の入力は必須です。";//TODOメッセージ化
+			}
 			
 			//Check Single Order or RMA
 			if(recogLine.getParent().getC_Order_ID() > 0 && recogLine.getC_OrderLine_ID() > 0)

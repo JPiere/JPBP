@@ -1,5 +1,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
+import org.compiere.model.MInOutLine;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
@@ -13,6 +15,7 @@ import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 public abstract class AbstractContractValidator {	
 	
@@ -106,9 +109,11 @@ public abstract class AbstractContractValidator {
 	protected String derivativeDocLineCommonCheck(PO po, int type)
 	{
 		if(type == ModelValidator.TYPE_BEFORE_NEW
-				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
+				||( type == ModelValidator.TYPE_BEFORE_CHANGE 
+					&& ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
+						||   po.is_ValueChanged("JP_ContractProcPeriod_ID")
 						||   po.is_ValueChanged("C_OrderLine_ID")
-						||   po.is_ValueChanged("M_RMALine_ID")) ))
+						||   po.is_ValueChanged("M_RMALine_ID") ) ))
 		{		
 			int C_OrderLine_ID = po.get_ValueAsInt("C_OrderLine_ID");
 			int M_RMALine_ID = po.get_ValueAsInt("M_RMALine_ID");
@@ -130,8 +135,6 @@ public abstract class AbstractContractValidator {
 				baseDocLine  = new MRMALine(Env.getCtx(), M_RMALine_ID, po.get_TrxName());
 
 			int JP_ContractLine_ID = baseDocLine.get_ValueAsInt("JP_ContractLine_ID");
-			
-			
 			if(JP_ContractLine_ID == 0)
 			{
 				po.set_ValueNoCheck("JP_ContractLine_ID", null);
@@ -140,6 +143,7 @@ public abstract class AbstractContractValidator {
 			}
 				
 			MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
+			MContractContent content = contractLine.getParent();
 			MContract contract = contractLine.getParent().getParent();
 			
 			//Check JP_ContractLine_ID, JP_ContractProcPeriod_ID
@@ -147,13 +151,57 @@ public abstract class AbstractContractValidator {
 
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
-				po.set_ValueNoCheck("JP_ContractLine_ID", baseDocLine.get_ValueAsInt("JP_ContractLine_ID"));
+				//Set JP_ContractProcPeriod_ID Mandetory When Change
+				if(type == ModelValidator.TYPE_BEFORE_CHANGE)
+				{
+					int JP_ContractProcPeriod_ID = po.get_ValueAsInt("JP_ContractProcPeriod_ID");
+					if(JP_ContractProcPeriod_ID <= 0)
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+						
+					}
+					
+				}
+				
+				//Both BEFORE_NEW and BEFORE_CHANGE
 				if(M_RMALine_ID > 0)
+				{
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+					
+				}else if(po.get_TableName().equals(MInOutLine.Table_Name) || po.get_TableName().equals(MRecognitionLine.Table_Name)){
+					
+					if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+							||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+					{
+						
+						;//Transfer check & process to the individual Contract Validator
+						
+					}else{
+						
+						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						
+					}
+					
+				}else if(po.get_TableName().equals(MInvoiceLine.Table_Name)){
+					
+					
+					if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+							||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+					{
+						
+						;//Transfer check & process to the individual Contract Validator
+						
+					}else{
+						
+						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						
+					}
+					
+				}
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 				
-				po.set_ValueNoCheck("JP_ContractLine_ID", baseDocLine.get_ValueAsInt("JP_ContractLine_ID"));
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
@@ -165,52 +213,6 @@ public abstract class AbstractContractValidator {
 		}//if(type == ModelValidator.TYPE_BEFORE_NEW)
 		
 		
-		
-		//Check Contract Process Period In case of Period Contract
-		if(type == ModelValidator.TYPE_BEFORE_CHANGE)
-		{		
-			int C_OrderLine_ID = po.get_ValueAsInt("C_OrderLine_ID");
-			int M_RMALine_ID = po.get_ValueAsInt("M_RMALine_ID");
-			int JP_ContractLine_ID = po.get_ValueAsInt("JP_ContractLine_ID");
-			if( (C_OrderLine_ID > 0 || M_RMALine_ID > 0) && JP_ContractLine_ID > 0)
-			{
-				MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
-				if(contractLine.getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				{
-					/** Check Mandetory Proc Period When Period Contract */
-					int JP_ContractProcPeriod_ID = po.get_ValueAsInt("JP_ContractProcPeriod_ID");
-					if(JP_ContractProcPeriod_ID <= 0)
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-						
-					}else{
-						
-						/** Check Derivative Doc Process Period is corresponding with Base Doc Process Period */
-						if(po.is_ValueChanged("JP_ContractProcPeriod_ID"))
-						{
-							PO poLine = null;
-							if(C_OrderLine_ID > 0)
-								poLine = new MOrderLine(Env.getCtx(),C_OrderLine_ID ,po.get_TrxName());
-							else
-								poLine = new MRMALine(Env.getCtx(),C_OrderLine_ID ,po.get_TrxName());
-							
-							MContractProcPeriod derivativeDocPeriod = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
-							if(!derivativeDocPeriod.isContainedBaseDocContractProcPeriod(poLine.get_ValueAsInt("JP_ContractProcPeriod_ID")))
-							{
-								//Contract Period that is derivative doc line is not corresponding with Contract Period that is base doc line.
-								return Msg.getMsg(Env.getCtx(), "JP_CorrespondingContractProcPeriod");
-							}
-							
-						}//if(ioLine.is_ValueChanged("JP_ContractProcPeriod_ID"))
-						
-					}//if(JP_ContractProcPeriod_ID <= 0)
-					
-				}//if(contractLine.getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				
-			}//if(C_OrderLine_ID > 0 && JP_ContractLine_ID > 0)
-			
-		}//if(type == ModelValidator.TYPE_BEFORE_CHANGE)
 		
 		return null;
 		
