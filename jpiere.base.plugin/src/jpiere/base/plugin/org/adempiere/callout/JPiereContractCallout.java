@@ -22,6 +22,7 @@ import org.adempiere.util.Callback;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContractCancelTerm;
 import jpiere.base.plugin.org.adempiere.model.MContractExtendPeriod;
@@ -81,7 +82,25 @@ public class JPiereContractCallout implements IColumnCallout {
 			
 		}else if(mField.getColumnName().equals("JP_ContractCancelDate") && value != null){
 
-			mTab.setValue("JP_ContractPeriodDate_To", (Timestamp)value);
+			GridField  G_ContractPeriodDate_To = mTab.getField("JP_ContractPeriodDate_To");
+			Timestamp JP_ContractPeriodDate_To = (Timestamp)G_ContractPeriodDate_To.getValue();
+			Timestamp JP_ContractCancelDate = (Timestamp)value;
+			
+			if(JP_ContractPeriodDate_To == null)
+				return "";
+			
+			if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) < 0 )
+			{
+				mTab.setValue("JP_ContractCancelDate", (Timestamp)oldValue);
+				//You can not enter contract cancel date before contract Period data(to).
+				return Msg.getMsg(ctx, "JP_ContractCancelDate_UpdateError");
+				
+			}else{
+				
+				mTab.setValue("JP_ContractPeriodDate_To", (Timestamp)value);
+				
+			}
+	
 		}
 
 		return "";

@@ -777,18 +777,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			//JP_ContractProcDate_To and isAutomaticUpdateJP())
 			if(getParent().isAutomaticUpdateJP())
 			{
-				if(getJP_ContractProcDate_To() == null)
-				{
-					log.saveError("Error","契約書が自動更新のため、契約処理期間(TO)は必須入力です。");//TODO メッセージ化
-					return false;
-				}
-				
-				
+				setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+
 			}else{
 				
 				if(isAutomaticUpdateJP())
 				{
-					log.saveError("Error","契約書が自動更新ではないため、契約内容を自動更新にはできません。");//TODO メッセージ化
+					//You can not Automatic update, because Contract document is not Automatic update.
+					log.saveError("Error",Msg.getMsg(getCtx(), "JP_IsAutomaticUpdateJP_UpdateError"));
 					return false;
 				}
 				
@@ -800,13 +796,6 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
 				{
 					log.saveError("Error",Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
-					return false;
-				}
-			}else{
-				
-				if(isAutomaticUpdateJP())
-				{
-					log.saveError("Error","自動更新の場合は、契約処理期間(TO)は必須入力です。");//TODO メッセージ化;
 					return false;
 				}
 			}
@@ -877,6 +866,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		return true;
 	}
 
+	//Cache parent
 	private MContract parent = null;
 	
 	public MContract getParent()
@@ -889,6 +879,11 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		return parent;
 	}
 	
+	//Reset Parent Cache
+	public void setParent(MContract contract)
+	{
+			parent = contract;
+	}
 	
 	private MContractLine[] 	m_lines = null;
 	

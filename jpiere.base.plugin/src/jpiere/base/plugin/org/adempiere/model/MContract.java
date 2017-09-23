@@ -231,8 +231,6 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			
 		}
 		
-
-		
 		
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
@@ -288,7 +286,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		
 		//	Implicit Approval
-	//	if (!isApproved())
+		if (!isApproved())
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
@@ -524,13 +522,37 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		//Check Valid JP_ContractPeriodDate_To
 		if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To") ) && getJP_ContractPeriodDate_To()!=null )
 		{
-			if(getJP_ContractPeriodDate_To().compareTo(getJP_ContractPeriodDate_From()) <= 0 )
+			//JP_ContractPeriodDate_From < JP_ContractPeriodDate_To
+			if(getJP_ContractPeriodDate_From().compareTo(getJP_ContractPeriodDate_To()) > 0 )
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractPeriodDate_To"));
 				return false;
 			}
+			
+			if( getJP_ContractCancelDate() != null && !is_ValueChanged("JP_ContractCancelDate"))
+			{
+				//You can not update Contract Period Data(To) because Contract Cancel date have been entered. 
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_ContractPeriodDate_To_UpdateError"));
+				return false;
+			}
 		}
 		
+		
+		//Check JP_ContractCancelDate
+		if(newRecord || ( getJP_ContractCancelDate() != null && is_ValueChanged("JP_ContractCancelDate")) )
+		{
+			if(getJP_ContractPeriodDate_To() == null)
+			{
+				setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
+			}
+			
+			if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) < 0 )
+			{
+				//You can not enter contract cancel date before contract Period data(to).
+				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getMsg(getCtx(), "JP_ContractCancelDate_UpdateError"));
+				return false;
+			}
+		}
 		
 		// Check Automatic Update Info
 		if(isAutomaticUpdateJP())
@@ -543,27 +565,12 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			
 			if(getJP_ContractExtendPeriod_ID() == 0)
 				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractExtendPeriod_ID"));
-		
-			//Set JP_ContractPeriodDate_To
-			if(( newRecord || is_ValueChanged("JP_ContractCancelDate") ) && getJP_ContractCancelDate() != null )
-			{
-				setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
-			}
 			
 			//Set Contract Cancel Deadline
-			if(( newRecord || is_ValueChanged("JP_ContractPeriodDate_To")) || getJP_ContractCancelDeadline() == null )
+			if(( newRecord || getJP_ContractCancelDate() == null && ( is_ValueChanged("JP_ContractPeriodDate_To")) || getJP_ContractCancelDeadline() == null) )
 			{
 				MContractCancelTerm m_ContractCancelTerm = MContractCancelTerm.get(getCtx(), getJP_ContractCancelTerm_ID());
 				setJP_ContractCancelDeadline(m_ContractCancelTerm.calculateCancelDeadLine(getJP_ContractPeriodDate_To()));
-			}
-			
-			if(newRecord || is_ValueChanged("JP_ContractPeriodDate_To") || is_ValueChanged("JP_ContractCancelDeadline"))
-			{
-				if(getJP_ContractPeriodDate_To().compareTo(getJP_ContractCancelDeadline()) < 0)
-				{
-					log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractCancelDeadline"));
-					return false;
-				}
 			}
 			
 		}else{ 
@@ -580,6 +587,67 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		return true;
 	}
 	
+	
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success) 
+	{
+		if(newRecord && success)
+			return true;
+		
+		//Sync JP_ContractPeriodDate_To at Contract Doc and JP_ContractProcDate_To at Contract Content
+		if(is_ValueChanged(MContract.COLUMNNAME_JP_ContractPeriodDate_To) && getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			Timestamp old_ContractPeriodDate_To = (Timestamp)get_ValueOld(MContract.COLUMNNAME_JP_ContractPeriodDate_To);
+			Timestamp new_ContractPeriodDate_To = getJP_ContractPeriodDate_To();
+			
+			MContractContent[] contents = getContractContents(true, "");
+			for(int i = 0; i < contents.length; i++)
+			{
+				MContractContent content = contents[i];
+				if( content.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed)
+					|| content.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress)
+					|| content.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend)
+					)
+				{
+					content.setParent(this);//Reset cache for beforSave at MContract Content
+					
+					if(content.isAutomaticUpdateJP())
+					{
+						content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
+						
+					}else{
+						
+						Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
+						if(JP_ContractProcDate_To == null)
+						{
+							content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
+							
+						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
+							
+							content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
+							
+						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) < 0){
+							
+							//Assumption need sync, In case of same date between JP_ContractPeriodDate_To and JP_ContractProcDate_To.
+							if(JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
+							{
+								content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
+							}
+						}
+						
+					}//if(content.isAutomaticUpdateJP())
+					
+					content.saveEx(get_TrxName());
+					
+				}
+				
+			}//for i
+		
+		}//if
+		
+		return true;
+	}
+
 	private void updateContractStatus(String docAction)
 	{
 		if(getDocStatus().equals(DocAction.STATUS_Closed)
@@ -600,7 +668,11 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 					{
 						setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
 						setJP_ContractStatus_UC_Date(now);
+					
+					}else if(getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_ExpirationOfContract)){
+						setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
 					}
+					
 					setJP_ContractStatus_EC_Date(null);
 
 				}else{
