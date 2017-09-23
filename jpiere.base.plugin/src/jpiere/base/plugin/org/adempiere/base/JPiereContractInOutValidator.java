@@ -445,8 +445,10 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 					}
 					
 					//Check valid Contract Period
-					if(content.getJP_ContractProcDate_From().compareTo(ioLine_ContractProcPeriod.getStartDate()) > 0 
-							|| (content.getJP_ContractProcDate_To() != null && content.getJP_ContractProcDate_To().compareTo(ioLine_ContractProcPeriod.getEndDate()) < 0) )
+					MInOut inOut =ioLine.getParent();
+					MContractProcPeriod ioPeriod = MContractProcPeriod.get(Env.getCtx(), inOut.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+					if(ioPeriod.getStartDate().compareTo(ioLine_ContractProcPeriod.getStartDate()) > 0 
+							|| (ioPeriod.getEndDate() != null && ioPeriod.getEndDate().compareTo(ioLine_ContractProcPeriod.getEndDate()) < 0) )
 					{
 						//Outside the Contract Process Period.
 						return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
