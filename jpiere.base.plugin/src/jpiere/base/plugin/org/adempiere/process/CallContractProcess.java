@@ -66,7 +66,7 @@ public class CallContractProcess extends SvrProcess {
 	private boolean p_IsRecordCommitJP = false;
 	private String p_JP_ContractProcessTraceLevel = "WAR";
 
-	//COntract Log
+	//Contract Log
 	private Trx conractLogTrx = null;
 	private MContractLog m_ContractLog = null;
 	
@@ -148,6 +148,21 @@ public class CallContractProcess extends SvrProcess {
 			else
 				processingNow.put(getAD_Client_ID(), true);
 
+			//Create Contract Management Log
+			if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
+			{
+				String trxName = Trx.createTrxName("Contract");
+				conractLogTrx = Trx.get(trxName, false);
+				m_ContractLog = new MContractLog(getCtx(), 0, conractLogTrx.getTrxName());
+				m_ContractLog.setJP_ContractProcessTraceLevel(p_JP_ContractProcessTraceLevel);
+				m_ContractLog.setAD_PInstance_ID(getAD_PInstance_ID());
+				m_ContractLog.setJP_ContractProcessUnit(p_JP_ContractProcessUnit);
+				m_ContractLog.saveEx(conractLogTrx.getTrxName());
+				int JP_ContractLog_ID = m_ContractLog.getJP_ContractLog_ID();
+				addBufferLog(0, null, null, Msg.getMsg(getCtx(), "JP_DetailLog")+" -> " + Msg.getElement(getCtx(), "JP_ContractLog_ID"), MContractLog.Table_ID, JP_ContractLog_ID);
+				conractLogTrx.commit();
+			}
+			
 			msg = doContractProcess();
 			
 		} catch (Exception e) {
@@ -182,22 +197,6 @@ public class CallContractProcess extends SvrProcess {
 	
 	private String doContractProcess() throws Exception 
 	{
-		
-		//Create Contract Management Log
-		if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
-		{
-			String trxName = Trx.createTrxName("Contract");
-			conractLogTrx = Trx.get(trxName, false);
-			m_ContractLog = new MContractLog(getCtx(), 0, conractLogTrx.getTrxName());
-			m_ContractLog.setJP_ContractProcessTraceLevel(p_JP_ContractProcessTraceLevel);
-			m_ContractLog.setAD_PInstance_ID(getAD_PInstance_ID());
-			m_ContractLog.setJP_ContractProcessUnit(p_JP_ContractProcessUnit);
-			m_ContractLog.saveEx(conractLogTrx.getTrxName());
-			int JP_ContractLog_ID = m_ContractLog.getJP_ContractLog_ID();
-			addBufferLog(0, null, null, Msg.getMsg(getCtx(), "JP_DetailLog")+" -> " + Msg.getElement(getCtx(), "JP_ContractLog_ID"), MContractLog.Table_ID, JP_ContractLog_ID);
-			conractLogTrx.commit();
-		}
-		
 		
 		if(p_JP_ContractProcessUnit == null)
 		{
@@ -302,13 +301,14 @@ public class CallContractProcess extends SvrProcess {
 		
 		StringBuilder returnMsg = new StringBuilder("");
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_CreateDocNum")).append(":").append(m_ContractLog.createDocNum).append(" / ");//Number of documents to create
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" [ ");//Number of To Be Confirmed
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractContent")).append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //Number of skips(Contract Content)
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractLine")).append(":").append(m_ContractLog.skipContractLineNum).append(" / ");  //Number of skips(Contract Content Line)
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractLine")).append(":").append(m_ContractLog.skipContractLineNum).append(" ] / ");  //Number of skips(Contract Content Line)
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append("  ");//Number of errors
 		
 		StringBuilder systemProcessLog = new StringBuilder("");
-		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Fine))
+		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information))
 		{
 			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
 			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  ( ");	

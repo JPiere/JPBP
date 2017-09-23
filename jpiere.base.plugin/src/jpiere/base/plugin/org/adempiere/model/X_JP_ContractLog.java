@@ -30,7 +30,7 @@ public class X_JP_ContractLog extends PO implements I_JP_ContractLog, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170922L;
+	private static final long serialVersionUID = 20170923L;
 
     /** Standard Constructor */
     public X_JP_ContractLog (Properties ctx, int JP_ContractLog_ID, String trxName)
@@ -149,14 +149,16 @@ public class X_JP_ContractLog extends PO implements I_JP_ContractLog, I_Persiste
 		return (String)get_Value(COLUMNNAME_JP_ContractLog_UU);
 	}
 
-	/** Fine = FIN */
-	public static final String JP_CONTRACTPROCESSTRACELEVEL_Fine = "FIN";
+	/** Information = FIN */
+	public static final String JP_CONTRACTPROCESSTRACELEVEL_Information = "FIN";
 	/** Error = ERR */
 	public static final String JP_CONTRACTPROCESSTRACELEVEL_Error = "ERR";
 	/** Warning = WAR */
 	public static final String JP_CONTRACTPROCESSTRACELEVEL_Warning = "WAR";
 	/** No log = NON */
 	public static final String JP_CONTRACTPROCESSTRACELEVEL_NoLog = "NON";
+	/** To Be Confirmed = TBC */
+	public static final String JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed = "TBC";
 	/** Set Contract Process Trace Level.
 		@param JP_ContractProcessTraceLevel Contract Process Trace Level	  */
 	public void setJP_ContractProcessTraceLevel (String JP_ContractProcessTraceLevel)

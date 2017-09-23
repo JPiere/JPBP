@@ -20,16 +20,22 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 
+import org.compiere.model.MClient;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCancelTerm;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractExtendPeriod;
+import jpiere.base.plugin.org.adempiere.model.MContractLog;
+import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 
 
 /** 
@@ -46,6 +52,14 @@ public class ContractStatusUpdate extends SvrProcess {
 	private int			p_JP_ContractCategoryL1_ID = 0;
 	private int			p_JP_ContractCategory_ID = 0;
 	
+	volatile static HashMap<Integer, Boolean> processingNow = null;
+	
+	//Contract Log
+	private Trx conractLogTrx = null;
+	private MContractLog m_ContractLog = null;
+	
+	private String p_JP_ContractProcessTraceLevel = "TBC";
+	private boolean p_IsRecordCommitJP = false;
 	
 	@Override
 	protected void prepare() 
@@ -64,6 +78,10 @@ public class ContractStatusUpdate extends SvrProcess {
 				p_JP_ContractCategoryL1_ID = para[i].getParameterAsInt();
 			else if (name.equals("JP_ContractCategory_ID"))
 				p_JP_ContractCategory_ID = para[i].getParameterAsInt();
+			else if (name.equals("IsRecordCommitJP"))
+				p_IsRecordCommitJP = para[i].getParameterAsBoolean();
+			else if (name.equals("JP_ContractProcessTraceLevel"))
+				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		
@@ -76,6 +94,74 @@ public class ContractStatusUpdate extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception 
 	{
+		
+		if(processingNow == null)
+		{
+			processingNow = new HashMap<Integer, Boolean>();
+			MClient[] clients = MClient.getAll(getCtx());
+			for(int i = 0; i < clients.length; i++)
+			{
+				processingNow.put(clients[i].getAD_Client_ID(), false);
+			}
+		}
+		
+		
+		
+		String msg = "";
+		try 
+		{
+			if(processingNow.get(getAD_Client_ID()))
+				throw new Exception(Msg.getMsg(getCtx(), "JP_Contract ProcessRunningNow"));//Contract process is running now by other user.
+			else
+				processingNow.put(getAD_Client_ID(), true);
+
+			//Create Contract Management Log
+			if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
+			{
+				String trxName = Trx.createTrxName("ConStUp");
+				conractLogTrx = Trx.get(trxName, false);
+				m_ContractLog = new MContractLog(getCtx(), 0, conractLogTrx.getTrxName());
+				m_ContractLog.setJP_ContractProcessTraceLevel(p_JP_ContractProcessTraceLevel);
+				m_ContractLog.setAD_PInstance_ID(getAD_PInstance_ID());
+				m_ContractLog.saveEx(conractLogTrx.getTrxName());
+				int JP_ContractLog_ID = m_ContractLog.getJP_ContractLog_ID();
+				addBufferLog(0, null, null, Msg.getMsg(getCtx(), "JP_DetailLog")+" -> " + Msg.getElement(getCtx(), "JP_ContractLog_ID"), MContractLog.Table_ID, JP_ContractLog_ID);
+				conractLogTrx.commit();
+			}
+			
+			msg = doContractStatusUpdate();
+			
+		} catch (Exception e) {
+			
+			if(conractLogTrx != null)
+			{
+				if(p_IsRecordCommitJP)
+					msg = "--Rollback--";
+				else
+					msg = "";
+				
+				m_ContractLog.setDescription( msg + " Error : " +  e.getMessage( ) );
+				m_ContractLog.saveEx(conractLogTrx.getTrxName());
+				conractLogTrx.commit();
+			}
+			
+			throw e;
+			
+		} finally {
+			
+			processingNow.put(getAD_Client_ID(), false);
+			if(conractLogTrx != null)
+			{
+				conractLogTrx.close();
+				conractLogTrx = null;
+			}
+		}
+		
+		return  msg;
+	}
+		
+	private String doContractStatusUpdate() throws Exception 
+	{	
 		//Adjust time because of reference time do not have hh:mm info
 		now_LocalDateTime = new Timestamp(System.currentTimeMillis()).toLocalDateTime();
 		now_LocalDateTime = now_LocalDateTime.minusDays(1);
@@ -216,12 +302,31 @@ public class ContractStatusUpdate extends SvrProcess {
 		contract.setJP_ContractCancelDeadline(Timestamp.valueOf(local_ContractCancelDeadline));
 		
 		contract.saveEx(get_TrxName());
+		
+		//Create Contract Log
+		MContractLogDetail contractlog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+		contractlog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+		contractlog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_AutomaticUpdateOfTheContract);
+		contractlog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+		contractlog.setJP_Contract_ID(contract.getJP_Contract_ID());
+		contractlog.saveEx( m_ContractLog.get_TrxName());
+		
 	}
 	
 	private void cancelContract(MContract contract)
 	{
 		contract.setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
 		contract.saveEx(get_TrxName());
+		
+		//Create Contract Log
+		MContractLogDetail contractlog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+		contractlog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+		contractlog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractStatusUpdate);
+		contractlog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+		contractlog.setJP_Contract_ID(contract.getJP_Contract_ID());
+		contractlog.saveEx( m_ContractLog.get_TrxName());
+		
+		
 		MContractContent[] contents = contract.getContractContents();
 		for(int i = 0; i < contents.length; i++)
 		{
@@ -229,6 +334,15 @@ public class ContractStatusUpdate extends SvrProcess {
 			{
 				contents[i].setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 				contents[i].saveEx(get_TrxName());
+				
+				//Create Contract Log
+				MContractLogDetail contentLog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+				contentLog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+				contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdate);
+				contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+				contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
+				contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
+				contentLog.saveEx( m_ContractLog.get_TrxName());
 			}
 		}//for j
 	
@@ -246,6 +360,15 @@ public class ContractStatusUpdate extends SvrProcess {
 			{
 				contents[i].setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 				contents[i].saveEx(get_TrxName());
+				
+				//Create Contract Log
+				MContractLogDetail contentLog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+				contentLog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+				contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdate);
+				contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+				contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
+				contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
+				contentLog.saveEx( m_ContractLog.get_TrxName());
 				
 			}else{
 				

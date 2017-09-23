@@ -33,7 +33,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170922L;
+	private static final long serialVersionUID = 20170923L;
 
     /** Standard Constructor */
     public X_JP_ContractLineT (Properties ctx, int JP_ContractLineT_ID, String trxName)

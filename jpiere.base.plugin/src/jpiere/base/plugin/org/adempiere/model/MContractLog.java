@@ -6,8 +6,11 @@ import java.util.Properties;
 
 public class MContractLog extends X_JP_ContractLog {
 	
-	//fine
+	//Info
 	public int createDocNum = 0;
+	
+	//To be confirmed
+	public int confirmNum = 0;
 	public int skipContractContentNum = 0;
 	public int skipContractLineNum = 0;
 	

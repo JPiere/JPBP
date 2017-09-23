@@ -30,7 +30,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170922L;
+	private static final long serialVersionUID = 20170923L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -325,6 +325,12 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_NotFoundLocator = "W1";
 	/** Over Ordered Quantity = W2 */
 	public static final String JP_CONTRACTLOGMSG_OverOrderedQuantity = "W2";
+	/** Contract Status Update = S1 */
+	public static final String JP_CONTRACTLOGMSG_ContractStatusUpdate = "S1";
+	/** Contract Process Status Update = S2 */
+	public static final String JP_CONTRACTLOGMSG_ContractProcessStatusUpdate = "S2";
+	/** Automatic update of the contract = S3 */
+	public static final String JP_CONTRACTLOGMSG_AutomaticUpdateOfTheContract = "S3";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)
@@ -390,14 +396,16 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		return ii.intValue();
 	}
 
-	/** Fine = FIN */
-	public static final String JP_CONTRACTPROCESSTRACELEVEL_Fine = "FIN";
+	/** Information = FIN */
+	public static final String JP_CONTRACTPROCESSTRACELEVEL_Information = "FIN";
 	/** Error = ERR */
 	public static final String JP_CONTRACTPROCESSTRACELEVEL_Error = "ERR";
 	/** Warning = WAR */
 	public static final String JP_CONTRACTPROCESSTRACELEVEL_Warning = "WAR";
 	/** No log = NON */
 	public static final String JP_CONTRACTPROCESSTRACELEVEL_NoLog = "NON";
+	/** To Be Confirmed = TBC */
+	public static final String JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed = "TBC";
 	/** Set Contract Process Trace Level.
 		@param JP_ContractProcessTraceLevel Contract Process Trace Level	  */
 	public void setJP_ContractProcessTraceLevel (String JP_ContractProcessTraceLevel)

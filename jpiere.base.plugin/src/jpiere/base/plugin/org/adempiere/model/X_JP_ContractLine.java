@@ -34,7 +34,7 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170922L;
+	private static final long serialVersionUID = 20170923L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)

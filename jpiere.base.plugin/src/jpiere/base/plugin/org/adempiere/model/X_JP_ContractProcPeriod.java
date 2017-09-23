@@ -31,7 +31,7 @@ public class X_JP_ContractProcPeriod extends PO implements I_JP_ContractProcPeri
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170922L;
+	private static final long serialVersionUID = 20170923L;
 
     /** Standard Constructor */
     public X_JP_ContractProcPeriod (Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
