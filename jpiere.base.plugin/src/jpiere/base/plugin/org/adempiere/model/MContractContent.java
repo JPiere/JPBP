@@ -585,7 +585,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			if(getParent().getDocStatus().equals(DocAction.STATUS_Closed) || getParent().getDocStatus().equals(DocAction.STATUS_Voided)
 					|| getParent().getDocStatus().equals(DocAction.STATUS_Reversed))
 			{
-				log.saveError("Error", "契約書の伝票ステータスにより、契約内容が作成できません。");//TODO メッセージ化
+				//You can not create Contract Content for Document status of Contract Document.
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_NotCreateContractContentForDocStatus"));
 				return false;
 			}
 		}
@@ -650,8 +651,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 		}//Check overlap of Contract process date in Same contract content tempalete
 		
-		//TODO 契約処理が開始されたら、契約カレンダーは変更できない旨のチェックロジックの実装
-		//伝票が作成されたから契約カレンダーを変更されてしまうとデータに整合性がなくなｔってしいまう。
+		
+		//Can not update for Not Unprocecced.
 		if(!getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
 		{
 			if(is_ValueChanged(MContractContent.COLUMNNAME_DocBaseType) 
@@ -659,22 +660,31 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractCalender_ID)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcess_ID)
+					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_Contract_Acct_ID)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_C_BPartner_ID))
 			{
-				log.saveError("Error", "契約処理ステータスが未処理ではないため変更できません。");//TODO メッセージ化
+				//You can not update this field because Contract Process Status is not Unprocecced.
+				StringBuilder msg = new StringBuilder(Msg.getMsg(getCtx(), "JP_NotUpdateForContractProcessStatus"));
+				if(is_ValueChanged(MContractContent.COLUMNNAME_DocBaseType))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_DocBaseType));
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_BaseDocDocType_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_BaseDocDocType_ID));
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy));
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractCalender_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractCalender_ID));				
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcess_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractProcess_ID));
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_Contract_Acct_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_Contract_Acct_ID));				
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_C_BPartner_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_C_BPartner_ID));	
+				
+				log.saveError("Error", msg.toString());
 				return false;
 			}
 		}
 		
-		//TODO 下のフィールドの更新制御 - 明細が登録されていたら変更できなくする。
-		//基点となる伝票
-		//基点となる伝票の伝票タイプ
-		//派生伝票作成方針
-		//契約カレンダー選択リスト
-		//契約処理マスタ選択リスト
-		
-		
-		//TODO 契約会計情報の選択制御ロジック
 		
 		//Check DateOrdered
 		if(!newRecord && is_ValueChanged(MContractContent.COLUMNNAME_DateOrdered) && getDateOrdered() != null)
@@ -699,11 +709,25 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID));
 				return false;
+				
 			}else{
 				
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
 					setOrderType(docType.getDocSubTypeSO());
+					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+					{
+						if(!docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_StandardOrder)
+								&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Quotation)
+								&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Proposal) )
+						{
+							//Base doc DocType that you selected is available When Create Derivative Doc policy is Manual.
+							log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
+													+ "   " + Msg.getMsg(getCtx(), "JP_BaseDocDocType_CreateDerivativeDocPolicy"));
+							return false;
+						}
+					}
+					
 				}else{
 					setOrderType("--");
 				}
@@ -715,7 +739,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		//Check JP_CreateDerivativeDocPolicy
 		if(newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
 		{
-			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder))
+			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) 
+					&& ( getDocBaseType().equals("SOO") || getDocBaseType().equals("POO") ) )
 			{
 				if(Util.isEmpty(getJP_CreateDerivativeDocPolicy()))
 				{
@@ -724,7 +749,23 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					log.saveError("Error",msg);
 					return false;
 				}
+				
+				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
+				{
+					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+					{
+						if(!getOrderType().equals(MDocType.DOCSUBTYPESO_StandardOrder)
+								&& !getOrderType().equals(MDocType.DOCSUBTYPESO_Quotation)
+								&& !getOrderType().equals(MDocType.DOCSUBTYPESO_Proposal) )
+						{
+							//Base doc DocType that you selected is available When Create Derivative Doc policy is Manual.
+							log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.JP_CREATEDERIVATIVEDOCPOLICY_Manual)
+													+ "   " + Msg.getMsg(getCtx(), "JP_BaseDocDocType_CreateDerivativeDocPolicy"));
+							return false;
+						}
+					}
 					
+				}
 			}else{
 				setJP_CreateDerivativeDocPolicy(null);
 			}

@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.ModelValidationEngine;
@@ -136,7 +137,8 @@ public class JPiereContractOrderValidator implements ModelValidator {
 		if( type == ModelValidator.TYPE_BEFORE_NEW 
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
 												||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
-												||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID) ) ) )
+												||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+												||   po.is_ValueChanged(MOrder.COLUMNNAME_C_DocTypeTarget_ID) ) ) )
 		{
 			MOrder order = (MOrder)po;
 			
@@ -163,12 +165,6 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				}
 			}
 			
-			//Check BP
-			if(contract.getC_BPartner_ID() != order.getC_BPartner_ID())
-			{
-				//Different business partner between Contract Content and Document.
-				return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
-			}
 			
 			//Check Period Contract
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
@@ -195,11 +191,19 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
 					}
 					
-					
-					//Check kind of Base Doc
-					if(!content.getDocBaseType().equals(MContractContent.DOCBASETYPE_SalesOrder) && !content.getDocBaseType().equals(MContractContent.DOCBASETYPE_PurchaseOrder))
+					//Check BP
+					if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
 					{
-						return "選択した契約内容は、基点となる伝票の種類が異なります。";//TODO メッセージ化 
+						//Different business partner between Contract Content and Document.
+						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
+					}
+					
+					//Check Doc Type
+					if(content.getJP_BaseDocDocType_ID() != order.getC_DocTypeTarget_ID())
+					{
+						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
+						//Please select the Document Type that is same as Contract content. 
+						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
 					}
 					
 					
@@ -259,6 +263,21 @@ public class JPiereContractOrderValidator implements ModelValidator {
 					{
 						//You selected different contract Document.
 						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
+					}
+					
+					//Check BP
+					if(content.getC_BPartner_ID() != order.getC_BPartner_ID())
+					{
+						//Different business partner between Contract Content and Document.
+						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
+					}
+					
+					//Check Doc Type
+					if(content.getJP_BaseDocDocType_ID() != order.getC_DocTypeTarget_ID())
+					{
+						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
+						//Please select the Document Type that is same as Contract content. 
+						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
 					}
 					
 				}
