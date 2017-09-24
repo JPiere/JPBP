@@ -299,6 +299,9 @@ public class CallContractProcess extends SvrProcess {
 			
 		}//if
 		
+		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
+			return "";
+		
 		StringBuilder returnMsg = new StringBuilder("");
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_CreateDocNum")).append(":").append(m_ContractLog.createDocNum).append(" / ");//Number of documents to create
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" [ ");//Number of To Be Confirmed

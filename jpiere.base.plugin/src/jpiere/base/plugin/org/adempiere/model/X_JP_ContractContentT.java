@@ -19,6 +19,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
@@ -32,7 +33,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20170924L;
 
     /** Standard Constructor */
     public X_JP_ContractContentT (Properties ctx, int JP_ContractContentT_ID, String trxName)
@@ -494,6 +495,23 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Date Invoiced.
+		@param DateInvoiced 
+		Date printed on Invoice
+	  */
+	public void setDateInvoiced (Timestamp DateInvoiced)
+	{
+		set_Value (COLUMNNAME_DateInvoiced, DateInvoiced);
+	}
+
+	/** Get Date Invoiced.
+		@return Date printed on Invoice
+	  */
+	public Timestamp getDateInvoiced () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateInvoiced);
 	}
 
 	/** DeliveryRule AD_Reference_ID=151 */

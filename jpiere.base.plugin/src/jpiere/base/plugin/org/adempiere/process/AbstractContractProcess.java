@@ -256,14 +256,14 @@ public class AbstractContractProcess extends SvrProcess
 		if(p_DatePromised != null)
 			return p_DatePromised;
 		
-		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)
-				&& p_JP_ContractProcessUnit.equals("PCC") 
-				&& ( m_ContractContent.getDocBaseType().equals("SOO") ||  m_ContractContent.getDocBaseType().equals("POO")) )
-		{
-			
-			return m_ContractContent.getDatePromised();
-			
-		}
+//		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)
+//				&& p_JP_ContractProcessUnit.equals("PCC") 
+//				&& ( m_ContractContent.getDocBaseType().equals("SOO") ||  m_ContractContent.getDocBaseType().equals("POO")) )
+//		{
+//			
+//			return m_ContractContent.getDatePromised();
+//			
+//		}
 		
 		if(dateFrom != null)
 		{
@@ -291,19 +291,24 @@ public class AbstractContractProcess extends SvrProcess
 	
 	protected Timestamp getOrderLineDatePromised(MContractLine m_Contractline)
 	{
-		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)
-				&& p_JP_ContractProcessUnit.equals("PCC") 
-				&& ( m_ContractContent.getDocBaseType().equals("SOO") ||  m_ContractContent.getDocBaseType().equals("POO")) )
-		{
-			if(m_Contractline != null && m_Contractline.getDatePromised() != null)
-				return m_Contractline.getDatePromised();
-		}
+//		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)
+//				&& p_JP_ContractProcessUnit.equals("PCC") 
+//				&& ( m_ContractContent.getDocBaseType().equals("SOO") ||  m_ContractContent.getDocBaseType().equals("POO")) )
+//		{
+//			if(m_Contractline != null && m_Contractline.getDatePromised() != null)
+//				return m_Contractline.getDatePromised();
+//		}
 		
 		if(m_Contractline != null)
 		{
 			LocalDateTime dateAcctLocal = getDateAcct().toLocalDateTime();
 			dateAcctLocal = dateAcctLocal.plusDays(m_Contractline.getDeliveryTime_Promised());
 			return Timestamp.valueOf(dateAcctLocal) ;
+			
+		}else{
+		
+			if(p_DatePromised != null)
+				return p_DatePromised;
 		}
 		
 		return null;
@@ -387,6 +392,16 @@ public class AbstractContractProcess extends SvrProcess
 	
 	protected void createContractLogDetail(String ContractLogMsg, MContractLine ContractLine, PO po, String descriptionMsg)
 	{
+		
+		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
+		{
+			if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument)){ //A1
+				DocAction doc = (DocAction)po;
+				addBufferLog(0, null, null, Msg.getMsg(getCtx(), "DocumentNo") +" : "+ doc.getDocumentNo(), po.get_Table_ID(), po.get_ID());
+			}
+			return ;
+		}
+				
 		String TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
 		
 		/** Count up of counter */
@@ -458,9 +473,6 @@ public class AbstractContractProcess extends SvrProcess
 					|| TraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning))
 				return ;	
 			
-		}if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog)){
-			
-			return ;
 		}
 		
 		

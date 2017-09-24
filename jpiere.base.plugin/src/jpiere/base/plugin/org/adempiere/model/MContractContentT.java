@@ -65,6 +65,13 @@ public class MContractContentT extends X_JP_ContractContentT {
 			}
 		}
 		
+		//For callout of Product in Line
+		if(newRecord)
+		{
+			setDateInvoiced(getCreated());
+		}
+		
+		
 		if(!newRecord
 				&&( is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType)
 				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)

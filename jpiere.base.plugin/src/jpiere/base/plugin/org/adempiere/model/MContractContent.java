@@ -587,6 +587,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 		}
 		
+		//For callout of Product in Line
+		if(newRecord || is_ValueChanged("DateDoc"))
+		{
+			setDateInvoiced(getDateDoc());
+		}
+		
 		//Check overlap of Contract process date in Same contract content tempalete
 		MContract contract = getParent();
 		if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && 

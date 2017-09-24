@@ -103,6 +103,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		invoice.setDocStatus(DocAction.STATUS_Drafted);
 		invoice.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		invoice.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
+		invoice.setDateInvoiced(getDateDoc());
 		invoice.setDateAcct(getDateAcct());		
 		invoice.setDocumentNo(""); //Reset Document No
 		invoice.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
