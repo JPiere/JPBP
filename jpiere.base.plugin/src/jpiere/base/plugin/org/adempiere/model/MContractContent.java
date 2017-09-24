@@ -30,6 +30,7 @@ import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MPriceList;
 import org.compiere.model.MQuery;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -850,7 +851,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			;//We can not check. because Create Contract content from template process can not set JP_ContractProcess_ID automatically.
 		}else{
 			
-			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
 				if(getJP_ContractProcess_ID() == 0)
 				{
@@ -864,7 +865,32 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				;//Noting to do.
 			}
 			
+			if(is_ValueChanged("JP_ContractProcess_ID"))
+			{
+				MContractProcess contractProcess = MContractProcess.get(getCtx(), getJP_ContractProcess_ID());
+				if(!contractProcess.getDocBaseType().equals(getDocBaseType()) || !contractProcess.isCreateBaseDocJP())
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcess_ID")
+						+ " and  " + Msg.getElement(getCtx(), "DocBaseType"));
+					return false;
+				}
+			}
 		}	
+		
+		
+		//Check Price List and IsSotrx
+		if(newRecord || is_ValueChanged("M_PriceList_ID") || is_ValueChanged("IsSOTrx"))
+		{
+			MPriceList pricelist = MPriceList.get(getCtx(), getM_PriceList_ID(), get_TrxName());
+			if(pricelist.isSOPriceList() != isSOTrx())
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "M_PriceList_ID")
+										+ " and  " + Msg.getElement(getCtx(), "IsSOTrx"));
+				return false;
+			}
+		}
+		
+		
 		
 		return true;
 	}

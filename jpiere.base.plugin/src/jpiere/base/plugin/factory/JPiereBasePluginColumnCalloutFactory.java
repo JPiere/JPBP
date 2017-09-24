@@ -19,6 +19,8 @@ import java.util.List;
 import org.adempiere.base.IColumnCallout;
 import org.adempiere.base.IColumnCalloutFactory;
 import org.compiere.model.MInOut;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
@@ -187,6 +189,21 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 					list.add(new JPiereInOutCallout());
 				else if(columnName.equals(MOrder.COLUMNNAME_DropShip_BPartner_ID))
 					list.add(new JPiereDropShipBPartnerCallout());
+			
+			}else if(tableName.equals(MInvoice.Table_Name)){
+				
+				if(columnName.equals("JP_Contract_ID") || columnName.equals("JP_ContractContent_ID")) { //JPIERE-0363
+					
+					list.add(new JPiereContractOrderCallout());
+				}		
+				
+			}else if(tableName.equals(MInvoiceLine.Table_Name)){
+				
+				if(columnName.equals("JP_ContractLine_ID")) { //JPIERE-0363
+					
+					list.add(new JPiereContractOrderCallout());
+				}		
+				
 			}
 		}
 

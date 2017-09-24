@@ -66,11 +66,11 @@ public class MContractContentT extends X_JP_ContractContentT {
 		}
 		
 		if(!newRecord
-				|| is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType)
+				&&( is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType)
 				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
 				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_CreateDerivativeDocPolicy)
 				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractCalenderRef_ID)
-				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID))
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID) ))
 		{
 			MContractLineT[] lines = getContractLineTemplates(true,"");
 			if(lines.length > 0)
