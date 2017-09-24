@@ -220,18 +220,18 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						
 					}else{
 
-						MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
+						MContractProcPeriod docContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
 						
 						//Check Contract Calender
-						if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID() )
+						if(content.getJP_ContractCalender_ID() != docContractProcPeriod.getJP_ContractCalender_ID() )
 						{
 							//Contract Calender that belong to selected contract period does not accord with Contract Calender of Contract content.
 							return Msg.getMsg(Env.getCtx(), "JP_DifferentContractCalender");
 						}
 						
 						//Check Contract Period
-						if(content.getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0 
-								|| (content.getJP_ContractProcDate_To() != null && content.getJP_ContractProcDate_To().compareTo(period.getEndDate()) < 0) )
+						if(content.getJP_ContractProcDate_From().compareTo(docContractProcPeriod.getStartDate()) > 0 
+								|| (content.getJP_ContractProcDate_To() != null && content.getJP_ContractProcDate_To().compareTo(docContractProcPeriod.getEndDate()) < 0) )
 						{
 							//Outside the Contract Process Period.
 							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");

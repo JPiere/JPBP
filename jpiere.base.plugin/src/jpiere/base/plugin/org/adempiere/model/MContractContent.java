@@ -354,11 +354,6 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (!isApproved())
 			approveIt();
 		
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		//TODO 必須をロジックでかけているだけなので、完成時にパターンに応じて必須チェックする必要があるよ。
-		
-		
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
 		
@@ -715,7 +710,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
 					setOrderType(docType.getDocSubTypeSO());
-					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+					if(getJP_CreateDerivativeDocPolicy() != null
+							&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
 					{
 						if(!docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_StandardOrder)
 								&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Quotation)
@@ -752,7 +748,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
-					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+					if(getJP_CreateDerivativeDocPolicy() != null
+							&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
 					{
 						if(!getOrderType().equals(MDocType.DOCSUBTYPESO_StandardOrder)
 								&& !getOrderType().equals(MDocType.DOCSUBTYPESO_Quotation)

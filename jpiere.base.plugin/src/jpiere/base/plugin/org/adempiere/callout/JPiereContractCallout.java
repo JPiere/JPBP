@@ -92,8 +92,10 @@ public class JPiereContractCallout implements IColumnCallout {
 			if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) < 0 )
 			{
 				mTab.setValue("JP_ContractCancelDate", (Timestamp)oldValue);
+				
 				//You can not enter contract cancel date before contract Period data(to).
 				return Msg.getMsg(ctx, "JP_ContractCancelDate_UpdateError");
+				
 				
 			}else{
 				

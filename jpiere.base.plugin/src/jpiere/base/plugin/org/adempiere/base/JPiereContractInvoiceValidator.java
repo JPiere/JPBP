@@ -21,9 +21,12 @@ import org.compiere.model.FactsValidator;
 import org.compiere.model.I_C_InvoiceLine;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
+import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
@@ -159,13 +162,14 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			
 			return null;
 		}
-			
+		
 		
 		//Check Base Doc
 		if( type == ModelValidator.TYPE_BEFORE_NEW 
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
 																	||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
-																	||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID) ) ) )
+																	||   po.is_ValueChanged(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+																	||   po.is_ValueChanged(MOrder.COLUMNNAME_C_DocTypeTarget_ID) ) ) )
 		{
 			
 			MInvoice invoice = (MInvoice)po;
@@ -191,13 +195,6 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					String msg = Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");
 					return msg;
 				}
-			}
-			
-			//Check BP
-			if(contract.getC_BPartner_ID() != invoice.getC_BPartner_ID())
-			{
-				//Different business partner between Contract Content and Document.
-				return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
 			}
 			
 
@@ -226,11 +223,21 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
 					}
 					
-					//Check kind of Base Doc
-					if(!content.getDocBaseType().equals(MContractContent.DOCBASETYPE_ARInvoice) && !content.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice))
+					//Check BP
+					if(content.getC_BPartner_ID() != invoice.getC_BPartner_ID())
 					{
-						return "選択した契約内容は、基点となる伝票の種類が異なります。";//TODO メッセージ化
+						//Different business partner between Contract Content and Document.
+						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
 					}
+					
+					//Check Doc Type
+					if(content.getJP_BaseDocDocType_ID() != invoice.getC_DocTypeTarget_ID())
+					{
+						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
+						//Please select the Document Type that is same as Contract content. 
+						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
+					}
+					
 					
 					/** 
 					 * Check JP_ContractProcPeriod_ID
@@ -245,18 +252,18 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						
 					}else{
 
-						MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
+						MContractProcPeriod docContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
 						
 						//Check Contract Calender
-						if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID() )
+						if(content.getJP_ContractCalender_ID() != docContractProcPeriod.getJP_ContractCalender_ID() )
 						{
 							//Contract Calender that belong to selected contract period does not accord with Contract Calender of Contract content.
 							return Msg.getMsg(Env.getCtx(), "JP_DifferentContractCalender");
 						}
 						
 						//Check Contract Period
-						if(content.getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0 
-								|| (content.getJP_ContractProcDate_To() != null && content.getJP_ContractProcDate_To().compareTo(period.getEndDate()) < 0) )
+						if(content.getJP_ContractProcDate_From().compareTo(docContractProcPeriod.getStartDate()) > 0 
+								|| (content.getJP_ContractProcDate_To() != null && content.getJP_ContractProcDate_To().compareTo(docContractProcPeriod.getEndDate()) < 0) )
 						{
 							//Outside the Contract Process Period.
 							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
@@ -290,6 +297,20 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						return Msg.getMsg(Env.getCtx(), "JP_Diff_ContractDocument");
 					}
 					
+					//Check BP
+					if(content.getC_BPartner_ID() != invoice.getC_BPartner_ID())
+					{
+						//Different business partner between Contract Content and Document.
+						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
+					}
+					
+					//Check Doc Type
+					if(content.getJP_BaseDocDocType_ID() != invoice.getC_DocTypeTarget_ID())
+					{
+						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
+						//Please select the Document Type that is same as Contract content. 
+						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
+					}
 				}
 				
 				/** In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null; */
@@ -353,13 +374,14 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				//Check Single Order or RMA
 				if(invoiceLine.getParent().getC_Order_ID() > 0 && invoiceLine.getC_OrderLine_ID() > 0)
 				{
+					//You can not bundle different Order document.
 					if(invoiceLine.getC_OrderLine().getC_Order_ID() != invoiceLine.getParent().getC_Order_ID())
-						return "期間契約とスポット契約の場合、異なる受発注伝票の明細を含める事はできません。";//TODO メッセージ化
+						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentOrder");
 					
 				}else if(invoiceLine.getParent().getM_RMA_ID() > 0 && invoiceLine.getM_RMALine_ID() > 0){
 					
 					if(invoiceLine.getM_RMALine().getM_RMA_ID() != invoiceLine.getParent().getM_RMA_ID())
-						return "期間契約とスポット契約の場合、異なる返品受付依頼伝票の明細を含める事はできません。";//TODO メッセージ化
+						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentRMA");
 				}
 				
 				if(JP_ContractLine_ID <= 0)
@@ -375,24 +397,34 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				}
 				
 				
-				//Check Contract Process Period - Mandetory
+				//Check Contract Process Period
 				int invoiceLine_ContractProcPeriod_ID = invoiceLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
-				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
+				MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && invoiceLine_ContractProcPeriod_ID > 0) 
 				{ 
-					if(invoiceLine_ContractProcPeriod_ID <= 0)
+					if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+							||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-						
-					}else{
-				
 						//Check Contract Process Period - Calender
 						MContractProcPeriod invoiceLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), invoiceLine_ContractProcPeriod_ID);				
-						if(invoiceLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_Inv_ID())
-						{
-							return "契約書の契約カレンダーの契約処理期間を選択して下さい。";//TODO メッセージ化
+						if(invoiceLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
+						{	
+							//Please select the Contract Process Period that belong to Calender of Contract Content line. 
+							return Msg.getMsg(Env.getCtx(), "JP_SelectContractProcPeriodBelongToContractLine");
 						}
+						
+						//Check valid Contract Period
+						MInvoice invoice =invoiceLine.getParent();
+						MContractProcPeriod ioPeriod = MContractProcPeriod.get(Env.getCtx(), invoice.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						if(ioPeriod.getStartDate().compareTo(invoiceLine_ContractProcPeriod.getStartDate()) > 0 
+								|| (ioPeriod.getEndDate() != null && ioPeriod.getEndDate().compareTo(invoiceLine_ContractProcPeriod.getEndDate()) < 0) )
+						{
+							//Outside the Contract Process Period.
+							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						}
+					
 					}
+					
 				}
 				
 			}//if(type == ModelValidator.TYPE_BEFORE_NEW)
@@ -454,8 +486,6 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			
 			
 		}
-		
-		//TODO:異なる契約内容の受注伝票明細が混じらないようにチェックする。
 		
 		return null;
 	}

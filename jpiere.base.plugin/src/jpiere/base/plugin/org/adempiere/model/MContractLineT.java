@@ -57,9 +57,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{		
-		//TODO:契約内容テンプレートのの派生伝票作成方針の変更とテンプレート明細の各種設定の矛盾をどうするか・・・(+o+)・。
-		
-		
 		//Check Period Contract - Derivative Doc Policy
 		if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{

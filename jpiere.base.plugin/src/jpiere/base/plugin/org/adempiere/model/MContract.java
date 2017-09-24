@@ -545,8 +545,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			{
 				setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
 			}
-			
-			if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) < 0 )
+			else if(getJP_ContractCancelDate() != null && getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) < 0 )
 			{
 				//You can not enter contract cancel date before contract Period data(to).
 				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getMsg(getCtx(), "JP_ContractCancelDate_UpdateError"));

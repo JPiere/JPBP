@@ -117,7 +117,7 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 			createContractLine(m_ContractContent, MContractContentT.get(getCtx(), m_ContractContent.getJP_ContractContentT_ID()));
 		}
 		
-		return Msg.getMsg(getCtx(), "OK");
+		return Msg.getMsg(getCtx(), "Success");
 	}
 	
 	protected void createContractContent() throws Exception 

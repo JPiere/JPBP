@@ -400,18 +400,20 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			int M_RMALine_ID = ioLine.getM_RMALine_ID();
 			if(C_OrderLine_ID <= 0 && M_RMALine_ID <= 0)
 			{
-				return "期間契約とスポット契約の場合、受発注伝票明細か返品受付依頼伝票明細の入力は必須です。";//TODOメッセージ化
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_OrderLine_ID") + " or " + Msg.getElement(Env.getCtx(), "M_RMALine_ID")};
+				return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
 			}
 			
 			if(ioLine.getC_OrderLine_ID() > 0)
 			{
+				//You can not bundle different Order document. 
 				if(ioLine.getC_OrderLine().getC_Order_ID() != ioLine.getParent().getC_Order_ID())
-					return "期間契約とスポット契約の場合、異なる受発注伝票の明細を含める事はできません。";//TODO メッセージ化
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentOrder");
 				
 			}else if(ioLine.getM_RMALine_ID() > 0){
 				
 				if(ioLine.getM_RMALine().getM_RMA_ID() != ioLine.getParent().getM_RMA_ID())
-					return "期間契約とスポット契約の場合、異なる返品受付依頼伝票の明細を含める事はできません。";//TODO メッセージ化
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentRMA");
 			}
 			
 			if(JP_ContractLine_ID <= 0)
