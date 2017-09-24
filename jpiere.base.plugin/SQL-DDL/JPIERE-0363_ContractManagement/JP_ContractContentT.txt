@@ -106,7 +106,7 @@ CREATE TABLE adempiere.JP_ContractContentT
 
   SendeMail character(1) NOT NULL DEFAULT 'N'::bpchar,
   OrderType character varying(2) ,
-
+ dateinvoiced timestamp without time zone,
  
 
   CONSTRAINT JP_ContractContentT_pkey PRIMARY KEY (JP_ContractContentT_ID)

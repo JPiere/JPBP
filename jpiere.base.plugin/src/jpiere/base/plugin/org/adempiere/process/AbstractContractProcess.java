@@ -19,12 +19,15 @@ import java.time.LocalDateTime;
 import java.util.logging.Level;
 
 import org.adempiere.util.IProcessUI;
+import org.compiere.model.MColumn;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MRefList;
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
@@ -390,17 +393,52 @@ public class AbstractContractProcess extends SvrProcess
 	}
 	
 	
+	private int Reference_ContractLogMsg = 0;  
+	
 	protected void createContractLogDetail(String ContractLogMsg, MContractLine ContractLine, PO po, String descriptionMsg)
 	{
 		
 		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
 		{
-			if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument)){ //A1
-				DocAction doc = (DocAction)po;
-				addBufferLog(0, null, null, Msg.getMsg(getCtx(), "DocumentNo") +" : "+ doc.getDocumentNo(), po.get_Table_ID(), po.get_ID());
+			if(Reference_ContractLogMsg == 0)
+			{
+				MTable JP_ContractLogDetail = MTable.get(getCtx(), MContractLogDetail.Table_Name);
+				MColumn[] columns = JP_ContractLogDetail.getColumns(false);
+				for(int i = 0; i < columns.length; i++)
+				{
+					if(columns[i].getColumnName().equals(MContractLogDetail.COLUMNNAME_JP_ContractLogMsg))
+					{
+						int AD_Reference_Value_ID = columns[i].getAD_Reference_Value_ID();
+						Reference_ContractLogMsg = AD_Reference_Value_ID;
+						break;
+					}
+				}
 			}
+			
+			String logMsg = MRefList.getListName(getCtx(), Reference_ContractLogMsg, ContractLogMsg);
+			if(po != null)
+			{
+				if(po instanceof DocAction)
+				{
+					DocAction doc = (DocAction)po;
+					addBufferLog(0, null, null, logMsg + " ---> " + Msg.getMsg(getCtx(), "DocumentNo") +" : "+ doc.getDocumentNo(), po.get_Table_ID(), po.get_ID());
+				
+				}else{
+					
+					addBufferLog(0, null, null, logMsg , po.get_Table_ID(), po.get_ID());
+				}
+				
+			}else{
+				
+				if(Util.isEmpty(descriptionMsg))
+					addLog(logMsg + " - " + ContractLine.toString());
+				else
+					addLog(logMsg + " - " + descriptionMsg);
+			}
+			
 			return ;
-		}
+			
+		}//NoLog
 				
 		String TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
 		

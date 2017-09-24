@@ -512,4 +512,14 @@ public class MContractLine extends X_JP_ContractLine {
 		list.toArray(iLines);
 		return iLines;
 	}
+
+	@Override
+	public String toString() 
+	{
+	      StringBuffer sb = new StringBuffer ("JP_ContractLine_ID[")
+	    	        .append(get_ID()).append("]");
+	 	  return sb.toString();
+	}
+	
+	
 }

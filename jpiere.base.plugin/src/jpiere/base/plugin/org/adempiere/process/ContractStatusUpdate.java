@@ -315,6 +315,7 @@ public class ContractStatusUpdate extends SvrProcess {
 	
 	private void cancelContract(MContract contract)
 	{
+		String JP_ConstractStatus_From = contract.getJP_ContractStatus();
 		contract.setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
 		contract.saveEx(get_TrxName());
 		
@@ -328,10 +329,12 @@ public class ContractStatusUpdate extends SvrProcess {
 		
 		
 		MContractContent[] contents = contract.getContractContents();
+		String JP_ConstractProcStatus_From = null;
 		for(int i = 0; i < contents.length; i++)
 		{
 			if(!contents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Processed))
 			{
+				JP_ConstractProcStatus_From = contents[i].getJP_ContractProcStatus();
 				contents[i].setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 				contents[i].saveEx(get_TrxName());
 				
@@ -351,6 +354,7 @@ public class ContractStatusUpdate extends SvrProcess {
 	private void checkContractProcStatus(MContract contract)
 	{
 		MContractContent[] contents = contract.getContractContents();
+		String JP_ConstractProcStatus_From = null;
 		for(int i = 0; i < contents.length; i++)
 		{
 			if(contents[i].getJP_ContractProcDate_To() == null)
@@ -358,6 +362,7 @@ public class ContractStatusUpdate extends SvrProcess {
 			
 			if(contents[i].getJP_ContractProcDate_To().compareTo(now_Timestamp) <= 0 )
 			{
+				JP_ConstractProcStatus_From = contents[i].getJP_ContractProcStatus();
 				contents[i].setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 				contents[i].saveEx(get_TrxName());
 				
