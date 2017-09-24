@@ -252,6 +252,24 @@ public interface I_JP_ContractLogDetail
 
 	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException;
 
+    /** Column name JP_ContractProcStatus_From */
+    public static final String COLUMNNAME_JP_ContractProcStatus_From = "JP_ContractProcStatus_From";
+
+	/** Set Contract Process Status(From)	  */
+	public void setJP_ContractProcStatus_From (String JP_ContractProcStatus_From);
+
+	/** Get Contract Process Status(From)	  */
+	public String getJP_ContractProcStatus_From();
+
+    /** Column name JP_ContractProcStatus_To */
+    public static final String COLUMNNAME_JP_ContractProcStatus_To = "JP_ContractProcStatus_To";
+
+	/** Set Contract Process Status(To)	  */
+	public void setJP_ContractProcStatus_To (String JP_ContractProcStatus_To);
+
+	/** Get Contract Process Status(To)	  */
+	public String getJP_ContractProcStatus_To();
+
     /** Column name JP_ContractProcessTraceLevel */
     public static final String COLUMNNAME_JP_ContractProcessTraceLevel = "JP_ContractProcessTraceLevel";
 
@@ -271,6 +289,24 @@ public interface I_JP_ContractLogDetail
 	public int getJP_ContractProcess_ID();
 
 	public I_JP_ContractProcess getJP_ContractProcess() throws RuntimeException;
+
+    /** Column name JP_ContractStatus_From */
+    public static final String COLUMNNAME_JP_ContractStatus_From = "JP_ContractStatus_From";
+
+	/** Set Contract Status(From)	  */
+	public void setJP_ContractStatus_From (String JP_ContractStatus_From);
+
+	/** Get Contract Status(From)	  */
+	public String getJP_ContractStatus_From();
+
+    /** Column name JP_ContractStatus_To */
+    public static final String COLUMNNAME_JP_ContractStatus_To = "JP_ContractStatus_To";
+
+	/** Set Contract Status(To)	  */
+	public void setJP_ContractStatus_To (String JP_ContractStatus_To);
+
+	/** Get Contract Status(To)	  */
+	public String getJP_ContractStatus_To();
 
     /** Column name JP_Contract_ID */
     public static final String COLUMNNAME_JP_Contract_ID = "JP_Contract_ID";

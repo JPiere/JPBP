@@ -30,7 +30,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20170924L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -396,6 +396,56 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		return ii.intValue();
 	}
 
+	/** In Progress = IP */
+	public static final String JP_CONTRACTPROCSTATUS_FROM_InProgress = "IP";
+	/** Invalid = IN */
+	public static final String JP_CONTRACTPROCSTATUS_FROM_Invalid = "IN";
+	/** Unprocessed = UN */
+	public static final String JP_CONTRACTPROCSTATUS_FROM_Unprocessed = "UN";
+	/** Processed = PD */
+	public static final String JP_CONTRACTPROCSTATUS_FROM_Processed = "PD";
+	/** Suspend = SD */
+	public static final String JP_CONTRACTPROCSTATUS_FROM_Suspend = "SD";
+	/** Set Contract Process Status(From).
+		@param JP_ContractProcStatus_From Contract Process Status(From)	  */
+	public void setJP_ContractProcStatus_From (String JP_ContractProcStatus_From)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractProcStatus_From, JP_ContractProcStatus_From);
+	}
+
+	/** Get Contract Process Status(From).
+		@return Contract Process Status(From)	  */
+	public String getJP_ContractProcStatus_From () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractProcStatus_From);
+	}
+
+	/** In Progress = IP */
+	public static final String JP_CONTRACTPROCSTATUS_TO_InProgress = "IP";
+	/** Invalid = IN */
+	public static final String JP_CONTRACTPROCSTATUS_TO_Invalid = "IN";
+	/** Unprocessed = UN */
+	public static final String JP_CONTRACTPROCSTATUS_TO_Unprocessed = "UN";
+	/** Processed = PD */
+	public static final String JP_CONTRACTPROCSTATUS_TO_Processed = "PD";
+	/** Suspend = SD */
+	public static final String JP_CONTRACTPROCSTATUS_TO_Suspend = "SD";
+	/** Set Contract Process Status(To).
+		@param JP_ContractProcStatus_To Contract Process Status(To)	  */
+	public void setJP_ContractProcStatus_To (String JP_ContractProcStatus_To)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractProcStatus_To, JP_ContractProcStatus_To);
+	}
+
+	/** Get Contract Process Status(To).
+		@return Contract Process Status(To)	  */
+	public String getJP_ContractProcStatus_To () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractProcStatus_To);
+	}
+
 	/** Information = FIN */
 	public static final String JP_CONTRACTPROCESSTRACELEVEL_Information = "FIN";
 	/** Error = ERR */
@@ -444,6 +494,52 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Prepare = PR */
+	public static final String JP_CONTRACTSTATUS_FROM_Prepare = "PR";
+	/** Under Contract = UC */
+	public static final String JP_CONTRACTSTATUS_FROM_UnderContract = "UC";
+	/** Expiration of Contract = EC */
+	public static final String JP_CONTRACTSTATUS_FROM_ExpirationOfContract = "EC";
+	/** Invalid = IN */
+	public static final String JP_CONTRACTSTATUS_FROM_Invalid = "IN";
+	/** Set Contract Status(From).
+		@param JP_ContractStatus_From Contract Status(From)	  */
+	public void setJP_ContractStatus_From (String JP_ContractStatus_From)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractStatus_From, JP_ContractStatus_From);
+	}
+
+	/** Get Contract Status(From).
+		@return Contract Status(From)	  */
+	public String getJP_ContractStatus_From () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractStatus_From);
+	}
+
+	/** Prepare = PR */
+	public static final String JP_CONTRACTSTATUS_TO_Prepare = "PR";
+	/** Under Contract = UC */
+	public static final String JP_CONTRACTSTATUS_TO_UnderContract = "UC";
+	/** Expiration of Contract = EC */
+	public static final String JP_CONTRACTSTATUS_TO_ExpirationOfContract = "EC";
+	/** Invalid = IN */
+	public static final String JP_CONTRACTSTATUS_TO_Invalid = "IN";
+	/** Set Contract Status(To).
+		@param JP_ContractStatus_To Contract Status(To)	  */
+	public void setJP_ContractStatus_To (String JP_ContractStatus_To)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractStatus_To, JP_ContractStatus_To);
+	}
+
+	/** Get Contract Status(To).
+		@return Contract Status(To)	  */
+	public String getJP_ContractStatus_To () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractStatus_To);
 	}
 
 	public I_JP_Contract getJP_Contract() throws RuntimeException

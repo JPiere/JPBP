@@ -325,6 +325,8 @@ public class ContractStatusUpdate extends SvrProcess {
 		contractlog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractStatusUpdate);
 		contractlog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 		contractlog.setJP_Contract_ID(contract.getJP_Contract_ID());
+		contractlog.setJP_ContractStatus_From(JP_ConstractStatus_From);
+		contractlog.setJP_ContractStatus_To(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
 		contractlog.saveEx( m_ContractLog.get_TrxName());
 		
 		
@@ -345,6 +347,8 @@ public class ContractStatusUpdate extends SvrProcess {
 				contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 				contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
 				contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
+				contentLog.setJP_ContractProcStatus_From(JP_ConstractProcStatus_From);
+				contentLog.setJP_ContractProcStatus_To(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 				contentLog.saveEx( m_ContractLog.get_TrxName());
 			}
 		}//for j
@@ -373,6 +377,8 @@ public class ContractStatusUpdate extends SvrProcess {
 				contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 				contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
 				contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
+				contentLog.setJP_ContractProcStatus_From(JP_ConstractProcStatus_From);
+				contentLog.setJP_ContractProcStatus_To(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 				contentLog.saveEx( m_ContractLog.get_TrxName());
 				
 			}else{
