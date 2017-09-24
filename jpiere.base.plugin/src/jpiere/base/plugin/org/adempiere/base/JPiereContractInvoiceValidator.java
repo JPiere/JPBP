@@ -380,6 +380,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					
 				}else if(invoiceLine.getParent().getM_RMA_ID() > 0 && invoiceLine.getM_RMALine_ID() > 0){
 					
+					//You can not bundle different RMA document.
 					if(invoiceLine.getM_RMALine().getM_RMA_ID() != invoiceLine.getParent().getM_RMA_ID())
 						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentRMA");
 				}
@@ -415,9 +416,9 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						
 						//Check valid Contract Period
 						MInvoice invoice =invoiceLine.getParent();
-						MContractProcPeriod ioPeriod = MContractProcPeriod.get(Env.getCtx(), invoice.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-						if(ioPeriod.getStartDate().compareTo(invoiceLine_ContractProcPeriod.getStartDate()) > 0 
-								|| (ioPeriod.getEndDate() != null && ioPeriod.getEndDate().compareTo(invoiceLine_ContractProcPeriod.getEndDate()) < 0) )
+						MContractProcPeriod invoicePeriod = MContractProcPeriod.get(Env.getCtx(), invoice.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						if(invoicePeriod.getStartDate().compareTo(invoiceLine_ContractProcPeriod.getStartDate()) > 0 
+								|| (invoicePeriod.getEndDate() != null && invoicePeriod.getEndDate().compareTo(invoiceLine_ContractProcPeriod.getEndDate()) < 0) )
 						{
 							//Outside the Contract Process Period.
 							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");

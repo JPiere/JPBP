@@ -65,14 +65,34 @@ public class MContractContentT extends X_JP_ContractContentT {
 			}
 		}
 		
+		if(!newRecord
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType)
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_CreateDerivativeDocPolicy)
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractCalenderRef_ID)
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID))
+		{
+			MContractLineT[] lines = getContractLineTemplates(true,"");
+			if(lines.length > 0)
+			{
+				//You can not update this field Because Doc Line is registered.
+				StringBuilder msg = new StringBuilder(Msg.getMsg(getCtx(), "JP_NotUpdateForLine"));
+				if(is_ValueChanged(MContractContent.COLUMNNAME_DocBaseType))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_DocBaseType));
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_BaseDocDocType_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID));
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_CreateDerivativeDocPolicy));
+				else if(is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractCalenderRef_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_ContractCalenderRef_ID));				
+				else if(is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID));			
 		
+				log.saveError("Error", msg.toString());
+				return false;
+			}
+		}
 		
-		//TODO 下のフィールドの更新制御 - 明細が登録されていたら変更できなくする。
-		//基点となる伝票
-		//基点となる伝票の伝票タイプ
-		//派生伝票作成方針
-		//契約カレンダー選択リスト
-		//契約処理マスタ選択リスト
 		
 		//Check JP_BaseDocDocType_ID and DocBaseType
 		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
