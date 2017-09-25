@@ -14,7 +14,6 @@ import org.compiere.util.Msg;
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
-import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 public abstract class AbstractContractValidator {	
@@ -74,7 +73,10 @@ public abstract class AbstractContractValidator {
 			{
 				if(po.get_ValueAsInt("C_Order_ID") == 0 && po.get_ValueAsInt("M_RMA_ID")  == 0)
 				{
-					return "期間契約とスポット契約の場合、受注伝票、発注伝票、得意先返品受付伝票、仕入先返品依頼伝票のいずれかの入力が必要です。";//TODO:メッセージ化
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_Order_ID",true)+","+Msg.getElement(Env.getCtx(), "C_Order_ID",false)
+													+ "," + Msg.getElement(Env.getCtx(), "M_RMA_ID",true) +"," + Msg.getElement(Env.getCtx(), "M_RMA_ID",false)};
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+
 				}
 				
 				/** In case of Period Contract, order has JP_ContractContent_ID and JP_ContractProcPeriod_ID always*/

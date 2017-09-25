@@ -34,7 +34,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170906L;
+	private static final long serialVersionUID = 20170925L;
 
     /** Standard Constructor */
     public X_JP_Recognition (Properties ctx, int JP_Recognition_ID, String trxName)
@@ -68,9 +68,10 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 // @IsSOTrx@
 			setIsSelfService (false);
 			setIsTaxIncluded (false);
-			setJP_DateRecognized (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
+			setJP_ContractContent_ID (0);
+			setJP_Contract_ID (0);
 			setJP_Recognition_ID (0);
+			setM_InOut_ID (0);
 			setM_PriceList_ID (0);
 			setPosted (false);
 // N
@@ -832,9 +833,9 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	public void setJP_ContractContent_ID (int JP_ContractContent_ID)
 	{
 		if (JP_ContractContent_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractContent_ID, null);
+			set_Value (COLUMNNAME_JP_ContractContent_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
+			set_Value (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
 	}
 
 	/** Get Contract Content.
@@ -857,9 +858,9 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	public void setJP_ContractProcPeriod_ID (int JP_ContractProcPeriod_ID)
 	{
 		if (JP_ContractProcPeriod_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriod_ID, null);
+			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriod_ID, Integer.valueOf(JP_ContractProcPeriod_ID));
+			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, Integer.valueOf(JP_ContractProcPeriod_ID));
 	}
 
 	/** Get Contract Process Period.
@@ -882,9 +883,9 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	public void setJP_Contract_ID (int JP_Contract_ID)
 	{
 		if (JP_Contract_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_Contract_ID, null);
+			set_Value (COLUMNNAME_JP_Contract_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
+			set_Value (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
 	}
 
 	/** Get Contract Document.
@@ -897,25 +898,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 		return ii.intValue();
 	}
 
-	/** Set Date Recognized.
-		@param JP_DateRecognized 
-		Date Recognized
-	  */
-	public void setJP_DateRecognized (Timestamp JP_DateRecognized)
-	{
-		set_Value (COLUMNNAME_JP_DateRecognized, JP_DateRecognized);
-	}
-
-	/** Get Date Recognized.
-		@return Date Recognized
-	  */
-	public Timestamp getJP_DateRecognized () 
-	{
-		return (Timestamp)get_Value(COLUMNNAME_JP_DateRecognized);
-	}
-
-	/** Set Recognition Doc.
-		@param JP_Recognition_ID Recognition Doc	  */
+	/** Set Revenue Recognition Doc.
+		@param JP_Recognition_ID Revenue Recognition Doc	  */
 	public void setJP_Recognition_ID (int JP_Recognition_ID)
 	{
 		if (JP_Recognition_ID < 1) 
@@ -924,8 +908,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 			set_ValueNoCheck (COLUMNNAME_JP_Recognition_ID, Integer.valueOf(JP_Recognition_ID));
 	}
 
-	/** Get Recognition Doc.
-		@return Recognition Doc	  */
+	/** Get Revenue Recognition Doc.
+		@return Revenue Recognition Doc	  */
 	public int getJP_Recognition_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_ID);
@@ -1030,6 +1014,23 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Movement Date.
+		@param MovementDate 
+		Date a product was moved in or out of inventory
+	  */
+	public void setMovementDate (Timestamp MovementDate)
+	{
+		set_ValueNoCheck (COLUMNNAME_MovementDate, MovementDate);
+	}
+
+	/** Get Movement Date.
+		@return Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
 	}
 
 	/** Set Order Reference.

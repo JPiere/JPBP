@@ -33,7 +33,7 @@ SELECT
     ,r.C_Currency_ID
     ,r.M_RMA_ID
     ,r.DateAcct AS DateAcct
-    ,r.JP_DateRecognized AS JP_DateRecognized
+    ,r.MovementDate AS MovementDate
 
 FROM adempiere.JP_RecognitionLine rl
 	INNER JOIN adempiere.JP_Recognition r ON (rl.JP_Recognition_ID = r.JP_Recognition_ID)

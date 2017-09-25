@@ -347,10 +347,10 @@ public interface I_JP_RecognitionLine
     /** Column name JP_Recognition_ID */
     public static final String COLUMNNAME_JP_Recognition_ID = "JP_Recognition_ID";
 
-	/** Set Recognition Doc	  */
+	/** Set Revenue Recognition Doc	  */
 	public void setJP_Recognition_ID (int JP_Recognition_ID);
 
-	/** Get Recognition Doc	  */
+	/** Get Revenue Recognition Doc	  */
 	public int getJP_Recognition_ID();
 
 	public I_JP_Recognition getJP_Recognition() throws RuntimeException;

@@ -192,7 +192,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			}else if(io.getM_RMA_ID() > 0){
 			
 				isRMA = true;
-				MRMA rma = new MRMA(Env.getCtx(),io.getM_RMA_ID(),io.get_TrxName());
+				MRMA rma = new MRMA(Env.getCtx(),io.getM_RMA_ID(),trxName);
 				int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
 				if(JP_Order_ID == 0)
 					return null;
@@ -215,8 +215,6 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				recognition.setM_RMA_ID(io.getM_RMA_ID());
 			}
 			
-			
-			recognition.setJP_DateRecognized(io.getDateAcct());
 			recognition.setM_InOut_ID(io.getM_InOut_ID());
 			if (!recognition.save(trxName))
 			{
@@ -233,7 +231,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				if(isRMA)
 				{
 					int M_RMALine_ID = sLine.getM_RMALine_ID();
-					MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, io.get_TrxName());
+					MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, trxName);
 					int JP_OrderLine_ID = rmaLine.get_ValueAsInt("JP_OrderLine_ID");
 					rcogLine.setC_OrderLine_ID(JP_OrderLine_ID);
 				}
@@ -247,7 +245,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				rcogLine.setJP_QtyRecognized(sLine.getMovementQty());
 				rcogLine.setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID"));
 				rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-				if (!rcogLine.save(io.get_TrxName()))
+				if (!rcogLine.save(trxName))
 				{
 					log.warning("Could not create Invoice Line from Shipment Line: "+ recognition.getDocumentInfo());
 					return null;

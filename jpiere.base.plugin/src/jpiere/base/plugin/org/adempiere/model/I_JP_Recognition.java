@@ -512,26 +512,13 @@ public interface I_JP_Recognition
 
 	public I_JP_Contract getJP_Contract() throws RuntimeException;
 
-    /** Column name JP_DateRecognized */
-    public static final String COLUMNNAME_JP_DateRecognized = "JP_DateRecognized";
-
-	/** Set Date Recognized.
-	  * Date Recognized
-	  */
-	public void setJP_DateRecognized (Timestamp JP_DateRecognized);
-
-	/** Get Date Recognized.
-	  * Date Recognized
-	  */
-	public Timestamp getJP_DateRecognized();
-
     /** Column name JP_Recognition_ID */
     public static final String COLUMNNAME_JP_Recognition_ID = "JP_Recognition_ID";
 
-	/** Set Recognition Doc	  */
+	/** Set Revenue Recognition Doc	  */
 	public void setJP_Recognition_ID (int JP_Recognition_ID);
 
-	/** Get Recognition Doc	  */
+	/** Get Revenue Recognition Doc	  */
 	public int getJP_Recognition_ID();
 
     /** Column name JP_Recognition_UU */
@@ -587,6 +574,19 @@ public interface I_JP_Recognition
 	public int getM_RMA_ID();
 
 	public org.compiere.model.I_M_RMA getM_RMA() throws RuntimeException;
+
+    /** Column name MovementDate */
+    public static final String COLUMNNAME_MovementDate = "MovementDate";
+
+	/** Set Movement Date.
+	  * Date a product was moved in or out of inventory
+	  */
+	public void setMovementDate (Timestamp MovementDate);
+
+	/** Get Movement Date.
+	  * Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate();
 
     /** Column name POReference */
     public static final String COLUMNNAME_POReference = "POReference";

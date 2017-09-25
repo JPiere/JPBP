@@ -32,7 +32,7 @@ public class X_JP_RecognitionTax extends PO implements I_JP_RecognitionTax, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170906L;
+	private static final long serialVersionUID = 20170925L;
 
     /** Standard Constructor */
     public X_JP_RecognitionTax (Properties ctx, int JP_RecognitionTax_ID, String trxName)
@@ -173,8 +173,8 @@ public class X_JP_RecognitionTax extends PO implements I_JP_RecognitionTax, I_Pe
 		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
 			.getPO(getJP_Recognition_ID(), get_TrxName());	}
 
-	/** Set Recognition Doc.
-		@param JP_Recognition_ID Recognition Doc	  */
+	/** Set Revenue Recognition Doc.
+		@param JP_Recognition_ID Revenue Recognition Doc	  */
 	public void setJP_Recognition_ID (int JP_Recognition_ID)
 	{
 		if (JP_Recognition_ID < 1) 
@@ -183,8 +183,8 @@ public class X_JP_RecognitionTax extends PO implements I_JP_RecognitionTax, I_Pe
 			set_ValueNoCheck (COLUMNNAME_JP_Recognition_ID, Integer.valueOf(JP_Recognition_ID));
 	}
 
-	/** Get Recognition Doc.
-		@return Recognition Doc	  */
+	/** Get Revenue Recognition Doc.
+		@return Revenue Recognition Doc	  */
 	public int getJP_Recognition_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_ID);
