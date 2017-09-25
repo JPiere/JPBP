@@ -25,25 +25,22 @@ import org.compiere.apps.IStatusBar;
 import org.compiere.grid.CreateFrom;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.GridTab;
-import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoice;
-import org.compiere.model.MInvoiceLine;
-import org.compiere.model.MInvoicePaySchedule;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
-import org.compiere.model.MOrderPaySchedule;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MUOMConversion;
-import org.compiere.model.PO;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
  *  JPIERE-0364 : Create Recognition Transactions from Ship or Receipt or RMA
@@ -96,22 +93,22 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 		//
 		StringBuffer sql = new StringBuffer("SELECT s.M_InOut_ID,").append(display)
 			.append(" FROM M_InOut s "
-			+ "WHERE s.C_BPartner_ID=? AND s.IsSOTrx=? AND s.DocStatus IN ('CL','CO')"
+			+ "WHERE s.C_BPartner_ID=? AND s.IsSOTrx=? AND s.DocStatus IN ('CL','CO') AND s.JP_ContractContent_ID IS Not Null "
 			+ " AND s.M_InOut_ID IN "
 				+ "(SELECT sl.M_InOut_ID FROM M_InOutLine sl");
-			if(!isSOTrx)
-				sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
-					+ " JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID) "
-					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO') "
-					+ " GROUP BY sl.M_InOut_ID,sl.MovementQty,mi.M_InOutLine_ID"
-					+ " HAVING (sl.MovementQty<>SUM(mi.Qty) AND mi.M_InOutLine_ID IS NOT NULL)"
-					+ " OR mi.M_InOutLine_ID IS NULL ");
-			else
+//			if(!isSOTrx)
+//				sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
+//					+ " JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID) "
+//					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO') "
+//					+ " GROUP BY sl.M_InOut_ID,sl.MovementQty,mi.M_InOutLine_ID"
+//					+ " HAVING (sl.MovementQty<>SUM(mi.Qty) AND mi.M_InOutLine_ID IS NOT NULL)"
+//					+ " OR mi.M_InOutLine_ID IS NULL ");
+//			else
 				sql.append(" INNER JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID)"
-					+ " LEFT JOIN C_InvoiceLine il ON sl.M_InOutLine_ID = il.M_InOutLine_ID"
+					+ " LEFT JOIN JP_RecognitionLine rl ON sl.M_InOutLine_ID = rl.M_InOutLine_ID"
 					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO')"
 					+ " GROUP BY sl.M_InOutLine_ID"
-					+ " HAVING sl.MovementQty - sum(COALESCE(il.QtyInvoiced,0)) > 0");
+					+ " HAVING sl.MovementQty - sum(COALESCE(rl.QtyInvoiced,0)) > 0");
 			sql.append(") ORDER BY s.MovementDate");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -142,38 +139,6 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 		return list;
 	}
 
-	/**
-	 *  Load PBartner dependent Order/Invoice/Shipment Field.
-	 *  @param C_BPartner_ID BPartner
-	 */
-	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
-		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
-
-		String sqlStmt = "SELECT r.M_RMA_ID, r.DocumentNo || '-' || r.Amt from M_RMA r "
-				+ "WHERE ISSOTRX='N' AND r.DocStatus in ('CO', 'CL') "
-				+ "AND r.C_BPartner_ID=? "
-				+ "AND NOT EXISTS (SELECT * FROM C_Invoice inv "
-				+ "WHERE inv.M_RMA_ID=r.M_RMA_ID AND inv.DocStatus IN ('CO', 'CL'))";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			pstmt = DB.prepareStatement(sqlStmt, null);
-			pstmt.setInt(1, C_BPartner_ID);
-			rs = pstmt.executeQuery();
-			while (rs.next()) {
-				list.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
-			}
-		} catch (SQLException e) {
-			log.log(Level.SEVERE, sqlStmt.toString(), e);
-		} finally{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-
-		return list;
-	}
 
 	/**
 	 *  Load Data - Shipment not invoiced
@@ -194,9 +159,9 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 		//
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT ");	//	QtyEntered
-		if(!isSOTrx)
-			sql.append("l.MovementQty-SUM(COALESCE(mi.Qty, 0)),");
-		else
+//		if(!isSOTrx)
+//			sql.append("l.MovementQty-SUM(COALESCE(mi.Qty, 0)),");
+//		else
 			sql.append("l.MovementQty-SUM(COALESCE(il.QtyInvoiced,0)),");
 		sql.append(" l.QtyEntered/l.MovementQty,"
 			+ " l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name),"			//  3..4
@@ -212,9 +177,9 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 
 		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)")
 			.append(" INNER JOIN M_InOut io ON (l.M_InOut_ID=io.M_InOut_ID)");
-		if(!isSOTrx)
-			sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (l.M_InOutLine_ID=mi.M_InOutLine_ID)");
-		else
+//		if(!isSOTrx)
+//			sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (l.M_InOutLine_ID=mi.M_InOutLine_ID)");
+//		else
 			sql.append(" LEFT JOIN C_InvoiceLine il ON l.M_InOutLine_ID = il.M_InOutLine_ID");
 		sql.append(" LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND io.C_BPartner_ID = po.C_BPartner_ID)")
 
@@ -272,88 +237,6 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 		return data;
 	}   //  loadShipment
 
-	/**
-	 * Load RMA details
-	 * @param M_RMA_ID RMA
-	 */
-	protected Vector<Vector<Object>> getRMAData(int M_RMA_ID)
-	{
-	    p_order = null;
-
-//	    MRMA m_rma = new MRMA(Env.getCtx(), M_RMA_ID, null);
-
-	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-	    StringBuilder sqlStmt = new StringBuilder();
-	    sqlStmt.append("SELECT rl.M_RMALine_ID, rl.line, rl.Qty - COALESCE(rl.QtyInvoiced, 0), iol.M_Product_ID, p.Name, uom.C_UOM_ID, COALESCE(uom.UOMSymbol,uom.Name) ");
-	    sqlStmt.append("FROM M_RMALine rl INNER JOIN M_InOutLine iol ON rl.M_InOutLine_ID=iol.M_InOutLine_ID ");
-
-	    if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
-        {
-	        sqlStmt.append("LEFT OUTER JOIN C_UOM uom ON (uom.C_UOM_ID=iol.C_UOM_ID) ");
-        }
-	    else
-        {
-	        sqlStmt.append("LEFT OUTER JOIN C_UOM_Trl uom ON (uom.C_UOM_ID=iol.C_UOM_ID AND uom.AD_Language='");
-	        sqlStmt.append(Env.getAD_Language(Env.getCtx())).append("') ");
-        }
-	    sqlStmt.append("LEFT OUTER JOIN M_Product p ON p.M_Product_ID=iol.M_Product_ID ");
-	    sqlStmt.append("WHERE rl.M_RMA_ID=? ");
-	    sqlStmt.append("AND rl.M_INOUTLINE_ID IS NOT NULL");
-
-	    sqlStmt.append(" UNION ");
-
-	    sqlStmt.append("SELECT rl.M_RMALine_ID, rl.line, rl.Qty - rl.QtyDelivered, 0, c.Name, uom.C_UOM_ID, COALESCE(uom.UOMSymbol,uom.Name) ");
-	    sqlStmt.append("FROM M_RMALine rl INNER JOIN C_Charge c ON c.C_Charge_ID = rl.C_Charge_ID ");
-	    if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
-        {
-	        sqlStmt.append("LEFT OUTER JOIN C_UOM uom ON (uom.C_UOM_ID=100) ");
-        }
-	    else
-        {
-	        sqlStmt.append("LEFT OUTER JOIN C_UOM_Trl uom ON (uom.C_UOM_ID=100 AND uom.AD_Language='");
-	        sqlStmt.append(Env.getAD_Language(Env.getCtx())).append("') ");
-        }
-	    sqlStmt.append("WHERE rl.M_RMA_ID=? ");
-	    sqlStmt.append("AND rl.C_Charge_ID IS NOT NULL");
-
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
-	    try
-	    {
-	        pstmt = DB.prepareStatement(sqlStmt.toString(), null);
-	        pstmt.setInt(1, M_RMA_ID);
-	        pstmt.setInt(2, M_RMA_ID);
-	        rs = pstmt.executeQuery();
-
-	        while (rs.next())
-            {
-	            Vector<Object> line = new Vector<Object>(7);
-	            line.add(new Boolean(false));   // 0-Selection
-	            line.add(rs.getBigDecimal(3));  // 1-Qty
-	            KeyNamePair pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
-	            line.add(pp); // 2-UOM
-	            pp = new KeyNamePair(rs.getInt(4), rs.getString(5));
-	            line.add(pp); // 3-Product
-	            line.add(null); //4-Vendor Product No
-	            line.add(null); //5-Order
-	            pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
-	            line.add(null);   //6-Ship
-	            line.add(pp);   //7-RMA
-	            data.add(line);
-            }
-	    }
-	    catch (Exception ex)
-	    {
-	        log.log(Level.SEVERE, sqlStmt.toString(), ex);
-	    }
-	    finally
-	    {
-	    	DB.close(rs, pstmt);
-	    	rs = null; pstmt = null;
-	    }
-
-	    return data;
-	}
 
 	/**
 	 *  List number of rows selected
@@ -384,33 +267,9 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 	public boolean save(IMiniTable miniTable, String trxName)
 	{
 		//  Invoice
-		int C_Invoice_ID = ((Integer)getGridTab().getValue("C_Invoice_ID")).intValue();
-		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, trxName);
-		if (log.isLoggable(Level.CONFIG)) log.config(invoice.toString());
-
-		if (p_order != null)
-		{
-			invoice.setOrder(p_order);	//	overwrite header values
-			invoice.saveEx();
-		}
-
-		if (m_rma != null)
-		{
-			invoice.setM_RMA_ID(m_rma.getM_RMA_ID());
-			invoice.saveEx();
-		}
-
-//		MInOut inout = null;
-//		if (m_M_InOut_ID > 0)
-//		{
-//			inout = new MInOut(Env.getCtx(), m_M_InOut_ID, trxName);
-//		}
-//		if (inout != null && inout.getM_InOut_ID() != 0
-//			&& inout.getC_Invoice_ID() == 0)	//	only first time
-//		{
-//			inout.setC_Invoice_ID(C_Invoice_ID);
-//			inout.saveEx();
-//		}
+		int JP_Recognition_ID = ((Integer)getGridTab().getValue("JP_Recognition_ID")).intValue();
+		MRecognition recognition = new MRecognition (Env.getCtx(), JP_Recognition_ID, trxName);
+		if (log.isLoggable(Level.CONFIG)) log.config(recognition.toString());
 
 		//  Lines
 		for (int i = 0; i < miniTable.getRowCount(); i++)
@@ -457,16 +316,16 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 					+ ", OrderLine_ID=" + C_OrderLine_ID + ", InOutLine_ID=" + M_InOutLine_ID);
 
 				//	Create new Invoice Line
-				MInvoiceLine invoiceLine = new MInvoiceLine (invoice);
-				invoiceLine.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
-				invoiceLine.setQty(QtyEntered);							//	Invoiced/Entered
+				MRecognitionLine recogLine = new MRecognitionLine (recognition);
+				recogLine.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
+				recogLine.setQty(QtyEntered);							//	Invoiced/Entered
 				BigDecimal QtyInvoiced = null;
 				if (M_Product_ID > 0 && product.getC_UOM_ID() != C_UOM_ID) {
 					QtyInvoiced = MUOMConversion.convertProductFrom(Env.getCtx(), M_Product_ID, C_UOM_ID, QtyEntered);
 				}
 				if (QtyInvoiced == null)
 					QtyInvoiced = QtyEntered;
-				invoiceLine.setQtyInvoiced(QtyInvoiced);
+				recogLine.setQtyInvoiced(QtyInvoiced);
 
 				//  Info
 				MOrderLine orderLine = null;
@@ -542,76 +401,42 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 				//	Shipment Info
 				if (inoutLine != null)
 				{
-					invoiceLine.setShipLine(inoutLine);		//	overwrites
+					recogLine.setRecogLine(inoutLine);		//	overwrites
 					//JPIERE-0296
-					invoiceLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", inoutLine.get_Value("JP_ProductExplodeBOM_ID") );
+					recogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", inoutLine.get_Value("JP_ProductExplodeBOM_ID") );
 				}
 				else {
 					log.fine("No Receipt Line");
 					//	Order Info
 					if (orderLine != null)
 					{
-						invoiceLine.setOrderLine(orderLine);	//	overwrites
+						recogLine.setOrderLine(orderLine);	//	overwrites
 						//JPIERE-0296
-						invoiceLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", orderLine.get_Value("JP_ProductExplodeBOM_ID") );
+						recogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", orderLine.get_Value("JP_ProductExplodeBOM_ID") );
 					}
 					else
 					{
 						log.fine("No Order Line");
-						invoiceLine.setPrice();
-						invoiceLine.setTax();
+						recogLine.setPrice();
+						recogLine.setTax();
 					}
 
 					//RMA Info
 					if (rmaLine != null)
 					{
-						invoiceLine.setRMALine(rmaLine);		//	overwrites
+						recogLine.setRMALine(rmaLine);		//	overwrites
 						//JPIERE-0296
 //						invoiceLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", rmaLine.get_Value("JP_ProductExplodeBOM_ID") );
 					}
 					else
 						log.fine("No RMA Line");
 				}
-				invoiceLine.saveEx();
+				recogLine.saveEx();
 			}   //   if selected
 		}   //  for all rows
 
-		if (p_order != null) {
-			invoice.setPaymentRule(p_order.getPaymentRule());
-			invoice.setC_PaymentTerm_ID(p_order.getC_PaymentTerm_ID());
-			invoice.saveEx();
-			invoice.load(invoice.get_TrxName()); // refresh from DB
-			// copy payment schedule from order if invoice doesn't have a current payment schedule
-			MOrderPaySchedule[] opss = MOrderPaySchedule.getOrderPaySchedule(invoice.getCtx(), p_order.getC_Order_ID(), 0, invoice.get_TrxName());
-			MInvoicePaySchedule[] ipss = MInvoicePaySchedule.getInvoicePaySchedule(invoice.getCtx(), invoice.getC_Invoice_ID(), 0, invoice.get_TrxName());
-			if (ipss.length == 0 && opss.length > 0) {
-				BigDecimal ogt = p_order.getGrandTotal();
-				BigDecimal igt = invoice.getGrandTotal();
-				BigDecimal percent = Env.ONE;
-				if (ogt.compareTo(igt) != 0)
-					percent = igt.divide(ogt, 10, BigDecimal.ROUND_HALF_UP);
-				MCurrency cur = MCurrency.get(p_order.getCtx(), p_order.getC_Currency_ID());
-				int scale = cur.getStdPrecision();
-			
-				for (MOrderPaySchedule ops : opss) {
-					MInvoicePaySchedule ips = new MInvoicePaySchedule(invoice.getCtx(), 0, invoice.get_TrxName());
-					PO.copyValues(ops, ips);
-					if (percent != Env.ONE) {
-						BigDecimal propDueAmt = ops.getDueAmt().multiply(percent);
-						if (propDueAmt.scale() > scale)
-							propDueAmt = propDueAmt.setScale(scale, BigDecimal.ROUND_HALF_UP);
-						ips.setDueAmt(propDueAmt);
-					}
-					ips.setC_Invoice_ID(invoice.getC_Invoice_ID());
-					ips.setAD_Org_ID(ops.getAD_Org_ID());
-					ips.setProcessing(ops.isProcessing());
-					ips.setIsActive(ops.isActive());
-					ips.saveEx();
-				}
-				invoice.validatePaySchedule();
-				invoice.saveEx();
-			}
-		}
+		recognition.saveEx();
+		recognition.load(recognition.get_TrxName()); // refresh from DB
 
 		return true;
 	}   //  saveInvoice

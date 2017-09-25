@@ -263,7 +263,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 * 	Does not set quantity!
 	 *	@param sLine ship line
 	 */
-	public void setShipLine (MInOutLine sLine)
+	public void setRecogLine (MInOutLine sLine)
 	{
 		setM_InOutLine_ID(sLine.getM_InOutLine_ID());
 		setC_OrderLine_ID(sLine.getC_OrderLine_ID());
@@ -329,6 +329,8 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		setAD_OrgTrx_ID(sLine.getAD_OrgTrx_ID());
 		setUser1_ID(sLine.getUser1_ID());
 		setUser2_ID(sLine.getUser2_ID());
+		setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID") );
+		setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
 	}	//	setShipLine
 
 	/**
@@ -812,7 +814,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			return m_precision.intValue();
 
 		String sql = "SELECT c.StdPrecision "
-			+ "FROM C_Currency c INNER JOIN C_Invoice x ON (x.C_Currency_ID=c.C_Currency_ID) "
+			+ "FROM C_Currency c INNER JOIN JP_Recognition x ON (x.C_Currency_ID=c.C_Currency_ID) "
 			+ "WHERE x.JP_Recognition_ID=?";
 		int i = DB.getSQLValue(get_TrxName(), sql, getJP_Recognition_ID());
 		if (i < 0)
@@ -1029,41 +1031,13 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		if (!success)
 			return success;
 
-		// reset shipment line invoiced flag
-		if ( getM_InOutLine_ID() > 0 )
-		{
-			MInOutLine sLine = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
-			sLine.setIsInvoiced(false);
-			sLine.saveEx();
-		}
-
-		return updateHeaderTax();
+		MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
+		IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+		MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
+		if (taxCalculater == null)
+			throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+    	return taxCalculater.recalculateTax(provider, this, false);
 	}	//	afterDelete
-
-	/**
-	 *	Update Tax & Header
-	 *	@return true if header updated with tax
-	 */
-	public boolean updateHeaderTax()
-	{
-		return false;//TODO とりあえずコメントアウトでエラー回避
-		
-//		// Update header only if the document is not processed - teo_sarca BF [ 2317305 ]
-//		if (isProcessed() && !is_ValueChanged(COLUMNNAME_Processed))
-//			return true;
-//
-//		//	Recalculate Tax for this Tax
-//        MTax tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
-//        MTaxProvider provider = new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName());
-//		ITaxProvider calculator = Core.getTaxProvider(provider);
-//		if (calculator == null)
-//			throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-//    	if (!calculator.updateInvoiceTax(provider, this))
-//			return false;
-//
-//		return calculator.updateHeaderTax(provider, this);
-	}	//	updateHeaderTax
-
 
 
 	/**

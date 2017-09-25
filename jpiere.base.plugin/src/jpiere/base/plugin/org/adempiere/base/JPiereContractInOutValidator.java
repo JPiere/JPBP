@@ -227,7 +227,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				MInOutLine sLine = sLines[i];
 				//
 				MRecognitionLine rcogLine = new MRecognitionLine(recognition);
-				rcogLine.setShipLine(sLine);
+				rcogLine.setRecogLine(sLine);
 				if(isRMA)
 				{
 					int M_RMALine_ID = sLine.getM_RMALine_ID();
