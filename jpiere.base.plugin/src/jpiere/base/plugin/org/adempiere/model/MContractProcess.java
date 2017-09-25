@@ -39,6 +39,27 @@ public class MContractProcess extends X_JP_ContractProcess {
 		super(ctx, rs, trxName);
 	}
 
+	
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		if(newRecord || is_ValueChanged("DocBaseType") || is_ValueChanged("IsCreateBaseDocJP"))
+		{
+			if(getDocBaseType().equals(MContractProcess.DOCBASETYPE_SalesOrder)||getDocBaseType().equals(MContractProcess.DOCBASETYPE_PurchaseOrder))
+			{
+				setIsCreateBaseDocJP(true);
+			}else if(getDocBaseType().equals(MContractProcess.DOCBASETYPE_MaterialDelivery)||getDocBaseType().equals(MContractProcess.DOCBASETYPE_MaterialReceipt))
+			{
+				setIsCreateBaseDocJP(false);
+			}
+		}
+		
+		return true;
+	}
+
+
+
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractProcess>	s_cache = new CCache<Integer,MContractProcess>(Table_Name, 20);
 	
@@ -59,5 +80,6 @@ public class MContractProcess extends X_JP_ContractProcess {
 			s_cache.put (JP_ContractProcess_ID, retValue);
 		return retValue;
 	}	//	get
+	
 	
 }

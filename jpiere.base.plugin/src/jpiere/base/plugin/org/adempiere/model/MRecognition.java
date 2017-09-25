@@ -783,14 +783,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		if(newRecord || is_ValueChanged("M_InOut_ID"))
 		{
 			MInOut io = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
-			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)
-					&& !getM_InOut().getDocStatus().equals(DocAction.STATUS_Closed))
-			{
-				//Document Status of Ship/Receipt doc must be Complete or Close
-				log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogInOutDocStatus"));
-				return false;
-			}
-			
 			int JP_ContractContent_ID = io.get_ValueAsInt(MRecognition.COLUMNNAME_JP_ContractContent_ID);
 			MContractContent contractContent = MContractContent.get(getCtx(), JP_ContractContent_ID);
 			if(!contractContent.getJP_Contract_Acct().isPostingRecognitionDocJP())
@@ -799,6 +791,14 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_InOutDocCannotCreateRecog"));
 				return false;
 			}
+			
+//			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)
+//					&& !getM_InOut().getDocStatus().equals(DocAction.STATUS_Closed))
+//			{
+//				//Document Status of Ship/Receipt doc must be Complete or Close
+//				log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogInOutDocStatus"));
+//				return false;
+//			}
 		}
 		
 		
