@@ -205,6 +205,7 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		int AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
 		MLookup lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, false, true, lookup);
+		bPartnerField.setReadWrite(false);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
 		bPartnerField.setValue(new Integer(C_BPartner_ID));
@@ -220,7 +221,6 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 	private void initBPShipmentDetails(int C_BPartner_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID" + C_BPartner_ID);
-
 		//  load Shipments (Receipts) - Completed, Closed
 		shipmentField.removeActionListener(this);
 		shipmentField.removeAllItems();
@@ -228,12 +228,15 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		KeyNamePair pp = new KeyNamePair(0,"");
 		shipmentField.addItem(pp);
 		
-		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID);
+		int M_InOut_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "M_InOut_ID");
+		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID, M_InOut_ID);
+		
 		for(KeyNamePair knp : list)
 			shipmentField.addItem(knp);
 		
-		shipmentField.setSelectedIndex(0);
+		shipmentField.setSelectedIndex(1);
 		shipmentField.addActionListener(this);
+		loadShipment (M_InOut_ID);
 	}
 	
 

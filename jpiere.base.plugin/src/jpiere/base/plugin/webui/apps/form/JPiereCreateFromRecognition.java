@@ -25,12 +25,9 @@ import org.compiere.apps.IStatusBar;
 import org.compiere.grid.CreateFrom;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.GridTab;
-import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
-import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MUOMConversion;
 import org.compiere.util.DB;
@@ -82,9 +79,8 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 	 * Load PBartner dependent Order/Invoice/Shipment Field.
 	 * @param C_BPartner_ID
 	 */
-	protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID)
+	protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID, int M_InOut_ID)
 	{
-		String isSOTrxParam = isSOTrx ? "Y":"N";
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
 		//	Display
@@ -93,32 +89,16 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 		//
 		StringBuffer sql = new StringBuffer("SELECT s.M_InOut_ID,").append(display)
 			.append(" FROM M_InOut s "
-			+ "WHERE s.C_BPartner_ID=? AND s.IsSOTrx=? AND s.DocStatus IN ('CL','CO') AND s.JP_ContractContent_ID IS Not Null "
-			+ " AND s.M_InOut_ID IN "
-				+ "(SELECT sl.M_InOut_ID FROM M_InOutLine sl");
-//			if(!isSOTrx)
-//				sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
-//					+ " JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID) "
-//					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO') "
-//					+ " GROUP BY sl.M_InOut_ID,sl.MovementQty,mi.M_InOutLine_ID"
-//					+ " HAVING (sl.MovementQty<>SUM(mi.Qty) AND mi.M_InOutLine_ID IS NOT NULL)"
-//					+ " OR mi.M_InOutLine_ID IS NULL ");
-//			else
-				sql.append(" INNER JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID)"
-					+ " LEFT JOIN JP_RecognitionLine rl ON sl.M_InOutLine_ID = rl.M_InOutLine_ID"
-					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO')"
-					+ " GROUP BY sl.M_InOutLine_ID"
-					+ " HAVING sl.MovementQty - sum(COALESCE(rl.QtyInvoiced,0)) > 0");
-			sql.append(") ORDER BY s.MovementDate");
+			+ "WHERE s.C_BPartner_ID=? AND s.DocStatus IN ('CL','CO') AND s.JP_ContractContent_ID IS Not Null " //1
+			+ " AND s.M_InOut_ID=? ") ;//2
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_BPartner_ID);
-			pstmt.setString(2, isSOTrxParam);
-			pstmt.setInt(3, C_BPartner_ID);
-			pstmt.setString(4, isSOTrxParam);
+			pstmt.setInt(2, M_InOut_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -147,22 +127,11 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 	protected Vector<Vector<Object>> getShipmentData(int M_InOut_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("M_InOut_ID=" + M_InOut_ID);
-		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, null);
-		p_order = null;
-		if (inout.getC_Order_ID() != 0)
-			p_order = new MOrder (Env.getCtx(), inout.getC_Order_ID(), null);
-
-		m_rma = null;
-		if (inout.getM_RMA_ID() != 0)
-			m_rma = new MRMA (Env.getCtx(), inout.getM_RMA_ID(), null);
 
 		//
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT ");	//	QtyEntered
-//		if(!isSOTrx)
-//			sql.append("l.MovementQty-SUM(COALESCE(mi.Qty, 0)),");
-//		else
-			sql.append("l.MovementQty-SUM(COALESCE(il.QtyInvoiced,0)),");
+		sql.append("l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)),");
 		sql.append(" l.QtyEntered/l.MovementQty,"
 			+ " l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name),"			//  3..4
 			+ " l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line,"        //  5..9
@@ -177,10 +146,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 
 		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)")
 			.append(" INNER JOIN M_InOut io ON (l.M_InOut_ID=io.M_InOut_ID)");
-//		if(!isSOTrx)
-//			sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (l.M_InOutLine_ID=mi.M_InOutLine_ID)");
-//		else
-			sql.append(" LEFT JOIN C_InvoiceLine il ON l.M_InOutLine_ID = il.M_InOutLine_ID");
+		sql.append(" LEFT JOIN JP_RecognitionLine rl ON l.M_InOutLine_ID = rl.M_InOutLine_ID");
 		sql.append(" LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND io.C_BPartner_ID = po.C_BPartner_ID)")
 
 			.append(" WHERE l.M_InOut_ID=? AND l.MovementQty<>0 ")
@@ -190,7 +156,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 		if(!isSOTrx)
 			sql.append(" HAVING l.MovementQty-SUM(COALESCE(mi.Qty, 0)) <>0");
 		else
-			sql.append(" HAVING l.MovementQty-SUM(COALESCE(il.QtyInvoiced,0)) <>0");
+			sql.append(" HAVING l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)) <>0");
 		sql.append("ORDER BY l.Line");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -253,9 +219,9 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 		miniTable.setColumnClass(2, String.class, true);        //  2-UOM
 		miniTable.setColumnClass(3, String.class, true);        //  3-Product
 		miniTable.setColumnClass(4, String.class, true);        //  4-VendorProductNo
-		miniTable.setColumnClass(5, String.class, true);        //  5-Order
-		miniTable.setColumnClass(6, String.class, true);        //  6-Ship
-		miniTable.setColumnClass(7, String.class, true);        //  7-Invoice
+		miniTable.setColumnClass(5, String.class, true);        //  5-Order Line
+		miniTable.setColumnClass(6, String.class, true);        //  6-Ship Line
+		miniTable.setColumnClass(7, String.class, true);        //  7-Invoice Line
 		//  Table UI
 		miniTable.autoSize();
 	}
@@ -451,8 +417,8 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", isSOTrx));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_InOut_ID", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "M_InOutLine_ID", isSOTrx));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMALine_ID", isSOTrx));
 
 	    return columnNames;
 	}

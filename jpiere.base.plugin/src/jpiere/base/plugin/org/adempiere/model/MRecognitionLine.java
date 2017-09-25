@@ -18,19 +18,15 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.adempiere.base.Core;
 import org.adempiere.exceptions.AdempiereException;
-import org.adempiere.model.ITaxProvider;
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MLandedCost;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
@@ -850,8 +846,6 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//TODO ヘッダ情報に出荷納品伝票が場合には、他の出荷納品伝票の明細が入力されないように制御する。
-		
 		//
 		setJP_QtyRecognized(getQtyInvoiced());
 		
@@ -1071,17 +1065,6 @@ public class MRecognitionLine extends X_JP_RecognitionLine
         setC_Campaign_ID(rmaLine.getC_Campaign_ID());
 	}
 
-//	/**
-//	 * @return matched qty
-//	 */
-//	public BigDecimal getMatchedQty()
-//	{
-//		String sql = "SELECT COALESCE(SUM("+MMatchInv.COLUMNNAME_Qty+"),0)"
-//						+" FROM "+MMatchInv.Table_Name
-//						+" WHERE "+MMatchInv.COLUMNNAME_C_InvoiceLine_ID+"=?"
-//							+" AND "+MMatchInv.COLUMNNAME_Processed+"=?";
-//		return DB.getSQLValueBDEx(get_TrxName(), sql, getC_InvoiceLine_ID(), true);
-//	}
 
 	public void clearParent()
 	{

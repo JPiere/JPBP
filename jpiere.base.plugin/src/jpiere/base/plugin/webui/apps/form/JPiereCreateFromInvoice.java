@@ -370,9 +370,9 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 		miniTable.setColumnClass(2, String.class, true);        //  2-UOM
 		miniTable.setColumnClass(3, String.class, true);        //  3-Product
 		miniTable.setColumnClass(4, String.class, true);        //  4-VendorProductNo
-		miniTable.setColumnClass(5, String.class, true);        //  5-Order
-		miniTable.setColumnClass(6, String.class, true);        //  6-Ship
-		miniTable.setColumnClass(7, String.class, true);        //  7-Invoice
+		miniTable.setColumnClass(5, String.class, true);        //  5-Order Line
+		miniTable.setColumnClass(6, String.class, true);        //  6-Ship Line
+		miniTable.setColumnClass(7, String.class, true);        //  7-Invoice Line
 		//  Table UI
 		miniTable.autoSize();
 	}
@@ -399,18 +399,6 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 			invoice.setM_RMA_ID(m_rma.getM_RMA_ID());
 			invoice.saveEx();
 		}
-
-//		MInOut inout = null;
-//		if (m_M_InOut_ID > 0)
-//		{
-//			inout = new MInOut(Env.getCtx(), m_M_InOut_ID, trxName);
-//		}
-//		if (inout != null && inout.getM_InOut_ID() != 0
-//			&& inout.getC_Invoice_ID() == 0)	//	only first time
-//		{
-//			inout.setC_Invoice_ID(C_Invoice_ID);
-//			inout.saveEx();
-//		}
 
 		//  Lines
 		for (int i = 0; i < miniTable.getRowCount(); i++)
@@ -625,9 +613,9 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_InOut_ID", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "C_OrderLine_ID", isSOTrx));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "M_InOutLine_ID", isSOTrx));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMALine_ID", isSOTrx));
 
 	    return columnNames;
 	}
