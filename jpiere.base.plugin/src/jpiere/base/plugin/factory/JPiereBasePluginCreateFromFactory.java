@@ -13,20 +13,22 @@
  *****************************************************************************/
 package jpiere.base.plugin.factory;
 
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromInvoiceUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAInOutUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRMAOrderUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromReceiptUI;
+import jpiere.base.plugin.webui.apps.form.JPiereCreateFromRecognitionUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromShipmentUI;
 import jpiere.base.plugin.webui.apps.form.JPiereCreateFromStatementUI;
 
 import org.compiere.grid.ICreateFrom;
 import org.compiere.grid.ICreateFromFactory;
 import org.compiere.model.GridTab;
-import org.compiere.model.I_C_BankStatement;
-import org.compiere.model.I_C_Invoice;
+import org.compiere.model.MBankStatement;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MRMA;
 import org.compiere.util.Env;
 
@@ -37,6 +39,7 @@ import org.compiere.util.Env;
  * JPIERE-0235:RMA Order
  * JPIERE-0296:Invoice
  * JPIERE-0343:Receipt
+ * JPIERE-0364:Recognition
  *
  * @author Hideaki Hagiwara
  *
@@ -48,7 +51,7 @@ public class JPiereBasePluginCreateFromFactory implements ICreateFromFactory
 	public ICreateFrom create(GridTab mTab)
 	{
 		String tableName = mTab.getTableName();
-		if (tableName.equals(I_C_BankStatement.Table_Name))
+		if (tableName.equals(MBankStatement.Table_Name))
 		{
 			return new JPiereCreateFromStatementUI(mTab);	//JPIERE-0091
 			
@@ -77,10 +80,14 @@ public class JPiereBasePluginCreateFromFactory implements ICreateFromFactory
 			
 			return new JPiereCreateFromRMAOrderUI(mTab); //JPIERE-0235
 			
-		}else if(tableName.equals(I_C_Invoice.Table_Name)){
+		}else if(tableName.equals(MInvoice.Table_Name)){
 			
 				return new JPiereCreateFromInvoiceUI(mTab); //JPIERE-0296
-		}
+				
+		}else if(tableName.equals(MRecognition.Table_Name)){
+			
+			return new JPiereCreateFromRecognitionUI(mTab); //JPIERE-0364
+	}
 
 		return null;
 	}
