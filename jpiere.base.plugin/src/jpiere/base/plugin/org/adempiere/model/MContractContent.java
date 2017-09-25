@@ -587,11 +587,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 		}
 		
-		//For callout of Product in Line
+		//For callout of Product in Line And Doc Date Management
 		if(newRecord || is_ValueChanged("DateDoc"))
 		{
 			setDateInvoiced(getDateDoc());
+			setDateOrdered(getDateDoc());
 		}
+		
 		
 		//Check overlap of Contract process date in Same contract content tempalete
 		MContract contract = getParent();
@@ -684,18 +686,6 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				
 				log.saveError("Error", msg.toString());
 				return false;
-			}
-		}
-		
-		
-		//Check DateOrdered
-		if(!newRecord && is_ValueChanged(MContractContent.COLUMNNAME_DateOrdered) && getDateOrdered() != null)
-		{
-			MContractLine[] line =  getLines();
-			for(int i = 0; i < line.length; i++)
-			{
-				line[i].setDateOrdered(getDateOrdered());
-				line[i].saveEx(get_TrxName());
 			}
 		}
 		

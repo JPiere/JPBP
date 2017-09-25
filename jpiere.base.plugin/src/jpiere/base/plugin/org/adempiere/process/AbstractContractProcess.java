@@ -66,6 +66,7 @@ public class AbstractContractProcess extends SvrProcess
 	protected Timestamp p_DateDoc = null;
 	protected Timestamp p_DateOrdered = null;
 	protected Timestamp p_DatePromised = null;
+	protected Timestamp p_DateInvoiced = null;
 	protected String p_DocAction = null;
 	protected int p_AD_Org_ID = 0;
 	protected int p_JP_ContractCategory_ID = 0;
@@ -146,6 +147,10 @@ public class AbstractContractProcess extends SvrProcess
 			}else if (name.equals("DateOrdered")){
 				
 				p_DateOrdered = para[i].getParameterAsTimestamp();
+				
+			}else if (name.equals("DateInvoiced")){
+				
+				p_DateInvoiced = para[i].getParameterAsTimestamp();
 				
 			}else if (name.equals("DocAction")){
 
@@ -251,6 +256,24 @@ public class AbstractContractProcess extends SvrProcess
 		
 		
 		return m_ContractContent.getDateOrdered();
+		
+	}
+	
+	protected Timestamp getDateInvoiced()
+	{
+		if(p_DateInvoiced != null)
+			return p_DateInvoiced;
+		
+		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)
+				&& p_JP_ContractProcessUnit.equals("PCC") 
+				&& ( m_ContractContent.getDocBaseType().equals("API") ||  m_ContractContent.getDocBaseType().equals("ARI")) )
+		{
+			
+			return m_ContractContent.getDateInvoiced();
+			
+		}		
+		
+		return  getDateDoc();
 		
 	}
 	

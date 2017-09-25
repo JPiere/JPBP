@@ -141,6 +141,12 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			isCreateDocLine = false; //Reset
 			MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
 			PO.copyValues(orders[i], invoice);
+			if(orders[i].getBill_BPartner_ID() > 0)
+				invoice.setC_BPartner_ID(orders[i].getBill_BPartner_ID());
+			if(orders[i].getBill_Location_ID() > 0)
+				invoice.setC_BPartner_Location_ID(orders[i].getBill_Location_ID());			
+			if(orders[i].getBill_User_ID() > 0)
+				invoice.setAD_User_ID(orders[i].getBill_User_ID());					
 			invoice.setC_Order_ID(orders[i].getC_Order_ID());
 			invoice.setProcessed(false);
 			invoice.setDocStatus(DocAction.STATUS_Drafted);

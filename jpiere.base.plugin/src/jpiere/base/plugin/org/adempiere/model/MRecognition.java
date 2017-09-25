@@ -34,7 +34,6 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrg;
@@ -55,6 +54,7 @@ import org.compiere.model.Query;
 import org.compiere.print.MPrintFormat;
 import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
+import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
@@ -71,7 +71,7 @@ import org.compiere.util.Msg;
  * @author Hideaki Hagiwara
  *
  */
-public class MRecognition extends X_JP_Recognition implements DocAction
+public class MRecognition extends X_JP_Recognition implements DocAction,DocOptions
 {
 	/**
 	 * 
@@ -135,6 +135,11 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		PO.copyValues (from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
 		to.set_ValueNoCheck ("JP_Recognition_ID", I_ZERO);
 		to.set_ValueNoCheck ("DocumentNo", documentNo);
+		to.setJP_Contract_ID(from.getJP_Contract_ID());
+		to.setJP_ContractContent_ID(from.getJP_ContractContent_ID());
+		to.setJP_ContractProcPeriod_ID(from.getJP_ContractProcPeriod_ID());
+		to.setC_Order_ID(from.getC_Order_ID());
+		to.setM_InOut_ID(from.getM_InOut_ID());
 		//
 		to.setDocStatus (DOCSTATUS_Drafted);		//	Draft
 		to.setDocAction(DOCACTION_Complete);
@@ -160,9 +165,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		//[ 1633721 ] Reverse Documents- Processing=Y
 		to.setProcessing(false);
 		//	delete references
-		to.setIsSelfService(false);
-		if (!setOrder)
-			to.setC_Order_ID(0);
+
 		if (counter)
 		{
 			MOrg org = MOrg.get(from.getCtx(), from.getAD_Org_ID());
@@ -634,12 +637,13 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			line.setJP_Recognition_ID(getJP_Recognition_ID());
 			line.setRecognition(this);
 			line.set_ValueNoCheck ("JP_RecognitionLine_ID", I_ZERO);	// new
-			//	Reset
-			if (!setOrder)
-				line.setC_OrderLine_ID(0);
-//			line.setRef_InvoiceLine_ID(0);
-			line.setM_InOutLine_ID(0);
-//			line.setA_Asset_ID(0);
+			
+			line.setC_OrderLine_ID(fromLine.getC_OrderLine_ID());
+			line.setM_RMALine_ID(fromLine.getM_RMALine_ID());
+			line.setM_InOutLine_ID(fromLine.getM_InOutLine_ID());
+			line.setJP_ContractLine_ID(fromLine.getJP_ContractLine_ID());
+			line.setJP_ContractProcPeriod_ID(fromLine.getJP_ContractProcPeriod_ID());
+			
 			line.setM_AttributeSetInstance_ID(0);
 			line.setS_ResourceAssignment_ID(0);
 			//	New Tax
@@ -651,14 +655,14 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 //				line.setRef_InvoiceLine_ID(fromLine.getC_InvoiceLine_ID());
 				if (fromLine.getC_OrderLine_ID() != 0)
 				{
-					MRecognitionLine peer = new MRecognitionLine(getCtx(), fromLine.getC_OrderLine_ID(), get_TrxName());
+//					MRecognitionLine peer = new MRecognitionLine(getCtx(), fromLine.getC_OrderLine_ID(), get_TrxName());
 //					if (peer.getRef_OrderLine_ID() != 0)
 //						line.setC_OrderLine_ID(peer.getRef_OrderLine_ID());
 				}
 				line.setM_InOutLine_ID(0);
 				if (fromLine.getM_InOutLine_ID() != 0)
 				{
-					MRecognitionLine peer = new MRecognitionLine (getCtx(), fromLine.getM_InOutLine_ID(), get_TrxName());
+//					MRecognitionLine peer = new MRecognitionLine (getCtx(), fromLine.getM_InOutLine_ID(), get_TrxName());
 //					if (peer.getRef_InOutLine_ID() != 0)
 //						line.setM_InOutLine_ID(peer.getRef_InOutLine_ID());
 				}
@@ -671,7 +675,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 			if (counter)
 			{
 //				fromLine.setRef_InvoiceLine_ID(line.getC_InvoiceLine_ID());
-				fromLine.saveEx(get_TrxName());
+//				fromLine.saveEx(get_TrxName());
 			}
 
 			// end MZ
@@ -792,6 +796,24 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 				return false;
 			}
 			
+			if(io.getC_Order_ID() == 0 && io.getM_RMA_ID() == 0)
+			{
+				//This Ship/Receipt document can not create Recognition doc.
+				log.saveError("Error", "入出荷伝票が受発注伝票もしくは返品受付依頼伝票と結びついていません");//TODO メッセージ化
+				return false;
+			
+			}else if(io.getC_Order_ID() > 0){
+				
+				MOrder order = new MOrder(getCtx(), io.getC_Order_ID(), get_TrxName());
+				setC_Order_ID(order.getC_Order_ID());
+				setDateOrdered(order.getDateOrdered());
+				
+			}else if(io.getM_RMA_ID() > 0){
+			
+				MRMA rma = new MRMA(getCtx(), io.getM_RMA_ID(), get_TrxName());
+				setM_RMA_ID(rma.getM_RMA_ID());				
+			}
+			
 //			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)
 //					&& !getM_InOut().getDocStatus().equals(DocAction.STATUS_Closed))
 //			{
@@ -799,6 +821,43 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 //				log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogInOutDocStatus"));
 //				return false;
 //			}
+		}
+		
+		
+		if(newRecord || is_ValueChanged("C_DocTypeTarget_ID"))
+		{
+			if(getC_Order_ID() > 0)
+			{
+				if(isSOTrx())
+				{
+					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPR")))
+					{
+						log.saveError("Error", "返品受付伝票の場合はJPRの伝票タイプです。");//TODO メッセージ化
+						return false;  
+					}
+				}else{
+					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPX")))
+					{
+						log.saveError("Error", "返品依頼伝票の場合はJPXの伝票タイプです。");//TODO メッセージ化
+						return false;  
+					}				
+				}
+			}else if(getM_RMA_ID() > 0){
+				if(isSOTrx())
+				{
+				  if(!(getC_DocTypeTarget().getDocBaseType().equals("JPS")))
+				  {
+						log.saveError("Error", "返品受付伝票の場合はJPSの伝票タイプです。");//TODO メッセージ化
+						return false;  
+				  }
+				}else{
+				  if(!(getC_DocTypeTarget().getDocBaseType().equals("JPY")))
+				  {
+						log.saveError("Error", "返品依頼伝票の場合はJPYの伝票タイプです。");//TODO メッセージ化
+						return false;  
+				  }				
+				}	
+			}
 		}
 		
 		
@@ -1367,14 +1426,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 					line.setLineTotalAmt(Env.ZERO);
 					StringBuilder msgadd = new StringBuilder(Msg.getMsg(getCtx(), "Voided")).append(" (").append(old).append(")");
 					line.addDescription(msgadd.toString());
-					//	Unlink Shipment
-					if (line.getM_InOutLine_ID() != 0)
-					{
-						MInOutLine ioLine = new MInOutLine(getCtx(), line.getM_InOutLine_ID(), get_TrxName());
-						ioLine.setIsInvoiced(false);
-						ioLine.saveEx(get_TrxName());
-						line.setM_InOutLine_ID(0);
-					}
 					line.saveEx(get_TrxName());
 				}
 			}
@@ -1469,7 +1520,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		if (reversalDate == null) {
 			reversalDate = new Timestamp(System.currentTimeMillis());
 		}
-		Timestamp reversalDateInvoiced = accrual ? reversalDate : getDateInvoiced();
+		Timestamp reversalDateRecognitioned = accrual ? reversalDate : getDateAcct();
 		
 		MPeriod.testPeriodOpen(getCtx(), reversalDate, getC_DocType_ID(), getAD_Org_ID());
 
@@ -1480,9 +1531,9 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		//	Deep Copy
 		MRecognition reversal = null;
 		if (MSysConfig.getBooleanValue(MSysConfig.Invoice_ReverseUseNewNumber, true, getAD_Client_ID()))
-			reversal = copyFrom (this, reversalDateInvoiced, reversalDate, getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true);
+			reversal = copyFrom (this, reversalDateRecognitioned, reversalDate, getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true);
 		else 
-			reversal = copyFrom (this, reversalDateInvoiced, reversalDate, getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true, getDocumentNo()+"^");
+			reversal = copyFrom (this, reversalDateRecognitioned, reversalDate, getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true, getDocumentNo()+"^");
 		if (reversal == null)
 		{
 			m_processMsg = "Could not create Invoice Reversal";
@@ -1800,6 +1851,32 @@ public class MRecognition extends X_JP_Recognition implements DocAction
 		MRecognition[] recogs = new MRecognition[list.size()];
 		list.toArray(recogs);
 		return recogs;
+	}
+
+	@Override
+	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
+			int AD_Table_ID, String[] docAction, String[] options, int index) 
+	{
+		if(docStatus.equals(DocAction.STATUS_Completed))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Close;
+			options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
+			options[index++] = DocumentEngine.ACTION_Reverse_Correct;
+			return index;
+		}
+
+		if(docStatus.equals(DocAction.STATUS_Drafted))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Prepare;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_Complete;
+			return index;
+		}
+
+		return index;
+
 	}
 
 }	//	MRecognition
