@@ -615,16 +615,16 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 
 	/**
 	 * 	Copy Lines From other Invoice.
-	 *	@param otherInvoice invoice
+	 *	@param otherRecognition invoice
 	 * 	@param counter create counter links
 	 * 	@param setOrder set order links
 	 *	@return number of lines copied
 	 */
-	public int copyLinesFrom (MRecognition otherInvoice, boolean counter, boolean setOrder)
+	public int copyLinesFrom (MRecognition otherRecognition, boolean counter, boolean setOrder)
 	{
-		if (isProcessed() || isPosted() || otherInvoice == null)
+		if (isProcessed() || isPosted() || otherRecognition == null)
 			return 0;
-		MRecognitionLine[] fromLines = otherInvoice.getLines(false);
+		MRecognitionLine[] fromLines = otherRecognition.getLines(false);
 		int count = 0;
 		for (int i = 0; i < fromLines.length; i++)
 		{
@@ -647,7 +647,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			line.setM_AttributeSetInstance_ID(0);
 			line.setS_ResourceAssignment_ID(0);
 			//	New Tax
-			if (getC_BPartner_ID() != otherInvoice.getC_BPartner_ID())
+			if (getC_BPartner_ID() != otherRecognition.getC_BPartner_ID())
 				line.setTax();	//	recalculate
 			//
 			if (counter)
@@ -1208,38 +1208,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	}	//	prepareIt
 
 
-
-	/**
-	 * 	Calculate Tax and Total
-	 * 	@return true if calculated
-	 */
-	public boolean calculateTaxTotal()
-	{
-		log.fine("");
-		//	Delete Taxes
-		StringBuilder msgdb = new StringBuilder("DELETE JP_RecognitionTax WHERE JP_Recognition_ID=").append(getJP_Recognition_ID());
-		DB.executeUpdateEx(msgdb.toString(), get_TrxName());
-		m_taxes = null;
-
-		//TODO 税金処理　とりあえずエラー回避のためコメントアウト
-		
-		
-//		MTaxProvider[] providers = getTaxProviders();
-//		for (MTaxProvider provider : providers)
-//		{
-//			ITaxProvider calculator = Core.getTaxProvider(provider);
-//			if (calculator == null)
-//				throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-//			
-//			if (!calculator.calculateInvoiceTaxTotal(provider, this))
-//				return false;
-//		}
-		
-		return true;
-	}	//	calculateTaxTotal
-
-
-
 	/**
 	 * 	Approve Document
 	 * 	@return true if success
@@ -1585,34 +1553,10 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		msgadd = new StringBuilder("(").append(reversal.getDocumentNo()).append("<-)");
 		addDescription(msgadd.toString());
 
-		//	Clean up Reversed (this)
-		MRecognitionLine[] iLines = getLines(false);
-		for (int i = 0; i < iLines.length; i++)
-		{
-			MRecognitionLine iLine = iLines[i];
-			if (iLine.getM_InOutLine_ID() != 0)
-			{
-				MInOutLine ioLine = new MInOutLine(getCtx(), iLine.getM_InOutLine_ID(), get_TrxName());
-				ioLine.setIsInvoiced(false);
-				ioLine.saveEx(get_TrxName());
-				//	Reconsiliation
-				iLine.setM_InOutLine_ID(0);
-				iLine.saveEx(get_TrxName());
-			}
-        }
 		setProcessed(true);
-		//FR1948157
 		setReversal_ID(reversal.getJP_Recognition_ID());
 		setDocStatus(DOCSTATUS_Reversed);	//	may come from void
 		setDocAction(DOCACTION_None);
-
-		//	Create Allocation
-		StringBuilder msgall = new StringBuilder().append(Msg.translate(getCtx(), "JP_Recognition_ID")).append(": ").append(getDocumentNo()).append("/").append(reversal.getDocumentNo());
-
-		//	Amount
-		BigDecimal gt = getGrandTotal(true);
-		if (!isSOTrx())
-			gt = gt.negate();
 
 		
 		return reversal;
