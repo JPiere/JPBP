@@ -291,7 +291,13 @@ public class MContractLine extends X_JP_ContractLine {
 								
 								if(getJP_DerivativeDocPolicy_InOut().equals("PB"))
 								{
-									;//TODO StartとEndを比較して、日付の大小をチェックするロジックの実装
+									MContractProcPeriod startPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_InOut_ID());
+									MContractProcPeriod endPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_InOut_ID());
+									if(startPeriod.getStartDate().compareTo(endPeriod.getStartDate()) > 0 )
+									{
+										log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + " " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID") + " > " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_ID"));
+										return false;
+									}
 								}								
 							}//PS,PB
 							
@@ -394,7 +400,13 @@ public class MContractLine extends X_JP_ContractLine {
 								
 								if(getJP_DerivativeDocPolicy_Inv().equals("PB"))
 								{
-									;//TODO StartとEndを比較して、日付の大小をチェックするロジックの実装
+									MContractProcPeriod startPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_Inv_ID());
+									MContractProcPeriod endPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_Inv_ID());
+									if(startPeriod.getStartDate().compareTo(endPeriod.getStartDate()) > 0 )
+									{
+										log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + " " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID") + " > " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_ID"));
+										return false;
+									}
 								}	
 							}//PS,PB
 							
@@ -501,7 +513,13 @@ public class MContractLine extends X_JP_ContractLine {
 								
 								if(getJP_DerivativeDocPolicy_InOut().equals("PB"))
 								{
-									;//TODO StartとEndを比較して、日付の大小をチェックするロジックの実装
+									MContractProcPeriod startPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_InOut_ID());
+									MContractProcPeriod endPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_InOut_ID());
+									if(startPeriod.getStartDate().compareTo(endPeriod.getStartDate()) > 0 )
+									{
+										log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + " " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID") + " > " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_ID"));
+										return false;
+									}
 								}	
 							}//PS,PB
 							
@@ -624,7 +642,13 @@ public class MContractLine extends X_JP_ContractLine {
 								
 								if(getJP_DerivativeDocPolicy_Inv().equals("PB"))
 								{
-									;//TODO StartとEndを比較して、日付の大小をチェックするロジックの実装
+									MContractProcPeriod startPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_Inv_ID());
+									MContractProcPeriod endPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_Inv_ID());
+									if(startPeriod.getStartDate().compareTo(endPeriod.getStartDate()) > 0 )
+									{
+										log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + " " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID") + " > " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_ID"));
+										return false;
+									}
 								}	
 							}//PS,PB
 							

@@ -115,7 +115,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 							return false;
 						}
 						
-						//TODO マイナス数値はエラーにする-> アプリケーション辞書もレファレンスをIntergerにして、0以上を設定する
 						if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 						{
 							setJP_ProcPeriodOffs_Start_InOut(0);
@@ -128,7 +127,11 @@ public class MContractLineT extends X_JP_ContractLineT {
 							setJP_ProcPeriodOffs_Start_InOut(0);
 						}else if(getJP_DerivativeDocPolicy_InOut().equals("PB")){
 							setJP_ProcPeriodOffs_Lump_InOut(0);
-							//TODO 数値をPSとPEを比較して、PEの方が数値が大きくないとエラーにする!!
+							if(getJP_ProcPeriodOffs_Start_InOut() > getJP_ProcPeriodOffs_End_InOut())
+							{
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_InOut")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_InOut"));
+								return false;
+							}
 						}
 						
 					}else{
@@ -161,7 +164,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 							return false;
 						}
 						
-						//TODO マイナス数値はエラーにする-> アプリケーション辞書もレファレンスをIntergerにして、0以上を設定する
 						if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
 						{
 							setJP_ProcPeriodOffs_Start_Inv(0);
@@ -174,7 +176,11 @@ public class MContractLineT extends X_JP_ContractLineT {
 							setJP_ProcPeriodOffs_Start_Inv(0);
 						}else if(getJP_DerivativeDocPolicy_Inv().equals("PB")){
 							setJP_ProcPeriodOffs_Lump_Inv(0);
-							//TODO 数値をPSとPEを比較して、PEの方が数値が大きくないとエラーにする!!
+							if(getJP_ProcPeriodOffs_Start_Inv() > getJP_ProcPeriodOffs_End_Inv())
+							{
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_Inv")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_Inv"));
+								return false;
+							}
 						}
 						
 					}else{
@@ -208,7 +214,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 							return false;
 						}
 						
-						//TODO マイナス数値はエラーにする-> アプリケーション辞書もレファレンスをIntergerにして、0以上を設定する
 						if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 						{
 							setJP_ProcPeriodOffs_Start_InOut(0);
@@ -221,7 +226,11 @@ public class MContractLineT extends X_JP_ContractLineT {
 							setJP_ProcPeriodOffs_Start_InOut(0);
 						}else if(getJP_DerivativeDocPolicy_InOut().equals("PB")){
 							setJP_ProcPeriodOffs_Lump_InOut(0);
-							//TODO 数値をPSとPEを比較して、PEの方が数値が大きくないとエラーにする!!
+							if(getJP_ProcPeriodOffs_Start_InOut() > getJP_ProcPeriodOffs_End_InOut())
+							{
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_InOut")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_InOut"));
+								return false;
+							}
 						}
 						
 					}else{
@@ -274,7 +283,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 							return false;
 						}
 						
-						//TODO マイナス数値はエラーにする-> アプリケーション辞書もレファレンスをIntergerにして、0以上を設定する
 						if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
 						{
 							setJP_ProcPeriodOffs_Start_Inv(0);
@@ -287,7 +295,11 @@ public class MContractLineT extends X_JP_ContractLineT {
 							setJP_ProcPeriodOffs_Start_Inv(0);
 						}else if(getJP_DerivativeDocPolicy_Inv().equals("PB")){
 							setJP_ProcPeriodOffs_Lump_Inv(0);
-							//TODO 数値をPSとPEを比較して、PEの方が数値が大きくないとエラーにする!!
+							if(getJP_ProcPeriodOffs_Start_Inv() > getJP_ProcPeriodOffs_End_Inv())
+							{
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_Inv")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_Inv"));
+								return false;
+							}
 						}
 						
 					}else{
