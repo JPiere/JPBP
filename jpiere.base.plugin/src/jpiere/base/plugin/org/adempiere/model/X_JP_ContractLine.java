@@ -585,6 +585,31 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	/** For the Duration of Contract process period = DD */
+	public static final String JP_BASEDOCLINEPOLICY_ForTheDurationOfContractProcessPeriod = "DD";
+	/** Lump on a certain point of Contract process period = LP */
+	public static final String JP_BASEDOCLINEPOLICY_LumpOnACertainPointOfContractProcessPeriod = "LP";
+	/** From start Contract process period = PS */
+	public static final String JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriod = "PS";
+	/** To End Contract process period = PE */
+	public static final String JP_BASEDOCLINEPOLICY_ToEndContractProcessPeriod = "PE";
+	/** From Start Contract process period to End = PB */
+	public static final String JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriodToEnd = "PB";
+	/** Set Base Doc Line Policy.
+		@param JP_BaseDocLinePolicy Base Doc Line Policy	  */
+	public void setJP_BaseDocLinePolicy (String JP_BaseDocLinePolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_BaseDocLinePolicy, JP_BaseDocLinePolicy);
+	}
+
+	/** Get Base Doc Line Policy.
+		@return Base Doc Line Policy	  */
+	public String getJP_BaseDocLinePolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BaseDocLinePolicy);
+	}
+
 	public I_JP_ContractCalender getJP_ContractCalender_InOut() throws RuntimeException
     {
 		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
@@ -902,6 +927,31 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_End() throws RuntimeException
+    {
+		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
+			.getPO(getJP_ProcPeriod_End_ID(), get_TrxName());	}
+
+	/** Set End Contract Process Period.
+		@param JP_ProcPeriod_End_ID End Contract Process Period	  */
+	public void setJP_ProcPeriod_End_ID (int JP_ProcPeriod_End_ID)
+	{
+		if (JP_ProcPeriod_End_ID < 1) 
+			set_Value (COLUMNNAME_JP_ProcPeriod_End_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ProcPeriod_End_ID, Integer.valueOf(JP_ProcPeriod_End_ID));
+	}
+
+	/** Get End Contract Process Period.
+		@return End Contract Process Period	  */
+	public int getJP_ProcPeriod_End_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriod_End_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_InOut() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -952,6 +1002,31 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump() throws RuntimeException
+    {
+		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
+			.getPO(getJP_ProcPeriod_Lump_ID(), get_TrxName());	}
+
+	/** Set Period to handle in a lump.
+		@param JP_ProcPeriod_Lump_ID Period to handle in a lump	  */
+	public void setJP_ProcPeriod_Lump_ID (int JP_ProcPeriod_Lump_ID)
+	{
+		if (JP_ProcPeriod_Lump_ID < 1) 
+			set_Value (COLUMNNAME_JP_ProcPeriod_Lump_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ProcPeriod_Lump_ID, Integer.valueOf(JP_ProcPeriod_Lump_ID));
+	}
+
+	/** Get Period to handle in a lump.
+		@return Period to handle in a lump	  */
+	public int getJP_ProcPeriod_Lump_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriod_Lump_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_InOut() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -997,6 +1072,31 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	public int getJP_ProcPeriod_Lump_Inv_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriod_Lump_Inv_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start() throws RuntimeException
+    {
+		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
+			.getPO(getJP_ProcPeriod_Start_ID(), get_TrxName());	}
+
+	/** Set Start Contract Process Period.
+		@param JP_ProcPeriod_Start_ID Start Contract Process Period	  */
+	public void setJP_ProcPeriod_Start_ID (int JP_ProcPeriod_Start_ID)
+	{
+		if (JP_ProcPeriod_Start_ID < 1) 
+			set_Value (COLUMNNAME_JP_ProcPeriod_Start_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ProcPeriod_Start_ID, Integer.valueOf(JP_ProcPeriod_Start_ID));
+	}
+
+	/** Get Start Contract Process Period.
+		@return Start Contract Process Period	  */
+	public int getJP_ProcPeriod_Start_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriod_Start_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

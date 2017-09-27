@@ -317,6 +317,15 @@ public interface I_JP_ContractLineT
 	  */
 	public boolean isDescription();
 
+    /** Column name JP_BaseDocLinePolicy */
+    public static final String COLUMNNAME_JP_BaseDocLinePolicy = "JP_BaseDocLinePolicy";
+
+	/** Set Base Doc Line Policy	  */
+	public void setJP_BaseDocLinePolicy (String JP_BaseDocLinePolicy);
+
+	/** Get Base Doc Line Policy	  */
+	public String getJP_BaseDocLinePolicy();
+
     /** Column name JP_ContractCalRef_InOut_ID */
     public static final String COLUMNNAME_JP_ContractCalRef_InOut_ID = "JP_ContractCalRef_InOut_ID";
 
@@ -441,6 +450,15 @@ public interface I_JP_ContractLineT
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_ProcPeriodOffs_End */
+    public static final String COLUMNNAME_JP_ProcPeriodOffs_End = "JP_ProcPeriodOffs_End";
+
+	/** Set Offset of End Contract Process Period	  */
+	public void setJP_ProcPeriodOffs_End (int JP_ProcPeriodOffs_End);
+
+	/** Get Offset of End Contract Process Period	  */
+	public int getJP_ProcPeriodOffs_End();
+
     /** Column name JP_ProcPeriodOffs_End_InOut */
     public static final String COLUMNNAME_JP_ProcPeriodOffs_End_InOut = "JP_ProcPeriodOffs_End_InOut";
 
@@ -459,6 +477,15 @@ public interface I_JP_ContractLineT
 	/** Get Offset of End Contract Process Period(Invoice)	  */
 	public int getJP_ProcPeriodOffs_End_Inv();
 
+    /** Column name JP_ProcPeriodOffs_Lump */
+    public static final String COLUMNNAME_JP_ProcPeriodOffs_Lump = "JP_ProcPeriodOffs_Lump";
+
+	/** Set Offset of Period to handle in a lump	  */
+	public void setJP_ProcPeriodOffs_Lump (int JP_ProcPeriodOffs_Lump);
+
+	/** Get Offset of Period to handle in a lump	  */
+	public int getJP_ProcPeriodOffs_Lump();
+
     /** Column name JP_ProcPeriodOffs_Lump_InOut */
     public static final String COLUMNNAME_JP_ProcPeriodOffs_Lump_InOut = "JP_ProcPeriodOffs_Lump_InOut";
 
@@ -476,6 +503,15 @@ public interface I_JP_ContractLineT
 
 	/** Get Offset of Period to handle in a lump(Invoice)	  */
 	public int getJP_ProcPeriodOffs_Lump_Inv();
+
+    /** Column name JP_ProcPeriodOffs_Start */
+    public static final String COLUMNNAME_JP_ProcPeriodOffs_Start = "JP_ProcPeriodOffs_Start";
+
+	/** Set Offset of Start Contract Process Period	  */
+	public void setJP_ProcPeriodOffs_Start (int JP_ProcPeriodOffs_Start);
+
+	/** Get Offset of Start Contract Process Period	  */
+	public int getJP_ProcPeriodOffs_Start();
 
     /** Column name JP_ProcPeriodOffs_Start_InOut */
     public static final String COLUMNNAME_JP_ProcPeriodOffs_Start_InOut = "JP_ProcPeriodOffs_Start_InOut";

@@ -365,6 +365,15 @@ public interface I_JP_ContractLine
 
 	public I_M_AttributeSetInstance getJP_ASI_To() throws RuntimeException;
 
+    /** Column name JP_BaseDocLinePolicy */
+    public static final String COLUMNNAME_JP_BaseDocLinePolicy = "JP_BaseDocLinePolicy";
+
+	/** Set Base Doc Line Policy	  */
+	public void setJP_BaseDocLinePolicy (String JP_BaseDocLinePolicy);
+
+	/** Get Base Doc Line Policy	  */
+	public String getJP_BaseDocLinePolicy();
+
     /** Column name JP_ContractCalender_InOut_ID */
     public static final String COLUMNNAME_JP_ContractCalender_InOut_ID = "JP_ContractCalender_InOut_ID";
 
@@ -500,6 +509,17 @@ public interface I_JP_ContractLine
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_ProcPeriod_End_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_End_ID = "JP_ProcPeriod_End_ID";
+
+	/** Set End Contract Process Period	  */
+	public void setJP_ProcPeriod_End_ID (int JP_ProcPeriod_End_ID);
+
+	/** Get End Contract Process Period	  */
+	public int getJP_ProcPeriod_End_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_End() throws RuntimeException;
+
     /** Column name JP_ProcPeriod_End_InOut_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_End_InOut_ID = "JP_ProcPeriod_End_InOut_ID";
 
@@ -522,6 +542,17 @@ public interface I_JP_ContractLine
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_Inv() throws RuntimeException;
 
+    /** Column name JP_ProcPeriod_Lump_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_Lump_ID = "JP_ProcPeriod_Lump_ID";
+
+	/** Set Period to handle in a lump	  */
+	public void setJP_ProcPeriod_Lump_ID (int JP_ProcPeriod_Lump_ID);
+
+	/** Get Period to handle in a lump	  */
+	public int getJP_ProcPeriod_Lump_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump() throws RuntimeException;
+
     /** Column name JP_ProcPeriod_Lump_InOut_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Lump_InOut_ID = "JP_ProcPeriod_Lump_InOut_ID";
 
@@ -543,6 +574,17 @@ public interface I_JP_ContractLine
 	public int getJP_ProcPeriod_Lump_Inv_ID();
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_Inv() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Start_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_Start_ID = "JP_ProcPeriod_Start_ID";
+
+	/** Set Start Contract Process Period	  */
+	public void setJP_ProcPeriod_Start_ID (int JP_ProcPeriod_Start_ID);
+
+	/** Get Start Contract Process Period	  */
+	public int getJP_ProcPeriod_Start_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start() throws RuntimeException;
 
     /** Column name JP_ProcPeriod_Start_InOut_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Start_InOut_ID = "JP_ProcPeriod_Start_InOut_ID";

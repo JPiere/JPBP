@@ -49,13 +49,19 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 			setIsDescription (false);
 			setJP_ContractContentT_ID (0);
 			setJP_ContractLineT_ID (0);
+			setJP_ProcPeriodOffs_End (0);
+// 0
 			setJP_ProcPeriodOffs_End_InOut (0);
 // 0
 			setJP_ProcPeriodOffs_End_Inv (0);
 // 0
+			setJP_ProcPeriodOffs_Lump (0);
+// 0
 			setJP_ProcPeriodOffs_Lump_InOut (0);
 // 0
 			setJP_ProcPeriodOffs_Lump_Inv (0);
+// 0
+			setJP_ProcPeriodOffs_Start (0);
 // 0
 			setJP_ProcPeriodOffs_Start_InOut (0);
 // 0
@@ -511,6 +517,31 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return false;
 	}
 
+	/** For the Duration of Contract process period = DD */
+	public static final String JP_BASEDOCLINEPOLICY_ForTheDurationOfContractProcessPeriod = "DD";
+	/** Lump on a certain point of Contract process period = LP */
+	public static final String JP_BASEDOCLINEPOLICY_LumpOnACertainPointOfContractProcessPeriod = "LP";
+	/** From start Contract process period = PS */
+	public static final String JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriod = "PS";
+	/** To End Contract process period = PE */
+	public static final String JP_BASEDOCLINEPOLICY_ToEndContractProcessPeriod = "PE";
+	/** From Start Contract process period to End = PB */
+	public static final String JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriodToEnd = "PB";
+	/** Set Base Doc Line Policy.
+		@param JP_BaseDocLinePolicy Base Doc Line Policy	  */
+	public void setJP_BaseDocLinePolicy (String JP_BaseDocLinePolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_BaseDocLinePolicy, JP_BaseDocLinePolicy);
+	}
+
+	/** Get Base Doc Line Policy.
+		@return Base Doc Line Policy	  */
+	public String getJP_BaseDocLinePolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BaseDocLinePolicy);
+	}
+
 	public I_JP_ContractCalenderRef getJP_ContractCalRef_InOut() throws RuntimeException
     {
 		return (I_JP_ContractCalenderRef)MTable.get(getCtx(), I_JP_ContractCalenderRef.Table_Name)
@@ -803,6 +834,23 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return ii.intValue();
 	}
 
+	/** Set Offset of End Contract Process Period.
+		@param JP_ProcPeriodOffs_End Offset of End Contract Process Period	  */
+	public void setJP_ProcPeriodOffs_End (int JP_ProcPeriodOffs_End)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_End, Integer.valueOf(JP_ProcPeriodOffs_End));
+	}
+
+	/** Get Offset of End Contract Process Period.
+		@return Offset of End Contract Process Period	  */
+	public int getJP_ProcPeriodOffs_End () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_End);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Offset of End Contract Process Period(In/Out).
 		@param JP_ProcPeriodOffs_End_InOut Offset of End Contract Process Period(In/Out)	  */
 	public void setJP_ProcPeriodOffs_End_InOut (int JP_ProcPeriodOffs_End_InOut)
@@ -837,6 +885,23 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return ii.intValue();
 	}
 
+	/** Set Offset of Period to handle in a lump.
+		@param JP_ProcPeriodOffs_Lump Offset of Period to handle in a lump	  */
+	public void setJP_ProcPeriodOffs_Lump (int JP_ProcPeriodOffs_Lump)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_Lump, Integer.valueOf(JP_ProcPeriodOffs_Lump));
+	}
+
+	/** Get Offset of Period to handle in a lump.
+		@return Offset of Period to handle in a lump	  */
+	public int getJP_ProcPeriodOffs_Lump () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_Lump);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Offset of Period to handle in a lump(In/Out).
 		@param JP_ProcPeriodOffs_Lump_InOut Offset of Period to handle in a lump(In/Out)	  */
 	public void setJP_ProcPeriodOffs_Lump_InOut (int JP_ProcPeriodOffs_Lump_InOut)
@@ -866,6 +931,23 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public int getJP_ProcPeriodOffs_Lump_Inv () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_Lump_Inv);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Offset of Start Contract Process Period.
+		@param JP_ProcPeriodOffs_Start Offset of Start Contract Process Period	  */
+	public void setJP_ProcPeriodOffs_Start (int JP_ProcPeriodOffs_Start)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_Start, Integer.valueOf(JP_ProcPeriodOffs_Start));
+	}
+
+	/** Get Offset of Start Contract Process Period.
+		@return Offset of Start Contract Process Period	  */
+	public int getJP_ProcPeriodOffs_Start () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_Start);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
