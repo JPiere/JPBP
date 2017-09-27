@@ -60,357 +60,30 @@ public class MContractLineT extends X_JP_ContractLineT {
 		//Check Period Contract - Derivative Doc Policy
 		if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			if(Util.isEmpty(getParent().getJP_CreateDerivativeDocPolicy()))
+			if(newRecord
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_BaseDocLinePolicy)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Lump)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Start)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_End)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_DerivativeDocPolicy_InOut)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ContractCalRef_InOut_ID)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ContractProcRef_InOut_ID)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Lump_InOut)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Start_InOut)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_End_InOut)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_DerivativeDocPolicy_Inv)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ContractCalRef_Inv_ID)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ContractProcRef_Inv_ID)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Lump_Inv)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Start_Inv)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_End_Inv)
+					)
 			{
-				//Check JP_CreateDerivativeDocPolicy
-				if(getParent().getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder))
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")};
-					String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-					log.saveError("Error",msg);
+				if(!beforeSavePeriodContractCheck(newRecord))
 					return false;
-					
-				}else{
-					
-					//Base Doc Line
-					if(Util.isEmpty(getJP_BaseDocLinePolicy()))//Mandetory
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_BaseDocLinePolicy")}));
-						return false;
-					}
-					
-					if(getJP_BaseDocLinePolicy().equals("LP"))
-					{
-						setJP_ProcPeriodOffs_Start(0);
-						setJP_ProcPeriodOffs_End(0);
-					}else if(getJP_BaseDocLinePolicy().equals("PS")){
-						setJP_ProcPeriodOffs_Lump(0);	
-						setJP_ProcPeriodOffs_End(0);
-					}else if(getJP_BaseDocLinePolicy().equals("PE")){
-						setJP_ProcPeriodOffs_Lump(0);
-						setJP_ProcPeriodOffs_Start(0);
-					}else if(getJP_BaseDocLinePolicy().equals("PB")){
-						setJP_ProcPeriodOffs_Lump(0);
-						if(getJP_ProcPeriodOffs_Start() > getJP_ProcPeriodOffs_End())
-						{
-							log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End"));
-							return false;
-						}
-					}
-					
-					
-					//Ship & Receipt
-					setJP_DerivativeDocPolicy_InOut(null);
-					setJP_ContractCalRef_InOut_ID(0);
-					setJP_ContractProcRef_InOut_ID(0);
-					setJP_ProcPeriodOffs_Lump_InOut(0);	
-					setJP_ProcPeriodOffs_Start_InOut(0);
-					setJP_ProcPeriodOffs_End_InOut(0);
-					
-					//Invoice
-					setJP_DerivativeDocPolicy_Inv(null);
-					setJP_ContractCalRef_Inv_ID(0);
-					setJP_ContractProcRef_Inv_ID(0);
-					setJP_ProcPeriodOffs_Lump_Inv(0);	
-					setJP_ProcPeriodOffs_Start_Inv(0);
-					setJP_ProcPeriodOffs_End_Inv(0);
-					
-				}
-				
-			}else{
+			}
 			
-				if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
-				{
-					//Base Doc Line
-					if(Util.isEmpty(getJP_BaseDocLinePolicy()))//Mandetory
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_BaseDocLinePolicy")}));
-						return false;
-					}
-					
-					if(getJP_BaseDocLinePolicy().equals("LP"))
-					{
-						setJP_ProcPeriodOffs_Start(0);
-						setJP_ProcPeriodOffs_End(0);
-					}else if(getJP_BaseDocLinePolicy().equals("PS")){
-						setJP_ProcPeriodOffs_Lump(0);	
-						setJP_ProcPeriodOffs_End(0);
-					}else if(getJP_BaseDocLinePolicy().equals("PE")){
-						setJP_ProcPeriodOffs_Lump(0);
-						setJP_ProcPeriodOffs_Start(0);
-					}else if(getJP_BaseDocLinePolicy().equals("PB")){
-						setJP_ProcPeriodOffs_Lump(0);
-						if(getJP_ProcPeriodOffs_Start() > getJP_ProcPeriodOffs_End())
-						{
-							log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End"));
-							return false;
-						}
-					}
-					
-					
-					//Ship & Receipt
-					setJP_DerivativeDocPolicy_InOut(null);
-					setJP_ContractCalRef_InOut_ID(0);
-					setJP_ContractProcRef_InOut_ID(0);
-					setJP_ProcPeriodOffs_Lump_InOut(0);	
-					setJP_ProcPeriodOffs_Start_InOut(0);
-					setJP_ProcPeriodOffs_End_InOut(0);
-					
-					//Invoice
-					setJP_DerivativeDocPolicy_Inv(null);
-					setJP_ContractCalRef_Inv_ID(0);
-					setJP_ContractProcRef_Inv_ID(0);
-					setJP_ProcPeriodOffs_Lump_Inv(0);	
-					setJP_ProcPeriodOffs_Start_Inv(0);
-					setJP_ProcPeriodOffs_End_Inv(0);
-					
-				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)){
-					
-					//Base Doc Line
-					setJP_BaseDocLinePolicy(null);
-					setJP_ProcPeriodOffs_Lump(0);	
-					setJP_ProcPeriodOffs_Start(0);
-					setJP_ProcPeriodOffs_End(0);
-					
-					//Ship & Receipt
-					if(Util.isEmpty(getJP_DerivativeDocPolicy_InOut()))//Mandetory
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));
-						return false;
-					}
-					
-					if(getJP_ContractCalRef_InOut_ID() == 0)//Mandetory
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_InOut_ID")}));
-						return false;
-					}
-					
-					if(getJP_DerivativeDocPolicy_InOut().equals("LP") || getJP_DerivativeDocPolicy_InOut().equals("PS")
-							 || getJP_DerivativeDocPolicy_InOut().equals("PE") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
-					{
-						if(getJP_ContractProcRef_InOut_ID() == 0)//Mandetory
-						{
-							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_InOut_ID")}));
-							return false;
-						}
-						
-						if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
-						{
-							setJP_ProcPeriodOffs_Start_InOut(0);
-							setJP_ProcPeriodOffs_End_InOut(0);
-						}else if(getJP_DerivativeDocPolicy_InOut().equals("PS")){
-							setJP_ProcPeriodOffs_Lump_InOut(0);	
-							setJP_ProcPeriodOffs_End_InOut(0);
-						}else if(getJP_DerivativeDocPolicy_InOut().equals("PE")){
-							setJP_ProcPeriodOffs_Lump_InOut(0);
-							setJP_ProcPeriodOffs_Start_InOut(0);
-						}else if(getJP_DerivativeDocPolicy_InOut().equals("PB")){
-							setJP_ProcPeriodOffs_Lump_InOut(0);
-							if(getJP_ProcPeriodOffs_Start_InOut() > getJP_ProcPeriodOffs_End_InOut())
-							{
-								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_InOut")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_InOut"));
-								return false;
-							}
-						}
-						
-					}else{
-						setJP_ProcPeriodOffs_Lump_InOut(0);	
-						setJP_ProcPeriodOffs_Start_InOut(0);
-						setJP_ProcPeriodOffs_End_InOut(0);
-					}
-					
-					
-					
-					//Invoice
-					if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));
-						return false;
-					}
-					
-					if(getJP_ContractCalRef_Inv_ID() == 0)
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_Inv_ID")}));
-						return false;
-					}
-					
-					if(getJP_DerivativeDocPolicy_Inv().equals("LP") || getJP_DerivativeDocPolicy_Inv().equals("PS")
-							 || getJP_DerivativeDocPolicy_Inv().equals("PE") || getJP_DerivativeDocPolicy_Inv().equals("PB"))
-					{
-						if(getJP_ContractProcRef_Inv_ID() == 0)
-						{
-							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));
-							return false;
-						}
-						
-						if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
-						{
-							setJP_ProcPeriodOffs_Start_Inv(0);
-							setJP_ProcPeriodOffs_End_Inv(0);
-						}else if(getJP_DerivativeDocPolicy_Inv().equals("PS")){
-							setJP_ProcPeriodOffs_Lump_Inv(0);	
-							setJP_ProcPeriodOffs_End_Inv(0);
-						}else if(getJP_DerivativeDocPolicy_Inv().equals("PE")){
-							setJP_ProcPeriodOffs_Lump_Inv(0);
-							setJP_ProcPeriodOffs_Start_Inv(0);
-						}else if(getJP_DerivativeDocPolicy_Inv().equals("PB")){
-							setJP_ProcPeriodOffs_Lump_Inv(0);
-							if(getJP_ProcPeriodOffs_Start_Inv() > getJP_ProcPeriodOffs_End_Inv())
-							{
-								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_Inv")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_Inv"));
-								return false;
-							}
-						}
-						
-					}else{
-						setJP_ProcPeriodOffs_Lump_Inv(0);	
-						setJP_ProcPeriodOffs_Start_Inv(0);
-						setJP_ProcPeriodOffs_End_Inv(0);
-					}
-					
-					
-				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)){
-					
-					//Base Doc Line
-					setJP_BaseDocLinePolicy(null);
-					setJP_ProcPeriodOffs_Lump(0);	
-					setJP_ProcPeriodOffs_Start(0);
-					setJP_ProcPeriodOffs_End(0);
-					
-					//Ship & Receipt
-					if(Util.isEmpty(getJP_DerivativeDocPolicy_InOut()))
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));
-						return false;
-					}
-					
-					if(getJP_ContractCalRef_InOut_ID() == 0)
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_InOut_ID")}));
-						return false;
-					}
-					
-					if(getJP_DerivativeDocPolicy_InOut().equals("LP") || getJP_DerivativeDocPolicy_InOut().equals("PS")
-							 || getJP_DerivativeDocPolicy_InOut().equals("PE") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
-					{
-						if(getJP_ContractProcRef_InOut_ID() == 0)//Mandetory
-						{
-							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_InOut_ID")}));
-							return false;
-						}
-						
-						if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
-						{
-							setJP_ProcPeriodOffs_Start_InOut(0);
-							setJP_ProcPeriodOffs_End_InOut(0);
-						}else if(getJP_DerivativeDocPolicy_InOut().equals("PS")){
-							setJP_ProcPeriodOffs_Lump_InOut(0);	
-							setJP_ProcPeriodOffs_End_InOut(0);
-						}else if(getJP_DerivativeDocPolicy_InOut().equals("PE")){
-							setJP_ProcPeriodOffs_Lump_InOut(0);
-							setJP_ProcPeriodOffs_Start_InOut(0);
-						}else if(getJP_DerivativeDocPolicy_InOut().equals("PB")){
-							setJP_ProcPeriodOffs_Lump_InOut(0);
-							if(getJP_ProcPeriodOffs_Start_InOut() > getJP_ProcPeriodOffs_End_InOut())
-							{
-								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_InOut")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_InOut"));
-								return false;
-							}
-						}
-						
-					}else{
-						setJP_ProcPeriodOffs_Lump_InOut(0);	
-						setJP_ProcPeriodOffs_Start_InOut(0);
-						setJP_ProcPeriodOffs_End_InOut(0);
-					}
-					
-					//Invoice
-					setJP_DerivativeDocPolicy_Inv(null);
-					setJP_ContractCalRef_Inv_ID(0);
-					setJP_ContractProcRef_Inv_ID(0);
-					setJP_DerivativeDocPolicy_Inv(null);
-					setJP_ContractCalRef_Inv_ID(0);
-					setJP_ContractProcRef_Inv_ID(0);
-					setJP_ProcPeriodOffs_Lump_Inv(0);	
-					setJP_ProcPeriodOffs_Start_Inv(0);
-					setJP_ProcPeriodOffs_End_Inv(0);
-					
-					
-				}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)){
-					
-					//Base Doc Line
-					setJP_BaseDocLinePolicy(null);
-					setJP_ProcPeriodOffs_Lump(0);	
-					setJP_ProcPeriodOffs_Start(0);
-					setJP_ProcPeriodOffs_End(0);
-					
-					//Ship & Receipt
-					setJP_DerivativeDocPolicy_InOut(null);
-					setJP_ContractCalRef_InOut_ID(0);
-					setJP_ContractProcRef_InOut_ID(0);
-					setJP_ProcPeriodOffs_Lump_InOut(0);	
-					setJP_ProcPeriodOffs_Start_InOut(0);
-					setJP_ProcPeriodOffs_End_InOut(0);
-					
-					//Invoice
-					if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));
-						return false;
-					}
-					
-					if(getJP_ContractCalRef_Inv_ID() == 0)
-					{
-						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_Inv_ID")}));
-						return false;
-					}		
-					
-					if(getJP_DerivativeDocPolicy_Inv().equals("LP") || getJP_DerivativeDocPolicy_Inv().equals("PS")
-							 || getJP_DerivativeDocPolicy_Inv().equals("PE") || getJP_DerivativeDocPolicy_Inv().equals("PB"))
-					{
-						if(getJP_ContractProcRef_Inv_ID() == 0)
-						{
-							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));
-							return false;
-						}
-						
-						if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
-						{
-							setJP_ProcPeriodOffs_Start_Inv(0);
-							setJP_ProcPeriodOffs_End_Inv(0);
-						}else if(getJP_DerivativeDocPolicy_Inv().equals("PS")){
-							setJP_ProcPeriodOffs_Lump_Inv(0);	
-							setJP_ProcPeriodOffs_End_Inv(0);
-						}else if(getJP_DerivativeDocPolicy_Inv().equals("PE")){
-							setJP_ProcPeriodOffs_Lump_Inv(0);
-							setJP_ProcPeriodOffs_Start_Inv(0);
-						}else if(getJP_DerivativeDocPolicy_Inv().equals("PB")){
-							setJP_ProcPeriodOffs_Lump_Inv(0);
-							if(getJP_ProcPeriodOffs_Start_Inv() > getJP_ProcPeriodOffs_End_Inv())
-							{
-								log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_Inv")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_Inv"));
-								return false;
-							}
-						}
-						
-					}else{
-						setJP_ProcPeriodOffs_Lump_Inv(0);	
-						setJP_ProcPeriodOffs_Start_Inv(0);
-						setJP_ProcPeriodOffs_End_Inv(0);
-					}
-					
-				}else{
-					
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractDerivativeDocPolicy_ID")};
-					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-					log.saveError("Error",msg);
-					return false;
-
-				}//if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
-			
-			}//if(Util.isEmpty(getParent().getJP_CreateDerivativeDocPolicy()))
-			
-		}//if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		}//Period Contract
 		
 		//Check Spot Contract - Derivative Doc Policy
 		if(getParent().getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
@@ -497,5 +170,360 @@ public class MContractLineT extends X_JP_ContractLineT {
 		return retValue;
 	}	//	get
 	
-	
+	private boolean beforeSavePeriodContractCheck(boolean newRecord)
+	{
+
+		if(Util.isEmpty(getParent().getJP_CreateDerivativeDocPolicy()))
+		{
+			//Check JP_CreateDerivativeDocPolicy
+			if(getParent().getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder))
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")};
+				String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+				log.saveError("Error",msg);
+				return false;
+				
+			}else{//DocBaseType IN ('API','ARI')
+				
+				//Base Doc Line
+				if(Util.isEmpty(getJP_BaseDocLinePolicy()))//Mandetory
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_BaseDocLinePolicy")}));
+					return false;
+				}
+				
+				if(getJP_BaseDocLinePolicy().equals("LP"))
+				{
+					setJP_ProcPeriodOffs_Start(0);
+					setJP_ProcPeriodOffs_End(0);
+				}else if(getJP_BaseDocLinePolicy().equals("PS")){
+					setJP_ProcPeriodOffs_Lump(0);	
+					setJP_ProcPeriodOffs_End(0);
+				}else if(getJP_BaseDocLinePolicy().equals("PE")){
+					setJP_ProcPeriodOffs_Lump(0);
+					setJP_ProcPeriodOffs_Start(0);
+				}else if(getJP_BaseDocLinePolicy().equals("PB")){
+					setJP_ProcPeriodOffs_Lump(0);
+					if(getJP_ProcPeriodOffs_Start() > getJP_ProcPeriodOffs_End())
+					{
+						log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End"));
+						return false;
+					}
+				}
+				
+				
+				//Ship & Receipt
+				setJP_DerivativeDocPolicy_InOut(null);
+				setJP_ContractCalRef_InOut_ID(0);
+				setJP_ContractProcRef_InOut_ID(0);
+				setJP_ProcPeriodOffs_Lump_InOut(0);	
+				setJP_ProcPeriodOffs_Start_InOut(0);
+				setJP_ProcPeriodOffs_End_InOut(0);
+				
+				//Invoice
+				setJP_DerivativeDocPolicy_Inv(null);
+				setJP_ContractCalRef_Inv_ID(0);
+				setJP_ContractProcRef_Inv_ID(0);
+				setJP_ProcPeriodOffs_Lump_Inv(0);	
+				setJP_ProcPeriodOffs_Start_Inv(0);
+				setJP_ProcPeriodOffs_End_Inv(0);
+				
+			}
+			
+		//getParent().getJP_CreateDerivativeDocPolicy() is Not Null
+		}else{
+		
+			if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+			{
+				//Base Doc Line
+				if(Util.isEmpty(getJP_BaseDocLinePolicy()))//Mandetory
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_BaseDocLinePolicy")}));
+					return false;
+				}
+				
+				if(getJP_BaseDocLinePolicy().equals("LP"))
+				{
+					setJP_ProcPeriodOffs_Start(0);
+					setJP_ProcPeriodOffs_End(0);
+				}else if(getJP_BaseDocLinePolicy().equals("PS")){
+					setJP_ProcPeriodOffs_Lump(0);	
+					setJP_ProcPeriodOffs_End(0);
+				}else if(getJP_BaseDocLinePolicy().equals("PE")){
+					setJP_ProcPeriodOffs_Lump(0);
+					setJP_ProcPeriodOffs_Start(0);
+				}else if(getJP_BaseDocLinePolicy().equals("PB")){
+					setJP_ProcPeriodOffs_Lump(0);
+					if(getJP_ProcPeriodOffs_Start() > getJP_ProcPeriodOffs_End())
+					{
+						log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End"));
+						return false;
+					}
+				}
+				
+				
+				//Ship & Receipt
+				setJP_DerivativeDocPolicy_InOut(null);
+				setJP_ContractCalRef_InOut_ID(0);
+				setJP_ContractProcRef_InOut_ID(0);
+				setJP_ProcPeriodOffs_Lump_InOut(0);	
+				setJP_ProcPeriodOffs_Start_InOut(0);
+				setJP_ProcPeriodOffs_End_InOut(0);
+				
+				//Invoice
+				setJP_DerivativeDocPolicy_Inv(null);
+				setJP_ContractCalRef_Inv_ID(0);
+				setJP_ContractProcRef_Inv_ID(0);
+				setJP_ProcPeriodOffs_Lump_Inv(0);	
+				setJP_ProcPeriodOffs_Start_Inv(0);
+				setJP_ProcPeriodOffs_End_Inv(0);
+				
+			}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)){
+				
+				//Base Doc Line
+				setJP_BaseDocLinePolicy(null);
+				setJP_ProcPeriodOffs_Lump(0);	
+				setJP_ProcPeriodOffs_Start(0);
+				setJP_ProcPeriodOffs_End(0);
+				
+				//Ship & Receipt
+				if(Util.isEmpty(getJP_DerivativeDocPolicy_InOut()))//Mandetory
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));
+					return false;
+				}
+				
+				if(getJP_ContractCalRef_InOut_ID() == 0)//Mandetory
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_InOut_ID")}));
+					return false;
+				}
+				
+				if(getJP_DerivativeDocPolicy_InOut().equals("LP") || getJP_DerivativeDocPolicy_InOut().equals("PS")
+						 || getJP_DerivativeDocPolicy_InOut().equals("PE") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
+				{
+					if(getJP_ContractProcRef_InOut_ID() == 0)//Mandetory
+					{
+						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_InOut_ID")}));
+						return false;
+					}
+					
+					if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
+					{
+						setJP_ProcPeriodOffs_Start_InOut(0);
+						setJP_ProcPeriodOffs_End_InOut(0);
+					}else if(getJP_DerivativeDocPolicy_InOut().equals("PS")){
+						setJP_ProcPeriodOffs_Lump_InOut(0);	
+						setJP_ProcPeriodOffs_End_InOut(0);
+					}else if(getJP_DerivativeDocPolicy_InOut().equals("PE")){
+						setJP_ProcPeriodOffs_Lump_InOut(0);
+						setJP_ProcPeriodOffs_Start_InOut(0);
+					}else if(getJP_DerivativeDocPolicy_InOut().equals("PB")){
+						setJP_ProcPeriodOffs_Lump_InOut(0);
+						if(getJP_ProcPeriodOffs_Start_InOut() > getJP_ProcPeriodOffs_End_InOut())
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_InOut")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_InOut"));
+							return false;
+						}
+					}
+					
+				}else{
+					setJP_ProcPeriodOffs_Lump_InOut(0);	
+					setJP_ProcPeriodOffs_Start_InOut(0);
+					setJP_ProcPeriodOffs_End_InOut(0);
+				}
+				
+				
+				
+				//Invoice
+				if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));
+					return false;
+				}
+				
+				if(getJP_ContractCalRef_Inv_ID() == 0)
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_Inv_ID")}));
+					return false;
+				}
+				
+				if(getJP_DerivativeDocPolicy_Inv().equals("LP") || getJP_DerivativeDocPolicy_Inv().equals("PS")
+						 || getJP_DerivativeDocPolicy_Inv().equals("PE") || getJP_DerivativeDocPolicy_Inv().equals("PB"))
+				{
+					if(getJP_ContractProcRef_Inv_ID() == 0)
+					{
+						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));
+						return false;
+					}
+					
+					if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
+					{
+						setJP_ProcPeriodOffs_Start_Inv(0);
+						setJP_ProcPeriodOffs_End_Inv(0);
+					}else if(getJP_DerivativeDocPolicy_Inv().equals("PS")){
+						setJP_ProcPeriodOffs_Lump_Inv(0);	
+						setJP_ProcPeriodOffs_End_Inv(0);
+					}else if(getJP_DerivativeDocPolicy_Inv().equals("PE")){
+						setJP_ProcPeriodOffs_Lump_Inv(0);
+						setJP_ProcPeriodOffs_Start_Inv(0);
+					}else if(getJP_DerivativeDocPolicy_Inv().equals("PB")){
+						setJP_ProcPeriodOffs_Lump_Inv(0);
+						if(getJP_ProcPeriodOffs_Start_Inv() > getJP_ProcPeriodOffs_End_Inv())
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_Inv")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_Inv"));
+							return false;
+						}
+					}
+					
+				}else{
+					setJP_ProcPeriodOffs_Lump_Inv(0);	
+					setJP_ProcPeriodOffs_Start_Inv(0);
+					setJP_ProcPeriodOffs_End_Inv(0);
+				}
+				
+				
+			}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)){
+				
+				//Base Doc Line
+				setJP_BaseDocLinePolicy(null);
+				setJP_ProcPeriodOffs_Lump(0);	
+				setJP_ProcPeriodOffs_Start(0);
+				setJP_ProcPeriodOffs_End(0);
+				
+				//Ship & Receipt
+				if(Util.isEmpty(getJP_DerivativeDocPolicy_InOut()))
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut")}));
+					return false;
+				}
+				
+				if(getJP_ContractCalRef_InOut_ID() == 0)
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_InOut_ID")}));
+					return false;
+				}
+				
+				if(getJP_DerivativeDocPolicy_InOut().equals("LP") || getJP_DerivativeDocPolicy_InOut().equals("PS")
+						 || getJP_DerivativeDocPolicy_InOut().equals("PE") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
+				{
+					if(getJP_ContractProcRef_InOut_ID() == 0)//Mandetory
+					{
+						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_InOut_ID")}));
+						return false;
+					}
+					
+					if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
+					{
+						setJP_ProcPeriodOffs_Start_InOut(0);
+						setJP_ProcPeriodOffs_End_InOut(0);
+					}else if(getJP_DerivativeDocPolicy_InOut().equals("PS")){
+						setJP_ProcPeriodOffs_Lump_InOut(0);	
+						setJP_ProcPeriodOffs_End_InOut(0);
+					}else if(getJP_DerivativeDocPolicy_InOut().equals("PE")){
+						setJP_ProcPeriodOffs_Lump_InOut(0);
+						setJP_ProcPeriodOffs_Start_InOut(0);
+					}else if(getJP_DerivativeDocPolicy_InOut().equals("PB")){
+						setJP_ProcPeriodOffs_Lump_InOut(0);
+						if(getJP_ProcPeriodOffs_Start_InOut() > getJP_ProcPeriodOffs_End_InOut())
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_InOut")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_InOut"));
+							return false;
+						}
+					}
+					
+				}else{
+					setJP_ProcPeriodOffs_Lump_InOut(0);	
+					setJP_ProcPeriodOffs_Start_InOut(0);
+					setJP_ProcPeriodOffs_End_InOut(0);
+				}
+				
+				//Invoice
+				setJP_DerivativeDocPolicy_Inv(null);
+				setJP_ContractCalRef_Inv_ID(0);
+				setJP_ContractProcRef_Inv_ID(0);
+				setJP_DerivativeDocPolicy_Inv(null);
+				setJP_ContractCalRef_Inv_ID(0);
+				setJP_ContractProcRef_Inv_ID(0);
+				setJP_ProcPeriodOffs_Lump_Inv(0);	
+				setJP_ProcPeriodOffs_Start_Inv(0);
+				setJP_ProcPeriodOffs_End_Inv(0);
+				
+				
+			}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)){
+				
+				//Base Doc Line
+				setJP_BaseDocLinePolicy(null);
+				setJP_ProcPeriodOffs_Lump(0);	
+				setJP_ProcPeriodOffs_Start(0);
+				setJP_ProcPeriodOffs_End(0);
+				
+				//Ship & Receipt
+				setJP_DerivativeDocPolicy_InOut(null);
+				setJP_ContractCalRef_InOut_ID(0);
+				setJP_ContractProcRef_InOut_ID(0);
+				setJP_ProcPeriodOffs_Lump_InOut(0);	
+				setJP_ProcPeriodOffs_Start_InOut(0);
+				setJP_ProcPeriodOffs_End_InOut(0);
+				
+				//Invoice
+				if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));
+					return false;
+				}
+				
+				if(getJP_ContractCalRef_Inv_ID() == 0)
+				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalRef_Inv_ID")}));
+					return false;
+				}		
+				
+				if(getJP_DerivativeDocPolicy_Inv().equals("LP") || getJP_DerivativeDocPolicy_Inv().equals("PS")
+						 || getJP_DerivativeDocPolicy_Inv().equals("PE") || getJP_DerivativeDocPolicy_Inv().equals("PB"))
+				{
+					if(getJP_ContractProcRef_Inv_ID() == 0)
+					{
+						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));
+						return false;
+					}
+					
+					if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
+					{
+						setJP_ProcPeriodOffs_Start_Inv(0);
+						setJP_ProcPeriodOffs_End_Inv(0);
+					}else if(getJP_DerivativeDocPolicy_Inv().equals("PS")){
+						setJP_ProcPeriodOffs_Lump_Inv(0);	
+						setJP_ProcPeriodOffs_End_Inv(0);
+					}else if(getJP_DerivativeDocPolicy_Inv().equals("PE")){
+						setJP_ProcPeriodOffs_Lump_Inv(0);
+						setJP_ProcPeriodOffs_Start_Inv(0);
+					}else if(getJP_DerivativeDocPolicy_Inv().equals("PB")){
+						setJP_ProcPeriodOffs_Lump_Inv(0);
+						if(getJP_ProcPeriodOffs_Start_Inv() > getJP_ProcPeriodOffs_End_Inv())
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start_Inv")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End_Inv"));
+							return false;
+						}
+					}
+					
+				}else{
+					setJP_ProcPeriodOffs_Lump_Inv(0);	
+					setJP_ProcPeriodOffs_Start_Inv(0);
+					setJP_ProcPeriodOffs_End_Inv(0);
+				}
+				
+			}else{
+				
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractDerivativeDocPolicy_ID")};
+				String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+				log.saveError("Error",msg);
+				return false;
+
+			}//if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+		
+		}//if(Util.isEmpty(getParent().getJP_CreateDerivativeDocPolicy()))
+		
+		return true;
+	}
 }
