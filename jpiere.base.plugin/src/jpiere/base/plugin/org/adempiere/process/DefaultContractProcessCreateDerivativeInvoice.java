@@ -108,9 +108,11 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				//check Lump or Divide
 				if(contractLine.getJP_DerivativeDocPolicy_Inv().equals("LP"))
 				{
-					if(contractLine.getJP_ContractProcPeriod_Inv_ID() != JP_ContractProcPeriod_ID)
+					if(contractLine.getJP_ProcPeriod_Lump_Inv_ID() != JP_ContractProcPeriod_ID)
 						continue;
 				}
+				
+				//TODO Start と End Period のチェックロジックの実装。
 				
 				BigDecimal qtyInvoiced = contractLine.getQtyInvoiced();
 				BigDecimal qtyToInvoice = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyInvoiced());
@@ -180,11 +182,14 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				}
 				
 				//check Lump or Divide
+				//TODO ログ化
 				if(contractLine.getJP_DerivativeDocPolicy_Inv().equals("LP"))
 				{
-					if(contractLine.getJP_ContractProcPeriod_Inv_ID() != JP_ContractProcPeriod_ID)
+					if(contractLine.getJP_ProcPeriod_Lump_Inv_ID() != JP_ContractProcPeriod_ID)
 						continue;
 				}
+				
+				//TODO Start と End Period のチェックロジックの実装。
 				
 				//Check over ordered qty
 				BigDecimal qtyInvoiced = contractLine.getQtyInvoiced();

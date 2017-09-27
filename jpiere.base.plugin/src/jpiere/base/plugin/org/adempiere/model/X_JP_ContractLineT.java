@@ -33,7 +33,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20170927L;
 
     /** Standard Constructor */
     public X_JP_ContractLineT (Properties ctx, int JP_ContractLineT_ID, String trxName)
@@ -49,9 +49,17 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 			setIsDescription (false);
 			setJP_ContractContentT_ID (0);
 			setJP_ContractLineT_ID (0);
-			setJP_ContractProcPOffset_InOut (0);
+			setJP_ProcPeriodOffs_End_InOut (0);
 // 0
-			setJP_ContractProcPOffset_Inv (0);
+			setJP_ProcPeriodOffs_End_Inv (0);
+// 0
+			setJP_ProcPeriodOffs_Lump_InOut (0);
+// 0
+			setJP_ProcPeriodOffs_Lump_Inv (0);
+// 0
+			setJP_ProcPeriodOffs_Start_InOut (0);
+// 0
+			setJP_ProcPeriodOffs_Start_Inv (0);
 // 0
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_ContractLineT WHERE JP_ContractContentT_ID=@JP_ContractContentT_ID@
@@ -620,40 +628,6 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return (String)get_Value(COLUMNNAME_JP_ContractLineT_UU);
 	}
 
-	/** Set Contract Process Period Offset(In/Out).
-		@param JP_ContractProcPOffset_InOut Contract Process Period Offset(In/Out)	  */
-	public void setJP_ContractProcPOffset_InOut (int JP_ContractProcPOffset_InOut)
-	{
-		set_Value (COLUMNNAME_JP_ContractProcPOffset_InOut, Integer.valueOf(JP_ContractProcPOffset_InOut));
-	}
-
-	/** Get Contract Process Period Offset(In/Out).
-		@return Contract Process Period Offset(In/Out)	  */
-	public int getJP_ContractProcPOffset_InOut () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPOffset_InOut);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Contract Process Period Offset(Invoice).
-		@param JP_ContractProcPOffset_Inv Contract Process Period Offset(Invoice)	  */
-	public void setJP_ContractProcPOffset_Inv (int JP_ContractProcPOffset_Inv)
-	{
-		set_Value (COLUMNNAME_JP_ContractProcPOffset_Inv, Integer.valueOf(JP_ContractProcPOffset_Inv));
-	}
-
-	/** Get Contract Process Period Offset(Invoice).
-		@return Contract Process Period Offset(Invoice)	  */
-	public int getJP_ContractProcPOffset_Inv () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPOffset_Inv);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public I_JP_ContractProcessRef getJP_ContractProcRef_InOut() throws RuntimeException
     {
 		return (I_JP_ContractProcessRef)MTable.get(getCtx(), I_JP_ContractProcessRef.Table_Name)
@@ -704,10 +678,16 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return ii.intValue();
 	}
 
-	/** Divide into Contract process period = DD */
-	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_DivideIntoContractProcessPeriod = "DD";
+	/** For the Duration of Contract process period = DD */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod = "DD";
 	/** Lump on a certain point of Contract process period = LP */
 	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod = "LP";
+	/** From start Contract process period = PS */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod = "PS";
+	/** To End Contract process period = PE */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod = "PE";
+	/** From Start Contract process period to End = PB */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd = "PB";
 	/** Set Derivative Doc Policy(In/Out).
 		@param JP_DerivativeDocPolicy_InOut Derivative Doc Policy(In/Out)	  */
 	public void setJP_DerivativeDocPolicy_InOut (String JP_DerivativeDocPolicy_InOut)
@@ -723,10 +703,16 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return (String)get_Value(COLUMNNAME_JP_DerivativeDocPolicy_InOut);
 	}
 
-	/** Divide into Contract process period = DD */
-	public static final String JP_DERIVATIVEDOCPOLICY_INV_DivideIntoContractProcessPeriod = "DD";
+	/** For the Duration of Contract process period = DD */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod = "DD";
 	/** Lump on a certain point of Contract process period = LP */
 	public static final String JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod = "LP";
+	/** From start Contract process period = PS */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod = "PS";
+	/** To End Contract process period = PE */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod = "PE";
+	/** From Start Contract process period to End = PB */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd = "PB";
 	/** Set Derivative Doc Policy(Invoice).
 		@param JP_DerivativeDocPolicy_Inv Derivative Doc Policy(Invoice)	  */
 	public void setJP_DerivativeDocPolicy_Inv (String JP_DerivativeDocPolicy_Inv)
@@ -812,6 +798,108 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public int getJP_Locator_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Locator_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Offset of End Contract Process Period(In/Out).
+		@param JP_ProcPeriodOffs_End_InOut Offset of End Contract Process Period(In/Out)	  */
+	public void setJP_ProcPeriodOffs_End_InOut (int JP_ProcPeriodOffs_End_InOut)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_End_InOut, Integer.valueOf(JP_ProcPeriodOffs_End_InOut));
+	}
+
+	/** Get Offset of End Contract Process Period(In/Out).
+		@return Offset of End Contract Process Period(In/Out)	  */
+	public int getJP_ProcPeriodOffs_End_InOut () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_End_InOut);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Offset of End Contract Process Period(Invoice).
+		@param JP_ProcPeriodOffs_End_Inv Offset of End Contract Process Period(Invoice)	  */
+	public void setJP_ProcPeriodOffs_End_Inv (int JP_ProcPeriodOffs_End_Inv)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_End_Inv, Integer.valueOf(JP_ProcPeriodOffs_End_Inv));
+	}
+
+	/** Get Offset of End Contract Process Period(Invoice).
+		@return Offset of End Contract Process Period(Invoice)	  */
+	public int getJP_ProcPeriodOffs_End_Inv () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_End_Inv);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Offset of Period to handle in a lump(In/Out).
+		@param JP_ProcPeriodOffs_Lump_InOut Offset of Period to handle in a lump(In/Out)	  */
+	public void setJP_ProcPeriodOffs_Lump_InOut (int JP_ProcPeriodOffs_Lump_InOut)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_Lump_InOut, Integer.valueOf(JP_ProcPeriodOffs_Lump_InOut));
+	}
+
+	/** Get Offset of Period to handle in a lump(In/Out).
+		@return Offset of Period to handle in a lump(In/Out)	  */
+	public int getJP_ProcPeriodOffs_Lump_InOut () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_Lump_InOut);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Offset of Period to handle in a lump(Invoice).
+		@param JP_ProcPeriodOffs_Lump_Inv Offset of Period to handle in a lump(Invoice)	  */
+	public void setJP_ProcPeriodOffs_Lump_Inv (int JP_ProcPeriodOffs_Lump_Inv)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_Lump_Inv, Integer.valueOf(JP_ProcPeriodOffs_Lump_Inv));
+	}
+
+	/** Get Offset of Period to handle in a lump(Invoice).
+		@return Offset of Period to handle in a lump(Invoice)	  */
+	public int getJP_ProcPeriodOffs_Lump_Inv () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_Lump_Inv);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Offset of Start Contract Process Period(In/Out).
+		@param JP_ProcPeriodOffs_Start_InOut Offset of Start Contract Process Period(In/Out)	  */
+	public void setJP_ProcPeriodOffs_Start_InOut (int JP_ProcPeriodOffs_Start_InOut)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_Start_InOut, Integer.valueOf(JP_ProcPeriodOffs_Start_InOut));
+	}
+
+	/** Get Offset of Start Contract Process Period(In/Out).
+		@return Offset of Start Contract Process Period(In/Out)	  */
+	public int getJP_ProcPeriodOffs_Start_InOut () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_Start_InOut);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Offset of Start Contract Process Period(Invoice).
+		@param JP_ProcPeriodOffs_Start_Inv Offset of Start Contract Process Period(Invoice)	  */
+	public void setJP_ProcPeriodOffs_Start_Inv (int JP_ProcPeriodOffs_Start_Inv)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriodOffs_Start_Inv, Integer.valueOf(JP_ProcPeriodOffs_Start_Inv));
+	}
+
+	/** Get Offset of Start Contract Process Period(Invoice).
+		@return Offset of Start Contract Process Period(Invoice)	  */
+	public int getJP_ProcPeriodOffs_Start_Inv () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ProcPeriodOffs_Start_Inv);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

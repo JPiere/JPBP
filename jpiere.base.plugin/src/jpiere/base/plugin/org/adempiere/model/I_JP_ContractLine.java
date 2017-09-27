@@ -427,28 +427,6 @@ public interface I_JP_ContractLine
 	/** Get Contract Content Line(UU)	  */
 	public String getJP_ContractLine_UU();
 
-    /** Column name JP_ContractProcPeriod_InOut_ID */
-    public static final String COLUMNNAME_JP_ContractProcPeriod_InOut_ID = "JP_ContractProcPeriod_InOut_ID";
-
-	/** Set Contract Process Period(In/Out)	  */
-	public void setJP_ContractProcPeriod_InOut_ID (int JP_ContractProcPeriod_InOut_ID);
-
-	/** Get Contract Process Period(In/Out)	  */
-	public int getJP_ContractProcPeriod_InOut_ID();
-
-	public I_JP_ContractProcPeriod getJP_ContractProcPeriod_InOut() throws RuntimeException;
-
-    /** Column name JP_ContractProcPeriod_Inv_ID */
-    public static final String COLUMNNAME_JP_ContractProcPeriod_Inv_ID = "JP_ContractProcPeriod_Inv_ID";
-
-	/** Set Contract Process Period(Invoice)	  */
-	public void setJP_ContractProcPeriod_Inv_ID (int JP_ContractProcPeriod_Inv_ID);
-
-	/** Get Contract Process Period(Invoice)	  */
-	public int getJP_ContractProcPeriod_Inv_ID();
-
-	public I_JP_ContractProcPeriod getJP_ContractProcPeriod_Inv() throws RuntimeException;
-
     /** Column name JP_ContractProcess_InOut_ID */
     public static final String COLUMNNAME_JP_ContractProcess_InOut_ID = "JP_ContractProcess_InOut_ID";
 
@@ -521,6 +499,72 @@ public interface I_JP_ContractLine
 	public int getJP_Locator_ID();
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_End_InOut_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_End_InOut_ID = "JP_ProcPeriod_End_InOut_ID";
+
+	/** Set End Contract Process Period(In/Out)	  */
+	public void setJP_ProcPeriod_End_InOut_ID (int JP_ProcPeriod_End_InOut_ID);
+
+	/** Get End Contract Process Period(In/Out)	  */
+	public int getJP_ProcPeriod_End_InOut_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_InOut() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_End_Inv_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_End_Inv_ID = "JP_ProcPeriod_End_Inv_ID";
+
+	/** Set End Contract Process Period(Invoice)	  */
+	public void setJP_ProcPeriod_End_Inv_ID (int JP_ProcPeriod_End_Inv_ID);
+
+	/** Get End Contract Process Period(Invoice)	  */
+	public int getJP_ProcPeriod_End_Inv_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_Inv() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Lump_InOut_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_Lump_InOut_ID = "JP_ProcPeriod_Lump_InOut_ID";
+
+	/** Set Period to handle in a lump(In/Out)	  */
+	public void setJP_ProcPeriod_Lump_InOut_ID (int JP_ProcPeriod_Lump_InOut_ID);
+
+	/** Get Period to handle in a lump(In/Out)	  */
+	public int getJP_ProcPeriod_Lump_InOut_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_InOut() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Lump_Inv_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_Lump_Inv_ID = "JP_ProcPeriod_Lump_Inv_ID";
+
+	/** Set Period to handle in a lump(Invoice)	  */
+	public void setJP_ProcPeriod_Lump_Inv_ID (int JP_ProcPeriod_Lump_Inv_ID);
+
+	/** Get Period to handle in a lump(Invoice)	  */
+	public int getJP_ProcPeriod_Lump_Inv_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_Inv() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Start_InOut_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_Start_InOut_ID = "JP_ProcPeriod_Start_InOut_ID";
+
+	/** Set Start Contract Process Period(In/Out)	  */
+	public void setJP_ProcPeriod_Start_InOut_ID (int JP_ProcPeriod_Start_InOut_ID);
+
+	/** Get Start Contract Process Period(In/Out)	  */
+	public int getJP_ProcPeriod_Start_InOut_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start_InOut() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Start_Inv_ID */
+    public static final String COLUMNNAME_JP_ProcPeriod_Start_Inv_ID = "JP_ProcPeriod_Start_Inv_ID";
+
+	/** Set Start Contract Process Period(Invoice)	  */
+	public void setJP_ProcPeriod_Start_Inv_ID (int JP_ProcPeriod_Start_Inv_ID);
+
+	/** Get Start Contract Process Period(Invoice)	  */
+	public int getJP_ProcPeriod_Start_Inv_ID();
+
+	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start_Inv() throws RuntimeException;
 
     /** Column name JP_Processing1 */
     public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";

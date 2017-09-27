@@ -52,7 +52,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
 						|| content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 				{
-					int processPeriodOffset = lineTemplate.getJP_ContractProcPOffset_InOut();
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_Lump_InOut();
 					if(processPeriodOffset > 0)
 						processPeriodOffset++;
 					else
@@ -63,9 +63,63 @@ public class JPiereContractLineCallout implements IColumnCallout {
 					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
 					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,content.getJP_ContractProcDate_From() , null ,processPeriodOffset);
 					if(period == null)
-						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Lump_InOut_ID");
 					
-					mTab.setValue ("JP_ContractProcPeriod_InOut_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_Lump_InOut_ID", period.getJP_ContractProcPeriod_ID());
+				}
+			}
+			
+			if( value != null && (mTab.getValue("JP_DerivativeDocPolicy_InOut").equals("PS") || mTab.getValue("JP_DerivativeDocPolicy_InOut").equals("PB")) )
+			{
+				int JP_ContractContent_ID =  ((Integer)mTab.getValue("JP_ContractContent_ID")).intValue();
+				int JP_ContractLineT_ID = ((Integer)mTab.getValue("JP_ContractLineT_ID")).intValue();
+				MContractContent content= MContractContent.get(ctx, JP_ContractContent_ID);
+				MContractLineT lineTemplate = MContractLineT.get(ctx, JP_ContractLineT_ID);
+				
+				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+						|| content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+				{
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_Start_InOut();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+					
+					int JP_ContractCalender_ID = ((Integer)value).intValue();
+					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,content.getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period == null)
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Start_InOut_ID");
+					
+					mTab.setValue ("JP_ProcPeriod_Start_InOut_ID", period.getJP_ContractProcPeriod_ID());
+				}
+			}
+			
+			if( value != null && (mTab.getValue("JP_DerivativeDocPolicy_InOut").equals("PE") || mTab.getValue("JP_DerivativeDocPolicy_InOut").equals("PB")) )
+			{
+				int JP_ContractContent_ID =  ((Integer)mTab.getValue("JP_ContractContent_ID")).intValue();
+				int JP_ContractLineT_ID = ((Integer)mTab.getValue("JP_ContractLineT_ID")).intValue();
+				MContractContent content= MContractContent.get(ctx, JP_ContractContent_ID);
+				MContractLineT lineTemplate = MContractLineT.get(ctx, JP_ContractLineT_ID);
+				
+				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+						|| content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+				{
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_End_InOut();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+					
+					int JP_ContractCalender_ID = ((Integer)value).intValue();
+					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,content.getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period == null)
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_End_InOut_ID");
+					
+					mTab.setValue ("JP_ProcPeriod_End_InOut_ID", period.getJP_ContractProcPeriod_ID());
 				}
 			}
 			
@@ -81,7 +135,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
 						|| content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 				{
-					int processPeriodOffset = lineTemplate.getJP_ContractProcPOffset_Inv();
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_Lump_Inv();
 					if(processPeriodOffset > 0)
 						processPeriodOffset++;
 					else
@@ -92,9 +146,64 @@ public class JPiereContractLineCallout implements IColumnCallout {
 					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
 					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,content.getJP_ContractProcDate_From(), null ,processPeriodOffset);
 					if(period == null)
-						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Lump_Inv_ID");
 					
-					mTab.setValue ("JP_ContractProcPeriod_Inv_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_Lump_Inv_ID", period.getJP_ContractProcPeriod_ID());
+				}
+			}
+			
+			if( value != null && (mTab.getValue("JP_DerivativeDocPolicy_Inv").equals("PS") ||  mTab.getValue("JP_DerivativeDocPolicy_Inv").equals("PB")) )
+			{
+				int JP_ContractContent_ID =  ((Integer)mTab.getValue("JP_ContractContent_ID")).intValue();
+				int JP_ContractLineT_ID = ((Integer)mTab.getValue("JP_ContractLineT_ID")).intValue();
+				MContractContent content= MContractContent.get(ctx, JP_ContractContent_ID);
+				MContractLineT lineTemplate = MContractLineT.get(ctx, JP_ContractLineT_ID);
+				
+				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+						|| content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+				{
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_Start_Inv();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+					
+					int JP_ContractCalender_ID = ((Integer)value).intValue();
+					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,content.getJP_ContractProcDate_From(), null ,processPeriodOffset);
+					if(period == null)
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Start_Inv_ID");
+					
+					mTab.setValue ("JP_ProcPeriod_Start_Inv_ID", period.getJP_ContractProcPeriod_ID());
+				}
+			}
+			
+			
+			if( value != null && (mTab.getValue("JP_DerivativeDocPolicy_Inv").equals("PE") ||  mTab.getValue("JP_DerivativeDocPolicy_Inv").equals("PB")) )
+			{
+				int JP_ContractContent_ID =  ((Integer)mTab.getValue("JP_ContractContent_ID")).intValue();
+				int JP_ContractLineT_ID = ((Integer)mTab.getValue("JP_ContractLineT_ID")).intValue();
+				MContractContent content= MContractContent.get(ctx, JP_ContractContent_ID);
+				MContractLineT lineTemplate = MContractLineT.get(ctx, JP_ContractLineT_ID);
+				
+				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+						|| content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+				{
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_End_Inv();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+					
+					int JP_ContractCalender_ID = ((Integer)value).intValue();
+					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+					MContractProcPeriod period = calender.getContractProcessPeriod(ctx,content.getJP_ContractProcDate_From(), null ,processPeriodOffset);
+					if(period == null)
+						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_End_Inv_ID");
+					
+					mTab.setValue ("JP_ProcPeriod_End_Inv_ID", period.getJP_ContractProcPeriod_ID());
 				}
 			}
 			

@@ -82,15 +82,20 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			if(oLines != null && oLines.length > 0)
 				continue;
 			
+			//TODO Start と Endのperiodが期間ないかどうかのチェック
+			
 			isCreateDocLine = true;
 			break;
 		}
+		
 		
 		if(!isCreateDocLine)
 		{
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);	
 			return "";
 		}
+		
+
 		
 		
 		/** Create Order header */
@@ -129,6 +134,8 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				continue;
 				
 			}//Check Overlap
+			
+			//TODO Start と Endのperiodが期間ないかどうかのチェック
 			
 			MOrderLine oline = new MOrderLine(getCtx(), 0, get_TrxName());
 			PO.copyValues(m_lines[i], oline);

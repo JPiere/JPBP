@@ -110,11 +110,14 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 					continue;
 				
 				//check Lump or Divide
+				//TODO ログ化
 				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("LP"))
 				{
-					if(contractLine.getJP_ContractProcPeriod_InOut_ID() != JP_ContractProcPeriod_ID)
+					if(contractLine.getJP_ProcPeriod_Lump_InOut_ID() != JP_ContractProcPeriod_ID)
 						continue;
 				}
+				
+				//TODO Start と End Period のチェックロジックの実装。
 				
 				BigDecimal movementQty = contractLine.getMovementQty();
 				BigDecimal qtyToDeliver = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyDelivered());
@@ -182,12 +185,14 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				
 				
 				//check Lump or Divide
+				//TODO ログ化
 				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("LP"))
 				{
-					if(contractLine.getJP_ContractProcPeriod_InOut_ID() != JP_ContractProcPeriod_ID)
+					if(contractLine.getJP_ProcPeriod_Lump_InOut_ID() != JP_ContractProcPeriod_ID)
 						continue;
 				}
 				
+				//TODO Start と End Period のチェックロジックの実装。
 				
 				BigDecimal movementQty = contractLine.getMovementQty();
 				BigDecimal qtyToDeliver = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyDelivered());

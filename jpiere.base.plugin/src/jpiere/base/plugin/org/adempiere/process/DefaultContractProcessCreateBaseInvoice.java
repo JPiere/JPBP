@@ -69,6 +69,8 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod, null,  invoices[0], null);			
 			return "";
 			
+			//TODO Start と Endのperiodが期間ないかどうかのチェック
+			
 		}//Check Overlap
 		
 		
@@ -128,6 +130,9 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod, m_lines[i], iLines[0], null);
 				continue;				
 			}//Check Overlap
+			
+			//TODO Start と Endのperiodが期間ないかどうかのチェック
+			
 			
 			MInvoiceLine iline = new MInvoiceLine(getCtx(), 0, get_TrxName());
 			PO.copyValues(m_lines[i], iline);
