@@ -84,8 +84,12 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 		MOrder[] orders = m_ContractContent.getOrderByContractPeriod(getCtx(), orderProcPeriod.getJP_ContractProcPeriod_ID(), get_TrxName());
 		for(int i = 0; i < orders.length; i++)
 		{
-			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))//TODO ログ化
+			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
+			{
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusOfOrderIsNotCompleted, null, orders[i], null);
 				continue;
+			}
+			
 			
 			/** Pre check - Pre judgment create Document or not. */
 			MOrderLine[] orderLines = orders[i].getLines(true, "");

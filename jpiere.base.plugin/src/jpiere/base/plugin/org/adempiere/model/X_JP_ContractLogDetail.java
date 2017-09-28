@@ -343,6 +343,8 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_DocumentActionError = "Z2";
 	/** Skipped for create Derivative Doc  manually = B6 */
 	public static final String JP_CONTRACTLOGMSG_SkippedForCreateDerivativeDocManually = "B6";
+	/** Skipped for Document Status of Order is not Completed = B7 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForDocumentStatusOfOrderIsNotCompleted = "B7";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)
