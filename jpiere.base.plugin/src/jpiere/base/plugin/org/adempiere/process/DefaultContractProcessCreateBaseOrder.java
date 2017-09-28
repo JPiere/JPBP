@@ -276,9 +276,8 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				if(end_ContractProcPeriod.getEndDate().compareTo(process_ContractProcPeriod.getEndDate()) >= 0)
 				{
 					;//It is OK Let's Start
-				}
-				if(!end_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
-				{
+				}else{
+					
 					if(isCreateLog)
 						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_ID");
 					
@@ -334,9 +333,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				if(end_ContractProcPeriod.getEndDate().compareTo(process_ContractProcPeriod.getEndDate()) >= 0)
 				{
 					;///This is OK.
-				}
-				if(!end_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
-				{
+				}else{
 					if(isCreateLog)
 						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_InOut_ID");
 					
@@ -386,9 +383,9 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				if(end_ContractProcPeriod.getEndDate().compareTo(process_ContractProcPeriod.getEndDate()) >= 0)
 				{
 					;///This is OK.
-				}
-				if(!end_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
-				{
+					
+				}else{
+					
 					if(isCreateLog)
 						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_Iv_ID");
 					

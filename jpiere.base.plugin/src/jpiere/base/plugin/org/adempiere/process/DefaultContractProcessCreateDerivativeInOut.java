@@ -90,13 +90,12 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		MOrder[] orders = m_ContractContent.getOrderByContractPeriod(getCtx(), orderProcPeriod.getJP_ContractProcPeriod_ID(), get_TrxName());
 		for(int i = 0; i < orders.length; i++)
 		{
-			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
+			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))//TODO ログ化
 				continue;
 			
 			/** Pre check - Pre judgment create Document or not. */
 			MOrderLine[] orderLines = orders[i].getLines(true, "");
 			boolean isCreateDocLine = false;
-			ArrayList<MOrderLine> overQtyOrderedLineList = new ArrayList<MOrderLine>();
 			for(int j = 0; j < orderLines.length; j++)
 			{
 				if(!isCreateInOutLine(orderLines[j], JP_ContractProcPeriod_ID, false))
@@ -241,7 +240,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		
 		
 		//Check Overlap
-		MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
+		MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 		if(ioLines != null && ioLines.length > 0)
 		{
 			if(isCreateLog)
@@ -272,12 +271,16 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			//Start Period
 			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod)
 					||contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd) )
-			{
+			{				
 				MContractProcPeriod start_ContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_InOut_ID());
-				if(!start_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
+				MContractProcPeriod process_ContractProcPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+				if(start_ContractProcPeriod.getStartDate().compareTo(process_ContractProcPeriod.getStartDate()) <= 0)
 				{
+					;//This is OK.
+				}else{
+					
 					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod, contractLine, null, null);
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID"));
 					
 					return false;
 				}
@@ -286,12 +289,15 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			//End Period
 			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod)
 					||contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd) )
-			{
+			{	
 				MContractProcPeriod end_ContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_InOut_ID());
-				if(!end_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
+				MContractProcPeriod process_ContractProcPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+				if(end_ContractProcPeriod.getEndDate().compareTo(process_ContractProcPeriod.getEndDate()) >= 0)
 				{
+					;///This is OK.
+				}else{
 					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod, contractLine, null, null);	
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_InOut_ID");
 					
 					return false;
 				}

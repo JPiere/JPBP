@@ -91,7 +91,7 @@ public class MContractLine extends X_JP_ContractLine {
 		
 		
 		//Check update.
-		if(getParent().getParent().getJP_ContractT().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
 			if( newRecord 
 					|| is_ValueChanged(MContractLine.COLUMNNAME_M_Product_ID) 
