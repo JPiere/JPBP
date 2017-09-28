@@ -402,6 +402,14 @@ public class MContractLine extends X_JP_ContractLine {
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_ID"));
 								return false;
 							}
+							
+							if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
+							{
+								//TODO:基点となる伝票のカレンダーと明細に選択されている契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
+								return false;
+							}
+							
 						}
 						setJP_ProcPeriod_Start_ID(0);
 						setJP_ProcPeriod_End_ID(0);
@@ -423,6 +431,14 @@ public class MContractLine extends X_JP_ContractLine {
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_ID"));
 								return false;
 							}
+							
+							if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
+							{
+								//TODO:基点となる伝票のカレンダーと明細に選択されている契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
+								return false;
+							}
+							
 						}
 						setJP_ProcPeriod_Lump_ID(0);
 						if(getJP_BaseDocLinePolicy().equals("PS"))
@@ -443,6 +459,13 @@ public class MContractLine extends X_JP_ContractLine {
 							{
 								//Outside the Contract Process Period
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_ID"));
+								return false;
+							}
+							
+							if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
+							{
+								//TODO:基点となる伝票のカレンダーと明細に選択されている契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
 								return false;
 							}
 						}
@@ -531,6 +554,14 @@ public class MContractLine extends X_JP_ContractLine {
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_ID"));
 								return false;
 							}
+							
+							if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_InOut_ID())
+							{
+								//TODO:選択されているカレンダーと契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
+								return false;
+							}
+							
 						}
 						setJP_ProcPeriod_Start_InOut_ID(0);
 						setJP_ProcPeriod_End_InOut_ID(0);
@@ -550,6 +581,13 @@ public class MContractLine extends X_JP_ContractLine {
 							{
 								//Outside the Contract Process Period
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID"));
+								return false;
+							}
+							
+							if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_InOut_ID())
+							{
+								//TODO:選択されているカレンダーと契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
 								return false;
 							}
 						}
@@ -572,6 +610,13 @@ public class MContractLine extends X_JP_ContractLine {
 							{
 								//Outside the Contract Process Period
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_ID"));
+								return false;
+							}
+							
+							if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_InOut_ID())
+							{
+								//TODO:選択されているカレンダーと契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
 								return false;
 							}
 						}
@@ -640,6 +685,13 @@ public class MContractLine extends X_JP_ContractLine {
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_ID"));
 								return false;
 							}
+							
+							if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_Inv_ID())
+							{
+								//TODO:選択されているカレンダーと契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
+								return false;
+							}
 						}
 						setJP_ProcPeriod_Start_Inv_ID(0);
 						setJP_ProcPeriod_End_Inv_ID(0);
@@ -659,6 +711,13 @@ public class MContractLine extends X_JP_ContractLine {
 							{
 								//Outside the Contract Process Period
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID"));
+								return false;
+							}
+							
+							if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_Inv_ID())
+							{
+								//TODO:選択されているカレンダーと契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
 								return false;
 							}
 						}
@@ -681,6 +740,13 @@ public class MContractLine extends X_JP_ContractLine {
 							{
 								//Outside the Contract Process Period
 								log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_ID"));
+								return false;
+							}
+							
+							if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_Inv_ID())
+							{
+								//TODO:選択されているカレンダーと契約処理期間のカレンダーが異なります。
+								log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
 								return false;
 							}
 						}
@@ -1276,6 +1342,13 @@ public class MContractLine extends X_JP_ContractLine {
 							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_ID"));
 							return false;
 						}
+						
+						if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
+						{
+							//TODO:選択されてい契約処理期間のカレンダーとヘッダーのカレンダーが異なります。
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
+							return false;
+						}
 					}
 					setJP_ProcPeriod_Start_ID(0);
 					setJP_ProcPeriod_End_ID(0);
@@ -1295,6 +1368,13 @@ public class MContractLine extends X_JP_ContractLine {
 						{
 							//Outside the Contract Process Period
 							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_ID"));
+							return false;
+						}
+						
+						if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
+						{
+							//TODO:選択されてい契約処理期間のカレンダーとヘッダーのカレンダーが異なります。
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
 							return false;
 						}
 					}
@@ -1317,6 +1397,13 @@ public class MContractLine extends X_JP_ContractLine {
 						{
 							//Outside the Contract Process Period
 							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_ID"));
+							return false;
+						}
+						
+						if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
+						{
+							//TODO:選択されてい契約処理期間のカレンダーとヘッダーのカレンダーが異なります。
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"カレンダーが異なります。"));
 							return false;
 						}
 					}
