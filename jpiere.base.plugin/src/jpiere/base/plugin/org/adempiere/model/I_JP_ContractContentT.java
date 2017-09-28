@@ -498,6 +498,15 @@ public interface I_JP_ContractContentT
 	  */
 	public boolean isDropShip();
 
+    /** Column name IsOrverlapContractProcDateJP */
+    public static final String COLUMNNAME_IsOrverlapContractProcDateJP = "IsOrverlapContractProcDateJP";
+
+	/** Set Permit overlap of Contract Process Date	  */
+	public void setIsOrverlapContractProcDateJP (boolean IsOrverlapContractProcDateJP);
+
+	/** Get Permit overlap of Contract Process Date	  */
+	public boolean isOrverlapContractProcDateJP();
+
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
 
