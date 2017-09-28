@@ -111,7 +111,7 @@ public class ContractStatusUpdate extends SvrProcess {
 		try 
 		{
 			if(processingNow.get(getAD_Client_ID()))
-				throw new Exception(Msg.getMsg(getCtx(), "JP_Contract ProcessRunningNow"));//Contract process is running now by other user.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_ContractProcessRunningNow"));//Contract process is running now by other user.
 			else
 				processingNow.put(getAD_Client_ID(), true);
 

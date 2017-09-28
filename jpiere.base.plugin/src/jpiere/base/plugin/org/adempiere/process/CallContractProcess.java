@@ -38,6 +38,7 @@ import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLog;
+import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
@@ -144,7 +145,7 @@ public class CallContractProcess extends SvrProcess {
 		try 
 		{
 			if(processingNow.get(getAD_Client_ID()))
-				throw new Exception(Msg.getMsg(getCtx(), "JP_Contract ProcessRunningNow"));//Contract process is running now by other user.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_ContractProcessRunningNow"));//Contract process is running now by other user.
 			else
 				processingNow.put(getAD_Client_ID(), true);
 
@@ -170,16 +171,23 @@ public class CallContractProcess extends SvrProcess {
 			if(contractLogTrx != null)
 			{
 				if(p_IsRecordCommitJP)
-					msg = "--Rollback--";
+					msg = "-- Stop Process for Error --  ";
 				else
-					msg = "";
+					msg = "-- ALL Rollback--  " + " Error : " +  e.getMessage( ) ;
 				
-				m_ContractLog.setDescription( msg + " Error : " +  e.getMessage( ) );
+				m_ContractLog.setDescription( msg + " Error : " +  e.getMessage( ));
 				m_ContractLog.saveEx(contractLogTrx.getTrxName());
 				contractLogTrx.commit();
 			}
 			
-			throw e;
+			if(p_IsRecordCommitJP)
+			{
+				;
+			}else{
+				rollback();
+			}
+			
+//			throw e;
 			
 		} finally {
 			
@@ -756,22 +764,34 @@ public class CallContractProcess extends SvrProcess {
 			
 		}else{
 			
-			if(p_IsRecordCommitJP)
+			if(contractLogTrx != null)
+			{
+				MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+				logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+				logDetail.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError);
+				logDetail.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Error);
+				logDetail.setDescription(pi.getSummary());
+				if(pi.getRecord_ID() > 0 )
+					logDetail.setJP_ContractContent_ID(pi.getRecord_ID());
+				
+				logDetail.saveEx(m_ContractLog.get_TrxName());
+				contractLogTrx.commit();
+			}
+			
+			if(p_IsRecordCommitJP)//CONTINUOUS PROCESSING
 			{
 				try 
 				{
-					if(contractLogTrx != null)
-					{
-						contractLogTrx.commit();
-					}
-					rollback();
+
+					rollback();//one record only
 					
 				} catch (Exception e) {
 					
 					throw e;					
 				}
 				
-			}else{
+			}else{//Finish Process
+				
 				throw new AdempiereException(pi.getSummary());
 			}
 		}
