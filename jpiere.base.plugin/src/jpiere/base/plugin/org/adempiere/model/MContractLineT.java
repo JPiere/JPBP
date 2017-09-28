@@ -209,6 +209,10 @@ public class MContractLineT extends X_JP_ContractLineT {
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End"));
 						return false;
 					}
+				}else if(getJP_BaseDocLinePolicy().equals("DD")){
+					setJP_ProcPeriodOffs_Lump(0);
+					setJP_ProcPeriodOffs_Start(0);
+					setJP_ProcPeriodOffs_End(0);
 				}
 				
 				
@@ -259,6 +263,10 @@ public class MContractLineT extends X_JP_ContractLineT {
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"Invalid") + Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_Start")+" > " +Msg.getElement(Env.getCtx(), "JP_ProcPeriodOffs_End"));
 						return false;
 					}
+				}else if(getJP_BaseDocLinePolicy().equals("DD")){
+					setJP_ProcPeriodOffs_Lump(0);
+					setJP_ProcPeriodOffs_Start(0);
+					setJP_ProcPeriodOffs_End(0);
 				}
 				
 				
@@ -327,7 +335,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 						}
 					}
 					
-				}else{
+				}else{//DD
 					setJP_ProcPeriodOffs_Lump_InOut(0);	
 					setJP_ProcPeriodOffs_Start_InOut(0);
 					setJP_ProcPeriodOffs_End_InOut(0);
@@ -376,7 +384,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 						}
 					}
 					
-				}else{
+				}else{//DD
 					setJP_ProcPeriodOffs_Lump_Inv(0);	
 					setJP_ProcPeriodOffs_Start_Inv(0);
 					setJP_ProcPeriodOffs_End_Inv(0);
@@ -432,7 +440,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 						}
 					}
 					
-				}else{
+				}else{//DD
 					setJP_ProcPeriodOffs_Lump_InOut(0);	
 					setJP_ProcPeriodOffs_Start_InOut(0);
 					setJP_ProcPeriodOffs_End_InOut(0);
@@ -507,7 +515,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 						}
 					}
 					
-				}else{
+				}else{//DD
 					setJP_ProcPeriodOffs_Lump_Inv(0);	
 					setJP_ProcPeriodOffs_Start_Inv(0);
 					setJP_ProcPeriodOffs_End_Inv(0);

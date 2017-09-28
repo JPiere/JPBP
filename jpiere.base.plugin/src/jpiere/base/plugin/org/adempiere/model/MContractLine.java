@@ -467,7 +467,7 @@ public class MContractLine extends X_JP_ContractLine {
 							}								
 						}//PS,PB
 						
-					}else{
+					}else{ //DD
 						setJP_ProcPeriod_Lump_InOut_ID(0);
 						setJP_ProcPeriod_Start_InOut_ID(0);
 						setJP_ProcPeriod_End_InOut_ID(0);
@@ -596,7 +596,7 @@ public class MContractLine extends X_JP_ContractLine {
 							}								
 						}//PS,PB
 						
-					}else{
+					}else{//DD
 						setJP_ProcPeriod_Lump_InOut_ID(0);
 						setJP_ProcPeriod_Start_InOut_ID(0);
 						setJP_ProcPeriod_End_InOut_ID(0);
@@ -705,7 +705,7 @@ public class MContractLine extends X_JP_ContractLine {
 							}	
 						}//PS,PB
 						
-					}else{
+					}else{//DD
 						setJP_ProcPeriod_Lump_Inv_ID(0);
 						setJP_ProcPeriod_Start_Inv_ID(0);
 						setJP_ProcPeriod_End_Inv_ID(0);
@@ -824,7 +824,7 @@ public class MContractLine extends X_JP_ContractLine {
 							}	
 						}//PS,PB
 						
-					}else{
+					}else{//DD
 						setJP_ProcPeriod_Lump_InOut_ID(0);
 						setJP_ProcPeriod_Start_InOut_ID(0);
 						setJP_ProcPeriod_End_InOut_ID(0);
@@ -959,7 +959,7 @@ public class MContractLine extends X_JP_ContractLine {
 							}	
 						}//PS,PB
 						
-					}else{
+					}else{//DD
 						setJP_ProcPeriod_Lump_Inv_ID(0);
 						setJP_ProcPeriod_Start_Inv_ID(0);
 						setJP_ProcPeriod_End_Inv_ID(0);
