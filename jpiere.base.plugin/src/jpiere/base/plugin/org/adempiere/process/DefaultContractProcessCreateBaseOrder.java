@@ -147,7 +147,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
 				throw e;
 			}finally {
-				
+				;
 			}
 			isCreateDocLine = true;
 		}
@@ -183,11 +183,10 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				try {
 					order.saveEx(get_TrxName());//DocStatus is Draft
 				} catch (AdempiereException e) {
-
 					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
 					throw e;
 				}finally {
-					
+					;
 				}
 				
 			}

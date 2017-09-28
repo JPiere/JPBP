@@ -17,6 +17,7 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
@@ -136,8 +137,15 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			invoice.setDocumentNo(""); //Reset Document No
 			invoice.setC_DocTypeTarget_ID(orders[i].getC_DocTypeTarget().getC_DocTypeInvoice_ID());
 			invoice.setDateAcct(getDateAcct());
-			invoice.saveEx(get_TrxName());
 			
+			try{
+				invoice.saveEx(get_TrxName());
+			} catch (AdempiereException e) {
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+				throw e;
+			}finally {
+				;
+			}
 			
 			orders[i].set_TrxName(get_TrxName());
 			isCreateDocLine = false; //Reset
@@ -164,7 +172,14 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				iLine.setQtyInvoiced(contractLine.getQtyInvoiced());
 				iLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 				
-				iLine.saveEx(get_TrxName());
+				try{
+					iLine.saveEx(get_TrxName());
+				} catch (AdempiereException e) {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
+					throw e;
+				}finally {
+					;
+				}
 				isCreateDocLine = true;
 			}//for J
 			
@@ -173,11 +188,35 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				String docAction = getDocAction();
 				if(!Util.isEmpty(docAction))
 				{
-					invoice.processIt(docAction);
+					if(!invoice.processIt(docAction))
+					{
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, invoice, invoice.getProcessMsg());
+						throw new AdempiereException(invoice.getProcessMsg());
+					}
+					
 					if(!docAction.equals(DocAction.ACTION_Complete))
-						invoice.saveEx(get_TrxName());
+					{
+						invoice.setDocAction(DocAction.ACTION_Complete);
+						try {
+							invoice.saveEx(get_TrxName());//DocStatus is Draft
+						} catch (AdempiereException e) {
+							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
+							throw e;
+						}finally {
+							;
+						}
+					}
 				}else{
-					invoice.saveEx(get_TrxName());//DocStatus is Draft
+					
+					invoice.setDocAction(DocAction.ACTION_Complete);
+					try {
+						invoice.saveEx(get_TrxName());//DocStatus is Draft
+					} catch (AdempiereException e) {
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
+						throw e;
+					}finally {
+						;
+					}
 				}
 				
 			}else{
