@@ -498,6 +498,7 @@ public class AbstractContractProcess extends SvrProcess
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse) //B3
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod) //B4
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod) //B5
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDerivativeDocManually) //B6
 				){ 
 			
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
