@@ -67,7 +67,7 @@ public class CallContractProcess extends SvrProcess {
 	private String p_JP_ContractProcessTraceLevel = "WAR";
 
 	//Contract Log
-	private Trx conractLogTrx = null;
+	private Trx contractLogTrx = null;
 	private MContractLog m_ContractLog = null;
 	
 	private int successNum = 0;
@@ -152,22 +152,22 @@ public class CallContractProcess extends SvrProcess {
 			if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
 			{
 				String trxName = Trx.createTrxName("Contract");
-				conractLogTrx = Trx.get(trxName, false);
-				m_ContractLog = new MContractLog(getCtx(), 0, conractLogTrx.getTrxName());
+				contractLogTrx = Trx.get(trxName, false);
+				m_ContractLog = new MContractLog(getCtx(), 0, contractLogTrx.getTrxName());
 				m_ContractLog.setJP_ContractProcessTraceLevel(p_JP_ContractProcessTraceLevel);
 				m_ContractLog.setAD_PInstance_ID(getAD_PInstance_ID());
 				m_ContractLog.setJP_ContractProcessUnit(p_JP_ContractProcessUnit);
-				m_ContractLog.saveEx(conractLogTrx.getTrxName());
+				m_ContractLog.saveEx(contractLogTrx.getTrxName());
 				int JP_ContractLog_ID = m_ContractLog.getJP_ContractLog_ID();
 				addBufferLog(0, null, null, Msg.getMsg(getCtx(), "JP_DetailLog")+" -> " + Msg.getElement(getCtx(), "JP_ContractLog_ID"), MContractLog.Table_ID, JP_ContractLog_ID);
-				conractLogTrx.commit();
+				contractLogTrx.commit();
 			}
 			
 			msg = doContractProcess();
 			
 		} catch (Exception e) {
 			
-			if(conractLogTrx != null)
+			if(contractLogTrx != null)
 			{
 				if(p_IsRecordCommitJP)
 					msg = "--Rollback--";
@@ -175,8 +175,8 @@ public class CallContractProcess extends SvrProcess {
 					msg = "";
 				
 				m_ContractLog.setDescription( msg + " Error : " +  e.getMessage( ) );
-				m_ContractLog.saveEx(conractLogTrx.getTrxName());
-				conractLogTrx.commit();
+				m_ContractLog.saveEx(contractLogTrx.getTrxName());
+				contractLogTrx.commit();
 			}
 			
 			throw e;
@@ -184,10 +184,10 @@ public class CallContractProcess extends SvrProcess {
 		} finally {
 			
 			processingNow.put(getAD_Client_ID(), false);
-			if(conractLogTrx != null)
+			if(contractLogTrx != null)
 			{
-				conractLogTrx.close();
-				conractLogTrx = null;
+				contractLogTrx.close();
+				contractLogTrx = null;
 			}
 		}
 		
@@ -201,11 +201,11 @@ public class CallContractProcess extends SvrProcess {
 		if(p_JP_ContractProcessUnit == null)
 		{
 			String msg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcessUnit");
-			if(conractLogTrx !=null)
+			if(contractLogTrx !=null)
 			{
 				m_ContractLog.setDescription(msg);
-				m_ContractLog.saveEx(conractLogTrx.getTrxName());
-				conractLogTrx.commit();
+				m_ContractLog.saveEx(contractLogTrx.getTrxName());
+				contractLogTrx.commit();
 			}
 			
 			throw new Exception(msg);
@@ -325,17 +325,17 @@ public class CallContractProcess extends SvrProcess {
 		}
 		
 
-		if(conractLogTrx !=null)
+		if(contractLogTrx !=null)
 		{
 			if(Util.isEmpty(m_ContractLog.getDescription()))
 				m_ContractLog.setDescription(returnMsg.toString() + " [ --System Process Log-- " + systemProcessLog.toString() + " ]");
 			else
 				m_ContractLog.setDescription(m_ContractLog.getDescription() +"   "+ returnMsg.toString() + " [ " + systemProcessLog.toString()+ " ]");
 			
-			m_ContractLog.save(conractLogTrx.getTrxName());
-			conractLogTrx.commit();
-			conractLogTrx.close();
-			conractLogTrx = null;
+			m_ContractLog.save(contractLogTrx.getTrxName());
+			contractLogTrx.commit();
+			contractLogTrx.close();
+			contractLogTrx = null;
 		}
 		
 		return returnMsg.toString();
@@ -735,9 +735,9 @@ public class CallContractProcess extends SvrProcess {
 				try 
 				{
 					commitEx();
-					if(conractLogTrx != null)
+					if(contractLogTrx != null)
 					{
-						conractLogTrx.commit();
+						contractLogTrx.commit();
 					}
 					
 				} catch (SQLException e) {
@@ -747,17 +747,31 @@ public class CallContractProcess extends SvrProcess {
 				
 			}else{
 				
-				if(conractLogTrx != null)
+				if(contractLogTrx != null)
 				{
-					conractLogTrx.commit();
+					contractLogTrx.commit();
 				}
 				
 			}
 			
 		}else{
 			
-			if(!p_IsRecordCommitJP)
+			if(p_IsRecordCommitJP)
 			{
+				try 
+				{
+					if(contractLogTrx != null)
+					{
+						contractLogTrx.commit();
+					}
+					rollback();
+					
+				} catch (Exception e) {
+					
+					throw e;					
+				}
+				
+			}else{
 				throw new AdempiereException(pi.getSummary());
 			}
 		}

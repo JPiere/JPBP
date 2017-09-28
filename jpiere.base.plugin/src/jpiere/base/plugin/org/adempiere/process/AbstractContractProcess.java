@@ -420,7 +420,7 @@ public class AbstractContractProcess extends SvrProcess
 	
 	protected void createContractLogDetail(String ContractLogMsg, MContractLine ContractLine, PO po, String descriptionMsg)
 	{
-		
+		//No Log
 		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
 		{
 			if(Reference_ContractLogMsg == 0)
@@ -463,10 +463,11 @@ public class AbstractContractProcess extends SvrProcess
 			
 		}//NoLog
 				
+		
 		String TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
 		
 		/** Count up of counter */
-		if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument)){ //A1
+		if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument)){ //A1
 	
 			m_ContractLog.createDocNum++;
 			DocAction doc = (DocAction)po;
@@ -476,7 +477,7 @@ public class AbstractContractProcess extends SvrProcess
 			if(processUI != null)
 				processUI.statusUpdate(Msg.getMsg(getCtx(), "JP_CreateDocNum") + " : " + (m_ContractLog.createDocNum));
 		
-		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod)){//B1
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod)){//B1
 			if(ContractLine == null)
 			{
 				m_ContractLog.confirmNum++;
@@ -493,6 +494,13 @@ public class AbstractContractProcess extends SvrProcess
 			m_ContractLog.confirmNum++;
 			m_ContractLog.skipContractContentNum++;
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed;
+		
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse) //B3
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod) //B4
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod) //B5
+				){ 
+			
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
 			
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator)){ //W1
 			
@@ -504,7 +512,9 @@ public class AbstractContractProcess extends SvrProcess
 			m_ContractLog.warnNum++;
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning;
 			
-		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError)){ //ZZ
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError)//Z1
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError) //Z2
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError)){ //ZZ
 			
 			m_ContractLog.errorNum++;
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Error;

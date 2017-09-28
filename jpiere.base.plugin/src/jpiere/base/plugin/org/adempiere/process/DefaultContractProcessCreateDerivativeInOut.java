@@ -104,6 +104,9 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				if(!contractLine.isCreateDocLineJP())
 					continue;
 				
+				//TODO 契約処理プロセスがパラメータと同じかどうかのチェック。違っていたらスキップ（ログなし）
+				
+				
 				//Check Overlap
 				MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
 				if(ioLines != null && ioLines.length > 0)					
@@ -175,11 +178,13 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				if(!contractLine.isCreateDocLineJP())
 					continue;
 				
+				//TODO 契約処理プロセスがパラメータと同じかどうかのチェック。違っていたらスキップ（ログなし）
+				
 				//Check Overlap
 				MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
 				if(ioLines != null && ioLines.length > 0)
 				{
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod, contractLine, ioLines[0], null);					
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod, contractLine, ioLines[0], null);					
 					continue;
 				}//Check Overlap
 				
@@ -269,7 +274,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				continue;
 			}
 			
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument, null, inout, null);
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, inout, null);
 			
 		}//for i
 		

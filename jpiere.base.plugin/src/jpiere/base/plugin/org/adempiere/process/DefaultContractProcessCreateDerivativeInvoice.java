@@ -177,7 +177,7 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				MInvoiceLine[] iLines = contractLine.getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
 				if(iLines != null && iLines.length > 0)
 				{
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod, contractLine, iLines[0], null);	
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod, contractLine, iLines[0], null);	
 					continue;					
 				}
 				
@@ -244,7 +244,7 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				continue;
 			}
 			
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument, null, invoice, null);
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, invoice, null);
 			
 		}//for i
 		

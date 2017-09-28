@@ -66,7 +66,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		MInvoice[] invoices = m_ContractContent.getInvoiceByContractPeriod(Env.getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 		if(invoices != null && invoices.length > 0)
 		{
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod, null,  invoices[0], null);			
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod, null,  invoices[0], null);			
 			return "";
 			
 			//TODO Start と Endのperiodが期間ないかどうかのチェック
@@ -127,7 +127,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 			MInvoiceLine[] iLines = m_lines[i].getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
 			if(iLines != null && iLines.length > 0)
 			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod, m_lines[i], iLines[0], null);
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod, m_lines[i], iLines[0], null);
 				continue;				
 			}//Check Overlap
 			
@@ -171,7 +171,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		}
 		
 		
-		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument, null, invoice, null);
+		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, invoice, null);
 		return "";
 	}
 	

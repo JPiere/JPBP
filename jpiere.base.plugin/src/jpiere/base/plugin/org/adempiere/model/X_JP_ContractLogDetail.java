@@ -30,7 +30,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170924L;
+	private static final long serialVersionUID = 20170928L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -311,12 +311,12 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		return (String)get_Value(COLUMNNAME_JP_ContractLogDetail_UU);
 	}
 
-	/** Create Document = A1 */
-	public static final String JP_CONTRACTLOGMSG_CreateDocument = "A1";
-	/** Create Document Line = A2 */
-	public static final String JP_CONTRACTLOGMSG_CreateDocumentLine = "A2";
-	/** Skip Contract process for overlap Contract process period = B1 */
-	public static final String JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod = "B1";
+	/** Created Document = A1 */
+	public static final String JP_CONTRACTLOGMSG_CreatedDocument = "A1";
+	/** Created Document Line = A2 */
+	public static final String JP_CONTRACTLOGMSG_CreatedDocumentLine = "A2";
+	/** Skipped Contract process for overlap Contract process period = B1 */
+	public static final String JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod = "B1";
 	/** Unexpected Error = ZZ */
 	public static final String JP_CONTRACTLOGMSG_UnexpectedError = "ZZ";
 	/** All Contract content line was Skipped = B2 */
@@ -325,12 +325,22 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_NotFoundLocator = "W1";
 	/** Over Ordered Quantity = W2 */
 	public static final String JP_CONTRACTLOGMSG_OverOrderedQuantity = "W2";
-	/** Contract Status Update = S1 */
-	public static final String JP_CONTRACTLOGMSG_ContractStatusUpdate = "S1";
-	/** Contract Process Status Update = S2 */
-	public static final String JP_CONTRACTLOGMSG_ContractProcessStatusUpdate = "S2";
-	/** Automatic update of the contract = S3 */
-	public static final String JP_CONTRACTLOGMSG_AutomaticUpdateOfTheContract = "S3";
+	/** Contract Status Updated = S1 */
+	public static final String JP_CONTRACTLOGMSG_ContractStatusUpdated = "S1";
+	/** Contract Process Status Updated = S2 */
+	public static final String JP_CONTRACTLOGMSG_ContractProcessStatusUpdated = "S2";
+	/** Automatic updated of the contract = S3 */
+	public static final String JP_CONTRACTLOGMSG_AutomaticUpdatedOfTheContract = "S3";
+	/** Skipped for Create Doc Line is False = B3 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse = "B3";
+	/** Skipped for outside of the Derivative doc period = B4 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod = "B4";
+	/** Skipped for outside of the Base doc line period = B5 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod = "B5";
+	/** Save Error = Z1 */
+	public static final String JP_CONTRACTLOGMSG_SaveError = "Z1";
+	/** Document Action Error = Z2 */
+	public static final String JP_CONTRACTLOGMSG_DocumentActionError = "Z2";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)

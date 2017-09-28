@@ -306,7 +306,7 @@ public class ContractStatusUpdate extends SvrProcess {
 		//Create Contract Log
 		MContractLogDetail contractlog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
 		contractlog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
-		contractlog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_AutomaticUpdateOfTheContract);
+		contractlog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_AutomaticUpdatedOfTheContract);
 		contractlog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 		contractlog.setJP_Contract_ID(contract.getJP_Contract_ID());
 		contractlog.saveEx( m_ContractLog.get_TrxName());
@@ -322,7 +322,7 @@ public class ContractStatusUpdate extends SvrProcess {
 		//Create Contract Log
 		MContractLogDetail contractlog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
 		contractlog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
-		contractlog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractStatusUpdate);
+		contractlog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractStatusUpdated);
 		contractlog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 		contractlog.setJP_Contract_ID(contract.getJP_Contract_ID());
 		contractlog.setJP_ContractStatus_From(JP_ConstractStatus_From);
@@ -343,7 +343,7 @@ public class ContractStatusUpdate extends SvrProcess {
 				//Create Contract Log
 				MContractLogDetail contentLog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
 				contentLog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
-				contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdate);
+				contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdated);
 				contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 				contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
 				contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
@@ -373,7 +373,7 @@ public class ContractStatusUpdate extends SvrProcess {
 				//Create Contract Log
 				MContractLogDetail contentLog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
 				contentLog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
-				contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdate);
+				contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdated);
 				contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 				contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
 				contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
