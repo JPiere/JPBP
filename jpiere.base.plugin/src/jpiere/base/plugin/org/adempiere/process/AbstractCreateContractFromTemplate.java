@@ -232,7 +232,8 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 	
 					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
 					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractContent.getJP_ContractProcDate_From(), null , processPeriodOffset);
-					contrctLine.setJP_ProcPeriod_Lump_ID(period.getJP_ContractProcPeriod_ID());
+					if(period != null)
+						contrctLine.setJP_ProcPeriod_Lump_ID(period.getJP_ContractProcPeriod_ID());
 				}
 				
 				if(contrctLine.getJP_BaseDocLinePolicy().equals("PS") || contrctLine.getJP_BaseDocLinePolicy().equals("PB"))
@@ -248,7 +249,8 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 	
 					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
 					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractContent.getJP_ContractProcDate_From(), null , processPeriodOffset);
-					contrctLine.setJP_ProcPeriod_Start_ID(period.getJP_ContractProcPeriod_ID());					
+					if(period != null)
+						contrctLine.setJP_ProcPeriod_Start_ID(period.getJP_ContractProcPeriod_ID());					
 				}
 				
 				if(contrctLine.getJP_BaseDocLinePolicy().equals("PE") || contrctLine.getJP_BaseDocLinePolicy().equals("PB"))
@@ -264,7 +266,8 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 	
 					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
 					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractContent.getJP_ContractProcDate_From(), null , processPeriodOffset);
-					contrctLine.setJP_ProcPeriod_End_ID(period.getJP_ContractProcPeriod_ID());					
+					if(period != null)
+						contrctLine.setJP_ProcPeriod_End_ID(period.getJP_ContractProcPeriod_ID());					
 				}
 				
 			}
