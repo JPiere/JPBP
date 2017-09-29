@@ -391,6 +391,41 @@ public class MContractLineT extends X_JP_ContractLineT {
 				}
 				
 				
+				
+				/** Check Derivative Doc Policy correspondence between Derivative shi/Recipt And Derivative invoice */
+				if( (getJP_DerivativeDocPolicy_InOut().equals("LP") && getJP_DerivativeDocPolicy_Inv().equals("LP"))
+						|| (getJP_DerivativeDocPolicy_InOut().equals("LP") && getJP_DerivativeDocPolicy_Inv().equals("PB"))
+						|| (getJP_DerivativeDocPolicy_InOut().equals("PB") && getJP_DerivativeDocPolicy_Inv().equals("LP"))
+						)
+				{
+					;//It is ok in this case
+					
+				}else if(getJP_DerivativeDocPolicy_InOut().equals("PB") && getJP_DerivativeDocPolicy_Inv().equals("PB")){
+					
+					;//It is ok in this case
+					
+				}else if(getJP_DerivativeDocPolicy_InOut().equals("PS") && getJP_DerivativeDocPolicy_Inv().equals("PS")){
+					
+					;//It is ok in this case
+					
+				}else if(getJP_DerivativeDocPolicy_InOut().equals("PE") && getJP_DerivativeDocPolicy_Inv().equals("PE")){
+					
+					;//It is ok in this case
+					
+				}else if(getJP_DerivativeDocPolicy_InOut().equals("DD") && getJP_DerivativeDocPolicy_Inv().equals("DD")){
+					
+					
+					;//It is ok in this case
+				
+				}else{
+					
+					//Inconsistency between Derivativ Doc Policy(InOut) and Derivative Doc Policy(Invoice)
+					log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut"),Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inv")}));
+					return false;
+					
+				}//Check Derivative Doc Policy correspondence between Derivative shi/Recipt And Derivative invoice
+				
+				
 			}else if(getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)){
 				
 				//Base Doc Line
