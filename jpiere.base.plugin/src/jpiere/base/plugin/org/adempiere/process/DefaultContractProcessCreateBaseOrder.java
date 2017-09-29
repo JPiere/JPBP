@@ -285,8 +285,11 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			}
 			
 			return true;
-		}
+			
+		}//Check Base Doc Line
 		
+		
+		//ignore Base doc line info because carete Derivative Doc
 		//Check Derivative Ship/Recipt Doc Line
 		if(m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt) ||
 				m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice) )
@@ -332,7 +335,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_InOut_ID());
 				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
 				if(contractLine_Period.getEndDate().compareTo(process_Period.getEndDate()) >= 0
-						|| contractLine_Period.getEndDate().compareTo(process_Period.getStartDate()) <= 0)
+						|| contractLine_Period.getEndDate().compareTo(process_Period.getStartDate()) >= 0)
 				{
 					;//This is OK.  process_Period.StartDate  <=  contractLine_Period.EndDate >= process_Period.EndDate
 				}else{
@@ -390,7 +393,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_Inv_ID());
 				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
 				if(contractLine_Period.getEndDate().compareTo(process_Period.getEndDate()) >= 0
-						|| contractLine_Period.getEndDate().compareTo(process_Period.getStartDate()) <= 0 )
+						|| contractLine_Period.getEndDate().compareTo(process_Period.getStartDate()) >= 0 )
 				{
 					;//This is OK.  process_Period.StartDate  <=  contractLine_Period.EndDate >= process_Period.EndDate
 					

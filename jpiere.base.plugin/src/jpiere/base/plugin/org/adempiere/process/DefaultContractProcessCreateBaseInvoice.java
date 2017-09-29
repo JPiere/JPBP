@@ -224,9 +224,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 	
 		
 		//Check Base Doc Line
-		if(contractLine.getJP_BaseDocLinePolicy() != null && 
-				( m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual) 
-				||  !m_ContractContent.getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder)) )
+		if(contractLine.getJP_BaseDocLinePolicy() != null)
 		{
 			//Lump
 			if(contractLine.getJP_BaseDocLinePolicy().equals(MContractLine.JP_BASEDOCLINEPOLICY_LumpOnACertainPointOfContractProcessPeriod))

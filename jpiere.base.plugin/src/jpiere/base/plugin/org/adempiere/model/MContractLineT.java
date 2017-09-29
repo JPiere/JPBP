@@ -89,30 +89,13 @@ public class MContractLineT extends X_JP_ContractLineT {
 			
 		}//Period Contract
 		
+		
 		//Check Spot Contract - Derivative Doc Policy
 		if(getParent().getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract))
 		{
-			//Base Doc Line
-			setJP_BaseDocLinePolicy(null);
-			setJP_ProcPeriodOffs_Lump(0);	
-			setJP_ProcPeriodOffs_Start(0);
-			setJP_ProcPeriodOffs_End(0);
-			
-			//Ship & Receipt
-			setJP_DerivativeDocPolicy_InOut(null);
-			setJP_ContractCalRef_InOut_ID(0);
-			setJP_ContractProcRef_InOut_ID(0);
-			setJP_ProcPeriodOffs_Lump_InOut(0);	
-			setJP_ProcPeriodOffs_Start_InOut(0);
-			setJP_ProcPeriodOffs_End_InOut(0);
-			
-			//Invoice
-			setJP_DerivativeDocPolicy_Inv(null);
-			setJP_ContractCalRef_Inv_ID(0);
-			setJP_ContractProcRef_Inv_ID(0);
-			setJP_ProcPeriodOffs_Lump_Inv(0);	
-			setJP_ProcPeriodOffs_Start_Inv(0);
-			setJP_ProcPeriodOffs_End_Inv(0);
+			setNullCreateBaseDocLineInfo();
+			setNullCreateDerivativeInOutInfo();
+			setNullCreateDerivativeInvoiceInfo();
 		}
 		
 		
@@ -122,7 +105,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 			if (getM_Product_ID() != 0)
 				setM_Product_ID(0);
 		}
-	
 		
 		return true;
 	}
