@@ -244,9 +244,13 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 		MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
 		
 		//Check Contract Process
-		if(contractLine.getJP_ContractProcess_InOut_ID() != getJP_ContractProcess_ID())
+		if(contractLine.getJP_ContractProcess_Inv_ID() != getJP_ContractProcess_ID())
 			return false;
 		
+		//Check Contract Calender
+		MContractProcPeriod processPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+		if(contractLine.getJP_ContractCalender_Inv_ID() != processPeriod.getJP_ContractCalender_ID())
+			return false;
 
 		if(!contractLine.isCreateDocLineJP())
 		{
@@ -318,7 +322,7 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 		
 		BigDecimal qtyInvoiced = contractLine.getQtyInvoiced();
 		BigDecimal qtyToInvoice = orderLine.getQtyOrdered().subtract(orderLine.getQtyInvoiced());
-		if(qtyToInvoice.compareTo(qtyInvoiced) >= 0)
+		if(qtyToInvoice.compareTo(qtyInvoiced) < 0)
 		{
 			if(isCreateLog)
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, contractLine, orderLine, null);

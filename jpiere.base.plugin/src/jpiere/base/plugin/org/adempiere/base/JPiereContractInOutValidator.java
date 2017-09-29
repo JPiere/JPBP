@@ -437,7 +437,8 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 						||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 				{
 					//Check Contract Process Period - Calender
-					MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);				
+					MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);		
+					int aaa = contractLine.getJP_ContractCalender_InOut_ID();
 					if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
 					{	
 						//Please select the Contract Process Period that belong to Calender of Contract Content line. 

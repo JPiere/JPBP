@@ -77,6 +77,10 @@ public class MContractLineT extends X_JP_ContractLineT {
 					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Lump_Inv)
 					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_Start_Inv)
 					|| is_ValueChanged(MContractLineT.COLUMNNAME_JP_ProcPeriodOffs_End_Inv)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_QtyEntered)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_QtyOrdered)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_MovementQty)
+					|| is_ValueChanged(MContractLineT.COLUMNNAME_QtyInvoiced)
 					)
 			{
 				if(!beforeSavePeriodContractCheck(newRecord))
@@ -354,6 +358,20 @@ public class MContractLineT extends X_JP_ContractLineT {
 			return false;
 		}
 		
+		if(getQtyOrdered().signum() != getMovementQty().signum())
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "MovementQty"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
+			return false;
+		}
+		
+		if(getMovementQty().abs().compareTo(getQtyOrdered().abs()) > 0)
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "MovementQty"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
+			return false;
+		}
+		
+
+		
 		if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 		{
 			setJP_ProcPeriodOffs_Start_InOut(0);
@@ -398,6 +416,19 @@ public class MContractLineT extends X_JP_ContractLineT {
 		if(getJP_ContractProcRef_Inv_ID() == 0)
 		{
 			log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcRef_Inv_ID")}));
+			return false;
+		}
+		
+		if(getQtyOrdered().signum() != getQtyInvoiced().signum())
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "QtyInvoiced"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
+			return false;
+		}
+		
+		
+		if(getQtyInvoiced().abs().compareTo(getQtyOrdered().abs()) > 0)
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "QtyInvoiced"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
 			return false;
 		}
 		

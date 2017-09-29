@@ -603,6 +603,19 @@ public class MContractLine extends X_JP_ContractLine {
 			return false;
 		}
 		
+		if(getQtyOrdered().signum() != getMovementQty().signum())
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "MovementQty"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
+			return false;
+		}
+		
+		if(getMovementQty().abs().compareTo(getQtyOrdered().abs()) > 0)
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "MovementQty"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
+			return false;
+		}
+		
+		
 		if(getJP_DerivativeDocPolicy_InOut().equals("LP")|| getJP_DerivativeDocPolicy_InOut().equals("PS")
 				 || getJP_DerivativeDocPolicy_InOut().equals("PE") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
 		{
@@ -742,6 +755,19 @@ public class MContractLine extends X_JP_ContractLine {
 			log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")}));
 			return false;
 		}
+		
+		if(getQtyOrdered().signum() != getQtyInvoiced().signum())
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "QtyInvoiced"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
+			return false;
+		}
+		
+		if(getQtyInvoiced().abs().compareTo(getQtyOrdered().abs()) > 0)
+		{
+			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "QtyInvoiced"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
+			return false;
+		}
+		
 		
 		if(getJP_DerivativeDocPolicy_Inv().equals("LP")|| getJP_DerivativeDocPolicy_Inv().equals("PS")
 				 || getJP_DerivativeDocPolicy_Inv().equals("PE") || getJP_DerivativeDocPolicy_Inv().equals("PB"))

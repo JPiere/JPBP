@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.IProcessUI;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MClient;
 import org.compiere.process.ProcessInfo;
@@ -733,9 +734,21 @@ public class CallContractProcess extends SvrProcess {
 		pi.setParameter(pars);	
 	}
 	
+	private IProcessUI processUI = null;
+	
 	private boolean startProcess(ProcessInfo pi) throws Exception
 	{
-		boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+		if(processUI == null)
+		{
+			processUI = Env.getProcessUI(getCtx());
+			
+		}
+//		else
+//		{
+//			Env.getCtx().put(PROCESS_UI_CTX_KEY, processUI);
+//		}
+//		
+		boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI);
 		if(success)
 		{				
 			if(p_IsRecordCommitJP)

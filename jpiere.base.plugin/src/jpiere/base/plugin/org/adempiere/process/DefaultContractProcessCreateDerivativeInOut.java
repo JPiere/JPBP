@@ -271,6 +271,10 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		if(contractLine.getJP_ContractProcess_InOut_ID() != getJP_ContractProcess_ID())
 			return false;
 		
+		//Check Contract Calender
+		MContractProcPeriod processPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+		if(contractLine.getJP_ContractCalender_InOut_ID() != processPeriod.getJP_ContractCalender_ID())
+			return false;
 		
 		if(!contractLine.isCreateDocLineJP())
 		{
