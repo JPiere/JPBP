@@ -92,6 +92,51 @@ public interface I_JP_Recognition
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
 
+    /** Column name Bill_BPartner_ID */
+    public static final String COLUMNNAME_Bill_BPartner_ID = "Bill_BPartner_ID";
+
+	/** Set Invoice Partner.
+	  * Business Partner to be invoiced
+	  */
+	public void setBill_BPartner_ID (int Bill_BPartner_ID);
+
+	/** Get Invoice Partner.
+	  * Business Partner to be invoiced
+	  */
+	public int getBill_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getBill_BPartner() throws RuntimeException;
+
+    /** Column name Bill_Location_ID */
+    public static final String COLUMNNAME_Bill_Location_ID = "Bill_Location_ID";
+
+	/** Set Invoice Location.
+	  * Business Partner Location for invoicing
+	  */
+	public void setBill_Location_ID (int Bill_Location_ID);
+
+	/** Get Invoice Location.
+	  * Business Partner Location for invoicing
+	  */
+	public int getBill_Location_ID();
+
+	public org.compiere.model.I_C_BPartner_Location getBill_Location() throws RuntimeException;
+
+    /** Column name Bill_User_ID */
+    public static final String COLUMNNAME_Bill_User_ID = "Bill_User_ID";
+
+	/** Set Invoice Contact.
+	  * Business Partner Contact for invoicing
+	  */
+	public void setBill_User_ID (int Bill_User_ID);
+
+	/** Get Invoice Contact.
+	  * Business Partner Contact for invoicing
+	  */
+	public int getBill_User_ID();
+
+	public org.compiere.model.I_AD_User getBill_User() throws RuntimeException;
+
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
@@ -662,7 +707,7 @@ public interface I_JP_Recognition
 	  */
 	public int getReversal_ID();
 
-	public org.compiere.model.I_C_Invoice getReversal() throws RuntimeException;
+	public I_JP_Recognition getReversal() throws RuntimeException;
 
     /** Column name SalesRep_ID */
     public static final String COLUMNNAME_SalesRep_ID = "SalesRep_ID";

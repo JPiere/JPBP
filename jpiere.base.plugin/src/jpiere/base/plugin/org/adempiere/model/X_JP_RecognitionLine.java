@@ -33,7 +33,7 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170925L;
+	private static final long serialVersionUID = 20170929L;
 
     /** Standard Constructor */
     public X_JP_RecognitionLine (Properties ctx, int JP_RecognitionLine_ID, String trxName)
