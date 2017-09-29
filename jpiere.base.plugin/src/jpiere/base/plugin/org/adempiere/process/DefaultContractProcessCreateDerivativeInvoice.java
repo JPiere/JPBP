@@ -272,6 +272,7 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 
 		
 		//Check Derivative Invoice Doc Line
+		//Lump
 		if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod))
 		{
 			MContractProcPeriod lump_ContractProcPeriod = MContractProcPeriod.get(getCtx(),contractLine.getJP_ProcPeriod_Lump_Inv_ID());
@@ -284,14 +285,15 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			}
 		}
 		
+		//Start Period
 		if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod)
 				||contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd) )
 		{				
-			MContractProcPeriod start_ContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_Inv_ID());
-			MContractProcPeriod process_ContractProcPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-			if(start_ContractProcPeriod.getStartDate().compareTo(process_ContractProcPeriod.getStartDate()) <= 0)
+			MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_Inv_ID());
+			MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+			if(contractLine_Period.getStartDate().compareTo(process_Period.getStartDate()) <= 0)
 			{
-				;//This is OK.
+				;//This is OK. contractLine_Period.StartDate <= process_Period.StartDate
 			}else{
 				
 				if(isCreateLog)
@@ -301,14 +303,15 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			}
 		}
 		
+		//End Period
 		if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod)
 				|| contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd) )
 		{
-			MContractProcPeriod end_ContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_Inv_ID());
-			MContractProcPeriod process_ContractProcPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-			if(end_ContractProcPeriod.getEndDate().compareTo(process_ContractProcPeriod.getEndDate()) >= 0)
+			MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_Inv_ID());
+			MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+			if(contractLine_Period.getEndDate().compareTo(process_Period.getEndDate()) >= 0)
 			{
-				;///This is OK.
+				;//This is OK. contractLine_Period.EndDate >= process_Period.EndDate
 				
 			}else{
 				
