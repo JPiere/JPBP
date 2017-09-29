@@ -133,9 +133,21 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 			oline.setAD_Org_ID(order.getAD_Org_ID());
 			oline.setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
 			oline.setProcessed(false);
+			
+			//Qty
+			if(m_lines[i].getM_Product_ID() > 0)
+			{
+				oline.setC_UOM_ID(m_lines[i].getM_Product().getC_UOM_ID());
+				oline.setQtyEntered(m_lines[i].getQtyOrdered());
+			}else{
+				oline.setQtyEntered(m_lines[i].getQtyEntered());
+				
+			}
+			oline.setQtyOrdered(m_lines[i].getQtyOrdered());
 			oline.setQtyReserved(Env.ZERO);
 			oline.setQtyDelivered(Env.ZERO);
 			oline.setQtyInvoiced(Env.ZERO);
+			
 			oline.set_ValueNoCheck("JP_ContractLine_ID", m_lines[i].getJP_ContractLine_ID());
 			if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 				oline.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);

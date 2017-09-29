@@ -169,8 +169,6 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			/** Create Recognition*/
 			MInOut io = (MInOut)po;			
 			String trxName = po.get_TrxName();
-			boolean isReversal = io.isReversal();//TODO 出荷納品伝票がリバースされる際に、売上計上伝票もリバースする必要がある。
-			MDocType ioDocType = MDocType.get(po.getCtx(), io.getC_DocType_ID());
 			
 			MOrder order = null;
 			MRecognition recognition = null;
@@ -211,9 +209,10 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			}
 			
 			recognition.setM_InOut_ID(io.getM_InOut_ID());
+			recognition.setMovementDate(io.getMovementDate());
 			if (!recognition.save(trxName))
 			{
-				return "Could not create Recognition: "+ io.getDocumentInfo();//TODO
+				return "Could not create Recognition: "+ io.getDocumentInfo();//TODO メッセージ化
 			}
 
 			MInOutLine[] sLines = io.getLines(false);
@@ -242,14 +241,10 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
 				if (!rcogLine.save(trxName))
 				{
-					log.warning("Could not create Invoice Line from Shipment Line: "+ recognition.getDocumentInfo());
-					return null;
+//					log.warning("Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo());
+					return "Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo();//TODO メッセージ化
 				}
 
-				if (!sLine.save(trxName))
-				{
-					log.warning("Could not update Shipment line: " + sLine);//TODO
-				}
 			}//for
 
 			
