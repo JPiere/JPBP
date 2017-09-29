@@ -33,7 +33,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170924L;
+	private static final long serialVersionUID = 20170928L;
 
     /** Standard Constructor */
     public X_JP_ContractContentT (Properties ctx, int JP_ContractContentT_ID, String trxName)
@@ -60,6 +60,8 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 // N
 			setIsDropShip (false);
 // N
+			setIsOrverlapContractProcDateJP (true);
+// Y
 			setIsSOTrx (true);
 // Y
 			setIsTaxIncluded (false);
@@ -859,6 +861,27 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public boolean isDropShip () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsDropShip);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Permit overlap of Contract Process Date.
+		@param IsOrverlapContractProcDateJP Permit overlap of Contract Process Date	  */
+	public void setIsOrverlapContractProcDateJP (boolean IsOrverlapContractProcDateJP)
+	{
+		set_Value (COLUMNNAME_IsOrverlapContractProcDateJP, Boolean.valueOf(IsOrverlapContractProcDateJP));
+	}
+
+	/** Get Permit overlap of Contract Process Date.
+		@return Permit overlap of Contract Process Date	  */
+	public boolean isOrverlapContractProcDateJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsOrverlapContractProcDateJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

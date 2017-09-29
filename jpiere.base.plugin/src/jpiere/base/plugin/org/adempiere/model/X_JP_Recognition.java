@@ -34,7 +34,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170925L;
+	private static final long serialVersionUID = 20170929L;
 
     /** Standard Constructor */
     public X_JP_Recognition (Properties ctx, int JP_Recognition_ID, String trxName)
@@ -49,7 +49,6 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 			setC_DocTypeTarget_ID (0);
 			setC_DocType_ID (0);
 // 0
-			setC_Order_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setDateInvoiced (new Timestamp( System.currentTimeMillis() ));
@@ -63,6 +62,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 			setIsApproved (false);
 // @IsApproved@
 			setIsDiscountPrinted (false);
+// N
 			setIsPrinted (false);
 			setIsSOTrx (false);
 // @IsSOTrx@
@@ -155,6 +155,90 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	public int getAD_User_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_User_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BPartner getBill_BPartner() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
+			.getPO(getBill_BPartner_ID(), get_TrxName());	}
+
+	/** Set Invoice Partner.
+		@param Bill_BPartner_ID 
+		Business Partner to be invoiced
+	  */
+	public void setBill_BPartner_ID (int Bill_BPartner_ID)
+	{
+		if (Bill_BPartner_ID < 1) 
+			set_Value (COLUMNNAME_Bill_BPartner_ID, null);
+		else 
+			set_Value (COLUMNNAME_Bill_BPartner_ID, Integer.valueOf(Bill_BPartner_ID));
+	}
+
+	/** Get Invoice Partner.
+		@return Business Partner to be invoiced
+	  */
+	public int getBill_BPartner_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BPartner_Location getBill_Location() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
+			.getPO(getBill_Location_ID(), get_TrxName());	}
+
+	/** Set Invoice Location.
+		@param Bill_Location_ID 
+		Business Partner Location for invoicing
+	  */
+	public void setBill_Location_ID (int Bill_Location_ID)
+	{
+		if (Bill_Location_ID < 1) 
+			set_Value (COLUMNNAME_Bill_Location_ID, null);
+		else 
+			set_Value (COLUMNNAME_Bill_Location_ID, Integer.valueOf(Bill_Location_ID));
+	}
+
+	/** Get Invoice Location.
+		@return Business Partner Location for invoicing
+	  */
+	public int getBill_Location_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_Location_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_User getBill_User() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
+			.getPO(getBill_User_ID(), get_TrxName());	}
+
+	/** Set Invoice Contact.
+		@param Bill_User_ID 
+		Business Partner Contact for invoicing
+	  */
+	public void setBill_User_ID (int Bill_User_ID)
+	{
+		if (Bill_User_ID < 1) 
+			set_Value (COLUMNNAME_Bill_User_ID, null);
+		else 
+			set_Value (COLUMNNAME_Bill_User_ID, Integer.valueOf(Bill_User_ID));
+	}
+
+	/** Get Invoice Contact.
+		@return Business Partner Contact for invoicing
+	  */
+	public int getBill_User_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_User_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -1139,9 +1223,9 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 		return false;
 	}
 
-	public org.compiere.model.I_C_Invoice getReversal() throws RuntimeException
+	public I_JP_Recognition getReversal() throws RuntimeException
     {
-		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_Name)
+		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
 			.getPO(getReversal_ID(), get_TrxName());	}
 
 	/** Set Reversal ID.

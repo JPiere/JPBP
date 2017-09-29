@@ -130,6 +130,32 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 
 		//
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+//		StringBuilder sql = new StringBuilder("SELECT ");	//	QtyEntered
+//		sql.append("l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)),");
+//		sql.append(" l.QtyEntered/l.MovementQty,"
+//			+ " l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name),"			//  3..4
+//			+ " l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line,"        //  5..9
+//			+ " l.C_OrderLine_ID " //  10
+//			+ " FROM M_InOutLine l "
+//			);
+//		if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
+//			sql.append(" LEFT OUTER JOIN C_UOM uom ON (l.C_UOM_ID=uom.C_UOM_ID)");
+//		else
+//			sql.append(" LEFT OUTER JOIN C_UOM_Trl uom ON (l.C_UOM_ID=uom.C_UOM_ID AND uom.AD_Language='")
+//				.append(Env.getAD_Language(Env.getCtx())).append("')");
+//
+//		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)")
+//			.append(" INNER JOIN M_InOut io ON (l.M_InOut_ID=io.M_InOut_ID)")
+//			.append(" LEFT OUTER JOIN JP_RecognitionLine rl ON (l.M_InOutLine_ID = rl.M_InOutLine_ID)")
+//			.append(" LEFT OUTER JOIN JP_Recognition r ON (rl.JP_Recognition_ID = r.JP_Recognition_ID)")
+//			.append(" LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND io.C_BPartner_ID = po.C_BPartner_ID)")
+//			.append(" WHERE l.M_InOut_ID=? AND l.MovementQty<>0 AND r.DocStatus NOT IN('VO','RE') ")
+//			.append("GROUP BY l.MovementQty, l.QtyEntered/l.MovementQty, "
+//				+ "l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name), "
+//				+ "l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line, l.C_OrderLine_ID ")
+//			.append(" HAVING l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)) <>0")
+//			.append(" ORDER BY l.Line");
+		
 		StringBuilder sql = new StringBuilder("SELECT ");	//	QtyEntered
 		sql.append("l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)),");
 		sql.append(" l.QtyEntered/l.MovementQty,"
@@ -148,16 +174,13 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 			.append(" INNER JOIN M_InOut io ON (l.M_InOut_ID=io.M_InOut_ID)");
 		sql.append(" LEFT JOIN JP_RecognitionLine rl ON l.M_InOutLine_ID = rl.M_InOutLine_ID");
 		sql.append(" LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND io.C_BPartner_ID = po.C_BPartner_ID)")
-
 			.append(" WHERE l.M_InOut_ID=? AND l.MovementQty<>0 ")
 			.append("GROUP BY l.MovementQty, l.QtyEntered/l.MovementQty, "
 				+ "l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name), "
 				+ "l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line, l.C_OrderLine_ID ");
-		if(!isSOTrx)
-			sql.append(" HAVING l.MovementQty-SUM(COALESCE(mi.Qty, 0)) <>0");
-		else
-			sql.append(" HAVING l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)) <>0");
+		sql.append(" HAVING l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)) <>0");
 		sql.append("ORDER BY l.Line");
+		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

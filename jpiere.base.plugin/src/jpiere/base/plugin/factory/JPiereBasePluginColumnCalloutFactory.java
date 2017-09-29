@@ -42,6 +42,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereInvValAdjustCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValCalCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereOrderCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereRecognitionCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
@@ -54,6 +55,7 @@ import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
 
 /**
  *  JPiere Base Plugin Callout Factory
@@ -145,6 +147,12 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				if(columnName.equals("JP_ContractCalender_InOut_ID") || columnName.equals("JP_ContractCalender_Inv_ID") )
 				{
 					list.add(new JPiereContractLineCallout());
+				}
+			}else if(tableName.equals(MRecognition.Table_Name)){//JPIERE-036４
+				
+				if(columnName.equals("M_InOut_ID") )
+				{
+					list.add(new JPiereRecognitionCallout());
 				}
 			}
 			

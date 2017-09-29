@@ -168,6 +168,19 @@ public interface I_JP_ContractLogDetail
 	  */
 	public String getDescription();
 
+    /** Column name Help */
+    public static final String COLUMNNAME_Help = "Help";
+
+	/** Set Comment/Help.
+	  * Comment or Hint
+	  */
+	public void setHelp (String Help);
+
+	/** Get Comment/Help.
+	  * Comment or Hint
+	  */
+	public String getHelp();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -180,6 +193,26 @@ public interface I_JP_ContractLogDetail
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name JP_Confirmed */
+    public static final String COLUMNNAME_JP_Confirmed = "JP_Confirmed";
+
+	/** Set Confirmed	  */
+	public void setJP_Confirmed (Timestamp JP_Confirmed);
+
+	/** Get Confirmed	  */
+	public Timestamp getJP_Confirmed();
+
+    /** Column name JP_ConfirmedBy */
+    public static final String COLUMNNAME_JP_ConfirmedBy = "JP_ConfirmedBy";
+
+	/** Set Confirmed By	  */
+	public void setJP_ConfirmedBy (int JP_ConfirmedBy);
+
+	/** Get Confirmed By	  */
+	public int getJP_ConfirmedBy();
+
+	public org.compiere.model.I_AD_User getJP_Confirme() throws RuntimeException;
 
     /** Column name JP_ContractContent_ID */
     public static final String COLUMNNAME_JP_ContractContent_ID = "JP_ContractContent_ID";
@@ -319,6 +352,24 @@ public interface I_JP_ContractLogDetail
 
 	public I_JP_Contract getJP_Contract() throws RuntimeException;
 
+    /** Column name JP_Processing1 */
+    public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
+
+	/** Set Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1);
+
+	/** Get Process Now	  */
+	public String getJP_Processing1();
+
+    /** Column name JP_Processing2 */
+    public static final String COLUMNNAME_JP_Processing2 = "JP_Processing2";
+
+	/** Set Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2);
+
+	/** Get Process Now	  */
+	public String getJP_Processing2();
+
     /** Column name M_InOutLine_ID */
     public static final String COLUMNNAME_M_InOutLine_ID = "M_InOutLine_ID";
 
@@ -348,6 +399,28 @@ public interface I_JP_ContractLogDetail
 	public int getM_InOut_ID();
 
 	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException;
+
+    /** Column name Processed */
+    public static final String COLUMNNAME_Processed = "Processed";
+
+	/** Set Processed.
+	  * The document has been processed
+	  */
+	public void setProcessed (boolean Processed);
+
+	/** Get Processed.
+	  * The document has been processed
+	  */
+	public boolean isProcessed();
+
+    /** Column name Processing */
+    public static final String COLUMNNAME_Processing = "Processing";
+
+	/** Set Process Now	  */
+	public void setProcessing (boolean Processing);
+
+	/** Get Process Now	  */
+	public boolean isProcessing();
 
     /** Column name Record_ID */
     public static final String COLUMNNAME_Record_ID = "Record_ID";

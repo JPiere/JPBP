@@ -18,6 +18,7 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 
@@ -30,7 +31,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170924L;
+	private static final long serialVersionUID = 20170929L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -39,6 +40,14 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
       /** if (JP_ContractLogDetail_ID == 0)
         {
 			setJP_ContractLogDetail_ID (0);
+			setJP_Processing1 (null);
+// N
+			setJP_Processing2 (null);
+// N
+			setProcessed (false);
+// N
+			setProcessing (false);
+// N
         } */
     }
 
@@ -227,6 +236,59 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** Set Comment/Help.
+		@param Help 
+		Comment or Hint
+	  */
+	public void setHelp (String Help)
+	{
+		set_Value (COLUMNNAME_Help, Help);
+	}
+
+	/** Get Comment/Help.
+		@return Comment or Hint
+	  */
+	public String getHelp () 
+	{
+		return (String)get_Value(COLUMNNAME_Help);
+	}
+
+	/** Set Confirmed.
+		@param JP_Confirmed Confirmed	  */
+	public void setJP_Confirmed (Timestamp JP_Confirmed)
+	{
+		set_Value (COLUMNNAME_JP_Confirmed, JP_Confirmed);
+	}
+
+	/** Get Confirmed.
+		@return Confirmed	  */
+	public Timestamp getJP_Confirmed () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_Confirmed);
+	}
+
+	public org.compiere.model.I_AD_User getJP_Confirme() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
+			.getPO(getJP_ConfirmedBy(), get_TrxName());	}
+
+	/** Set Confirmed By.
+		@param JP_ConfirmedBy Confirmed By	  */
+	public void setJP_ConfirmedBy (int JP_ConfirmedBy)
+	{
+		set_Value (COLUMNNAME_JP_ConfirmedBy, Integer.valueOf(JP_ConfirmedBy));
+	}
+
+	/** Get Confirmed By.
+		@return Confirmed By	  */
+	public int getJP_ConfirmedBy () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ConfirmedBy);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException
     {
 		return (I_JP_ContractContent)MTable.get(getCtx(), I_JP_ContractContent.Table_Name)
@@ -311,12 +373,12 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		return (String)get_Value(COLUMNNAME_JP_ContractLogDetail_UU);
 	}
 
-	/** Create Document = A1 */
-	public static final String JP_CONTRACTLOGMSG_CreateDocument = "A1";
-	/** Create Document Line = A2 */
-	public static final String JP_CONTRACTLOGMSG_CreateDocumentLine = "A2";
-	/** Skip Contract process for overlap Contract process period = B1 */
-	public static final String JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod = "B1";
+	/** Created Document = A1 */
+	public static final String JP_CONTRACTLOGMSG_CreatedDocument = "A1";
+	/** Created Document Line = A2 */
+	public static final String JP_CONTRACTLOGMSG_CreatedDocumentLine = "A2";
+	/** Skipped Contract process for overlap Contract process period = B1 */
+	public static final String JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod = "B1";
 	/** Unexpected Error = ZZ */
 	public static final String JP_CONTRACTLOGMSG_UnexpectedError = "ZZ";
 	/** All Contract content line was Skipped = B2 */
@@ -325,12 +387,26 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_NotFoundLocator = "W1";
 	/** Over Ordered Quantity = W2 */
 	public static final String JP_CONTRACTLOGMSG_OverOrderedQuantity = "W2";
-	/** Contract Status Update = S1 */
-	public static final String JP_CONTRACTLOGMSG_ContractStatusUpdate = "S1";
-	/** Contract Process Status Update = S2 */
-	public static final String JP_CONTRACTLOGMSG_ContractProcessStatusUpdate = "S2";
-	/** Automatic update of the contract = S3 */
-	public static final String JP_CONTRACTLOGMSG_AutomaticUpdateOfTheContract = "S3";
+	/** Contract Status Updated = S1 */
+	public static final String JP_CONTRACTLOGMSG_ContractStatusUpdated = "S1";
+	/** Contract Process Status Updated = S2 */
+	public static final String JP_CONTRACTLOGMSG_ContractProcessStatusUpdated = "S2";
+	/** Automatic updated of the contract = S3 */
+	public static final String JP_CONTRACTLOGMSG_AutomaticUpdatedOfTheContract = "S3";
+	/** Skipped for Create Doc Line is False = B3 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse = "B3";
+	/** Skipped for outside of the Derivative doc period = B4 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod = "B4";
+	/** Skipped for outside of the Base doc line period = B5 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod = "B5";
+	/** Save Error = Z1 */
+	public static final String JP_CONTRACTLOGMSG_SaveError = "Z1";
+	/** Document Action Error = Z2 */
+	public static final String JP_CONTRACTLOGMSG_DocumentActionError = "Z2";
+	/** Skipped for create Derivative Doc  manually = B6 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForCreateDerivativeDocManually = "B6";
+	/** Skipped for Document Status of Order is not Completed = B7 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForDocumentStatusOfOrderIsNotCompleted = "B7";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)
@@ -567,6 +643,34 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		return ii.intValue();
 	}
 
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
 	public org.compiere.model.I_M_InOutLine getM_InOutLine() throws RuntimeException
     {
 		return (org.compiere.model.I_M_InOutLine)MTable.get(getCtx(), org.compiere.model.I_M_InOutLine.Table_Name)
@@ -621,6 +725,51 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Processed.
+		@param Processed 
+		The document has been processed
+	  */
+	public void setProcessed (boolean Processed)
+	{
+		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
+	}
+
+	/** Get Processed.
+		@return The document has been processed
+	  */
+	public boolean isProcessed () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processed);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Process Now.
+		@param Processing Process Now	  */
+	public void setProcessing (boolean Processing)
+	{
+		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public boolean isProcessing () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processing);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Record ID.

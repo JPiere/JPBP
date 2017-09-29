@@ -30,7 +30,7 @@ public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20170929L;
 
     /** Standard Constructor */
     public X_JP_ContractCalender (Properties ctx, int JP_ContractCalender_ID, String trxName)
@@ -121,6 +121,81 @@ public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, 
 	public String getJP_ContractCalender_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractCalender_UU);
+	}
+
+	public I_JP_ContractCategory getJP_ContractCategory() throws RuntimeException
+    {
+		return (I_JP_ContractCategory)MTable.get(getCtx(), I_JP_ContractCategory.Table_Name)
+			.getPO(getJP_ContractCategory_ID(), get_TrxName());	}
+
+	/** Set Contract Category.
+		@param JP_ContractCategory_ID Contract Category	  */
+	public void setJP_ContractCategory_ID (int JP_ContractCategory_ID)
+	{
+		if (JP_ContractCategory_ID < 1) 
+			set_Value (COLUMNNAME_JP_ContractCategory_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
+	}
+
+	/** Get Contract Category.
+		@return Contract Category	  */
+	public int getJP_ContractCategory_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCategory_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException
+    {
+		return (I_JP_ContractContent)MTable.get(getCtx(), I_JP_ContractContent.Table_Name)
+			.getPO(getJP_ContractContent_ID(), get_TrxName());	}
+
+	/** Set Contract Content.
+		@param JP_ContractContent_ID Contract Content	  */
+	public void setJP_ContractContent_ID (int JP_ContractContent_ID)
+	{
+		if (JP_ContractContent_ID < 1) 
+			set_Value (COLUMNNAME_JP_ContractContent_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
+	}
+
+	/** Get Contract Content.
+		@return Contract Content	  */
+	public int getJP_ContractContent_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractContent_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractLine getJP_ContractLine() throws RuntimeException
+    {
+		return (I_JP_ContractLine)MTable.get(getCtx(), I_JP_ContractLine.Table_Name)
+			.getPO(getJP_ContractLine_ID(), get_TrxName());	}
+
+	/** Set Contract Content Line.
+		@param JP_ContractLine_ID Contract Content Line	  */
+	public void setJP_ContractLine_ID (int JP_ContractLine_ID)
+	{
+		if (JP_ContractLine_ID < 1) 
+			set_Value (COLUMNNAME_JP_ContractLine_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_ContractLine_ID, Integer.valueOf(JP_ContractLine_ID));
+	}
+
+	/** Get Contract Content Line.
+		@return Contract Content Line	  */
+	public int getJP_ContractLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Name.

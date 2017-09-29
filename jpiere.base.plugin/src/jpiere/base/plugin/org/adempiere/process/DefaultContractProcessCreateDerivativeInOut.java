@@ -17,6 +17,7 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrder;
@@ -30,6 +31,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -42,6 +44,9 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 */
 public class DefaultContractProcessCreateDerivativeInOut extends AbstractContractProcess {
 
+	
+	ArrayList<MOrderLine> overQtyOrderedLineList = new ArrayList<MOrderLine>();
+	
 	@Override
 	protected void prepare() 
 	{
@@ -87,50 +92,26 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		for(int i = 0; i < orders.length; i++)
 		{
 			if(!orders[i].getDocStatus().equals(DocAction.STATUS_Completed))
+			{
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusOfOrderIsNotCompleted, null, orders[i], null);
 				continue;
+			}
 			
 			/** Pre check - Pre judgment create Document or not. */
 			MOrderLine[] orderLines = orders[i].getLines(true, "");
 			boolean isCreateDocLine = false;
-			boolean isOverQtyOrdered = false;
-			ArrayList<MOrderLine> overQtyOrderedLineList = new ArrayList<MOrderLine>();
 			for(int j = 0; j < orderLines.length; j++)
 			{
-				int JP_ContractLine_ID = orderLines[j].get_ValueAsInt("JP_ContractLine_ID");
-				if(JP_ContractLine_ID == 0)
-					continue;
+				if(!isCreateInOutLine(orderLines[j], JP_ContractProcPeriod_ID, false))
+					continue;	
 				
-				MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
-				if(!contractLine.isCreateDocLineJP())
-					continue;
-				
-				//Check Overlap
-				MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
-				if(ioLines != null && ioLines.length > 0)					
-					continue;
-				
-				//check Lump or Divide
-				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("LP"))
-				{
-					if(contractLine.getJP_ContractProcPeriod_InOut_ID() != JP_ContractProcPeriod_ID)
-						continue;
-				}
-				
-				BigDecimal movementQty = contractLine.getMovementQty();
-				BigDecimal qtyToDeliver = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyDelivered());
-				if(qtyToDeliver.compareTo(movementQty) >= 0)
-				{
-					isCreateDocLine = true;
-					break;
-				}else{
-					isOverQtyOrdered = true;
-					overQtyOrderedLineList.add(orderLines[j]);
-				}
+				isCreateDocLine = true;
+				break;
 			}
 			
 			if(!isCreateDocLine)
 			{
-				if(isOverQtyOrdered)
+				if(overQtyOrderedLineList.size() > 0)
 				{
 					for(MOrderLine oLine : overQtyOrderedLineList)
 						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, null, oLine, null);	
@@ -157,91 +138,73 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 			else
 				inout.setMovementType(MInOut.MOVEMENTTYPE_VendorReceipts);
 			
-			inout.saveEx(get_TrxName());
 			
+			try{
+				inout.saveEx(get_TrxName());
+			} catch (AdempiereException e) {
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+				throw e;
+			}finally {
+				;
+			}
 			
 			orders[i].set_TrxName(get_TrxName());
 			isCreateDocLine = false; //Reset
 			for(int j = 0; j < orderLines.length; j++)
 			{
-				int JP_ContractLine_ID = orderLines[j].get_ValueAsInt("JP_ContractLine_ID");
-				if(JP_ContractLine_ID == 0)
-					continue;
+				if(!isCreateInOutLine(orderLines[j], JP_ContractProcPeriod_ID, true))
+					continue;	
 				
+				int JP_ContractLine_ID = orderLines[j].get_ValueAsInt("JP_ContractLine_ID");				
 				MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
-				if(!contractLine.isCreateDocLineJP())
-					continue;
-				
-				//Check Overlap
-				MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());;
-				if(ioLines != null && ioLines.length > 0)
+				MInOutLine ioLine = new MInOutLine(getCtx(), 0, get_TrxName());
+				PO.copyValues(orderLines[j], ioLine);
+				ioLine.setC_OrderLine_ID(orderLines[j].getC_OrderLine_ID());
+				ioLine.setProcessed(false);
+				ioLine.setM_InOut_ID(inout.getM_InOut_ID());
+				ioLine.setAD_Org_ID(inout.getAD_Org_ID());
+				ioLine.setAD_OrgTrx_ID(inout.getAD_OrgTrx_ID());
+				int M_Locator_ID = orderLines[j].get_ValueAsInt("JP_Locator_ID");
+				if(M_Locator_ID > 0)
 				{
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkipContractProcessForOverlapContractProcessPeriod, contractLine, ioLines[0], null);					
-					continue;
-				}//Check Overlap
+					ioLine.setM_Locator_ID(M_Locator_ID);
 				
+				}else if(contractLine.getJP_Locator().getM_Warehouse_ID() == orderLines[j].getM_Warehouse_ID()) {
 				
-				//check Lump or Divide
-				if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("LP"))
-				{
-					if(contractLine.getJP_ContractProcPeriod_InOut_ID() != JP_ContractProcPeriod_ID)
-						continue;
-				}
-				
-				
-				BigDecimal movementQty = contractLine.getMovementQty();
-				BigDecimal qtyToDeliver = orderLines[j].getQtyOrdered().subtract(orderLines[j].getQtyDelivered());
-				if(qtyToDeliver.compareTo(movementQty) >= 0)
-				{
-					MInOutLine ioLine = new MInOutLine(getCtx(), 0, get_TrxName());
-					PO.copyValues(orderLines[j], ioLine);
-					ioLine.setC_OrderLine_ID(orderLines[j].getC_OrderLine_ID());
-					ioLine.setProcessed(false);
-					ioLine.setM_InOut_ID(inout.getM_InOut_ID());
-					ioLine.setAD_Org_ID(inout.getAD_Org_ID());
-					ioLine.setAD_OrgTrx_ID(inout.getAD_OrgTrx_ID());
-					int M_Locator_ID = orderLines[j].get_ValueAsInt("JP_Locator_ID");
-					if(M_Locator_ID > 0)
-					{
-						ioLine.setM_Locator_ID(M_Locator_ID);
+					ioLine.setM_Locator_ID(contractLine.getJP_Locator_ID());
 					
-					}else if(contractLine.getJP_Locator().getM_Warehouse_ID() == orderLines[j].getM_Warehouse_ID()) {
+				}else if(MWarehouse.get(getCtx(), inout.getM_Warehouse_ID()).getDefaultLocator().getM_Locator_ID() > 0){
 					
-						ioLine.setM_Locator_ID(contractLine.getJP_Locator_ID());
-						
-					}else if(MWarehouse.get(getCtx(), inout.getM_Warehouse_ID()).getDefaultLocator().getM_Locator_ID() > 0){
-						
-						ioLine.setM_Locator_ID(MWarehouse.get(getCtx(), inout.getM_Warehouse_ID()).getDefaultLocator().getM_Locator_ID());
-						
-					}else{
-						
-						//Not Found Locator
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator, contractLine, orderLines[j], null);
-						continue;
-						
-					}
-					
-					
-					if(ioLine.getM_Product_ID() > 0)
-						ioLine.setC_UOM_ID(MProduct.get(getCtx(), ioLine.getM_Product_ID()).getC_UOM_ID());
-					else
-						ioLine.setC_UOM_ID(MUOM.getDefault_UOM_ID(getCtx()));
-					
-					ioLine.setQtyEntered(contractLine.getMovementQty());
-					ioLine.setMovementQty(contractLine.getMovementQty());
-					ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
-					
-					ioLine.saveEx(get_TrxName());
-					isCreateDocLine = true;
-					
+					ioLine.setM_Locator_ID(MWarehouse.get(getCtx(), inout.getM_Warehouse_ID()).getDefaultLocator().getM_Locator_ID());
 					
 				}else{
 					
-					//Over Ordered Quantity
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, contractLine, orderLines[j], null);
+					//Not Found Locator
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator, contractLine, orderLines[j], null);
+					continue;
+					
 				}
 				
 				
+				if(ioLine.getM_Product_ID() > 0)
+					ioLine.setC_UOM_ID(MProduct.get(getCtx(), ioLine.getM_Product_ID()).getC_UOM_ID());
+				else
+					ioLine.setC_UOM_ID(MUOM.getDefault_UOM_ID(getCtx()));
+				
+				ioLine.setQtyEntered(contractLine.getMovementQty());
+				ioLine.setMovementQty(contractLine.getMovementQty());
+				ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+				
+				try{
+					ioLine.saveEx(get_TrxName());
+				} catch (AdempiereException e) {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, inout, e.getMessage());
+					throw e;
+				}finally {
+					;
+				}
+				isCreateDocLine = true;
+						
 			}//for J
 			
 			if(isCreateDocLine)
@@ -249,11 +212,35 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				String docAction = getDocAction();
 				if(!Util.isEmpty(docAction))
 				{
-					inout.processIt(docAction);
+					if(!inout.processIt(docAction))
+					{
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, inout, inout.getProcessMsg());
+						throw new AdempiereException(inout.getProcessMsg());
+					}
+						
 					if(!docAction.equals(DocAction.ACTION_Complete))
-						inout.saveEx(get_TrxName());
+					{
+						inout.setDocAction(DocAction.ACTION_Complete);
+						try {
+							inout.saveEx(get_TrxName());//DocStatus is Draft
+						} catch (AdempiereException e) {
+							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, inout, e.getMessage());
+							throw e;
+						}finally {
+							;
+						}
+					}
 				}else{
-					inout.saveEx(get_TrxName());//DocStatus is Draft
+					
+					inout.setDocAction(DocAction.ACTION_Complete);
+					try {
+						inout.saveEx(get_TrxName());//DocStatus is Draft
+					} catch (AdempiereException e) {
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, inout, e.getMessage());
+						throw e;
+					}finally {
+						;
+					}
 				}
 				
 			}else{
@@ -264,7 +251,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 				continue;
 			}
 			
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreateDocument, null, inout, null);
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, inout, null);
 			
 		}//for i
 		
@@ -272,7 +259,112 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		return "";
 	}
 	
-	
+	private boolean isCreateInOutLine(MOrderLine orderLine, int JP_ContractProcPeriod_ID, boolean isCreateLog)
+	{
+		int JP_ContractLine_ID = orderLine.get_ValueAsInt("JP_ContractLine_ID");
+		if(JP_ContractLine_ID == 0)
+			return false;
+		
+		MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
+		
+		//Check Contract Process
+		if(contractLine.getJP_ContractProcess_InOut_ID() != getJP_ContractProcess_ID())
+			return false;
+		
+		//Check Contract Calender
+		MContractProcPeriod processPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+		if(contractLine.getJP_ContractCalender_InOut_ID() != processPeriod.getJP_ContractCalender_ID())
+			return false;
+		
+		if(!contractLine.isCreateDocLineJP())
+		{
+			if(isCreateLog)
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse, contractLine, null, null);
+			
+			return false;
+		}
+		
+		
+		//Check Overlap
+		MInOutLine[] ioLines = contractLine.getInOutLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+		if(ioLines != null && ioLines.length > 0)
+		{
+			if(isCreateLog)
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod, contractLine, ioLines[0], null);
+			
+			return false;
+		}
+		
+		
+		//Check Derivative Ship/Recipt Doc Line
+		if(m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt) ||
+				m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice) )
+		{
+			
+			//Lump
+			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod))
+			{
+				MContractProcPeriod lump_ContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Lump_InOut_ID());
+				if(!lump_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
+				{
+					if(isCreateLog)
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod, contractLine, null, null);
+					
+					return false;
+				}
+			}
+			
+			//Start Period
+			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod)
+					||contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd) )
+			{				
+				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_InOut_ID());
+				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+				if(contractLine_Period.getStartDate().compareTo(process_Period.getStartDate()) <= 0)
+				{
+					;//This is OK. contractLine_Period.StartDate <= process_Period.StartDate
+				}else{
+					
+					if(isCreateLog)
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID"));
+					
+					return false;
+				}
+			}
+			
+			//End Period
+			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod)
+					||contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd) )
+			{	
+				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_InOut_ID());
+				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+				if(contractLine_Period.getEndDate().compareTo(process_Period.getEndDate()) >= 0)
+				{
+					;///This is OK. contractLine_Period.EndDate >= process_Period.EndDate
+				}else{
+					if(isCreateLog)
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_InOut_ID");
+					
+					return false;
+				}
+			}
+		}
+		
+		
+		BigDecimal movementQty = contractLine.getMovementQty();
+		BigDecimal qtyToDeliver = orderLine.getQtyOrdered().subtract(orderLine.getQtyDelivered());
+		if(qtyToDeliver.compareTo(movementQty) < 0)
+		{
+			if(isCreateLog)
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity, contractLine, orderLine, null);
+			else
+				overQtyOrderedLineList.add(orderLine);
+			
+			return false;
+		}
+		
+		return true;
+	}
 	
 	
 }

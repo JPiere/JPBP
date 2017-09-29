@@ -124,6 +124,39 @@ public interface I_JP_ContractCalender
 	/** Get JP_ContractCalender_UU	  */
 	public String getJP_ContractCalender_UU();
 
+    /** Column name JP_ContractCategory_ID */
+    public static final String COLUMNNAME_JP_ContractCategory_ID = "JP_ContractCategory_ID";
+
+	/** Set Contract Category	  */
+	public void setJP_ContractCategory_ID (int JP_ContractCategory_ID);
+
+	/** Get Contract Category	  */
+	public int getJP_ContractCategory_ID();
+
+	public I_JP_ContractCategory getJP_ContractCategory() throws RuntimeException;
+
+    /** Column name JP_ContractContent_ID */
+    public static final String COLUMNNAME_JP_ContractContent_ID = "JP_ContractContent_ID";
+
+	/** Set Contract Content	  */
+	public void setJP_ContractContent_ID (int JP_ContractContent_ID);
+
+	/** Get Contract Content	  */
+	public int getJP_ContractContent_ID();
+
+	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException;
+
+    /** Column name JP_ContractLine_ID */
+    public static final String COLUMNNAME_JP_ContractLine_ID = "JP_ContractLine_ID";
+
+	/** Set Contract Content Line	  */
+	public void setJP_ContractLine_ID (int JP_ContractLine_ID);
+
+	/** Get Contract Content Line	  */
+	public int getJP_ContractLine_ID();
+
+	public I_JP_ContractLine getJP_ContractLine() throws RuntimeException;
+
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
 

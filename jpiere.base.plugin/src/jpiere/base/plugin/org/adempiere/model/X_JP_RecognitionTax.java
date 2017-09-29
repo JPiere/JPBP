@@ -32,7 +32,7 @@ public class X_JP_RecognitionTax extends PO implements I_JP_RecognitionTax, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170925L;
+	private static final long serialVersionUID = 20170929L;
 
     /** Standard Constructor */
     public X_JP_RecognitionTax (Properties ctx, int JP_RecognitionTax_ID, String trxName)

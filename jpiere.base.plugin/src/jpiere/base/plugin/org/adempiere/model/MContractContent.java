@@ -219,82 +219,16 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				return DocAction.STATUS_Invalid;
 			}
 			
-			if( (getDocBaseType().equals("SOO") || getDocBaseType().equals("POO"))
-					&& getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder) 
-					&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+			for(int i = 0; i < lines.length; i++)
 			{
-				for(int i = 0; i < lines.length; i++)
+				if(!lines[i].checkPeriodContractInfo(false))
 				{
-					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice))
-					{
-						if(lines[i].getJP_DerivativeDocPolicy_InOut() == null)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}
-						
-						if(lines[i].getJP_ContractCalender_InOut_ID() == 0)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}						
-						
-						if(lines[i].getJP_ContractProcess_InOut_ID() == 0)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}							
-						
-						if(lines[i].getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod)
-								&& lines[i].getJP_ContractProcPeriod_InOut_ID() == 0)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_InOut_ID)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}
-					}
-					
-					
-					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt))
-					{
-						if(lines[i].getJP_DerivativeDocPolicy_Inv() == null)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}
-						
-						
-						
-						if(lines[i].getJP_ContractCalender_Inv_ID() == 0)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}	
-						
-						if(lines[i].getJP_ContractProcess_Inv_ID() == 0)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}	
-						
-						if(lines[i].getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod)
-							&&	lines[i].getJP_ContractProcPeriod_Inv_ID() == 0)
-						{
-							m_processMsg = Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractProcPeriod_Inv_ID)
-												+ " - " + Msg.getElement(getCtx(),  MContractLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
-							return DocAction.STATUS_Invalid;
-						}
-					}
-					
-					
-				}//for i
-			}
+					Object error= Env.getCtx().get( "org.compiere.util.CLogger.lastError");
+					m_processMsg = Msg.getElement(getCtx(), MContractLine.COLUMNNAME_Line)+" : "+ lines[i].getLine() +"  " + error.toString();
+					return DocAction.STATUS_Invalid;
+				}
+			}//for i
+			
 		}
 		
 		//	Add up Amounts
@@ -600,59 +534,66 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && 
 				( newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_From) ||  is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_To)))
 		{
-			MContractContent[] contractContents = contract.getContractContents();
-			for(int i = 0; i < contractContents.length; i++)
+			
+			if(!getJP_ContractContentT().isOrverlapContractProcDateJP())
 			{
-				//Self
-				if(contractContents[i].getJP_ContractContent_ID() == getJP_ContractContent_ID())
-					continue;
-				
-				//Diff Template
-				if(contractContents[i].getJP_ContractContentT_ID() != getJP_ContractContentT_ID())
-					continue;
-				
-				//Invalid status
-				if(contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid))
-					continue;
-				
-				//Check
-				if(contractContents[i].getJP_ContractProcDate_To() != null &&  getJP_ContractProcDate_To() != null)
+				//Check overlap
+				MContractContent[] contractContents = contract.getContractContents();
+				for(int i = 0; i < contractContents.length; i++)
 				{
-					if(contractContents[i].getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) <= 0
-							&& contractContents[i].getJP_ContractProcDate_To().compareTo(getJP_ContractProcDate_From()) >= 0 )
-					{
-						//Overlap of Contract process date in same contract content template.
-						log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
-						return false;
-					}		
-				
-				}else if(contractContents[i].getJP_ContractProcDate_To() != null){
+					//Self
+					if(contractContents[i].getJP_ContractContent_ID() == getJP_ContractContent_ID())
+						continue;
 					
-					if(contractContents[i].getJP_ContractProcDate_To().compareTo(getJP_ContractProcDate_From()) >= 0)
+					//Diff Template
+					if(contractContents[i].getJP_ContractContentT_ID() != getJP_ContractContentT_ID())
+						continue;
+					
+					//Invalid status
+					if(contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid))
+						continue;
+					
+					//Check
+					if(contractContents[i].getJP_ContractProcDate_To() != null &&  getJP_ContractProcDate_To() != null)
 					{
-						//overlap of Contract process date in Same contract content template
-						log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
-						return false;
-					}		
+						if(contractContents[i].getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) <= 0
+								&& contractContents[i].getJP_ContractProcDate_To().compareTo(getJP_ContractProcDate_From()) >= 0 )
+						{
+							//Overlap of Contract process date in same contract content template.
+							log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
+							return false;
+						}		
+					
+					}else if(contractContents[i].getJP_ContractProcDate_To() != null){
 						
-				}else if(getJP_ContractProcDate_To() != null){
-					
-					if(contractContents[i].getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) <= 0)
-					{
+						if(contractContents[i].getJP_ContractProcDate_To().compareTo(getJP_ContractProcDate_From()) >= 0)
+						{
+							//overlap of Contract process date in Same contract content template
+							log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
+							return false;
+						}		
+							
+					}else if(getJP_ContractProcDate_To() != null){
+						
+						if(contractContents[i].getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) <= 0)
+						{
+							//overlap of Contract process date in Same contract content template
+							log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
+							return false;
+						}
+						
+					}else{ //contractContents[i].getJP_ContractProcDate_To() == null && getJP_ContractProcDate_To() == null
+						
 						//overlap of Contract process date in Same contract content template
 						log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
 						return false;
+						
 					}
 					
-				}else{ //contractContents[i].getJP_ContractProcDate_To() == null && getJP_ContractProcDate_To() == null
-					
-					//overlap of Contract process date in Same contract content template
-					log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
-					return false;
-					
-				}
-				
+				}//for			
 			}
+				
+
 		}//Check overlap of Contract process date in Same contract content tempalete
 		
 		

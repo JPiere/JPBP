@@ -217,6 +217,62 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 			contrctLine.setAD_OrgTrx_ID(contractContent.getAD_OrgTrx_ID());
 			contrctLine.setJP_ContractContent_ID(contractContent.getJP_ContractContent_ID());
 			contrctLine.setJP_ContractLineT_ID(m_ContractLineTemplates[i].getJP_ContractLineT_ID());
+			if(contrctLine.getJP_BaseDocLinePolicy() != null)
+			{
+				if(contrctLine.getJP_BaseDocLinePolicy().equals("LP"))
+				{
+					MContractLineT lineTemplate = MContractLineT.get(getCtx(), contrctLine.getJP_ContractLineT_ID());
+					
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_Lump();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+	
+					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractContent.getJP_ContractProcDate_From(), null , processPeriodOffset);
+					if(period != null)
+						contrctLine.setJP_ProcPeriod_Lump_ID(period.getJP_ContractProcPeriod_ID());
+				}
+				
+				if(contrctLine.getJP_BaseDocLinePolicy().equals("PS") || contrctLine.getJP_BaseDocLinePolicy().equals("PB"))
+				{
+					MContractLineT lineTemplate = MContractLineT.get(getCtx(), contrctLine.getJP_ContractLineT_ID());
+					
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_Start();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+	
+					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractContent.getJP_ContractProcDate_From(), null , processPeriodOffset);
+					if(period != null)
+						contrctLine.setJP_ProcPeriod_Start_ID(period.getJP_ContractProcPeriod_ID());					
+				}
+				
+				if(contrctLine.getJP_BaseDocLinePolicy().equals("PE") || contrctLine.getJP_BaseDocLinePolicy().equals("PB"))
+				{
+					MContractLineT lineTemplate = MContractLineT.get(getCtx(), contrctLine.getJP_ContractLineT_ID());
+					
+					int processPeriodOffset = lineTemplate.getJP_ProcPeriodOffs_End();
+					if(processPeriodOffset > 0)
+						processPeriodOffset++;
+					else
+						processPeriodOffset--;
+					
+	
+					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractContent.getJP_ContractProcDate_From(), null , processPeriodOffset);
+					if(period != null)
+						contrctLine.setJP_ProcPeriod_End_ID(period.getJP_ContractProcPeriod_ID());					
+				}
+				
+			}
+			
+			
 			contrctLine.saveEx(get_TrxName());
 		}//For i
 		
