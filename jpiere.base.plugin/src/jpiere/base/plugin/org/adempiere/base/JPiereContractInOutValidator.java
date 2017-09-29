@@ -16,14 +16,11 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.util.List;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.compiere.model.I_M_InOut;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
-import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
-import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidationEngine;
@@ -37,8 +34,6 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
-import jpiere.base.plugin.org.adempiere.model.MContractAcct;
-import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -438,7 +433,6 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				{
 					//Check Contract Process Period - Calender
 					MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);		
-					int aaa = contractLine.getJP_ContractCalender_InOut_ID();
 					if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
 					{	
 						//Please select the Contract Process Period that belong to Calender of Contract Content line. 
