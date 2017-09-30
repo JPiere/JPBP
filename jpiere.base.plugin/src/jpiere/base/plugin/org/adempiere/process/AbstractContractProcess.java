@@ -271,9 +271,15 @@ public class AbstractContractProcess extends SvrProcess
 			
 			return m_ContractContent.getDateInvoiced();
 			
-		}		
+		}
 		
-		return  getDateDoc();
+		if(p_DateDoc != null)
+			return p_DateDoc;
+		
+		if(p_JP_ContractProcPeriod_ID > 0)
+			return MContractProcPeriod.get(getCtx(), p_JP_ContractProcPeriod_ID).getDateDoc();
+		
+		return  m_ContractContent.getDateInvoiced();
 		
 	}
 	
