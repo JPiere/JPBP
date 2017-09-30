@@ -568,6 +568,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		setQtyEntered(Qty);
 		setQtyInvoiced(getQtyEntered());
 		setJP_QtyRecognized(getQtyInvoiced());
+		setJP_TargetQtyRecognized(getQtyInvoiced());
 	}	//	setQtyInvoiced
 
 	/**

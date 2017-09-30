@@ -33,7 +33,9 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
+import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MInOutLineConfirm;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrg;
@@ -648,6 +650,11 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			line.setJP_ContractLine_ID(fromLine.getJP_ContractLine_ID());
 			line.setJP_ContractProcPeriod_ID(fromLine.getJP_ContractProcPeriod_ID());
 			
+			line.setQtyEntered(fromLine.getQtyEntered());
+			line.setQtyInvoiced(fromLine.getQtyInvoiced());
+			line.setJP_QtyRecognized(fromLine.getJP_QtyRecognized());
+			line.setJP_TargetQtyRecognized(fromLine.getJP_TargetQtyRecognized());
+			
 			line.setM_AttributeSetInstance_ID(0);
 			line.setS_ResourceAssignment_ID(0);
 			//	New Tax
@@ -1254,10 +1261,13 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		
 		//	Update Order Lines or RMA Lines
 		MRecognitionLine[] lines = getLines(false);
+		boolean isDiffQty = false;
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRecognitionLine line = lines[i];
-					
+			if(isDiffQty == false && line.getJP_QtyRecognized().compareTo(line.getJP_TargetQtyRecognized()) != 0)
+				isDiffQty = true;
+			
 			//Update JP_QtyRecognized Order Line
 			MOrderLine ol = null;
 			if (line.getC_OrderLine_ID() != 0 && line.getM_RMALine_ID() == 0)
@@ -1301,6 +1311,17 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 					
 		}//	for i
 
+		if(isDiffQty)
+		{
+			MContractContent content = MContractContent.get(getCtx(), getJP_ContractContent_ID());
+			MContractAcct acct = MContractAcct.get(getCtx(),content.getJP_Contract_Acct_ID());
+			if(acct != null && acct.isPostingContractAcctJP() && acct.isPostingRecognitionDocJP() && acct.isSplitWhenDifferenceJP())
+			{
+				splitRecognition(lines);
+			}
+			
+		}
+		
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (valid != null)
@@ -1510,6 +1531,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			MRecognitionLine rLine = rLines[i];
 			rLine.setQtyEntered(rLine.getQtyEntered().negate());
 			rLine.setQtyInvoiced(rLine.getQtyInvoiced().negate());
+			rLine.setJP_QtyRecognized(rLine.getJP_QtyRecognized().negate());
+			rLine.setJP_TargetQtyRecognized(rLine.getJP_TargetQtyRecognized().negate());
 			rLine.setLineNetAmt(rLine.getLineNetAmt().negate());
 			if (rLine.getTaxAmt() != null && rLine.getTaxAmt().compareTo(Env.ZERO) != 0)
 				rLine.setTaxAmt(rLine.getTaxAmt().negate());
@@ -1761,7 +1784,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		return getC_DocType_ID() > 0 ? getC_DocType_ID() : getC_DocTypeTarget_ID();
 	}
 	
-	static public MRecognition[] getRecognitionsByInOut(Properties ctx, int M_InOut_ID, String trxName)
+	static public MRecognition[] getRecognitionsByInOut(Properties ctx, int M_InOut_ID, boolean isReversal, int original_InOut_ID, String trxName)
 	{
 		ArrayList<MRecognition> list = new ArrayList<MRecognition>();
 		final String sql = "SELECT * FROM JP_Recognition WHERE M_InOut_ID=? AND DocStatus NOT IN ('VO','RE','CL')";
@@ -1770,7 +1793,12 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		try
 		{
 			pstmt = DB.prepareStatement(sql, trxName);
-			pstmt.setInt(1, M_InOut_ID);
+			if(isReversal)
+			{
+				pstmt.setInt(1, original_InOut_ID);
+			}else{
+				pstmt.setInt(1, M_InOut_ID);
+			}
 			rs = pstmt.executeQuery();
 			while(rs.next())
 				list.add(new MRecognition(ctx, rs, trxName));
@@ -1817,4 +1845,49 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 
 	}
 
+	private void splitRecognition (MRecognitionLine[] lines)
+	{
+		MRecognition split = new MRecognition (getCtx(), 0, get_TrxName());
+		PO.copyValues(this,split );
+		split.setAD_Org_ID(getAD_Org_ID());
+		split.setDocumentNo(null);
+		split.setJP_Recognition_SplitFrom_ID(getJP_Recognition_ID());
+		split.setReversal_ID(0);
+		split.setJP_Contract_ID(getJP_Contract_ID());
+		split.setJP_ContractContent_ID(getJP_ContractContent_ID());
+		split.setJP_ContractProcPeriod_ID(getJP_ContractProcPeriod_ID());
+		split.setDocStatus(DocAction.STATUS_Drafted);
+		split.setDocAction(DocAction.ACTION_Complete);
+		split.setTotalLines(Env.ZERO);
+		split.setGrandTotal(Env.ZERO);
+		split.saveEx();
+		
+		setJP_Recognition_SplitFrom_ID(split.getJP_Recognition_ID());
+		
+		for (int i = 0; i < lines.length; i++)
+		{
+			MRecognitionLine line = lines[i];
+			BigDecimal differenceQty = line.getJP_TargetQtyRecognized().subtract(line.getJP_QtyRecognized());
+			if (differenceQty.compareTo(Env.ZERO) == 0)
+				continue;
+
+			MRecognitionLine splitLine = new MRecognitionLine (getCtx(), 0, get_TrxName());
+			PO.copyValues(line,splitLine);
+			splitLine.setJP_Recognition_ID(split.getJP_Recognition_ID());
+			splitLine.setAD_Org_ID(line.getAD_Org_ID());
+			splitLine.setC_OrderLine_ID(line.getC_OrderLine_ID());
+			splitLine.setM_RMALine_ID(line.getM_RMALine_ID());
+			splitLine.setM_InOutLine_ID(line.getM_InOutLine_ID());
+			splitLine.setLine(line.getLine());
+			
+			splitLine.setJP_TargetQtyRecognized(differenceQty);
+			splitLine.setQty(differenceQty);
+			
+			splitLine.setJP_RecogLine_SplitFrom_ID(line.getJP_RecognitionLine_ID());
+			splitLine.saveEx();
+		}
+		
+	}	//	splitRecognition
+
+	
 }	//	MRecognition

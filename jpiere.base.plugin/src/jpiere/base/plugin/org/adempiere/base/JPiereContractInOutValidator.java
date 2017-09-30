@@ -21,6 +21,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrder;
+import org.compiere.model.MPeriod;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidationEngine;
@@ -169,101 +170,111 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			/** Create Recognition*/
 			MInOut io = (MInOut)po;			
 			String trxName = po.get_TrxName();
-			
-			MOrder order = null;
-			MRecognition recognition = null;
-			boolean isRMA = false;
-			if(io.getC_Order_ID() > 0)
+			boolean isReversal = io.isReversal();
+			if(isReversal)
 			{
-				order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
-				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
-				if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
-					return null;
+				String action = io.getDocAction();
+				int original_InOut_ID = io.getReversal_ID();
+				reversalRecognition(io, timing, true, original_InOut_ID);
 				
-				recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+			}else{// Create Recognition
 				
-			}else if(io.getM_RMA_ID() > 0){
-			
-				isRMA = true;
-				MRMA rma = new MRMA(Env.getCtx(),io.getM_RMA_ID(),trxName);
-				int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
-				if(JP_Order_ID == 0)
-					return null;
-				
-				order = new MOrder(po.getCtx(), JP_Order_ID, trxName);
-				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
-				if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
-					return null;
-				
-				recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
-				MDocType odt = MDocType.get(order.getCtx(), rma.getC_DocType_ID());
-				if (odt != null)
+				MOrder order = null;
+				MRecognition recognition = null;
+				boolean isRMA = false;
+				if(io.getC_Order_ID() > 0)
 				{
-					int C_DocTypeTarget_ID = odt.get_ValueAsInt("JP_DocTypeRecognition_ID");
-					if (C_DocTypeTarget_ID <= 0)
-						throw new AdempiereException("@NotFound@ @C_DocTypeInvoice_ID@ - @C_DocType_ID@:"+odt.get_Translation(MDocType.COLUMNNAME_Name));
+					order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
+					MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+					if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
+						return null;
 					
-					recognition.setC_DocTypeTarget_ID(C_DocTypeTarget_ID);
+					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+					
+				}else if(io.getM_RMA_ID() > 0){
+				
+					isRMA = true;
+					MRMA rma = new MRMA(Env.getCtx(),io.getM_RMA_ID(),trxName);
+					int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+					if(JP_Order_ID == 0)
+						return null;
+					
+					order = new MOrder(po.getCtx(), JP_Order_ID, trxName);
+					MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
+					if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
+						return null;
+					
+					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+					MDocType odt = MDocType.get(order.getCtx(), rma.getC_DocType_ID());
+					if (odt != null)
+					{
+						int C_DocTypeTarget_ID = odt.get_ValueAsInt("JP_DocTypeRecognition_ID");
+						if (C_DocTypeTarget_ID <= 0)
+							throw new AdempiereException("@NotFound@ @C_DocTypeInvoice_ID@ - @C_DocType_ID@:"+odt.get_Translation(MDocType.COLUMNNAME_Name));
+						
+						recognition.setC_DocTypeTarget_ID(C_DocTypeTarget_ID);
+					}
+					recognition.setM_RMA_ID(io.getM_RMA_ID());
 				}
-				recognition.setM_RMA_ID(io.getM_RMA_ID());
-			}
-			
-			recognition.setM_InOut_ID(io.getM_InOut_ID());
-			recognition.setMovementDate(io.getMovementDate());
-			if (!recognition.save(trxName))
-			{
-				return "Could not create Recognition: "+ io.getDocumentInfo();//TODO メッセージ化
-			}
-
-			MInOutLine[] sLines = io.getLines(false);
-			for (int i = 0; i < sLines.length; i++)
-			{
-				MInOutLine sLine = sLines[i];
-				//
-				MRecognitionLine rcogLine = new MRecognitionLine(recognition);
-				rcogLine.setRecogLine(sLine);
-				if(isRMA)
+				
+				recognition.setM_InOut_ID(io.getM_InOut_ID());
+				recognition.setMovementDate(io.getMovementDate());
+				if (!recognition.save(trxName))
 				{
-					int M_RMALine_ID = sLine.getM_RMALine_ID();
-					MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, trxName);
-					int JP_OrderLine_ID = rmaLine.get_ValueAsInt("JP_OrderLine_ID");
-					rcogLine.setC_OrderLine_ID(JP_OrderLine_ID);
+					return "Could not create Recognition: "+ io.getDocumentInfo();//TODO メッセージ化
 				}
-				rcogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
-				//	Qty = Delivered
-				if (sLine.sameOrderLineUOM())
-					rcogLine.setQtyEntered(sLine.getQtyEntered());
-				else
-					rcogLine.setQtyEntered(sLine.getMovementQty());
-				rcogLine.setQtyInvoiced(sLine.getMovementQty());
-				rcogLine.setJP_QtyRecognized(sLine.getMovementQty());
-				rcogLine.setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID"));
-				rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-				if (!rcogLine.save(trxName))
+	
+				MInOutLine[] sLines = io.getLines(false);
+				for (int i = 0; i < sLines.length; i++)
 				{
-//					log.warning("Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo());
-					return "Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo();//TODO メッセージ化
+					MInOutLine sLine = sLines[i];
+					//
+					MRecognitionLine rcogLine = new MRecognitionLine(recognition);
+					rcogLine.setRecogLine(sLine);
+					if(isRMA)
+					{
+						int M_RMALine_ID = sLine.getM_RMALine_ID();
+						MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, trxName);
+						int JP_OrderLine_ID = rmaLine.get_ValueAsInt("JP_OrderLine_ID");
+						rcogLine.setC_OrderLine_ID(JP_OrderLine_ID);
+					}
+					rcogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+					//	Qty = Delivered
+					if (sLine.sameOrderLineUOM())
+						rcogLine.setQtyEntered(sLine.getQtyEntered());
+					else
+						rcogLine.setQtyEntered(sLine.getMovementQty());
+					rcogLine.setQtyInvoiced(sLine.getMovementQty());
+					rcogLine.setJP_QtyRecognized(sLine.getMovementQty());
+					rcogLine.setJP_TargetQtyRecognized(sLine.getMovementQty());
+					rcogLine.setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID"));
+					rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+					if (!rcogLine.save(trxName))
+					{
+	//					log.warning("Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo());
+						return "Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo();//TODO メッセージ化
+					}
+	
+				}//for
+	
+				
+				String docAction = content.getJP_Contract_Acct().getDocAction();
+				if(docAction == null)
+				{
+					;//Noting to do. DocStatus is Draft
+				}else{
+				
+					if (!recognition.processIt(docAction))
+						throw new AdempiereException("Failed when processing document - " + recognition.getProcessMsg());
+	
 				}
-
-			}//for
-
+				
+				if (!recognition.getDocStatus().equals(DocAction.STATUS_Completed))
+				{
+					recognition.saveEx(trxName);
+				}
+			}// Create Recognition
 			
-			String docAction = content.getJP_Contract_Acct().getDocAction();
-			if(docAction == null)
-			{
-				;//Noting to do. DocStatus is Draft
-			}else{
-			
-				if (!recognition.processIt(docAction))
-					throw new AdempiereException("Failed when processing document - " + recognition.getProcessMsg());
-
-			}
-			
-			if (!recognition.getDocStatus().equals(DocAction.STATUS_Completed))
-			{
-				recognition.saveEx(trxName);
-			}
-
 		}//if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
 
 		
@@ -272,41 +283,60 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				|| timing == ModelValidator.TIMING_AFTER_VOID )
 		{
 			MInOut io = (MInOut)po;
-			String trxName = io.get_TrxName();
-			MRecognition[] recogs = MRecognition.getRecognitionsByInOut(Env.getCtx(), io.getM_InOut_ID(), trxName);
-			for(int i = 0; i < recogs.length; i++)
-			{
-				MRecognition recog = recogs[i];
-				if(recog.getDocStatus().equals(DocAction.STATUS_Completed))
-				{
-					if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL)
-					{
-						recog.processIt(DocAction.ACTION_Reverse_Accrual);
-					
-					}else if(timing == ModelValidator.TIMING_AFTER_REVERSECORRECT){
-						
-						recog.processIt(DocAction.ACTION_Reverse_Correct);
-						
-					}else{
-						
-						recog.processIt(DocAction.ACTION_Reverse_Accrual);
-						
-					}
-					
-				}else{
-					
-					recog.processIt(DocAction.ACTION_Void);
-				}
-				
-				recog.saveEx(trxName);
-				
-			}//for i
+			reversalRecognition(io, timing, false, io.getM_InOut_ID());
 			
 		}//if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL
 		
 		return null;
 	}
 	
+	private boolean reversalRecognition(MInOut io, int timing, boolean isReversal, int original_InOut_ID)
+	{
+		String trxName = io.get_TrxName();
+		MRecognition[] recogs = MRecognition.getRecognitionsByInOut(Env.getCtx(), io.getM_InOut_ID(), isReversal, original_InOut_ID, trxName);
+		for(int i = 0; i < recogs.length; i++)
+		{
+			MRecognition recog = recogs[i];
+			if(recog.getDocStatus().equals(DocAction.STATUS_Completed))
+			{
+				if(timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL)
+				{
+					recog.processIt(DocAction.ACTION_Reverse_Accrual);
+				
+				}else if(timing == ModelValidator.TIMING_AFTER_REVERSECORRECT){
+					
+					recog.processIt(DocAction.ACTION_Reverse_Correct);
+					
+				}else{
+					
+					recog.processIt(DocAction.ACTION_Reverse_Accrual);
+					
+				}
+				
+			}else{
+				
+				if(!recog.getDocStatus().equals(DocAction.ACTION_Complete))
+				{
+					recog.processIt(DocAction.ACTION_Void);
+				}else{
+					
+					if(MPeriod.isOpen(Env.getCtx(), recog.getDateAcct(), recog.getC_DocType().getDocBaseType(), io.getAD_Org_ID()))
+					{
+						recog.processIt(DocAction.ACTION_Reverse_Correct);
+					}else{
+						recog.processIt(DocAction.ACTION_Reverse_Accrual);
+					}
+					
+				}
+				
+			}
+			
+			recog.saveEx(trxName);
+			
+		}//for i
+		
+		return true;
+	}
 	
 	/**
 	 * Order Validate
