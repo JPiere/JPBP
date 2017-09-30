@@ -29,6 +29,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
+import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 
 
 /** 
@@ -93,7 +94,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 		
 		
 		/** Create Order header */
-		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
+		MOrderJP order = new MOrderJP(getCtx(), 0, get_TrxName());
 
 		
 		PO.copyValues(m_ContractContent, order);
@@ -106,6 +107,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 		order.setDatePromised(getOrderHeaderDatePromised(p_DateAcct)); //DateAcct is basis.
 		order.setDocumentNo(""); //Reset Document No
 		order.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
+		order.setC_DocType_ID(m_ContractContent.getJP_BaseDocDocType_ID());
 		order.set_ValueOfColumn("JP_Contract_ID", m_ContractContent.getParent().getJP_Contract_ID());
 		order.set_ValueOfColumn("JP_ContractContent_ID", m_ContractContent.getJP_ContractContent_ID());
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))

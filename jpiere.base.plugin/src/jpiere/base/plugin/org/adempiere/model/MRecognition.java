@@ -336,6 +336,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			}
 		}
 		setC_DocTypeTarget_ID(C_DocTypeTarget_ID);
+		setC_DocType_ID(C_DocTypeTarget_ID);
 		setDateInvoiced(DateAcct);
 		setDateAcct(DateAcct);
 		//
@@ -817,13 +818,14 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				setM_RMA_ID(rma.getM_RMA_ID());				
 			}
 			
-			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)
-					&& !getM_InOut().getDocStatus().equals(DocAction.STATUS_Closed))
-			{
-				//Document Status of Ship/Receipt doc must be Complete or Close
-				log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogInOutDocStatus"));
-				return false;
-			}
+			//Should be Comment out Because Recognitiond document can not create from InOut when DocAciton Complete
+//			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)
+//					&& !getM_InOut().getDocStatus().equals(DocAction.STATUS_Closed))
+//			{
+//				//Document Status of Ship/Receipt doc must be Complete or Close
+//				log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogInOutDocStatus"));
+//				return false;
+//			}
 		}
 		
 		

@@ -39,6 +39,7 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MRMA;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
@@ -320,16 +321,21 @@ public class Doc_JPRecognition extends Doc
 		MRecognition recog = (MRecognition)getPO();
 		
 		if(recog.getJP_ContractContent_ID()==0)
-			return facts;
+		{
+			return facts;//TODO 転記エラーにする。
+		}
 		
 		MContractContent contractContent = MContractContent.get(Env.getCtx(),recog.getJP_ContractContent_ID());
 		if(contractContent.getJP_Contract_Acct_ID() == 0)
-			return facts;
+		{
+			return facts;//TODO 転記エラーにする。
+		}
 		
 		MContractAcct contractAcct = MContractAcct.get(Env.getCtx(),contractContent.getJP_Contract_Acct_ID());
-		
-		if( !(contractAcct.isPostingContractAcctJP() && contractAcct.isPostingRecognitionDocJP()) )
-			return facts;
+		if( !contractAcct.isPostingContractAcctJP() || !contractAcct.isPostingRecognitionDocJP() )
+		{
+			return facts;//TODO 転記エラーにする。
+		}
 		
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);		
@@ -422,7 +428,7 @@ public class Doc_JPRecognition extends Doc
 				int M_InOutLine_ID = line.getPO().get_ValueAsInt("M_InOutLine_ID");
 				if(M_InOutLine_ID > 0)
 				{
-					MInOutLine ioLine =	new MInOutLine(getCtx(),M_InOutLine_ID, get_TableName());
+					MInOutLine ioLine =	new MInOutLine(getCtx(),M_InOutLine_ID, getTrxName());
 					dr.setM_Locator_ID(ioLine.getM_Locator_ID());
 					dr.setLocationFromLocator(ioLine.getM_Locator_ID(), true);    //  from Loc
 
@@ -498,6 +504,26 @@ public class Doc_JPRecognition extends Doc
 			log.log(Level.SEVERE, p_Error);
 			fact = null;
 		}
+		
+		
+		FactLine[]  factLine = fact.getLines();
+		for(int i = 0; i < factLine.length; i++)
+		{
+			if(recog.getC_Order_ID() > 0)
+			{
+				factLine[i].set_ValueNoCheck("JP_Order_ID", recog.getC_Order_ID());
+			}else if(recog.getM_RMA_ID() > 0){
+				int M_RMA_ID = recog.getM_RMA_ID();
+				MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID,null);
+				int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+				if(JP_Order_ID > 0)
+					factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
+			}
+			
+			factLine[i].set_ValueNoCheck("JP_ContractContent_ID", recog.getJP_ContractContent_ID());
+		}//for
+		
+		
 		//
 		facts.add(fact);
 		return facts;

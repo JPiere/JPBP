@@ -104,6 +104,7 @@ public class DefaultContractProcessCreateBaseInvoice extends AbstractContractPro
 		invoice.setDateAcct(getDateAcct());		
 		invoice.setDocumentNo(""); //Reset Document No
 		invoice.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
+		invoice.setC_DocType_ID(m_ContractContent.getJP_BaseDocDocType_ID());
 		invoice.set_ValueOfColumn("JP_Contract_ID", m_ContractContent.getParent().getJP_Contract_ID());
 		invoice.set_ValueOfColumn("JP_ContractContent_ID", m_ContractContent.getJP_ContractContent_ID());
 		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))

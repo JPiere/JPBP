@@ -68,8 +68,7 @@ public abstract class AbstractContractValidator {
 			
 			po.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
-			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
-					|| contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
 				if(po.get_ValueAsInt("C_Order_ID") == 0 && po.get_ValueAsInt("M_RMA_ID")  == 0)
 				{
