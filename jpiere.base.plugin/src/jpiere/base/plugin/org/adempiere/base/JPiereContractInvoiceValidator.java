@@ -230,13 +230,13 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
 					}
 					
-					//Check Doc Type
-					if(content.getJP_BaseDocDocType_ID() != invoice.getC_DocTypeTarget_ID())
-					{
-						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
-						//Please select the Document Type that is same as Contract content. 
-						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
-					}
+					//Check Doc Type comment out because Interruption in case of ARC and APC
+//					if(content.getJP_BaseDocDocType_ID() != invoice.getC_DocTypeTarget_ID())
+//					{
+//						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
+//						//Please select the Document Type that is same as Contract content. 
+//						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
+//					}
 					
 					
 					/** 
@@ -304,13 +304,13 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
 					}
 					
-					//Check Doc Type
-					if(content.getJP_BaseDocDocType_ID() != invoice.getC_DocTypeTarget_ID())
-					{
-						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
-						//Please select the Document Type that is same as Contract content. 
-						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
-					}
+					//Check Doc Type comment out because Interruption in case of ARC and APC
+//					if(content.getJP_BaseDocDocType_ID() != invoice.getC_DocTypeTarget_ID())
+//					{
+//						MDocType docType = MDocType.get(Env.getCtx(), content.getJP_BaseDocDocType_ID());
+//						//Please select the Document Type that is same as Contract content. 
+//						return Msg.getMsg(Env.getCtx(), "JP_SelectDocTypeSameAsContractContent")  + " -> " + docType.getNameTrl();
+//					}
 				}
 				
 				/** In case of Spot Contract or General Contract, JP_ContractProcPeriod_ID should be null; */

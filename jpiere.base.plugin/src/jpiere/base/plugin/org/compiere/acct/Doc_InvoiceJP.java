@@ -91,159 +91,178 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		if (getDocumentType().equals(DOCTYPE_ARInvoice)
 			|| getDocumentType().equals(DOCTYPE_ARProForma))
 		{
-			BigDecimal amt = Env.ZERO;
-			//CR : TaxDue
-			MContractTaxAcct taxAcct = null;
-			for (int i = 0; i < m_taxes.length; i++)
-			{
-				amt = m_taxes[i].getAmount();
-				if (amt != null && amt.signum() != 0)
-				{
-					//CR
-					FactLine tl = null;
-					 taxAcct = contractAcct.getContracTaxAcct(m_taxes[i].getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-					if(taxAcct == null || taxAcct.getT_Due_Acct() == 0 )
-					{
-						tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),getC_Currency_ID(), null, amt);
-					}else{
-						tl = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getT_Due_Acct()), getC_Currency_ID(), null, amt);
-					}
-					
-					if (tl != null)
-						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	;
-				}//if
-			}//for
-			
-			//CR : Revenue
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				amt = p_lines[i].getAmtSource();
-				BigDecimal dAmt = null;
-				//DR : Posting Trade Discount
-				if (as.isTradeDiscountPosted())
-				{
-					BigDecimal discount = p_lines[i].getDiscount();
-					if (discount != null && discount.signum() != 0)
-					{
-						amt = amt.add(discount);
-						dAmt = discount;
-						fact.createLine (p_lines[i], 
-								getTDiscountGrantValidCombination(p_lines[i], contractAcct,  as),
-								getC_Currency_ID(), dAmt, null);
-					}
-				}
-				
-				//CR : Revenue
-				fact.createLine (p_lines[i], 
-						getRevenueValidCombination(p_lines[i], contractAcct,  as), 
-						getC_Currency_ID(), null, amt);
-				
-			}//For
-			
-			//  Set Locations
-			FactLine[] fLines = fact.getLines();
-			for (int i = 0; i < fLines.length; i++)
-			{
-				if (fLines[i] != null)
-				{
-					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
-					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				}
-			}
-
-			//DR : Receivables
-			int receivables_ID = getReceivableValidCombination_ID(contractAcct,  as);
-			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-			if (grossAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
-					getC_Currency_ID(), grossAmt, null);
-
+			postARI(as, contractAcct, fact);
 		}
 		//  ARC
 		else if (getDocumentType().equals(DOCTYPE_ARCredit))
 		{
-			BigDecimal amt = Env.ZERO;
-			//DR :  TaxDue                  
-			MContractTaxAcct taxAcct = null;
-			for (int i = 0; i < m_taxes.length; i++)
-			{
-				amt = m_taxes[i].getAmount();
-				if (amt != null && amt.signum() != 0)
-				{
-					//DR
-					FactLine tl = null;
-					 taxAcct = contractAcct.getContracTaxAcct(m_taxes[i].getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-					if(taxAcct == null || taxAcct.getT_Due_Acct() == 0 )
-					{
-						tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),getC_Currency_ID(), amt, null);
-					}else{
-						tl = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getT_Due_Acct()), getC_Currency_ID(), amt, null);
-					}
-					
-					if (tl != null)
-						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	;
-				}//if
-			}//for
-			
-			//DR :  Revenue 
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				amt = p_lines[i].getAmtSource();
-				BigDecimal dAmt = null;
-				//CR:Posting Trade Discount
-				if (as.isTradeDiscountPosted())
-				{
-					BigDecimal discount = p_lines[i].getDiscount();
-					if (discount != null && discount.signum() != 0)
-					{
-						amt = amt.add(discount);
-						dAmt = discount;
-						fact.createLine (p_lines[i], 
-								getTDiscountGrantValidCombination(p_lines[i], contractAcct,  as),
-								getC_Currency_ID(), null, dAmt);
-					}
-				}
-				
-				//DR : Revenue
-				fact.createLine (p_lines[i], 
-						getRevenueValidCombination(p_lines[i], contractAcct,  as), 
-						getC_Currency_ID(), amt, null);
-				
-			}//For
-			
-			//  Set Locations
-			FactLine[] fLines = fact.getLines();
-			for (int i = 0; i < fLines.length; i++)
-			{
-				if (fLines[i] != null)
-				{
-					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
-					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				}
-			}
-
-			//CR : Receivables
-			int receivables_ID = getReceivableValidCombination_ID(contractAcct,  as);
-			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-			if (grossAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
-					getC_Currency_ID(), null, grossAmt);
+			postARC(as, contractAcct, fact);
 		}
 		//  ** API
 		else if (getDocumentType().equals(DOCTYPE_APInvoice))
 		{
-			;//TODO
+			postAPI(as, contractAcct, fact);//TODO
 		}
 		//  APC
 		else if (getDocumentType().equals(DOCTYPE_APCredit))
 		{
-			;//TODO
+			postAPC(as, contractAcct, fact);//TODO
 		}
 		
 		facts.add(fact);
 		return facts;
 	}
 	
+	
+	private void postARI(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{
+		BigDecimal amt = Env.ZERO;
+		//CR : TaxDue
+		MContractTaxAcct taxAcct = null;
+		for (int i = 0; i < m_taxes.length; i++)
+		{
+			amt = m_taxes[i].getAmount();
+			if (amt != null && amt.signum() != 0)
+			{
+				//CR
+				FactLine tl = null;
+				 taxAcct = contractAcct.getContracTaxAcct(m_taxes[i].getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
+				if(taxAcct == null || taxAcct.getT_Due_Acct() == 0 )
+				{
+					tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),getC_Currency_ID(), null, amt);
+				}else{
+					tl = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getT_Due_Acct()), getC_Currency_ID(), null, amt);
+				}
+				
+				if (tl != null)
+					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	;
+			}//if
+		}//for
+		
+		//CR : Revenue
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			amt = p_lines[i].getAmtSource();
+			BigDecimal dAmt = null;
+			//DR : Posting Trade Discount
+			if (as.isTradeDiscountPosted())
+			{
+				BigDecimal discount = p_lines[i].getDiscount();
+				if (discount != null && discount.signum() != 0)
+				{
+					amt = amt.add(discount);
+					dAmt = discount;
+					fact.createLine (p_lines[i], 
+							getTDiscountGrantValidCombination(p_lines[i], contractAcct,  as),
+							getC_Currency_ID(), dAmt, null);
+				}
+			}
+			
+			//CR : Revenue
+			fact.createLine (p_lines[i], 
+					getRevenueValidCombination(p_lines[i], contractAcct,  as), 
+					getC_Currency_ID(), null, amt);
+			
+		}//For
+		
+		//  Set Locations
+		FactLine[] fLines = fact.getLines();
+		for (int i = 0; i < fLines.length; i++)
+		{
+			if (fLines[i] != null)
+			{
+				fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
+				fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+			}
+		}
+
+		//DR : Receivables
+		int receivables_ID = getReceivableValidCombination_ID(contractAcct,  as);
+		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, MAccount.get(getCtx(), receivables_ID),getC_Currency_ID(), grossAmt, null);
+	}
+	
+	
+	private void postARC(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{
+		BigDecimal amt = Env.ZERO;
+		//DR :  TaxDue                  
+		MContractTaxAcct taxAcct = null;
+		for (int i = 0; i < m_taxes.length; i++)
+		{
+			amt = m_taxes[i].getAmount();
+			if (amt != null && amt.signum() != 0)
+			{
+				//DR
+				FactLine tl = null;
+				 taxAcct = contractAcct.getContracTaxAcct(m_taxes[i].getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
+				if(taxAcct == null || taxAcct.getT_Due_Acct() == 0 )
+				{
+					tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),getC_Currency_ID(), amt, null);
+				}else{
+					tl = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getT_Due_Acct()), getC_Currency_ID(), amt, null);
+				}
+				
+				if (tl != null)
+					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	;
+			}//if
+		}//for
+		
+		//DR :  Revenue 
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			amt = p_lines[i].getAmtSource();
+			BigDecimal dAmt = null;
+			//CR:Posting Trade Discount
+			if (as.isTradeDiscountPosted())
+			{
+				BigDecimal discount = p_lines[i].getDiscount();
+				if (discount != null && discount.signum() != 0)
+				{
+					amt = amt.add(discount);
+					dAmt = discount;
+					fact.createLine (p_lines[i], 
+							getTDiscountGrantValidCombination(p_lines[i], contractAcct,  as),
+							getC_Currency_ID(), null, dAmt);
+				}
+			}
+			
+			//DR : Revenue
+			fact.createLine (p_lines[i], 
+					getRevenueValidCombination(p_lines[i], contractAcct,  as), 
+					getC_Currency_ID(), amt, null);
+			
+		}//For
+		
+		//  Set Locations
+		FactLine[] fLines = fact.getLines();
+		for (int i = 0; i < fLines.length; i++)
+		{
+			if (fLines[i] != null)
+			{
+				fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
+				fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+			}
+		}
+
+		//CR : Receivables
+		int receivables_ID = getReceivableValidCombination_ID(contractAcct,  as);
+		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
+				getC_Currency_ID(), null, grossAmt);
+	}
+	
+	private void postAPI(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{
+		;//TODO 実装
+	}
+	
+	private void postAPC(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{
+		;//TODO 実装
+	}
 	
 	/**
 	 * 
