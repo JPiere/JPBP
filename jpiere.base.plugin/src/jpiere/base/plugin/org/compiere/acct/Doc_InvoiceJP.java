@@ -29,6 +29,7 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MRMA;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
@@ -108,6 +109,23 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		{
 			postAPC(as, contractAcct, fact);//TODO
 		}
+		
+		FactLine[]  factLine = fact.getLines();
+		for(int i = 0; i < factLine.length; i++)
+		{
+			if(invoice.getC_Order_ID() > 0)
+			{
+				factLine[i].set_ValueNoCheck("JP_Order_ID", invoice.getC_Order_ID());
+			}else if(invoice.getM_RMA_ID() > 0){
+				int M_RMA_ID = invoice.getM_RMA_ID();
+				MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID,null);
+				int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+				if(JP_Order_ID > 0)
+					factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
+			}
+			
+			factLine[i].set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
+		}//for
 		
 		facts.add(fact);
 		return facts;

@@ -15,21 +15,12 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.util.List;
 
-import org.compiere.acct.Fact;
-import org.compiere.acct.FactLine;
-import org.compiere.model.FactsValidator;
+
 import org.compiere.model.I_C_InvoiceLine;
-import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
-import org.compiere.model.MDocType;
-import org.compiere.model.MInOut;
-import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
-import org.compiere.model.MOrderLine;
-import org.compiere.model.MRMA;
-import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -40,8 +31,6 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
-import jpiere.base.plugin.org.adempiere.model.MContractAcct;
-import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -55,7 +44,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
-public class JPiereContractInvoiceValidator extends AbstractContractValidator  implements ModelValidator,FactsValidator {
+public class JPiereContractInvoiceValidator extends AbstractContractValidator  implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereContractInvoiceValidator.class);
 	private int AD_Client_ID = -1;
@@ -72,7 +61,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		engine.addModelChange(MInvoice.Table_Name, this);
 		engine.addModelChange(MInvoiceLine.Table_Name, this);
 		engine.addDocValidate(MInvoice.Table_Name, this);
-		engine.addFactsValidate(MInvoice.Table_Name, this);
+//		engine.addFactsValidate(MInvoice.Table_Name, this);
 
 	}
 
@@ -487,44 +476,6 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			
 			
 		}
-		
-		return null;
-	}
-
-	@Override
-	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po) 
-	{
-		if(po.get_TableName().equals(MInvoice.Table_Name))
-		{		
-			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
-			if(JP_ContractContent_ID > 0)
-			{
-				MInvoice invoice = (MInvoice)po;
-				//Set Order Info
-				for(Fact fact : facts)
-				{
-					FactLine[]  factLine = fact.getLines();
-					for(int i = 0; i < factLine.length; i++)
-					{
-						if(invoice.getC_Order_ID() > 0)
-						{
-							factLine[i].set_ValueNoCheck("JP_Order_ID", invoice.getC_Order_ID());
-						}else if(invoice.getM_RMA_ID() > 0){
-							int M_RMA_ID = invoice.getM_RMA_ID();
-							MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID,po.get_TrxName());
-							int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
-							if(JP_Order_ID > 0)
-								factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
-						}
-						
-						factLine[i].set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
-					}//for
-					
-				}//for
-					
-			}//if(JP_ContractContent_ID > 0)
-		
-		}//if(po.get_TableName().equals(MInvoice.Table_Name))
 		
 		return null;
 	}
