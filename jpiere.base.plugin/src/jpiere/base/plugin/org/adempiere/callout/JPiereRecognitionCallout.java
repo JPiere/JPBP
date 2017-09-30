@@ -19,6 +19,8 @@ import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MInOut;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 
 /**
@@ -40,8 +42,12 @@ public class JPiereRecognitionCallout implements IColumnCallout {
 		{
 			MInOut io = new MInOut(ctx, ((Integer)value).intValue(), null);
 			if(io.get_ValueAsInt("JP_Contract_ID")==0 || io.get_ValueAsInt("JP_ContractContent_ID")==0)
-				return "期間契約かスポット契約の出荷納品伝票である必要があります。";//TODO
-				
+			{
+				String msg = Msg.getMsg(Env.getCtx(), "Invalid")+ " "+Msg.getElement(Env.getCtx(), "M_InOut_ID") + "  "
+						+ Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed") + "  " + Msg.getElement(Env.getCtx(), "JP_ContractType");
+				return msg;
+			}
+			
 			mTab.setValue("JP_Contract_ID", io.get_Value("JP_Contract_ID"));
 			mTab.setValue("JP_ContractContent_ID", io.get_Value("JP_ContractContent_ID"));
 			mTab.setValue("JP_ContractProcPeriod_ID", io.get_Value("JP_ContractProcPeriod_ID"));

@@ -220,7 +220,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				recognition.setMovementDate(io.getMovementDate());
 				if (!recognition.save(trxName))
 				{
-					return "Could not create Recognition: "+ io.getDocumentInfo();//TODO メッセージ化
+					return Msg.getMsg(Env.getCtx(),"JP_CouldNotCreate") + " " + Msg.getElement(Env.getCtx(),"JP_Recognition_ID") +" : "+ io.getDocumentInfo();
 				}
 	
 				MInOutLine[] sLines = io.getLines(false);
@@ -250,8 +250,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 					rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
 					if (!rcogLine.save(trxName))
 					{
-	//					log.warning("Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo());
-						return "Could not create Recognitiong Line from Shipment Line: "+ recognition.getDocumentInfo();//TODO メッセージ化
+						return Msg.getMsg(Env.getCtx(),"JP_CouldNotCreate") + " " + Msg.getElement(Env.getCtx(),"JP_RecognitionLine_ID") +" : "+ recognition.getDocumentInfo();
 					}
 	
 				}//for

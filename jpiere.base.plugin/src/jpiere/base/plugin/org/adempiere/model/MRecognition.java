@@ -314,8 +314,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		super(ctx, rs, trxName);
 	}	//	MRecognition
 
-	/** TODO なんだこのメソッドは?? どんな使い道があるのか？　いらないんじゃない？
-	 * 
+	/** 
 	 * 	Create Recognition from Order
 	 *	@param order order
 	 *	@param C_DocTypeTarget_ID target document type
@@ -344,9 +343,20 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		//
 		setSalesRep_ID(order.getSalesRep_ID());
 		//
-		setC_BPartner_ID(order.getBill_BPartner_ID());
-		setC_BPartner_Location_ID(order.getBill_Location_ID());
-		setAD_User_ID(order.getBill_User_ID());
+		setC_BPartner_ID(order.getC_BPartner_ID());
+		setC_BPartner_Location_ID(order.getC_BPartner_Location_ID());
+		setAD_User_ID(order.getAD_User_ID());
+		
+		if(order.getBill_BPartner_ID() > 0)
+		{
+			setBill_BPartner_ID(order.getBill_BPartner_ID());
+			setBill_Location_ID(order.getBill_Location_ID());
+			setBill_User_ID(order.getBill_User_ID());
+		}else{
+			setBill_BPartner_ID(order.getC_BPartner_ID());
+			setBill_Location_ID(order.getC_BPartner_Location_ID());
+			setBill_User_ID(order.getAD_User_ID());
+		}
 		
 		//Contract Info
 		setJP_Contract_ID(order.get_ValueAsInt("JP_Contract_ID"));
@@ -408,7 +418,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				setC_BPartner_Location_ID(locs[0].getC_BPartner_Location_ID());
 		}
 		if (getC_BPartner_Location_ID() == 0)
-			log.log(Level.SEVERE, new BPartnerNoAddressException(bp).getLocalizedMessage()); //TODO: throw exception?
+			log.log(Level.SEVERE, new BPartnerNoAddressException(bp).getLocalizedMessage());
 
 		//	Set Contact
 		MUser[] contacts = bp.getContacts(false);
@@ -809,8 +819,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			
 			if(io.getC_Order_ID() == 0 && io.getM_RMA_ID() == 0)
 			{
-				//This Ship/Receipt document can not create Recognition doc.
-				log.saveError("Error", "入出荷伝票が受発注伝票もしくは返品受付依頼伝票と結びついていません");//TODO メッセージ化
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_CouldNotCreateRecog_NoInOutInfo"));
 				return false;
 			
 			}else if(io.getC_Order_ID() > 0){
@@ -844,13 +853,15 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				{
 					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPR")))
 					{
-						log.saveError("Error", "返品受付伝票の場合はJPRの伝票タイプです。");//TODO メッセージ化
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
+						log.saveError("Error", msg);
 						return false;  
 					}
 				}else{
 					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPX")))
 					{
-						log.saveError("Error", "返品依頼伝票の場合はJPXの伝票タイプです。");//TODO メッセージ化
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
+						log.saveError("Error", msg);
 						return false;  
 					}				
 				}
@@ -859,13 +870,15 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				{
 				  if(!(getC_DocTypeTarget().getDocBaseType().equals("JPS")))
 				  {
-						log.saveError("Error", "返品受付伝票の場合はJPSの伝票タイプです。");//TODO メッセージ化
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx())});						
+						log.saveError("Error", msg);
 						return false;  
 				  }
 				}else{
 				  if(!(getC_DocTypeTarget().getDocBaseType().equals("JPY")))
 				  {
-						log.saveError("Error", "返品依頼伝票の場合はJPYの伝票タイプです。");//TODO メッセージ化
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx())});						
+						log.saveError("Error", msg);
 						return false;  
 				  }				
 				}	
@@ -1189,14 +1202,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			return DocAction.STATUS_Invalid;
 		}
 
-		
-		//TODO この下のチェックメソッドはいらないよね？
-//		if (!calculateTaxTotal())	//	setTotals
-//		{
-//			m_processMsg = "Error calculating Tax";
-//			return DocAction.STATUS_Invalid;
-//		}
-
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -1283,8 +1288,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 					BigDecimal qtyRecognized = JP_QtyRecognized.add(line.getJP_QtyRecognized());
 					if(qtyRecognized.compareTo(qtyDelivered) > 0)
 					{
-						//TODO メッセージ化
-						m_processMsg = "計上数量が入出荷済数量を超えてしまいます。" + " " + Msg.getElement(getCtx(), MRecognitionLine.COLUMNNAME_JP_ContractLine_ID)+" : " +line.getLine(); 
+						m_processMsg = Msg.getElement(getCtx(), "JP_QtyRecognized") + " > " + Msg.getElement(getCtx(), "QtyDelivered") 
+									+ "  "+Msg.getElement(getCtx(), "JP_ToBeConfirmed") +" : " + Msg.getElement(getCtx(), MRecognitionLine.COLUMNNAME_JP_ContractLine_ID)+" : " + line.getLine(); 
 						return DocAction.STATUS_Invalid;
 						
 					}else{
@@ -1294,7 +1299,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				
 				if (!ol.save(get_TrxName()))
 				{
-					m_processMsg = "Could not update Order Line"; //TODO メッセージ化
+					//Could not update Order Line
+					m_processMsg = Msg.getMsg(getCtx(), "JP_CouldNotUpdate") + " " + Msg.getElement(getCtx(), "C_OrderLine_ID", isSOTrx());
 					return DocAction.STATUS_Invalid;
 				}
 			}
@@ -1699,24 +1705,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
         setGrandTotal(rma.getAmt());
         setIsSOTrx(rma.isSOTrx());
         setTotalLines(rma.getAmt());
-
-//        MRecognition originalInvoice = rma.getOriginalInvoice(); TODO とりあえずコメントアウトでエラー回避
-//
-//        if (originalInvoice == null)
-//        {
-//            throw new IllegalStateException("Not invoiced - RMA: " + rma.getDocumentNo());
-//        }
-//
-//        setC_BPartner_Location_ID(originalInvoice.getC_BPartner_Location_ID());
-//        setAD_User_ID(originalInvoice.getAD_User_ID());
-//        setC_Currency_ID(originalInvoice.getC_Currency_ID());
-//        setIsTaxIncluded(originalInvoice.isTaxIncluded());
-//        setM_PriceList_ID(originalInvoice.getM_PriceList_ID());
-//        setC_Project_ID(originalInvoice.getC_Project_ID());
-//        setC_Activity_ID(originalInvoice.getC_Activity_ID());
-//        setC_Campaign_ID(originalInvoice.getC_Campaign_ID());
-//        setUser1_ID(originalInvoice.getUser1_ID());
-//        setUser2_ID(originalInvoice.getUser2_ID());
 	}
 
 	/**
@@ -1731,32 +1719,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			|| DOCSTATUS_Reversed.equals(ds);
 	}	//	isComplete
 
-	/**
-	 * Get original order
-	 * @return order
-	 */
-	public MOrder getOriginalOrder()
-	{
-		if (getM_RMA_ID() > 0)
-		{
-			MRMA rma = new MRMA(getCtx(), getM_RMA_ID(), get_TrxName());
-			MOrder originalOrder = rma.getOriginalOrder();
-			if (originalOrder != null)
-				return originalOrder;
-			
-			//TODO とりあえずコメントアウトでエラー回避
-//			MRecognition originalInvoice = rma.getOriginalInvoice();
-//			if (originalInvoice.getC_Order_ID() > 0)
-//			{
-//				originalOrder = new MOrder(getCtx(), originalInvoice.getC_Order_ID(), get_TrxName());
-//				if (originalOrder != null)
-//					return originalOrder;
-//			}
-		}
-		else if (getC_Order_ID() > 0)
-			return new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
-		return null;
-	}
 
 	/**
 	 * Set process message

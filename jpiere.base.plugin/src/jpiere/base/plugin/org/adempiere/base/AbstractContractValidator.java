@@ -76,15 +76,22 @@ public abstract class AbstractContractValidator {
 				int JP_ContractProcPeriod_ID = baseDoc.get_ValueAsInt("JP_ContractProcPeriod_ID");
 				if(JP_ContractContent_ID <= 0)
 				{
-					return "期間契約の場合、契約内容は必須です。";//TODO メッセージ化
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractContent_ID")};
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+
 				}else if(JP_ContractProcPeriod_ID <= 0){
-					return "期間契約の場合、契約処理期間は必須です。";//TODO メッセージ化
+					
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					
 				}else{
 					MContractContent content = MContractContent.get(Env.getCtx(),  JP_ContractContent_ID);
 					MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(),  JP_ContractProcPeriod_ID);
 					if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID())
 					{
-						return "契約カレンダーが矛盾しています。";//TODO メッセージ化
+						 //Inconsistency between JP_ContractContent_ID and JP_ContractProcPeriod_ID
+						String msg = Msg.getMsg(Env.getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractContent_ID"),Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")});
+						return msg;
 					}
 				}
 				po.set_ValueNoCheck("JP_ContractContent_ID",JP_ContractContent_ID);

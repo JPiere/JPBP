@@ -166,12 +166,20 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 			//JP_Contract_ID is Mandetory field in Recognition doc
 			if(!contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
 					&& !contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
-				return "計上伝票の契約書フィールドには、期間契約とスポット契約の契約書のみ入力する事ができます。";//TODO メッセージ化		
+			{
+				msg = Msg.getMsg(Env.getCtx(), "Invalid")+ " "+Msg.getElement(Env.getCtx(), "JP_Contract_ID") + "  "
+					+ Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed") + "  " + Msg.getElement(Env.getCtx(), "JP_ContractType");
+				return msg;		
+			}
 			
 			//JP_ContractContent_ID is Mandetory field in Recognition doc.
 			MContractContent content = MContractContent.get(Env.getCtx(), po.get_ValueAsInt("JP_ContractContent_ID"));
 			if(!content.getJP_Contract_Acct().isPostingRecognitionDocJP())
-				return "入力されている契約内容は計上伝票を使用する事はできません。";//TODO メッセージ化	
+			{
+				msg = Msg.getMsg(Env.getCtx(), "Invalid")+ " "+Msg.getElement(Env.getCtx(), "JP_ContractContent_ID") + "  "
+						+ Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed") + "  " + Msg.getElement(Env.getCtx(), "JP_Contract_Acct_ID");
+				return msg;	
+			}
 			
 		}//Type
 		
