@@ -82,17 +82,22 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 			//JPIERE-0212:Check InOutLineConfirm
 			if(MSysConfig.getBooleanValue("JP_CHECK_INOUTLINE_CONFIRM", false,  iol.getAD_Client_ID(), iol.getAD_Org_ID()))
 			{
-				MInOutConfirm[] ioConfirms =  iol.getParent().getConfirmations(false);
+				MInOutConfirm[] ioConfirms =  iol.getParent().getConfirmations(true);
 				if(ioConfirms.length > 0)
 				{
 					if(type == ModelValidator.TYPE_BEFORE_NEW)
 					{
 						return Msg.getMsg(iol.getCtx(), "JP_CanNotAddLineForConfirmations");//You can not add a line because of Confirmations.
 
-					}else if(type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("QtyEntered")
+					} else if(type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("QtyEntered")
 							&& !iol.getParent().getDocAction().equals(DocAction.ACTION_Void)){
-
-						return Msg.getMsg(iol.getCtx(), "JP_CanNotChangeQtyForConfirmations");//You can not change Qty because of Confirmations.
+						
+						if(iol.getParent().getC_DocType().isSplitWhenDifference())
+						{
+							;// Can not check. Because, In Case of Split , InOut Cnfirm update QtyEntered When Complete. JPBP #108 -  2017/9/30 
+						}else{
+							return Msg.getMsg(iol.getCtx(), "JP_CanNotChangeQtyForConfirmations");//You can not change Qty because of Confirmations.
+						}
 					}
 				}
 			}
