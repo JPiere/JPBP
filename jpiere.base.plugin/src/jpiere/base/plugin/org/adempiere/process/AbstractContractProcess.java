@@ -317,13 +317,14 @@ public class AbstractContractProcess extends SvrProcess
 	
 	protected Timestamp getOrderLineDatePromised(MContractLine m_Contractline)
 	{
-//		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)
-//				&& p_JP_ContractProcessUnit.equals("PCC") 
-//				&& ( m_ContractContent.getDocBaseType().equals("SOO") ||  m_ContractContent.getDocBaseType().equals("POO")) )
-//		{
-//			if(m_Contractline != null && m_Contractline.getDatePromised() != null)
-//				return m_Contractline.getDatePromised();
-//		}
+		
+		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)
+				&& p_JP_ContractProcessUnit.equals("PCC") 
+				&& ( m_ContractContent.getDocBaseType().equals("SOO") ||  m_ContractContent.getDocBaseType().equals("POO")) )
+		{
+			if(m_Contractline != null && m_Contractline.getDatePromised() != null)
+				return m_Contractline.getDatePromised();
+		}
 		
 		if(m_Contractline != null)
 		{

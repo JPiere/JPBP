@@ -143,10 +143,11 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 			contractContent.setJP_Contract_Acct_ID(m_ContractContentTemplates[i].getJP_Contract_Acct_ID());
 			contractContent.setDateDoc(m_Contract.getDateDoc());
 			contractContent.setDateAcct(m_Contract.getDateAcct());
-			contractContent.setDatePromised(m_Contract.getDateAcct());
-			LocalDateTime dateAcctLocal = m_Contract.getDateAcct().toLocalDateTime();
-			dateAcctLocal = dateAcctLocal.plusDays(m_ContractContentTemplates[i].getDeliveryTime_Promised());
-			contractContent.setDatePromised(Timestamp.valueOf(dateAcctLocal)) ;
+			LocalDateTime datePromisedLocal = m_Contract.getDateAcct().toLocalDateTime();
+			datePromisedLocal = datePromisedLocal.plusDays(m_ContractContentTemplates[i].getDeliveryTime_Promised());
+			contractContent.setDatePromised(Timestamp.valueOf(datePromisedLocal)) ;
+			contractContent.setDateInvoiced(m_Contract.getDateAcct());
+			
 			
 			if(m_ContractContentTemplates[i].getJP_ContractProcPOffset()==0)
 			{
@@ -221,6 +222,12 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 			PO.copyValues(m_ContractLineTemplates[i], contrctLine);
 			contrctLine.setAD_Org_ID(contractContent.getAD_Org_ID());
 			contrctLine.setAD_OrgTrx_ID(contractContent.getAD_OrgTrx_ID());
+			contrctLine.setDateOrdered(contractContent.getDateOrdered());
+			LocalDateTime datePromisedLocal = contractContent.getDateAcct().toLocalDateTime();
+			datePromisedLocal = datePromisedLocal.plusDays(m_ContractLineTemplates[i].getDeliveryTime_Promised());
+			contrctLine.setDatePromised(Timestamp.valueOf(datePromisedLocal)) ;
+			
+			contrctLine.setDatePromised(contractContent.getDatePromised());
 			contrctLine.setJP_ContractContent_ID(contractContent.getJP_ContractContent_ID());
 			contrctLine.setJP_ContractLineT_ID(m_ContractLineTemplates[i].getJP_ContractLineT_ID());
 			if(contrctLine.getJP_BaseDocLinePolicy() != null)
