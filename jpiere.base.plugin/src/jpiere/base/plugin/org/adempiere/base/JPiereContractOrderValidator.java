@@ -222,7 +222,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 
 						MContractProcPeriod docContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), JP_ContractProcPeriod_ID);
 						
-						//Check Contract Calender
+						//Check Contract Calender Between Contract Content and Order Header
 						if(content.getJP_ContractCalender_ID() != docContractProcPeriod.getJP_ContractCalender_ID() )
 						{
 							//Contract Calender that belong to selected contract period does not accord with Contract Calender of Contract content.
@@ -312,6 +312,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 		{
 			MOrderLine oLine = (MOrderLine)po;
 			
+			//Set Recognized Qty When not use Recognition Doc
 			int JP_ContractContent_ID = oLine.getParent().get_ValueAsInt("JP_ContractContent_ID");
 			if(JP_ContractContent_ID == 0)
 			{

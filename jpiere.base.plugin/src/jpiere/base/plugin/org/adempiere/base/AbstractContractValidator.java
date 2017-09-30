@@ -14,6 +14,7 @@ import org.compiere.util.Msg;
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 public abstract class AbstractContractValidator {	
@@ -69,18 +70,27 @@ public abstract class AbstractContractValidator {
 			po.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			{
-				if(po.get_ValueAsInt("C_Order_ID") == 0 && po.get_ValueAsInt("M_RMA_ID")  == 0)
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_Order_ID",true)+","+Msg.getElement(Env.getCtx(), "C_Order_ID",false)
-													+ "," + Msg.getElement(Env.getCtx(), "M_RMA_ID",true) +"," + Msg.getElement(Env.getCtx(), "M_RMA_ID",false)};
-					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-
-				}
-				
+			{				
 				/** In case of Period Contract, order has JP_ContractContent_ID and JP_ContractProcPeriod_ID always*/
-				po.set_ValueNoCheck("JP_ContractContent_ID", baseDoc.get_ValueAsInt("JP_ContractContent_ID"));
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDoc.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+				int JP_ContractContent_ID = baseDoc.get_ValueAsInt("JP_ContractContent_ID");
+				int JP_ContractProcPeriod_ID = baseDoc.get_ValueAsInt("JP_ContractProcPeriod_ID");
+				if(JP_ContractContent_ID <= 0)
+				{
+					return "期間契約の場合、契約内容は必須です。";//TODO メッセージ化
+				}else if(JP_ContractProcPeriod_ID <= 0){
+					return "期間契約の場合、契約処理期間は必須です。";//TODO メッセージ化
+				}else{
+					MContractContent content = MContractContent.get(Env.getCtx(),  JP_ContractContent_ID);
+					MContractProcPeriod period = MContractProcPeriod.get(Env.getCtx(),  JP_ContractProcPeriod_ID);
+					if(content.getJP_ContractCalender_ID() != period.getJP_ContractCalender_ID())
+					{
+						return "契約カレンダーが矛盾しています。";//TODO メッセージ化
+					}
+				}
+				po.set_ValueNoCheck("JP_ContractContent_ID",JP_ContractContent_ID);
+				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+				
+				
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 				

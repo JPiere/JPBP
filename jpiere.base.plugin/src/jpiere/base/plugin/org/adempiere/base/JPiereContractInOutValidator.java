@@ -173,7 +173,6 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			boolean isReversal = io.isReversal();
 			if(isReversal)
 			{
-				String action = io.getDocAction();
 				int original_InOut_ID = io.getReversal_ID();
 				reversalRecognition(io, timing, true, original_InOut_ID);
 				
