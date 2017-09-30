@@ -1049,6 +1049,36 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		return inOuts;
 	}
 	
+	public MRecognition[] getRecognitionByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		ArrayList<MRecognition> list = new ArrayList<MRecognition>();
+		final String sql = "SELECT * FROM JP_Recognition WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MRecognition(getCtx(), rs, trxName));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		
+		MRecognition[] recog = new MRecognition[list.size()];
+		list.toArray(recog);
+		return recog;
+	}
 	
 	public MContractProcess[] getContractProcessDerivativeInOutByCalender(int JP_ContractCalender_ID)
 	{
