@@ -566,6 +566,17 @@ public interface I_JP_Recognition
 	/** Get Revenue Recognition Doc	  */
 	public int getJP_Recognition_ID();
 
+    /** Column name JP_Recognition_SplitFrom_ID */
+    public static final String COLUMNNAME_JP_Recognition_SplitFrom_ID = "JP_Recognition_SplitFrom_ID";
+
+	/** Set Recognition Doc(Split from)	  */
+	public void setJP_Recognition_SplitFrom_ID (int JP_Recognition_SplitFrom_ID);
+
+	/** Get Recognition Doc(Split from)	  */
+	public int getJP_Recognition_SplitFrom_ID();
+
+	public I_JP_Recognition getJP_Recognition_SplitFrom() throws RuntimeException;
+
     /** Column name JP_Recognition_UU */
     public static final String COLUMNNAME_JP_Recognition_UU = "JP_Recognition_UU";
 

@@ -331,16 +331,19 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			
 			MInOut io = (MInOut)po;
 			int JP_Contract_ID = io.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);	
-			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
-			//Check to Change Contract Info		
-			if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			{	
-				
-				MInOutLine[] contractInvoiceLines = getInOutLinesWithContractLine(io);
-				if(contractInvoiceLines.length > 0)
-				{
-					//Contract Info can not be changed because the document contains contract Info lines.
-					return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");
+			if(JP_Contract_ID > 0)
+			{
+				MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
+				//Check to Change Contract Info		
+				if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+				{	
+					
+					MInOutLine[] contractInvoiceLines = getInOutLinesWithContractLine(io);
+					if(contractInvoiceLines.length > 0)
+					{
+						//Contract Info can not be changed because the document contains contract Info lines.
+						return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");
+					}
 				}
 			}
 			

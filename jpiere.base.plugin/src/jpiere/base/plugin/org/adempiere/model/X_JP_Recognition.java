@@ -34,7 +34,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170929L;
+	private static final long serialVersionUID = 20170930L;
 
     /** Standard Constructor */
     public X_JP_Recognition (Properties ctx, int JP_Recognition_ID, String trxName)
@@ -997,6 +997,31 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	public int getJP_Recognition_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_Recognition getJP_Recognition_SplitFrom() throws RuntimeException
+    {
+		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
+			.getPO(getJP_Recognition_SplitFrom_ID(), get_TrxName());	}
+
+	/** Set Recognition Doc(Split from).
+		@param JP_Recognition_SplitFrom_ID Recognition Doc(Split from)	  */
+	public void setJP_Recognition_SplitFrom_ID (int JP_Recognition_SplitFrom_ID)
+	{
+		if (JP_Recognition_SplitFrom_ID < 1) 
+			set_Value (COLUMNNAME_JP_Recognition_SplitFrom_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Recognition_SplitFrom_ID, Integer.valueOf(JP_Recognition_SplitFrom_ID));
+	}
+
+	/** Get Recognition Doc(Split from).
+		@return Recognition Doc(Split from)	  */
+	public int getJP_Recognition_SplitFrom_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_SplitFrom_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

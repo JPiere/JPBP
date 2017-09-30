@@ -30,7 +30,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20170930L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -175,15 +175,15 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return (String)get_Value(COLUMNNAME_DocBaseType);
 	}
 
-	/** Set Contract Acct Posting.
-		@param IsPostingContractAcctJP Contract Acct Posting	  */
+	/** Set Use Contract Acct Info.
+		@param IsPostingContractAcctJP Use Contract Acct Info	  */
 	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP)
 	{
 		set_Value (COLUMNNAME_IsPostingContractAcctJP, Boolean.valueOf(IsPostingContractAcctJP));
 	}
 
-	/** Get Contract Acct Posting.
-		@return Contract Acct Posting	  */
+	/** Get Use Contract Acct Info.
+		@return Use Contract Acct Info	  */
 	public boolean isPostingContractAcctJP () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsPostingContractAcctJP);
@@ -196,15 +196,15 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return false;
 	}
 
-	/** Set Posting at Recognition Doc.
-		@param IsPostingRecognitionDocJP Posting at Recognition Doc	  */
+	/** Set Use Recognition Doc.
+		@param IsPostingRecognitionDocJP Use Recognition Doc	  */
 	public void setIsPostingRecognitionDocJP (boolean IsPostingRecognitionDocJP)
 	{
 		set_Value (COLUMNNAME_IsPostingRecognitionDocJP, Boolean.valueOf(IsPostingRecognitionDocJP));
 	}
 
-	/** Get Posting at Recognition Doc.
-		@return Posting at Recognition Doc	  */
+	/** Get Use Recognition Doc.
+		@return Use Recognition Doc	  */
 	public boolean isPostingRecognitionDocJP () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsPostingRecognitionDocJP);
@@ -232,6 +232,30 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public boolean isSOTrx () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Split when Difference.
+		@param IsSplitWhenDifferenceJP 
+		Split document when there is a difference
+	  */
+	public void setIsSplitWhenDifferenceJP (boolean IsSplitWhenDifferenceJP)
+	{
+		set_Value (COLUMNNAME_IsSplitWhenDifferenceJP, Boolean.valueOf(IsSplitWhenDifferenceJP));
+	}
+
+	/** Get Split when Difference.
+		@return Split document when there is a difference
+	  */
+	public boolean isSplitWhenDifferenceJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSplitWhenDifferenceJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

@@ -135,19 +135,19 @@ public interface I_JP_Contract_Acct
     /** Column name IsPostingContractAcctJP */
     public static final String COLUMNNAME_IsPostingContractAcctJP = "IsPostingContractAcctJP";
 
-	/** Set Contract Acct Posting	  */
+	/** Set Use Contract Acct Info	  */
 	public void setIsPostingContractAcctJP (boolean IsPostingContractAcctJP);
 
-	/** Get Contract Acct Posting	  */
+	/** Get Use Contract Acct Info	  */
 	public boolean isPostingContractAcctJP();
 
     /** Column name IsPostingRecognitionDocJP */
     public static final String COLUMNNAME_IsPostingRecognitionDocJP = "IsPostingRecognitionDocJP";
 
-	/** Set Posting at Recognition Doc	  */
+	/** Set Use Recognition Doc	  */
 	public void setIsPostingRecognitionDocJP (boolean IsPostingRecognitionDocJP);
 
-	/** Get Posting at Recognition Doc	  */
+	/** Get Use Recognition Doc	  */
 	public boolean isPostingRecognitionDocJP();
 
     /** Column name IsSOTrx */
@@ -162,6 +162,19 @@ public interface I_JP_Contract_Acct
 	  * This is a Sales Transaction
 	  */
 	public boolean isSOTrx();
+
+    /** Column name IsSplitWhenDifferenceJP */
+    public static final String COLUMNNAME_IsSplitWhenDifferenceJP = "IsSplitWhenDifferenceJP";
+
+	/** Set Split when Difference.
+	  * Split document when there is a difference
+	  */
+	public void setIsSplitWhenDifferenceJP (boolean IsSplitWhenDifferenceJP);
+
+	/** Get Split when Difference.
+	  * Split document when there is a difference
+	  */
+	public boolean isSplitWhenDifferenceJP();
 
     /** Column name JP_Contract_Acct_ID */
     public static final String COLUMNNAME_JP_Contract_Acct_ID = "JP_Contract_Acct_ID";

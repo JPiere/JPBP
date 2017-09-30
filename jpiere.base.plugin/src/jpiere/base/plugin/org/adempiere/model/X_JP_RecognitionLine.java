@@ -33,7 +33,7 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170929L;
+	private static final long serialVersionUID = 20170930L;
 
     /** Standard Constructor */
     public X_JP_RecognitionLine (Properties ctx, int JP_RecognitionLine_ID, String trxName)
@@ -50,6 +50,8 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
 // 1
 			setJP_RecognitionLine_ID (0);
 			setJP_Recognition_ID (0);
+			setJP_TargetQtyRecognized (Env.ZERO);
+// 0
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM JP_RecognitionLine WHERE JP_Recognition_ID=@JP_Recognition_ID@
 			setLineNetAmt (Env.ZERO);
@@ -528,6 +530,31 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
 		return bd;
 	}
 
+	public I_JP_RecognitionLine getJP_RecogLine_SplitFrom() throws RuntimeException
+    {
+		return (I_JP_RecognitionLine)MTable.get(getCtx(), I_JP_RecognitionLine.Table_Name)
+			.getPO(getJP_RecogLine_SplitFrom_ID(), get_TrxName());	}
+
+	/** Set Recognition Line(Split from).
+		@param JP_RecogLine_SplitFrom_ID Recognition Line(Split from)	  */
+	public void setJP_RecogLine_SplitFrom_ID (int JP_RecogLine_SplitFrom_ID)
+	{
+		if (JP_RecogLine_SplitFrom_ID < 1) 
+			set_Value (COLUMNNAME_JP_RecogLine_SplitFrom_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_RecogLine_SplitFrom_ID, Integer.valueOf(JP_RecogLine_SplitFrom_ID));
+	}
+
+	/** Get Recognition Line(Split from).
+		@return Recognition Line(Split from)	  */
+	public int getJP_RecogLine_SplitFrom_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_RecogLine_SplitFrom_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Revenue and Expense Recognition Line.
 		@param JP_RecognitionLine_ID Revenue and Expense Recognition Line	  */
 	public void setJP_RecognitionLine_ID (int JP_RecognitionLine_ID)
@@ -594,6 +621,23 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
     {
         return new KeyNamePair(get_ID(), String.valueOf(getJP_Recognition_ID()));
     }
+
+	/** Set Target Recognized Qty.
+		@param JP_TargetQtyRecognized Target Recognized Qty	  */
+	public void setJP_TargetQtyRecognized (BigDecimal JP_TargetQtyRecognized)
+	{
+		set_ValueNoCheck (COLUMNNAME_JP_TargetQtyRecognized, JP_TargetQtyRecognized);
+	}
+
+	/** Get Target Recognized Qty.
+		@return Target Recognized Qty	  */
+	public BigDecimal getJP_TargetQtyRecognized () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_TargetQtyRecognized);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
 
 	/** Set Tax Amt.
 		@param JP_TaxAmt Tax Amt	  */

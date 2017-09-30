@@ -25,10 +25,7 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
-import org.compiere.util.Env;
 import org.compiere.util.Msg;
-
-import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 public class JPiereInOutLineModelValidator implements ModelValidator {
 

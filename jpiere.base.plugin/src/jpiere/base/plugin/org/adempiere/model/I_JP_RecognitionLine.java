@@ -326,6 +326,17 @@ public interface I_JP_RecognitionLine
 	  */
 	public BigDecimal getJP_QtyRecognized();
 
+    /** Column name JP_RecogLine_SplitFrom_ID */
+    public static final String COLUMNNAME_JP_RecogLine_SplitFrom_ID = "JP_RecogLine_SplitFrom_ID";
+
+	/** Set Recognition Line(Split from)	  */
+	public void setJP_RecogLine_SplitFrom_ID (int JP_RecogLine_SplitFrom_ID);
+
+	/** Get Recognition Line(Split from)	  */
+	public int getJP_RecogLine_SplitFrom_ID();
+
+	public I_JP_RecognitionLine getJP_RecogLine_SplitFrom() throws RuntimeException;
+
     /** Column name JP_RecognitionLine_ID */
     public static final String COLUMNNAME_JP_RecognitionLine_ID = "JP_RecognitionLine_ID";
 
@@ -354,6 +365,15 @@ public interface I_JP_RecognitionLine
 	public int getJP_Recognition_ID();
 
 	public I_JP_Recognition getJP_Recognition() throws RuntimeException;
+
+    /** Column name JP_TargetQtyRecognized */
+    public static final String COLUMNNAME_JP_TargetQtyRecognized = "JP_TargetQtyRecognized";
+
+	/** Set Target Recognized Qty	  */
+	public void setJP_TargetQtyRecognized (BigDecimal JP_TargetQtyRecognized);
+
+	/** Get Target Recognized Qty	  */
+	public BigDecimal getJP_TargetQtyRecognized();
 
     /** Column name JP_TaxAmt */
     public static final String COLUMNNAME_JP_TaxAmt = "JP_TaxAmt";
