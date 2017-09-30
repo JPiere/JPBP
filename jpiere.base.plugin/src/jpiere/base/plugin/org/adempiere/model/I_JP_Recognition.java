@@ -577,6 +577,17 @@ public interface I_JP_Recognition
 
 	public I_JP_Recognition getJP_Recognition_SplitFrom() throws RuntimeException;
 
+    /** Column name JP_Recognition_SplitTo_ID */
+    public static final String COLUMNNAME_JP_Recognition_SplitTo_ID = "JP_Recognition_SplitTo_ID";
+
+	/** Set Recognition Doc(Split To)	  */
+	public void setJP_Recognition_SplitTo_ID (int JP_Recognition_SplitTo_ID);
+
+	/** Get Recognition Doc(Split To)	  */
+	public int getJP_Recognition_SplitTo_ID();
+
+	public I_JP_Recognition getJP_Recognition_SplitTo() throws RuntimeException;
+
     /** Column name JP_Recognition_UU */
     public static final String COLUMNNAME_JP_Recognition_UU = "JP_Recognition_UU";
 

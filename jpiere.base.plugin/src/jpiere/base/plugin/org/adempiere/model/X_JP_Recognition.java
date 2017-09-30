@@ -1027,6 +1027,31 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 		return ii.intValue();
 	}
 
+	public I_JP_Recognition getJP_Recognition_SplitTo() throws RuntimeException
+    {
+		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
+			.getPO(getJP_Recognition_SplitTo_ID(), get_TrxName());	}
+
+	/** Set Recognition Doc(Split To).
+		@param JP_Recognition_SplitTo_ID Recognition Doc(Split To)	  */
+	public void setJP_Recognition_SplitTo_ID (int JP_Recognition_SplitTo_ID)
+	{
+		if (JP_Recognition_SplitTo_ID < 1) 
+			set_Value (COLUMNNAME_JP_Recognition_SplitTo_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Recognition_SplitTo_ID, Integer.valueOf(JP_Recognition_SplitTo_ID));
+	}
+
+	/** Get Recognition Doc(Split To).
+		@return Recognition Doc(Split To)	  */
+	public int getJP_Recognition_SplitTo_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_SplitTo_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set JP_Recognition_UU.
 		@param JP_Recognition_UU JP_Recognition_UU	  */
 	public void setJP_Recognition_UU (String JP_Recognition_UU)

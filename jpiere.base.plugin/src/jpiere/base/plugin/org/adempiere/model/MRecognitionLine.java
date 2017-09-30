@@ -847,9 +847,31 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 *	@return true if save
 	 */
 	protected boolean beforeSave (boolean newRecord)
-	{
-		//
-		setJP_QtyRecognized(getQtyInvoiced());
+	{		
+		if(newRecord || is_ValueChanged("QtyInvoiced") || is_ValueChanged("QtyEntered"))
+		{
+			if(newRecord)
+			{
+				if(getJP_TargetQtyRecognized().signum() == 0)
+				{
+					setJP_TargetQtyRecognized(getM_InOutLine().getMovementQty());
+				}
+			}
+			
+			setJP_QtyRecognized(getQtyInvoiced());
+			if(getJP_TargetQtyRecognized().signum() != getJP_QtyRecognized().signum())
+			{
+				log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
+				return false;
+			}
+			
+			if(getJP_QtyRecognized().abs().compareTo(getJP_TargetQtyRecognized().abs()) > 0)
+			{
+				log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
+				return false;
+			}
+		}
+		
 		
 		if (log.isLoggable(Level.FINE)) log.fine("New=" + newRecord);
 		if (newRecord && getParent().isComplete()) {

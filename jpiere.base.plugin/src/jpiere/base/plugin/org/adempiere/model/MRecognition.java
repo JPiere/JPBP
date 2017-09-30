@@ -1279,12 +1279,22 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				
 				if (line.getJP_QtyRecognized() != null)
 				{
-					ol.set_ValueNoCheck("JP_QtyRecognized", JP_QtyRecognized.add(line.getJP_QtyRecognized() ));
+					BigDecimal qtyDelivered = ol.getQtyDelivered();
+					BigDecimal qtyRecognized = JP_QtyRecognized.add(line.getJP_QtyRecognized());
+					if(qtyRecognized.compareTo(qtyDelivered) > 0)
+					{
+						//TODO メッセージ化
+						m_processMsg = "計上数量が入出荷済数量を超えてしまいます。" + " " + Msg.getElement(getCtx(), MRecognitionLine.COLUMNNAME_JP_ContractLine_ID)+" : " +line.getLine(); 
+						return DocAction.STATUS_Invalid;
+						
+					}else{
+						ol.set_ValueNoCheck("JP_QtyRecognized", qtyRecognized);
+					}
 				}
 				
 				if (!ol.save(get_TrxName()))
 				{
-					m_processMsg = "Could not update Order Line";
+					m_processMsg = "Could not update Order Line"; //TODO メッセージ化
 					return DocAction.STATUS_Invalid;
 				}
 			}
@@ -1862,7 +1872,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		split.setGrandTotal(Env.ZERO);
 		split.saveEx();
 		
-		setJP_Recognition_SplitFrom_ID(split.getJP_Recognition_ID());
+		setJP_Recognition_SplitTo_ID(split.getJP_Recognition_ID());
 		
 		for (int i = 0; i < lines.length; i++)
 		{
@@ -1880,7 +1890,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			splitLine.setM_InOutLine_ID(line.getM_InOutLine_ID());
 			splitLine.setLine(line.getLine());
 			
-			splitLine.setJP_TargetQtyRecognized(differenceQty);
 			splitLine.setQty(differenceQty);
 			
 			splitLine.setJP_RecogLine_SplitFrom_ID(line.getJP_RecognitionLine_ID());

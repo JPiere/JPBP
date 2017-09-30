@@ -15,6 +15,8 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrgInfo;
@@ -141,6 +143,10 @@ public class AbstractCreateContractFromTemplate extends SvrProcess {
 			contractContent.setJP_Contract_Acct_ID(m_ContractContentTemplates[i].getJP_Contract_Acct_ID());
 			contractContent.setDateDoc(m_Contract.getDateDoc());
 			contractContent.setDateAcct(m_Contract.getDateAcct());
+			contractContent.setDatePromised(m_Contract.getDateAcct());
+			LocalDateTime dateAcctLocal = m_Contract.getDateAcct().toLocalDateTime();
+			dateAcctLocal = dateAcctLocal.plusDays(m_ContractContentTemplates[i].getDeliveryTime_Promised());
+			contractContent.setDatePromised(Timestamp.valueOf(dateAcctLocal)) ;
 			
 			if(m_ContractContentTemplates[i].getJP_ContractProcPOffset()==0)
 			{
