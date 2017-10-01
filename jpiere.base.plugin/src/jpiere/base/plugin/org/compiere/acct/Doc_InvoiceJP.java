@@ -31,6 +31,7 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
@@ -68,7 +69,6 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	{
 		if (!as.isAccrual())
 			return super.createFacts(as);
-		
 		
 		MInvoice invoice = (MInvoice)getPO();
 		
@@ -502,6 +502,39 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		}
 	}
 	
+	private MAccount getInvoiceExpenseAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		//Charge Account
+		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
+		{
+			MContractChargeAcct contractChargeAcct =  contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
+			if(contractChargeAcct != null && contractChargeAcct.getCh_Expense_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), contractChargeAcct.getCh_Expense_Acct());
+			}else{
+				return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+			}
+			
+		}else if(line.getM_Product_ID() > 0){
+			if(docLine.isItem())
+			{
+				return docLine.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
+			}else{
+			
+				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+				if(contractProductAcct != null && contractProductAcct.getP_Expense_Acct() > 0)
+				{
+					return MAccount.get(getCtx(),contractProductAcct.getP_Expense_Acct());
+				}else{
+					return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+				}
+			}
+		}else{
+			return docLine.getAccount (ProductCost.ACCTTYPE_P_Expense, as);
+		}
+	}
+	
 	
 	private MAccount getInvoiceTDiscountGrantAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
@@ -516,6 +549,18 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		}
 	}
 	
+	private MAccount getInvoiceTDiscountRecAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		
+		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)
+		{
+			return MAccount.get(getCtx(),contractProductAcct.getP_TradeDiscountRec_Acct());
+		}else{
+			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+		}
+	}
 	
 	private MAccount getReceivableAccount(MContractAcct contractAcct, MAcctSchema as)
 	{		
@@ -527,6 +572,18 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as));
 		}
 	}
+
+	private MAccount getPayableAccount(MContractAcct contractAcct, MAcctSchema as)
+	{		
+		MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
+		if(bpAcct != null && bpAcct.getV_Liability_Acct() > 0)
+		{
+			return MAccount.get(getCtx(),bpAcct.getV_Liability_Acct());
+		}else{
+			return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_V_Liability, as));
+		}
+	}
+	
 	
 	private MAccount getInvoiceTaxDueAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
 	{

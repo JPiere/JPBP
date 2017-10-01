@@ -43,6 +43,10 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractBPAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
+
 /**
  *  Post Allocation Documents.
  *  <pre>
@@ -206,9 +210,20 @@ public class Doc_AllocationHdrJP extends Doc
 			MPayment payment = null;
 			if (line.getC_Payment_ID() != 0)
 				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+			//JPIERE-0363
 			MInvoice invoice = null;
+			MContractAcct contractAcct = null;
 			if (line.getC_Invoice_ID() != 0)
+			{
 				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
+				int JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
+				if(JP_ContractContent_ID > 0)
+				{
+					MContractContent content = MContractContent.get(getCtx(), JP_ContractContent_ID);
+					if(content.getJP_Contract_Acct_ID() > 0)
+						contractAcct = MContractAcct.get(getCtx(), content.getJP_Contract_Acct_ID());
+				}
+			}//JPIERE-0363
 
 			//	No Invoice
 			if (invoice == null)
@@ -248,7 +263,7 @@ public class Doc_AllocationHdrJP extends Doc
 					acct_unallocated_cash =  getPaymentAcct(as, line.getC_Payment_ID());
 				else if (line.getC_CashLine_ID() != 0)
 					acct_unallocated_cash =  getCashAcct(as, line.getC_CashLine_ID());
-				MAccount acct_receivable = getAccount(Doc.ACCTTYPE_C_Receivable, as);
+				MAccount acct_receivable = getReceivableAccount(contractAcct, as);//JPIERE-0363
 
 				if ((!as.isPostIfClearingEqual()) && acct_unallocated_cash != null && acct_unallocated_cash.equals(acct_receivable) && (!isInterOrg)) {
 
@@ -301,7 +316,7 @@ public class Doc_AllocationHdrJP extends Doc
 				//	AR Invoice Amount	CR
 				if (as.isAccrual())
 				{
-					bpAcct = getAccount(Doc.ACCTTYPE_C_Receivable, as);
+					bpAcct = getReceivableAccount(contractAcct, as); //JPIERE-0363
 					fl = fact.createLine (line, bpAcct,
 						getC_Currency_ID(), null, allocationSource);		//	payment currency
 					if (fl != null)
@@ -335,7 +350,7 @@ public class Doc_AllocationHdrJP extends Doc
 					acct_payment_select = getPaymentAcct(as, line.getC_Payment_ID());
 				else if (line.getC_CashLine_ID() != 0)
 					acct_payment_select = getCashAcct(as, line.getC_CashLine_ID());
-				MAccount acct_liability = getAccount(Doc.ACCTTYPE_V_Liability, as);
+				MAccount acct_liability = getPayableAccount(contractAcct, as);//JPIERE-0363
 				boolean isUsingClearing = true;
 
 				// Save original allocation source for realized gain & loss purposes
@@ -355,7 +370,7 @@ public class Doc_AllocationHdrJP extends Doc
 				//	AP Invoice Amount	DR
 				if (as.isAccrual())
 				{
-					bpAcct = getAccount(Doc.ACCTTYPE_V_Liability, as);
+					bpAcct = getPayableAccount(contractAcct, as);//JPIERE-0363
 					fl = fact.createLine (line, bpAcct,
 						getC_Currency_ID(), allocationSource, null);		//	payment currency
 					if (fl != null)
@@ -894,6 +909,48 @@ public class Doc_AllocationHdrJP extends Doc
 
 	}	//	createTaxCorrection
 
+	/**
+	 * JPIERE
+	 * 
+	 * @param contractAcct
+	 * @param as
+	 * @return
+	 */
+	private MAccount getReceivableAccount(MContractAcct contractAcct, MAcctSchema as)
+	{		
+		if(contractAcct != null)
+		{
+			MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
+			if(bpAcct != null && bpAcct.getC_Receivable_Acct() > 0)
+			{
+				return MAccount.get(getCtx(),bpAcct.getC_Receivable_Acct());
+			}
+		}
+		
+		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as));
+	}
+
+	/**
+	 * JPIERE
+	 * 
+	 * @param contractAcct
+	 * @param as
+	 * @return
+	 */
+	private MAccount getPayableAccount(MContractAcct contractAcct, MAcctSchema as)
+	{	
+		if(contractAcct != null)
+		{
+			MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
+			if(bpAcct != null && bpAcct.getV_Liability_Acct() > 0)
+			{
+				return MAccount.get(Env.getCtx(),bpAcct.getV_Liability_Acct());
+			}
+		}
+		
+		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_V_Liability, as));
+	}
+	
 }   //  Doc_Allocation
 
 /**
@@ -1118,5 +1175,6 @@ class Doc_AllocationTax
 		if (log.isLoggable(Level.FINE)) log.fine(retValue + " (Mult=" + multiplier + "(Prec=" + precision + ")");
 		return retValue;
 	}	//	calcAmount
+	
 
 }	//	Doc_AllocationTax

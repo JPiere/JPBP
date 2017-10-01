@@ -583,6 +583,90 @@ public class Doc_JPRecognition extends Doc
 		}
 	}
 	
+	
+	private MAccount getRecognitionExpenseAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		//Charge Account
+		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
+		{
+			MContractChargeAcct contractChargeAcct =  contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
+			if(contractChargeAcct != null && contractChargeAcct.getJP_Ch_Expense_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), contractChargeAcct.getJP_Ch_Expense_Acct());
+			}else{
+				return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+			}
+			
+		}else if(line.getM_Product_ID() > 0){
+			if(docLine.isItem())
+			{
+				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+				if(contractProductAcct != null && contractProductAcct.getJP_PurchaseOffset_Acct() > 0 && contractProductAcct.getJP_Purchase_Acct() > 0)
+				{
+					return MAccount.get(getCtx(),contractProductAcct.getJP_Purchase_Acct());		
+				}else{
+
+					return docLine.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
+				}
+				
+			}else{
+			
+				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+				if(contractProductAcct != null && contractProductAcct.getJP_Expense_Acct() > 0)
+				{
+					return MAccount.get(getCtx(),contractProductAcct.getJP_Expense_Acct());
+				}else{
+					return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+				}
+			}
+		}else{
+			return docLine.getAccount (ProductCost.ACCTTYPE_P_Expense, as);
+		}
+	}
+	
+	
+	private MAccount getInvoiceExpenseAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		//Charge Account
+		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
+		{
+			MContractChargeAcct contractChargeAcct =  contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
+			if(contractChargeAcct != null && contractChargeAcct.getCh_Expense_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), contractChargeAcct.getCh_Expense_Acct());
+			}else{
+				return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+			}
+			
+		}else if(line.getM_Product_ID() > 0){
+			if(docLine.isItem())
+			{
+				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+				if(contractProductAcct != null && contractProductAcct.getJP_PurchaseOffset_Acct() > 0 && contractProductAcct.getJP_Purchase_Acct() > 0)
+				{
+					return MAccount.get(getCtx(),contractProductAcct.getJP_PurchaseOffset_Acct());		
+				}else{
+
+					return docLine.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
+				}
+				
+			}else{
+			
+				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+				if(contractProductAcct != null && contractProductAcct.getP_Expense_Acct() > 0)
+				{
+					return MAccount.get(getCtx(),contractProductAcct.getP_Expense_Acct());
+				}else{
+					return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+				}
+			}
+		}else{
+			return docLine.getAccount (ProductCost.ACCTTYPE_P_Expense, as);
+		}
+	}
+	
 	private MAccount getRecognitionTDiscountGrantAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
@@ -607,6 +691,32 @@ public class Doc_JPRecognition extends Doc
 			return MAccount.get(getCtx(),contractProductAcct.getP_TradeDiscountGrant_Acct());
 		}else{
 			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as);
+		}
+	}
+	
+	private MAccount getRecognitionTDiscountRecAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		
+		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+		if(contractProductAcct != null && contractProductAcct.getJP_TradeDiscountRec_Acct() > 0)
+		{
+			return MAccount.get(getCtx(),contractProductAcct.getJP_TradeDiscountRec_Acct());
+		}else{
+			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+		}
+	}
+	
+	private MAccount getInvoiceTDiscountRecAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		
+		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)
+		{
+			return MAccount.get(getCtx(),contractProductAcct.getP_TradeDiscountRec_Acct());
+		}else{
+			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
 		}
 	}
 	
