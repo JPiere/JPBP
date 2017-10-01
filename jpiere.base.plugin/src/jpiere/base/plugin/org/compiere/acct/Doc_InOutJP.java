@@ -22,9 +22,9 @@ import java.util.logging.Level;
 
 import org.compiere.acct.DocLine;
 import org.compiere.acct.Doc_InOut;
-import org.compiere.acct.Doc_Order;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
+import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MInOut;
@@ -37,7 +37,10 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
 *  JPIERE-0363
@@ -101,13 +104,11 @@ public class Doc_InOutJP extends Doc_InOut {
 		{
 			if (getDocumentType().equals(DOCTYPE_MatShipment) && isSOTrx()) //Sales - Shipment
 			{
-				//TODO：原価の勘定科目上書処理き
-				postSalesShipment(as, contractAcct, fact);//TODO
+				postSalesShipment(as, contractAcct, fact);
 				
 			}else if ( getDocumentType().equals(DOCTYPE_MatReceipt) && isSOTrx() ){//Sales - Return
 				
-				//TODO：原価の勘定科目上書き処理
-				postSalesReturn(as, contractAcct, fact);//TODO
+				postSalesReturn(as, contractAcct, fact);
 				
 			}else if (getDocumentType().equals(DOCTYPE_MatReceipt) && !isSOTrx()){//Purchasing - Receipt
 				
@@ -234,7 +235,7 @@ public class Doc_InOutJP extends Doc_InOut {
 			
 			//  CoGS            DR
 			dr = fact.createLine(line,
-				line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),
+				getCOGSAccount(line, contractAcct, as),
 				as.getC_Currency_ID(), costs, null);
 			if (dr == null)
 			{
@@ -510,7 +511,7 @@ public class Doc_InOutJP extends Doc_InOut {
 
 			//  CoGS            CR
 			cr = fact.createLine(line,
-				line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),
+				getCOGSAccount(line, contractAcct, as),
 				as.getC_Currency_ID(), null, costs);
 			if (cr == null)
 			{
@@ -540,5 +541,32 @@ public class Doc_InOutJP extends Doc_InOut {
 	
 	private boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
+	}
+	
+	private MAccount getCOGSAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
+	{
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		//Charge Account
+		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
+		{
+			MContractChargeAcct contractChargeAcct =  contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
+			if(contractChargeAcct != null && contractChargeAcct.getCh_Expense_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), contractChargeAcct.getCh_Expense_Acct());
+			}else{
+				return docLine.getAccount(ProductCost.ACCTTYPE_P_Cogs, as) ;
+			}
+			
+		}else if(line.getM_Product_ID() > 0){
+			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+			if(contractProductAcct != null && contractProductAcct.getP_COGS_Acct() > 0)
+			{
+				return MAccount.get(getCtx(),contractProductAcct.getP_COGS_Acct());
+			}else{
+				return docLine.getAccount(ProductCost.ACCTTYPE_P_Cogs, as) ;
+			}
+		}else{
+			return docLine.getAccount(ProductCost.ACCTTYPE_P_Cogs, as) ;
+		}
 	}
 }
