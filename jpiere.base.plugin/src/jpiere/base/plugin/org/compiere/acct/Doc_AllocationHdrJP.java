@@ -39,6 +39,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
+import org.compiere.model.MRMA;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -180,12 +181,15 @@ public class Doc_AllocationHdrJP extends Doc
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		Fact factForRGL = new Fact(this, as, Fact.POST_Actual); // dummy fact (not posted) to calculate Realized Gain & Loss
 		boolean isInterOrg = isInterOrg(as);
-
+		
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			DocLine_Allocation line = (DocLine_Allocation)p_lines[i];
 			setC_BPartner_ID(line.getC_BPartner_ID());
 
+			int JP_ContractContent_ID = 0;//JPIERE-0363;
+			int JP_Order_ID = 0;		//JPIERE-0363
+			
 			//  CashBankTransfer - all references null and Discount/WriteOff = 0
 			if (line.getC_Payment_ID() != 0
 				&& line.getC_Invoice_ID() == 0 && line.getC_Order_ID() == 0
@@ -216,7 +220,15 @@ public class Doc_AllocationHdrJP extends Doc
 			if (line.getC_Invoice_ID() != 0)
 			{
 				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
-				int JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
+				if(invoice.getC_Order_ID() > 0)
+				{
+					JP_Order_ID = invoice.getC_Order_ID();
+				}else if(invoice.getM_RMA_ID() > 0){
+					int M_RMA_ID = invoice.getM_RMA_ID();
+					MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID, getTrxName());
+					JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+				}
+				JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
 				if(JP_ContractContent_ID > 0)
 				{
 					MContractContent content = MContractContent.get(getCtx(), JP_ContractContent_ID);
@@ -324,7 +336,11 @@ public class Doc_AllocationHdrJP extends Doc
 					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#reateFacts() by Hideaki hagiwara
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
-					}														//JPiere-0026 Finish
+					}													//JPiere-0026 Finish
+					if(JP_ContractContent_ID > 0)
+						fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
+					if(JP_Order_ID > 0)
+						fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
 						getC_Currency_ID(), null, allocationSourceForRGL);		//	payment currency
@@ -379,6 +395,10 @@ public class Doc_AllocationHdrJP extends Doc
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
 					}														//JPiere-0026 Finish
+					if(JP_ContractContent_ID > 0)
+						fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
+					if(JP_Order_ID > 0)
+						fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
 						getC_Currency_ID(), allocationSourceForRGL, null);		//	payment currency
