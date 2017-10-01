@@ -322,19 +322,19 @@ public class Doc_JPRecognition extends Doc
 		
 		if(recog.getJP_ContractContent_ID()==0)
 		{
-			return facts;//TODO 転記エラーにする。
+			return null;
 		}
 		
 		MContractContent contractContent = MContractContent.get(Env.getCtx(),recog.getJP_ContractContent_ID());
 		if(contractContent.getJP_Contract_Acct_ID() == 0)
 		{
-			return facts;//TODO 転記エラーにする。
+			return null;
 		}
 		
 		MContractAcct contractAcct = MContractAcct.get(Env.getCtx(),contractContent.getJP_Contract_Acct_ID());
 		if( !contractAcct.isPostingContractAcctJP() || !contractAcct.isPostingRecognitionDocJP() )
 		{
-			return facts;//TODO 転記エラーにする。
+			return null;
 		}
 		
 		//  create Fact Header
@@ -344,25 +344,25 @@ public class Doc_JPRecognition extends Doc
 		if (!as.isAccrual())
 			return facts;
 		
-		//  ** JPR - Revenue Recognition
+		//JPR - Revenue Recognition
 		if (getDocumentType().equals("JPR"))
 		{
 			postJPR(as, contractAcct, fact);
 		}
-		//  ** JPS - Revenue Recognition Credit Memo
+		//JPS - Revenue Recognition Credit Memo
 		else if (getDocumentType().equals("JPS"))//TODO
 		{			
 			postJPS(as, contractAcct, fact);;
 		}
-		//TODO  ** JPX
+		//JPX
 		else if (getDocumentType().equals("JPX")) //Expense Recognition
 		{
-			;
+			postJPX(as, contractAcct, fact);
 		}
-		//TODO  JPY
+		//JPY
 		else if (getDocumentType().equals("JPY")) //Expense Recognition - Credit memo
 		{
-			;
+			postJPY(as, contractAcct, fact);
 		}
 		else
 		{
@@ -500,7 +500,7 @@ public class Doc_JPRecognition extends Doc
 		}	//	for all lines
 	
 		return null;
-	}
+	}//JPR
 	
 	
 	private String postJPS(MAcctSchema as, MContractAcct contractAcct, Fact fact)
@@ -607,7 +607,135 @@ public class Doc_JPRecognition extends Doc
 		}	//	for all lines
 	
 		return null;
-	}
+	}//JPS
+	
+	
+	private String postJPX(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{
+		//  Line pointers
+		FactLine dr = null;
+		FactLine cr = null;
+		
+		BigDecimal amt = Env.ZERO;
+
+		//DR: Invoice  TaxDue      / CR:   Recognition TaxDue
+		for (int i = 0; i < m_taxes.length; i++)
+		{
+			amt = m_taxes[i].getAmount();
+			if (amt != null && amt.signum() != 0)
+			{
+				//CR
+				FactLine taxLineDR = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
+				if (taxLineDR != null)
+					taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+				
+				//DR
+				FactLine taxLineCR = fact.createLine(null, getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
+				if (taxLineCR != null)
+					taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	
+			}
+		}//for
+		
+		//
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			DocLine line = p_lines[i];		
+			amt = p_lines[i].getAmtSource();
+			BigDecimal dAmt = null;
+			if (as.isTradeDiscountPosted())
+			{
+				BigDecimal discount = p_lines[i].getDiscount();
+				if (discount != null && discount.signum() != 0)
+				{
+					amt = amt.add(discount);
+					dAmt = discount;
+					//CR
+					fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
+					
+					//DR
+					fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
+				}
+			}
+			
+			//CR - Invoice Expense Acct
+			dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
+			dr.setQty(line.getQty().negate());
+			
+			//DR - Recognition Expense Acct
+			cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
+			cr.setQty(line.getQty());
+			
+			cr.setM_Locator_ID(line.getM_Locator_ID());
+			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+			
+		}	//	for all lines
+	
+		return null;
+	}//JPX
+	
+	
+	private String postJPY(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{
+		//  Line pointers
+		FactLine dr = null;
+		FactLine cr = null;
+		
+		BigDecimal amt = Env.ZERO;
+
+		//DR: Invoice  TaxDue      / CR:   Recognition TaxDue
+		for (int i = 0; i < m_taxes.length; i++)
+		{
+			amt = m_taxes[i].getAmount();
+			if (amt != null && amt.signum() != 0)
+			{
+				//CR
+				FactLine taxLineDR = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
+				if (taxLineDR != null)
+					taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+				
+				//DR
+				FactLine taxLineCR = fact.createLine(null, getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
+				if (taxLineCR != null)
+					taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	
+			}
+		}//for
+		
+		//
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			DocLine line = p_lines[i];		
+			amt = p_lines[i].getAmtSource();
+			BigDecimal dAmt = null;
+			if (as.isTradeDiscountPosted())
+			{
+				BigDecimal discount = p_lines[i].getDiscount();
+				if (discount != null && discount.signum() != 0)
+				{
+					amt = amt.add(discount);
+					dAmt = discount;
+					//CR
+					fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
+					
+					//DR
+					fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
+				}
+			}
+			
+			//CR - Invoice Expense Acct -> DR
+			dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
+			dr.setQty(line.getQty().negate());
+			
+			//DR - Recognition Expense Acct -> CR
+			cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
+			cr.setQty(line.getQty());
+			
+			cr.setM_Locator_ID(line.getM_Locator_ID());
+			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+			
+		}	//	for all lines
+	
+		return null;
+	}//JPY
 	
 	
 	/***
@@ -858,22 +986,22 @@ public class Doc_JPRecognition extends Doc
 	private MAccount getInvoiceTaxCreditAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-		if(taxAcct != null && taxAcct.getT_Credit_Acct() > 0)
+		MTax tax = MTax.get(getCtx(), doc_Tax.getC_Tax_ID());
+		if(tax.isSalesTax())
 		{
-			return MAccount.get(getCtx(), taxAcct.getT_Credit_Acct());
+			if(taxAcct != null && taxAcct.getT_Expense_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), taxAcct.getT_Expense_Acct());
+			}else{
+				return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxExpense,as);
+			}
 		}else{
-			return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxCredit,as);
-		}
-	}
-	
-	private MAccount getInvoiceTaxExpenseAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
-	{
-		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-		if(taxAcct != null && taxAcct.getT_Expense_Acct() > 0)
-		{
-			return MAccount.get(getCtx(), taxAcct.getT_Expense_Acct());
-		}else{
-			return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxExpense,as);
+			if(taxAcct != null && taxAcct.getT_Credit_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), taxAcct.getT_Credit_Acct());
+			}else{
+				return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxCredit,as);
+			}
 		}
 	}
 	
@@ -891,24 +1019,25 @@ public class Doc_JPRecognition extends Doc
 	private MAccount getRecognitionTaxCreditAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-		if(taxAcct != null && taxAcct.getJP_TaxCredit_Acct() > 0)
+		MTax tax = MTax.get(getCtx(), doc_Tax.getC_Tax_ID());
+		if(tax.isSalesTax())
 		{
-			return MAccount.get(getCtx(), taxAcct.getJP_TaxCredit_Acct());
+			if(taxAcct != null && taxAcct.getJP_TaxExpense_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), taxAcct.getJP_TaxExpense_Acct());
+			}else{
+				return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxExpense,as);
+			}
 		}else{
-			return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxCredit,as);
+			if(taxAcct != null && taxAcct.getJP_TaxCredit_Acct() > 0)
+			{
+				return MAccount.get(getCtx(), taxAcct.getJP_TaxCredit_Acct());
+			}else{
+				return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxCredit,as);
+			}			
 		}
 	}
-	
-	private MAccount getRecognitionTaxExpenseAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
-	{
-		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-		if(taxAcct != null && taxAcct.getJP_TaxExpense_Acct() > 0)
-		{
-			return MAccount.get(getCtx(), taxAcct.getJP_TaxExpense_Acct());
-		}else{
-			return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxExpense,as);
-		}
-	}
+
 	
 	
 	private int				m_Reversal_ID = 0;
