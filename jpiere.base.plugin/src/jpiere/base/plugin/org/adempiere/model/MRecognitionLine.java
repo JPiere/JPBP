@@ -736,7 +736,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 */
 	public String toString ()
 	{
-		StringBuilder sb = new StringBuilder ("MInvoiceLine[")
+		StringBuilder sb = new StringBuilder ("MRecotnitionLine[")
 			.append(get_ID()).append(",").append(getLine())
 			.append(",QtyInvoiced=").append(getQtyInvoiced())
 			.append(",LineNetAmt=").append(getLineNetAmt())

@@ -40,6 +40,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractTaxAcct;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
 *  JPIERE-0363
@@ -54,16 +55,12 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		super(as, rs, trxName);
 	}
 	
-		
 	
 	@Override
 	protected String loadDocumentDetails() 
 	{
 		return super.loadDocumentDetails();
 	}
-
-
-
 
 
 	@Override
@@ -139,8 +136,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	private void postARI(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		BigDecimal amt = Env.ZERO;
-		//CR : TaxDue
-		MContractTaxAcct taxAcct = null;
+
+		//DR :  TaxDue  
 		for (int i = 0; i < m_taxes.length; i++)
 		{
 			amt = m_taxes[i].getAmount();
@@ -148,14 +145,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				//CR
 				FactLine tl = null;
-				 taxAcct = contractAcct.getContracTaxAcct(m_taxes[i].getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-				if(taxAcct == null || taxAcct.getT_Due_Acct() == 0 )
-				{
-					tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),getC_Currency_ID(), null, amt);
-				}else{
-					tl = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getT_Due_Acct()), getC_Currency_ID(), null, amt);
-				}
-				
+				tl = fact.createLine(null, getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);				
 				if (tl != null)
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	;
 			}//if
@@ -175,14 +165,14 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					amt = amt.add(discount);
 					dAmt = discount;
 					fact.createLine (p_lines[i], 
-							getTDiscountGrantValidCombination(p_lines[i], contractAcct,  as),
+							getInvoiceTDiscountGrantAccount(p_lines[i], contractAcct,  as),
 							getC_Currency_ID(), dAmt, null);
 				}
 			}
 			
 			//CR : Revenue
 			fact.createLine (p_lines[i], 
-					getRevenueValidCombination(p_lines[i], contractAcct,  as), 
+					getInvoiceRevenueAccount(p_lines[i], contractAcct,  as), 
 					getC_Currency_ID(), null, amt);
 			
 		}//For
@@ -199,18 +189,17 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		}
 
 		//DR : Receivables
-		int receivables_ID = getReceivableValidCombination_ID(contractAcct,  as);
 		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
 		if (grossAmt.signum() != 0)
-			fact.createLine(null, MAccount.get(getCtx(), receivables_ID),getC_Currency_ID(), grossAmt, null);
+			fact.createLine(null, getReceivableAccount(contractAcct,  as),getC_Currency_ID(), grossAmt, null);
 	}
 	
 	
 	private void postARC(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		BigDecimal amt = Env.ZERO;
+		
 		//DR :  TaxDue                  
-		MContractTaxAcct taxAcct = null;
 		for (int i = 0; i < m_taxes.length; i++)
 		{
 			amt = m_taxes[i].getAmount();
@@ -218,14 +207,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				//DR
 				FactLine tl = null;
-				 taxAcct = contractAcct.getContracTaxAcct(m_taxes[i].getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
-				if(taxAcct == null || taxAcct.getT_Due_Acct() == 0 )
-				{
-					tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),getC_Currency_ID(), amt, null);
-				}else{
-					tl = fact.createLine(null, MAccount.get(getCtx(), taxAcct.getT_Due_Acct()), getC_Currency_ID(), amt, null);
-				}
-				
+				tl = fact.createLine(null,getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
 				if (tl != null)
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	;
 			}//if
@@ -245,14 +227,14 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					amt = amt.add(discount);
 					dAmt = discount;
 					fact.createLine (p_lines[i], 
-							getTDiscountGrantValidCombination(p_lines[i], contractAcct,  as),
+							getInvoiceTDiscountGrantAccount(p_lines[i], contractAcct,  as),
 							getC_Currency_ID(), null, dAmt);
 				}
 			}
 			
 			//DR : Revenue
 			fact.createLine (p_lines[i], 
-					getRevenueValidCombination(p_lines[i], contractAcct,  as), 
+					getInvoiceRevenueAccount(p_lines[i], contractAcct,  as), 
 					getC_Currency_ID(), amt, null);
 			
 		}//For
@@ -269,11 +251,9 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		}
 
 		//CR : Receivables
-		int receivables_ID = getReceivableValidCombination_ID(contractAcct,  as);
 		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
 		if (grossAmt.signum() != 0)
-			fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
-				getC_Currency_ID(), null, grossAmt);
+			fact.createLine(null, getReceivableAccount(contractAcct,  as), getC_Currency_ID(), null, grossAmt);
 	}
 	
 	private void postAPI(MAcctSchema as, MContractAcct contractAcct, Fact fact)
@@ -484,80 +464,79 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				getC_Currency_ID(), serviceAmt, null);
 	}
 	
+
+	
 	/**
+	 * 
 	 * 
 	 * @param docLine
 	 * @param contractAcct
-	 * @param C_AcctSchema_ID
+	 * @param as
 	 * @return
-	 */	
-	private MAccount getRevenueValidCombination(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
+	 */
+	private MAccount getInvoiceRevenueAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
-		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
-		//	Charge Account
+
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		//Charge Account
 		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
 		{
-			MContractChargeAcct cAcct = contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
-			if(cAcct == null || cAcct.getCh_Expense_Acct() == 0)
+			MContractChargeAcct contractChargeAcct =  contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
+			if(contractChargeAcct != null && contractChargeAcct.getCh_Expense_Acct() > 0)
 			{
-				return docLine.getAccount(ProductCost.ACCTTYPE_P_Revenue, as);
+				return MAccount.get(getCtx(), contractChargeAcct.getCh_Expense_Acct());
 			}else{
-				
-				return MAccount.get(getCtx(), cAcct.getCh_Expense_Acct()) ;
+				return docLine.getAccount (ProductCost.ACCTTYPE_P_Revenue, as);
 			}
 			
-		
+		}else if(line.getM_Product_ID() > 0){
+			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+			if(contractProductAcct != null && contractProductAcct.getP_Revenue_Acct() > 0)
+			{
+				return MAccount.get(getCtx(),contractProductAcct.getP_Revenue_Acct());
+			}else{
+				return docLine.getAccount (ProductCost.ACCTTYPE_P_Revenue, as);
+			}
 		}else{
-			
-			MContractProductAcct pAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
-			if(pAcct == null || pAcct.getP_Revenue_Acct() == 0)
-			{
-				return docLine.getAccount(ProductCost.ACCTTYPE_P_Revenue, as);
-			}else{
-				return MAccount.get(getCtx(),pAcct.getP_Revenue_Acct()) ;
-			}
-			
+			return docLine.getAccount (ProductCost.ACCTTYPE_P_Revenue, as);
 		}
-		
 	}
 	
 	
-	private MAccount getTDiscountGrantValidCombination(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
+	private MAccount getInvoiceTDiscountGrantAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
-		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
-		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
+		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		
+		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountGrant_Acct() > 0)
 		{
-			MContractChargeAcct cAcct = contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
-			if(cAcct == null || cAcct.getCh_Expense_Acct() == 0)
-			{
-				return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as);
-				
-				
-			}else{
-				return MAccount.get(getCtx(),cAcct.getCh_Expense_Acct());
-			}
-		}else {
-			MContractProductAcct pAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
-			if(pAcct == null || pAcct.getP_Revenue_Acct() == 0)
-			{
-				return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as);
-			}else{
-				return MAccount.get(getCtx(),pAcct.getP_TradeDiscountGrant_Acct()) ;
-			}
-			
+			return MAccount.get(getCtx(),contractProductAcct.getP_TradeDiscountGrant_Acct());
+		}else{
+			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as);
 		}
-		
 	}
 	
 	
-	private int getReceivableValidCombination_ID(MContractAcct contractAcct,  MAcctSchema as)
-	{
+	private MAccount getReceivableAccount(MContractAcct contractAcct, MAcctSchema as)
+	{		
 		MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
-		if(bpAcct == null || bpAcct.getC_Receivable_Acct() == 0)
+		if(bpAcct != null && bpAcct.getC_Receivable_Acct() > 0)
 		{
-			return getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as);
+			return MAccount.get(getCtx(),bpAcct.getC_Receivable_Acct());
 		}else{
-			return bpAcct.getC_Receivable_Acct();
+			return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as));
 		}
 	}
+	
+	private MAccount getInvoiceTaxDueAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
+	{
+		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
+		if(taxAcct != null && taxAcct.getT_Due_Acct() > 0)
+		{
+			return MAccount.get(getCtx(), taxAcct.getT_Due_Acct());
+		}else{
+			return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxDue,as);
+		}
+	}
+	
 }
