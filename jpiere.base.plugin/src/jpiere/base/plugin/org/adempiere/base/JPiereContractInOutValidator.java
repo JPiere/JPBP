@@ -16,6 +16,10 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.util.List;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.acct.Fact;
+import org.compiere.acct.FactLine;
+import org.compiere.model.FactsValidator;
+import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
@@ -50,7 +54,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
-public class JPiereContractInOutValidator extends AbstractContractValidator  implements ModelValidator {
+public class JPiereContractInOutValidator extends AbstractContractValidator  implements ModelValidator,FactsValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereContractInOutValidator.class);
 	private int AD_Client_ID = -1;
@@ -67,7 +71,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 		engine.addModelChange(MInOut.Table_Name, this);
 		engine.addModelChange(MInOutLine.Table_Name, this);
 		engine.addDocValidate(MInOut.Table_Name, this);
-
+		engine.addFactsValidate(MInOut.Table_Name, this);
 	}
 
 	@Override
@@ -493,5 +497,43 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 										.setOrderBy(MInOutLine.COLUMNNAME_Line)
 										.list();
 		return list.toArray(new MInOutLine[list.size()]);
+	}
+
+	@Override
+	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po)
+	{
+		if(po.get_TableName().equals(MInOut.Table_Name))
+		{		
+			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
+			if(JP_ContractContent_ID > 0)
+			{
+				MInOut inOut = (MInOut)po;
+				//Set Order Info
+				for(Fact fact : facts)
+				{
+					FactLine[]  factLine = fact.getLines();
+					for(int i = 0; i < factLine.length; i++)
+					{
+						if(inOut.getC_Order_ID() > 0)
+						{
+							factLine[i].set_ValueNoCheck("JP_Order_ID", inOut.getC_Order_ID());
+						}else if(inOut.getM_RMA_ID() > 0){
+							int M_RMA_ID = inOut.getM_RMA_ID();
+							MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID,null);
+							int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+							if(JP_Order_ID > 0)
+								factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
+						}
+						
+						factLine[i].set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
+					}//for
+					
+				}//for
+					
+			}//if(JP_ContractContent_ID > 0)
+		
+		}//if(po.get_TableName().equals(MInvoice.Table_Name))
+		
+		return null;
 	}
 }

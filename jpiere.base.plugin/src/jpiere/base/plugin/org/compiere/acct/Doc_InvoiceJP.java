@@ -18,6 +18,7 @@ package jpiere.base.plugin.org.compiere.acct;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 import org.compiere.acct.Doc;
 import org.compiere.acct.DocLine;
@@ -27,9 +28,9 @@ import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MCostDetail;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
-import org.compiere.model.MRMA;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
@@ -102,30 +103,21 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		//  ** API
 		else if (getDocumentType().equals(DOCTYPE_APInvoice))
 		{
+			//TODO アイテム以外は、勘定科目を上書きする実装と債務勘定科目を上書きする実装
 			postAPI(as, contractAcct, fact);//TODO
 		}
 		//  APC
 		else if (getDocumentType().equals(DOCTYPE_APCredit))
 		{
+			//TODO アイテム以外は、勘定科目を上書きする実装と債務勘定科目を上書きする実装
 			postAPC(as, contractAcct, fact);//TODO
 		}
-		
-		FactLine[]  factLine = fact.getLines();
-		for(int i = 0; i < factLine.length; i++)
+		else
 		{
-			if(invoice.getC_Order_ID() > 0)
-			{
-				factLine[i].set_ValueNoCheck("JP_Order_ID", invoice.getC_Order_ID());
-			}else if(invoice.getM_RMA_ID() > 0){
-				int M_RMA_ID = invoice.getM_RMA_ID();
-				MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID,null);
-				int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
-				if(JP_Order_ID > 0)
-					factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
-			}
-			
-			factLine[i].set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
-		}//for
+			p_Error = "DocumentType unknown: " + getDocumentType();
+			log.log(Level.SEVERE, p_Error);
+			fact = null;
+		}
 		
 		facts.add(fact);
 		return facts;
@@ -274,12 +266,210 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	
 	private void postAPI(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
-		;//TODO 実装
+		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		BigDecimal serviceAmt = Env.ZERO;
+
+		//  Charge          DR
+		fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
+			getC_Currency_ID(), getAmount(Doc.AMTTYPE_Charge), null);
+		//  TaxCredit       DR
+		for (int i = 0; i < m_taxes.length; i++)
+		{
+			FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
+				getC_Currency_ID(), m_taxes[i].getAmount(), null);
+			if (tl != null)
+				tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+		}
+		//  Expense         DR
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			DocLine line = p_lines[i];
+			boolean landedCost = landedCost(as, fact, line, true);
+			if (landedCost && as.isExplicitCostAdjustment())
+			{
+				fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+					getC_Currency_ID(), line.getAmtSource(), null);
+				//
+				FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+					getC_Currency_ID(), null, line.getAmtSource());
+				String desc = line.getDescription();
+				if (desc == null)
+					desc = "100%";
+				else
+					desc += " 100%";
+				fl.setDescription(desc);
+			}
+			if (!landedCost)
+			{
+				MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+				if (line.isItem())
+					expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
+				BigDecimal amt = line.getAmtSource();
+				BigDecimal dAmt = null;
+				if (as.isTradeDiscountPosted() && !line.isItem())
+				{
+					BigDecimal discount = line.getDiscount();
+					if (discount != null && discount.signum() != 0)
+					{
+						amt = amt.add(discount);
+						dAmt = discount;
+						MAccount tradeDiscountReceived = line.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+						fact.createLine (line, tradeDiscountReceived,
+								getC_Currency_ID(), null, dAmt);
+					}
+				}
+				fact.createLine (line, expense,
+					getC_Currency_ID(), amt, null);
+				if (!line.isItem())
+				{
+					grossAmt = grossAmt.subtract(amt);
+					serviceAmt = serviceAmt.add(amt);
+				}
+				//
+				if (line.getM_Product_ID() != 0
+					&& line.getProduct().isService())	//	otherwise Inv Matching
+					MCostDetail.createInvoice(as, line.getAD_Org_ID(),
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,		//	No Cost Element
+						line.getAmtSource(), line.getQty(),
+						line.getDescription(), getTrxName());
+			}
+		}
+		//  Set Locations
+		FactLine[] fLines = fact.getLines();
+		for (int i = 0; i < fLines.length; i++)
+		{
+			if (fLines[i] != null)
+			{
+				fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), true);  //  from Loc
+				fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), false);    //  to Loc
+			}
+		}
+
+		//  Liability               CR
+		int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
+		int payablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability_Services, as);
+		if (m_allLinesItem || !as.isPostServices()
+			|| payables_ID == payablesServices_ID)
+		{
+			grossAmt = getAmount(Doc.AMTTYPE_Gross);
+			serviceAmt = Env.ZERO;
+		}
+		else if (m_allLinesService)
+		{
+			serviceAmt = getAmount(Doc.AMTTYPE_Gross);
+			grossAmt = Env.ZERO;
+		}
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, MAccount.get(getCtx(), payables_ID),
+				getC_Currency_ID(), null, grossAmt);
+		if (serviceAmt.signum() != 0)
+			fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
+				getC_Currency_ID(), null, serviceAmt);
+		//
+		updateProductPO(as);	//	Only API
 	}
 	
 	private void postAPC(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
-		;//TODO 実装
+		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		BigDecimal serviceAmt = Env.ZERO;
+		//  Charge                  CR
+		fact.createLine (null, getAccount(Doc.ACCTTYPE_Charge, as),
+			getC_Currency_ID(), null, getAmount(Doc.AMTTYPE_Charge));
+		//  TaxCredit               CR
+		for (int i = 0; i < m_taxes.length; i++)
+		{
+			FactLine tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
+				getC_Currency_ID(), null, m_taxes[i].getAmount());
+			if (tl != null)
+				tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+		}
+		//  Expense                 CR
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			DocLine line = p_lines[i];
+			boolean landedCost = landedCost(as, fact, line, false);
+			if (landedCost && as.isExplicitCostAdjustment())
+			{
+				fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+					getC_Currency_ID(), null, line.getAmtSource());
+				//
+				FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+					getC_Currency_ID(), line.getAmtSource(), null);
+				String desc = line.getDescription();
+				if (desc == null)
+					desc = "100%";
+				else
+					desc += " 100%";
+				fl.setDescription(desc);
+			}
+			if (!landedCost)
+			{
+				MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+				if (line.isItem())
+					expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
+				BigDecimal amt = line.getAmtSource();
+				BigDecimal dAmt = null;
+				if (as.isTradeDiscountPosted() && !line.isItem())
+				{
+					BigDecimal discount = line.getDiscount();
+					if (discount != null && discount.signum() != 0)
+					{
+						amt = amt.add(discount);
+						dAmt = discount;
+						MAccount tradeDiscountReceived = line.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+						fact.createLine (line, tradeDiscountReceived,
+								getC_Currency_ID(), dAmt, null);
+					}
+				}
+				fact.createLine (line, expense,
+					getC_Currency_ID(), null, amt);
+				if (!line.isItem())
+				{
+					grossAmt = grossAmt.subtract(amt);
+					serviceAmt = serviceAmt.add(amt);
+				}
+				//
+				if (line.getM_Product_ID() != 0
+					&& line.getProduct().isService())	//	otherwise Inv Matching
+					MCostDetail.createInvoice(as, line.getAD_Org_ID(),
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,		//	No Cost Element
+						line.getAmtSource().negate(), line.getQty(),
+						line.getDescription(), getTrxName());
+			}
+		}
+		//  Set Locations
+		FactLine[] fLines = fact.getLines();
+		for (int i = 0; i < fLines.length; i++)
+		{
+			if (fLines[i] != null)
+			{
+				fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), true);  //  from Loc
+				fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), false);    //  to Loc
+			}
+		}
+		//  Liability       DR
+		int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
+		int payablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability_Services, as);
+		if (m_allLinesItem || !as.isPostServices()
+			|| payables_ID == payablesServices_ID)
+		{
+			grossAmt = getAmount(Doc.AMTTYPE_Gross);
+			serviceAmt = Env.ZERO;
+		}
+		else if (m_allLinesService)
+		{
+			serviceAmt = getAmount(Doc.AMTTYPE_Gross);
+			grossAmt = Env.ZERO;
+		}
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, MAccount.get(getCtx(), payables_ID),
+				getC_Currency_ID(), grossAmt, null);
+		if (serviceAmt.signum() != 0)
+			fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
+				getC_Currency_ID(), serviceAmt, null);
 	}
 	
 	/**
