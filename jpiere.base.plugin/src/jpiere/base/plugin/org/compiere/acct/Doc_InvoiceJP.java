@@ -477,7 +477,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	private MAccount getInvoiceRevenueAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
 
-		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
 		//Charge Account
 		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
 		{
@@ -504,7 +504,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	
 	private MAccount getInvoiceExpenseAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
-		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
 		//Charge Account
 		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
 		{
@@ -538,7 +538,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	
 	private MAccount getInvoiceTDiscountGrantAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
-		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
 		
 		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountGrant_Acct() > 0)
@@ -551,7 +551,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	
 	private MAccount getInvoiceTDiscountRecAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
-		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
 		
 		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)

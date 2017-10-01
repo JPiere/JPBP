@@ -466,7 +466,7 @@ public class Doc_JPRecognition extends Doc
 				dr.setLocationFromLocator(ioLine.getM_Locator_ID(), true);    //  from Loc
 
 			}
-			dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc				
+					
 			dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
 			dr.setQty(line.getQty().negate());
 			
@@ -483,7 +483,6 @@ public class Doc_JPRecognition extends Doc
 			}
 			cr.setM_Locator_ID(line.getM_Locator_ID());
 			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
-			cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
 			
 		}	//	for all lines
 
@@ -507,7 +506,13 @@ public class Doc_JPRecognition extends Doc
 			if (fLines[i] != null)
 			{
 				fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
-				fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+				if(recog.getBill_BPartner_ID() > 0)
+					fLines[i].setC_BPartner_ID(recog.getBill_BPartner_ID());
+				
+				if(recog.getBill_Location_ID() > 0)
+					fLines[i].setLocationFromBPartner(recog.getBill_Location_ID(), false);  //  to Loc
+				else
+					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
 				fLines[i].set_ValueNoCheck("JP_Order_ID", recog.getC_Order_ID());
 				fLines[i].set_ValueNoCheck("JP_ContractContent_ID", recog.getJP_ContractContent_ID());
 			}
