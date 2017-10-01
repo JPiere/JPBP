@@ -322,19 +322,19 @@ public class Doc_JPRecognition extends Doc
 		
 		if(recog.getJP_ContractContent_ID()==0)
 		{
-			return null;
+			return facts;
 		}
 		
 		MContractContent contractContent = MContractContent.get(Env.getCtx(),recog.getJP_ContractContent_ID());
 		if(contractContent.getJP_Contract_Acct_ID() == 0)
 		{
-			return null;
+			return facts;
 		}
 		
 		MContractAcct contractAcct = MContractAcct.get(Env.getCtx(),contractContent.getJP_Contract_Acct_ID());
 		if( !contractAcct.isPostingContractAcctJP() || !contractAcct.isPostingRecognitionDocJP() )
 		{
-			return null;
+			return facts;
 		}
 		
 		//  create Fact Header

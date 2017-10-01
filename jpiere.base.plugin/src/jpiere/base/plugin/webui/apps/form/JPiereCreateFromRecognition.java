@@ -172,7 +172,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 
 		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)")
 			.append(" INNER JOIN M_InOut io ON (l.M_InOut_ID=io.M_InOut_ID)");
-		sql.append(" LEFT JOIN JP_RecognitionLine rl ON l.M_InOutLine_ID = rl.M_InOutLine_ID");
+		sql.append(" LEFT JOIN JP_RecognitionLine rl ON (l.M_InOutLine_ID = rl.M_InOutLine_ID)");
 		sql.append(" LEFT OUTER JOIN M_Product_PO po ON (l.M_Product_ID = po.M_Product_ID AND io.C_BPartner_ID = po.C_BPartner_ID)")
 			.append(" WHERE l.M_InOut_ID=? AND l.MovementQty<>0 ")
 			.append("GROUP BY l.MovementQty, l.QtyEntered/l.MovementQty, "
