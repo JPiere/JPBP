@@ -41,7 +41,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractT;
 * @author Hideaki Hagiwara
 *
 */
-public class AbstractCreateContractFromTemplate extends SvrProcess {
+public abstract class AbstractCreateContractFromTemplate extends SvrProcess {
 	
 	
 	protected MContract m_Contract = null;

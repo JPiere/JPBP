@@ -51,7 +51,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 * @author Hideaki Hagiwara
 *
 */
-public class AbstractContractProcess extends SvrProcess 
+public abstract class AbstractContractProcess extends SvrProcess 
 {
 	protected int Record_ID = 0;
 	protected MContractContent m_ContractContent = null;
