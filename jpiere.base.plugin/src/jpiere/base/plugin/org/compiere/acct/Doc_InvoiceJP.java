@@ -53,6 +53,18 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	{
 		super(as, rs, trxName);
 	}
+	
+		
+	
+	@Override
+	protected String loadDocumentDetails() 
+	{
+		return super.loadDocumentDetails();
+	}
+
+
+
+
 
 	@Override
 	public ArrayList<Fact> createFacts(MAcctSchema as) 

@@ -29,6 +29,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import org.adempiere.base.IDocFactory;
 import org.compiere.acct.Doc;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
@@ -55,6 +56,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 		Doc doc = null;
 		if(	       AD_Table_ID==MInvoice.Table_ID //318
 				|| AD_Table_ID==MInOut.Table_ID //319
+				|| AD_Table_ID==MAllocationHdr.Table_ID//735
 				|| AD_Table_ID==MBankStatement.Table_ID //392
 				|| AD_Table_ID==MRecognition.Table_ID //1000188
 				|| AD_Table_ID==MEstimation.Table_ID //1000080
@@ -111,6 +113,8 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_InvoiceJP";
 		}else if(AD_Table_ID == MInOut.Table_ID){//319
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_InOutJP";
+		}else if(AD_Table_ID == MAllocationHdr.Table_ID){//735
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_AllocationHdrJP";			
 		}else if(AD_Table_ID == MBankStatement.Table_ID){//392
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_BankStatementJP";
 		}else if(AD_Table_ID == MBill.Table_ID){
