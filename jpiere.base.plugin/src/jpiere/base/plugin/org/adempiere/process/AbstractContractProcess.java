@@ -584,6 +584,7 @@ public class AbstractContractProcess extends SvrProcess
 			
 		}else{
 			
+			logDetail.saveEx(m_ContractLog.get_TrxName());
 			return ;
 		}
 		

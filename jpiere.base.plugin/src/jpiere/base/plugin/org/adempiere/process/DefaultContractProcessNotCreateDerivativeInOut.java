@@ -14,8 +14,11 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
+import org.compiere.util.Msg;
+
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
+import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 /** 
 * JPIERE-0363
@@ -36,14 +39,31 @@ public class DefaultContractProcessNotCreateDerivativeInOut extends AbstractCont
 	protected String doIt() throws Exception 
 	{		
 		super.doIt();
-		createContractLogDetail("B6", null, null, null);
+
+		int JP_ContractProcPeriod_ID = getJP_ContractProctPeriod_ID();
+		
+		if(JP_ContractProcPeriod_ID == 0)
+		{
+			String descriptionMsg = Msg.getMsg(getCtx(), "NotFound") + " : " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID");
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, descriptionMsg);
+			return "";
+		}
+		
 		MContractLine[] contractLines = m_ContractContent.getLines(true, "");
 		for(int i = 0; i < contractLines.length; i++)
 		{
-			if(contractLines[i].getJP_ContractProcess_InOut_ID() == getJP_ContractProcess_ID())
-			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDerivativeDocManually,contractLines[i], null, null);
-			}
+			
+			//Check Contract Process
+			if(contractLines[i].getJP_ContractProcess_InOut_ID() != getJP_ContractProcess_ID())
+				continue;
+			
+			//Check Contract Calender
+			MContractProcPeriod processPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+			if(contractLines[i].getJP_ContractCalender_InOut_ID() != processPeriod.getJP_ContractCalender_ID())
+				continue;
+			
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDerivativeDocManually,contractLines[i], null, null);
+			
 		}
 		
 		return "";
