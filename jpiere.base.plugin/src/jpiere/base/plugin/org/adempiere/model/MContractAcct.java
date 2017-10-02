@@ -71,6 +71,17 @@ public class MContractAcct extends X_JP_Contract_Acct {
 					|| !isPostingContractAcctJP())
 			{
 				setIsPostingRecognitionDocJP(false);
+				setDocAction(null);
+				setIsSplitWhenDifferenceJP(false);
+			}
+		}
+		
+		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingRecognitionDocJP))
+		{
+			if(!isPostingRecognitionDocJP())
+			{
+				setDocAction(null);
+				setIsSplitWhenDifferenceJP(false);
 			}
 		}
 		
