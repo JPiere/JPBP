@@ -26,6 +26,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MUOM;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -259,6 +260,16 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			
 			return false;
 		}
+		
+		//Skip Qty ZERO
+		if(contractLine.getQtyInvoiced().compareTo(Env.ZERO) == 0)
+		{
+			if(isCreateLog)
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyOfContractLineIsZero, contractLine, null, null);
+			
+			return false;
+		}
+		
 		
 		//Check Overlap
 		MInvoiceLine[] iLines = contractLine.getInvoiceLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());

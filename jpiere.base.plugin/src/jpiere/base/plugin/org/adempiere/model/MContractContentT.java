@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MPriceList;
 import org.compiere.model.Query;
@@ -292,5 +293,10 @@ public class MContractContentT extends X_JP_ContractContentT {
 			s_cache.put (JP_ContractContentT_ID, retValue);
 		return retValue;
 	}	//	get
+	
+	public int getPrecision()
+	{
+		return MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
+	}
 
 }

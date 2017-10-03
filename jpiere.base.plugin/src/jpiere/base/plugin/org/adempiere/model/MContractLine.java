@@ -14,15 +14,21 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProductPricing;
+import org.compiere.model.MRole;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -36,6 +42,14 @@ import org.compiere.util.Util;
  *
  */
 public class MContractLine extends X_JP_ContractLine {
+	
+	/** Parent					*/
+	protected MContractContent			m_parent = null;
+	protected Integer			m_precision = null;
+	protected int 			m_M_PriceList_ID = 0;
+	protected boolean			m_IsSOTrx = true;
+	protected MProductPricing	m_productPrice = null;
+	protected Timestamp		m_DateDoc = null;
 	
 	public MContractLine(Properties ctx, int JP_ContractLine_ID, String trxName) 
 	{
@@ -68,10 +82,6 @@ public class MContractLine extends X_JP_ContractLine {
 		return retValue;
 	}	//	get
 	
-	
-	/** Parent					*/
-	protected MContractContent			m_parent = null;
-
 	public MContractContent getParent()
 	{
 		if (m_parent == null)
@@ -83,13 +93,6 @@ public class MContractLine extends X_JP_ContractLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
 	{
-		if(newRecord)
-		{
-			setC_BPartner_ID(getParent().getC_BPartner_ID());
-			setC_BPartner_Location_ID(getParent().getC_BPartner_Location_ID());
-		}
-		
-		
 		//Check update.
 		if(getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
@@ -198,15 +201,116 @@ public class MContractLine extends X_JP_ContractLine {
 		}		
 		
 		
+		//	Get Defaults from Parent
+		if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0)
+			setContentInfo();
+		if (m_M_PriceList_ID == 0)
+			setHeaderInfo();
+		
 		//	Charge
-		if (getC_Charge_ID() != 0)
-		{
-			if (getM_Product_ID() != 0)
+		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
 				setM_Product_ID(0);
+		//	No Product
+		if (getM_Product_ID() == 0)
+			setM_AttributeSetInstance_ID(0);
+		//	Product
+		else	//	Set/check Product Price
+		{
+			//	Set Price if Actual = 0
+			if (m_productPrice == null 
+				&&  Env.ZERO.compareTo(getPriceActual()) == 0
+				&&  Env.ZERO.compareTo(getPriceList()) == 0)
+				setPrice();
+			//	Check if on Price list
+			if (m_productPrice == null)
+				getProductPricing(m_M_PriceList_ID);
+			// IDEMPIERE-1574 Sales Order Line lets Price under the Price Limit when updating
+			//	Check PriceLimit
+			boolean enforce = m_IsSOTrx && getParent().getM_PriceList().isEnforcePriceLimit();
+			if (enforce && MRole.getDefault().isOverwritePriceLimit())
+				enforce = false;
+			//	Check Price Limit?
+			if (enforce && getPriceLimit() != Env.ZERO
+			  && getPriceActual().compareTo(getPriceLimit()) < 0)
+			{
+				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
+				return false;
+			}
+			//
+			if (!m_productPrice.isCalculated())
+			{
+				throw new ProductNotOnPriceListException(m_productPrice, getLine());
+			}
 		}
 		
 		return true;
-	}
+		
+	}//beforeSave
+	
+	public void setContentInfo ()
+	{
+		m_parent = getParent();
+		setC_BPartner_ID(m_parent.getC_BPartner_ID());
+		setC_BPartner_Location_ID(m_parent.getC_BPartner_Location_ID());
+		setDateOrdered(m_parent.getDateOrdered());
+		setDatePromised(m_parent.getDatePromised());
+		//
+		setHeaderInfo();	
+	}	
+	
+	public void setHeaderInfo ()
+	{
+		m_parent = getParent();
+		m_precision = new Integer(m_parent.getPrecision());
+		m_M_PriceList_ID = m_parent.getM_PriceList_ID();
+		m_IsSOTrx = m_parent.isSOTrx();
+		m_DateDoc = m_parent.getDateDoc();
+	}	//	setHeaderInfo
+	
+
+	public void setPrice()
+	{
+		if (getM_Product_ID() == 0)
+			return;
+		if (m_M_PriceList_ID == 0)
+			throw new IllegalStateException("PriceList unknown!");
+		setPrice (m_M_PriceList_ID);
+	}	//	setPrice
+	
+	
+	public void setPrice (int M_PriceList_ID)
+	{
+		if (getM_Product_ID() == 0)
+			return;
+		//
+		if (log.isLoggable(Level.FINE)) log.fine(toString() + " - M_PriceList_ID=" + M_PriceList_ID);
+		getProductPricing (M_PriceList_ID);
+		setPriceActual (m_productPrice.getPriceStd());
+		setPriceList (m_productPrice.getPriceList());
+		setPriceLimit (m_productPrice.getPriceLimit());
+		//
+		if (getQtyEntered().compareTo(getQtyOrdered()) == 0)
+			setPriceEntered(getPriceActual());
+		else
+			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
+				.divide(getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP)));	//	recision
+		
+		//	Calculate Discount
+		setDiscount(m_productPrice.getDiscount());
+		//	Set UOM
+		setC_UOM_ID(m_productPrice.getC_UOM_ID());
+	}	//	setPrice
+
+	protected MProductPricing getProductPricing (int M_PriceList_ID)
+	{
+		m_productPrice = new MProductPricing (getM_Product_ID(), 
+			getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx, get_TrxName());
+		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
+		m_productPrice.setPriceDate(m_DateDoc);
+		//
+		m_productPrice.calculatePrice();
+		return m_productPrice;
+	}	//	getProductPrice
 
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) 
@@ -603,7 +707,7 @@ public class MContractLine extends X_JP_ContractLine {
 			return false;
 		}
 		
-		if(getQtyOrdered().signum() != getMovementQty().signum())
+		if(getMovementQty().signum()!=0 && getQtyOrdered().signum() != getMovementQty().signum())
 		{
 			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "MovementQty"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
 			return false;
@@ -756,7 +860,7 @@ public class MContractLine extends X_JP_ContractLine {
 			return false;
 		}
 		
-		if(getQtyOrdered().signum() != getQtyInvoiced().signum())
+		if(getQtyOrdered().signum()!=0 && getQtyOrdered().signum() != getQtyInvoiced().signum())
 		{
 			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "QtyInvoiced"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
 			return false;

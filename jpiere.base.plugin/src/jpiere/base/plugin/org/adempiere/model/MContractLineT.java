@@ -14,9 +14,14 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
+import java.util.logging.Level;
 
+import org.adempiere.exceptions.ProductNotOnPriceListException;
+import org.compiere.model.MProductPricing;
+import org.compiere.model.MRole;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -33,6 +38,13 @@ import org.compiere.util.Util;
  */
 public class MContractLineT extends X_JP_ContractLineT {
 	
+	/** Parent					*/
+	protected MContractContentT			m_parent = null;
+	protected Integer			m_precision = null;
+	protected int 			m_M_PriceList_ID = 0;
+	protected boolean			m_IsSOTrx = true;
+	protected MProductPricing	m_productPrice = null;
+	
 	public MContractLineT(Properties ctx, int JP_ContractLineT_ID, String trxName)
 	{
 		super(ctx, JP_ContractLineT_ID, trxName);
@@ -43,8 +55,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 		super(ctx, rs, trxName);
 	}
 	
-	/** Parent					*/
-	protected MContractContentT			m_parent = null;
+
 
 	public MContractContentT getParent()
 	{
@@ -53,6 +64,8 @@ public class MContractLineT extends X_JP_ContractLineT {
 		return m_parent;
 	}	//	getParent
 	
+	
+
 	
 	@Override
 	protected boolean beforeSave(boolean newRecord) 
@@ -98,16 +111,113 @@ public class MContractLineT extends X_JP_ContractLineT {
 			setNullCreateDerivativeInvoiceInfo();
 		}
 		
+		//	Get Defaults from Parent
+		if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0)
+			setContentTemplateInfo();
+		if (m_M_PriceList_ID == 0)
+			setHeaderInfo();
 		
 		//	Charge
-		if (getC_Charge_ID() != 0)
-		{
-			if (getM_Product_ID() != 0)
+		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
 				setM_Product_ID(0);
+
+		if (getM_Product_ID() > 0)
+		{
+			//	Set Price if Actual = 0
+			if (m_productPrice == null 
+				&&  Env.ZERO.compareTo(getPriceActual()) == 0
+				&&  Env.ZERO.compareTo(getPriceList()) == 0)
+				setPrice();
+			//	Check if on Price list
+			if (m_productPrice == null)
+				getProductPricing(m_M_PriceList_ID);
+			// IDEMPIERE-1574 Sales Order Line lets Price under the Price Limit when updating
+			//	Check PriceLimit
+			boolean enforce = m_IsSOTrx && getParent().getM_PriceList().isEnforcePriceLimit();
+			if (enforce && MRole.getDefault().isOverwritePriceLimit())
+				enforce = false;
+			//	Check Price Limit?
+			if (enforce && getPriceLimit() != Env.ZERO
+			  && getPriceActual().compareTo(getPriceLimit()) < 0)
+			{
+				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
+				return false;
+			}
+			//
+			if (!m_productPrice.isCalculated())
+			{
+				throw new ProductNotOnPriceListException(m_productPrice, getLine());
+			}
 		}
 		
 		return true;
-	}
+		
+	}//beforeSave
+	
+
+	public void setContentTemplateInfo ()
+	{
+		m_parent = getParent();
+		setC_BPartner_ID(m_parent.getC_BPartner_ID());
+		setC_BPartner_Location_ID(m_parent.getC_BPartner_Location_ID());
+		//
+		setHeaderInfo();	
+	}	
+	
+	
+	public void setHeaderInfo ()
+	{
+		m_parent = getParent();
+		m_precision = new Integer(m_parent.getPrecision());
+		m_M_PriceList_ID = m_parent.getM_PriceList_ID();
+		m_IsSOTrx = m_parent.isSOTrx();
+	}	//	setHeaderInfo
+	
+
+	public void setPrice()
+	{
+		if (getM_Product_ID() == 0)
+			return;
+		if (m_M_PriceList_ID == 0)
+			throw new IllegalStateException("PriceList unknown!");
+		setPrice (m_M_PriceList_ID);
+	}	//	setPrice
+	
+	
+	public void setPrice (int M_PriceList_ID)
+	{
+		if (getM_Product_ID() == 0)
+			return;
+		//
+		if (log.isLoggable(Level.FINE)) log.fine(toString() + " - M_PriceList_ID=" + M_PriceList_ID);
+		getProductPricing (M_PriceList_ID);
+		setPriceActual (m_productPrice.getPriceStd());
+		setPriceList (m_productPrice.getPriceList());
+		setPriceLimit (m_productPrice.getPriceLimit());
+		//
+		if (getQtyEntered().compareTo(getQtyOrdered()) == 0)
+			setPriceEntered(getPriceActual());
+		else
+			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
+				.divide(getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP)));	//	recision
+		
+		//	Calculate Discount
+		setDiscount(m_productPrice.getDiscount());
+		//	Set UOM
+		setC_UOM_ID(m_productPrice.getC_UOM_ID());
+	}	//	setPrice
+
+	protected MProductPricing getProductPricing (int M_PriceList_ID)
+	{
+		m_productPrice = new MProductPricing (getM_Product_ID(), 
+			getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx, get_TrxName());
+		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
+//		m_productPrice.setPriceDate(getDateOrdered());
+		//
+		m_productPrice.calculatePrice();
+		return m_productPrice;
+	}	//	getProductPrice
+	
 	
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) 
@@ -340,7 +450,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 			return false;
 		}
 		
-		if(getQtyOrdered().signum() != getMovementQty().signum())
+		if(getMovementQty().signum()!=0 && getQtyOrdered().signum() != getMovementQty().signum())
 		{
 			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "MovementQty"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
 			return false;
@@ -353,7 +463,6 @@ public class MContractLineT extends X_JP_ContractLineT {
 		}
 		
 
-		
 		if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 		{
 			setJP_ProcPeriodOffs_Start_InOut(0);
@@ -401,7 +510,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 			return false;
 		}
 		
-		if(getQtyOrdered().signum() != getQtyInvoiced().signum())
+		if(getQtyOrdered().signum() != 0 && getQtyOrdered().signum() != getQtyInvoiced().signum())
 		{
 			log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "QtyInvoiced"),Msg.getElement(Env.getCtx(), "QtyOrdered")}));
 			return false;

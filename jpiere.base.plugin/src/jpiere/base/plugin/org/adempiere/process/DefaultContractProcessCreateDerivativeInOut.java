@@ -27,6 +27,7 @@ import org.compiere.model.MUOM;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -280,6 +281,15 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 		{
 			if(isCreateLog)
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse, contractLine, null, null);
+			
+			return false;
+		}
+		
+		//Skip Qty ZERO
+		if(contractLine.getMovementQty().compareTo(Env.ZERO) == 0)
+		{
+			if(isCreateLog)
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyOfContractLineIsZero, contractLine, null, null);
 			
 			return false;
 		}

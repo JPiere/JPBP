@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
@@ -1139,6 +1140,11 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		MContractProcess[] 	processes = new MContractProcess[list.size()];
 		list.toArray(processes);
 		return processes;
+	}
+	
+	public int getPrecision()
+	{
+		return MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
 	}
 	
 }	//	MContractContent
