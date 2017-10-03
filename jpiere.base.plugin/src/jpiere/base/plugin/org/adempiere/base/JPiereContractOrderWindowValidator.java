@@ -23,11 +23,13 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractLine;
 
 
 /** 
@@ -45,7 +47,11 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 		if(event.getName().equals(WindowValidatorEventType.BEFORE_SAVE.getName()))
 		{
 			GridTab gridTab =event.getWindow().getADWindowContent().getActiveGridTab();
+			int Record_ID =((Integer)gridTab.getRecord_ID()).intValue();
 			GridField gf_ContractProcPeriod_ID = gridTab.getField("JP_ContractProcPeriod_ID");
+			if(gf_ContractProcPeriod_ID==null)
+				callback.onCallback(true);
+			
 			int old_ContractProcPeriod_ID = 0;
 			int new_ContractProcPeriod_ID = 0;
 			Object old_value = gf_ContractProcPeriod_ID.getOldValue();
@@ -60,15 +66,14 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 			else
 				new_ContractProcPeriod_ID = ((Integer)new_value).intValue();
 			
-			if(old_ContractProcPeriod_ID == new_ContractProcPeriod_ID)
+			if(Record_ID > 0 && old_ContractProcPeriod_ID == new_ContractProcPeriod_ID)
 			{
 				;//Notihg to do
 				
 			}else{	
 				
-				if(new_ContractProcPeriod_ID > 0)
+				if(gridTab.getTabNo() == 0 && new_ContractProcPeriod_ID > 0)
 				{
-					int Record_ID =((Integer)gridTab.getRecord_ID()).intValue();
 					Object obj_ContracContent_ID = gridTab.getValue("JP_ContractContent_ID");
 					if(obj_ContracContent_ID == null)
 					{
@@ -106,6 +111,48 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 						}//for
 					}
 				}
+				
+				else if(gridTab.getTabNo() == 1 && new_ContractProcPeriod_ID > 0)
+				{
+					Object obj_ContracLine_ID = gridTab.getValue("JP_ContractLine_ID");
+					if(obj_ContracLine_ID == null)
+					{
+						;//Nothing to do
+					}else{
+						int JP_ContractLine_ID = ((Integer)obj_ContracLine_ID).intValue();
+						MContractLine contractline = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
+						MOrderLine[] orderLines = contractline.getOrderLineByContractPeriod(Env.getCtx(), new_ContractProcPeriod_ID, null);
+						for(int i = 0; i < orderLines.length; i++)
+						{
+							if(orderLines[i].getC_OrderLine_ID() == Record_ID)
+							{
+								continue;
+							}else{
+									
+								String docInfo = Msg.getElement(Env.getCtx(), "DocumentNo") + " : " + orderLines[i].getParent().getDocumentNo()
+													+" - " + Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID") + " : " + orderLines[i].getLine();
+								String msg = docInfo + " " + Msg.getMsg(Env.getCtx(),"JP_DoYouConfirmIt");//Do you confirm it?
+								final MOrderLine orderLine = orderLines[i];
+								Callback<Boolean> isZoom = new Callback<Boolean>()
+								{
+										@Override
+										public void onCallback(Boolean result)
+										{
+											if(result)
+											{
+												AEnv.zoom(MOrderLine.Table_ID, orderLine.getC_OrderLine_ID());
+											}
+										}
+									
+								};
+								FDialog.ask( event.getWindow().getADWindowContent().getWindowNo(), event.getWindow().getComponent(),Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID"), "JP_OverlapPeriod", msg, isZoom);
+								break;
+							}
+						}//for
+					}
+				}
+				
+				
 			}//if(obj == null)
 			callback.onCallback(true);
 		}//BEFORE_SAVE
