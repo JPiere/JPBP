@@ -344,13 +344,13 @@ public class Doc_JPRecognition extends Doc
 		if (!as.isAccrual())
 			return facts;
 		
-		//JPR - Revenue Recognition
-		if (getDocumentType().equals("JPR"))
+		//JPR
+		if (getDocumentType().equals("JPR"))//Revenue Recognition
 		{
 			postJPR(as, contractAcct, fact);
 		}
-		//JPS - Revenue Recognition Credit Memo
-		else if (getDocumentType().equals("JPS"))//TODO
+		//JPS
+		else if (getDocumentType().equals("JPS"))//Revenue Recognition Credit Memo
 		{			
 			postJPS(as, contractAcct, fact);;
 		}
@@ -567,7 +567,7 @@ public class Doc_JPRecognition extends Doc
 				costs  = (BigDecimal)oLine.get_Value("JP_ScheduledCostLineAmt");
 			}
 			
-			if(line.getQty().signum() > 0)
+			if(line.getQty().signum() < 0)
 			{
 				costs = costs.negate();
 			}
