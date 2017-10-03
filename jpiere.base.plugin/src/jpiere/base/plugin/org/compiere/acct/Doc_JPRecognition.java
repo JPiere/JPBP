@@ -460,11 +460,6 @@ public class Doc_JPRecognition extends Doc
 				costs  = (BigDecimal)oLine.get_Value("JP_ScheduledCostLineAmt");
 			}
 			
-			if(line.getQty().signum() > 0)
-			{
-				costs = costs.negate();
-			}
-			
 			//  CoGS            DR
 			dr = fact.createLine(line, getCOGSAccount(line, contractAcct, as), as.getC_Currency_ID(), costs, null);
 			if (dr == null)
