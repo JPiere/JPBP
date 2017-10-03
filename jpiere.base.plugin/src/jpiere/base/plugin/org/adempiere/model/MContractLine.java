@@ -433,6 +433,38 @@ public class MContractLine extends X_JP_ContractLine {
 		list.toArray(iLines);
 		return iLines;
 	}
+	
+	public MRecognitionLine[] getRecognitionLineByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		ArrayList<MRecognitionLine> list = new ArrayList<MRecognitionLine>();
+		final String sql = "SELECT rl.* FROM JP_RecognitionLine rl  INNER JOIN  JP_Recognition r ON(r.JP_Recognition_ID = rl.JP_Recognition_ID) "
+					+ " WHERE rl.JP_ContractLine_ID=? AND rl.JP_ContractProcPeriod_ID=? AND r.DocStatus NOT IN ('VO','RE')";
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			while(rs.next())
+				list.add(new MRecognitionLine(getCtx(), rs, trxName));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		MRecognitionLine[] iLines = new MRecognitionLine[list.size()];
+		list.toArray(iLines);
+		return iLines;
+	}
 
 	@Override
 	public String toString() 
