@@ -165,7 +165,7 @@ public class CopyContractAcct extends SvrProcess {
 						{
 							productAcctTo = entryTo2.getValue();
 							if(productAcctFrom.getC_AcctSchema_ID() == productAcctTo.getC_AcctSchema_ID()
-									|| productAcctFrom.getM_Product_Category_ID() == productAcctTo.getM_Product_Category_ID())
+									&& productAcctFrom.getM_Product_Category_ID() == productAcctTo.getM_Product_Category_ID())
 							{
 								PO.copyValues(productAcctFrom, productAcctTo);
 								productAcctTo.setJP_Contract_Acct_ID(p_JP_Contract_Acct_ID_To);
@@ -223,7 +223,7 @@ public class CopyContractAcct extends SvrProcess {
 						{
 							chargeAcctTo = entryTo2.getValue();
 							if(chargeAcctFrom.getC_AcctSchema_ID() == chargeAcctTo.getC_AcctSchema_ID()
-									|| chargeAcctFrom.getC_Charge_ID() == chargeAcctTo.getC_Charge_ID())
+									&& chargeAcctFrom.getC_Charge_ID() == chargeAcctTo.getC_Charge_ID())
 							{
 								PO.copyValues(chargeAcctFrom, chargeAcctTo);
 								chargeAcctTo.setJP_Contract_Acct_ID(p_JP_Contract_Acct_ID_To);
@@ -282,7 +282,7 @@ public class CopyContractAcct extends SvrProcess {
 						{
 							taxAcctTo = entryTo2.getValue();
 							if(taxAcctFrom.getC_AcctSchema_ID() == taxAcctTo.getC_AcctSchema_ID()
-									|| taxAcctFrom.getC_Tax_ID() == taxAcctTo.getC_Tax_ID())
+									&& taxAcctFrom.getC_Tax_ID() == taxAcctTo.getC_Tax_ID())
 							{
 								PO.copyValues(taxAcctFrom, taxAcctTo);
 								taxAcctTo.setJP_Contract_Acct_ID(p_JP_Contract_Acct_ID_To);

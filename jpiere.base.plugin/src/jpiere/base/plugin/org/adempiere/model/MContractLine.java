@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
-import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProductPricing;
 import org.compiere.model.MRole;
