@@ -822,16 +822,18 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_CouldNotCreateRecog_NoInOutInfo"));
 				return false;
 			
+			}else if(io.getM_RMA_ID() > 0){
+				
+				MRMA rma = new MRMA(getCtx(), io.getM_RMA_ID(), get_TrxName());
+				setM_RMA_ID(rma.getM_RMA_ID());					
+			
 			}else if(io.getC_Order_ID() > 0){
 				
 				MOrder order = new MOrder(getCtx(), io.getC_Order_ID(), get_TrxName());
 				setC_Order_ID(order.getC_Order_ID());
 				setDateOrdered(order.getDateOrdered());
 				
-			}else if(io.getM_RMA_ID() > 0){
 			
-				MRMA rma = new MRMA(getCtx(), io.getM_RMA_ID(), get_TrxName());
-				setM_RMA_ID(rma.getM_RMA_ID());				
 			}
 			
 			//Should be Comment out Because Recognitiond document can not create from InOut when DocAciton Complete
@@ -847,25 +849,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		
 		if(newRecord || is_ValueChanged("C_DocTypeTarget_ID"))
 		{
-			if(getC_Order_ID() > 0)
+			if(getM_RMA_ID() > 0)
 			{
-				if(isSOTrx())
-				{
-					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPR")))
-					{
-						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
-						log.saveError("Error", msg);
-						return false;  
-					}
-				}else{
-					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPX")))
-					{
-						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
-						log.saveError("Error", msg);
-						return false;  
-					}				
-				}
-			}else if(getM_RMA_ID() > 0){
 				if(isSOTrx())
 				{
 				  if(!(getC_DocTypeTarget().getDocBaseType().equals("JPS")))
@@ -882,6 +867,25 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 						return false;  
 				  }				
 				}	
+				
+			} else if(getC_Order_ID() > 0) {
+				
+				if(isSOTrx())
+				{
+					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPR")))
+					{
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
+						log.saveError("Error", msg);
+						return false;  
+					}
+				}else{
+					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPX")))
+					{
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
+						log.saveError("Error", msg);
+						return false;  
+					}				
+				}
 			}
 		}
 		
