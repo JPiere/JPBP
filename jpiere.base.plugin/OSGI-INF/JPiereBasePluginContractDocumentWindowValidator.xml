@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="JPiereBasePluginContractDocumentWindowValidator">
+   <implementation class="jpiere.base.plugin.org.adempiere.base.JPiereContractDocumentWindowValidator"/>
+   <property name="AD_Window_UU" type="String">357f31b9-34b9-43b0-8f32-fa2b9dd2a0db
+   </property>
+   <service>
+      <provide interface="org.adempiere.webui.adwindow.validator.WindowValidator"/>
+   </service>
+</scr:component>

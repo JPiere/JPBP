@@ -40,6 +40,7 @@ Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml
  ,OSGI-INF/JPiereBasePluginContractInvoiceWindowValidator.xml
  ,OSGI-INF/JPiereBasePluginContractRecognitionWindowValidator.xml
  ,OSGI-INF/JPiereBasePluginContractInOutWindowValidator.xml
+ ,OSGI-INF/JPiereBasePluginContractDocumentWindowValidator.xml
 Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
  jpiere.base.plugin.org.adempiere.model,

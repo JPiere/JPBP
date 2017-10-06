@@ -64,7 +64,7 @@ public class JPiereContractOrderWindowValidator implements WindowValidator {
 				else
 					new_ContractProcPeriod_ID = ((Integer)new_value).intValue();
 				
-				int Record_ID =((Integer)gridTab.getRecord_ID()).intValue();
+				int Record_ID = gridTab.getRecord_ID();
 				if(Record_ID > 0 && old_ContractProcPeriod_ID == new_ContractProcPeriod_ID)
 				{
 					;//Notihg to do
