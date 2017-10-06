@@ -612,31 +612,57 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 					
 					if(content.isAutomaticUpdateJP())
 					{
-						content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
+						String sql = "UPDATE JP_ContractContent "
+								+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
+						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+						if (no != 1)
+						{
+							log.warning("(1) #" + no);
+							return false;
+						}
 						
 					}else{
 						
 						Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
 						if(JP_ContractProcDate_To == null)
 						{
-							content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
-							
+							String sql = "UPDATE JP_ContractContent "
+									+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
+							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+							if (no != 1)
+							{
+								log.warning("(1) #" + no);
+								return false;
+							}
+								
 						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
 							
-							content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
+							String sql = "UPDATE JP_ContractContent "
+									+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
+							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+							if (no != 1)
+							{
+								log.warning("(1) #" + no);
+								return false;
+							}
 							
 						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) < 0){
 							
 							//Assumption need sync, In case of same date between JP_ContractPeriodDate_To and JP_ContractProcDate_To.
 							if(JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
 							{
-								content.setJP_ContractProcDate_To(new_ContractPeriodDate_To);
+								String sql = "UPDATE JP_ContractContent "
+										+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
+								int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+								if (no != 1)
+								{
+									log.warning("(1) #" + no);
+									return false;
+								}
 							}
 						}
 						
 					}//if(content.isAutomaticUpdateJP())
-					
-					content.saveEx(get_TrxName());
 					
 				}
 				
