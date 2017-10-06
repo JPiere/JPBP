@@ -599,6 +599,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			Timestamp old_ContractPeriodDate_To = (Timestamp)get_ValueOld(MContract.COLUMNNAME_JP_ContractPeriodDate_To);
 			Timestamp new_ContractPeriodDate_To = getJP_ContractPeriodDate_To();
 			
+			String sql = "UPDATE JP_ContractContent SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
 			MContractContent[] contents = getContractContents(true, "");
 			for(int i = 0; i < contents.length; i++)
 			{
@@ -612,8 +613,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 					
 					if(content.isAutomaticUpdateJP())
 					{
-						String sql = "UPDATE JP_ContractContent "
-								+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
+
 						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 						if (no != 1)
 						{
@@ -626,8 +626,6 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 						Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
 						if(JP_ContractProcDate_To == null)
 						{
-							String sql = "UPDATE JP_ContractContent "
-									+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
 							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 							if (no != 1)
 							{
@@ -637,8 +635,6 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 								
 						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
 							
-							String sql = "UPDATE JP_ContractContent "
-									+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
 							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 							if (no != 1)
 							{
@@ -651,8 +647,6 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 							//Assumption need sync, In case of same date between JP_ContractPeriodDate_To and JP_ContractProcDate_To.
 							if(JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
 							{
-								String sql = "UPDATE JP_ContractContent "
-										+ " SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
 								int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 								if (no != 1)
 								{
