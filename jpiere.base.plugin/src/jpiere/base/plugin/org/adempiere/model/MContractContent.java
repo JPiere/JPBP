@@ -605,6 +605,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_BaseDocDocType_ID)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractCalender_ID)
+					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_From)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcess_ID)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_Contract_Acct_ID)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_C_BPartner_ID))
@@ -618,7 +619,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
 					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy));
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractCalender_ID))
-					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractCalender_ID));				
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractCalender_ID));	
+				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_From))
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractProcDate_From));	
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcess_ID))
 					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractProcess_ID));
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_Contract_Acct_ID))
