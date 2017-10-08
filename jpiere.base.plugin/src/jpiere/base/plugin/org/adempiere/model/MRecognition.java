@@ -33,9 +33,6 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
-import org.compiere.model.MInOutConfirm;
-import org.compiere.model.MInOutLine;
-import org.compiere.model.MInOutLineConfirm;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrg;
@@ -1545,10 +1542,12 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		reversal.setReversal(true);
 
 		//	Reverse Line Qty
+		MRecognitionLine[] sLines = getLines(false);
 		MRecognitionLine[] rLines = reversal.getLines(true);
 		for (int i = 0; i < rLines.length; i++)
 		{
 			MRecognitionLine rLine = rLines[i];
+			rLine.setReversalLine_ID(sLines[i].getJP_RecognitionLine_ID());
 			rLine.setQtyEntered(rLine.getQtyEntered().negate());
 			rLine.setQtyInvoiced(rLine.getQtyInvoiced().negate());
 			rLine.setJP_QtyRecognized(rLine.getJP_QtyRecognized().negate());

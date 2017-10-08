@@ -33,7 +33,7 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170930L;
+	private static final long serialVersionUID = 20171008L;
 
     /** Standard Constructor */
     public X_JP_RecognitionLine (Properties ctx, int JP_RecognitionLine_ID, String trxName)
@@ -197,6 +197,34 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
 	public int getC_Charge_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_InvoiceLine)MTable.get(getCtx(), org.compiere.model.I_C_InvoiceLine.Table_Name)
+			.getPO(getC_InvoiceLine_ID(), get_TrxName());	}
+
+	/** Set Invoice Line.
+		@param C_InvoiceLine_ID 
+		Invoice Detail Line
+	  */
+	public void setC_InvoiceLine_ID (int C_InvoiceLine_ID)
+	{
+		if (C_InvoiceLine_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_InvoiceLine_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_InvoiceLine_ID, Integer.valueOf(C_InvoiceLine_ID));
+	}
+
+	/** Get Invoice Line.
+		@return Invoice Detail Line
+	  */
+	public int getC_InvoiceLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_InvoiceLine_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -987,6 +1015,34 @@ public class X_JP_RecognitionLine extends PO implements I_JP_RecognitionLine, I_
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	public I_JP_RecognitionLine getReversalLine() throws RuntimeException
+    {
+		return (I_JP_RecognitionLine)MTable.get(getCtx(), I_JP_RecognitionLine.Table_Name)
+			.getPO(getReversalLine_ID(), get_TrxName());	}
+
+	/** Set Reversal Line.
+		@param ReversalLine_ID 
+		Use to keep the reversal line ID for reversing costing purpose
+	  */
+	public void setReversalLine_ID (int ReversalLine_ID)
+	{
+		if (ReversalLine_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_ReversalLine_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_ReversalLine_ID, Integer.valueOf(ReversalLine_ID));
+	}
+
+	/** Get Reversal Line.
+		@return Use to keep the reversal line ID for reversing costing purpose
+	  */
+	public int getReversalLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ReversalLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Resource Assign.

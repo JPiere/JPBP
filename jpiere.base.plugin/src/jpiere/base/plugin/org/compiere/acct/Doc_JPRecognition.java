@@ -82,6 +82,8 @@ public class Doc_JPRecognition extends Doc
 	protected boolean			m_allLinesService = true;
 	/** All lines are product item		*/
 	protected boolean			m_allLinesItem = true;
+	
+	private int				m_Reversal_ID = 0;
 
 	/**
 	 *	Load Specific Document Details
@@ -92,6 +94,7 @@ public class Doc_JPRecognition extends Doc
 		MRecognition recognition = (MRecognition)getPO();
 		setDateDoc(recognition.getDateInvoiced());
 		setIsTaxIncluded(recognition.isTaxIncluded());
+		m_Reversal_ID = recognition.getReversal_ID();//store original (voided/reversed) document
 		//	Amounts
 		setAmount(Doc.AMTTYPE_Gross, recognition.getGrandTotal());
 		setAmount(Doc.AMTTYPE_Net, recognition.getTotalLines());
@@ -170,6 +173,7 @@ public class Doc_JPRecognition extends Doc
 			if (line.isDescription())
 				continue;
 			DocLine docLine = new DocLine(line, this);
+			docLine.setReversalLine_ID(line.getReversalLine_ID());
 			//	Qty
 			BigDecimal Qty = line.getQtyInvoiced();
 			boolean cm = getDocumentType().equals("JPS")//Recognition Revenu Credit memo
@@ -1427,9 +1431,6 @@ public class Doc_JPRecognition extends Doc
 		}
 	}
 
-	
-	
-	private int				m_Reversal_ID = 0;
 	
 	private boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
