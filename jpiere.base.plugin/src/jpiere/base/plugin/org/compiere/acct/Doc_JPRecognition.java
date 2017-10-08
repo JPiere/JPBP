@@ -597,7 +597,7 @@ public class Doc_JPRecognition extends Doc
 				if (isReversal(line))
 				{
 					//	Set AmtAcctDr from Original Shipment/Receipt
-					if (!dr.updateReverseLine (MInOut.Table_ID,
+					if (!dr.updateReverseLine (MRecognition.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
 						if (! product.isStocked())	{ //	ignore service
@@ -626,7 +626,7 @@ public class Doc_JPRecognition extends Doc
 				if (isReversal(line))
 				{
 					//	Set AmtAcctCr from Original Shipment/Receipt
-					if (!cr.updateReverseLine (MInOut.Table_ID,
+					if (!cr.updateReverseLine (MRecognition.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
 						p_Error = "Original Shipment/Receipt not posted yet";
@@ -884,7 +884,7 @@ public class Doc_JPRecognition extends Doc
 				if (isReversal(line))
 				{
 					//	Set AmtAcctDr from Original Shipment/Receipt
-					if (!dr.updateReverseLine (MInOut.Table_ID,
+					if (!dr.updateReverseLine (MRecognition.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
 						if (! product.isStocked())	{ //	ignore service
@@ -915,7 +915,7 @@ public class Doc_JPRecognition extends Doc
 				if (isReversal(line))
 				{
 					//	Set AmtAcctCr from Original Shipment/Receipt
-					if (!cr.updateReverseLine (MInOut.Table_ID,
+					if (!cr.updateReverseLine (MRecognition.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
 						p_Error = "Original Shipment/Receipt not posted yet";

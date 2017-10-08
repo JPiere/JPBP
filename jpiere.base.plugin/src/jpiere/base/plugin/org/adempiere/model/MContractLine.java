@@ -1199,32 +1199,32 @@ public class MContractLine extends X_JP_ContractLine {
 			if(newRecord && getJP_ContractCalender_InOut_ID()==0 && getJP_ContractCalender_Inv_ID()==0)//for copy process
 				return true;
 			
-			if( (getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_InOut_ID())
-					&& (getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_Inv_ID()) )
-			{
-				;//no check
-			}else{
-				
-				//Check Start Date of First Contract Process Period
-				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
-				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				
-				MContractCalender inout_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
-				MContractProcPeriod inout_ProcPeriod = inout_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				
-				MContractCalender invoice_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
-				MContractProcPeriod invoice_ProcPeriod = invoice_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				if(order_ProcPeriod.getStartDate().compareTo(inout_ProcPeriod.getStartDate()) == 0
-						&& order_ProcPeriod.getStartDate().compareTo(invoice_ProcPeriod.getStartDate()) == 0)
-				{
-					;//this is OK
-				}else{
-					
-					//Please Confirm Start date of First Contract Process Period. Inconsistency Start date of First Contract Process Period.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ConfirmStartDateFirstContracProcPeriod"));
-					return false;
-				}
-			}
+//			if( (getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_InOut_ID())
+//					&& (getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_Inv_ID()) )
+//			{
+//				;//no check
+//			}else{
+//				
+//				//Check Start Date of First Contract Process Period
+//				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
+//				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+//				
+//				MContractCalender inout_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
+//				MContractProcPeriod inout_ProcPeriod = inout_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+//				
+//				MContractCalender invoice_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
+//				MContractProcPeriod invoice_ProcPeriod = invoice_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+//				if(order_ProcPeriod.getStartDate().compareTo(inout_ProcPeriod.getStartDate()) == 0
+//						&& order_ProcPeriod.getStartDate().compareTo(invoice_ProcPeriod.getStartDate()) == 0)
+//				{
+//					;//this is OK
+//				}else{
+//					
+//					//Please Confirm Start date of First Contract Process Period. Inconsistency Start date of First Contract Process Period.
+//					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ConfirmStartDateFirstContracProcPeriod"));
+//					return false;
+//				}
+//			}
 		
 		}else{
 			
@@ -1268,21 +1268,21 @@ public class MContractLine extends X_JP_ContractLine {
 			}else{
 				
 				//Check Start Date of First Contract Process Period
-				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
-				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				
-				MContractCalender inout_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
-				MContractProcPeriod inout_ProcPeriod = inout_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				
-				if(order_ProcPeriod.getStartDate().compareTo(inout_ProcPeriod.getStartDate()) == 0)
-				{
-					;//this is OK
-				}else{
-					
-					//Please Confirm Start date of First Contract Process Period. Inconsistency Start date of First Contract Process Period.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ConfirmStartDateFirstContracProcPeriod"));
-					return false;
-				}
+//				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
+//				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+//				
+//				MContractCalender inout_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
+//				MContractProcPeriod inout_ProcPeriod = inout_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+//				
+//				if(order_ProcPeriod.getStartDate().compareTo(inout_ProcPeriod.getStartDate()) == 0)
+//				{
+//					;//this is OK
+//				}else{
+//					
+//					//Please Confirm Start date of First Contract Process Period. Inconsistency Start date of First Contract Process Period.
+//					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ConfirmStartDateFirstContracProcPeriod"));
+//					return false;
+//				}
 			}
 		}
 		
@@ -1320,21 +1320,21 @@ public class MContractLine extends X_JP_ContractLine {
 			}else{
 				
 				//Check Start Date of First Contract Process Period
-				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
-				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				
-				MContractCalender inv_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
-				MContractProcPeriod inv_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				
-				if(order_ProcPeriod.getStartDate().compareTo(inv_ProcPeriod.getStartDate()) == 0)
-				{
-					;//this is OK
-				}else{
-					
-					//Please Confirm Start date of First Contract Process Period. Inconsistency Start date of First Contract Process Period.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ConfirmStartDateFirstContracProcPeriod"));
-					return false;
-				}
+//				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
+//				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+//				
+//				MContractCalender inv_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
+//				MContractProcPeriod inv_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+//				
+//				if(order_ProcPeriod.getStartDate().compareTo(inv_ProcPeriod.getStartDate()) == 0)
+//				{
+//					;//this is OK
+//				}else{
+//					
+//					//Please Confirm Start date of First Contract Process Period. Inconsistency Start date of First Contract Process Period.
+//					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ConfirmStartDateFirstContracProcPeriod"));
+//					return false;
+//				}
 			}
 		}
 		
