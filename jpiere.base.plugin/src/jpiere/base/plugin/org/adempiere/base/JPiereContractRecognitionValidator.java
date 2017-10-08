@@ -223,7 +223,11 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 			//Check Period Contract & Spot Contract fron now on
 			int C_OrderLine_ID = recogLine.getC_OrderLine_ID();
 			int M_RMALine_ID = recogLine.getM_RMALine_ID();
-			if(C_OrderLine_ID <= 0 && M_RMALine_ID <= 0)
+			int M_InOutLine_ID = recogLine.getM_InOutLine_ID();
+			if(C_OrderLine_ID == 0 && M_RMALine_ID == 0 && M_InOutLine_ID == 0)
+				return null;
+		
+			if(C_OrderLine_ID <= 0 && M_RMALine_ID <= 0 && M_InOutLine_ID != 0)
 			{
 				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_OrderLine_ID") + " or " + Msg.getElement(Env.getCtx(), "M_RMALine_ID")};
 				return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);

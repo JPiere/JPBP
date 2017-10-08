@@ -852,23 +852,28 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		{
 			if(newRecord)
 			{
-				if(getJP_TargetQtyRecognized().signum() == 0)
+				if(getJP_TargetQtyRecognized().signum() == 0 && getM_InOutLine_ID() > 0)
 				{
 					setJP_TargetQtyRecognized(getM_InOutLine().getMovementQty());
+				}else{
+					setJP_TargetQtyRecognized(Env.ZERO);
 				}
 			}
 			
 			setJP_QtyRecognized(getQtyInvoiced());
-			if(getJP_TargetQtyRecognized().signum() != getJP_QtyRecognized().signum())
+			if(getJP_TargetQtyRecognized().signum() != 0)
 			{
-				log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
-				return false;
-			}
-			
-			if(getJP_QtyRecognized().abs().compareTo(getJP_TargetQtyRecognized().abs()) > 0)
-			{
-				log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
-				return false;
+				if(getJP_TargetQtyRecognized().signum() != getJP_QtyRecognized().signum())
+				{
+					log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
+					return false;
+				}
+				
+				if(getJP_QtyRecognized().abs().compareTo(getJP_TargetQtyRecognized().abs()) > 0)
+				{
+					log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
+					return false;
+				}
 			}
 		}
 		
