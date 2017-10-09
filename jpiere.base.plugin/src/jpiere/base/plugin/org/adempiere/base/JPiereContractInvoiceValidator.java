@@ -396,7 +396,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
 				if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
 				{ 
-					if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+					if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
 							||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 					{
 						if(type == ModelValidator.TYPE_BEFORE_CHANGE)
@@ -405,7 +405,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 							if(invoiceLine_ContractProcPeriod_ID <= 0)
 							{
 								Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-								return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);					
+								return Msg.getMsg(Env.getCtx(), "JP_InCaseOfCreateDerivativeDocPolicy") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);					
 							}
 							
 							//Check Contract Process Period - Calender

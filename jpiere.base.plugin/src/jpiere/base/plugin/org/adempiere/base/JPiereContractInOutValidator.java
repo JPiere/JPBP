@@ -468,7 +468,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 						if(ioLine_ContractProcPeriod_ID <= 0)
 						{
 							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-							return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);					
+							return Msg.getMsg(Env.getCtx(), "JP_InCaseOfCreateDerivativeDocPolicy") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);					
 						}
 						
 						//Check Contract Process Period - Calender
