@@ -106,7 +106,9 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
-				
+				int JP_ContractContent_ID = recog.getJP_ContractContent_ID();
+				MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+
 				//Check Mandetory - JP_ContractProcPeriod_ID
 				MRecognitionLine[] lines = recog.getLines();
 				int JP_ContractLine_ID = 0;
@@ -117,10 +119,14 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 					JP_ContractProcPeriod_ID = lines[i].get_ValueAsInt("JP_ContractProcPeriod_ID");
 					if(JP_ContractLine_ID > 0 && JP_ContractProcPeriod_ID <= 0)
 					{
-						return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
-													+ " - " + Msg.getElement(Env.getCtx(),  MRecognitionLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+						if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+								||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+						{
+							return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+														+ " - " + Msg.getElement(Env.getCtx(),  MRecognitionLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+						}
 					}
-				}
+				}//For
 			}
 			
 		}//TIMING_BEFORE_PREPARE

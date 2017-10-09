@@ -112,6 +112,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
+				int JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
+				MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
 				
 				//Check Mandetory - JP_ContractProcPeriod_ID
 				MInvoiceLine[] lines = invoice.getLines();
@@ -123,8 +125,14 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					JP_ContractProcPeriod_ID = lines[i].get_ValueAsInt("JP_ContractProcPeriod_ID");
 					if(JP_ContractLine_ID > 0 && JP_ContractProcPeriod_ID <= 0)
 					{
-						return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
-													+ " - " + Msg.getElement(Env.getCtx(),  MInvoiceLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+						if(content.getDocBaseType().equals("API") ||  content.getDocBaseType().equals("ARI") 
+								|| (content.getJP_CreateDerivativeDocPolicy() != null &&
+								        ( content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+										||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)) ) )
+						{
+							return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID)
+														+ " - " + Msg.getElement(Env.getCtx(),  MInvoiceLine.COLUMNNAME_Line) + " : " + lines[i].getLine();
+						}
 					}
 				}
 				
