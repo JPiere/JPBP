@@ -17,6 +17,7 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
@@ -847,46 +848,113 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 *	@return true if save
 	 */
 	protected boolean beforeSave (boolean newRecord)
-	{		
-		if(newRecord || is_ValueChanged("QtyInvoiced") || is_ValueChanged("QtyEntered"))
+	{
+		if (log.isLoggable(Level.FINE)) log.fine("New=" + newRecord);
+		if (newRecord && getParent().isComplete()) {
+			log.saveError("ParentComplete", Msg.getMsg(getCtx(), "JP_RecognitionLine_ID"));
+			return false;
+		}
+		
+		
+		if(newRecord || is_ValueChanged("QtyInvoiced") || is_ValueChanged("QtyEntered") || is_ValueChanged("M_InOutLine_ID"))
 		{
+			setJP_QtyRecognized(getQtyInvoiced());
+			
 			if(newRecord)
 			{
-				if(getJP_TargetQtyRecognized().signum() == 0 && getM_InOutLine_ID() > 0 && getJP_RecogLine_SplitFrom_ID() == 0)
+				if(getJP_RecogLine_SplitFrom_ID() > 0 || getJP_TargetQtyRecognized().signum() != 0)
 				{
-					setJP_TargetQtyRecognized(getM_InOutLine().getMovementQty());
-				}else if(getJP_RecogLine_SplitFrom_ID() > 0){
 					;//Noting to do;
-				}else if(getJP_TargetQtyRecognized().signum() != 0){
-					;//Noting to do;
+				}else if(getJP_TargetQtyRecognized().signum() == 0 && getM_InOutLine_ID() > 0 ) {
+					
+					BigDecimal qtyRecognized = Env.ZERO;
+					String sql = "SELECT SUM(rl.QtyInvoiced) FROM JP_RecognitionLine rl INNER JOIN JP_Recognition r ON (rl.JP_Recognition_ID = r.JP_Recognition_ID) WHERE rl.M_InOutLine_ID=? AND r.DocStatus NOT IN ('VO','VE') ";
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					try
+					{
+						pstmt = DB.prepareStatement(sql.toString(), null);
+						pstmt.setInt(1, getM_InOutLine_ID());
+						rs = pstmt.executeQuery();
+						if (rs.next())
+						{
+							qtyRecognized = rs.getBigDecimal(1);
+						}
+					}
+					catch (SQLException e)
+					{
+						log.log(Level.SEVERE, sql.toString(), e);
+					}
+					finally
+					{
+						DB.close(rs, pstmt);
+						rs = null;
+						pstmt = null;
+					}
+					
+					BigDecimal targetQtyRecognized = getM_InOutLine().getMovementQty().subtract(qtyRecognized);
+					setJP_TargetQtyRecognized(targetQtyRecognized);
+
 				}else{
 					setJP_TargetQtyRecognized(Env.ZERO);
 				}
-			}
 			
-			setJP_QtyRecognized(getQtyInvoiced());
-			if(getJP_TargetQtyRecognized().signum() != 0)
-			{
-				if(getJP_TargetQtyRecognized().signum() != getJP_QtyRecognized().signum())
+			//Not New Record
+			}else{
+				
+				if(is_ValueChanged("M_InOutLine_ID") && getM_InOutLine_ID() > 0)
 				{
-					log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
-					return false;
+					BigDecimal qtyRecognized = Env.ZERO;
+					String sql = "SELECT SUM(rl.QtyInvoiced) FROM JP_RecognitionLine rl INNER JOIN JP_Recognition r ON (rl.JP_Recognition_ID = r.JP_Recognition_ID) WHERE rl.M_InOutLine_ID=? AND r.DocStatus NOT IN ('VO','VE') ";
+					PreparedStatement pstmt = null;
+					ResultSet rs = null;
+					try
+					{
+						pstmt = DB.prepareStatement(sql.toString(), null);
+						pstmt.setInt(1, getM_InOutLine_ID());
+						rs = pstmt.executeQuery();
+						if (rs.next())
+						{
+							qtyRecognized = rs.getBigDecimal(1);
+						}
+					}
+					catch (SQLException e)
+					{
+						log.log(Level.SEVERE, sql.toString(), e);
+					}
+					finally
+					{
+						DB.close(rs, pstmt);
+						rs = null;
+						pstmt = null;
+					}
+					
+					BigDecimal targetQtyRecognized = getM_InOutLine().getMovementQty().subtract(qtyRecognized);
+					setJP_TargetQtyRecognized(targetQtyRecognized);
+				}else if(is_ValueChanged("M_InOutLine_ID") && getM_InOutLine_ID() == 0){
+					setQty(Env.ZERO);
 				}
 				
-				if(getJP_QtyRecognized().abs().compareTo(getJP_TargetQtyRecognized().abs()) > 0)
+				
+				if(getJP_TargetQtyRecognized().signum() != 0)
 				{
-					log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
-					return false;
-				}
-			}
-		}
+					if(getJP_TargetQtyRecognized().signum() != getJP_QtyRecognized().signum())
+					{
+						log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
+						return false;
+					}
+					
+					if(getJP_QtyRecognized().abs().compareTo(getJP_TargetQtyRecognized().abs()) > 0)
+					{
+						log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
+						return false;
+					}
+				}			
+			}//if(newRecord)
+
+		}//if(newRecord ...
 		
 		
-		if (log.isLoggable(Level.FINE)) log.fine("New=" + newRecord);
-		if (newRecord && getParent().isComplete()) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_InvoiceLine"));
-			return false;
-		}
 		// Re-set invoice header (need to update m_IsSOTrx flag) - phib [ 1686773 ]
 		setRecognition(getParent());
 		//	Charge

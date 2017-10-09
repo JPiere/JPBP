@@ -875,7 +875,7 @@ public class Doc_JPRecognition extends Doc
 				//  Inventory               DR
 				dr = fact.createLine(line,
 					line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
-					as.getC_Currency_ID(), costs, null);
+					as.getC_Currency_ID(), costs.negate(), null);
 				if (dr == null)
 				{
 					p_Error = "FactLine DR not created: " + line;
@@ -904,7 +904,7 @@ public class Doc_JPRecognition extends Doc
 				//  CoGS            CR
 				cr = fact.createLine(line,
 					getCOGSAccount(line, contractAcct, as),
-					as.getC_Currency_ID(), null, costs);
+					as.getC_Currency_ID(), null, costs.negate());
 				if (cr == null)
 				{
 					p_Error = "FactLine CR not created: " + line;
