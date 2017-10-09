@@ -33,6 +33,7 @@ import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MMatchInv;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -56,6 +57,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 		Doc doc = null;
 		if(	       AD_Table_ID==MInvoice.Table_ID //318
 				|| AD_Table_ID==MInOut.Table_ID //319
+				|| AD_Table_ID==MMatchInv.Table_ID//472
 				|| AD_Table_ID==MAllocationHdr.Table_ID//735
 				|| AD_Table_ID==MBankStatement.Table_ID //392
 				|| AD_Table_ID==MRecognition.Table_ID //1000188
@@ -113,10 +115,14 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_InvoiceJP";
 		}else if(AD_Table_ID == MInOut.Table_ID){//319
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_InOutJP";
+		}else if(AD_Table_ID == MMatchInv.Table_ID){//472
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_MatchInvJP";
 		}else if(AD_Table_ID == MAllocationHdr.Table_ID){//735
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_AllocationHdrJP";			
 		}else if(AD_Table_ID == MBankStatement.Table_ID){//392
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_BankStatementJP";
+		}else if(AD_Table_ID == MRecognition.Table_ID){
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPRecognition";
 		}else if(AD_Table_ID == MBill.Table_ID){
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPBill";
 		}else if(AD_Table_ID == MInvValCal.Table_ID){
@@ -129,8 +135,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPContract";
 		}else if(AD_Table_ID == MContractContent.Table_ID){
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPContractContent";
-		}else if(AD_Table_ID == MRecognition.Table_ID){
-			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPRecognition";
+
 		}else {
 			return null;
 		}
