@@ -173,31 +173,57 @@ public abstract class AbstractContractValidator {
 				if(type == ModelValidator.TYPE_BEFORE_CHANGE)
 				{
 					int JP_ContractProcPeriod_ID = po.get_ValueAsInt("JP_ContractProcPeriod_ID");
-					if(JP_ContractProcPeriod_ID <= 0)
+					if(po.get_TableName().equals(MInOutLine.Table_Name) || po.get_TableName().equals(MRecognitionLine.Table_Name))
 					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+						if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+								||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+						{
+							if(JP_ContractProcPeriod_ID <= 0)
+							{
+								Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+								return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+								
+							}
+						}
+						
+					}else if(po.get_TableName().equals(MInvoiceLine.Table_Name)){
+						
+						if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+								||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+						{
+							if(JP_ContractProcPeriod_ID <= 0)
+							{
+								Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+								return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+								
+							}
+						}
 						
 					}
-					
-				}
+				}//if(type == ModelValidator.TYPE_BEFORE_CHANGE)
 				
 				//Both BEFORE_NEW and BEFORE_CHANGE
-				if(M_RMALine_ID > 0)
+				if(po.get_TableName().equals(MInOutLine.Table_Name) || po.get_TableName().equals(MRecognitionLine.Table_Name))
 				{
-					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-					
-				}else if(po.get_TableName().equals(MInOutLine.Table_Name) || po.get_TableName().equals(MRecognitionLine.Table_Name)){
 					
 					if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
 							||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 					{
-						
-						;//Transfer check & process to the individual Contract Validator
+						if(M_RMALine_ID > 0)
+						{
+							int JP_ContractProcPeriod_ID = baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
+							if(JP_ContractProcPeriod_ID > 0)
+								po.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+							
+						}else{
+							
+							;//Transfer check & process to the individual Contract Validator
+							
+						}
 						
 					}else{
 						
-						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 						
 					}
 					
@@ -212,7 +238,7 @@ public abstract class AbstractContractValidator {
 						
 					}else{
 						
-						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", baseDocLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 						
 					}
 					
