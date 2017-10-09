@@ -194,6 +194,15 @@ public interface I_JP_Contract_Acct
 	/** Get Contract Acct Info(UU)	  */
 	public String getJP_Contract_Acct_UU();
 
+    /** Column name JP_RecogToInvoicePolicy */
+    public static final String COLUMNNAME_JP_RecogToInvoicePolicy = "JP_RecogToInvoicePolicy";
+
+	/** Set Policy of Create Invoice From Recognition	  */
+	public void setJP_RecogToInvoicePolicy (String JP_RecogToInvoicePolicy);
+
+	/** Get Policy of Create Invoice From Recognition	  */
+	public String getJP_RecogToInvoicePolicy();
+
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
 

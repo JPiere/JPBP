@@ -30,7 +30,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170930L;
+	private static final long serialVersionUID = 20171009L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -297,6 +297,29 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public String getJP_Contract_Acct_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Contract_Acct_UU);
+	}
+
+	/** Lump After Order All Recognized = LP */
+	public static final String JP_RECOGTOINVOICEPOLICY_LumpAfterOrderAllRecognized = "LP";
+	/** After Recognition = DD */
+	public static final String JP_RECOGTOINVOICEPOLICY_AfterRecognition = "DD";
+	/** Manual = MA */
+	public static final String JP_RECOGTOINVOICEPOLICY_Manual = "MA";
+	/** Not Create Invoice from Recognition = NO */
+	public static final String JP_RECOGTOINVOICEPOLICY_NotCreateInvoiceFromRecognition = "NO";
+	/** Set Policy of Create Invoice From Recognition.
+		@param JP_RecogToInvoicePolicy Policy of Create Invoice From Recognition	  */
+	public void setJP_RecogToInvoicePolicy (String JP_RecogToInvoicePolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_RecogToInvoicePolicy, JP_RecogToInvoicePolicy);
+	}
+
+	/** Get Policy of Create Invoice From Recognition.
+		@return Policy of Create Invoice From Recognition	  */
+	public String getJP_RecogToInvoicePolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_RecogToInvoicePolicy);
 	}
 
 	/** Set Name.
