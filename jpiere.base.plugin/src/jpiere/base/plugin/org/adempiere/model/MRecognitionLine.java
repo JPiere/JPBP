@@ -892,6 +892,8 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 						pstmt = null;
 					}
 					
+					if(qtyRecognized == null)
+						qtyRecognized = Env.ZERO;
 					BigDecimal targetQtyRecognized = getM_InOutLine().getMovementQty().subtract(qtyRecognized);
 					setJP_TargetQtyRecognized(targetQtyRecognized);
 

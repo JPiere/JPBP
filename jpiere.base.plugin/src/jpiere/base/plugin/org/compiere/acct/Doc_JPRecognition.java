@@ -458,11 +458,13 @@ public class Doc_JPRecognition extends Doc
 			
 			//DR - Invoice Revenue Acct
 			dr = fact.createLine (line, getInvoiceRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-			dr.setQty(line.getQty().negate());
+			if(dr != null)
+				dr.setQty(line.getQty().negate());
 			
 			//CR - Recognition Revenue Acct
 			cr = fact.createLine (line, getRecognitionRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
-			cr.setQty(line.getQty());
+			if(cr != null)
+				cr.setQty(line.getQty());
 			
 			
 			/*** COGS ***/
@@ -516,7 +518,7 @@ public class Doc_JPRecognition extends Doc
 			//Current Cost
 			}else{
 				
-				if (!isReversal(line))
+				if (!isReversal(line) && product != null)
 				{
 					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
 					{	
@@ -603,7 +605,7 @@ public class Doc_JPRecognition extends Doc
 					if (!dr.updateReverseLine (MRecognition.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
-						if (! product.isStocked())	{ //	ignore service
+						if (product != null && !product.isStocked())	{ //	ignore service
 							fact.remove(dr);
 							continue;
 						}
@@ -642,7 +644,7 @@ public class Doc_JPRecognition extends Doc
 			
 			/*** Create Cost Detail ***/
 			MRecognitionLine recogLine = (MRecognitionLine) line.getPO();
-			if(recogLine.getM_InOutLine_ID() > 0)
+			if(recogLine.getM_InOutLine_ID() > 0  && product != null )
 			{
 				MInOutLine ioLine = new MInOutLine(getCtx(), recogLine.getM_InOutLine_ID(),getTrxName());
 				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
@@ -819,7 +821,7 @@ public class Doc_JPRecognition extends Doc
 				
 			}else{
 				
-				if (!isReversal(line)) 
+				if (!isReversal(line) && product != null) 
 				{
 					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
 					{	
@@ -890,7 +892,7 @@ public class Doc_JPRecognition extends Doc
 					if (!dr.updateReverseLine (MRecognition.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
-						if (! product.isStocked())	{ //	ignore service
+						if (product != null && !product.isStocked())	{ //	ignore service
 							fact.remove(dr);
 							continue;
 						}
@@ -930,7 +932,7 @@ public class Doc_JPRecognition extends Doc
 			
 			/*** Create Cost Detail ***/
 			MRecognitionLine recogLine = (MRecognitionLine) line.getPO();
-			if(recogLine.getM_InOutLine_ID() > 0)
+			if(recogLine.getM_InOutLine_ID() > 0  && product != null)
 			{
 				MInOutLine ioLine = new MInOutLine(getCtx(), recogLine.getM_InOutLine_ID(),getTrxName());
 				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
