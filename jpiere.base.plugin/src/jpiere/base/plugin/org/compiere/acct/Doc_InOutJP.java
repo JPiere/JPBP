@@ -143,7 +143,27 @@ public class Doc_InOutJP extends Doc_InOut {
 			
 		}else if(contractAcct.isPostingRecognitionDocJP()){
 			
-			;//Noting to do. Posting Recognition Doc Only.
+			if (getDocumentType().equals(DOCTYPE_MatShipment) && isSOTrx()) //Sales - Shipment
+			{
+				;//Noting to do;
+				
+			}else if ( getDocumentType().equals(DOCTYPE_MatReceipt) && isSOTrx() ){//Sales - Return
+				
+				;//Noting to do;
+				
+			}else if (getDocumentType().equals(DOCTYPE_MatReceipt) && !isSOTrx()){//Purchasing - Receipt
+				
+				return super.createFacts(as);
+				
+			}else if (getDocumentType().equals(DOCTYPE_MatShipment) && !isSOTrx()){ //Purchasing - return
+			
+				return super.createFacts(as);
+				
+			}else{
+				p_Error = "DocumentType unknown: " + getDocumentType();
+				log.log(Level.SEVERE, p_Error);
+				return null;
+			}
 			
 		}else{
 			
