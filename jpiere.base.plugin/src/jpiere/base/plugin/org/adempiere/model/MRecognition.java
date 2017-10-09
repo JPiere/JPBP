@@ -1217,7 +1217,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRecognitionLine line = lines[i];
-			if(isDiffQty == false && line.getJP_QtyRecognized().compareTo(line.getJP_TargetQtyRecognized()) != 0)
+			if(isDiffQty == false && line.getJP_TargetQtyRecognized().compareTo(Env.ZERO) != 0 && line.getJP_QtyRecognized().compareTo(line.getJP_TargetQtyRecognized()) != 0)
 				isDiffQty = true;
 			
 			//Update JP_QtyRecognized Order Line
@@ -1787,6 +1787,9 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRecognitionLine line = lines[i];
+			if(line.getJP_TargetQtyRecognized().compareTo(Env.ZERO) == 0)
+				continue;
+			
 			BigDecimal differenceQty = line.getJP_TargetQtyRecognized().subtract(line.getJP_QtyRecognized());
 			if (differenceQty.compareTo(Env.ZERO) == 0)
 				continue;

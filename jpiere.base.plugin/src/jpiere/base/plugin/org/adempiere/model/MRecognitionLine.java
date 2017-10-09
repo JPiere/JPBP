@@ -852,9 +852,13 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		{
 			if(newRecord)
 			{
-				if(getJP_TargetQtyRecognized().signum() == 0 && getM_InOutLine_ID() > 0)
+				if(getJP_TargetQtyRecognized().signum() == 0 && getM_InOutLine_ID() > 0 && getJP_RecogLine_SplitFrom_ID() == 0)
 				{
 					setJP_TargetQtyRecognized(getM_InOutLine().getMovementQty());
+				}else if(getJP_RecogLine_SplitFrom_ID() > 0){
+					;//Noting to do;
+				}else if(getJP_TargetQtyRecognized().signum() != 0){
+					;//Noting to do;
 				}else{
 					setJP_TargetQtyRecognized(Env.ZERO);
 				}
