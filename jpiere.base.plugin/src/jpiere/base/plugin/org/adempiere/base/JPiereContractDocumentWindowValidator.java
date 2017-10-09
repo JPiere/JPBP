@@ -67,20 +67,23 @@ public class JPiereContractDocumentWindowValidator implements WindowValidator {
 						else
 							new_ContractPeriodDate_To = (Timestamp)new_value;
 						
-						if(old_ContractPeriodDate_To != null && new_ContractPeriodDate_To != null
-								&& old_ContractPeriodDate_To.compareTo(new_ContractPeriodDate_To) != 0 )
+
+						if(old_ContractPeriodDate_To == null && new_ContractPeriodDate_To == null)
 						{
+							
+							;//Noting to do;
+							
+						}else if(old_ContractPeriodDate_To == null || new_ContractPeriodDate_To == null){
+							
 							MContract contract = MContract.get(Env.getCtx(), Record_ID);
 							if(contract.getContractContents(true,null).length > 0)
 							{
 								FDialog.info(event.getWindow().getADWindowContent().getWindowNo()
 										, event.getWindow().getComponent(), "JP_ToBeConfirmed", Msg.getMsg(Env.getCtx(), "JP_ConfirmContractProcessDateTo"));
 							}
-						}else if(old_ContractPeriodDate_To == null && new_ContractPeriodDate_To == null){
 							
-							;//Noting to do;
+						}else if(old_ContractPeriodDate_To.compareTo(new_ContractPeriodDate_To) != 0 ){
 							
-						}else if(old_ContractPeriodDate_To == null || new_ContractPeriodDate_To == null){
 							MContract contract = MContract.get(Env.getCtx(), Record_ID);
 							if(contract.getContractContents(true,null).length > 0)
 							{
