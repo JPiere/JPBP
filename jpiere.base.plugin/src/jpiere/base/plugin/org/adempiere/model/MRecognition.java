@@ -35,7 +35,6 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
-import org.compiere.model.MOrg;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
@@ -163,37 +162,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		to.setProcessed (false);
 		//[ 1633721 ] Reverse Documents- Processing=Y
 		to.setProcessing(false);
-		//	delete references
-
-		if (counter)
-		{
-			MOrg org = MOrg.get(from.getCtx(), from.getAD_Org_ID());
-			int counterC_BPartner_ID = org.getLinkedC_BPartner_ID(trxName);
-			if (counterC_BPartner_ID == 0)
-				return null;
-			to.setBPartner(MBPartner.get(from.getCtx(), counterC_BPartner_ID));
-			//	Try to find Order link
-			if (from.getC_Order_ID() != 0)
-			{
-				MOrder peer = new MOrder (from.getCtx(), from.getC_Order_ID(), from.get_TrxName());
-				if (peer.getRef_Order_ID() != 0)
-					to.setC_Order_ID(peer.getRef_Order_ID());
-			}
-			// Try to find RMA link
-			if (from.getM_RMA_ID() != 0)
-			{
-				MRMA peer = new MRMA (from.getCtx(), from.getM_RMA_ID(), from.get_TrxName());
-				if (peer.getRef_RMA_ID() > 0)
-					to.setM_RMA_ID(peer.getRef_RMA_ID());
-			}
-			//
-		}
-//		else
-//			to.setRef_Invoice_ID(0);
 
 		to.saveEx(trxName);
-//		if (counter)
-//			from.setRef_Invoice_ID(to.getC_Invoice_ID());
 
 		//	Lines
 		if (to.copyLinesFrom(from, counter, setOrder) == 0)
@@ -668,33 +638,9 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			if (getC_BPartner_ID() != otherRecognition.getC_BPartner_ID())
 				line.setTax();	//	recalculate
 			//
-			if (counter)
-			{
-//				line.setRef_InvoiceLine_ID(fromLine.getC_InvoiceLine_ID());
-				if (fromLine.getC_OrderLine_ID() != 0)
-				{
-//					MRecognitionLine peer = new MRecognitionLine(getCtx(), fromLine.getC_OrderLine_ID(), get_TrxName());
-//					if (peer.getRef_OrderLine_ID() != 0)
-//						line.setC_OrderLine_ID(peer.getRef_OrderLine_ID());
-				}
-				line.setM_InOutLine_ID(0);
-				if (fromLine.getM_InOutLine_ID() != 0)
-				{
-//					MRecognitionLine peer = new MRecognitionLine (getCtx(), fromLine.getM_InOutLine_ID(), get_TrxName());
-//					if (peer.getRef_InOutLine_ID() != 0)
-//						line.setM_InOutLine_ID(peer.getRef_InOutLine_ID());
-				}
-			}
-			//
 			line.setProcessed(false);
 			if (line.save(get_TrxName()))
 				count++;
-			//	Cross Link
-			if (counter)
-			{
-//				fromLine.setRef_InvoiceLine_ID(line.getC_InvoiceLine_ID());
-//				fromLine.saveEx(get_TrxName());
-			}
 
 			// end MZ
 		}
@@ -1524,9 +1470,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		
 		MPeriod.testPeriodOpen(getCtx(), reversalDate, getC_DocType_ID(), getAD_Org_ID());
 
-
 		//
-		load(get_TrxName());	//	reload allocation reversal info
+//		load(get_TrxName());	//	reload allocation reversal info
 
 		//	Deep Copy
 		MRecognition reversal = null;
