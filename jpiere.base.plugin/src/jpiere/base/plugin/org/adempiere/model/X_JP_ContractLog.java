@@ -30,7 +30,7 @@ public class X_JP_ContractLog extends PO implements I_JP_ContractLog, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170929L;
+	private static final long serialVersionUID = 20171009L;
 
     /** Standard Constructor */
     public X_JP_ContractLog (Properties ctx, int JP_ContractLog_ID, String trxName)

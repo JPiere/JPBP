@@ -31,7 +31,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171003L;
+	private static final long serialVersionUID = 20171009L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -671,6 +671,56 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public String getJP_Processing2 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
+	public I_JP_RecognitionLine getJP_RecognitionLine() throws RuntimeException
+    {
+		return (I_JP_RecognitionLine)MTable.get(getCtx(), I_JP_RecognitionLine.Table_Name)
+			.getPO(getJP_RecognitionLine_ID(), get_TrxName());	}
+
+	/** Set Revenue and Expense Recognition Line.
+		@param JP_RecognitionLine_ID Revenue and Expense Recognition Line	  */
+	public void setJP_RecognitionLine_ID (int JP_RecognitionLine_ID)
+	{
+		if (JP_RecognitionLine_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_RecognitionLine_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_RecognitionLine_ID, Integer.valueOf(JP_RecognitionLine_ID));
+	}
+
+	/** Get Revenue and Expense Recognition Line.
+		@return Revenue and Expense Recognition Line	  */
+	public int getJP_RecognitionLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_RecognitionLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_Recognition getJP_Recognition() throws RuntimeException
+    {
+		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
+			.getPO(getJP_Recognition_ID(), get_TrxName());	}
+
+	/** Set Revenue Recognition Doc.
+		@param JP_Recognition_ID Revenue Recognition Doc	  */
+	public void setJP_Recognition_ID (int JP_Recognition_ID)
+	{
+		if (JP_Recognition_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_Recognition_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_Recognition_ID, Integer.valueOf(JP_Recognition_ID));
+	}
+
+	/** Get Revenue Recognition Doc.
+		@return Revenue Recognition Doc	  */
+	public int getJP_Recognition_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_InOutLine getM_InOutLine() throws RuntimeException

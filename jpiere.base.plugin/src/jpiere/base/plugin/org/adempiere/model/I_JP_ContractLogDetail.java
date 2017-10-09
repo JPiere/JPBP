@@ -370,6 +370,28 @@ public interface I_JP_ContractLogDetail
 	/** Get Process Now	  */
 	public String getJP_Processing2();
 
+    /** Column name JP_RecognitionLine_ID */
+    public static final String COLUMNNAME_JP_RecognitionLine_ID = "JP_RecognitionLine_ID";
+
+	/** Set Revenue and Expense Recognition Line	  */
+	public void setJP_RecognitionLine_ID (int JP_RecognitionLine_ID);
+
+	/** Get Revenue and Expense Recognition Line	  */
+	public int getJP_RecognitionLine_ID();
+
+	public I_JP_RecognitionLine getJP_RecognitionLine() throws RuntimeException;
+
+    /** Column name JP_Recognition_ID */
+    public static final String COLUMNNAME_JP_Recognition_ID = "JP_Recognition_ID";
+
+	/** Set Revenue Recognition Doc	  */
+	public void setJP_Recognition_ID (int JP_Recognition_ID);
+
+	/** Get Revenue Recognition Doc	  */
+	public int getJP_Recognition_ID();
+
+	public I_JP_Recognition getJP_Recognition() throws RuntimeException;
+
     /** Column name M_InOutLine_ID */
     public static final String COLUMNNAME_M_InOutLine_ID = "M_InOutLine_ID";
 
