@@ -268,24 +268,36 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
 						||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 				{
-					//Check Contract Process Period - Calender
-					MContractProcPeriod recogLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), recogLine_ContractProcPeriod_ID);				
-					if(recogLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
-					{	
-						//Please select the Contract Process Period that belong to Calender of Contract Content line. 
-						return Msg.getMsg(Env.getCtx(), "JP_SelectContractProcPeriodBelongToContractLine");
+					if(type == ModelValidator.TYPE_BEFORE_CHANGE)
+					{
+						//Check Mandetory
+						if(recogLine_ContractProcPeriod_ID <= 0)
+						{
+							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+							return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);					
+						}
+						
+						//Check Contract Process Period - Calender
+						MContractProcPeriod recogLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), recogLine_ContractProcPeriod_ID);				
+						if(recogLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
+						{	
+							//Please select the Contract Process Period that belong to Calender of Contract Content line. 
+							return Msg.getMsg(Env.getCtx(), "JP_SelectContractProcPeriodBelongToContractLine");
+						}
+						
+						//Check valid Contract Period
+						MRecognition recog =recogLine.getParent();
+						MContractProcPeriod recogPeriod = MContractProcPeriod.get(Env.getCtx(), recog.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						if(recogPeriod.getStartDate().compareTo(recogLine_ContractProcPeriod.getStartDate()) > 0 
+								|| (recogPeriod.getEndDate() != null && recogPeriod.getEndDate().compareTo(recogLine_ContractProcPeriod.getEndDate()) < 0) )
+						{
+							//Outside the Contract Process Period.
+							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						}
 					}
 					
-					//Check valid Contract Period
-					MRecognition recog =recogLine.getParent();
-					MContractProcPeriod recogPeriod = MContractProcPeriod.get(Env.getCtx(), recog.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-					if(recogPeriod.getStartDate().compareTo(recogLine_ContractProcPeriod.getStartDate()) > 0 
-							|| (recogPeriod.getEndDate() != null && recogPeriod.getEndDate().compareTo(recogLine_ContractProcPeriod.getEndDate()) < 0) )
-					{
-						//Outside the Contract Process Period.
-						return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-					}
-				
+				}else{
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 				}
 			}
 			

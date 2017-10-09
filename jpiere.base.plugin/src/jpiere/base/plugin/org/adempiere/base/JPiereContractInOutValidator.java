@@ -28,6 +28,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MRefList;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -455,30 +456,42 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			//Check Contract Process Period
 			int ioLine_ContractProcPeriod_ID = ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
 			MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && ioLine_ContractProcPeriod_ID > 0) 
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
 			{ 
 
 				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
 						||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 				{
-					//Check Contract Process Period - Calender
-					MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);		
-					if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
-					{	
-						//Please select the Contract Process Period that belong to Calender of Contract Content line. 
-						return Msg.getMsg(Env.getCtx(), "JP_SelectContractProcPeriodBelongToContractLine");
+					if(type == ModelValidator.TYPE_BEFORE_CHANGE)
+					{
+						//Check Mandetory
+						if(ioLine_ContractProcPeriod_ID <= 0)
+						{
+							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
+							return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);					
+						}
+						
+						//Check Contract Process Period - Calender
+						MContractProcPeriod ioLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), ioLine_ContractProcPeriod_ID);		
+						if(ioLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
+						{	
+							//Please select the Contract Process Period that belong to Calender of Contract Content line. 
+							return Msg.getMsg(Env.getCtx(), "JP_SelectContractProcPeriodBelongToContractLine");
+						}
+						
+						//Check valid Contract Period
+						MInOut inOut =ioLine.getParent();
+						MContractProcPeriod ioPeriod = MContractProcPeriod.get(Env.getCtx(), inOut.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						if(ioPeriod.getStartDate().compareTo(ioLine_ContractProcPeriod.getStartDate()) > 0 
+								|| (ioPeriod.getEndDate() != null && ioPeriod.getEndDate().compareTo(ioLine_ContractProcPeriod.getEndDate()) < 0) )
+						{
+							//Outside the Contract Process Period.
+							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						}
 					}
 					
-					//Check valid Contract Period
-					MInOut inOut =ioLine.getParent();
-					MContractProcPeriod ioPeriod = MContractProcPeriod.get(Env.getCtx(), inOut.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-					if(ioPeriod.getStartDate().compareTo(ioLine_ContractProcPeriod.getStartDate()) > 0 
-							|| (ioPeriod.getEndDate() != null && ioPeriod.getEndDate().compareTo(ioLine_ContractProcPeriod.getEndDate()) < 0) )
-					{
-						//Outside the Contract Process Period.
-						return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-					}
-				
+				}else{
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 				}
 				
 			}
