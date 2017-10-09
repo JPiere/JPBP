@@ -271,13 +271,9 @@ public class Doc_MatchInvJP extends Doc
 				if (getQty().signum() < 0)
 					effMultiplier = effMultiplier.negate();
 
-				//JPIERE-0363 -- Start
-				MAccount account = null;
-				if(m_contractAcct != null)
-				{
-					account = cr.getAccount();
-					cr.setAccount(as, getInvoiceExpenseAccount(as));//JPIERE-0363
-				}
+				//JPIERE-0363 -- Start : Override Account
+				if(m_pc.isService() && m_contractAcct != null)
+					cr.setAccount(as, getInvoiceExpenseAccount(as));
 				
 				//Set AmtAcctCr/Dr from Invoice (sets also Project)
 				if (!cr.updateReverseLine (MInvoice.Table_ID, 		//	Amt updated
@@ -287,10 +283,9 @@ public class Doc_MatchInvJP extends Doc
 					return null;
 				}
 				
-				if(m_contractAcct != null)
-				{
-					cr.setAccount(as,account);
-				}//JPIERE-0363 -- finishi
+				if(m_pc.isService() && m_contractAcct != null)
+					cr.setAccount(as,expense);
+				//JPIERE-0363 -- finish : Override Account
 				
 			}
 			if (log.isLoggable(Level.FINE)) log.fine("DR - Amt(" + temp + "->" + cr.getAcctBalance()
@@ -401,9 +396,17 @@ public class Doc_MatchInvJP extends Doc
 			BigDecimal ipv) {
 		if (ipv.signum() == 0) return;
 		
-		FactLine pv = fact.createLine(null,
-			m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
-			as.getC_Currency_ID(), ipv);
+		FactLine pv = null;
+		if (m_pc.isService())//JPIERE-0363
+		{
+			 pv = fact.createLine(null,
+					 m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as),//JPIERE-0363
+					 as.getC_Currency_ID(), ipv);
+		}else{
+			 pv = fact.createLine(null,
+					 m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
+					 as.getC_Currency_ID(), ipv);
+		}
 		updateFactLine(pv);
 		
 		MMatchInv matchInv = (MMatchInv)getPO();
