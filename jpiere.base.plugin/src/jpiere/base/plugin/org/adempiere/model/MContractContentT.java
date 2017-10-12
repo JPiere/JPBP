@@ -178,6 +178,44 @@ public class MContractContentT extends X_JP_ContractContentT {
 			}
 		}
 		
+		
+		//Check Contract Acct
+		if(newRecord || is_ValueChanged("DocBaseType") || is_ValueChanged("JP_CreateDerivativeDocPolicy") || is_ValueChanged("JP_Contract_Acct_ID") )
+		{
+			int JP_Contract_Acct_ID = getJP_Contract_Acct_ID();
+			if(JP_Contract_Acct_ID > 0)
+			{
+				MContractAcct acctInfo = MContractAcct.get(getCtx(), JP_Contract_Acct_ID);
+				
+				//Check - in case of Crate Invoice From Recognition
+				if(acctInfo.isPostingContractAcctJP() && acctInfo.isPostingRecognitionDocJP() && acctInfo.getJP_RecogToInvoicePolicy() != null
+						&& !acctInfo.getJP_RecogToInvoicePolicy().equals("NO"))
+				{
+					if(!getDocBaseType().equals("SOO") && !getDocBaseType().equals("POO"))
+					{
+						//In case of create Invoice from Recognition at Contract Account Info, you must select SOO or POO at Base Doc Type.  
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogToInvoice_SOOorPOO"));
+						return false;
+					}
+					
+					if(!getJP_BaseDocDocType().getDocSubTypeSO().equals("SO") && !getJP_BaseDocDocType().getDocSubTypeSO().equals("WP"))
+					{
+						//In case of create Invoice from Recognition at Contract Account Info, you must select Base Doc Doc Type that SO Sub Type is SO or WP.  
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogToInvoice_SOorWP"));
+						return false;
+					}
+					
+					if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && getJP_CreateDerivativeDocPolicy() != null
+						&& !getJP_CreateDerivativeDocPolicy().equals("MA") &&  !getJP_CreateDerivativeDocPolicy().equals("IO"))
+					{
+						//In case of create Invoice from Recognition at Contract Account Info, you must select Manual or Create Ship/Recipt at Create Derivative Doc Policy.  
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogToInvoice_MAorIO"));
+						return false;
+					}
+				}
+			}//if(JP_Contract_Acct_ID > 0)
+		}//Check Contract Acct
+		
 
 		//Check IsAutomaticUpdateJP
 		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_IsAutomaticUpdateJP))

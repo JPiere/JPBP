@@ -31,6 +31,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -76,6 +77,20 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 			String descriptionMsg = Msg.getMsg(getCtx(), "NotFound") + " : " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID");
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, descriptionMsg);
 			return "";
+		}
+		
+		//Check Contract Acct Info
+		int JP_Contract_Acct_ID = m_ContractContent.getJP_Contract_Acct_ID();
+		if(JP_Contract_Acct_ID > 0)
+		{
+			MContractAcct contractAcct = MContractAcct.get(getCtx(), JP_Contract_Acct_ID);
+			if(contractAcct.isPostingContractAcctJP() && contractAcct.isPostingRecognitionDocJP() 
+					&& contractAcct.getJP_RecogToInvoicePolicy() != null && !contractAcct.getJP_RecogToInvoicePolicy().equals("NO"))
+			{
+				String descriptionMsg = Msg.getMsg(Env.getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy"),Msg.getElement(Env.getCtx(), "JP_RecogToInvoicePolicy")});
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, descriptionMsg);
+				return "";
+			}
 		}
 		
 		//Check Header Overlap -> Unnecessary. because order : invoice = 1 : N. need overlap. 

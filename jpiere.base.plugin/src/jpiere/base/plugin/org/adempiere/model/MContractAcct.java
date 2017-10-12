@@ -73,6 +73,7 @@ public class MContractAcct extends X_JP_Contract_Acct {
 				setIsPostingRecognitionDocJP(false);
 				setDocAction(null);
 				setIsSplitWhenDifferenceJP(false);
+				setJP_RecogToInvoicePolicy(null);
 			}
 		}
 		
@@ -82,6 +83,7 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			{
 				setDocAction(null);
 				setIsSplitWhenDifferenceJP(false);
+				setJP_RecogToInvoicePolicy(null);
 			}
 		}
 		
