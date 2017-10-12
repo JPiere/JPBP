@@ -33,6 +33,8 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPeriod;
@@ -1285,6 +1287,18 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			
 		}
 		
+		//Create Invoice From Recognition
+		int JP_Contract_Acct_ID = getJP_ContractContent().getJP_Contract_Acct_ID();
+		if(JP_Contract_Acct_ID > 0)
+		{
+			MContractAcct acctInfo = MContractAcct.get(getCtx(), JP_Contract_Acct_ID);
+			if(acctInfo.isPostingContractAcctJP() && acctInfo.isPostingRecognitionDocJP() 
+					&& acctInfo.getJP_RecogToInvoicePolicy() != null && acctInfo.getJP_RecogToInvoicePolicy().equals(MContractAcct.JP_RECOGTOINVOICEPOLICY_AfterRecognition))
+			{
+				createInvoiceFromRecog();//TODO
+			}
+		}
+		
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (valid != null)
@@ -1811,5 +1825,61 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		
 	}	//	splitRecognition
 
+	
+	private boolean createInvoiceFromRecog()
+	{
+		MInOut io = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+		int  io_DocType_ID = io.getC_DocType_ID();
+		MDocType io_DocType = MDocType.get(getCtx(), io_DocType_ID);
+		//avoid overlap invoice
+		if(io_DocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
+		{
+			return true;
+			
+		}else if(io.getC_Invoice_ID() > 0){
+			
+			return true;
+		}
+		
+		MInvoice invoice = new MInvoice(getCtx(),0, get_TrxName());
+		MOrder order = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+		
+		PO.copyValues(this, invoice);
+		invoice.setC_Invoice_ID(0);
+		if(getBill_BPartner_ID() > 0)
+		{
+			invoice.setC_BPartner_ID(getBill_BPartner_ID());
+			invoice.setC_BPartner_Location_ID(getBill_Location_ID());
+			invoice.setAD_User_ID(getBill_User_ID());
+		}
+		invoice.setC_DocTypeTarget_ID(order.getC_DocType().getC_DocTypeInvoice_ID());
+		invoice.setAD_Org_ID(getAD_Org_ID());
+		invoice.setDocumentNo(null);
+		invoice.setTotalLines(Env.ZERO);
+		invoice.setGrandTotal(Env.ZERO);
+		invoice.setDocStatus(STATUS_Drafted);
+		invoice.setDocAction(DOCACTION_Complete);
+		invoice.set_ValueNoCheck("JP_Recognition_ID", getJP_Recognition_ID());
+		invoice.saveEx(get_TrxName());
+		
+		setC_Invoice_ID(invoice.getC_Invoice_ID());
+		
+		MRecognitionLine[] lines = getLines();
+		for(int i = 0; i < lines.length; i++)
+		{
+			MInvoiceLine iLine = new MInvoiceLine(getCtx(), 0, get_TrxName());
+			PO.copyValues(lines[i], iLine);
+			iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
+			iLine.setC_InvoiceLine_ID(0);
+			iLine.setAD_Org_ID(getAD_Org_ID());
+			iLine.set_ValueNoCheck("JP_RecognitionLine_ID", lines[i].getJP_RecognitionLine_ID());
+			iLine.saveEx(get_TrxName());
+			
+			lines[i].setC_InvoiceLine_ID(iLine.getC_InvoiceLine_ID());
+			lines[i].saveEx(get_TrxName());
+		}//for
+		
+		return true;
+	}//createInvoiceFromRecog()
 	
 }	//	MRecognition

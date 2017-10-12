@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
@@ -91,6 +92,27 @@ public class DefaultContractProcessCreateDerivativeInvoice extends AbstractContr
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, descriptionMsg);
 				return "";
 			}
+		}
+		
+		//Check Doc Type of Ship/Receipt
+		int C_DocTypeShipment_ID = m_ContractContent.getJP_BaseDocDocType().getC_DocTypeShipment_ID();
+		if(C_DocTypeShipment_ID > 0)
+		{
+			MDocType io_DocType = MDocType.get(getCtx(), C_DocTypeShipment_ID);
+			if(io_DocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
+			{
+				//Document Type for Shipment of Base Doc DocType is to create Invoice.
+				String msg1 = Msg.getMsg(getCtx(), "JP_DocTypeForShipmentOfBaseDocDocType");
+				String msg2 = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_BaseDocDocType_ID"),Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")});
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, msg1 +" : " +msg2);
+				return "";
+			}
+			
+		}else{
+			
+			String msg = Msg.getMsg(getCtx(), "NotFound") + "  " + Msg.getElement(getCtx(), "C_DocTypeShipment_ID");
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, msg);
+			return "";
 		}
 		
 		//Check Header Overlap -> Unnecessary. because order : invoice = 1 : N. need overlap. 

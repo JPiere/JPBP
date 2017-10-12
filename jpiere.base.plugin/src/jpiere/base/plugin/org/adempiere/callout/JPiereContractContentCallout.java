@@ -20,6 +20,7 @@ import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDocType;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -48,6 +49,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 			{
 				mTab.setValue ("OrderType",  "--");
 			}else{
+				
 				Integer JP_BaseDocDocType_ID = (Integer)value;
 				MDocType docType = MDocType.get(ctx, JP_BaseDocDocType_ID.intValue());
 				mTab.setValue("IsSOTrx", docType.isSOTrx());
@@ -56,10 +58,25 @@ public class JPiereContractContentCallout implements IColumnCallout {
 						|| docType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))
 				{
 					String DocSubTypeSO = docType.getDocSubTypeSO();
-					mTab.setValue ("OrderType", DocSubTypeSO);					
+					mTab.setValue ("OrderType", DocSubTypeSO);
+					
+					if(!docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_StandardOrder)
+							&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Quotation)
+							&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Proposal) )
+					{
+						String JP_ContractType = (String)Env.getContext(ctx, WindowNo, "JP_ContractType");
+						if(JP_ContractType.equals("PDC"))
+							mTab.setValue("JP_CreateDerivativeDocPolicy", "MA");
+						else if(JP_ContractType.equals("STC"))
+							mTab.setValue("JP_CreateDerivativeDocPolicy", null);
+					}
+					
 				}else{
 					mTab.setValue ("OrderType", "--");	
+					mTab.setValue("JP_CreateDerivativeDocPolicy", null);
 				}
+				
+
 			}
 			
 		}else if(mField.getColumnName().equals("JP_ContractCalender_ID")){

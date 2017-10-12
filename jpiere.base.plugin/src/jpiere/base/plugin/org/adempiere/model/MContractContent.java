@@ -661,7 +661,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 						{
 							//Base doc DocType that you selected is available When Create Derivative Doc policy is Manual.
 							log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
-													+ "   " + Msg.getMsg(getCtx(), "JP_BaseDocDocType_CreateDerivativeDocPolicy"));
+													+ "  :  " + Msg.getMsg(getCtx(), "JP_BaseDocDocType_CreateDerivativeDocPolicy"));
 							return false;
 						}
 					}
@@ -690,8 +690,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
-					if(getJP_CreateDerivativeDocPolicy() != null
-							&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
 					{
 						if(!getOrderType().equals(MDocType.DOCSUBTYPESO_StandardOrder)
 								&& !getOrderType().equals(MDocType.DOCSUBTYPESO_Quotation)
@@ -699,8 +698,26 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 						{
 							//Base doc DocType that you selected is available When Create Derivative Doc policy is Manual.
 							log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.JP_CREATEDERIVATIVEDOCPOLICY_Manual)
-													+ "   " + Msg.getMsg(getCtx(), "JP_BaseDocDocType_CreateDerivativeDocPolicy"));
+													+ "  :  " + Msg.getMsg(getCtx(), "JP_BaseDocDocType_CreateDerivativeDocPolicy"));
 							return false;
+						}
+					}
+					
+					if(getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)
+							||getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice) )
+					{
+						int C_DocTypeShipment_ID = getJP_BaseDocDocType().getC_DocTypeShipment_ID();
+						if(C_DocTypeShipment_ID > 0)
+						{
+							MDocType io_DocType = MDocType.get(getCtx(), C_DocTypeShipment_ID);
+							if(io_DocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
+							{
+								//Document Type for Shipment of Base Doc DocType is to create Invoice.
+								String msg1 = Msg.getMsg(getCtx(), "JP_DocTypeForShipmentOfBaseDocDocType");
+								String msg2 = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_BaseDocDocType_ID"),Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")});
+								log.saveError("Error", msg1 +" : " + msg2);
+								return false;
+							}
 						}
 					}
 					
@@ -869,14 +886,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 		
 		
-		
 		return true;
 	}
 	
 	
-	
-	
-
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) 
 	{
