@@ -30,6 +30,7 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -38,6 +39,8 @@ import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 
 
@@ -139,6 +142,39 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			}
 			
 		}//TIMING_BEFORE_PREPARE
+		
+		if(timing == ModelValidator.TIMING_AFTER_VOID
+				|| timing == ModelValidator.TIMING_AFTER_REVERSEACCRUAL
+				|| timing == ModelValidator.TIMING_AFTER_REVERSECORRECT)
+		{
+			MInvoice invoice = (MInvoice)po;
+			int JP_Recognition_ID = invoice.get_ValueAsInt("JP_Recognition_ID");
+			if(JP_Recognition_ID > 0)
+			{
+				StringBuilder sql = new StringBuilder("UPDATE ")
+					.append(MRecognition.Table_Name)
+					.append(" SET C_Invoice_ID = null WHERE JP_Recognition_ID=?");
+				int no = DB.executeUpdate(sql.toString(), JP_Recognition_ID, po.get_TrxName());
+				if(no != 1)
+					log.warning("#" + no + " - " + invoice.getDocumentInfo());
+			}
+			
+			MInvoiceLine[] iLines = invoice.getLines();
+			for(int i = 0; i < iLines.length; i++)
+			{
+				int JP_RecognitionLine_ID = iLines[i].get_ValueAsInt("JP_RecognitionLine_ID");
+				if(JP_RecognitionLine_ID > 0)
+				{
+					StringBuilder sql = new StringBuilder("UPDATE ")
+							.append(MRecognitionLine.Table_Name)
+							.append(" SET C_InvoiceLine_ID = null WHERE JP_RecognitionLine_ID=?");
+						int no = DB.executeUpdate(sql.toString(), JP_RecognitionLine_ID, po.get_TrxName());
+						if(no != 1)
+							log.warning("#" + no + " - " + invoice.getDocumentInfo() + " : "+ iLines[i].getLine());
+				}
+			}
+		
+		}//Void
 		
 		return null;
 	}

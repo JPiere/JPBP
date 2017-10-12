@@ -1295,7 +1295,10 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			if(acctInfo.isPostingContractAcctJP() && acctInfo.isPostingRecognitionDocJP() 
 					&& acctInfo.getJP_RecogToInvoicePolicy() != null && acctInfo.getJP_RecogToInvoicePolicy().equals(MContractAcct.JP_RECOGTOINVOICEPOLICY_AfterRecognition))
 			{
-				createInvoiceFromRecog();//TODO
+				if(!createInvoiceFromRecog())
+				{
+					return DocAction.STATUS_Invalid;
+				}
 			}
 		}
 		
@@ -1834,11 +1837,10 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		//avoid overlap invoice
 		if(io_DocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
 		{
-			return true;
-			
-		}else if(io.getC_Invoice_ID() > 0){
-			
-			return true;
+			//Document Type for Shipment of Base Doc DocType is to create Invoice.
+			String msg = Msg.getMsg(getCtx(), "JP_DocTypeForShipmentOfBaseDocDocType") + "  " + Msg.getElement(getCtx(), "DocumentNo") + " : " +getDocumentNo();
+			m_processMsg = msg;
+			return false;	
 		}
 		
 		MInvoice invoice = new MInvoice(getCtx(),0, get_TrxName());
@@ -1878,6 +1880,10 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			lines[i].setC_InvoiceLine_ID(iLine.getC_InvoiceLine_ID());
 			lines[i].saveEx(get_TrxName());
 		}//for
+		
+		invoice.processIt(ACTION_Complete);
+		if(!invoice.getDocStatus().equals(STATUS_Completed))
+			invoice.saveEx(get_TrxName());
 		
 		return true;
 	}//createInvoiceFromRecog()
