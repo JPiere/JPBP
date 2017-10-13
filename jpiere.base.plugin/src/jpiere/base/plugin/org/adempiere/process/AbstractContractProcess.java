@@ -513,6 +513,13 @@ public abstract class AbstractContractProcess extends SvrProcess
 				){ 
 			
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
+		
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CouldNotCreateInvoiceForInvoicedPartly)//C1
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToDeliver)//C2
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToRecognized)//C3
+				){ 	
+			
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
 			
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator)){ //W1
 			
@@ -523,9 +530,14 @@ public abstract class AbstractContractProcess extends SvrProcess
 			
 			m_ContractLog.warnNum++;
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning;
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_Warning)){ //W9
+			
+			m_ContractLog.warnNum++;
+			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning;
 			
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError)//Z1
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError) //Z2
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped) //Z9
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError)){ //ZZ
 			
 			m_ContractLog.errorNum++;

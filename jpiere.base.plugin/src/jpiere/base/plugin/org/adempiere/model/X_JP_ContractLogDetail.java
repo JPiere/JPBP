@@ -31,7 +31,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171009L;
+	private static final long serialVersionUID = 20171014L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -409,6 +409,16 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_SkippedForDocumentStatusOfOrderIsNotCompleted = "B7";
 	/** Skipped for Qty of Contract Line is Zero = B8 */
 	public static final String JP_CONTRACTLOGMSG_SkippedForQtyOfContractLineIsZero = "B8";
+	/** Could not Create Invoice for invoiced partly = C1 */
+	public static final String JP_CONTRACTLOGMSG_CouldNotCreateInvoiceForInvoicedPartly = "C1";
+	/** Skipped for Qty to Deliver = C2 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForQtyToDeliver = "C2";
+	/** Skipped for Qty to Recognized = C3 */
+	public static final String JP_CONTRACTLOGMSG_SkippedForQtyToRecognized = "C3";
+	/** Skipped = Z9 */
+	public static final String JP_CONTRACTLOGMSG_Skipped = "Z9";
+	/** Warning = W9 */
+	public static final String JP_CONTRACTLOGMSG_Warning = "W9";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)
