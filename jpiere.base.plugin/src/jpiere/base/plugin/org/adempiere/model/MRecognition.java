@@ -1917,19 +1917,20 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		
 		setC_Invoice_ID(invoice.getC_Invoice_ID());
 		
-		MRecognitionLine[] lines = getLines();
-		for(int i = 0; i < lines.length; i++)
+		MRecognitionLine[] rLines = getLines();
+		for(int i = 0; i < rLines.length; i++)
 		{
 			MInvoiceLine iLine = new MInvoiceLine(getCtx(), 0, get_TrxName());
-			PO.copyValues(lines[i], iLine);
+			PO.copyValues(rLines[i], iLine);
 			iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
 			iLine.setC_InvoiceLine_ID(0);
 			iLine.setAD_Org_ID(getAD_Org_ID());
-			iLine.set_ValueNoCheck("JP_RecognitionLine_ID", lines[i].getJP_RecognitionLine_ID());
+			iLine.set_ValueNoCheck("JP_RecognitionLine_ID", rLines[i].getJP_RecognitionLine_ID());
+			iLine.setM_InOutLine_ID(rLines[i].getM_InOutLine_ID());
 			iLine.saveEx(get_TrxName());
 			
-			lines[i].setC_InvoiceLine_ID(iLine.getC_InvoiceLine_ID());
-			lines[i].saveEx(get_TrxName());
+			rLines[i].setC_InvoiceLine_ID(iLine.getC_InvoiceLine_ID());
+			rLines[i].saveEx(get_TrxName());
 		}//for
 		
 		invoice.processIt(ACTION_Complete);
