@@ -29,6 +29,7 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -36,6 +37,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
@@ -151,12 +153,19 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			int JP_Recognition_ID = invoice.get_ValueAsInt("JP_Recognition_ID");
 			if(JP_Recognition_ID > 0)
 			{
-				StringBuilder sql = new StringBuilder("UPDATE ")
-					.append(MRecognition.Table_Name)
-					.append(" SET C_Invoice_ID = null WHERE JP_Recognition_ID=?");
-				int no = DB.executeUpdate(sql.toString(), JP_Recognition_ID, po.get_TrxName());
-				if(no != 1)
-					log.warning("#" + no + " - " + invoice.getDocumentInfo());
+				MRecognition recog = new MRecognition(Env.getCtx(),JP_Recognition_ID, po.get_TrxName());
+				if(recog.getC_Invoice_ID() == invoice.getC_Invoice_ID())
+				{
+					recog.setC_Invoice_ID(0);
+					recog.saveEx(po.get_TrxName());
+				}
+				
+//				StringBuilder sql = new StringBuilder("UPDATE ")
+//					.append(MRecognition.Table_Name)
+//					.append(" SET C_Invoice_ID = null WHERE JP_Recognition_ID=?");
+//				int no = DB.executeUpdate(sql.toString(), JP_Recognition_ID, po.get_TrxName());
+//				if(no != 1)
+//					log.warning("#" + no + " - " + invoice.getDocumentInfo());
 			}
 			
 			MInvoiceLine[] iLines = invoice.getLines();
@@ -165,16 +174,52 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				int JP_RecognitionLine_ID = iLines[i].get_ValueAsInt("JP_RecognitionLine_ID");
 				if(JP_RecognitionLine_ID > 0)
 				{
-					StringBuilder sql = new StringBuilder("UPDATE ")
-							.append(MRecognitionLine.Table_Name)
-							.append(" SET C_InvoiceLine_ID = null WHERE JP_RecognitionLine_ID=?");
-						int no = DB.executeUpdate(sql.toString(), JP_RecognitionLine_ID, po.get_TrxName());
-						if(no != 1)
-							log.warning("#" + no + " - " + invoice.getDocumentInfo() + " : "+ iLines[i].getLine());
+					MRecognitionLine rLine = new MRecognitionLine(Env.getCtx(),JP_RecognitionLine_ID, po.get_TrxName());
+					if(rLine.getC_InvoiceLine_ID() == iLines[i].getC_InvoiceLine_ID())
+					{
+						rLine.setC_InvoiceLine_ID(0);
+						rLine.saveEx(po.get_TrxName());
+					}
+					
+//					StringBuilder sql = new StringBuilder("UPDATE ")
+//							.append(MRecognitionLine.Table_Name)
+//							.append(" SET C_InvoiceLine_ID = null WHERE JP_RecognitionLine_ID=?");
+//						int no = DB.executeUpdate(sql.toString(), JP_RecognitionLine_ID, po.get_TrxName());
+//						if(no != 1)
+//							log.warning("#" + no + " - " + invoice.getDocumentInfo() + " : "+ iLines[i].getLine());
 				}
-			}
+			}//for
 		
 		}//Void
+		
+		if(timing == ModelValidator.TIMING_BEFORE_CLOSE)
+		{
+			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
+			if(JP_ContractContent_ID > 0 )
+			{
+				MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+				int JP_Contract_Acct_ID = content.getJP_Contract_Acct_ID();
+				if(JP_Contract_Acct_ID > 0)
+				{
+					MContractAcct acct = MContractAcct.get(Env.getCtx(), JP_Contract_Acct_ID);
+					if(acct.isPostingContractAcctJP() && acct.isPostingRecognitionDocJP() && 
+							acct.getJP_RecogToInvoicePolicy() != null && acct.getJP_RecogToInvoicePolicy().equals(MContractAcct.JP_RECOGTOINVOICEPOLICY_AfterRecognition))
+					{
+						int JP_Recognition_ID = po.get_ValueAsInt("JP_Recognition_ID");
+						MRecognition recog = new MRecognition(Env.getCtx(), JP_Recognition_ID , po.get_TrxName());
+						if(!recog.getDocStatus().equals(DocAction.STATUS_Closed))
+						{
+							//In case of Policy of Create Invoice From Recognition is After Recognition, You have to close Recognition Doc, before Invoice doc close.
+							String msg = Msg.getMsg(Env.getCtx(), "JP_AfterRecognition_InvoiceDocStatusCloseError");
+							return msg;
+						}
+					}
+					
+				}
+				
+			}
+			
+		}//Close
 		
 		return null;
 	}
@@ -363,6 +408,37 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			
 		}//Check Base Doc
 		
+		
+		if( type == ModelValidator.TYPE_AFTER_DELETE)
+		{
+			MInvoice invoice = (MInvoice)po;
+			int JP_Recognition_ID = invoice.get_ValueAsInt("JP_Recognition_ID");
+			if(JP_Recognition_ID > 0)
+			{
+				MRecognition recog = new MRecognition(Env.getCtx(),JP_Recognition_ID, po.get_TrxName());
+				if(recog.getC_Invoice_ID() == invoice.getC_Invoice_ID())
+				{
+					recog.setC_Invoice_ID(0);
+					recog.saveEx(po.get_TrxName());
+				}
+			}
+			
+			MInvoiceLine[] iLines = invoice.getLines();
+			for(int i = 0; i < iLines.length; i++)
+			{
+				int JP_RecognitionLine_ID = iLines[i].get_ValueAsInt("JP_RecognitionLine_ID");
+				if(JP_RecognitionLine_ID > 0)
+				{
+					MRecognitionLine rLine = new MRecognitionLine(Env.getCtx(),JP_RecognitionLine_ID, po.get_TrxName());
+					if(rLine.getC_InvoiceLine_ID() == iLines[i].getC_InvoiceLine_ID())
+					{
+						rLine.setC_InvoiceLine_ID(0);
+						rLine.saveEx(po.get_TrxName());
+					}
+				}
+			}//for
+		}
+		
 		return null;
 		
 	}
@@ -536,6 +612,23 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			
 			
 		}
+		
+		
+		if( type == ModelValidator.TYPE_AFTER_DELETE)
+		{
+			MInvoiceLine iLine = (MInvoiceLine)po;
+			int JP_RecognitionLine_ID = iLine.get_ValueAsInt("JP_RecognitionLine_ID");
+			if(JP_RecognitionLine_ID > 0)
+			{
+				MRecognitionLine rLine = new MRecognitionLine(Env.getCtx(),JP_RecognitionLine_ID, po.get_TrxName());
+				if(rLine.getC_InvoiceLine_ID() == iLine.getC_InvoiceLine_ID())
+				{
+					rLine.setC_InvoiceLine_ID(0);
+					rLine.saveEx(po.get_TrxName());
+				}
+			}
+			
+		}//TYPE_AFTER_DELETE
 		
 		return null;
 	}

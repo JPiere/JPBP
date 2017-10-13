@@ -1557,6 +1557,57 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		setDocAction(DOCACTION_None);
 
 		
+		//Sync Invoice
+		int JP_ContractContent_ID = getJP_ContractContent_ID();
+		if(JP_ContractContent_ID > 0 )
+		{
+			MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+			int JP_Contract_Acct_ID = content.getJP_Contract_Acct_ID();
+			if(JP_Contract_Acct_ID > 0)
+			{
+				MContractAcct acct = MContractAcct.get(Env.getCtx(), JP_Contract_Acct_ID);
+				if(acct.isPostingContractAcctJP() && acct.isPostingRecognitionDocJP() && 
+						acct.getJP_RecogToInvoicePolicy() != null && acct.getJP_RecogToInvoicePolicy().equals(MContractAcct.JP_RECOGTOINVOICEPOLICY_AfterRecognition))
+				{
+					int C_Invoice_ID = getC_Invoice_ID();
+					MInvoice invoice = new MInvoice(Env.getCtx(), C_Invoice_ID , get_TrxName());
+					if(invoice.getDocStatus().equals(DocAction.STATUS_Completed))
+					{
+						if(accrual)
+						{
+							invoice.processIt(DocAction.ACTION_Reverse_Accrual);
+						
+						}else if(!accrual){
+							
+							invoice.processIt(DocAction.ACTION_Reverse_Correct);	
+						}
+						
+					}else{
+						
+						if(!invoice.getDocStatus().equals(DocAction.ACTION_Complete))
+						{
+							invoice.processIt(DocAction.ACTION_Void);
+							
+						}else{
+							
+							if(MPeriod.isOpen(Env.getCtx(), invoice.getDateAcct(), invoice.getC_DocType().getDocBaseType(), invoice.getAD_Org_ID()))
+							{
+								invoice.processIt(DocAction.ACTION_Reverse_Correct);
+							}else{
+								invoice.processIt(DocAction.ACTION_Reverse_Accrual);
+							}
+							
+						}
+						
+					}
+					
+					invoice.saveEx(get_TrxName());
+				}
+				
+			}
+		}
+		
+		
 		return reversal;
 	}
 
