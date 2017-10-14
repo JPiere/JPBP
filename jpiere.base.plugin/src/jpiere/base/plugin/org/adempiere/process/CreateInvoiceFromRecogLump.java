@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
@@ -41,6 +42,8 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 	private String p_JP_ContractProcessTraceLevel = null;
 	
 	private MContractLog m_ContractLog = null;
+	
+	private IProcessUI processUI = null;
 	
 	@Override
 	protected void prepare() 
@@ -90,19 +93,22 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 		
 		m_ContractLog = new MContractLog(getCtx(), 0, get_TrxName());
 		m_ContractLog.setAD_PInstance_ID(getAD_PInstance_ID());
+		m_ContractLog.setJP_ContractProcessTraceLevel(p_JP_ContractProcessTraceLevel);
 		m_ContractLog.saveEx(get_TrxName());
 		int JP_ContractLog_ID = m_ContractLog.getJP_ContractLog_ID();
 		addBufferLog(0, null, null, Msg.getMsg(getCtx(), "JP_DetailLog")+" -> " + Msg.getElement(getCtx(), "JP_ContractLog_ID"), MContractLog.Table_ID, JP_ContractLog_ID);
+		
+		processUI = Env.getProcessUI(getCtx());
 	}
 	
 	@Override
 	protected String doIt() throws Exception 
 	{
 	
-		String msg = null;
-		
+		StringBuilder returnMsg = new StringBuilder("");
+		String processMsg = null;
 		try{
-			msg = createInvoice();
+			processMsg = createInvoice();
 		}catch (Exception e) {
 		
 			if(!p_IsRecordCommitJP)
@@ -112,7 +118,12 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 			;//noting to do;
 		}
 		
-		return msg;
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_CreateDocNum")).append(":").append(m_ContractLog.createDocNum).append(" / ");
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" / ");//Number of To Be Confirmed
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append("  ");//Number of errors
+		
+		return processMsg + " ( " + returnMsg.toString() + " ) ";
 	}
 	
 	private String createInvoice() throws Exception 
@@ -248,7 +259,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 						 isCreateInvoice = false;
 						//Inspite of Policy of Create Invoice From Recognition is Lump After Order All Recognized,	Order was invoiced partly. Please create Invoice by manually
 						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CouldNotCreateInvoiceForInvoicedPartly //C1
-								,oLines[i], Msg.getMsg(getCtx(), "JP_RecogToInvoicePolicy_Lump_Invoiced"),MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning);
+								,recogs[i], Msg.getMsg(getCtx(), "JP_RecogToInvoicePolicy_Lump_Invoiced"),MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning);
 						 break;
 					 }
 					 
@@ -260,7 +271,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 							 isCreateInvoice = false;
 							//Inspite of Policy of Create Invoice From Recognition is Lump After Order All Recognized,	Order was invoiced partly. Please create Invoice by manually
 							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CouldNotCreateInvoiceForInvoicedPartly //C1
-									,oLines[i], Msg.getMsg(getCtx(), "JP_RecogToInvoicePolicy_Lump_Invoiced"),MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning);
+									,rLines[j], Msg.getMsg(getCtx(), "JP_RecogToInvoicePolicy_Lump_Invoiced"),MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning);
 							 break;
 						}
 					}
@@ -289,13 +300,18 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 							 try{
 								 invoice.saveEx(get_TrxName());
 							 } catch (AdempiereException e) {
-								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, e.getMessage(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
 								 throw e;
 							 }finally {
 								 ;
 							 }
 							isCreateHeader = true;
-							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, invoice,null, null);
+							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, invoice, null, MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information);
+							m_ContractLog.createDocNum++;
+							if(processUI != null)
+							{
+								processUI.statusUpdate(Msg.getMsg(getCtx(), "JP_CreateDocNum") + " : " + (m_ContractLog.createDocNum));
+							}
 						 }
 						 
 						 recogs[i].setC_Invoice_ID(invoice.getC_Invoice_ID());
@@ -303,7 +319,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 						 try{
 							 recogs[i].saveEx(get_TrxName());
 						 } catch (AdempiereException e) {
-							 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, recogs[i], null, e.getMessage());
+							 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, recogs[i], e.getMessage(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
 							 throw e;
 						 }finally {
 							 ;
@@ -324,7 +340,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 							 try{
 								 iLine.saveEx(get_TrxName());
 							 } catch (AdempiereException e) {
-								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, e.getMessage(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
 								 throw e;
 							 }finally {
 								 ;
@@ -334,7 +350,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 							 try{
 								 rLines[j].saveEx(get_TrxName());
 							 } catch (AdempiereException e) {
-								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, rLines[j], null, e.getMessage());
+								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, rLines[j], e.getMessage(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
 								 throw e;
 							 }finally {
 								 ;
@@ -348,7 +364,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 						 
 						if(!invoice.processIt(p_DocAction))
 						{
-							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, invoice, null, invoice.getProcessMsg());
+							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, invoice, invoice.getProcessMsg(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
 							throw new AdempiereException(invoice.getProcessMsg());
 						}
 						 
@@ -357,7 +373,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 							 try{
 								 invoice.saveEx(get_TrxName());
 							 } catch (AdempiereException e) {
-								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, invoice, null, e.getMessage());
+								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, invoice, e.getMessage(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
 								 throw e;
 							 }finally {
 								 ;
@@ -396,6 +412,25 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 	
 	private void createContractLogDetail(String ContractLogMsg, PO po, String descriptionMsg, String JP_ContractProcessTraceLevel)
 	{
+		/** Count */
+		if(JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information))
+		{
+			;
+
+		}else if(JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed)){
+			
+			m_ContractLog.confirmNum++;
+			
+		}else if(JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning)){
+			
+			m_ContractLog.warnNum++;	
+			
+		}else if(JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error)){
+			
+			m_ContractLog.errorNum++;	
+			
+		}	
+		
 		
 		/** Check traceLevel */
 		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information))
@@ -466,6 +501,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 			logDetail.setC_Order_ID(recog.getC_Order_ID());	
 			logDetail.setM_InOut_ID(recog.getM_InOut_ID());	
 			logDetail.setJP_Recognition_ID(recog.getJP_Recognition_ID());	
+			logDetail.setC_Invoice_ID(recog.getC_Invoice_ID());
 			
 			MContractContent content = MContractContent.get(getCtx(), recog.getJP_ContractContent_ID());
 			logDetail.setJP_Contract_ID(content.getJP_Contract_ID());
@@ -478,12 +514,13 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 			logDetail.setM_InOutLine_ID(rLine.getM_InOutLine_ID());
 			logDetail.setJP_Recognition_ID(rLine.getJP_Recognition_ID());
 			logDetail.setJP_RecognitionLine_ID(rLine.getJP_RecognitionLine_ID());
+			logDetail.setC_InvoiceLine_ID(rLine.getC_InvoiceLine_ID());
 			
 			MContractContent content = MContractContent.get(getCtx(), rLine.getParent().getJP_ContractContent_ID());
 			logDetail.setJP_Contract_ID(content.getJP_Contract_ID());
 			logDetail.setJP_ContractContent_ID(content.getJP_ContractContent_ID());
 			
-			int JP_ContractLine_ID = rLine.get_ValueAsInt("JP_ContractLine_ID");
+			int JP_ContractLine_ID = rLine.getJP_ContractLine_ID();
 			if(JP_ContractLine_ID > 0)
 				logDetail.setJP_ContractLine_ID(JP_ContractLine_ID);
 			
