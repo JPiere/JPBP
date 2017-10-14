@@ -55,6 +55,7 @@ public class CreateInvoiceFromRecogManual extends SvrProcess {
 	private String p_DocAction = null;
 	
 	private MContractLog m_ContractLog = null;
+	private MOrder m_Order = null;
 	
 	@Override
 	protected void prepare() 
@@ -114,6 +115,24 @@ public class CreateInvoiceFromRecogManual extends SvrProcess {
 					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Warning, recogs[i], msg);
 					break;
 				}
+				
+				//Check Order
+				m_Order = new MOrder(getCtx(),  recogs[i].getC_Order_ID(), get_TrxName());
+				if(m_Order == null)
+				{
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, 
+							Msg.getElement(getCtx(), "C_Order_ID", m_Order.isSOTrx())+ "  " + Msg.getMsg(getCtx(), "JP_Null"));
+					break;
+				}
+				
+				if(!m_Order.getDocStatus().equals(DocAction.STATUS_Completed)
+						&& !m_Order.getDocStatus().equals(DocAction.STATUS_Closed))
+				{
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Warning, m_Order, Msg.getMsg(getCtx(), "Invalid") 
+								+ " : " + Msg.getElement(getCtx(), "DocStatus") + " - " + Msg.getElement(getCtx(), "C_Order_ID", m_Order.isSOTrx())+ "  " + m_Order.getDocumentNo());
+					break;
+				}
+				
 			}//if(i == 0)
 			
 			//Check Recog Doc Status
@@ -275,7 +294,16 @@ public class CreateInvoiceFromRecogManual extends SvrProcess {
 		logDetail.set_ValueNoCheck("AD_Table_ID", po.get_Table_ID());
 		logDetail.set_ValueNoCheck("Record_ID", po.get_ID());
 		
-		if(po.get_TableName().equals(MRecognition.Table_Name)){
+		if(po.get_TableName().equals(MOrder.Table_Name))
+		{
+			MOrder order = (MOrder)po;
+			logDetail.setC_Order_ID(order.getC_Order_ID());
+			
+			MContractContent content = MContractContent.get(getCtx(), order.get_ValueAsInt("JP_ContractContent_ID"));
+			logDetail.setJP_Contract_ID(content.getJP_Contract_ID());
+			logDetail.setJP_ContractContent_ID(content.getJP_ContractContent_ID());
+			
+		}else if(po.get_TableName().equals(MRecognition.Table_Name)){
 			
 			MRecognition recog = (MRecognition)po;
 			logDetail.setC_Order_ID(recog.getC_Order_ID());	
