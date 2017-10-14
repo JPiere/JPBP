@@ -148,9 +148,6 @@ public class CreateInvoiceFromRecogManual extends SvrProcess {
 					continue;
 				}
 				
-				//TODO 受注伝票の計上数量チェックを実装する？
-				//
-				
 				if(invoice == null)
 				{
 					int C_Order_ID = recogs[i].getC_Order_ID();
@@ -307,6 +304,15 @@ public class CreateInvoiceFromRecogManual extends SvrProcess {
 			if(JP_ContractLine_ID > 0)
 				logDetail.setJP_ContractLine_ID(JP_ContractLine_ID);
 			
+		}else if(po.get_TableName().equals(MInvoice.Table_Name)){
+			
+			MInvoice invoice = (MInvoice)po;
+			logDetail.setC_Order_ID(invoice.getC_Order_ID());	
+			logDetail.setC_Invoice_ID(invoice.getC_Invoice_ID());	
+			
+			MContractContent content = MContractContent.get(getCtx(), invoice.get_ValueAsInt("JP_ContractContent_ID"));
+			logDetail.setJP_Contract_ID(content.getJP_Contract_ID());
+			logDetail.setJP_ContractContent_ID(content.getJP_ContractContent_ID());
 		}
 		
 		logDetail.saveEx(get_TrxName());
