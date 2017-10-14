@@ -510,6 +510,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod) //B5
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDerivativeDocManually) //B6
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyOfContractLineIsZero) //B8
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped) //B9
 				){ 
 			
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information;
@@ -530,6 +531,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 			
 			m_ContractLog.warnNum++;
 			TraceLevel = MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning;
+			
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_Warning)){ //W9
 			
 			m_ContractLog.warnNum++;
@@ -537,7 +539,6 @@ public abstract class AbstractContractProcess extends SvrProcess
 			
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError)//Z1
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError) //Z2
-				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped) //Z9
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError)){ //ZZ
 			
 			m_ContractLog.errorNum++;

@@ -415,8 +415,8 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_SkippedForQtyToDeliver = "C2";
 	/** Skipped for Qty to Recognized = C3 */
 	public static final String JP_CONTRACTLOGMSG_SkippedForQtyToRecognized = "C3";
-	/** Skipped = Z9 */
-	public static final String JP_CONTRACTLOGMSG_Skipped = "Z9";
+	/** Skipped = B9 */
+	public static final String JP_CONTRACTLOGMSG_Skipped = "B9";
 	/** Warning = W9 */
 	public static final String JP_CONTRACTLOGMSG_Warning = "W9";
 	/** Set Contract Log Message.
