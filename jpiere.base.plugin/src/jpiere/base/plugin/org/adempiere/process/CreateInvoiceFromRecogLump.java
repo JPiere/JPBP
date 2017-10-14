@@ -1,3 +1,17 @@
+/******************************************************************************
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
+ *****************************************************************************/
+
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
@@ -29,6 +43,14 @@ import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
+
+/**
+ * JPIERE-0365 Create Invoice From Recognition
+ * 
+ * 
+ * @author h.hagiwara
+ *
+ */
 public class CreateInvoiceFromRecogLump extends SvrProcess {
 	
 	private Timestamp p_DateInvoiced = null;
@@ -335,7 +357,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 							PO.copyValues(rLines[j], iLine);
 							iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
 							iLine.setC_InvoiceLine_ID(0);
-							iLine.setAD_Org_ID(order.getAD_Org_ID());
+							iLine.setAD_Org_ID(invoice.getAD_Org_ID());
 							iLine.setLine(linecounter*10);
 							linecounter++;
 							iLine.setM_InOutLine_ID(rLines[j].getM_InOutLine_ID());
