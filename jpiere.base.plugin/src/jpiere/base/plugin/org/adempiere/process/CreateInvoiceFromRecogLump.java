@@ -129,28 +129,31 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 	private String createInvoice() throws Exception 
 	{
 		StringBuilder getContractContentSQL = new StringBuilder("");
+		getContractContentSQL.append("SELECT DISTINCT o.* FROM C_Order o "
+				+ " INNER JOIN C_OrderLine ol ON (o.C_Order_ID = ol.C_Order_ID)"
+				+ " INNER JOIN JP_ContractContent cc ON (o.JP_ContractContent_ID = cc.JP_ContractContent_ID)"
+				+ " INNER JOIN JP_Contract_Acct ca ON (cc.JP_Contract_Acct_ID = ca.JP_Contract_Acct_ID)"
+				+ " INNER JOIN JP_Contract c ON (c.JP_Contract_ID = cc.JP_Contract_ID)"
+				+ " WHERE o.AD_Client_ID = ?"	//1
+				+ " AND o.DocStatus in('CO','CL')"
+				+ " AND ol.QtyDelivered = ol.QtyOrdered "
+				+ " AND ol.QtyDelivered = ol.JP_QtyRecognized "
+				+ " AND ol.QtyDelivered <> ol.QtyInvoiced "//For Warning
+				+ " AND ca.JP_RecogToInvoicePolicy = 'LP' "//Lump
+				);
 		
 		if(p_IsSOTrx)
 		{
-			getContractContentSQL.append("SELECT DISTINCT o.* FROM C_Order o "
-					+ " INNER JOIN C_OrderLine ol ON (o.C_Order_ID = ol.C_Order_ID)"
-					+ " INNER JOIN JP_ContractContent cc ON (o.JP_ContractContent_ID = cc.JP_ContractContent_ID)"
-					+ " INNER JOIN JP_Contract_Acct ca ON (cc.JP_Contract_Acct_ID = ca.JP_Contract_Acct_ID)"
-					+ " INNER JOIN JP_Contract c ON (c.JP_Contract_ID = cc.JP_Contract_ID)"
-					+ " WHERE o.AD_Client_ID = ?"	//1
-					+ " AND o.DocStatus in('CO','CL')"
-					+ " AND ol.QtyDelivered = ol.QtyOrdered "
-					+ " AND ol.QtyDelivered = ol.JP_QtyRecognized "
-					+ " AND ol.QtyDelivered <> ol.QtyInvoiced "//For Warning
-					+ " AND ca.JP_RecogToInvoicePolicy = 'LP' "//Lump
-					+ " AND o.IsSOTrx='Y' "
-					);
-			
-			if(p_AD_Org_ID > 0)
-				getContractContentSQL.append(" AND o.AD_Org_ID = ? ");
-			if(p_JP_ContractCategory_ID > 0)
-				getContractContentSQL.append(" AND c.JP_ContractCategory_ID = ?");	
+			getContractContentSQL.append(" AND o.IsSOTrx='Y' ");	
+		}else{
+			getContractContentSQL.append(" AND o.IsSOTrx='N' ");	
 		}
+		
+		if(p_AD_Org_ID > 0)
+			getContractContentSQL.append(" AND o.AD_Org_ID = ? ");
+		if(p_JP_ContractCategory_ID > 0)
+			getContractContentSQL.append(" AND c.JP_ContractCategory_ID = ?");	
+		
 		
 		ArrayList<MOrder> orderList = new ArrayList<MOrder>();
 		PreparedStatement pstmt = null;
