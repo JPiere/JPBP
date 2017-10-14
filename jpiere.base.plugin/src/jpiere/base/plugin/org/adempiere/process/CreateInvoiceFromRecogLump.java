@@ -37,6 +37,9 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 	private int p_JP_ContractCategory_ID = 0;
 	private boolean p_IsSOTrx = true;
 	
+	private boolean p_IsRecordCommitJP = false;
+	private String p_JP_ContractProcessTraceLevel = null;
+	
 	private MContractLog m_ContractLog = null;
 	
 	@Override
@@ -71,6 +74,14 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 			}else if (name.equals("IsSOTrx")) {
 				
 				p_IsSOTrx = para[i].getParameterAsBoolean();
+			
+			}else if (name.equals("IsRecordCommitJP")){
+				
+				p_IsRecordCommitJP = para[i].getParameterAsBoolean();	
+			
+			}else if (name.equals("JP_ContractProcessTraceLevel")){			
+				
+				p_JP_ContractProcessTraceLevel = para[i].getParameterAsString();
 
 			}else {
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
@@ -86,6 +97,25 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 	
 	@Override
 	protected String doIt() throws Exception 
+	{
+	
+		String msg = null;
+		
+		try{
+			msg = createInvoice();
+		}catch (Exception e) {
+		
+			if(!p_IsRecordCommitJP)
+				throw e;
+			
+		}finally{
+			;//noting to do;
+		}
+		
+		return msg;
+	}
+	
+	private String createInvoice() throws Exception 
 	{
 		StringBuilder getContractContentSQL = new StringBuilder("");
 		
@@ -141,12 +171,12 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 			pstmt = null;
 		}
 		
-		//Create Invoice From Recognition
+		/** Create Invoice From Recognition*/
 		for(MOrder order : orderList)
 		{
 			boolean isCreateInvoice = true;
 			
-			//Check Order Line
+			/** Check Order Line */
 			MOrderLine[] oLines = order.getLines();
 			Object obj_QtyRecognized = null;
 			BigDecimal JP_QtyRecognized = Env.ZERO;
@@ -205,6 +235,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 			}//for i
 			
 			
+			/** Create Invoice */
 			if(isCreateInvoice)
 			{
 				 MRecognition[] recogs = getRecognitionByOrder(order.getC_Order_ID());
@@ -264,6 +295,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 								 ;
 							 }
 							isCreateHeader = true;
+							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, invoice,null, null);
 						 }
 						 
 						 recogs[i].setC_Invoice_ID(invoice.getC_Invoice_ID());
@@ -313,7 +345,13 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 					 
 					 if(invoice != null && p_DocAction != null)
 					 {
-						 invoice.processIt(p_DocAction);
+						 
+						if(!invoice.processIt(p_DocAction))
+						{
+							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, invoice, null, invoice.getProcessMsg());
+							throw new AdempiereException(invoice.getProcessMsg());
+						}
+						 
 						 if(!invoice.getDocStatus().equals(DocAction.ACTION_Complete))
 						 {
 							 try{
@@ -328,6 +366,9 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 					 }
 					 
 					 addBufferLog(0, null, null, invoice.getDocumentNo(), MInvoice.Table_ID, invoice.getC_Invoice_ID());
+					 
+					 if(p_IsRecordCommitJP)
+						 commitEx();
 					 
 				 }//if(isCreateInvoice)
 				 
@@ -355,6 +396,35 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 	
 	private void createContractLogDetail(String ContractLogMsg, PO po, String descriptionMsg, String JP_ContractProcessTraceLevel)
 	{
+		
+		/** Check traceLevel */
+		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information))
+		{
+			;//Noting to do. All create contract log.
+
+		}else if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed)){
+			
+			if(JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information))
+				return ;	
+			
+		}else if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning)){
+			
+			if(JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information)
+					|| JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed))
+				return ;	
+			
+		}else if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error)){
+			
+			if(JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information)
+					|| JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed)
+					|| JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning))
+				return ;	
+			
+		}else if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog)){
+			return ;
+		}
+		
+		
 		/** Create contract Log Detail */
 		MContractLogDetail logDetail = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
 		logDetail.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
