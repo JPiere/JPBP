@@ -13,6 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.compiere.acct.Fact;
@@ -602,7 +603,33 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		}
 		
 		
-		if( type == ModelValidator.TYPE_AFTER_DELETE)
+		if(type == ModelValidator.TYPE_BEFORE_NEW || 
+				type == ModelValidator.TYPE_BEFORE_CHANGE )
+		{
+			int JP_RecognitionLine_ID = po.get_ValueAsInt(MRecognitionLine.COLUMNNAME_JP_RecognitionLine_ID);
+			if(JP_RecognitionLine_ID > 0)
+			{
+				if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged(MRecognitionLine.COLUMNNAME_JP_RecognitionLine_ID))
+				{
+					MInvoiceLine iLine = (MInvoiceLine)po;
+					MRecognitionLine rLine = MRecognitionLine.get(Env.getCtx(), JP_RecognitionLine_ID);
+					BigDecimal rLine_QtyInvoiced = rLine.getQtyInvoiced();
+					BigDecimal iLine_QtyInvoiced = iLine.getQtyInvoiced();
+					if(rLine_QtyInvoiced.abs().compareTo(iLine_QtyInvoiced.abs()) == 0
+							|| iLine_QtyInvoiced.compareTo(Env.ZERO) == 0)
+					{
+						;//Noting to do
+					}else{
+						//Different Quantity between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "QtyInvoiced");
+						String msg1 = Msg.getElement(Env.getCtx(), "JP_RecognitionLine_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_QtyRecognized");
+						return Msg.getMsg(Env.getCtx(),"JP_DifferentQty",new Object[]{msg0,msg1});
+					}
+				}
+			}
+		}
+		
+		if(type == ModelValidator.TYPE_AFTER_DELETE)
 		{
 			MInvoiceLine iLine = (MInvoiceLine)po;
 			MInvoice invoice = iLine.getParent();

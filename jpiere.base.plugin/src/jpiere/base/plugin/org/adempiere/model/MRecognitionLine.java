@@ -40,6 +40,7 @@ import org.compiere.model.MTaxProvider;
 import org.compiere.model.MUOM;
 import org.compiere.model.Query;
 import org.compiere.model.Tax;
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -168,6 +169,30 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		super(ctx, rs, trxName);
 	}	//	MInvoiceLine
 
+	
+	
+	/**	Cache				*/
+	private static CCache<Integer,MRecognitionLine>	s_cache = new CCache<Integer,MRecognitionLine>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_RecognitionLine_ID id
+	 *	@return MRecognitionLine
+	 */
+	public static MRecognitionLine get (Properties ctx, int JP_RecognitionLine_ID)
+	{
+		Integer ii = new Integer (JP_RecognitionLine_ID);
+		MRecognitionLine retValue = (MRecognitionLine)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MRecognitionLine (ctx, JP_RecognitionLine_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_RecognitionLine_ID, retValue);
+		return retValue;
+	}	//	get
+	
+	
 	private int			m_M_PriceList_ID = 0;
 	private Timestamp	m_DateInvoiced = null;
 	private int			m_C_BPartner_ID = 0;
