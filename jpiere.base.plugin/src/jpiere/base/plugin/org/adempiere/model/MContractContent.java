@@ -637,7 +637,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		
 		//Check JP_BaseDocDocType_ID and DocBaseType
 		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
-				|| is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType))
+				|| is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType)
+				|| is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
 		{
 			MDocType docType = MDocType.get(getCtx(), getJP_BaseDocDocType_ID());
 			setIsSOTrx(docType.isSOTrx());
@@ -675,7 +676,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 						{
 							String msg1 = Msg.getMsg(getCtx(), "JP_ToBeConfirmed") + " - " + Msg.getElement(getCtx(),"JP_BaseDocDocType_ID") ;
 							String msg2 = Msg.getMsg(getCtx(), "JP_Null") + " - " + Msg.getElement(getCtx(),"C_DocTypeShipment_ID") ;
-							log.saveError("Error", Msg.getMsg(getCtx(), "JP_Null") + msg1 + " : " + msg2);
+							log.saveError("Error", msg1 + " : " + msg2);
 							return false;
 						}
 					}
