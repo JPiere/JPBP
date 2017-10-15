@@ -652,6 +652,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
 					setOrderType(docType.getDocSubTypeSO());
+					
 					if(getJP_CreateDerivativeDocPolicy() != null
 							&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
 					{
@@ -662,6 +663,32 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							//Base doc DocType that you selected is available When Create Derivative Doc policy is Manual.
 							log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
 													+ "  :  " + Msg.getMsg(getCtx(), "JP_BaseDocDocType_CreateDerivativeDocPolicy"));
+							return false;
+						}
+					}
+					
+					if(getJP_CreateDerivativeDocPolicy() != null
+							&& (getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+							|| getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)) )
+					{
+						if(docType.getC_DocTypeShipment_ID() == 0)
+						{
+							String msg1 = Msg.getMsg(getCtx(), "JP_ToBeConfirmed") + " - " + Msg.getElement(getCtx(),"JP_BaseDocDocType_ID") ;
+							String msg2 = Msg.getMsg(getCtx(), "JP_Null") + " - " + Msg.getElement(getCtx(),"C_DocTypeShipment_ID") ;
+							log.saveError("Error", Msg.getMsg(getCtx(), "JP_Null") + msg1 + " : " + msg2);
+							return false;
+						}
+					}
+					
+					if(getJP_CreateDerivativeDocPolicy() != null
+							&& (getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+							|| getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)) )
+					{
+						if(docType.getC_DocTypeInvoice_ID() == 0)
+						{
+							String msg1 = Msg.getMsg(getCtx(), "JP_ToBeConfirmed") + " - " + Msg.getElement(getCtx(),"JP_BaseDocDocType_ID") ;
+							String msg2 = Msg.getMsg(getCtx(), "JP_Null") + " - " + Msg.getElement(getCtx(),"C_DocTypeInvoice_ID") ;
+							log.saveError("Error", Msg.getMsg(getCtx(), "JP_Null") + msg1 + " : " + msg2);
 							return false;
 						}
 					}
@@ -720,8 +747,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							}
 						}
 					}
-					
 				}
+				
 			}else{
 				setJP_CreateDerivativeDocPolicy(null);
 			}
@@ -837,7 +864,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		
 		
 		//Check Contract Acct
-		if(newRecord || is_ValueChanged("DocBaseType") || is_ValueChanged("JP_CreateDerivativeDocPolicy") || is_ValueChanged("JP_Contract_Acct_ID") )
+		if(newRecord || is_ValueChanged("DocBaseType") || is_ValueChanged("JP_CreateDerivativeDocPolicy") || is_ValueChanged("JP_Contract_Acct_ID") || is_ValueChanged("JP_BaseDocDocType_ID") )
 		{
 			int JP_Contract_Acct_ID = getJP_Contract_Acct_ID();
 			if(JP_Contract_Acct_ID > 0)
@@ -860,6 +887,18 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 						//In case of create Invoice from Recognition at Contract Account Info, you must select Base Doc Doc Type that SO Sub Type is SO or WP.  
 						log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogToInvoice_SOorWP"));
 						return false;
+					}
+					
+					if(getJP_BaseDocDocType().getC_DocTypeShipment_ID() > 0)
+					{
+						MDocType shipDoc = MDocType.get(getCtx(), getJP_BaseDocDocType().getC_DocTypeShipment_ID());
+						if(shipDoc.get_ValueAsBoolean("IsCreateInvoiceJP"))
+						{
+							String msg1 = Msg.getMsg(getCtx(),"JP_ToBeConfirmed") + " - " + Msg.getElement(Env.getCtx(), "C_DocTypeShipment_ID");
+							String msg2 = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_RecogToInvoicePolicy"),Msg.getElement(Env.getCtx(), "IsCreateInvoiceJP")});
+							log.saveError("Error", msg1 + " : " + msg2);
+							return false;
+						}
 					}
 					
 					if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && getJP_CreateDerivativeDocPolicy() != null
