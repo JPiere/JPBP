@@ -603,16 +603,19 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		}
 		
 		
+		//Check Recognition Qty = Invoiced Qty
 		if(type == ModelValidator.TYPE_BEFORE_NEW || 
 				type == ModelValidator.TYPE_BEFORE_CHANGE )
 		{
 			int JP_RecognitionLine_ID = po.get_ValueAsInt(MRecognitionLine.COLUMNNAME_JP_RecognitionLine_ID);
 			if(JP_RecognitionLine_ID > 0)
 			{
-				if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged(MRecognitionLine.COLUMNNAME_JP_RecognitionLine_ID))
+				if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("QtyEntered")
+						|| po.is_ValueChanged("QtyInvoiced")
+						|| po.is_ValueChanged(MRecognitionLine.COLUMNNAME_JP_RecognitionLine_ID))
 				{
 					MInvoiceLine iLine = (MInvoiceLine)po;
-					MRecognitionLine rLine = MRecognitionLine.get(Env.getCtx(), JP_RecognitionLine_ID);
+					MRecognitionLine rLine = new MRecognitionLine(Env.getCtx(), JP_RecognitionLine_ID, po.get_TrxName());
 					BigDecimal rLine_QtyInvoiced = rLine.getQtyInvoiced();
 					BigDecimal iLine_QtyInvoiced = iLine.getQtyInvoiced();
 					if(rLine_QtyInvoiced.abs().compareTo(iLine_QtyInvoiced.abs()) == 0
@@ -627,8 +630,9 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}
 				}
 			}
-		}
+		}//Check Recognition Qty = Invoiced Qty
 		
+		//Delete Invoice Line Info at Recognition Line
 		if(type == ModelValidator.TYPE_AFTER_DELETE)
 		{
 			MInvoiceLine iLine = (MInvoiceLine)po;
