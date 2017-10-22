@@ -230,7 +230,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						}
 
 						//Check Contain Contract Period
-						if(content.getJP_ContractProcDate_To() == null)//TODO
+						if(content.getJP_ContractProcDate_To() == null)
 						{
 							if(content.getJP_ContractProcDate_From().compareTo(docContractProcPeriod.getEndDate()) <= 0)
 							{

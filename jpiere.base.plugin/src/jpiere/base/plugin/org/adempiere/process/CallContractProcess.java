@@ -573,8 +573,8 @@ public class CallContractProcess extends SvrProcess {
 			int i = 1;
 			pstmt.setInt (i++, getAD_Client_ID());	//1
 			pstmt.setInt(i++, procPeriod.getJP_ContractCalender_ID());	//2
-			pstmt.setTimestamp(i++, procPeriod.getEndDate());	//3	TODO
-			pstmt.setTimestamp(i++, procPeriod.getStartDate());	//4 TODO
+			pstmt.setTimestamp(i++, procPeriod.getEndDate());	//3
+			pstmt.setTimestamp(i++, procPeriod.getStartDate());	//4
 			if(p_AD_Org_ID > 0)
 				pstmt.setInt (i++, p_AD_Org_ID);			
 			if(p_JP_ContractCategory_ID > 0)
