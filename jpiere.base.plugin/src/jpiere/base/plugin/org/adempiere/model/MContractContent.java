@@ -816,7 +816,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 			
 			
-			if(getJP_ContractProcDate_To() != null)
+			if(getJP_ContractProcDate_To() != null && getParent().getJP_ContractPeriodDate_To() != null)
 			{
 				if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
 				{
