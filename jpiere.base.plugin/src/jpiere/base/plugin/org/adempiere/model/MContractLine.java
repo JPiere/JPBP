@@ -614,7 +614,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Lump_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_ID"));
@@ -646,7 +646,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_ID"));
@@ -677,7 +677,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_ID"));
@@ -762,7 +762,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Lump_InOut_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_ID"));
@@ -792,7 +792,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_InOut_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID"));
@@ -822,7 +822,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_InOut_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_ID"));
@@ -912,7 +912,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Lump_Inv_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_ID"));
@@ -941,7 +941,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_Inv_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID"));
@@ -971,7 +971,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_Inv_ID());
-					//TODO
+					
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_ID"));
@@ -1340,16 +1340,16 @@ public class MContractLine extends X_JP_ContractLine {
 		return true;
 	}
 
-	//TODO
+	
 	private boolean checkContainContractProcDate(MContractProcPeriod period)
 	{
-		if(getParent().getJP_ContractProcDate_To() == null)//TODO
+		if(getParent().getJP_ContractProcDate_To() == null)
 		{
-			if(getParent().getJP_ContractProcDate_From().compareTo(period.getEndDate()) > 0)
+			if(getParent().getJP_ContractProcDate_From().compareTo(period.getEndDate()) <= 0)
 			{
-				return false;
-			}else{
 				return true;
+			}else{
+				return false;
 			}
 		}else{
 			if(getParent().getJP_ContractProcDate_From().compareTo(period.getEndDate()) <= 0

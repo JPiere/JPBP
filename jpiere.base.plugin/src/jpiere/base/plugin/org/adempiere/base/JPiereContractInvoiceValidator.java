@@ -333,12 +333,12 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						//Check Contain Contract Period
 						if(content.getJP_ContractProcDate_To() == null)//TODO
 						{
-							if(content.getJP_ContractProcDate_From().compareTo(docContractProcPeriod.getEndDate()) > 0)
+							if(content.getJP_ContractProcDate_From().compareTo(docContractProcPeriod.getEndDate()) <= 0)
 							{
+								;//This is OK
+							}else{
 								//Outside the Contract Process Period.
 								return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-							}else{
-								;//Noting to do
 							}
 						}else{
 							if(content.getJP_ContractProcDate_From().compareTo(docContractProcPeriod.getEndDate()) <= 0
