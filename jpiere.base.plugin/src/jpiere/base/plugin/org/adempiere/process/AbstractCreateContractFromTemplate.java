@@ -154,32 +154,39 @@ public abstract class AbstractCreateContractFromTemplate extends SvrProcess {
 				contractContent.setJP_ContractProcDate_From(m_Contract.getJP_ContractPeriodDate_From());
 				
 			}else{
-				MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), m_Contract.getJP_ContractPeriodDate_From(), null, m_ContractContentTemplates[i].getJP_ContractProcPOffset());
-				contractContent.setJP_ContractProcDate_From(period.getStartDate());
+				if(contractContent.getJP_ContractCalender_ID() > 0)
+				{
+					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), m_Contract.getJP_ContractPeriodDate_From(), null, m_ContractContentTemplates[i].getJP_ContractProcPOffset());
+					contractContent.setJP_ContractProcDate_From(period.getStartDate());
+				}
 			}
 			
 			if(m_ContractContentTemplates[i].getJP_ContractProcPeriodNum()==0)
 			{
 				contractContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
 			}else{
-				MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From(), null, m_ContractContentTemplates[i].getJP_ContractProcPeriodNum());
-				if(m_Contract.getJP_ContractPeriodDate_To() == null)
+				
+				if(contractContent.getJP_ContractCalender_ID() > 0)
 				{
-					contractContent.setJP_ContractProcDate_To(period.getEndDate());
-					
-				}else{
-					
-					if(m_Contract.getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From(), null, m_ContractContentTemplates[i].getJP_ContractProcPeriodNum());
+					if(m_Contract.getJP_ContractPeriodDate_To() == null)
 					{
 						contractContent.setJP_ContractProcDate_To(period.getEndDate());
 						
 					}else{
 						
-						contractContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
+						if(m_Contract.getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+						{
+							contractContent.setJP_ContractProcDate_To(period.getEndDate());
+							
+						}else{
+							
+							contractContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
+						}
+						
 					}
-					
 				}
 			}
 			

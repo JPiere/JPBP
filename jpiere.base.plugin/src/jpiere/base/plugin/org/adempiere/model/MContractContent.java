@@ -781,7 +781,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
 		{
 			//Check JP_ContractProcDate_From
-			if(getJP_ContractProcDate_From() == null)
+			if(!newRecord && getJP_ContractProcDate_From() == null)
 			{
 				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcDate_From")};
 				String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
@@ -790,7 +790,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				
 			}else{
 				
-				if(getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 )
+				if(!newRecord && getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 )
 				{
 					log.saveError("Error",Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
 					return false;
