@@ -367,20 +367,22 @@ public class ContractStatusUpdate extends SvrProcess {
 			if(contents[i].getJP_ContractProcDate_To().compareTo(now_Timestamp) <= 0 )
 			{
 				JP_ConstractProcStatus_From = contents[i].getJP_ContractProcStatus();
-				contents[i].setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
-				contents[i].saveEx(get_TrxName());
-				
-				//Create Contract Log
-				MContractLogDetail contentLog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
-				contentLog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
-				contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdated);
-				contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
-				contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
-				contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
-				contentLog.setJP_ContractProcStatus_From(JP_ConstractProcStatus_From);
-				contentLog.setJP_ContractProcStatus_To(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
-				contentLog.saveEx( m_ContractLog.get_TrxName());
-				
+				if(!JP_ConstractProcStatus_From.equals(MContractContent.JP_CONTRACTPROCSTATUS_Processed))
+				{
+					contents[i].setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
+					contents[i].saveEx(get_TrxName());
+					
+					//Create Contract Log
+					MContractLogDetail contentLog = new MContractLogDetail(getCtx(), 0, m_ContractLog.get_TrxName());
+					contentLog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
+					contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdated);
+					contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+					contentLog.setJP_Contract_ID(contract.getJP_Contract_ID());
+					contentLog.setJP_ContractContent_ID(contents[i].getJP_ContractContent_ID());
+					contentLog.setJP_ContractProcStatus_From(JP_ConstractProcStatus_From);
+					contentLog.setJP_ContractProcStatus_To(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
+					contentLog.saveEx( m_ContractLog.get_TrxName());
+				}
 			}else{
 				
 				;//Nothing to do
