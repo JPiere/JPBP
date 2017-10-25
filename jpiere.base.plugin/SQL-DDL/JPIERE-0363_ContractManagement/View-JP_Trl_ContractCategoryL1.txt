@@ -1,0 +1,21 @@
+CREATE OR REPLACE VIEW adempiere.JP_Trl_ContractCategoryL1 AS
+
+SELECT t.AD_Language, t.JP_Trl_Name, t.JP_Trl_Description, a.* FROM adempiere.JP_ContractCategoryL1 a INNER JOIN
+(
+SELECT 
+    trl.JP_ContractCategoryL1_ID AS JP_ContractCategoryL1_ID
+    , trl.AD_Language AS AD_Language
+    , trl.Name AS JP_Trl_Name
+    , Trl.Description AS JP_Trl_Description
+ 
+ FROM adempiere.JP_ContractCategoryL1_Trl trl
+ 
+UNION ALL
+ 
+SELECT  
+    p.JP_ContractCategoryL1_ID AS JP_ContractCategoryL1_ID
+    ,(SELECT AD_Language FROM adempiere.AD_Language WHERE IsBaseLanguage = 'Y' ) AS AD_Language
+    ,p.Name AS JP_Trl_Name
+    ,p.Description AS JP_Trl_Description
+FROM adempiere.JP_ContractCategoryL1 p 
+) t ON (a.JP_ContractCategoryL1_ID = t.JP_ContractCategoryL1_ID) 

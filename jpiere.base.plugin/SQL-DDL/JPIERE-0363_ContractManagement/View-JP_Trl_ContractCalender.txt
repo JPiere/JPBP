@@ -1,0 +1,21 @@
+CREATE OR REPLACE VIEW adempiere.JP_Trl_ContractCalender AS
+
+SELECT t.AD_Language, t.JP_Trl_Name, t.JP_Trl_Description, a.* FROM adempiere.JP_ContractCalender a INNER JOIN
+(
+SELECT 
+    trl.JP_ContractCalender_ID AS JP_ContractCalender_ID
+    , trl.AD_Language AS AD_Language
+    , trl.Name AS JP_Trl_Name
+    , Trl.Description AS JP_Trl_Description
+ 
+ FROM adempiere.JP_ContractCalender_Trl trl
+ 
+UNION ALL
+ 
+SELECT  
+    p.JP_ContractCalender_ID AS JP_ContractCalender_ID
+    ,(SELECT AD_Language FROM adempiere.AD_Language WHERE IsBaseLanguage = 'Y' ) AS AD_Language
+    ,p.Name AS JP_Trl_Name
+    ,p.Description AS JP_Trl_Description
+FROM adempiere.JP_ContractCalender p 
+) t ON (a.JP_ContractCalender_ID = t.JP_ContractCalender_ID) 

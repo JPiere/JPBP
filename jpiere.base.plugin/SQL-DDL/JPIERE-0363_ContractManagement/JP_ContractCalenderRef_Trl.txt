@@ -14,6 +14,9 @@ CREATE TABLE adempiere.JP_ContractCalenderRef_Trl
   IsTranslated character(1) NOT NULL DEFAULT 'N'::bpchar,
   Name character varying(60) NOT NULL,
   Description character varying(255),
+    jp_contractcategory_id numeric(10,0) DEFAULT NULL::numeric,
+    jp_contractcontentt_id numeric(10,0) DEFAULT NULL::numeric,
+    jp_contractlinet_id numeric(10,0) DEFAULT NULL::numeric,
 
   CONSTRAINT JP_ContractCalenderRef_Trl_pkey PRIMARY KEY (JP_ContractCalenderRef_ID, AD_Language)
 );

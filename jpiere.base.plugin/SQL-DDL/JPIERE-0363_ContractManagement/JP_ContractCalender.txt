@@ -13,6 +13,9 @@ CREATE TABLE adempiere.JP_ContractCalender
   Value character varying(40) NOT NULL,
   Name character varying(120) NOT NULL,
   Description character varying(255),
+    jp_contractcategory_id numeric(10,0) DEFAULT NULL::numeric,
+    jp_contractcontent_id numeric(10,0) DEFAULT NULL::numeric,
+    jp_contractline_id numeric(10,0) DEFAULT NULL::numeric,
 
   CONSTRAINT JP_ContractCalender_pkey PRIMARY KEY (JP_ContractCalender_ID)
 )
