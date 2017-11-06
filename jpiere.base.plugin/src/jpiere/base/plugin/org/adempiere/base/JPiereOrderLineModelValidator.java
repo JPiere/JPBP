@@ -17,9 +17,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
-import jpiere.base.plugin.util.JPiereUtil;
-
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
@@ -35,10 +32,12 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.ProductCost;
 import org.compiere.process.DocAction;
-import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
+import jpiere.base.plugin.util.JPiereUtil;
 
 public class JPiereOrderLineModelValidator implements ModelValidator {
 
@@ -113,14 +112,14 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		{
 			String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
 			MOrderLine ol = (MOrderLine)po;
-			
+
 			if(ol.getM_Product_ID() != 0  && !config.equals("NO")
 					&& (type == ModelValidator.TYPE_BEFORE_NEW || ol.is_ValueChanged("M_Product_ID") || ol.is_ValueChanged("QtyOrdered") || ol.is_ValueChanged("JP_ScheduledCost") ) )
 			{
-				BigDecimal cost = (BigDecimal)ol.get_Value("JP_ScheduledCost");				
+				BigDecimal cost = (BigDecimal)ol.get_Value("JP_ScheduledCost");
 				if(cost == null)
 					cost = Env.ZERO;
-				
+
 				if( (cost.compareTo(Env.ZERO)==0 && type == ModelValidator.TYPE_BEFORE_NEW)
 						|| (type == ModelValidator.TYPE_BEFORE_CHANGE && ol.is_ValueChanged("M_Product_ID") && !ol.is_ValueChanged("JP_ScheduledCost")) )
 				{
@@ -130,24 +129,24 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 						setScheduledCost(ol);
 					else if(config.equals("PO") && !ol.getParent().isSOTrx())
 						setScheduledCost(ol);
-					
+
 					cost = (BigDecimal)ol.get_Value("JP_ScheduledCost");
 				}
-				
+
 				if(config.equals("BT"))//Both SO and PO
 					ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", cost.multiply(ol.getQtyOrdered()));
 				else if(config.equals("SO") && ol.getParent().isSOTrx())
 					ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", cost.multiply(ol.getQtyOrdered()));
 				else if(config.equals("PO") && !ol.getParent().isSOTrx())
 					ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", cost.multiply(ol.getQtyOrdered()));
-				
+
 			}else if(ol.getM_Product_ID() == 0){
 				ol.set_ValueNoCheck("JP_ScheduledCost", Env.ZERO);
 				ol.set_ValueNoCheck("JP_ScheduledCostLineAmt", Env.ZERO);
 			}
-			
+
 		}else if(type == ModelValidator.TYPE_AFTER_CHANGE){
-			
+
 			if(po.is_ValueChanged("JP_ScheduledCost"))
 			{
 				MOrderLine ol = (MOrderLine)po;
@@ -159,7 +158,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				if (no != 1)
 					return "Error";
 			}
-			
+
 		}//JPiere-0202
 
 		//JPIEERE-0207:Order Re-Activate Check
@@ -235,7 +234,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 							|| po.is_ValueChanged("JP_ASI_From_ID") || po.is_ValueChanged("JP_ASI_To_ID") || po.is_ValueChanged("M_Product_ID") )) )
 		{
 			MOrderLine oLine = (MOrderLine)po;
-			
+
 			//Check Stock Item.
 			if(oLine.getM_Product_ID() == 0 || !(oLine.getM_Product().getProductType().equals(MProduct.PRODUCTTYPE_Item) && oLine.getM_Product().isStocked()) )
 			{
@@ -245,13 +244,13 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				oLine.set_ValueNoCheck("JP_ASI_From_ID", null);
 				oLine.set_ValueNoCheck("JP_ASI_To_ID", null);
 			}
-			
+
 			int JP_LocatorFrom_ID = oLine.get_ValueAsInt("JP_LocatorFrom_ID");
-			
+
 			//Check Same Corporation Locator.
 			if(oLine.get_ValueAsInt("JP_LocatorFrom_ID") !=0 && (type == ModelValidator.TYPE_BEFORE_NEW ||po.is_ValueChanged("JP_LocatorFrom_ID")) )
 			{
-				
+
 				MLocator fromLocator =  MLocator.get(oLine.getCtx(), JP_LocatorFrom_ID);
 				MOrgInfo fromLocatorOrgInfo = MOrgInfo.get(oLine.getCtx(), fromLocator.getAD_Org_ID(), oLine.get_TrxName());
 				MOrgInfo lineOrgInfo = MOrgInfo.get(oLine.getCtx(), oLine.getAD_Org_ID(), oLine.get_TrxName());
@@ -260,11 +259,11 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMForDiffCorp");//You can not create Material Movement doc. Because of different corporation Locator.
 				}
 			}
-			
+
 			int JP_LocatorTo_ID = oLine.get_ValueAsInt("JP_LocatorTo_ID");
 			MDocType docType = MDocType.get(oLine.getCtx(), oLine.getParent().getC_DocTypeTarget_ID());
 			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
-			
+
 			//Check to Create MM Doc.
 			if(JP_DocTypeMM_ID > 0 && (JP_LocatorFrom_ID != 0 || JP_LocatorTo_ID !=0) )
 			{
@@ -298,26 +297,26 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		if( type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("JP_Locator_ID") || po.is_ValueChanged("QtyReserved")) )
 		{
 			MOrderLine oLine = (MOrderLine)po;
-			int now_Locator_ID = oLine.get_ValueAsInt("JP_Locator_ID"); 
+			int now_Locator_ID = oLine.get_ValueAsInt("JP_Locator_ID");
 			int old_Locator_ID = oLine.get_ValueOldAsInt("JP_Locator_ID");
 			Timestamp now_DateReserved  = (Timestamp)oLine.get_Value("JP_DateReserved");
 			Timestamp old_DateReserved  = (Timestamp)oLine.get_ValueOld("JP_DateReserved");
 			BigDecimal now_QtyReserved = (BigDecimal)oLine.getQtyReserved();
 			BigDecimal old_QtyReserved = (BigDecimal)oLine.get_ValueOld("QtyReserved");
-			
+
 			if(now_Locator_ID <= 0)
 			{
 				oLine.set_ValueNoCheck("JP_DateReserved", null);
-				
+
 			}else if(now_QtyReserved.compareTo(Env.ZERO) != 0) {
-				
+
 				if(now_DateReserved == null || old_Locator_ID != now_Locator_ID )
 				{
 					oLine.set_ValueNoCheck("JP_DateReserved", new Timestamp(Calendar.getInstance().getTimeInMillis()));
 				}
 			}
 		}//JPIERE-0334
-		
+
 		return null;
 	}
 
@@ -349,18 +348,15 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 	}//  getProductCosts
 
 	//JPIERE-0202
-	private static CCache<String, ProductCost> s_cache = new CCache<String, ProductCost>("OderLineCost", 1000, 10, true);
+	private ProductCost			m_productCost = null;
 
 	//JPIERE-0202
 	private ProductCost getProductCost(MOrderLine ol)
 	{
-		String key = ol.getM_Product_ID() + "-" +ol.getM_AttributeSetInstance_ID();
-		ProductCost	m_productCost = s_cache.get(key);
 		if(m_productCost == null)
 		{
 			m_productCost = new ProductCost (Env.getCtx(),
 						ol.getM_Product_ID(), ol.getM_AttributeSetInstance_ID(), ol.get_TrxName());
-			s_cache.put(key, m_productCost);
 		}
 		return m_productCost;
 	}	//	getProductCost
