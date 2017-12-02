@@ -614,7 +614,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Lump_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_ID"));
@@ -646,7 +646,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_ID"));
@@ -677,7 +677,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_ID"));
@@ -762,7 +762,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Lump_InOut_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_ID"));
@@ -792,7 +792,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_InOut_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID"));
@@ -822,7 +822,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_InOut_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_ID"));
@@ -860,6 +860,26 @@ public class MContractLine extends X_JP_ContractLine {
 			setJP_ProcPeriod_Lump_InOut_ID(0);
 			setJP_ProcPeriod_Start_InOut_ID(0);
 			setJP_ProcPeriod_End_InOut_ID(0);
+
+			MContractCalender inOut_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
+			MContractProcPeriod inOut_Start_ProcPeriod = inOut_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+			if(inOut_Start_ProcPeriod == null)
+			{
+				log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+						Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
+				return false;
+			}
+
+			if(getParent().getJP_ContractProcDate_To() != null)
+			{
+				MContractProcPeriod inout_End_ProcPeriod = inOut_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_To());
+				if(inout_End_ProcPeriod == null)
+				{
+					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+							Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+					return false;
+				}
+			}
 		}
 
 		if(!newRecord && getJP_ContractProcess_InOut_ID() == 0)
@@ -912,7 +932,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Lump_Inv_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_ID"));
@@ -941,7 +961,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_Inv_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID"));
@@ -971,7 +991,7 @@ public class MContractLine extends X_JP_ContractLine {
 				}else{
 
 					MContractProcPeriod period = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_Inv_ID());
-					
+
 					if(!checkContainContractProcDate(period))
 					{
 						log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_ID"));
@@ -1009,6 +1029,27 @@ public class MContractLine extends X_JP_ContractLine {
 			setJP_ProcPeriod_Lump_Inv_ID(0);
 			setJP_ProcPeriod_Start_Inv_ID(0);
 			setJP_ProcPeriod_End_Inv_ID(0);
+
+			MContractCalender inv_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
+			MContractProcPeriod inv_Start_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+			if(inv_Start_ProcPeriod == null)
+			{
+				log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+						Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID") + " - " +Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
+				return false;
+			}
+
+			if(getParent().getJP_ContractProcDate_To() != null)
+			{
+				MContractProcPeriod inv_End_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_To());
+				if(inv_End_ProcPeriod == null)
+				{
+					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+							Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+					return false;
+				}
+			}
+
 		}
 
 
@@ -1138,9 +1179,13 @@ public class MContractLine extends X_JP_ContractLine {
 					&&  getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0)
 				return true;
 
+			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
+
 			MContractProcPeriod inout_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_InOut_ID());
+			MContractProcPeriod order_Start_ProcPeriod_InOut = order_Calender.getContractProcessPeriod(getCtx(), inout_ProcPeriod.getStartDate());
 			MContractProcPeriod invoice_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_Inv_ID());
-			if(inout_ProcPeriod.getStartDate().compareTo(invoice_ProcPeriod.getStartDate()) != 0)
+			MContractProcPeriod order_Start_ProcPeriod_Inv = order_Calender.getContractProcessPeriod(getCtx(), invoice_ProcPeriod.getStartDate());
+			if(order_Start_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_Start_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
 				//Inconsistency Start Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
 				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyStartDateBetweenDerivativeDoc"));
@@ -1148,8 +1193,11 @@ public class MContractLine extends X_JP_ContractLine {
 			}
 
 			inout_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_InOut_ID());
+			MContractProcPeriod order_End_ProcPeriod_InOut = order_Calender.getContractProcessPeriod(getCtx(), inout_ProcPeriod.getEndDate());
 			invoice_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_Inv_ID());
-			if(inout_ProcPeriod.getEndDate().compareTo(invoice_ProcPeriod.getEndDate()) != 0)
+			MContractProcPeriod order_End_ProcPeriod_Inv = order_Calender.getContractProcessPeriod(getCtx(), invoice_ProcPeriod.getEndDate());
+
+			if(order_End_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_End_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
 				//Inconsistency End Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
 				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyEndDateBetweenDerivativeDoc"));
@@ -1162,9 +1210,13 @@ public class MContractLine extends X_JP_ContractLine {
 			if(newRecord && getJP_ProcPeriod_Start_InOut_ID()==0 && getJP_ProcPeriod_Start_Inv_ID()==0)//for copy process
 				return true;
 
+			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
+
 			MContractProcPeriod inout_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_InOut_ID());
+			MContractProcPeriod order_Start_ProcPeriod_InOut = order_Calender.getContractProcessPeriod(getCtx(), inout_ProcPeriod.getStartDate());
 			MContractProcPeriod invoice_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Start_Inv_ID());
-			if(inout_ProcPeriod.getStartDate().compareTo(invoice_ProcPeriod.getStartDate()) != 0)
+			MContractProcPeriod order_Start_ProcPeriod_Inv = order_Calender.getContractProcessPeriod(getCtx(), invoice_ProcPeriod.getStartDate());
+			if(order_Start_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_Start_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
 				//Inconsistency Start Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
 				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyStartDateBetweenDerivativeDoc"));
@@ -1176,9 +1228,14 @@ public class MContractLine extends X_JP_ContractLine {
 			if(newRecord &&  getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0)//for copy process
 				return true;
 
+			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
+
 			MContractProcPeriod inout_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_InOut_ID());
+			MContractProcPeriod order_End_ProcPeriod_InOut = order_Calender.getContractProcessPeriod(getCtx(), inout_ProcPeriod.getEndDate());
 			MContractProcPeriod invoice_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_End_Inv_ID());
-			if(inout_ProcPeriod.getEndDate().compareTo(invoice_ProcPeriod.getEndDate()) != 0)
+			MContractProcPeriod order_End_ProcPeriod_Inv = order_Calender.getContractProcessPeriod(getCtx(), invoice_ProcPeriod.getEndDate());
+
+			if(order_End_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_End_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
 				//Inconsistency End Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
 				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyEndDateBetweenDerivativeDoc"));
@@ -1187,44 +1244,7 @@ public class MContractLine extends X_JP_ContractLine {
 
 		}else if(getJP_DerivativeDocPolicy_InOut().equals("DD") && getJP_DerivativeDocPolicy_Inv().equals("DD")){
 
-			if(newRecord && getJP_ContractCalender_InOut_ID()==0 && getJP_ContractCalender_Inv_ID()==0)//for copy process
-				return true;
-
-			if( (getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_InOut_ID())
-					&& (getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_Inv_ID()) )
-			{
-				;//no check
-			}else{
-
-				//Check Start Date of First Contract Process Period
-				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
-				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-
-				MContractCalender inout_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
-				MContractProcPeriod inout_ProcPeriod = inout_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				if(order_ProcPeriod.getStartDate().compareTo(inout_ProcPeriod.getStartDate()) <= 0
-						&& order_ProcPeriod.getEndDate().compareTo(inout_ProcPeriod.getEndDate()) >= 0 )
-				{
-					;//this is OK
-				}else{
-					//It is necessary for the Contract Process period of Base Doc to include the Contract Process period of Derivative Doc.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ContractProcPeriodCorrespondenceError"));
-					return false;
-				}
-
-				MContractCalender invoice_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
-				MContractProcPeriod invoice_ProcPeriod = invoice_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				if(order_ProcPeriod.getStartDate().compareTo(invoice_ProcPeriod.getStartDate()) <= 0
-						&& order_ProcPeriod.getEndDate().compareTo(invoice_ProcPeriod.getEndDate()) >= 0 )
-				{
-					;//this is OK
-				}else{
-
-					//It is necessary for the Contract Process period of Base Doc to include the Contract Process period of Derivative Doc.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ContractProcPeriodCorrespondenceError"));
-					return false;
-				}
-			}
+			;//Noting to do;
 
 		}else{
 
@@ -1257,32 +1277,6 @@ public class MContractLine extends X_JP_ContractLine {
 				return false;
 			}
 
-		}else if(getJP_DerivativeDocPolicy_InOut().equals("DD")){
-
-			if(newRecord && getJP_ContractCalender_InOut_ID()==0)//for copy process
-				return true;
-
-			if(getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_InOut_ID())
-			{
-				;//no check
-			}else{
-
-				//Check Start Date of First Contract Process Period
-				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
-				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-
-				MContractCalender inout_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
-				MContractProcPeriod inout_ProcPeriod = inout_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				if(order_ProcPeriod.getStartDate().compareTo(inout_ProcPeriod.getStartDate()) <= 0
-						&& order_ProcPeriod.getEndDate().compareTo(inout_ProcPeriod.getEndDate()) >= 0 )
-				{
-					;//this is OK
-				}else{
-					//It is necessary for the Contract Process period of Base Doc to include the Contract Process period of Derivative Doc.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ContractProcPeriodCorrespondenceError"));
-				}
-
-			}
 		}
 
 		return true;
@@ -1308,39 +1302,12 @@ public class MContractLine extends X_JP_ContractLine {
 				return false;
 			}
 
-		}else if(getJP_DerivativeDocPolicy_Inv().equals("DD")){
-
-			if(newRecord && getJP_ContractCalender_Inv_ID()==0)//for copy process
-				return true;
-
-			if(getParent().getJP_ContractCalender_ID() == getJP_ContractCalender_Inv_ID())
-			{
-				;//no check
-			}else{
-
-				//Check Start Date of First Contract Process Period
-				MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
-				MContractProcPeriod order_ProcPeriod = order_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-
-				MContractCalender invoice_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
-				MContractProcPeriod invoice_ProcPeriod = invoice_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-				if(order_ProcPeriod.getStartDate().compareTo(invoice_ProcPeriod.getStartDate()) <= 0
-						&& order_ProcPeriod.getEndDate().compareTo(invoice_ProcPeriod.getEndDate()) >= 0 )
-				{
-					;//this is OK
-				}else{
-
-					//It is necessary for the Contract Process period of Base Doc to include the Contract Process period of Derivative Doc.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_ContractProcPeriodCorrespondenceError"));
-					return false;
-				}
-			}
 		}
 
 		return true;
 	}
 
-	
+
 	private boolean checkContainContractProcDate(MContractProcPeriod period)
 	{
 		if(getParent().getJP_ContractProcDate_To() == null)

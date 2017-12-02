@@ -60,17 +60,17 @@ import org.compiere.util.Util;
 public class MContractContent extends X_JP_ContractContent implements DocAction,DocOptions
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7588955558162632796L;
 
 
-	public MContractContent(Properties ctx, int JP_Contract_ID, String trxName) 
+	public MContractContent(Properties ctx, int JP_Contract_ID, String trxName)
 	{
 		super(ctx, JP_Contract_ID, trxName);
 	}
-	
-	public MContractContent(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractContent(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
@@ -114,20 +114,20 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		int m_docid = getJP_Contract_ID();
 		MQuery query = new MQuery(Table_Name);
 		query.addRestriction( COLUMNNAME_JP_Contract_ID, MQuery.EQUAL, new Integer(m_docid));
-	
+
 		// get Print Format
 		//int AD_PrintFormat_ID = 1000133;
 		//System.out.print(getC_DocTypeTarget_ID());
 		int AD_PrintFormat_ID = getC_DocType().getAD_PrintFormat_ID();
 		MPrintFormat pf = new  MPrintFormat(getCtx(), AD_PrintFormat_ID, get_TrxName());
-	
+
 		// set PrintInfo (temp)
 		PrintInfo info = new PrintInfo("0", 0, 0, 0);
-	
+
 		// Create ReportEngine
 		//ReportEngine re = ReportEngine.get(getCtx(), ReportEngine.JPE,  getJP_Estimation_ID(), get_TrxName());
 		ReportEngine re = new ReportEngine(getCtx(), pf, query, info);
-	
+
 		// For JaperReport
 		//System.out.print("PrintFormat: " + re.getPrintFormat().get_ID());
 		//MPrintFormat format = re.getPrintFormat();
@@ -150,7 +150,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		return re.getPDF(file);
 	}	//	createPDF
 
-	
+
 	/**************************************************************************
 	 * 	Process document
 	 *	@param processAction document action
@@ -162,7 +162,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		DocumentEngine engine = new DocumentEngine (this, getDocStatus());
 		return engine.processIt (processAction, getDocAction());
 	}	//	processIt
-	
+
 	/**	Process Message 			*/
 	private String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
@@ -170,7 +170,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 	/**
 	 * 	Unlock Document.
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean unlockIt()
 	{
@@ -178,10 +178,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setProcessing(false);
 		return true;
 	}	//	unlockIt
-	
+
 	/**
 	 * 	Invalidate Document
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean invalidateIt()
 	{
@@ -189,10 +189,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setDocAction(DOCACTION_Prepare);
 		return true;
 	}	//	invalidateIt
-	
+
 	/**
 	 *	Prepare Document
-	 * 	@return new status (In Progress or Invalid) 
+	 * 	@return new status (In Progress or Invalid)
 	 */
 	public String prepareIt()
 	{
@@ -200,7 +200,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
-		
+
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 
 		//	Std Period open?
@@ -209,7 +209,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			m_processMsg = "@PeriodClosed@";
 			return DocAction.STATUS_Invalid;
 		}
-		
+
 		//Check Lines
 		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
@@ -219,7 +219,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				m_processMsg = "@NoLines@";
 				return DocAction.STATUS_Invalid;
 			}
-			
+
 			for(int i = 0; i < lines.length; i++)
 			{
 				if(!lines[i].checkPeriodContractInfo(false))
@@ -229,9 +229,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					return DocAction.STATUS_Invalid;
 				}
 			}//for i
-			
+
 		}
-		
+
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -241,10 +241,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			setDocAction(DOCACTION_Complete);
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
-	
+
 	/**
 	 * 	Approve Document
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean  approveIt()
 	{
@@ -252,10 +252,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setIsApproved(true);
 		return true;
 	}	//	approveIt
-	
+
 	/**
 	 * 	Reject Approval
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean rejectIt()
 	{
@@ -263,7 +263,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setIsApproved(false);
 		return true;
 	}	//	rejectIt
-	
+
 	/**
 	 * 	Complete Document
 	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
@@ -284,15 +284,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
-		
-		
+
+
 		//Implicit Approval
 		if (!isApproved())
 			approveIt();
-		
+
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
-		
+
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (valid != null)
@@ -300,15 +300,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			m_processMsg = valid;
 			return DocAction.STATUS_Invalid;
 		}
-		
+
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
 		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend))
 			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
-		
+
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
-	
+
 	/**
 	 * 	Set the definite document number after completed
 	 */
@@ -317,7 +317,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (dt.isOverwriteDateOnComplete()) {
 			setDateAcct(new Timestamp (System.currentTimeMillis()));
 			MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
-			
+
 		}
 		if (dt.isOverwriteSeqOnComplete()) {
 			String value = null;
@@ -329,7 +329,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 		}
 	}
-	
+
 	public void setProcessed (boolean processed)
 	{
 		super.setProcessed (processed);
@@ -338,7 +338,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		StringBuilder set = new StringBuilder("SET Processed='")
 		.append((processed ? "Y" : "N"))
 		.append("' WHERE JP_ContractContent_ID=").append(getJP_ContractContent_ID());
-		
+
 		StringBuilder msgdb = new StringBuilder("UPDATE JP_ContractLine ").append(set);
 		int noLine = DB.executeUpdate(msgdb.toString(), get_TrxName());
 		m_lines = null;
@@ -349,7 +349,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	/**
 	 * 	Void Document.
 	 * 	Same as Close.
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean voidIt()
 	{
@@ -373,11 +373,11 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		return true;
 	}	//	voidIt
-	
+
 	/**
 	 * 	Close Document.
 	 * 	Cancel not delivered Qunatities
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean closeIt()
 	{
@@ -388,30 +388,30 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setDocAction(DOCACTION_None);
 		return true;
 	}	//	closeIt
-	
+
 	/**
 	 * 	Reverse Correction
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("reverseCorrectIt - " + toString());
 		return false;
 	}	//	reverseCorrectionIt
-	
+
 	/**
 	 * 	Reverse Accrual - none
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("reverseAccrualIt - " + toString());
 		return false;
 	}	//	reverseAccrualIt
-	
-	/** 
+
+	/**
 	 * 	Re-activate
-	 * 	@return true if success 
+	 * 	@return true if success
 	 */
 	public boolean reActivateIt()
 	{
@@ -436,8 +436,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		return true;
 	}	//	reActivateIt
-	
-	
+
+
 	/*************************************************************************
 	 * 	Get Summary
 	 *	@return Summary of Document
@@ -456,7 +456,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	{
 		return m_processMsg;
 	}	//	getProcessMsg
-	
+
 	/**
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID
@@ -475,10 +475,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		return getTotalLines();
 	}	//	getApprovalAmt
 
-	
+
 	@Override
 	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
-			int AD_Table_ID, String[] docAction, String[] options, int index) 
+			int AD_Table_ID, String[] docAction, String[] options, int index)
 	{
 		if(docStatus.equals(DocAction.STATUS_Completed))
 		{
@@ -502,7 +502,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	}
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) 
+	protected boolean beforeSave(boolean newRecord)
 	{
 		//Check - General Contract can not have Contract Content
 		if(newRecord)
@@ -512,7 +512,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_GeneralContractContent"));
 				return false;
 			}
-			
+
 			if(getParent().getDocStatus().equals(DocAction.STATUS_Closed) || getParent().getDocStatus().equals(DocAction.STATUS_Voided)
 					|| getParent().getDocStatus().equals(DocAction.STATUS_Reversed))
 			{
@@ -521,21 +521,21 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				return false;
 			}
 		}
-		
+
 		//For callout of Product in Line And Doc Date Management
 		if(newRecord || is_ValueChanged("DateDoc"))
 		{
 			setDateInvoiced(getDateDoc());
 			setDateOrdered(getDateDoc());
 		}
-		
-		
+
+
 		//Check overlap of Contract process date in Same contract content tempalete
 		MContract contract = getParent();
-		if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && 
+		if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) &&
 				( newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_From) ||  is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_To)))
 		{
-			
+
 			if(!getJP_ContractContentT().isOrverlapContractProcDateJP())
 			{
 				//Check overlap
@@ -545,15 +545,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					//Self
 					if(contractContents[i].getJP_ContractContent_ID() == getJP_ContractContent_ID())
 						continue;
-					
+
 					//Diff Template
 					if(contractContents[i].getJP_ContractContentT_ID() != getJP_ContractContentT_ID())
 						continue;
-					
+
 					//Invalid status
 					if(contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid))
 						continue;
-					
+
 					//Check
 					if(contractContents[i].getJP_ContractProcDate_To() != null &&  getJP_ContractProcDate_To() != null)
 					{
@@ -563,45 +563,45 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							//Overlap of Contract process date in same contract content template.
 							log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
 							return false;
-						}		
-					
+						}
+
 					}else if(contractContents[i].getJP_ContractProcDate_To() != null){
-						
+
 						if(contractContents[i].getJP_ContractProcDate_To().compareTo(getJP_ContractProcDate_From()) >= 0)
 						{
 							//overlap of Contract process date in Same contract content template
 							log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
 							return false;
-						}		
-							
+						}
+
 					}else if(getJP_ContractProcDate_To() != null){
-						
+
 						if(contractContents[i].getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) <= 0)
 						{
 							//overlap of Contract process date in Same contract content template
 							log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
 							return false;
 						}
-						
+
 					}else{ //contractContents[i].getJP_ContractProcDate_To() == null && getJP_ContractProcDate_To() == null
-						
+
 						//overlap of Contract process date in Same contract content template
 						log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapOfContractProcessDate"));
 						return false;
-						
+
 					}
-					
-				}//for			
+
+				}//for
 			}
-				
+
 
 		}//Check overlap of Contract process date in Same contract content tempalete
-		
-		
+
+
 		//Can not update for Not Unprocecced.
 		if(!getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
 		{
-			if(is_ValueChanged(MContractContent.COLUMNNAME_DocBaseType) 
+			if(is_ValueChanged(MContractContent.COLUMNNAME_DocBaseType)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_BaseDocDocType_ID)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractCalender_ID)
@@ -619,22 +619,22 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
 					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy));
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractCalender_ID))
-					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractCalender_ID));	
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractCalender_ID));
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcDate_From))
-					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractProcDate_From));	
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractProcDate_From));
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcess_ID))
 					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_ContractProcess_ID));
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_JP_Contract_Acct_ID))
-					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_Contract_Acct_ID));				
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_JP_Contract_Acct_ID));
 				else if(is_ValueChanged(MContractContent.COLUMNNAME_C_BPartner_ID))
-					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_C_BPartner_ID));	
-				
+					msg.append(" : ").append(Msg.getElement(getCtx(), MContractContent.COLUMNNAME_C_BPartner_ID));
+
 				log.saveError("Error", msg.toString());
 				return false;
 			}
 		}
-		
-		
+
+
 		//Check JP_BaseDocDocType_ID and DocBaseType
 		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
 				|| is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType)
@@ -642,18 +642,18 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		{
 			MDocType docType = MDocType.get(getCtx(), getJP_BaseDocDocType_ID());
 			setIsSOTrx(docType.isSOTrx());
-			
+
 			if(!getDocBaseType().equals(docType.getDocBaseType()))
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID));
 				return false;
-				
+
 			}else{
-				
+
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
 					setOrderType(docType.getDocSubTypeSO());
-					
+
 					if(getJP_CreateDerivativeDocPolicy() != null
 							&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
 					{
@@ -667,7 +667,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							return false;
 						}
 					}
-					
+
 					if(getJP_CreateDerivativeDocPolicy() != null
 							&& (getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
 							|| getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)) )
@@ -680,7 +680,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							return false;
 						}
 					}
-					
+
 					if(getJP_CreateDerivativeDocPolicy() != null
 							&& (getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
 							|| getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)) )
@@ -693,19 +693,19 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							return false;
 						}
 					}
-					
+
 				}else{
 					setOrderType("--");
 				}
-				
+
 			}
 		}
-		
-		
+
+
 		//Check JP_CreateDerivativeDocPolicy
 		if(newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_CreateDerivativeDocPolicy))
 		{
-			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) 
+			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
 					&& ( getDocBaseType().equals("SOO") || getDocBaseType().equals("POO") ) )
 			{
 				if(Util.isEmpty(getJP_CreateDerivativeDocPolicy()))
@@ -715,7 +715,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					log.saveError("Error",msg);
 					return false;
 				}
-				
+
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
 					if(!getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
@@ -730,7 +730,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							return false;
 						}
 					}
-					
+
 					if(getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)
 							||getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice) )
 					{
@@ -749,20 +749,20 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 						}
 					}
 				}
-				
+
 			}else{
 				setJP_CreateDerivativeDocPolicy(null);
 			}
-			
+
 		}
-		
-		
+
+
 		//Check JP_ContractCalender_ID
 		if(newRecord)
 		{
 			;//We can not check. because Create Contract content from template process can not set JP_ContractCalender_ID automatically.
 		}else{
-			
+
 			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
 			{
 				if(getJP_ContractCalender_ID() == 0)
@@ -772,11 +772,11 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					log.saveError("Error",msg);
 					return false;
 				}
-				
+
 			}
 		}
-		
-		
+
+
 		//Check Contract Process Period and Automatic Update
 		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
 		{
@@ -787,35 +787,34 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
 				log.saveError("Error",msg);
 				return false;
-				
+
 			}else{
-				
+
 				if(!newRecord && getJP_ContractProcDate_From().compareTo(getParent().getJP_ContractPeriodDate_From()) < 0 )
 				{
 					log.saveError("Error",Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
 					return false;
 				}
-				
 			}
-			
-			
+
+
 			//JP_ContractProcDate_To and isAutomaticUpdateJP())
 			if(getParent().isAutomaticUpdateJP())
 			{
 				setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
 
 			}else{
-				
+
 				if(isAutomaticUpdateJP())
 				{
 					//You can not Automatic update, because Contract document is not Automatic update.
 					log.saveError("Error",Msg.getMsg(getCtx(), "JP_IsAutomaticUpdateJP_UpdateError"));
 					return false;
 				}
-				
+
 			}
-			
-			
+
+
 			if(getJP_ContractProcDate_To() != null && getParent().getJP_ContractPeriodDate_To() != null)
 			{
 				if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
@@ -824,19 +823,42 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					return false;
 				}
 			}
-			
+
+			if(!newRecord && getJP_ContractCalender_ID() > 0)
+			{
+				MContractCalender base_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_ID());
+				MContractProcPeriod start_ProcPeriod = base_Calender.getContractProcessPeriod(getCtx(), getJP_ContractProcDate_From());
+				if(start_ProcPeriod == null)
+				{
+					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+							Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
+					return false;
+				}
+
+				if(getJP_ContractProcDate_To() != null)
+				{
+					MContractProcPeriod end_ProcPeriod = base_Calender.getContractProcessPeriod(getCtx(), getJP_ContractProcDate_To());
+					if(end_ProcPeriod == null)
+					{
+						log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+								Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+						return false;
+					}
+				}
+			}
+
 		}else{
 			setJP_ContractProcDate_From(null);
 			setJP_ContractProcDate_To(null);
 		}
-		
-		
+
+
 		//Check JP_ContractProcess_ID()
 		if(newRecord)
 		{
 			;//We can not check. because Create Contract content from template process can not set JP_ContractProcess_ID automatically.
 		}else{
-			
+
 			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
 				if(getJP_ContractProcess_ID() == 0)
@@ -846,11 +868,11 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					log.saveError("Error",msg);
 					return false;
 				}
-				
+
 			}else{
 				;//Noting to do.
 			}
-			
+
 			if(is_ValueChanged("JP_ContractProcess_ID"))
 			{
 				MContractProcess contractProcess = MContractProcess.get(getCtx(), getJP_ContractProcess_ID());
@@ -861,9 +883,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					return false;
 				}
 			}
-		}	
-		
-		
+		}
+
+
 		//Check Contract Acct
 		if(newRecord || is_ValueChanged("DocBaseType") || is_ValueChanged("JP_CreateDerivativeDocPolicy") || is_ValueChanged("JP_Contract_Acct_ID") || is_ValueChanged("JP_BaseDocDocType_ID") )
 		{
@@ -871,25 +893,25 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			if(JP_Contract_Acct_ID > 0)
 			{
 				MContractAcct acctInfo = MContractAcct.get(getCtx(), JP_Contract_Acct_ID);
-				
+
 				//Check - in case of Crate Invoice From Recognition
 				if(acctInfo.isPostingContractAcctJP() && acctInfo.isPostingRecognitionDocJP() && acctInfo.getJP_RecogToInvoicePolicy() != null
 						&& !acctInfo.getJP_RecogToInvoicePolicy().equals("NO"))
 				{
 					if(!getDocBaseType().equals("SOO") && !getDocBaseType().equals("POO"))
 					{
-						//In case of create Invoice from Recognition at Contract Account Info, you must select SOO or POO at Base Doc Type.  
+						//In case of create Invoice from Recognition at Contract Account Info, you must select SOO or POO at Base Doc Type.
 						log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogToInvoice_SOOorPOO"));
 						return false;
 					}
-					
+
 					if(!getJP_BaseDocDocType().getDocSubTypeSO().equals("SO") && !getJP_BaseDocDocType().getDocSubTypeSO().equals("WP"))
 					{
-						//In case of create Invoice from Recognition at Contract Account Info, you must select Base Doc Doc Type that SO Sub Type is SO or WP.  
+						//In case of create Invoice from Recognition at Contract Account Info, you must select Base Doc Doc Type that SO Sub Type is SO or WP.
 						log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogToInvoice_SOorWP"));
 						return false;
 					}
-					
+
 					if(getJP_BaseDocDocType().getC_DocTypeShipment_ID() > 0)
 					{
 						MDocType shipDoc = MDocType.get(getCtx(), getJP_BaseDocDocType().getC_DocTypeShipment_ID());
@@ -901,18 +923,18 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							return false;
 						}
 					}
-					
+
 					if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && getJP_CreateDerivativeDocPolicy() != null
 						&& !getJP_CreateDerivativeDocPolicy().equals("MA") &&  !getJP_CreateDerivativeDocPolicy().equals("IO"))
 					{
-						//In case of create Invoice from Recognition at Contract Account Info, you must select Manual or Create Ship/Recipt at Create Derivative Doc Policy.  
+						//In case of create Invoice from Recognition at Contract Account Info, you must select Manual or Create Ship/Recipt at Create Derivative Doc Policy.
 						log.saveError("Error", Msg.getMsg(getCtx(), "JP_RecogToInvoice_MAorIO"));
 						return false;
 					}
 				}
 			}//if(JP_Contract_Acct_ID > 0)
 		}//Check Contract Acct
-		
+
 		//Check Price List and IsSotrx
 		if(newRecord || is_ValueChanged("M_PriceList_ID") || is_ValueChanged("IsSOTrx"))
 		{
@@ -924,14 +946,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				return false;
 			}
 		}
-		
-		
+
+
 		return true;
 	}
-	
-	
+
+
 	@Override
-	protected boolean afterSave(boolean newRecord, boolean success) 
+	protected boolean afterSave(boolean newRecord, boolean success)
 	{
 		//	Sync Lines
 		if (   is_ValueChanged("AD_Org_ID")
@@ -957,31 +979,31 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				line.saveEx();
 			}
 		}
-		
+
 		return true;
 	}
 
 	//Cache parent
 	private MContract parent = null;
-	
+
 	public MContract getParent()
 	{
 		if(parent == null)
 		{
 			parent = new MContract(getCtx(), getJP_Contract_ID(), null);
 		}
-		
+
 		return parent;
 	}
-	
+
 	//Reset Parent Cache
 	public void setParent(MContract contract)
 	{
 			parent = contract;
 	}
-	
+
 	private MContractLine[] 	m_lines = null;
-	
+
 	public MContractLine[] getLines (String whereClause, String orderClause)
 	{
 		StringBuilder whereClauseFinal = new StringBuilder(MContractLine.COLUMNNAME_JP_ContractContent_ID+"=? ");
@@ -989,14 +1011,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			whereClauseFinal.append(whereClause);
 		if (orderClause.length() == 0)
 			orderClause = MContractLine.COLUMNNAME_Line;
-		
+
 		List<MContractLine> list = new Query(getCtx(), MContractLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
 										.setParameters(get_ID())
 										.setOrderBy(orderClause)
 										.list();
 
 		//
-		return list.toArray(new MContractLine[list.size()]);		
+		return list.toArray(new MContractLine[list.size()]);
 	}	//	getLines
 
 	public MContractLine[] getLines (boolean requery, String orderBy)
@@ -1020,11 +1042,11 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	{
 		return getLines(false, null);
 	}	//	getLines
-	
-	
+
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractContent>	s_cache = new CCache<Integer,MContractContent>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -1042,10 +1064,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			s_cache.put (JP_ContractContent_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param ctx
 	 * @param JP_ContractProcPeriod_ID
 	 * @return
@@ -1074,13 +1096,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
-		
+
+
 		MOrder[] orderes = new MOrder[list.size()];
 		list.toArray(orderes);
 		return orderes;
 	}
-	
+
 	public MInvoice[] getInvoiceByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
 	{
 		ArrayList<MInvoice> list = new ArrayList<MInvoice>();
@@ -1105,13 +1127,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
-		
+
+
 		MInvoice[] invoices = new MInvoice[list.size()];
 		list.toArray(invoices);
 		return invoices;
 	}
-	
+
 	public MInOut[] getInOutByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
 	{
 		ArrayList<MInOut> list = new ArrayList<MInOut>();
@@ -1136,13 +1158,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
-		
+
+
 		MInOut[] inOuts = new MInOut[list.size()];
 		list.toArray(inOuts);
 		return inOuts;
 	}
-	
+
 	public MRecognition[] getRecognitionByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
 	{
 		ArrayList<MRecognition> list = new ArrayList<MRecognition>();
@@ -1167,13 +1189,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
-		
+
+
 		MRecognition[] recog = new MRecognition[list.size()];
 		list.toArray(recog);
 		return recog;
 	}
-	
+
 	public MContractProcess[] getContractProcessDerivativeInOutByCalender(int JP_ContractCalender_ID)
 	{
 		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
@@ -1198,13 +1220,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
+
 		MContractProcess[] 	processes = new MContractProcess[list.size()];
 		list.toArray(processes);
 		return processes;
 	}
-	
-	
+
+
 	public MContractProcess[] getContractProcessDerivativeInvoiceByCalender(int JP_ContractCalender_ID)
 	{
 		ArrayList<MContractProcess> list = new ArrayList<MContractProcess>();
@@ -1229,15 +1251,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
+
 		MContractProcess[] 	processes = new MContractProcess[list.size()];
 		list.toArray(processes);
 		return processes;
 	}
-	
+
 	public int getPrecision()
 	{
 		return MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
 	}
-	
+
 }	//	MContractContent
