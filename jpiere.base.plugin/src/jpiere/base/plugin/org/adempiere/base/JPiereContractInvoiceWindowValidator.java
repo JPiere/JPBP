@@ -13,16 +13,15 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
-
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 
 public class JPiereContractInvoiceWindowValidator implements WindowValidator {
-	
+
 	@Override
-	public void onWindowEvent(WindowValidatorEvent event, Callback<Boolean> callback) 
+	public void onWindowEvent(WindowValidatorEvent event, Callback<Boolean> callback)
 	{
-		
+
 		if(event.getName().equals(WindowValidatorEventType.BEFORE_SAVE.getName()))
 		{
 			GridTab gridTab =event.getWindow().getADWindowContent().getActiveGridTab();
@@ -37,19 +36,19 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 					old_ContractProcPeriod_ID = 0;
 				else
 					old_ContractProcPeriod_ID = ((Integer)old_value).intValue();
-					
+
 				if(new_value == null)
 					new_ContractProcPeriod_ID = 0;
 				else
 					new_ContractProcPeriod_ID = ((Integer)new_value).intValue();
-				
+
 				int Record_ID = gridTab.getRecord_ID();
-				if(Record_ID > 0 && old_ContractProcPeriod_ID == new_ContractProcPeriod_ID)
+				if(Record_ID > 0 && (old_ContractProcPeriod_ID == 0 || old_ContractProcPeriod_ID == new_ContractProcPeriod_ID))
 				{
 					;//Notihg to do
-					
-				}else{	
-					
+
+				}else{
+
 					if(gridTab.getTabNo() == 0 && new_ContractProcPeriod_ID > 0)
 					{
 						Object obj_ContracContent_ID = gridTab.getValue("JP_ContractContent_ID");
@@ -57,7 +56,7 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 						{
 							;//Nothing to do
 						}else{
-							
+
 							int JP_ContractContent_ID = ((Integer)obj_ContracContent_ID).intValue();
 							MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
 							if(content.getDocBaseType().equals("API") || content.getDocBaseType().equals("ARI"))
@@ -69,7 +68,7 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 									{
 										continue;
 									}else{
-											
+
 										String docInfo = Msg.getElement(Env.getCtx(), "DocumentNo") + " : " + invoices[i].getDocumentNo();
 										String msg = docInfo + " " + Msg.getMsg(Env.getCtx(),"JP_DoYouConfirmIt");//Do you confirm it?
 										final MInvoice invoice = invoices[i];
@@ -83,7 +82,7 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 														AEnv.zoom(MInvoice.Table_ID, invoice.getC_Invoice_ID());
 													}
 												}
-											
+
 										};
 										FDialog.ask( event.getWindow().getADWindowContent().getWindowNo(), event.getWindow().getComponent(),Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID"), "JP_OverlapPeriod", msg, isZoom);
 										break;
@@ -92,7 +91,7 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 							}//Base Doc
 						}
 					}//gridTab.getTabNo() == 0
-					
+
 					else if(gridTab.getTabNo() == 1 && new_ContractProcPeriod_ID > 0)
 					{
 						Object obj_ContracLine_ID = gridTab.getValue("JP_ContractLine_ID");
@@ -109,7 +108,7 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 								{
 									continue;
 								}else{
-										
+
 									String docInfo = Msg.getElement(Env.getCtx(), "DocumentNo") + " : " + invoiceLines[i].getParent().getDocumentNo()
 														+" - " + Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID") + " : " + invoiceLines[i].getLine();
 									String msg = docInfo + " " + Msg.getMsg(Env.getCtx(),"JP_DoYouConfirmIt");//Do you confirm it?
@@ -124,7 +123,7 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 													AEnv.zoom(MInvoiceLine.Table_ID, invoiceLine.getC_InvoiceLine_ID());
 												}
 											}
-										
+
 									};
 									FDialog.ask( event.getWindow().getADWindowContent().getWindowNo(), event.getWindow().getComponent(),Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID"), "JP_OverlapPeriod", msg, isZoom);
 									break;
@@ -132,14 +131,14 @@ public class JPiereContractInvoiceWindowValidator implements WindowValidator {
 							}//for
 						}
 					}//gridTab.getTabNo() == 1
-					
-				}//Record_ID > 0 
-			
+
+				}//Record_ID > 0
+
 			}//if(gf_ContractProcPeriod_ID != null)
-			
+
 		}//BEFORE_SAVE
-		
+
 		callback.onCallback(true);
 	}
-	
+
 }
