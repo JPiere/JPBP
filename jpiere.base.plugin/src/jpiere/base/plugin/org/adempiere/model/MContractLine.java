@@ -1187,8 +1187,8 @@ public class MContractLine extends X_JP_ContractLine {
 			MContractProcPeriod order_Start_ProcPeriod_Inv = order_Calender.getContractProcessPeriod(getCtx(), invoice_ProcPeriod.getStartDate());
 			if(order_Start_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_Start_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
-				//Inconsistency Start Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
-				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyStartDateBetweenDerivativeDoc"));
+				//Inconsistency Start Contract Process Period between Contract Process Period(In/Out) and Contract Process Period(Invoice)
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyStartProcPeriodBetweenDerivativeDoc"));
 				return false;
 			}
 
@@ -1199,8 +1199,8 @@ public class MContractLine extends X_JP_ContractLine {
 
 			if(order_End_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_End_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
-				//Inconsistency End Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
-				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyEndDateBetweenDerivativeDoc"));
+				//Inconsistency End Contract Process Period between Contract Process Period(In/Out) and Contract Process Period(Invoice).
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyEndProcPeriodBetweenDerivativeDoc"));
 				return false;
 			}
 
@@ -1218,8 +1218,8 @@ public class MContractLine extends X_JP_ContractLine {
 			MContractProcPeriod order_Start_ProcPeriod_Inv = order_Calender.getContractProcessPeriod(getCtx(), invoice_ProcPeriod.getStartDate());
 			if(order_Start_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_Start_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
-				//Inconsistency Start Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
-				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyStartDateBetweenDerivativeDoc"));
+				//Inconsistency Start Contract Process Period between Contract Process Period(In/Out) and Contract Process Period(Invoice)
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyStartProcPeriodBetweenDerivativeDoc"));
 				return false;
 			}
 
@@ -1237,8 +1237,8 @@ public class MContractLine extends X_JP_ContractLine {
 
 			if(order_End_ProcPeriod_InOut.getJP_ContractProcPeriod_ID() != order_End_ProcPeriod_Inv.getJP_ContractProcPeriod_ID())
 			{
-				//Inconsistency End Date between Contract Process Period(In/Out) and Contract Process Period(Invoice)
-				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyEndDateBetweenDerivativeDoc"));
+				//Inconsistency End Contract Process Period between Contract Process Period(In/Out) and Contract Process Period(Invoice).
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_InconsistencyEndProcPeriodBetweenDerivativeDoc"));
 				return false;
 			}
 
