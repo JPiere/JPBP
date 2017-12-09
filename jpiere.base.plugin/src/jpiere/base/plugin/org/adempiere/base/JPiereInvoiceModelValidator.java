@@ -13,8 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
-import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
-import jpiere.base.plugin.util.JPierePaymentTerms;
+import java.sql.Timestamp;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
@@ -26,6 +25,9 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
+import jpiere.base.plugin.util.JPierePaymentTerms;
 
 public class JPiereInvoiceModelValidator implements ModelValidator {
 
@@ -106,7 +108,8 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
-		if(timing ==  ModelValidator.TIMING_BEFORE_PREPARE)//JPIERE-0295
+		//JPIERE-0295
+		if(timing ==  ModelValidator.TIMING_BEFORE_PREPARE)
 		{
 			if(po instanceof MInvoiceJP)
 			{
@@ -114,7 +117,44 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 				inv.explodeBOM();
 			}
 		}
-		
+
+		MInvoice invoice = (MInvoice)po;
+		MPaymentTerm paymentTerm = new MPaymentTerm(Env.getCtx(),invoice.getC_PaymentTerm_ID(),null);
+
+
+		//JPIERE-0368
+		if(timing ==  ModelValidator.TIMING_BEFORE_PREPARE)
+		{
+			if(invoice.isSOTrx())
+			{
+				Object obj_AR_ClosingDate= paymentTerm.get_Value("JP_AR_ClosingDate");
+				if(obj_AR_ClosingDate != null)
+				{
+					Timestamp JP_AR_ClosingDate = (Timestamp)obj_AR_ClosingDate;
+					if(invoice.getDateInvoiced().compareTo(JP_AR_ClosingDate) <= 0
+							|| invoice.getDateAcct().compareTo(JP_AR_ClosingDate) <= 0)
+					{
+						//Closing Date By Payment Term
+						return Msg.getMsg(po.getCtx(), "JP_PaymentTerm_ClosingDate");
+					}
+				}
+
+			}else {
+
+				Object obj_AP_ClosingDate= paymentTerm.get_Value("JP_AP_ClosingDate");
+				if(obj_AP_ClosingDate != null)
+				{
+					Timestamp JP_AP_ClosingDate = (Timestamp)obj_AP_ClosingDate;
+					if(invoice.getDateInvoiced().compareTo(JP_AP_ClosingDate) <= 0
+							|| invoice.getDateAcct().compareTo(JP_AP_ClosingDate) <= 0)
+					{
+						//Closing Date By Payment Term
+						return Msg.getMsg(po.getCtx(), "JP_PaymentTerm_ClosingDate");
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 
