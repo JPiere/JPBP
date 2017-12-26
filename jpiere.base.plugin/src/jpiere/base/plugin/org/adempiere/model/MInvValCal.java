@@ -508,7 +508,7 @@ public class MInvValCal extends X_JP_InvValCal implements DocAction, DocOptions
 		MInvValCal beginInvValCal = new Query(Env.getCtx(), MInvValCal.Table_Name, whereClause, null)
 								.setParameters(invValCal.getJP_LastDateValue(), invValCal.getJP_InvValProfile_ID(), invValCal.getAD_Org_ID())
 								.setOrderBy(orderClause)
-								.firstOnly();
+								.first();
 
 		return beginInvValCal;
 	}
