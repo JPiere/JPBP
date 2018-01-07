@@ -18,9 +18,6 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
-import jpiere.base.plugin.util.JPiereUtil;
-
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.compiere.model.MAcctSchema;
@@ -44,11 +41,14 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
+import jpiere.base.plugin.util.JPiereUtil;
+
 public class MEstimationLine extends X_JP_EstimationLine {
-	
+
 	/** Parent					*/
 	protected MEstimation			m_parent = null;
-	
+
 	protected int 			m_M_PriceList_ID = 0;
 	//
 	protected boolean			m_IsSOTrx = true;
@@ -57,23 +57,23 @@ public class MEstimationLine extends X_JP_EstimationLine {
 
 	/** Tax							*/
 	protected MTax 		m_tax = null;
-	
+
 	/** Cached Currency Precision	*/
 	protected Integer			m_precision = null;
 	/**	Product					*/
 	protected MProduct 		m_product = null;
 	/**	Charge					*/
 	protected MCharge 		m_charge = null;
-	
+
 	public MEstimationLine(Properties ctx, int JP_EstimationLine_ID, String trxName) {
 		super(ctx, JP_EstimationLine_ID, trxName);
 	}
-	
+
 	public MEstimationLine(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
-	
-	
+
+
 	public MEstimationLine (MEstimation estimation)
 	{
 		this (estimation.getCtx(), 0, estimation.get_TrxName());
@@ -82,23 +82,23 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		setJP_Estimation_ID (estimation.getJP_Estimation_ID());	//	parent
 		setEstimation(estimation);
 	}	//	MOrderLine
-	
+
 
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
 		//	Get Defaults from Parent
 		if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0
-			|| getM_Warehouse_ID() == 0 
+			|| getM_Warehouse_ID() == 0
 			|| getC_Currency_ID() == 0)
 			setEstimation(getParent());
 		if (m_M_PriceList_ID == 0)
 			setHeaderInfo(getParent());
-		
+
 		//	Charge
 		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
 				setM_Product_ID(0);
-		
+
 		//No Product
 		if (getM_Product_ID() == 0)
 			setM_AttributeSetInstance_ID(0);
@@ -106,7 +106,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		else	//	Set/check Product Price
 		{
 			//	Set Price if Actual = 0
-			if (m_productPrice == null 
+			if (m_productPrice == null
 				&&  Env.ZERO.compareTo(getPriceActual()) == 0
 				&&  Env.ZERO.compareTo(getPriceList()) == 0)
 				setPrice();
@@ -122,7 +122,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			if (enforce && getPriceLimit() != Env.ZERO
 			  && getPriceActual().compareTo(getPriceLimit()) < 0)
 			{
-				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
+				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit());
 				return false;
 			}
 			//
@@ -131,10 +131,10 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				throw new ProductNotOnPriceListException(m_productPrice, getLine());
 			}
 		}
-		
+
 		//	UOM
-		if (getC_UOM_ID() == 0 
-			&& (getM_Product_ID() != 0 
+		if (getC_UOM_ID() == 0
+			&& (getM_Product_ID() != 0
 				|| getPriceEntered().compareTo(Env.ZERO) != 0
 				|| getC_Charge_ID() != 0))
 		{
@@ -147,8 +147,8 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			setQtyEntered(getQtyEntered());
 		if (newRecord || is_ValueChanged("QtyOrdered"))
 			setQtyOrdered(getQtyOrdered());
-		
-		
+
+
 		//Tax Calculation
 		if(newRecord || is_ValueChanged("LineNetAmt") || is_ValueChanged("C_Tax_ID"))
 		{
@@ -160,28 +160,40 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			}else{
 
 				IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+				//JPIERE-0369:Start
+				boolean isTaxIncluded = isTaxIncluded();
+				if(getC_Charge_ID() != 0)
+				{
+					MCharge charge = MCharge.get(getCtx(), getC_Charge_ID());
+					if(!charge.isSameTax())
+					{
+						isTaxIncluded = charge.isTaxIncluded();
+					}
+				}
+				//JPiere-0369:finish
+
 				if(taxCalculater != null)
 				{
-					taxAmt = taxCalculater.calculateTax(m_tax, getLineNetAmt(), isTaxIncluded()
+					taxAmt = taxCalculater.calculateTax(m_tax, getLineNetAmt(), isTaxIncluded //JPIERE-0369
 							, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID())
 							, JPiereTaxProvider.getRoundingMode(getParent().getC_BPartner_ID(), getParent().isSOTrx(), m_tax.getC_TaxProvider()));
 				}else{
-					taxAmt = m_tax.calculateTax(getLineNetAmt(), isTaxIncluded(), MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID()));
+					taxAmt = m_tax.calculateTax(getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID()));//JPIERE-0369
 				}
-	
-				if(isTaxIncluded())
+
+				if(isTaxIncluded)//JPIERE-0369
 				{
 					set_ValueNoCheck("JP_TaxBaseAmt",  getLineNetAmt().subtract(taxAmt));
 				}else{
 					set_ValueNoCheck("JP_TaxBaseAmt",  getLineNetAmt());
 				}
-	
+
 				set_ValueOfColumn("JP_TaxAmt", taxAmt);
-				
+
 			}
 		}//Tax Calculation
-		
-		
+
+
 		//Check UOM
 		if(getM_Product_ID() > 0 && (newRecord || is_ValueChanged("M_Product_ID") || is_ValueChanged("C_UOM_ID")))
 		{
@@ -198,22 +210,22 @@ public class MEstimationLine extends X_JP_EstimationLine {
 					break;
 				}
 			}
-				
+
 			if(!isOK)
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "NoUOMConversion"));
 				return false;
 			}
-			
+
 		}
-		
-		
+
+
 		//JPIERE-0202:Set Cost to Estimation Line
 		String config = MSysConfig.getValue("JPIERE_SET_COST_TO_ORDER-LINE", "NO", Env.getAD_Client_ID(Env.getCtx()));
-		if(getM_Product_ID() != 0 && !config.equals("NO") 
+		if(getM_Product_ID() != 0 && !config.equals("NO")
 				&& (newRecord || is_ValueChanged("M_Product_ID") || is_ValueChanged("QtyOrdered") || is_ValueChanged("JP_ScheduledCost")) )
 		{
-			
+
 			BigDecimal cost = getJP_ScheduledCost();
 			if( (newRecord && cost.compareTo(Env.ZERO)==0)
 					|| (!newRecord && is_ValueChanged("M_Product_ID") && !is_ValueChanged("JP_ScheduledCost") ) )
@@ -224,24 +236,24 @@ public class MEstimationLine extends X_JP_EstimationLine {
 					setScheduledCost();
 				else if(config.equals("PO") && !getParent().isSOTrx())
 					setScheduledCost();
-				
+
 				cost = getJP_ScheduledCost();
 			}
-			
+
 			if(config.equals("BT"))//Both SO and PO
 				setJP_ScheduledCostLineAmt(cost.multiply(getQtyOrdered()));
 			else if(config.equals("SO") && getParent().isSOTrx())
 				setJP_ScheduledCostLineAmt(cost.multiply(getQtyOrdered()));
 			else if(config.equals("PO") && !getParent().isSOTrx())
 				setJP_ScheduledCostLineAmt(cost.multiply(getQtyOrdered()));
-			
+
 		}else if(getM_Product_ID() == 0){
 			setJP_ScheduledCost(Env.ZERO);
 			setJP_ScheduledCostLineAmt(Env.ZERO);
 		}
 		//JPiere-0202
-		
-		
+
+
 		//IDEMPIERE-178 Orders and Invoices must disallow amount lines without product/charge
 		if (getParent().getC_DocTypeTarget().isChargeOrProductMandatory()) {
 			if (getC_Charge_ID() == 0 && getM_Product_ID() == 0 && getPriceEntered().signum() != 0) {
@@ -249,10 +261,10 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				return false;
 			}
 		}
-		
-		
+
+
 		//JPIERE-0227
-		if(getJP_LocatorFrom_ID() != 0 && (newRecord || is_ValueChanged("JP_LocatorFrom_ID"))) 
+		if(getJP_LocatorFrom_ID() != 0 && (newRecord || is_ValueChanged("JP_LocatorFrom_ID")))
 		{
 			MLocator fromLocator =  MLocator.get(getCtx(), getJP_LocatorFrom_ID());
 			MOrgInfo fromLocatorOrgInfo = MOrgInfo.get(getCtx(), fromLocator.getAD_Org_ID(), get_TrxName());
@@ -262,7 +274,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMForDiffCorp"));//You can not create Material Movement doc. Because of different corporation Locator.
 				return false;
 			}
-			
+
 			MDocType docType = MDocType.get(getCtx(), getParent().getJP_DocTypeSO_ID());
 			int JP_DocTypeMM_ID = docType.get_ValueAsInt("JP_DocTypeMM_ID");
 			if(JP_DocTypeMM_ID > 0 && (getJP_LocatorFrom_ID() != 0 || getJP_LocatorTo_ID() !=0) )
@@ -273,7 +285,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 					log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorTo_ID")) ;//Please input a value into the field.
 					return false;
 				}
-				
+
 				if(getJP_LocatorFrom_ID() == 0 && getJP_LocatorTo_ID() > 0)
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_PleaseInputToField")+Msg.getElement(Env.getCtx(), "JP_LocatorFrom_ID")) ;//Please input a value into the field.
@@ -284,7 +296,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_SameLocatorMM"));//You are goring to create Inventory Move Doc at same Locator.
 					return false;
 				}
-				
+
 				if(!MLocator.get(getCtx(), getJP_LocatorFrom_ID()).get_Value("JP_PhysicalWarehouse_ID").equals(MLocator.get(getCtx(), getJP_LocatorTo_ID()).get_Value("JP_PhysicalWarehouse_ID")))
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDiffPhyWH"));//You can not create Inventory move doc at Sales Order because of different Physical Warehouse.
@@ -300,9 +312,9 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				}
 			}
 		}
-		
-		
-		
+
+
+
 		return true;
 	}
 
@@ -319,7 +331,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			throw new IllegalStateException("PriceList unknown!");
 		setPrice (m_M_PriceList_ID);
 	}
-	
+
 	/**
 	 * 	Set Price for Product and PriceList
 	 * 	@param M_PriceList_ID price list
@@ -340,14 +352,14 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		else
 			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
 				.divide(getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP)));	//	recision
-		
+
 		//	Calculate Discount
 		setDiscount(m_productPrice.getDiscount());
 		//	Set UOM
 		setC_UOM_ID(m_productPrice.getC_UOM_ID());
 	}	//	setPrice
-	
-	
+
+
 	/**
 	 * 	Get and calculate Product Pricing
 	 *	@param M_PriceList_ID id
@@ -355,7 +367,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	 */
 	protected MProductPricing getProductPricing (int M_PriceList_ID)
 	{
-		m_productPrice = new MProductPricing (getM_Product_ID(), 
+		m_productPrice = new MProductPricing (getM_Product_ID(),
 			getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx);
 		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
 		m_productPrice.setPriceDate(getDateOrdered());
@@ -363,10 +375,10 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		m_productPrice.calculatePrice();
 		return m_productPrice;
 	}	//	getProductPrice
-	
-	
+
+
 	/**
-	 * 	Set Qty Entered - enforce entered UOM 
+	 * 	Set Qty Entered - enforce entered UOM
 	 *	@param QtyEntered
 	 */
 	public void setQtyEntered (BigDecimal QtyEntered)
@@ -378,8 +390,8 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		}
 		super.setQtyEntered (QtyEntered);
 	}	//	setQtyEntered
-	
-	
+
+
 	/**
 	 * 	Get Product
 	 *	@return product or null
@@ -390,9 +402,9 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			m_product =  MProduct.get (getCtx(), getM_Product_ID());
 		return m_product;
 	}	//	getProduct
-	
+
 	/**
-	 * 	Set Qty Ordered - enforce Product UOM 
+	 * 	Set Qty Ordered - enforce Product UOM
 	 *	@param QtyOrdered
 	 */
 	public void setQtyOrdered (BigDecimal QtyOrdered)
@@ -405,8 +417,8 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		}
 		super.setQtyOrdered(QtyOrdered);
 	}	//	setQtyOrdered
-	
-	
+
+
 	//JPIERE-0202
 	private void setScheduledCost()
 	{
@@ -414,7 +426,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		BigDecimal cost = getProductCosts(as, getAD_Org_ID(), true);
 		setJP_ScheduledCost(cost);
 	}
-	
+
 	//JPIERE-0202
 	private BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK)
 	{
@@ -426,11 +438,11 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			return costs;
 		return Env.ZERO;
 	}//  getProductCosts
-	
-	
+
+
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
-		
+
 		if (!success)
 			return success;
 		if (getParent().isProcessed())
@@ -447,7 +459,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	    	if(!success)
 	    		return false;
 		}
-		
+
 		if(!newRecord && is_ValueChanged(MEstimationLine.COLUMNNAME_JP_ScheduledCost))
 		{
 			String sql = "UPDATE JP_Estimation i"
@@ -461,13 +473,13 @@ public class MEstimationLine extends X_JP_EstimationLine {
 					return false;
 				}
 		}
-		
+
 		return success;
 	}
-	
-	
-	
-	
+
+
+
+
 	@Override
 	protected boolean afterDelete(boolean success) {
 		if (!success)
@@ -477,14 +489,14 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			MResourceAssignment ra = new MResourceAssignment(getCtx(), getS_ResourceAssignment_ID(), get_TrxName());
 			ra.delete(true);
 		}
-		
+
 		MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
 		IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 		MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
 		if (taxCalculater == null)
 			throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
     	return taxCalculater.recalculateTax(provider, this, false);
-		
+
 	}
 
 	/**
@@ -497,7 +509,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			m_parent = new MEstimation(getCtx(), getJP_Estimation_ID(), get_TrxName());
 		return m_parent;
 	}	//	getParent
-	
+
 	/**
 	 *	Is Tax Included in Amount
 	 *	@return true if tax calculated
@@ -510,7 +522,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				"SELECT M_PriceList_ID FROM JP_Estimation WHERE JP_Estimation_ID=?",
 				getJP_Estimation_ID());
 		}
-		
+
 		MPriceList pl = MPriceList.get(getCtx(), m_M_PriceList_ID, get_TrxName());
 		return pl.isTaxIncluded();
 	}	//	isTaxIncluded
@@ -527,7 +539,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		m_IsSOTrx = estimation.isSOTrx();
 	}	//	setHeaderInfo
 
-	
+
 	/**
 	 * 	Get Currency Precision from Currency
 	 *	@return precision
@@ -560,7 +572,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		m_precision = new Integer(i);
 		return m_precision.intValue();
 	}	//	getPrecision
-	
+
 	/**
 	 * 	Set Defaults from Estimtion.
 	 * 	Does not set Parent !!
@@ -579,7 +591,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		setHeaderInfo(estimation);	//	sets m_order
 		//	Don't set Activity, etc as they are overwrites
 	}	//	setOrder
-	
+
 	public void clearParent()
 	{
 		this.m_parent = null;

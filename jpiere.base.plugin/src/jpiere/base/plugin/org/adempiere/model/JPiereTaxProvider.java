@@ -878,11 +878,22 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				MTax tax = new MTax(estimation.getCtx(), taxID, estimation.get_TrxName());
 				if (tax.getC_TaxProvider_ID() == 0)
 					continue;
-				MEstimationTax oTax = MEstimationTax.get (line, estimation.getPrecision(), false, estimation.get_TrxName());	//	current Tax
-				oTax.setIsTaxIncluded(estimation.isTaxIncluded());
-				if (!calculateTaxFromEstimationLines(line, oTax))
+				MEstimationTax eTax = MEstimationTax.get (line, estimation.getPrecision(), false, estimation.get_TrxName());	//	current Tax
+				//JPIERE-0369:Start
+				eTax.setIsTaxIncluded(estimation.isTaxIncluded());
+				if(line.getC_Charge_ID() != 0)
+				{
+					MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+					if(!charge.isSameTax())
+					{
+						eTax.setIsTaxIncluded(charge.isTaxIncluded());
+					}
+				}
+				//JPiere-0369:finish
+
+				if (!calculateTaxFromEstimationLines(line, eTax))
 					return false;
-				if (!oTax.save(estimation.get_TrxName()))
+				if (!eTax.save(estimation.get_TrxName()))
 					return false;
 				taxList.add(taxID);
 			}
@@ -896,20 +907,20 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 		for (int i = 0; i < taxes.length; i++)
 		{
-			MEstimationTax oTax = taxes[i];
-			if (oTax.getC_TaxProvider_ID() == 0) {
-				if (!estimation.isTaxIncluded())
-					grandTotal = grandTotal.add(oTax.getTaxAmt());
+			MEstimationTax eTax = taxes[i];
+			if (eTax.getC_TaxProvider_ID() == 0) {
+				if (!eTax.isTaxIncluded())	//JPIERE-0369
+					grandTotal = grandTotal.add(eTax.getTaxAmt());
 				continue;
 			}
-			MTax tax = MTax.get(oTax.getCtx(), oTax.getC_Tax_ID());
+			MTax tax = MTax.get(eTax.getCtx(), eTax.getC_Tax_ID());
 			if (tax.isSummary())
 			{
 				MTax[] cTaxes = tax.getChildTaxes(false);
 				for (int j = 0; j < cTaxes.length; j++)
 				{
 					MTax cTax = cTaxes[j];
-					BigDecimal taxAmt = calculateTax(cTax, oTax.getTaxBaseAmt(), estimation.isTaxIncluded(), estimation.getPrecision(), roundingMode);
+					BigDecimal taxAmt = calculateTax(cTax, eTax.getTaxBaseAmt(), eTax.isTaxIncluded(), estimation.getPrecision(), roundingMode);//JPIERE-0369
 					//
 					MEstimationTax newOTax = new MEstimationTax(estimation.getCtx(), 0, estimation.get_TrxName());
 					newOTax.set_ValueOfColumn("AD_Client_ID", estimation.getAD_Client_ID());
@@ -917,24 +928,24 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 					newOTax.setJP_Estimation_ID(estimation.getJP_Estimation_ID());
 					newOTax.setC_Tax_ID(cTax.getC_Tax_ID());
 //					newOTax.setPrecision(order.getPrecision());
-					newOTax.setIsTaxIncluded(estimation.isTaxIncluded());
-					newOTax.setTaxBaseAmt(oTax.getTaxBaseAmt());
+					newOTax.setIsTaxIncluded(eTax.isTaxIncluded());//JPIERE-0369
+					newOTax.setTaxBaseAmt(eTax.getTaxBaseAmt());
 					newOTax.setTaxAmt(taxAmt);
 					if (!newOTax.save(estimation.get_TrxName()))
 						return false;
 					//
-					if (!estimation.isTaxIncluded())
+					if (!eTax.isTaxIncluded())//JPIERE-0369
 						grandTotal = grandTotal.add(taxAmt);
 				}
-				if (!oTax.delete(true, estimation.get_TrxName()))
+				if (!eTax.delete(true, estimation.get_TrxName()))
 					return false;
-				if (!oTax.save(estimation.get_TrxName()))
+				if (!eTax.save(estimation.get_TrxName()))
 					return false;
 			}
 			else
 			{
-				if (!estimation.isTaxIncluded())
-					grandTotal = grandTotal.add(oTax.getTaxAmt());
+				if (!eTax.isTaxIncluded())//JPIERE-0369
+					grandTotal = grandTotal.add(eTax.getTaxAmt());
 			}
 		}
 		//
@@ -1027,6 +1038,18 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 	{
 		MEstimationTax tax = MEstimationTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
 		if (tax != null) {
+
+			//JPIERE-0369:Start
+			if(line.getC_Charge_ID() != 0)
+			{
+				MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+				if(!charge.isSameTax())
+				{
+					tax.setIsTaxIncluded(charge.isTaxIncluded());
+				}
+			}
+			//JPiere-0365:finish
+
 			if (!calculateTaxFromEstimationLines(line,tax))
 				return false;
 			if (tax.getTaxAmt().signum() != 0) {
@@ -1053,14 +1076,10 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		if (no != 1)
 			log.warning("(1) #" + no);
 
-		if (line.isTaxIncluded())
-			sql = "UPDATE JP_Estimation i "
-				+ " SET GrandTotal=TotalLines "
-				+ "WHERE JP_Estimation_ID=?";
-		else
-			sql = "UPDATE JP_Estimation i "
+		//JPIERE-0369
+		sql = "UPDATE JP_Estimation i "
 				+ " SET GrandTotal=TotalLines+"
-					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_EstimationTax it WHERE i.JP_Estimation_ID=it.JP_Estimation_ID) "
+					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_EstimationTax it WHERE i.JP_Estimation_ID=it.JP_Estimation_ID AND it.IsTaxIncluded='N' ) "
 					+ "WHERE JP_Estimation_ID=?";
 		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
