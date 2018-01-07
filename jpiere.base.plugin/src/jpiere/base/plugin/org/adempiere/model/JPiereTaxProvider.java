@@ -21,12 +21,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.model.ITaxProvider;
 import org.compiere.model.I_C_BPartner;
 import org.compiere.model.I_C_TaxProvider;
 import org.compiere.model.MBPartner;
+import org.compiere.model.MCharge;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MInvoiceTax;
@@ -45,6 +45,8 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
 
 /**
  * JPiere Tax Provider
@@ -305,6 +307,17 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				if (iTax != null)
 				{
 					iTax.setIsTaxIncluded(invoice.isTaxIncluded());
+					//JPIERE-0369:Start
+					if(line.getC_Charge_ID() != 0)
+					{
+						MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+						if(!charge.isSameTax())
+						{
+							iTax.setIsTaxIncluded(charge.isTaxIncluded());
+						}
+					}
+					//JPiere-0369:finish
+
 					if (!calculateTaxFromInvoiceLines(line,iTax))
 						return false;
 					iTax.saveEx();
@@ -323,7 +336,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			MInvoiceTax iTax = taxes[i];
 			if (iTax.getC_TaxProvider_ID() == 0) {
-				if (!invoice.isTaxIncluded())
+				if (!iTax.isTaxIncluded())	//JPIERE-0369
 				    grandTotal = grandTotal.add(iTax.getTaxAmt());
 		    	continue;
 		    }
@@ -334,7 +347,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				for (int j = 0; j < cTaxes.length; j++)
 				{
 					MTax cTax = cTaxes[j];
-					BigDecimal taxAmt = calculateTax(cTax, iTax.getTaxBaseAmt(), invoice.isTaxIncluded(), invoice.getPrecision(), roundingMode);
+					BigDecimal taxAmt = calculateTax(cTax, iTax.getTaxBaseAmt(), iTax.isTaxIncluded(), invoice.getPrecision(), roundingMode);//JPIERE-0369
 					//
 					MInvoiceTax newITax = new MInvoiceTax(invoice.getCtx(), 0, invoice.get_TrxName());
 					newITax.set_ValueOfColumn("AD_Client_ID", invoice.getAD_Client_ID());
@@ -342,12 +355,12 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 					newITax.setC_Invoice_ID(invoice.getC_Invoice_ID());
 					newITax.setC_Tax_ID(cTax.getC_Tax_ID());
 //					newITax.setPrecision(invoice.getPrecision());
-					newITax.setIsTaxIncluded(invoice.isTaxIncluded());
+					newITax.setIsTaxIncluded(iTax.isTaxIncluded());//JPIERE-0369
 					newITax.setTaxBaseAmt(iTax.getTaxBaseAmt());
 					newITax.setTaxAmt(taxAmt);
 					newITax.saveEx(invoice.get_TrxName());
 					//
-					if (!invoice.isTaxIncluded())
+					if (!iTax.isTaxIncluded())//JPIERE-0369
 						grandTotal = grandTotal.add(taxAmt);
 				}
 				iTax.deleteEx(true, invoice.get_TrxName());
@@ -377,15 +390,12 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		if (no != 1)
 			log.warning("(1) #" + no);
 
-		if (line.isTaxIncluded())
-			sql = "UPDATE C_Invoice i "
-				+ " SET GrandTotal=TotalLines "
-				+ "WHERE C_Invoice_ID=?";
-		else
-			sql = "UPDATE C_Invoice i "
+		//JPIERE-0369:Start
+		sql = "UPDATE C_Invoice i "
 				+ " SET GrandTotal=TotalLines+"
-					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM C_InvoiceTax it WHERE i.C_Invoice_ID=it.C_Invoice_ID) "
+					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM C_InvoiceTax it WHERE i.C_Invoice_ID=it.C_Invoice_ID AND it.IsTaxIncluded='N') "
 					+ "WHERE C_Invoice_ID=?";
+		//JPiere-0369:finish
 		no = DB.executeUpdateEx(sql, new Object[]{line.getC_Invoice_ID()}, line.get_TrxName());
 		if (no != 1)
 			log.warning("(2) #" + no);
@@ -419,6 +429,18 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 	private boolean updateInvoiceTax(MInvoiceLine line, boolean oldTax){
 	    MInvoiceTax tax = MInvoiceTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
 	    if (tax != null) {
+
+	    	//JPIERE-0369:Start
+	    	if(line.getC_Charge_ID() != 0)
+	    	{
+	    		MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+	    		if(!charge.isSameTax())
+	    		{
+	    			tax.setIsTaxIncluded(charge.isTaxIncluded());
+	    		}
+	    	}
+	    	//JPiere-0369:finish
+
 	    	if (!calculateTaxFromInvoiceLines(line, tax))
 	    		return false;
 	    	if (tax.getTaxAmt().signum() != 0) {
@@ -444,7 +466,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
 
 		//
-		String sql = "SELECT il.LineNetAmt, COALESCE(il.TaxAmt,0), i.IsSOTrx "
+		String sql = "SELECT il.LineNetAmt, COALESCE(il.JP_TaxAmt,0), i.IsSOTrx "//JPIERE-0369
 			+ "FROM C_InvoiceLine il"
 			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
 			+ "WHERE il.C_Invoice_ID=? AND il.C_Tax_ID=?";
@@ -735,13 +757,13 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				.firstOnly();
 			}
 		}
-		
+
 		RoundingMode roundingMode = null;
-		
+
 		if(bp != null)
 		{
 			s_cache.put (key, bp);
-			
+
 			if(isSOTrx){
 				Object SO_TaxRounding = bp.get_Value("JP_SOTaxRounding");
 				if(SO_TaxRounding != null)
@@ -810,18 +832,18 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			+ ") = " + finalTax + " [" + tax + "]");
 		return finalTax;
 	}	//	calculateTax
-	
-	
+
+
 	/**
 	 * Estimation
-	 * 
-	 * 
+	 *
+	 *
 	 * @param line
 	 * @param m_oderTax
 	 * @return
 	 */
 	public boolean calculateEstimationTaxTotal(MTaxProvider provider, MEstimation estimation){
-		
+
 		BigDecimal totalLines = Env.ZERO;
 		ArrayList<Integer> taxList = new ArrayList<Integer>();
 		MEstimationLine[] lines = estimation.getLines();
@@ -899,8 +921,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		estimation.setGrandTotal(grandTotal);
 		return true;
 	}
-	
-	
+
+
 	private boolean calculateTaxFromEstimationLines (MEstimationLine line, MEstimationTax m_oderTax)
 	{
 		BigDecimal taxBaseAmt = Env.ZERO;
@@ -959,7 +981,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		return true;
 	}	//	calculateTaxFromLines
 
-	
+
 	@Override
 	public boolean recalculateTax(MTaxProvider provider, MEstimationLine line, boolean newRecord)
 	{
@@ -974,12 +996,12 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 		return updateHeaderTax(provider, line);
 	}
-	
+
 	public boolean updateEstimationTax(MTaxProvider provider, MEstimationLine line)
 	{
 		return  updateEstimationTax(line, false);
 	}
-	
+
 	private boolean updateEstimationTax(MEstimationLine line, boolean oldTax)
 	{
 		MEstimationTax tax = MEstimationTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
@@ -996,7 +1018,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		}
 		return true;
 	}
-	
+
 	public boolean updateHeaderTax(MTaxProvider provider, MEstimationLine line)
 	{
 //		Update Order Header
@@ -1026,18 +1048,18 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		line.clearParent();
 		return no == 1;
 	}
-	
-	
+
+
 	/**
 	 * Recognition
-	 * 
-	 * 
+	 *
+	 *
 	 * @param line
 	 * @param m_oderTax
 	 * @return
 	 */
 	public boolean calculateRecognitionTaxTotal(MTaxProvider provider, MRecognition recognition){
-		
+
 		BigDecimal totalLines = Env.ZERO;
 		ArrayList<Integer> taxList = new ArrayList<Integer>();
 		MRecognitionLine[] lines = recognition.getLines();
@@ -1115,8 +1137,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		recognition.setGrandTotal(grandTotal);
 		return true;
 	}
-	
-	
+
+
 	private boolean calculateTaxFromRecognitionLines (MRecognitionLine line, MRecognitionTax m_oderTax)
 	{
 		BigDecimal taxBaseAmt = Env.ZERO;
@@ -1175,7 +1197,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		return true;
 	}	//	calculateTaxFromLines
 
-	
+
 	@Override
 	public boolean recalculateTax(MTaxProvider provider, MRecognitionLine line, boolean newRecord)
 	{
@@ -1190,12 +1212,12 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 		return updateHeaderTax(provider, line);
 	}
-	
+
 	public boolean updateRecognitionTax(MTaxProvider provider, MRecognitionLine line)
 	{
 		return  updateRecognitionTax(line, false);
 	}
-	
+
 	private boolean updateRecognitionTax(MRecognitionLine line, boolean oldTax)
 	{
 		MRecognitionTax tax = MRecognitionTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
@@ -1212,7 +1234,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		}
 		return true;
 	}
-	
+
 	public boolean updateHeaderTax(MTaxProvider provider, MRecognitionLine line)
 	{
 //		Update Order Header
@@ -1240,5 +1262,5 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		line.clearParent();
 		return no == 1;
 	}
-	
+
 }

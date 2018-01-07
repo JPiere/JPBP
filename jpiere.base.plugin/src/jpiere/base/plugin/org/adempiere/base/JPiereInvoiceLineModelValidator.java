@@ -15,9 +15,7 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
 
-import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
-import jpiere.base.plugin.util.JPiereUtil;
-
+import org.compiere.model.MCharge;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
@@ -29,6 +27,9 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
+import jpiere.base.plugin.util.JPiereUtil;
 
 public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
@@ -72,16 +73,27 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			MTax m_tax = MTax.get(Env.getCtx(), il.getC_Tax_ID());
 
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+			//JPIERE-0369:Start
+			boolean isTaxIncluded = il.isTaxIncluded();
+			if(il.getC_Charge_ID() != 0)
+			{
+	    		MCharge charge = MCharge.get(Env.getCtx(), il.getC_Charge_ID());
+	    		if(!charge.isSameTax())
+	    		{
+	    			isTaxIncluded = charge.isTaxIncluded();
+	    		}
+			}
+
 			if(taxCalculater != null)
 			{
-				taxAmt = taxCalculater.calculateTax(m_tax, il.getLineNetAmt(), il.isTaxIncluded()
+				taxAmt = taxCalculater.calculateTax(m_tax, il.getLineNetAmt(), isTaxIncluded
 						, MCurrency.getStdPrecision(po.getCtx(), il.getParent().getC_Currency_ID())
 						, JPiereTaxProvider.getRoundingMode(il.getParent().getC_BPartner_ID(), il.getParent().isSOTrx(), m_tax.getC_TaxProvider()));
 			}else{
-				taxAmt = m_tax.calculateTax(il.getLineNetAmt(), il.isTaxIncluded(), MCurrency.getStdPrecision(il.getCtx(), il.getParent().getC_Currency_ID()));
+				taxAmt = m_tax.calculateTax(il.getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(il.getCtx(), il.getParent().getC_Currency_ID()));
 			}
 
-			if(il.isTaxIncluded())
+			if(isTaxIncluded) //JPiere-0369:finish
 			{
 				il.set_ValueNoCheck("JP_TaxBaseAmt",  il.getLineNetAmt().subtract(taxAmt));
 			}else{
