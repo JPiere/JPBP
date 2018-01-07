@@ -86,7 +86,19 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				if (tax.getC_TaxProvider_ID() == 0)
 					continue;
 				MOrderTax oTax = MOrderTax.get (line, order.getPrecision(), false, order.get_TrxName());	//	current Tax
+
 				oTax.setIsTaxIncluded(order.isTaxIncluded());
+				//JPIERE-0369:Start
+				if(line.getC_Charge_ID() != 0)
+				{
+					MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+					if(!charge.isSameTax())
+					{
+						oTax.setIsTaxIncluded(charge.isTaxIncluded());
+					}
+				}
+				//JPiere-0369:finish
+
 				if (!calculateTaxFromOrderLines(line, oTax))
 					return false;
 				if (!oTax.save(order.get_TrxName()))
@@ -116,7 +128,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				for (int j = 0; j < cTaxes.length; j++)
 				{
 					MTax cTax = cTaxes[j];
-					BigDecimal taxAmt = calculateTax(cTax, oTax.getTaxBaseAmt(), order.isTaxIncluded(), order.getPrecision(), roundingMode);
+					BigDecimal taxAmt = calculateTax(cTax, oTax.getTaxBaseAmt(), oTax.isTaxIncluded(), order.getPrecision(), roundingMode);//JPIERE-0369
 					//
 					MOrderTax newOTax = new MOrderTax(order.getCtx(), 0, order.get_TrxName());
 					newOTax.set_ValueOfColumn("AD_Client_ID", order.getAD_Client_ID());
@@ -124,13 +136,13 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 					newOTax.setC_Order_ID(order.getC_Order_ID());
 					newOTax.setC_Tax_ID(cTax.getC_Tax_ID());
 //					newOTax.setPrecision(order.getPrecision());
-					newOTax.setIsTaxIncluded(order.isTaxIncluded());
+					newOTax.setIsTaxIncluded(oTax.isTaxIncluded());//JPIERE-0369
 					newOTax.setTaxBaseAmt(oTax.getTaxBaseAmt());
 					newOTax.setTaxAmt(taxAmt);
 					if (!newOTax.save(order.get_TrxName()))
 						return false;
 					//
-					if (!order.isTaxIncluded())
+					if (!oTax.isTaxIncluded())//JPIERE-0369
 						grandTotal = grandTotal.add(taxAmt);
 				}
 				if (!oTax.delete(true, order.get_TrxName()))
@@ -165,15 +177,12 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		if (no != 1)
 			log.warning("(1) #" + no);
 
-		if (line.isTaxIncluded())
-			sql = "UPDATE C_Order i "
-				+ " SET GrandTotal=TotalLines "
-				+ "WHERE C_Order_ID = ?";
-		else
-			sql = "UPDATE C_Order i "
+		//JPIERE-0369:Start
+		sql = "UPDATE C_Order i "
 				+ " SET GrandTotal=TotalLines+"
-					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM C_OrderTax it WHERE i.C_Order_ID=it.C_Order_ID) "
+					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM C_OrderTax it WHERE i.C_Order_ID=it.C_Order_ID AND it.IsTaxIncluded='N') "
 					+ "WHERE C_Order_ID = ?" ;
+		//JPiere-0369:finish
 		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(2) #" + no);
@@ -207,7 +216,19 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 	private boolean updateOrderTax(MOrderLine line, boolean oldTax){
 		MOrderTax tax = MOrderTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
-		if (tax != null) {
+		if (tax != null)
+		{
+			//JPIERE-0369:Start
+			if(line.getC_Charge_ID() != 0)
+			{
+				MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+				if(!charge.isSameTax())
+				{
+					tax.setIsTaxIncluded(charge.isTaxIncluded());
+				}
+			}
+			//JPiere-0369:finish
+
 			if (!calculateTaxFromOrderLines(line,tax))
 				return false;
 			if (tax.getTaxAmt().signum() != 0) {

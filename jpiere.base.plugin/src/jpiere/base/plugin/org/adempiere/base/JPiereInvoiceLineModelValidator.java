@@ -86,11 +86,11 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 			if(taxCalculater != null)
 			{
-				taxAmt = taxCalculater.calculateTax(m_tax, il.getLineNetAmt(), isTaxIncluded
+				taxAmt = taxCalculater.calculateTax(m_tax, il.getLineNetAmt(), isTaxIncluded //JPIERE-0369
 						, MCurrency.getStdPrecision(po.getCtx(), il.getParent().getC_Currency_ID())
 						, JPiereTaxProvider.getRoundingMode(il.getParent().getC_BPartner_ID(), il.getParent().isSOTrx(), m_tax.getC_TaxProvider()));
 			}else{
-				taxAmt = m_tax.calculateTax(il.getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(il.getCtx(), il.getParent().getC_Currency_ID()));
+				taxAmt = m_tax.calculateTax(il.getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(il.getCtx(), il.getParent().getC_Currency_ID()));//JPIERE-0369
 			}
 
 			if(isTaxIncluded) //JPiere-0369:finish

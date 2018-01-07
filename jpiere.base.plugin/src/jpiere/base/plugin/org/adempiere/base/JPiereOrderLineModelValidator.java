@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MCharge;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
@@ -88,16 +89,27 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				return null;
 
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+			//JPIERE-0369:Start
+			boolean isTaxIncluded = ol.isTaxIncluded();
+			if(ol.getC_Charge_ID() != 0)
+			{
+	    		MCharge charge = MCharge.get(Env.getCtx(), ol.getC_Charge_ID());
+	    		if(!charge.isSameTax())
+	    		{
+	    			isTaxIncluded = charge.isTaxIncluded();
+	    		}
+			}
+
 			if(taxCalculater != null)
 			{
-				taxAmt = taxCalculater.calculateTax(m_tax, ol.getLineNetAmt(), ol.isTaxIncluded()
+				taxAmt = taxCalculater.calculateTax(m_tax, ol.getLineNetAmt(), isTaxIncluded	//JPIERE-0369
 						, MCurrency.getStdPrecision(po.getCtx(), ol.getParent().getC_Currency_ID())
 						, JPiereTaxProvider.getRoundingMode(ol.getParent().getC_BPartner_ID(), ol.getParent().isSOTrx(), m_tax.getC_TaxProvider()));
 			}else{
-				taxAmt = m_tax.calculateTax(ol.getLineNetAmt(), ol.isTaxIncluded(), MCurrency.getStdPrecision(ol.getCtx(), ol.getParent().getC_Currency_ID()));
+				taxAmt = m_tax.calculateTax(ol.getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(ol.getCtx(), ol.getParent().getC_Currency_ID()));//JPIERE-0369
 			}
 
-			if(ol.isTaxIncluded())
+			if(isTaxIncluded)//JPIERE-0369
 			{
 				ol.set_ValueNoCheck("JP_TaxBaseAmt",  ol.getLineNetAmt().subtract(taxAmt));
 			}else{
