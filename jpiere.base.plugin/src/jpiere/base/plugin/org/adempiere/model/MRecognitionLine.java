@@ -59,7 +59,7 @@ import jpiere.base.plugin.util.JPiereUtil;
 public class MRecognitionLine extends X_JP_RecognitionLine
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -6174490999732876285L;
 
@@ -76,7 +76,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		List<MRecognitionLine> list = new Query(sLine.getCtx(),I_JP_RecognitionLine.Table_Name,whereClause,sLine.get_TrxName())
 		.setParameters(sLine.getM_InOutLine_ID())
 		.list();
-		
+
 		MRecognitionLine retValue = null;
 		if (list.size() > 0) {
 			retValue = list.get(0);
@@ -99,7 +99,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		List<MRecognitionLine> list = new Query(sLine.getCtx(),I_JP_RecognitionLine.Table_Name,whereClause,sLine.get_TrxName())
 		.setParameters(sLine.getM_InOutLine_ID())
 		.list();
-		
+
 		MRecognitionLine retValue = null;
 		if (list.size() > 0) {
 			retValue = list.get(0);
@@ -115,8 +115,8 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 
 	/** Tax							*/
 	private MTax 		m_tax = null;
-	
-	
+
+
 	/**************************************************************************
 	 * 	Invoice Line Constructor
 	 * 	@param ctx context
@@ -169,11 +169,11 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		super(ctx, rs, trxName);
 	}	//	MInvoiceLine
 
-	
-	
+
+
 	/**	Cache				*/
 	private static CCache<Integer,MRecognitionLine>	s_cache = new CCache<Integer,MRecognitionLine>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -191,8 +191,8 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			s_cache.put (JP_RecognitionLine_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	private int			m_M_PriceList_ID = 0;
 	private Timestamp	m_DateInvoiced = null;
 	private int			m_C_BPartner_ID = 0;
@@ -202,7 +202,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	private MProduct	m_product = null;
 	/**	Charge					*/
 	private MCharge 		m_charge = null;
-	
+
 	/**	Cached Name of the line		*/
 	private String		m_name = null;
 	/** Cached Precision			*/
@@ -367,7 +367,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		else{
 			StringBuilder msgd = new StringBuilder(desc).append(" | ").append(description);
 			setDescription(msgd.toString());
-		}	
+		}
 	}	//	addDescription
 
 	/**
@@ -509,45 +509,45 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	{
 		//	Calculations & Rounding
 		BigDecimal bd = getPriceActual().multiply(getQtyInvoiced());
-		
+
 		boolean documentLevel = getTax().isDocumentLevel();
 
 		//	juddm: Tax Exempt & Tax Included in Price List & not Document Level - Adjust Line Amount
 		//  http://sourceforge.net/tracker/index.php?func=detail&aid=1733602&group_id=176962&atid=879332
 		if (isTaxIncluded() && !documentLevel)	{
 			BigDecimal taxStdAmt = Env.ZERO, taxThisAmt = Env.ZERO;
-			
+
 			MTax invoiceTax = getTax();
 			MTax stdTax = null;
-			
+
 			if (getProduct() == null)
 			{
-				if (getCharge() != null)	// Charge 
+				if (getCharge() != null)	// Charge
 				{
-					stdTax = new MTax (getCtx(), 
+					stdTax = new MTax (getCtx(),
 							((MTaxCategory) getCharge().getC_TaxCategory()).getDefaultTax().getC_Tax_ID(),
 							get_TrxName());
 				}
-					
+
 			}
 			else	// Product
-				stdTax = new MTax (getCtx(), 
-							((MTaxCategory) getProduct().getC_TaxCategory()).getDefaultTax().getC_Tax_ID(), 
+				stdTax = new MTax (getCtx(),
+							((MTaxCategory) getProduct().getC_TaxCategory()).getDefaultTax().getC_Tax_ID(),
 							get_TrxName());
 
 			if (stdTax != null)
 			{
-				
+
 				if (log.isLoggable(Level.FINE)) log.fine("stdTax rate is " + stdTax.getRate());
 				if (log.isLoggable(Level.FINE)) log.fine("invoiceTax rate is " + invoiceTax.getRate());
-				
+
 				taxThisAmt = taxThisAmt.add(invoiceTax.calculateTax(bd, isTaxIncluded(), getPrecision()));
 				taxStdAmt = taxStdAmt.add(stdTax.calculateTax(bd, isTaxIncluded(), getPrecision()));
-				
+
 				bd = bd.subtract(taxStdAmt).add(taxThisAmt);
-				
-				if (log.isLoggable(Level.FINE)) log.fine("Price List includes Tax and Tax Changed on Invoice Line: New Tax Amt: " 
-						+ taxThisAmt + " Standard Tax Amt: " + taxStdAmt + " Line Net Amt: " + bd);	
+
+				if (log.isLoggable(Level.FINE)) log.fine("Price List includes Tax and Tax Changed on Invoice Line: New Tax Amt: "
+						+ taxThisAmt + " Standard Tax Amt: " + taxStdAmt + " Line Net Amt: " + bd);
 			}
 		}
 		int precision = getPrecision();
@@ -879,19 +879,19 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			log.saveError("ParentComplete", Msg.getMsg(getCtx(), "JP_RecognitionLine_ID"));
 			return false;
 		}
-		
-		
+
+
 		if(newRecord || is_ValueChanged("QtyInvoiced") || is_ValueChanged("QtyEntered") || is_ValueChanged("M_InOutLine_ID"))
 		{
 			setJP_QtyRecognized(getQtyInvoiced());
-			
+
 			if(newRecord)
 			{
 				if(getJP_RecogLine_SplitFrom_ID() > 0 || getJP_TargetQtyRecognized().signum() != 0)
 				{
 					;//Noting to do;
 				}else if(getJP_TargetQtyRecognized().signum() == 0 && getM_InOutLine_ID() > 0 ) {
-					
+
 					BigDecimal qtyRecognized = Env.ZERO;
 					String sql = "SELECT SUM(rl.QtyInvoiced) FROM JP_RecognitionLine rl INNER JOIN JP_Recognition r ON (rl.JP_Recognition_ID = r.JP_Recognition_ID) WHERE rl.M_InOutLine_ID=? AND r.DocStatus NOT IN ('VO','VE') ";
 					PreparedStatement pstmt = null;
@@ -916,7 +916,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 						rs = null;
 						pstmt = null;
 					}
-					
+
 					if(qtyRecognized == null)
 						qtyRecognized = Env.ZERO;
 					BigDecimal targetQtyRecognized = getM_InOutLine().getMovementQty().subtract(qtyRecognized);
@@ -925,10 +925,10 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 				}else{
 					setJP_TargetQtyRecognized(Env.ZERO);
 				}
-			
+
 			//Not New Record
 			}else{
-				
+
 				if(is_ValueChanged("M_InOutLine_ID") && getM_InOutLine_ID() > 0)
 				{
 					BigDecimal qtyRecognized = Env.ZERO;
@@ -955,14 +955,14 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 						rs = null;
 						pstmt = null;
 					}
-					
+
 					BigDecimal targetQtyRecognized = getM_InOutLine().getMovementQty().subtract(qtyRecognized);
 					setJP_TargetQtyRecognized(targetQtyRecognized);
 				}else if(is_ValueChanged("M_InOutLine_ID") && getM_InOutLine_ID() == 0){
 					setQty(Env.ZERO);
 				}
-				
-				
+
+
 				if(getJP_TargetQtyRecognized().signum() != 0)
 				{
 					if(getJP_TargetQtyRecognized().signum() != getJP_QtyRecognized().signum())
@@ -970,18 +970,18 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 						log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
 						return false;
 					}
-					
+
 					if(getJP_QtyRecognized().abs().compareTo(getJP_TargetQtyRecognized().abs()) > 0)
 					{
 						log.saveError("Error",Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "JP_TargetQtyRecognized"),Msg.getElement(Env.getCtx(), "JP_QtyRecognized")}));
 						return false;
 					}
-				}			
+				}
 			}//if(newRecord)
 
 		}//if(newRecord ...
-		
-		
+
+
 		// Re-set invoice header (need to update m_IsSOTrx flag) - phib [ 1686773 ]
 		setRecognition(getParent());
 		//	Charge
@@ -1005,7 +1005,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 				if (enforce && getPriceLimit() != Env.ZERO
 				  && getPriceActual().compareTo(getPriceLimit()) < 0)
 				{
-					log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
+					log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit());
 					return false;
 				}
 				//
@@ -1042,7 +1042,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		if (m_IsSOTrx || getTaxAmt().compareTo(Env.ZERO) == 0)
 			setTaxAmt();
 		//
-		
+
 		/* Carlos Ruiz - globalqss
 		 * IDEMPIERE-178 Orders and Invoices must disallow amount lines without product/charge
 		 */
@@ -1052,7 +1052,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 				return false;
 			}
 		}
-		
+
 		//Tax Calculation
 		if(newRecord || is_ValueChanged("LineNetAmt") || is_ValueChanged("C_Tax_ID"))
 		{
@@ -1064,27 +1064,39 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			}else{
 
 				IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+				//JPIERE-0369:Start
+				boolean isTaxIncluded = isTaxIncluded();
+				if(getC_Charge_ID() != 0)
+				{
+					MCharge charge = MCharge.get(getCtx(), getC_Charge_ID());
+					if(!charge.isSameTax())
+					{
+						isTaxIncluded = charge.isTaxIncluded();
+					}
+				}
+				//JPiere-0369:finish
+
 				if(taxCalculater != null)
 				{
-					taxAmt = taxCalculater.calculateTax(m_tax, getLineNetAmt(), isTaxIncluded()
+					taxAmt = taxCalculater.calculateTax(m_tax, getLineNetAmt(), isTaxIncluded //JPIERE-0369
 							, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID())
 							, JPiereTaxProvider.getRoundingMode(getParent().getC_BPartner_ID(), getParent().isSOTrx(), m_tax.getC_TaxProvider()));
 				}else{
-					taxAmt = m_tax.calculateTax(getLineNetAmt(), isTaxIncluded(), MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID()));
+					taxAmt = m_tax.calculateTax(getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID()));//JPIERE-0369
 				}
-	
-				if(isTaxIncluded())
+
+				if(isTaxIncluded)//JPIERE-0369
 				{
 					set_ValueNoCheck("JP_TaxBaseAmt",  getLineNetAmt().subtract(taxAmt));
 				}else{
 					set_ValueNoCheck("JP_TaxBaseAmt",  getLineNetAmt());
 				}
-	
+
 				set_ValueOfColumn("JP_TaxAmt", taxAmt);
-				
+
 			}
 		}//Tax Calculation
-		
+
 		return true;
 	}	//	beforeSave
 
@@ -1100,7 +1112,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		if (tax != null) {
 			if (!tax.calculateTaxFromLines())
 				return false;
-		
+
 			// red1 - solving BUGS #[ 1701331 ] , #[ 1786103 ]
 			if (tax.getTaxAmt().signum() != 0) {
 				if (!tax.save(get_TrxName()))
@@ -1138,9 +1150,9 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	    	if(!success)
 	    		return false;
 		}
-		
+
 		return success;
-		
+
 	}	//	afterSave
 
 	/**

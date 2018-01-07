@@ -1113,11 +1113,22 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				MTax tax = new MTax(recognition.getCtx(), taxID, recognition.get_TrxName());
 				if (tax.getC_TaxProvider_ID() == 0)
 					continue;
-				MRecognitionTax oTax = MRecognitionTax.get (line, recognition.getPrecision(), false, recognition.get_TrxName());	//	current Tax
-				oTax.setIsTaxIncluded(recognition.isTaxIncluded());
-				if (!calculateTaxFromRecognitionLines(line, oTax))
+				MRecognitionTax rTax = MRecognitionTax.get (line, recognition.getPrecision(), false, recognition.get_TrxName());	//	current Tax
+				rTax.setIsTaxIncluded(recognition.isTaxIncluded());
+				//JPIERE-0369:Start
+				if(line.getC_Charge_ID() != 0)
+				{
+					MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+					if(!charge.isSameTax())
+					{
+						rTax.setIsTaxIncluded(charge.isTaxIncluded());
+					}
+				}
+				//JPIERE-0369:finish
+
+				if (!calculateTaxFromRecognitionLines(line, rTax))
 					return false;
-				if (!oTax.save(recognition.get_TrxName()))
+				if (!rTax.save(recognition.get_TrxName()))
 					return false;
 				taxList.add(taxID);
 			}
@@ -1131,20 +1142,20 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 		for (int i = 0; i < taxes.length; i++)
 		{
-			MRecognitionTax oTax = taxes[i];
-			if (oTax.getC_TaxProvider_ID() == 0) {
-				if (!recognition.isTaxIncluded())
-					grandTotal = grandTotal.add(oTax.getTaxAmt());
+			MRecognitionTax rTax = taxes[i];
+			if (rTax.getC_TaxProvider_ID() == 0) {
+				if (!rTax.isTaxIncluded()) //JPIERE-0369
+					grandTotal = grandTotal.add(rTax.getTaxAmt());
 				continue;
 			}
-			MTax tax = MTax.get(oTax.getCtx(), oTax.getC_Tax_ID());
+			MTax tax = MTax.get(rTax.getCtx(), rTax.getC_Tax_ID());
 			if (tax.isSummary())
 			{
 				MTax[] cTaxes = tax.getChildTaxes(false);
 				for (int j = 0; j < cTaxes.length; j++)
 				{
 					MTax cTax = cTaxes[j];
-					BigDecimal taxAmt = calculateTax(cTax, oTax.getTaxBaseAmt(), recognition.isTaxIncluded(), recognition.getPrecision(), roundingMode);
+					BigDecimal taxAmt = calculateTax(cTax, rTax.getTaxBaseAmt(), rTax.isTaxIncluded(), recognition.getPrecision(), roundingMode);//JPIERE-0369
 					//
 					MRecognitionTax newOTax = new MRecognitionTax(recognition.getCtx(), 0, recognition.get_TrxName());
 					newOTax.set_ValueOfColumn("AD_Client_ID", recognition.getAD_Client_ID());
@@ -1152,24 +1163,24 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 					newOTax.setJP_Recognition_ID(recognition.getJP_Recognition_ID());
 					newOTax.setC_Tax_ID(cTax.getC_Tax_ID());
 //					newOTax.setPrecision(order.getPrecision());
-					newOTax.setIsTaxIncluded(recognition.isTaxIncluded());
-					newOTax.setTaxBaseAmt(oTax.getTaxBaseAmt());
+					newOTax.setIsTaxIncluded(rTax.isTaxIncluded());//JPIERE-0369
+					newOTax.setTaxBaseAmt(rTax.getTaxBaseAmt());
 					newOTax.setTaxAmt(taxAmt);
 					if (!newOTax.save(recognition.get_TrxName()))
 						return false;
 					//
-					if (!recognition.isTaxIncluded())
+					if (!rTax.isTaxIncluded())//JPIERE-0369
 						grandTotal = grandTotal.add(taxAmt);
 				}
-				if (!oTax.delete(true, recognition.get_TrxName()))
+				if (!rTax.delete(true, recognition.get_TrxName()))
 					return false;
-				if (!oTax.save(recognition.get_TrxName()))
+				if (!rTax.save(recognition.get_TrxName()))
 					return false;
 			}
 			else
 			{
-				if (!recognition.isTaxIncluded())
-					grandTotal = grandTotal.add(oTax.getTaxAmt());
+				if (!rTax.isTaxIncluded())//JPIERE-0369
+					grandTotal = grandTotal.add(rTax.getTaxAmt());
 			}
 		}
 		//
@@ -1261,7 +1272,19 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 	private boolean updateRecognitionTax(MRecognitionLine line, boolean oldTax)
 	{
 		MRecognitionTax tax = MRecognitionTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
-		if (tax != null) {
+		if (tax != null)
+		{
+			//JPIERE-0369:Start
+			if(line.getC_Charge_ID() != 0)
+			{
+				MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID() );
+				if(!charge.isSameTax())
+				{
+					tax.setIsTaxIncluded(charge.isTaxIncluded());
+				}
+			}
+			//Jpiere-0369:finish
+
 			if (!calculateTaxFromRecognitionLines(line,tax))
 				return false;
 			if (tax.getTaxAmt().signum() != 0) {
@@ -1286,14 +1309,11 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		if (no != 1)
 			log.warning("(1) #" + no);
 
-		if (line.isTaxIncluded())
-			sql = "UPDATE JP_Recognition r "
-				+ " SET GrandTotal=TotalLines "
-				+ "WHERE JP_Recognition_ID=?";
-		else
-			sql = "UPDATE JP_Recognition r "
+
+		//JPIERE-0369
+		sql = "UPDATE JP_Recognition r "
 				+ " SET GrandTotal=TotalLines+"
-					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_RecognitionTax rt WHERE r.JP_Recognition_ID=rt.JP_Recognition_ID) "
+					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_RecognitionTax rt WHERE r.JP_Recognition_ID=rt.JP_Recognition_ID AND rt.IsTaxIncluded='N') "
 					+ "WHERE JP_Recognition_ID=?";
 		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Recognition_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
