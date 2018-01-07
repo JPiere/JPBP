@@ -20,14 +20,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MContractAcct;
-import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
-import jpiere.base.plugin.org.adempiere.model.MContractContent;
-import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
-import jpiere.base.plugin.org.adempiere.model.MContractTaxAcct;
-import jpiere.base.plugin.org.adempiere.model.MRecognition;
-import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
-
 import org.compiere.acct.Doc;
 import org.compiere.acct.DocLine;
 import org.compiere.acct.DocTax;
@@ -35,6 +27,7 @@ import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MCharge;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MInOutLine;
@@ -46,6 +39,14 @@ import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractTaxAcct;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
  * Post Recognition Documents.
@@ -72,7 +73,7 @@ public class Doc_JPRecognition extends Doc
 	{
 		super (as, MRecognition.class, rs, null, trxName);
 	}
-	
+
 	/** Contained Optional Tax Lines    */
 	protected DocTax[]        m_taxes = null;
 	/** Currency Precision				*/
@@ -81,7 +82,7 @@ public class Doc_JPRecognition extends Doc
 	protected boolean			m_allLinesService = true;
 	/** All lines are product item		*/
 	protected boolean			m_allLinesItem = true;
-	
+
 	private int				m_Reversal_ID = 0;
 
 	/**
@@ -105,7 +106,7 @@ public class Doc_JPRecognition extends Doc
 		return null;
 	}	// loadDocumentDetails
 
-	
+
 	/**
 	 *	Load Invoice Taxes
 	 *  @return DocTax Array
@@ -178,7 +179,7 @@ public class Doc_JPRecognition extends Doc
 			boolean cm = getDocumentType().equals("JPS")//Recognition Revenu Credit memo
 				|| getDocumentType().equals("JPY");//Recognition Expense Credit memo
 			docLine.setQty(cm ? Qty.negate() : Qty, recognition.isSOTrx());
-			
+
 			//
 			BigDecimal LineNetAmt = line.getLineNetAmt();
 			BigDecimal PriceList = line.getPriceList();
@@ -227,7 +228,7 @@ public class Doc_JPRecognition extends Doc
 							}
 						}
 					}
-					
+
 					BigDecimal PriceListTax = tax.calculateTax(PriceList, true, getStdPrecision());
 					PriceList = PriceList.subtract(PriceListTax);
 				}
@@ -296,7 +297,7 @@ public class Doc_JPRecognition extends Doc
 			m_precision = MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
 		return m_precision;
 	}	//	getPrecision
-	
+
 
 	/***************************************************************************
 	 * Get Source Currency Balance - subtracts line and tax amounts from total -
@@ -323,33 +324,33 @@ public class Doc_JPRecognition extends Doc
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
-		
+
 		MRecognition recog = (MRecognition)getPO();
-		
+
 		if(recog.getJP_ContractContent_ID()==0)
 		{
 			return facts;
 		}
-		
+
 		MContractContent contractContent = MContractContent.get(Env.getCtx(),recog.getJP_ContractContent_ID());
 		if(contractContent.getJP_Contract_Acct_ID() == 0)
 		{
 			return facts;
 		}
-		
+
 		MContractAcct contractAcct = MContractAcct.get(Env.getCtx(),contractContent.getJP_Contract_Acct_ID());
 		if( !contractAcct.isPostingContractAcctJP() || !contractAcct.isPostingRecognitionDocJP() )
 		{
 			return facts;
 		}
-		
+
 		//  create Fact Header
-		Fact fact = new Fact(this, as, Fact.POST_Actual);		
-		
+		Fact fact = new Fact(this, as, Fact.POST_Actual);
+
 		//  Cash based accounting
 		if (!as.isAccrual())
 			return facts;
-		
+
 		//JPR
 		if (getDocumentType().equals("JPR"))//Revenue Recognition
 		{
@@ -357,7 +358,7 @@ public class Doc_JPRecognition extends Doc
 		}
 		//JPS
 		else if (getDocumentType().equals("JPS"))//Revenue Recognition Credit Memo
-		{			
+		{
 			postJPS(as, contractAcct, fact);;
 		}
 		//JPX
@@ -376,7 +377,7 @@ public class Doc_JPRecognition extends Doc
 			log.log(Level.SEVERE, p_Error);
 			fact = null;
 		}
-				
+
 		FactLine[] fLines = fact.getLines();
 		for (int i = 0; i < fLines.length; i++)
 		{
@@ -385,7 +386,7 @@ public class Doc_JPRecognition extends Doc
 				fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
 				if(recog.getBill_BPartner_ID() > 0)
 					fLines[i].setC_BPartner_ID(recog.getBill_BPartner_ID());
-				
+
 				if(recog.getBill_Location_ID() > 0)
 					fLines[i].setLocationFromBPartner(recog.getBill_Location_ID(), false);  //  to Loc
 				else
@@ -394,20 +395,20 @@ public class Doc_JPRecognition extends Doc
 				fLines[i].set_ValueNoCheck("JP_ContractContent_ID", recog.getJP_ContractContent_ID());
 			}
 		}//for
-		
-		
+
+
 		//
 		facts.add(fact);
 		return facts;
 	} // createFact
-	
-	
+
+
 	private String postJPR(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-		
+
 		BigDecimal amt = Env.ZERO;
 
 		/*** Tax ***/
@@ -424,22 +425,35 @@ public class Doc_JPRecognition extends Doc
 					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
 					if (taxLineDR != null)
 						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-					
+
 					//CR
 					FactLine taxLineCR = fact.createLine(null, recognitionTaxDueAccount, getC_Currency_ID(), null, amt);
 					if (taxLineCR != null)
-						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	
+						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 				}
 			}
 		}//for
-		
-		
+
+
 		/*** Revenue ***/
-		//DR:  Invoice Revenue / CR: Recognition Revenue  
+		//DR:  Invoice Revenue / CR: Recognition Revenue
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			DocLine line = p_lines[i];		
+			DocLine line = p_lines[i];
 			amt = p_lines[i].getAmtSource();
+
+			//JPIERE-0369:Start
+			int C_Charge_ID = line.getPO().get_ValueAsInt("C_Charge_ID");
+			if(C_Charge_ID != 0)
+			{
+				MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+				if(!charge.isSameTax() && charge.isTaxIncluded())
+				{
+					amt = (BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt");
+				}
+			}
+			//JPIERE-0369:finish
+
 			BigDecimal dAmt = null;
 			if (as.isTradeDiscountPosted())
 			{
@@ -450,23 +464,23 @@ public class Doc_JPRecognition extends Doc
 					dAmt = discount;
 					//CR  - Recognition Trade Deiscount Acct
 					fact.createLine (line, getRecognitionTDiscountGrantAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
-					
+
 					//DR  - Invoice Trade Deiscount Acct
 					fact.createLine (line, getInvoiceTDiscountGrantAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
 				}
 			}
-			
+
 			//DR - Invoice Revenue Acct
 			dr = fact.createLine (line, getInvoiceRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
 			if(dr != null)
 				dr.setQty(line.getQty().negate());
-			
+
 			//CR - Recognition Revenue Acct
 			cr = fact.createLine (line, getRecognitionRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 			if(cr != null)
 				cr.setQty(line.getQty());
-			
-			
+
+
 			/*** COGS ***/
 			boolean JP_RECOGNITION_COGS_SCHEDULED_COST = MSysConfig.getBooleanValue("JP_RECOGNITION_COGS_SCHEDULED_COST", false, getAD_Client_ID(), getAD_Org_ID());
 			MProduct product = line.getProduct();
@@ -479,7 +493,7 @@ public class Doc_JPRecognition extends Doc
 					MOrderLine oLine = new MOrderLine(getCtx(), line.getC_OrderLine_ID(), getTrxName() );
 					costs  = (BigDecimal)oLine.get_Value("JP_ScheduledCostLineAmt");
 				}
-				
+
 				if(costs.compareTo(Env.ZERO) != 0)
 				{
 					//  CoGS            DR
@@ -490,7 +504,7 @@ public class Doc_JPRecognition extends Doc
 						log.log(Level.WARNING, p_Error);
 						return null;
 					}
-					
+
 					int M_InOutLine_ID = line.getPO().get_ValueAsInt("M_InOutLine_ID");
 					if(M_InOutLine_ID > 0)
 					{
@@ -498,11 +512,11 @@ public class Doc_JPRecognition extends Doc
 						dr.setM_Locator_ID(ioLine.getM_Locator_ID());
 						dr.setLocationFromLocator(ioLine.getM_Locator_ID(), true);    //  from Loc
 					}
-							
+
 					dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
 					dr.setQty(line.getQty().negate());
-					
-		
+
+
 					//  Inventory               CR
 					cr = fact.createLine(line, getAssetAccount(line, contractAcct, as), as.getC_Currency_ID(), null, costs);
 					if (cr == null)
@@ -514,15 +528,15 @@ public class Doc_JPRecognition extends Doc
 					cr.setM_Locator_ID(line.getM_Locator_ID());
 					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
 				}
-			
+
 			//Current Cost
 			}else{
-				
+
 				if (!isReversal(line) && product != null)
 				{
-					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-					{	
-						if (line.getM_AttributeSetInstance_ID() == 0 ) 
+					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+					{
+						if (line.getM_AttributeSetInstance_ID() == 0 )
 						{
 							MInOutLine ioLine = (MInOutLine) line.getPO();
 							MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
@@ -537,30 +551,30 @@ public class Doc_JPRecognition extends Doc
 									pc.setQty(QtyMA);
 									pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
 									BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-								
+
 									costs = costs.add(maCosts);
-								}						
+								}
 							}
-						} 
-						else 
-						{							
-							costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");				
 						}
-					} 
+						else
+						{
+							costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+						}
+					}
 					else
 					{
 						// MZ Goodwill
 						// if Shipment CostDetail exist then get Cost from Cost Detail
-						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");			
+						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
 					}
-			
+
 					// end MZ
 					if (costs == null || costs.signum() == 0)	//	zero costs OK
 					{
 						if (product.isStocked())
 						{
 							//ok if we have purchased zero cost item from vendor before
-							int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)", 
+							int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)",
 									product.getM_Product_ID());
 							if (count > 0)
 							{
@@ -582,74 +596,76 @@ public class Doc_JPRecognition extends Doc
 					//temp to avoid NPE
 					costs = BigDecimal.ZERO;
 				}
-				
-				//  CoGS            DR
-				dr = fact.createLine(line,
-					getCOGSAccount(line, contractAcct, as),
-					as.getC_Currency_ID(), costs, null);
-				if (dr == null)
-				{
-					p_Error = "FactLine DR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				dr.setM_Locator_ID(line.getM_Locator_ID());
-				dr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
-				dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
-				dr.setQty(line.getQty().negate());
-				
-				if (isReversal(line))
-				{
-					//	Set AmtAcctDr from Original Shipment/Receipt
-					if (!dr.updateReverseLine (MRecognition.Table_ID,
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
-					{
-						if (product != null && !product.isStocked())	{ //	ignore service
-							fact.remove(dr);
-							continue;
-						}
-						p_Error = "Original Shipment/Receipt not posted yet";
-						return null;
-					}
-				}
 
-				//  Inventory               CR
-				cr = fact.createLine(line,
-					line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
-					as.getC_Currency_ID(), null, costs);
-				if (cr == null)
+				if(costs.compareTo(Env.ZERO) != 0)
 				{
-					p_Error = "FactLine CR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				cr.setM_Locator_ID(line.getM_Locator_ID());
-				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
-				cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
-				
-				if (isReversal(line))
-				{
-					//	Set AmtAcctCr from Original Shipment/Receipt
-					if (!cr.updateReverseLine (MRecognition.Table_ID,
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+					//  CoGS            DR
+					dr = fact.createLine(line,
+						getCOGSAccount(line, contractAcct, as),
+						as.getC_Currency_ID(), costs, null);
+					if (dr == null)
 					{
-						p_Error = "Original Shipment/Receipt not posted yet";
+						p_Error = "FactLine DR not created: " + line;
+						log.log(Level.WARNING, p_Error);
 						return null;
 					}
-					costs = cr.getAcctBalance(); //get original cost
-				}
-				
-			}//COGS	
-			
+					dr.setM_Locator_ID(line.getM_Locator_ID());
+					dr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
+					dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+					dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
+					dr.setQty(line.getQty().negate());
+
+					if (isReversal(line))
+					{
+						//	Set AmtAcctDr from Original Shipment/Receipt
+						if (!dr.updateReverseLine (MRecognition.Table_ID,
+								m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+						{
+							if (product != null && !product.isStocked())	{ //	ignore service
+								fact.remove(dr);
+								continue;
+							}
+							p_Error = "Original Shipment/Receipt not posted yet";
+							return null;
+						}
+					}
+
+					//  Inventory               CR
+					cr = fact.createLine(line,
+						line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
+						as.getC_Currency_ID(), null, costs);
+					if (cr == null)
+					{
+						p_Error = "FactLine CR not created: " + line;
+						log.log(Level.WARNING, p_Error);
+						return null;
+					}
+					cr.setM_Locator_ID(line.getM_Locator_ID());
+					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+					cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
+
+					if (isReversal(line))
+					{
+						//	Set AmtAcctCr from Original Shipment/Receipt
+						if (!cr.updateReverseLine (MRecognition.Table_ID,
+								m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+						{
+							p_Error = "Original Shipment/Receipt not posted yet";
+							return null;
+						}
+						costs = cr.getAcctBalance(); //get original cost
+					}
+				}//if(costs.compareTo(Env.ZERO) != 0)
+			}//COGS
+
 			/*** Create Cost Detail ***/
 			MRecognitionLine recogLine = (MRecognitionLine) line.getPO();
 			if(recogLine.getM_InOutLine_ID() > 0  && product != null )
 			{
 				MInOutLine ioLine = new MInOutLine(getCtx(), recogLine.getM_InOutLine_ID(),getTrxName());
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-				{	
-					if (line.getM_AttributeSetInstance_ID() == 0 ) 
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+				{
+					if (line.getM_AttributeSetInstance_ID() == 0 )
 					{
 						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
 						if (mas != null && mas.length > 0 )
@@ -665,10 +681,10 @@ public class Doc_JPRecognition extends Doc
 								{
 									p_Error = "Failed to create cost detail record";
 									return null;
-								}							
-							}						
+								}
+							}
 						}
-					} 
+					}
 					else
 					{
 						//
@@ -685,7 +701,7 @@ public class Doc_JPRecognition extends Doc
 							}
 						}
 					}
-				} 
+				}
 				else
 				{
 					//
@@ -702,21 +718,21 @@ public class Doc_JPRecognition extends Doc
 						}
 					}
 				}
-				
+
 			}//Create Cost Detail
-			
+
 		}	//	for all lines
-	
+
 		return null;
 	}//JPR
-	
-	
+
+
 	private String postJPS(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-		
+
 		BigDecimal amt = Env.ZERO;
 
 		//DR: Invoice  TaxDue      / CR:   Recognition TaxDue
@@ -732,20 +748,32 @@ public class Doc_JPRecognition extends Doc
 					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
 					if (taxLineDR != null)
 						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-					
+
 					//CR -> DR
 					FactLine taxLineCR = fact.createLine(null, recognitionTaxDueAccount, getC_Currency_ID(), amt, null);
 					if (taxLineCR != null)
-						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());	
+						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 				}
 			}
 		}//for
-		
-		//DR:  Invoice Revenue / CR: Recognition Revenue  
+
+		//DR:  Invoice Revenue / CR: Recognition Revenue
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			DocLine line = p_lines[i];		
+			DocLine line = p_lines[i];
 			amt = p_lines[i].getAmtSource();
+			//JPIERE-0369:Start
+			int C_Charge_ID = line.getPO().get_ValueAsInt("C_Charge_ID");
+			if(C_Charge_ID != 0)
+			{
+				MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+				if(!charge.isSameTax() && charge.isTaxIncluded())
+				{
+					amt = (BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt");
+				}
+			}
+			//JPIERE-0369:finish
+
 			BigDecimal dAmt = null;
 			if (as.isTradeDiscountPosted())
 			{
@@ -756,21 +784,21 @@ public class Doc_JPRecognition extends Doc
 					dAmt = discount;
 					//CR  - Recognition Trade Deiscount Acct -> DR
 					fact.createLine (line, getRecognitionTDiscountGrantAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
-					
+
 					//DR  - Invoice Trade Deiscount Acct -> CR
 					fact.createLine (line, getInvoiceTDiscountGrantAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
 				}
 			}
-			
+
 			//DR - Invoice Revenue Acct -> CR
 			dr = fact.createLine (line, getInvoiceRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 			dr.setQty(line.getQty().negate());
-			
+
 			//CR - Recognition Revenue Acct -> DR
 			cr = fact.createLine (line, getRecognitionRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
 			cr.setQty(line.getQty());
-			
-			
+
+
 			/***COGS***/
 			boolean JP_RECOGNITION_COGS_SCHEDULED_COST = MSysConfig.getBooleanValue("JP_RECOGNITION_COGS_SCHEDULED_COST", false, getAD_Client_ID(), getAD_Org_ID());
 			MProduct product = line.getProduct();
@@ -783,9 +811,9 @@ public class Doc_JPRecognition extends Doc
 					MOrderLine oLine = new MOrderLine(getCtx(), line.getC_OrderLine_ID(), getTrxName() );
 					costs  = (BigDecimal)oLine.get_Value("JP_ScheduledCostLineAmt");
 				}
-				
+
 				if(costs.compareTo(Env.ZERO) != 0)
-				{	
+				{
 					//  CoGS            DR -> CR
 					dr = fact.createLine(line,	getCOGSAccount(line, contractAcct, as),	as.getC_Currency_ID(), null, costs);
 					if (dr == null)
@@ -794,7 +822,7 @@ public class Doc_JPRecognition extends Doc
 						log.log(Level.WARNING, p_Error);
 						return null;
 					}
-					
+
 					int M_InOutLine_ID = line.getPO().get_ValueAsInt("M_InOutLine_ID");
 					if(M_InOutLine_ID > 0)
 					{
@@ -802,11 +830,11 @@ public class Doc_JPRecognition extends Doc
 						dr.setM_Locator_ID(ioLine.getM_Locator_ID());
 						dr.setLocationFromLocator(ioLine.getM_Locator_ID(), true);    //  from Loc
 					}
-							
+
 					dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
 					dr.setQty(line.getQty().negate());
-					
-		
+
+
 					//  Inventory               CR -> DR
 					cr = fact.createLine(line, getAssetAccount(line, contractAcct, as),	as.getC_Currency_ID(), costs, null);
 					if (cr == null)
@@ -818,14 +846,14 @@ public class Doc_JPRecognition extends Doc
 					cr.setM_Locator_ID(line.getM_Locator_ID());
 					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
 				}
-				
+
 			}else{
-				
-				if (!isReversal(line) && product != null) 
+
+				if (!isReversal(line) && product != null)
 				{
-					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-					{	
-						if (line.getM_AttributeSetInstance_ID() == 0 ) 
+					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+					{
+						if (line.getM_AttributeSetInstance_ID() == 0 )
 						{
 							MInOutLine ioLine = (MInOutLine) line.getPO();
 							MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
@@ -840,11 +868,11 @@ public class Doc_JPRecognition extends Doc
 									pc.setQty(QtyMA);
 									pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
 									BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-								
+
 									costs = costs.add(maCosts);
 								}
 							}
-						} 
+						}
 						else
 						{
 							costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
@@ -868,76 +896,80 @@ public class Doc_JPRecognition extends Doc
 						else	//	ignore service
 							continue;
 					}
-				} 
+				}
 				else
 				{
 					costs = BigDecimal.ZERO;
 				}
-				//  Inventory               DR
-				dr = fact.createLine(line,
-					line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
-					as.getC_Currency_ID(), costs.negate(), null);
-				if (dr == null)
+
+
+				if(costs.compareTo(Env.ZERO) != 0)
 				{
-					p_Error = "FactLine DR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				dr.setM_Locator_ID(line.getM_Locator_ID());
-				dr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
-				dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
-				if (isReversal(line))
-				{
-					//	Set AmtAcctDr from Original Shipment/Receipt
-					if (!dr.updateReverseLine (MRecognition.Table_ID,
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+					//  Inventory               DR
+					dr = fact.createLine(line,
+						line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
+						as.getC_Currency_ID(), costs.negate(), null);
+					if (dr == null)
 					{
-						if (product != null && !product.isStocked())	{ //	ignore service
-							fact.remove(dr);
-							continue;
+						p_Error = "FactLine DR not created: " + line;
+						log.log(Level.WARNING, p_Error);
+						return null;
+					}
+					dr.setM_Locator_ID(line.getM_Locator_ID());
+					dr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+					dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
+					if (isReversal(line))
+					{
+						//	Set AmtAcctDr from Original Shipment/Receipt
+						if (!dr.updateReverseLine (MRecognition.Table_ID,
+								m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+						{
+							if (product != null && !product.isStocked())	{ //	ignore service
+								fact.remove(dr);
+								continue;
+							}
+							p_Error = "Original Shipment/Receipt not posted yet";
+							return null;
 						}
-						p_Error = "Original Shipment/Receipt not posted yet";
-						return null;
+						costs = dr.getAcctBalance(); //get original cost
 					}
-					costs = dr.getAcctBalance(); //get original cost
-				}
-				
-				//  CoGS            CR
-				cr = fact.createLine(line,
-					getCOGSAccount(line, contractAcct, as),
-					as.getC_Currency_ID(), null, costs.negate());
-				if (cr == null)
-				{
-					p_Error = "FactLine CR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				cr.setM_Locator_ID(line.getM_Locator_ID());
-				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
-				cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				cr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
-				cr.setQty(line.getQty().negate());
-				if (isReversal(line))
-				{
-					//	Set AmtAcctCr from Original Shipment/Receipt
-					if (!cr.updateReverseLine (MRecognition.Table_ID,
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+
+					//  CoGS            CR
+					cr = fact.createLine(line,
+						getCOGSAccount(line, contractAcct, as),
+						as.getC_Currency_ID(), null, costs.negate());
+					if (cr == null)
 					{
-						p_Error = "Original Shipment/Receipt not posted yet";
+						p_Error = "FactLine CR not created: " + line;
+						log.log(Level.WARNING, p_Error);
 						return null;
 					}
-				}
-				
+					cr.setM_Locator_ID(line.getM_Locator_ID());
+					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
+					cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+					cr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
+					cr.setQty(line.getQty().negate());
+					if (isReversal(line))
+					{
+						//	Set AmtAcctCr from Original Shipment/Receipt
+						if (!cr.updateReverseLine (MRecognition.Table_ID,
+								m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+						{
+							p_Error = "Original Shipment/Receipt not posted yet";
+							return null;
+						}
+					}
+				}//if(costs.compareTo(Env.ZERO) != 0)
 			}//COGS
-			
+
 			/*** Create Cost Detail ***/
 			MRecognitionLine recogLine = (MRecognitionLine) line.getPO();
 			if(recogLine.getM_InOutLine_ID() > 0  && product != null)
 			{
 				MInOutLine ioLine = new MInOutLine(getCtx(), recogLine.getM_InOutLine_ID(),getTrxName());
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-				{	
-					if (ioLine.getM_AttributeSetInstance_ID() == 0 ) 
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+				{
+					if (ioLine.getM_AttributeSetInstance_ID() == 0 )
 					{
 						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
 						if (mas != null && mas.length > 0 )
@@ -989,19 +1021,19 @@ public class Doc_JPRecognition extends Doc
 				}
 
 			}
-			
+
 		}	//	for all lines
-	
+
 		return null;
 	}//JPS
-	
-	
+
+
 	private String postJPX(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-		
+
 		BigDecimal amt = Env.ZERO;
 
 		//DR: Invoice  TaxDue      / CR:   Recognition TaxDue
@@ -1017,7 +1049,7 @@ public class Doc_JPRecognition extends Doc
 					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
 					if (taxLineDR != null)
 						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-					
+
 					//DR
 					FactLine taxLineCR = fact.createLine(null, getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
 					if (taxLineCR != null)
@@ -1025,12 +1057,24 @@ public class Doc_JPRecognition extends Doc
 				}
 			}
 		}//for
-		
+
 		//
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			DocLine line = p_lines[i];		
+			DocLine line = p_lines[i];
 			amt = p_lines[i].getAmtSource();
+			//JPIERE-0369:Start
+			int C_Charge_ID = line.getPO().get_ValueAsInt("C_Charge_ID");
+			if(C_Charge_ID != 0)
+			{
+				MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+				if(!charge.isSameTax() && charge.isTaxIncluded())
+				{
+					amt = (BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt");
+				}
+			}
+			//JPIERE-0369:finish
+
 			BigDecimal dAmt = null;
 			if (as.isTradeDiscountPosted())
 			{
@@ -1041,35 +1085,35 @@ public class Doc_JPRecognition extends Doc
 					dAmt = discount;
 					//CR
 					fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
-					
+
 					//DR
 					fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
 				}
 			}
-			
+
 			//CR - Invoice Expense Acct
 			dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 			dr.setQty(line.getQty().negate());
-			
+
 			//DR - Recognition Expense Acct
 			cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
 			cr.setQty(line.getQty());
-			
+
 			cr.setM_Locator_ID(line.getM_Locator_ID());
 			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
-			
+
 		}	//	for all lines
-	
+
 		return null;
 	}//JPX
-	
-	
+
+
 	private String postJPY(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-		
+
 		BigDecimal amt = Env.ZERO;
 
 		//DR: Invoice  TaxDue      / CR:   Recognition TaxDue
@@ -1085,7 +1129,7 @@ public class Doc_JPRecognition extends Doc
 					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
 					if (taxLineDR != null)
 						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-					
+
 					//DR
 					FactLine taxLineCR = fact.createLine(null, getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
 					if (taxLineCR != null)
@@ -1093,12 +1137,24 @@ public class Doc_JPRecognition extends Doc
 				}
 			}
 		}//for
-		
+
 		//
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			DocLine line = p_lines[i];		
+			DocLine line = p_lines[i];
 			amt = p_lines[i].getAmtSource();
+			//JPIERE-0369:Start
+			int C_Charge_ID = line.getPO().get_ValueAsInt("C_Charge_ID");
+			if(C_Charge_ID != 0)
+			{
+				MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+				if(!charge.isSameTax() && charge.isTaxIncluded())
+				{
+					amt = (BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt");
+				}
+			}
+			//JPIERE-0369:finish
+
 			BigDecimal dAmt = null;
 			if (as.isTradeDiscountPosted())
 			{
@@ -1109,32 +1165,32 @@ public class Doc_JPRecognition extends Doc
 					dAmt = discount;
 					//CR
 					fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
-					
+
 					//DR
 					fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
 				}
 			}
-			
+
 			//CR - Invoice Expense Acct -> DR
 			dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
 			dr.setQty(line.getQty().negate());
-			
+
 			//DR - Recognition Expense Acct -> CR
 			cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 			cr.setQty(line.getQty());
-			
+
 			cr.setM_Locator_ID(line.getM_Locator_ID());
 			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
-			
+
 		}	//	for all lines
-	
+
 		return null;
 	}//JPY
-	
-	
+
+
 	/***
-	 * 
-	 * 
+	 *
+	 *
 	 * @param docLine
 	 * @param contractAcct
 	 * @param as
@@ -1143,7 +1199,7 @@ public class Doc_JPRecognition extends Doc
 	private MAccount getRecognitionRevenueAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
-		
+
 		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
 		{
 			MContractChargeAcct contractChargeAcct =  contractAcct.getContracChargeAcct(line.getC_Charge_ID(), as.getC_AcctSchema_ID(), false);
@@ -1153,7 +1209,7 @@ public class Doc_JPRecognition extends Doc
 			}else{
 				return docLine.getAccount (ProductCost.ACCTTYPE_P_Revenue, as);
 			}
-			
+
 		}else if(line.getM_Product_ID() > 0){
 			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getJP_Revenue_Acct() > 0)
@@ -1166,8 +1222,8 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount (ProductCost.ACCTTYPE_P_Revenue, as);
 		}
 	}
-	
-	
+
+
 	private MAccount getInvoiceRevenueAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
 
@@ -1182,7 +1238,7 @@ public class Doc_JPRecognition extends Doc
 			}else{
 				return docLine.getAccount (ProductCost.ACCTTYPE_P_Revenue, as);
 			}
-			
+
 		}else if(line.getM_Product_ID() > 0){
 			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_Revenue_Acct() > 0)
@@ -1195,8 +1251,8 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount (ProductCost.ACCTTYPE_P_Revenue, as);
 		}
 	}
-	
-	
+
+
 	private MAccount getRecognitionExpenseAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
@@ -1210,21 +1266,21 @@ public class Doc_JPRecognition extends Doc
 			}else{
 				return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 			}
-			
+
 		}else if(line.getM_Product_ID() > 0){
 			if(docLine.isItem())
 			{
 				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 				if(contractProductAcct != null && contractProductAcct.getJP_PurchaseOffset_Acct() > 0 && contractProductAcct.getJP_Purchase_Acct() > 0)
 				{
-					return MAccount.get(getCtx(),contractProductAcct.getJP_Purchase_Acct());		
+					return MAccount.get(getCtx(),contractProductAcct.getJP_Purchase_Acct());
 				}else{
 
 					return docLine.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
 				}
-				
+
 			}else{
-			
+
 				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 				if(contractProductAcct != null && contractProductAcct.getJP_Expense_Acct() > 0)
 				{
@@ -1237,8 +1293,8 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount (ProductCost.ACCTTYPE_P_Expense, as);
 		}
 	}
-	
-	
+
+
 	private MAccount getInvoiceExpenseAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
@@ -1252,21 +1308,21 @@ public class Doc_JPRecognition extends Doc
 			}else{
 				return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 			}
-			
+
 		}else if(line.getM_Product_ID() > 0){
 			if(docLine.isItem())
 			{
 				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 				if(contractProductAcct != null && contractProductAcct.getJP_PurchaseOffset_Acct() > 0 && contractProductAcct.getJP_Purchase_Acct() > 0)
 				{
-					return MAccount.get(getCtx(),contractProductAcct.getJP_PurchaseOffset_Acct());		
+					return MAccount.get(getCtx(),contractProductAcct.getJP_PurchaseOffset_Acct());
 				}else{
 
 					return docLine.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
 				}
-				
+
 			}else{
-			
+
 				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 				if(contractProductAcct != null && contractProductAcct.getP_Expense_Acct() > 0)
 				{
@@ -1279,11 +1335,11 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount (ProductCost.ACCTTYPE_P_Expense, as);
 		}
 	}
-	
+
 	private MAccount getRecognitionTDiscountGrantAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
-		
+
 		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getJP_TradeDiscountGrant_Acct() > 0)
 		{
@@ -1292,12 +1348,12 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as);
 		}
 	}
-	
-	
+
+
 	private MAccount getInvoiceTDiscountGrantAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
-		
+
 		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountGrant_Acct() > 0)
 		{
@@ -1306,11 +1362,11 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as);
 		}
 	}
-	
+
 	private MAccount getRecognitionTDiscountRecAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
-		
+
 		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getJP_TradeDiscountRec_Acct() > 0)
 		{
@@ -1319,11 +1375,11 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
 		}
 	}
-	
+
 	private MAccount getInvoiceTDiscountRecAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
-		
+
 		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)
 		{
@@ -1332,7 +1388,7 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
 		}
 	}
-	
+
 	private MAccount getCOGSAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
@@ -1346,7 +1402,7 @@ public class Doc_JPRecognition extends Doc
 			}else{
 				return docLine.getAccount(ProductCost.ACCTTYPE_P_Cogs, as) ;
 			}
-			
+
 		}else if(line.getM_Product_ID() > 0){
 			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_COGS_Acct() > 0)
@@ -1359,8 +1415,8 @@ public class Doc_JPRecognition extends Doc
 			return docLine.getAccount(ProductCost.ACCTTYPE_P_Cogs, as) ;
 		}
 	}
-	
-	
+
+
 	private MAccount getAssetAccount(DocLine docLine, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		return docLine.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
@@ -1376,7 +1432,7 @@ public class Doc_JPRecognition extends Doc
 			return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxDue,as);
 		}
 	}
-	
+
 	private MAccount getInvoiceTaxCreditAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
@@ -1398,7 +1454,7 @@ public class Doc_JPRecognition extends Doc
 			}
 		}
 	}
-	
+
 	private MAccount getRecognitionTaxDueAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
@@ -1409,7 +1465,7 @@ public class Doc_JPRecognition extends Doc
 			return null;
 		}
 	}
-	
+
 	private MAccount getRecognitionTaxCreditAccount(DocTax doc_Tax, MContractAcct contractAcct,  MAcctSchema as)
 	{
 		MContractTaxAcct taxAcct = contractAcct.getContracTaxAcct(doc_Tax.getC_Tax_ID(), as.getC_AcctSchema_ID(),false);
@@ -1428,11 +1484,11 @@ public class Doc_JPRecognition extends Doc
 				return MAccount.get(getCtx(), taxAcct.getJP_TaxCredit_Acct());
 			}else{
 				return null;
-			}			
+			}
 		}
 	}
 
-	
+
 	private boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}

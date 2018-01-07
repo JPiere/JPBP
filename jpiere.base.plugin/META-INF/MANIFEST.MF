@@ -23,24 +23,14 @@ Import-Package: org.compiere.apps,
  org.compiere.grid,
  org.compiere.minigrid,
  org.compiere.model
-Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml
- ,OSGI-INF/JPiereBasePluginTaxProviderFactory.xml
- ,OSGI-INF/JPiereBasePluginModelValidatorFactory.xml
- ,OSGI-INF/JPiereBasePluginDocFactory.xml
- ,OSGI-INF/JPiereBasePluginModelFactory.xml
- ,OSGI-INF/JPiereBasePluginEditorFactory.xml
- ,OSGI-INF/JPiereBasePluginDisplayTypeFactory.xml
- ,OSGI-INF/JPiereBasePluginCreateFromFactory.xml
- ,OSGI-INF/JPiereBasePluginColumnCalloutFactory.xml
- ,OSGI-INF/JPiereBasePluginProcessFactory.xml
- ,OSGI-INF/JPiereBasePluginJPiereTaxProviderFactory.xml
- ,OSGI-INF/JPiereBasePluginInfoFactory.xml
- ,OSGI-INF/JPiereBasePluginCreateBillFactory.xml
- ,OSGI-INF/JPiereBasePluginContractOrderWindowValidator.xml
- ,OSGI-INF/JPiereBasePluginContractInvoiceWindowValidator.xml
- ,OSGI-INF/JPiereBasePluginContractRecognitionWindowValidator.xml
- ,OSGI-INF/JPiereBasePluginContractInOutWindowValidator.xml
- ,OSGI-INF/JPiereBasePluginContractDocumentWindowValidator.xml
+Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml,
+ OSGI-INF/JPiereBasePluginTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginModelValidatorFactory.xml,
+ OSGI-INF/JPiereBasePluginDocFactory.xml,OSGI-INF/JPiereBasePluginModelFactory.xml,OSGI-INF/JPiereBasePluginEditorFactory.xml,
+ OSGI-INF/JPiereBasePluginDisplayTypeFactory.xml,OSGI-INF/JPiereBasePluginCreateFromFactory.xml,
+ OSGI-INF/JPiereBasePluginColumnCalloutFactory.xml,OSGI-INF/JPiereBasePluginProcessFactory.xml,
+ OSGI-INF/JPiereBasePluginJPiereTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginInfoFactory.xml,
+ OSGI-INF/JPiereBasePluginCreateBillFactory.xml,OSGI-INF/JPiereBasePluginContractOrderWindowValidator.xml,OSGI-INF/JPiereBasePluginContractInvoiceWindowValidator.xml,OSGI-INF/JPiereBasePluginContractRecognitionWindowValidator.xml,OSGI-INF/JPiereBasePluginContractInOutWindowValidator.xml,OSGI-INF/JPiereBasePluginContractDocumentWindowValidator.xml,
+ OSGI-INF/JPiereBasePluginProductPricingFactory.xml
 Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
  jpiere.base.plugin.org.adempiere.model,
