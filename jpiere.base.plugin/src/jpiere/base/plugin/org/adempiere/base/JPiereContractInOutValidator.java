@@ -507,7 +507,15 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 						ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
 						if(pInfo == null)
 						{
-							FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 派生伝票作成方針により");//TODO メッセージ化
+							String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
+							String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+							String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed:
+							String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
+							
+							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+									, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);//TODO
+							
+							/*"入力不可: 契約処理期間 -> 要確認 : 派生伝票作成方針"*/
 						}
 					}
 				}

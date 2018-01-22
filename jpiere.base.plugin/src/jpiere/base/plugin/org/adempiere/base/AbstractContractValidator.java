@@ -1,12 +1,14 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import org.adempiere.webui.window.FDialog;
+import org.compiere.model.MColumn;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MRefList;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfo;
@@ -55,7 +57,19 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約書、契約内容、契約処理期間は入力できません - 基点となる伝票が入力されていないため");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
+						String contract = Msg.getElement(Env.getCtx(), "JP_Contract_ID");
+						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_Order_ID", po.get_ValueAsBoolean("IsSOTrx"))};
+						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " + contract + "," + contractContent + "," + contractPeriod + " -> " + toBeConfirmed + " : " + message);//TODO
+						
+						/*"契約管理情報", "入力不可: 契約書、契約内容、契約処理期間 -> 要確認 : 受発注伝票に入力がありません"*/
 					}
 										
 				}
@@ -81,7 +95,18 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約内容、契約処理期間は入力できません - 契約書が入力されていないため");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
+						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_Contract_ID")};
+						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " + contractContent + "," + contractPeriod + " -> " + toBeConfirmed + " : " + message);//TODO
+						
+						/*"契約管理情報", "入力不可: 契約内容、契約処理期間 -> 要確認 : 契約書に入力がありません"*/
 					}					
 				}				
 				return null;
@@ -129,7 +154,17 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> スポット契約");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
+						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+ spotContract);//TODO
+						
+						/*"入力不可: 契約処理期間 -> 要確認 : スポット契約"*/
 					}
 				}
 				
@@ -144,7 +179,18 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約内容、契約処理期間は入力できません -> 一般契約");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
+						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
+						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);//TODO
+						
+						/*"入力不可: 契約内容,契約処理期間 -> 要確認 : 一般契約"*/
 					}
 				}
 
@@ -185,7 +231,19 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約内容明細、契約処理期間は入力できません -> 基点となる伝票明細が入力されていません");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
+						String contract = Msg.getElement(Env.getCtx(), "JP_Contract_ID");
+						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						Object[] objs = new Object[]{"C_OrderLine_ID or M_RMALine_ID "};
+						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " + contract + "," + contractContent + "," + contractPeriod + " -> " + toBeConfirmed + " : " + message);//TODO
+						
+						/*"契約管理情報", "入力不可: 契約書、契約内容、契約処理期間 -> 要確認 : C_OrderLine_ID or M_RMALine_IDに入力がありません"*/
 					}
 					
 				}
@@ -209,7 +267,17 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 契約内容明細が入力されていません");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")};
+						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);//TODO
+						
+						/*"契約管理情報", "入力不可: 契約処理期間 -> 要確認 : 契約内容明細に入力がありません"*/
 					}
 				}
 				return null;
@@ -282,7 +350,15 @@ public abstract class AbstractContractValidator {
 							po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 							if(pInfo == null)
 							{
-								FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 派生伝票作成方針により");//TODO メッセージ化
+								String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
+								String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+								String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed:
+								String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
+								
+								FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);//TODO
+								
+								/*"入力不可: 契約処理期間 -> 要確認 : 派生伝票作成方針"*/
 							}
 						}
 						
@@ -304,7 +380,15 @@ public abstract class AbstractContractValidator {
 							po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 							if(pInfo == null)
 							{
-								FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 派生伝票作成方針により");//TODO メッセージ化
+								String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
+								String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+								String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed:
+								String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
+								
+								FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);//TODO
+								
+								/*"入力不可: 契約処理期間 -> 要確認 : 派生伝票作成方針"*/
 							}
 						}
 						
@@ -319,7 +403,17 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> スポット契約");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
+						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);//TODO
+						
+						/*"入力不可: 契約処理期間 -> 要確認 : スポット契約"*/
 					}
 				}
 				
@@ -332,7 +426,18 @@ public abstract class AbstractContractValidator {
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
-						FDialog.info(0, null, "契約管理情報", "契約内容明細と契約処理期間は入力できません -> 一般契約");//TODO メッセージ化
+						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
+						String cLine = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID");
+						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
+						
+						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
+						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
+						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
+						
+						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+								, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);//TODO
+						
+						/*"契約管理情報", "入力不可: 契約内容明細,契約処理期間 -> 要確認 : 一般契約"*/
 					}
 				}
 			}
