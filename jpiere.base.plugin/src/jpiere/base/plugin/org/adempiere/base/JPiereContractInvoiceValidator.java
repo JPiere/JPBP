@@ -268,9 +268,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);//It is not input in {0}
 						
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-								, nonEnterable + " " + contractContent + " , " + contractPeriod + " -> " + toBeConfirmed +" : " + message);//TODO
-						
-						/*"入力不可: 契約内容,契約処理期間 -> 要確認 : 契約書に入力がありません"*/
+								, nonEnterable + " " + contractContent + " , " + contractPeriod + " -> " + toBeConfirmed +" : " + message);
 					}
 				}
 				
@@ -432,9 +430,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 						
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+  spotContract);//TODO
-						
-						/*"入力不可: 契約処理期間 -> 要確認 : スポット契約"*/
+								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+  spotContract);
 					}
 				}
 
@@ -458,9 +454,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 						
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);//TODO
-						
-						/*"入力不可: 契約内容,契約処理期間 -> 要確認 : 一般契約"*/
+								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
 					}
 				}
 			}
@@ -622,10 +616,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 								String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
 								
 								FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);//TODO
-								
-								/*"入力不可: 契約処理期間 -> 要確認 : 派生伝票作成方針"*/
-								
+										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);								
 							}
 						}
 					}
@@ -690,9 +681,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 							String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 							
 							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-									, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);//TODO
-							
-							/*"入力不可: 契約処理期間 -> 要確認 : スポット契約"*/
+									, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);
 						}					
 					}
 
@@ -715,9 +704,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 							String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 							
 							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-									, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);//TODO
-							
-							/*"契約管理情報", "入力不可: 契約内容明細,契約処理期間 -> 要確認 : 一般契約"*/
+									, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
 						}						
 					}
 					
@@ -738,9 +725,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
 						
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);//TODO
-						
-						/*"契約管理情報", "入力不可: 契約処理期間 -> 要確認 : 契約内容明細に入力がありません"*/
+								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);
 					}
 				}
 				
