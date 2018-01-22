@@ -1,5 +1,6 @@
 package jpiere.base.plugin.org.adempiere.base;
 
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
@@ -8,6 +9,7 @@ import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -39,15 +41,26 @@ public abstract class AbstractContractValidator {
 		{
 			int C_Order_ID = po.get_ValueAsInt("C_Order_ID");
 			int M_RMA_ID = po.get_ValueAsInt("M_RMA_ID");
+			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
 			
 			//Check C_Order_ID and M_RMA_ID
 			if(C_Order_ID == 0 && M_RMA_ID == 0)
 			{
-				po.set_ValueNoCheck("JP_Contract_ID", null);
-				po.set_ValueNoCheck("JP_ContractContent_ID", null);
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
+				if(po.get_ValueAsInt("JP_Contract_ID") != 0
+						|| po.get_ValueAsInt("JP_ContractContent_ID") != 0
+						|| po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_Contract_ID", null);
+					po.set_ValueNoCheck("JP_ContractContent_ID", null);
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約書、契約内容、契約処理期間は入力できません - 基点となる伝票が入力されていないため");//TODO メッセージ化
+					}
+										
+				}
 				return null;
+				
 			}
 			
 			//Check JP_Contract_ID, JP_ContractContent_ID, JP_ContractProcPeriod_ID
@@ -61,10 +74,18 @@ public abstract class AbstractContractValidator {
 			
 			if(JP_Contract_ID == 0)
 			{
-				po.set_ValueNoCheck("JP_ContractContent_ID", null);
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				if(po.get_ValueAsInt("JP_ContractContent_ID") != 0
+						|| po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_ContractContent_ID", null);
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約内容、契約処理期間は入力できません - 契約書が入力されていないため");//TODO メッセージ化
+					}					
+				}				
+				return null;
 				
-				return null;			
 			}
 			
 			po.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
@@ -103,12 +124,30 @@ public abstract class AbstractContractValidator {
 				
 				/** In case of Spot Contract, order has JP_ContractContent_ID always*/
 				po.set_ValueNoCheck("JP_ContractContent_ID", baseDoc.get_ValueAsInt("JP_ContractContent_ID"));
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				if(po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> スポット契約");//TODO メッセージ化
+					}
+				}
+				
+				
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
 				
-				po.set_ValueNoCheck("JP_ContractContent_ID", null);
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				if(po.get_ValueAsInt("JP_ContractContent_ID") != 0
+						|| po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_ContractContent_ID", null);
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約内容、契約処理期間は入力できません -> 一般契約");//TODO メッセージ化
+					}
+				}
+
 			}
 		}
 		
@@ -135,13 +174,23 @@ public abstract class AbstractContractValidator {
 		{		
 			int C_OrderLine_ID = po.get_ValueAsInt("C_OrderLine_ID");
 			int M_RMALine_ID = po.get_ValueAsInt("M_RMALine_ID");
+			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
 			
 			if(C_OrderLine_ID == 0 && M_RMALine_ID == 0)
 			{
-				po.set_ValueNoCheck("JP_ContractLine_ID", null);
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
+				if(po.get_ValueAsInt("JP_ContractLine_ID") != 0
+						|| po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_ContractLine_ID", null);
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約内容明細、契約処理期間は入力できません -> 基点となる伝票明細が入力されていません");//TODO メッセージ化
+					}
+					
+				}
 				return null;
+				
 			}
 			
 			
@@ -155,8 +204,14 @@ public abstract class AbstractContractValidator {
 			int JP_ContractLine_ID = baseDocLine.get_ValueAsInt("JP_ContractLine_ID");
 			if(JP_ContractLine_ID == 0)
 			{
-				po.set_ValueNoCheck("JP_ContractLine_ID", null);
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				if(po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 契約内容明細が入力されていません");//TODO メッセージ化
+					}
+				}
 				return null;
 			}
 				
@@ -222,7 +277,14 @@ public abstract class AbstractContractValidator {
 						
 					}else{
 						
-						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+						if(po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+						{
+							po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+							if(pInfo == null)
+							{
+								FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 派生伝票作成方針により");//TODO メッセージ化
+							}
+						}
 						
 					}
 					
@@ -237,7 +299,14 @@ public abstract class AbstractContractValidator {
 						
 					}else{
 						
-						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+						if(po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+						{
+							po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+							if(pInfo == null)
+							{
+								FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 派生伝票作成方針により");//TODO メッセージ化
+							}
+						}
 						
 					}
 					
@@ -245,12 +314,27 @@ public abstract class AbstractContractValidator {
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract)){
 				
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				if(po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> スポット契約");//TODO メッセージ化
+					}
+				}
 				
 			}else if (contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract)){
 				
-				po.set_ValueNoCheck("JP_ContractLine_ID", null);
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+				if(po.get_ValueAsInt("JP_ContractLine_ID") != 0
+						|| po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+				{
+					po.set_ValueNoCheck("JP_ContractLine_ID", null);
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					if(pInfo == null)
+					{
+						FDialog.info(0, null, "契約管理情報", "契約内容明細と契約処理期間は入力できません -> 一般契約");//TODO メッセージ化
+					}
+				}
 			}
 			
 		}//if(type == ModelValidator.TYPE_BEFORE_NEW)

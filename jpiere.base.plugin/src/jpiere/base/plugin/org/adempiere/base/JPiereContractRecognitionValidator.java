@@ -15,11 +15,13 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.util.List;
 
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MClient;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -303,7 +305,17 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 					}
 					
 				}else{
-					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+					
+					if(po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
+					{
+						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
+						ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
+						if(pInfo == null)
+						{
+							FDialog.info(0, null, "契約管理情報", "契約処理期間は入力できません -> 派生伝票作成方針により");//TODO メッセージ化
+						}
+					}
+					
 				}
 			}
 			
