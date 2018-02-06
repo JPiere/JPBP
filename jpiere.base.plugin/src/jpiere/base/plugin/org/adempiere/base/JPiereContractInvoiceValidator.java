@@ -256,22 +256,22 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						|| invoice.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
 				{
 					invoice.set_ValueNoCheck("JP_ContractContent_ID", null);
-					invoice.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);					
+					invoice.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
 						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_Contract_ID")};
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);//It is not input in {0}
-						
+
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
 								, nonEnterable + " " + contractContent + " , " + contractPeriod + " -> " + toBeConfirmed +" : " + message);
 					}
 				}
-				
+
 				return null;
 			}
 
@@ -315,7 +315,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}
 
 					//Check BP
-					if(content.getC_BPartner_ID() != invoice.getC_BPartner_ID())
+					if(content.getC_BPartner_ID() != invoice.getC_BPartner_ID() && content.getBill_BPartner_ID() != invoice.getC_BPartner_ID() )
 					{
 						//Different business partner between Contract Content and Document.
 						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
@@ -401,7 +401,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}
 
 					//Check BP
-					if(content.getC_BPartner_ID() != invoice.getC_BPartner_ID())
+					if(content.getC_BPartner_ID() != invoice.getC_BPartner_ID() && content.getBill_BPartner_ID() != invoice.getC_BPartner_ID() )
 					{
 						//Different business partner between Contract Content and Document.
 						return Msg.getMsg(Env.getCtx(), "JP_DifferentBusinessPartner_ContractContent");
@@ -424,11 +424,11 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					{
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
-						
+
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+  spotContract);
 					}
@@ -448,11 +448,11 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
 						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed:
 						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
-						
+
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
 								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
 					}
@@ -614,9 +614,9 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 								String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
 								String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed:
 								String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
-								
+
 								FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
-										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);								
+										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);
 							}
 						}
 					}
@@ -634,7 +634,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			/** Ref:JPiereContractOrderValidator */
 			MInvoiceLine invoiceLine = (MInvoiceLine)po;
 			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
-			
+
 			int JP_ContractLine_ID = invoiceLine.get_ValueAsInt(MContractLine.COLUMNNAME_JP_ContractLine_ID);
 			if(JP_ContractLine_ID > 0)
 			{
@@ -675,14 +675,14 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						{
 							String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
 							String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-							
+
 							String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 							MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 							String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
-							
+
 							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
 									, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);
-						}					
+						}
 					}
 
 				//Check General Contract
@@ -698,16 +698,16 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 							String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
 							String cLine = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID");
 							String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-							
+
 							String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 							MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 							String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
-							
+
 							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
 									, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
-						}						
+						}
 					}
-					
+
 				}
 
 			}else{
@@ -719,16 +719,16 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					{
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")};
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
-						
+
 						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);
 					}
 				}
-				
+
 			}
 
 
