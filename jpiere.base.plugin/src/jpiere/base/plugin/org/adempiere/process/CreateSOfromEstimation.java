@@ -16,10 +16,6 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MEstimation;
-import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
-import jpiere.base.plugin.org.adempiere.model.MOrderJP;
-
 import org.adempiere.util.Callback;
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MOpportunity;
@@ -33,6 +29,10 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.MEstimation;
+import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
+import jpiere.base.plugin.org.adempiere.model.MOrderJP;
+
 /**
  * JPIERE-0185 : Create SO from Estimation
  *
@@ -42,6 +42,7 @@ import org.compiere.util.Util;
 public class CreateSOfromEstimation extends SvrProcess {
 
 	private int			p_JP_Estimation_ID = 0;
+	private int			p_JP_DocTypeSO_ID = 0;
 	private String			p_DocAction = null;
 	private MEstimation 	estimation = null;
 	private IProcessUI 		processUI = null;
@@ -50,9 +51,9 @@ public class CreateSOfromEstimation extends SvrProcess {
 	private boolean 		isAskAnswer = true;
 	private String 			errorMsg = "";
 	private String 			returnMsg = "";
-	
+
 	@Override
-	protected void prepare() 
+	protected void prepare()
 	{
 
 		p_JP_Estimation_ID = getRecord_ID();
@@ -63,6 +64,8 @@ public class CreateSOfromEstimation extends SvrProcess {
 			String name = para[i].getParameterName();
 			if (para[i].getParameter() == null){
 				;
+			}else if (name.equals("JP_DocTypeSO_ID")){
+				p_JP_DocTypeSO_ID = para[i].getParameterAsInt();
 			}else if (name.equals("DocAction")){
 				p_DocAction = para[i].getParameterAsString();
 			}else{
@@ -73,33 +76,33 @@ public class CreateSOfromEstimation extends SvrProcess {
 
 		processUI = Env.getProcessUI(getCtx());
 		estimation = new MEstimation(getCtx(), p_JP_Estimation_ID, get_TrxName()) ;
-				
+
 	}
-	
+
 	@Override
 	protected String doIt() throws Exception
 	{
-		if(estimation.getJP_DocTypeSO_ID()==0)
+		if(p_JP_DocTypeSO_ID==0)
 		{
 			errorMsg = Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "JP_DocTypeSO_ID") + System.lineSeparator();
 		}
-		
+
 		if(estimation.getC_BPartner_ID() == 0)
 		{
 			errorMsg = errorMsg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID") + System.lineSeparator();
 		}
-		
+
 		if(estimation.getC_BPartner_Location_ID() == 0)
 		{
 			errorMsg = errorMsg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID")+ System.lineSeparator();
-		}		
-				
+		}
+
 		if(!Util.isEmpty(errorMsg))
 		{
 			throw new Exception(errorMsg);
 		}
-		
-		
+
+
 		if(processUI != null && estimation.getLink_Order_ID() != 0)
 		{
 			isOpenDialog = true;
@@ -119,27 +122,27 @@ public class CreateSOfromEstimation extends SvrProcess {
 		        }
 
 			});//FDialog.
-			
+
 		}else{
 			returnMsg = createSO();
 			isCreateSO = true;
 		}
-		
-		
+
+
 		while (isOpenDialog && isAskAnswer && !isCreateSO)
 		{
 			Thread.sleep(1000*2);
 		}
-		
+
 		if(isCreateSO)
 			addBufferLog(0, null, null, returnMsg, MOrder.Table_ID, estimation.getLink_Order_ID());
-		
+
 		return returnMsg;
-		
+
 	}
 
 	private String createSO()
-	{		
+	{
 		MEstimationLine[] eLines = estimation.getLines();
 
 		MOrderJP order = new MOrderJP(getCtx(), 0, get_TrxName()) ;
@@ -152,6 +155,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 		order.saveEx(get_TrxName());
 
 		estimation.setLink_Order_ID(order.getC_Order_ID());
+		estimation.setJP_DocTypeSO_ID(p_JP_DocTypeSO_ID);
 		estimation.saveEx(get_TrxName());
 
 		for(int i = 0; i < eLines.length; i++)
