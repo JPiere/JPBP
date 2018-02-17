@@ -149,7 +149,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 		PO.copyValues(estimation, order);
 		order.setAD_Org_ID(estimation.getAD_Org_ID());
 		order.setDocumentNo(null);
-		order.setC_DocTypeTarget_ID(estimation.getJP_DocTypeSO_ID());
+		order.setC_DocTypeTarget_ID(p_JP_DocTypeSO_ID);
 		order.setDocStatus(DocAction.STATUS_Drafted);
 		order.setDocAction(DocAction.ACTION_Complete);
 		order.saveEx(get_TrxName());
