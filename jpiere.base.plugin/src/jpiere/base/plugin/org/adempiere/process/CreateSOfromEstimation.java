@@ -165,6 +165,10 @@ public class CreateSOfromEstimation extends SvrProcess {
 			oLine.setAD_Org_ID(eLines[i].getAD_Org_ID());
 			oLine.saveEx(get_TrxName());
 
+			//Don't set for edit(Delete) Order Line.
+//			eLines[i].setLink_OrderLine_ID(oLine.getC_OrderLine_ID());
+//			eLines[i].saveEx(get_TrxName());
+
 		}//for
 
 		if(!Util.isEmpty(p_DocAction))
