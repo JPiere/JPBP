@@ -54,7 +54,7 @@ import org.compiere.util.Msg;
  * @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * 			<li>BF [ 1896947 ] Generate invoice from Order error
  * 			<li>BF [ 2007837 ] VCreateFrom.save() should run in trx
- * 
+ *
  * @author Hideaki Hagiwara
  */
 public abstract class JPiereCreateFromInvoice extends CreateFrom
@@ -111,7 +111,7 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 					+ " LEFT JOIN C_InvoiceLine il ON sl.M_InOutLine_ID = il.M_InOutLine_ID"
 					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO')"
 					+ " GROUP BY sl.M_InOutLine_ID"
-					+ " HAVING sl.MovementQty - sum(COALESCE(il.QtyInvoiced,0)) > 0");
+					+ " HAVING sl.MovementQty - sum(COALESCE(il.QtyInvoiced,0)) <> 0");
 			sql.append(") ORDER BY s.MovementDate");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -526,7 +526,7 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 
 				}
 				//	get Ship info
-				
+
 				//	Shipment Info
 				if (inoutLine != null)
 				{
@@ -580,7 +580,7 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 					percent = igt.divide(ogt, 10, BigDecimal.ROUND_HALF_UP);
 				MCurrency cur = MCurrency.get(p_order.getCtx(), p_order.getC_Currency_ID());
 				int scale = cur.getStdPrecision();
-			
+
 				for (MOrderPaySchedule ops : opss) {
 					MInvoicePaySchedule ips = new MInvoicePaySchedule(invoice.getCtx(), 0, invoice.get_TrxName());
 					PO.copyValues(ops, ips);
