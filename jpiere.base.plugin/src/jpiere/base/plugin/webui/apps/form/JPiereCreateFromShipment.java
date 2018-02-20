@@ -100,15 +100,15 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		int C_OrderLine_ID = 0;
 		BigDecimal QtyEntered = Env.ZERO;
 		int C_UOM_ID = 0;
-		
-		public IOLineOrderLineSummary(int C_OrderLine_ID, BigDecimal QtyEntered, int C_UOM_ID) 
+
+		public IOLineOrderLineSummary(int C_OrderLine_ID, BigDecimal QtyEntered, int C_UOM_ID)
 		{
 			this. C_OrderLine_ID =  C_OrderLine_ID;
 			this.QtyEntered = QtyEntered;
 			this.C_UOM_ID = C_UOM_ID;
 		}
 	}
-	
+
 	/**
 	 *  Load Data - Order
 	 *  @param C_Order_ID Order
@@ -116,7 +116,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 	 */
 	protected Vector<Vector<Object>> getOrderData (int C_Order_ID, boolean forInvoice)
 	{
-		
+
 		//Objective of this SQL is to exclude Order Lines that are contained Shipment Lines already.
 		StringBuilder preSQL = new StringBuilder("SELECT iol.C_OrderLine_ID, SUM(iol.QtyEntered), iol.C_UOM_ID FROM M_InOutLine iol INNER JOIN M_InOut io ON(io.M_InOut_ID = iol.M_InOut_ID) "
 													+" WHERE iol.M_InOut_ID=? GROUP BY C_OrderLine_ID, C_UOM_ID");
@@ -125,13 +125,13 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		ArrayList<IOLineOrderLineSummary> IOLineOrderLineSummary_list = new ArrayList<IOLineOrderLineSummary>();
 		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
 		try{
-			
+
 			prePSTMT = DB.prepareStatement(preSQL.toString(), null);
 			prePSTMT.setInt(1, M_InOut_ID);
 			preRS = prePSTMT.executeQuery();
 			while (preRS.next())
 				IOLineOrderLineSummary_list.add(new IOLineOrderLineSummary (preRS.getInt(1), preRS.getBigDecimal(2), preRS.getInt(3)));
-			
+
 		}catch (SQLException e){
 			log.log(Level.SEVERE, preSQL.toString(), e);
 //			throw new DBException(e, preSQL.toString());
@@ -139,8 +139,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 			DB.close(preRS, prePSTMT);
 			preRS = null; prePSTMT = null;
 		}
-		
-		
+
+
 		/**
 		 *  Selected        - 0
 		 *  Qty             - 1
@@ -198,7 +198,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				for(IOLineOrderLineSummary olSum : IOLineOrderLineSummary_list)
 				{
 					if(olSum.C_OrderLine_ID == rs.getInt(10)
-							&& olSum.C_UOM_ID == rs.getInt(3) )	
+							&& olSum.C_UOM_ID == rs.getInt(3) )
 					{
 						isContain = true;
 						BigDecimal qtyOrdered = rs.getBigDecimal(1);
@@ -206,11 +206,11 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						BigDecimal qtyEntered = qtyOrdered.multiply(multiplier).subtract(olSum.QtyEntered);
 						if(qtyEntered.compareTo(Env.ZERO)==0)
 							break;
-						
+
 						Vector<Object> line = new Vector<Object>();
 						line.add(new Boolean(false));           //  0-Selection
 						KeyNamePair pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
-						line.add(pp);                           //  1-OrderLine						
+						line.add(pp);                           //  1-OrderLine
 						line.add(qtyEntered);  //  2-Qty
 						pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
 						line.add(pp);                           //  3-UOM
@@ -220,19 +220,19 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						line.add(pp);                           //  5-Product Name
 						// Add locator
 						pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
-						line.add(pp);// 6-Locator				
+						line.add(pp);// 6-Locator
 						// Add Physical Warehouse
 						pp = new KeyNamePair(rs.getInt(12), rs.getString(13));
 						line.add(pp);// 7-Phsical Warehouse
-						
-						data.add(line);								
+
+						data.add(line);
 						break;
-					}				
+					}
 				}
 				if(isContain)
 					continue;
-				
-				
+
+
 				Vector<Object> line = new Vector<Object>();
 				line.add(new Boolean(false));           //  0-Selection
 				KeyNamePair pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
@@ -346,7 +346,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		miniTable.setColumnClass(5, String.class, true);   		//  Product Name
 		miniTable.setColumnClass(6, String.class, false); 		 //  Locator
 		miniTable.setColumnClass(7, String.class, false); 		 //  Physical Warehouse
-		
+
 		//  Table UI
 		miniTable.autoSize();
 
@@ -363,30 +363,30 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		{
 			FDialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID"));
 			return false;
-			
+
 		}else{
-			
+
 			for (int i = 0; i < miniTable.getRowCount(); i++)
 			{
-				if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) 
+				if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue())
 				{
 					KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
 					int JP_ScheduledShipLocator＿ID = pp.getKey();
 					if(JP_ScheduledShipLocator＿ID == 0 && M_Locator_ID == 0)
 					{
 						pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
-						
+
 						FDialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID")
 											+ System.lineSeparator()
-											+ Msg.getElement(Env.getCtx(), "Line") 
+											+ Msg.getElement(Env.getCtx(), "Line")
 											+ " : " + pp.getName());
 						return false;
 					}
 				}
 			}//for
-			
+
 		}//if (M_Locator_ID == 0) 	//Check Locator
-			
+
 		// Get Shipment
 		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
 		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, trxName);
@@ -395,7 +395,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		// Lines
 		for (int i = 0; i < miniTable.getRowCount(); i++)
 		{
-			if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue()) 
+			if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue())
 			{
 				// variable values
 				BigDecimal QtyEntered = (BigDecimal) miniTable.getValueAt(i, 2); // Qty
@@ -404,15 +404,15 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 
 				pp = (KeyNamePair) miniTable.getValueAt(i, 5); // Product
 				int M_Product_ID = pp.getKey();
-				
+
 				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
 				int JP_ScheduledShipLocator＿ID = pp.getKey();
-				
+
 				int C_OrderLine_ID = 0;
 				pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
 				if (pp != null)
-					C_OrderLine_ID = pp.getKey();				
-				
+					C_OrderLine_ID = pp.getKey();
+
 				//	Precision of Qty UOM
 				int precision = 2;
 				if (M_Product_ID != 0)
@@ -428,17 +428,17 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				//	Create new InOut Line
 				MInOutLine iol = new MInOutLine (inout);
 				iol.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
-				iol.setQty(QtyEntered);							//	Movement/Entered				
+				iol.setQty(QtyEntered);							//	Movement/Entered
 				//
 				MOrderLine ol = null;
 				if (C_OrderLine_ID != 0)
 				{
 					iol.setC_OrderLine_ID(C_OrderLine_ID);
 					ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
-					
+
 					//JPIERE-0294
 					iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ol.get_Value("JP_ProductExplodeBOM_ID") );
-					
+
 					if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
 					{
 						iol.setMovementQty(QtyEntered
@@ -486,7 +486,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		 *  - if linked to another order/invoice/rma - remove link
 		 *  - if no link set it
 		 */
-		if (p_order != null && p_order.getC_Order_ID() != 0)
+		if (p_order != null && p_order.getC_Order_ID() != 0 && inout.getC_Order_ID()==0)
 		{
 			inout.setC_Order_ID (p_order.getC_Order_ID());
 			inout.setAD_OrgTrx_ID(p_order.getAD_OrgTrx_ID());
@@ -523,7 +523,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
 	    columnNames.add(Msg.getMsg(Env.getCtx(), "JP_ScheduledShipLocator"));
 	    columnNames.add(Msg.getElement(Env.getCtx(), "JP_PhysicalWarehouse_ID"));
-	    
+
 	    return columnNames;
 	}
 
