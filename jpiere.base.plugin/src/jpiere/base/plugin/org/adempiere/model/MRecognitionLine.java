@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
@@ -40,6 +41,7 @@ import org.compiere.model.MTaxProvider;
 import org.compiere.model.MUOM;
 import org.compiere.model.Query;
 import org.compiere.model.Tax;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -1096,6 +1098,83 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 
 			}
 		}//Tax Calculation
+
+		//JPIERE-0377:Check Over Qty Recognized
+		if(newRecord || is_ValueChanged("QtyInvoiced") )
+		{
+			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
+			if(pInfo == null && getC_OrderLine_ID() > 0)
+			{
+				BigDecimal qtyInvoiced  = getQtyInvoiced();
+				MOrderLine oline = new MOrderLine(getCtx(), getC_OrderLine_ID(), get_TrxName());
+				BigDecimal qtyRecognized = (BigDecimal)oline.get_Value("JP_QtyRecognized");
+				BigDecimal qtyOrdered = oline.getQtyOrdered();
+				BigDecimal qtyToRecognize = qtyOrdered.subtract(qtyRecognized);
+				if(qtyOrdered.signum() >= 0)
+				{
+
+					if(qtyInvoiced.compareTo(qtyToRecognize) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ oline.getParent().getDocumentNo() +  " - " + oline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+
+					}
+
+				}else {
+
+					if(qtyInvoiced.compareTo(qtyToRecognize) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ oline.getParent().getDocumentNo() +  " - " + oline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}else if(pInfo == null && getM_RMALine_ID() > 0) {
+
+				BigDecimal qtyInvoiced  = getQtyInvoiced();
+				MRMALine rmaline = new MRMALine(getCtx(), getM_RMALine_ID(), get_TrxName());
+				BigDecimal qtyRecognized = (BigDecimal)rmaline.get_Value("JP_QtyRecognized");
+				BigDecimal qtyRMA = rmaline.getQty();
+				BigDecimal qtyToRecognize = qtyRMA.subtract(qtyRecognized);
+
+				if(qtyRMA.signum() >= 0)
+				{
+					if(qtyInvoiced.compareTo(qtyToRecognize) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ rmaline.getParent().getDocumentNo() +  " - " + rmaline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+
+				}else {
+
+					if(qtyInvoiced.compareTo(qtyToRecognize) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ rmaline.getParent().getDocumentNo() +  " - " + rmaline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}
+
+		}//JPiere-0376
+
+
 
 		return true;
 	}	//	beforeSave

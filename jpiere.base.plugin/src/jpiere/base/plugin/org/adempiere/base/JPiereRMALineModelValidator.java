@@ -58,7 +58,7 @@ public class JPiereRMALineModelValidator implements ModelValidator {
 			MRMALine rmaLine = (MRMALine)po;
 			if ( (rmaLine.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYINVOICED_C-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
 					  ||
-					 (!rmaLine.getParent().isSOTrx()	&& MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYINVOICED_V-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
+					 (!rmaLine.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYINVOICED_V-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
 			    )
 			{
 				BigDecimal qtyOrdered = rmaLine.getQty();
@@ -89,7 +89,7 @@ public class JPiereRMALineModelValidator implements ModelValidator {
 			MRMALine rmaLine = (MRMALine)po;
 			if ( (rmaLine.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYDELIVERED_C-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
 					  ||
-					 (!rmaLine.getParent().isSOTrx()	&& MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYDELIVERED_V-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
+					 (!rmaLine.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYDELIVERED_V-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
 			    )
 			{
 				BigDecimal qtyOrdered = rmaLine.getQty();
@@ -111,7 +111,38 @@ public class JPiereRMALineModelValidator implements ModelValidator {
 				}
 			}
 
-		}//JPiere-0375
+		}//JPiere-0376
+
+
+		//JPIERE-0377:Check Over Qty Recognized
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("JP_QtyRecognized") )
+		{
+			MRMALine rmaLine = (MRMALine)po;
+			if ( (rmaLine.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYRECOGNIZED_C-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
+					  ||
+				  (!rmaLine.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYRECOGNIZED_V-RMA", false, rmaLine.getAD_Client_ID(), rmaLine.getAD_Org_ID()) )
+			    )
+			{
+				BigDecimal qtyOrdered = rmaLine.getQty();
+				BigDecimal qtyRecognized  = (BigDecimal)rmaLine.get_Value("JP_QtyRecognized");
+
+				if(qtyOrdered.signum() >= 0)
+				{
+					if(qtyRecognized.compareTo(qtyOrdered) > 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyRecognized") + " : "+ rmaLine.getParent().getDocumentNo() +  " - " + rmaLine.getLine();
+					}
+
+				}else {
+
+					if(qtyRecognized.compareTo(qtyOrdered) < 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyRecognized") + " : "+ rmaLine.getParent().getDocumentNo() +  " - " + rmaLine.getLine();
+					}
+				}
+			}
+
+		}//JPiere-0377
 
 
 		return null;

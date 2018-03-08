@@ -390,6 +390,36 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 		}//JPiere-0376
 
+		//JPIERE-0377:Check Over Qty Recognized
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("JP_QtyRecognized"))
+		{
+			MOrderLine ol = (MOrderLine)po;
+			if ( (ol.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYRECOGNIZED_SO", false, ol.getAD_Client_ID(), ol.getAD_Org_ID()) )
+				  ||
+				 (!ol.getParent().isSOTrx()	&& MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYRECOGNIZED_PO", false, ol.getAD_Client_ID(), ol.getAD_Org_ID()) )
+		       )
+			{
+				BigDecimal qtyOrdered = ol.getQtyOrdered();
+				BigDecimal qtyRecognized  = (BigDecimal)ol.get_Value("JP_QtyRecognized");
+
+				if(qtyOrdered.signum() >= 0)
+				{
+					if(qtyRecognized.compareTo(qtyOrdered) > 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyRecognized") + " : "+ ol.getParent().getDocumentNo() +  " - " + ol.getLine();
+					}
+
+				}else {
+
+					if(qtyRecognized.compareTo(qtyOrdered) < 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyRecognized") + " : "+ ol.getParent().getDocumentNo() +  " - " + ol.getLine();
+					}
+				}
+			}
+
+		}//JPiere-0377
+
 
 		return null;
 	}
