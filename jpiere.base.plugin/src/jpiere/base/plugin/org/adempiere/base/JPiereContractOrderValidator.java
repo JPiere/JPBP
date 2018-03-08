@@ -146,29 +146,33 @@ public class JPiereContractOrderValidator implements ModelValidator {
 		{
 			MOrder order = (MOrder)po;
 			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
-			
+
 			//Check Contract Info
 			int JP_Contract_ID = order.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);
 			if(JP_Contract_ID <= 0)
 			{
-				
+
 				if(order.get_ValueAsInt("JP_ContractContent_ID") != 0
 						|| order.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
 				{
 					order.set_ValueNoCheck("JP_ContractContent_ID", null);
-					order.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);					
+					order.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 					if(pInfo == null)
 					{
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
 						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_Contract_ID")};
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);//It is not input in {0}
-						
-						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+
+						try {
+							FDialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractContent + " , " + contractPeriod + " -> " + toBeConfirmed +" : " + message);
+						}catch(Exception e) {
+							;//ignore
+						}
 					}
 				}
 				return null;
@@ -325,13 +329,17 @@ public class JPiereContractOrderValidator implements ModelValidator {
 					{
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
-						
-						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+
+						try {
+							FDialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+ spotContract);
+						}catch(Exception e) {
+							;//ignore
+						}
 					}
 				}
 
@@ -349,13 +357,17 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");//Non-enterable:
 						String contractContent = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID");
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 						MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
-						
-						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+
+						try {
+							FDialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
+						}catch(Exception e) {
+							;//ignore
+						}
 					}
 				}
 
@@ -407,7 +419,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 		{
 			MOrderLine oLine = (MOrderLine)po;
 			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
-			
+
 			int JP_ContractLine_ID = oLine.get_ValueAsInt(MContractLine.COLUMNNAME_JP_ContractLine_ID);
 			if(JP_ContractLine_ID > 0)
 			{
@@ -448,14 +460,18 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						{
 							String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
 							String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-							
+
 							String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 							MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 							String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
-							
-							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+
+							try {
+								FDialog.info(0, null, "JP_ContractManagementInfo"
 									, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);
-						}					
+							}catch(Exception e) {
+								;//ignore
+							}
+						}
 					}
 
 				//Check General Contract
@@ -471,14 +487,18 @@ public class JPiereContractOrderValidator implements ModelValidator {
 							String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
 							String cLine = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID");
 							String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-							
+
 							String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 							MColumn column = MColumn.get(Env.getCtx(), MContract.Table_Name, MContract.COLUMNNAME_JP_ContractType);
 							String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
-							
-							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+
+							try {
+								FDialog.info(0, null, "JP_ContractManagementInfo"
 									, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
-						}						
+							}catch(Exception e) {
+								;//ignore
+							}
+						}
 					}
 
 				}
@@ -492,13 +512,17 @@ public class JPiereContractOrderValidator implements ModelValidator {
 					{
 						String nonEnterable = Msg.getMsg(Env.getCtx(), "JP_NON-ENTERABLE");
 						String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
-						
+
 						String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed
 						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")};
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
-						
-						FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+
+						try {
+							FDialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);
+						}catch(Exception e) {
+							;//ignore
+						}
 					}
 				}
 			}

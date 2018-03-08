@@ -117,7 +117,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			}
 
 			ol.set_ValueOfColumn("JP_TaxAmt", taxAmt);
-		}
+		}//JPiere-0165
 
 		//JPIERE-0202:Set cost to OrderLine automatically.
 		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
@@ -236,7 +236,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeAmountForQtyInvoiced");//You can not change Amount. Because invoice was issued.
 			}
 
-		}//JPIEERE-0207:Order Re-Activate Check
+		}//JPiere-0207:Order Re-Activate Check
 
 
 		//JPIERE-0227 Common Warehouse & JPIERE-0317 Physical Warehouse
@@ -303,7 +303,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					return Msg.getMsg(Env.getCtx(), "JP_CanNotCreateMMforDocType");//You can not create Inventory move doc because of missing Doc Type setting.
 				}
 			}
-		}
+		}//JPiere-0227
 
 		//JPIERE-0334 Locator Level Reserved
 		if( type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("JP_Locator_ID") || po.is_ValueChanged("QtyReserved")) )
@@ -327,7 +327,39 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 					oLine.set_ValueNoCheck("JP_DateReserved", new Timestamp(Calendar.getInstance().getTimeInMillis()));
 				}
 			}
-		}//JPIERE-0334
+		}//JPiere-0334
+
+
+		//JPIERE-0375:Check Over Qty Invoice
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("QtyInvoiced"))
+		{
+			MOrderLine ol = (MOrderLine)po;
+			if ( (ol.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYINVOICED_SO", false, ol.getAD_Client_ID(), ol.getAD_Org_ID()) )
+				  ||
+				 (!ol.getParent().isSOTrx()	&& MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYINVOICED_PO", false, ol.getAD_Client_ID(), ol.getAD_Org_ID()) )
+		       )
+			{
+				BigDecimal qtyOrdered = ol.getQtyOrdered();
+				BigDecimal qtyInvoiced  = ol.getQtyInvoiced();
+
+				if(qtyOrdered.signum() >= 0)
+				{
+					if(qtyInvoiced.compareTo(qtyOrdered) > 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced") + " : "+ ol.getParent().getDocumentNo() +  " - " + ol.getLine();
+					}
+
+				}else {
+
+					if(qtyInvoiced.compareTo(qtyOrdered) < 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced") + " : "+ ol.getParent().getDocumentNo() +  " - " + ol.getLine();
+					}
+				}
+			}
+
+		}//JPiere-0375
+
 
 		return null;
 	}

@@ -149,7 +149,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 		PO.copyValues(estimation, order);
 		order.setAD_Org_ID(estimation.getAD_Org_ID());
 		order.setDocumentNo(null);
-		order.setC_DocTypeTarget_ID(estimation.getJP_DocTypeSO_ID());
+		order.setC_DocTypeTarget_ID(p_JP_DocTypeSO_ID);
 		order.setDocStatus(DocAction.STATUS_Drafted);
 		order.setDocAction(DocAction.ACTION_Complete);
 		order.saveEx(get_TrxName());
@@ -164,6 +164,10 @@ public class CreateSOfromEstimation extends SvrProcess {
 			PO.copyValues(eLines[i], oLine);
 			oLine.setAD_Org_ID(eLines[i].getAD_Org_ID());
 			oLine.saveEx(get_TrxName());
+
+			//Don't set for edit(Delete) Order Line.
+//			eLines[i].setLink_OrderLine_ID(oLine.getC_OrderLine_ID());
+//			eLines[i].saveEx(get_TrxName());
 
 		}//for
 

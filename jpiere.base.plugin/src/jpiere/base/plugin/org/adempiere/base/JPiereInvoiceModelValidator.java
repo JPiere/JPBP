@@ -108,7 +108,7 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
-		//JPIERE-0295
+		//JPIERE-0295 Explode BOM
 		if(timing ==  ModelValidator.TIMING_BEFORE_PREPARE)
 		{
 			if(po instanceof MInvoiceJP)
@@ -118,13 +118,12 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 			}
 		}
 
-		MInvoice invoice = (MInvoice)po;
-		MPaymentTerm paymentTerm = new MPaymentTerm(Env.getCtx(),invoice.getC_PaymentTerm_ID(),null);
-
-
-		//JPIERE-0368
+		//JPIERE-0368 Closing by Payment Term
 		if(timing ==  ModelValidator.TIMING_BEFORE_PREPARE)
 		{
+			MInvoice invoice = (MInvoice)po;
+			MPaymentTerm paymentTerm = new MPaymentTerm(Env.getCtx(),invoice.getC_PaymentTerm_ID(),null);
+
 			if(invoice.isSOTrx())
 			{
 				Object obj_AR_ClosingDate= paymentTerm.get_Value("JP_AR_ClosingDate");

@@ -53,7 +53,7 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) 
+	public void initialize(ModelValidationEngine engine, MClient client)
 	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
@@ -84,17 +84,17 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 		if(po.get_TableName().equals(MRecognition.Table_Name))
 		{
 			return recognitionValidate(po, type);
-			
+
 		}else if(po.get_TableName().equals(MRecognitionLine.Table_Name)){
-			
+
 			return recognitionLineValidate(po, type);
 		}
-		
+
 		return null;
 	}
 
 	@Override
-	public String docValidate(PO po, int timing) 
+	public String docValidate(PO po, int timing)
 	{
 		if(timing == ModelValidator.TIMING_BEFORE_PREPARE)
 		{
@@ -104,7 +104,7 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 			{
 				return Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), MRecognition.COLUMNNAME_JP_Contract_ID);
 			}
-			
+
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
@@ -130,16 +130,16 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 					}
 				}//For
 			}
-			
+
 		}//TIMING_BEFORE_PREPARE
-		
+
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Recognition Validate
-	 * 
+	 *
 	 * @param po
 	 * @param type
 	 * @return
@@ -149,7 +149,7 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 		String msg = derivativeDocHeaderCommonCheck(po, type);
 		if(!Util.isEmpty(msg))
 			return msg;
-		
+
 		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
 						||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
@@ -157,12 +157,12 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 						||   po.is_ValueChanged("M_RMA_ID") ) ) )
 		{
 			MRecognition recog = (MRecognition)po;
-			int JP_Contract_ID = recog.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);	
+			int JP_Contract_ID = recog.get_ValueAsInt(MContract.COLUMNNAME_JP_Contract_ID);
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
-			
-			//Check to Change Contract Info		
+
+			//Check to Change Contract Info
 			if(type == ModelValidator.TYPE_BEFORE_CHANGE && contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			{	
+			{
 				MRecognitionLine[] contractInvoiceLines = getRecognitionLinesWithContractLine(recog);
 				if(contractInvoiceLines.length > 0)
 				{
@@ -170,35 +170,35 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 					return Msg.getMsg(Env.getCtx(), "JP_CannotChangeContractInfoForLines");
 				}
 			}
-			
+
 			//JP_Contract_ID is Mandetory field in Recognition doc
 			if(!contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
 					&& !contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 			{
 				msg = Msg.getMsg(Env.getCtx(), "Invalid")+ " "+Msg.getElement(Env.getCtx(), "JP_Contract_ID") + "  "
 					+ Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed") + "  " + Msg.getElement(Env.getCtx(), "JP_ContractType");
-				return msg;		
+				return msg;
 			}
-			
+
 			//JP_ContractContent_ID is Mandetory field in Recognition doc.
 			MContractContent content = MContractContent.get(Env.getCtx(), po.get_ValueAsInt("JP_ContractContent_ID"));
 			if(!content.getJP_Contract_Acct().isPostingRecognitionDocJP())
 			{
 				msg = Msg.getMsg(Env.getCtx(), "Invalid")+ " "+Msg.getElement(Env.getCtx(), "JP_ContractContent_ID") + "  "
 						+ Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed") + "  " + Msg.getElement(Env.getCtx(), "JP_Contract_Acct_ID");
-				return msg;	
+				return msg;
 			}
-			
+
 		}//Type
-		
+
 		return null;
 	}
 
-	
-	
+
+
 	/**
 	 * Recognition Line Validate
-	 * 
+	 *
 	 * @param po
 	 * @param type
 	 * @return
@@ -208,7 +208,7 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 		String msg = derivativeDocLineCommonCheck(po, type);
 		if(!Util.isEmpty(msg))
 			return msg;
-		
+
 		/** Ref:JPiereContractInOutValidator AND JPiereContractInvoiceValidator*/
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractLine_ID)
@@ -218,61 +218,61 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 			int JP_Contract_ID = recogLine.getParent().get_ValueAsInt("JP_Contract_ID");
 			int JP_ContractContent_ID = recogLine.getParent().get_ValueAsInt("JP_ContractContent_ID");
 			int JP_ContractLine_ID = recogLine.get_ValueAsInt("JP_ContractLine_ID");
-			
+
 			if(JP_Contract_ID <= 0)
 				return null;
-			
+
 			MContract contract = MContract.get(Env.getCtx(), JP_Contract_ID);
 			if(!contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
 					&& !contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 				return null;
-			
-			
+
+
 			//Check Period Contract & Spot Contract fron now on
 			int C_OrderLine_ID = recogLine.getC_OrderLine_ID();
 			int M_RMALine_ID = recogLine.getM_RMALine_ID();
 			int M_InOutLine_ID = recogLine.getM_InOutLine_ID();
 			if(C_OrderLine_ID == 0 && M_RMALine_ID == 0 && M_InOutLine_ID == 0)
 				return null;
-		
+
 			if(C_OrderLine_ID <= 0 && M_RMALine_ID <= 0 && M_InOutLine_ID != 0)
 			{
 				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_OrderLine_ID") + " or " + Msg.getElement(Env.getCtx(), "M_RMALine_ID")};
 				return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
 			}
-			
+
 			//Check Single Order or RMA
 			if(recogLine.getParent().getC_Order_ID() > 0 && recogLine.getC_OrderLine_ID() > 0)
 			{
 				//You can not bundle different Order document.
 				if(recogLine.getC_OrderLine().getC_Order_ID() != recogLine.getParent().getC_Order_ID())
 					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentOrder");
-				
+
 			}else if(recogLine.getParent().getM_RMA_ID() > 0 && recogLine.getM_RMALine_ID() > 0){
-				
+
 				//You can not bundle different RMA document.
 				if(recogLine.getM_RMALine().getM_RMA_ID() != recogLine.getParent().getM_RMA_ID())
 					return  Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentRMA");
 			}
-			
+
 			if(JP_ContractLine_ID <= 0)
 				return null;
-			
+
 			MContractLine contractLine = MContractLine.get(Env.getCtx(), JP_ContractLine_ID);
-			
+
 			//Check Relation of Contract Cotent
 			if(contractLine.getJP_ContractContent_ID() != JP_ContractContent_ID)
 			{
 				//You can select Contract Content Line that is belong to Contract content
 				return Msg.getMsg(Env.getCtx(), "Invalid") +" - " +Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") + Msg.getMsg(Env.getCtx(), "JP_Diff_ContractContentLine");
 			}
-			
-			
+
+
 			//Check Contract Process Period
 			int recogLine_ContractProcPeriod_ID = recogLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
 			MContractContent content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
-			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)) 
-			{ 
+			if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
 				if(content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
 						||content.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
 				{
@@ -282,30 +282,30 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 						if(recogLine_ContractProcPeriod_ID <= 0)
 						{
 							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID")};
-							return Msg.getMsg(Env.getCtx(), "JP_InCaseOfCreateDerivativeDocPolicy") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);					
+							return Msg.getMsg(Env.getCtx(), "JP_InCaseOfCreateDerivativeDocPolicy") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
 						}
-						
+
 						//Check Contract Process Period - Calender
-						MContractProcPeriod recogLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), recogLine_ContractProcPeriod_ID);				
+						MContractProcPeriod recogLine_ContractProcPeriod = MContractProcPeriod.get(Env.getCtx(), recogLine_ContractProcPeriod_ID);
 						if(recogLine_ContractProcPeriod.getJP_ContractCalender_ID() != contractLine.getJP_ContractCalender_InOut_ID())
-						{	
-							//Please select the Contract Process Period that belong to Calender of Contract Content line. 
+						{
+							//Please select the Contract Process Period that belong to Calender of Contract Content line.
 							return Msg.getMsg(Env.getCtx(), "JP_SelectContractProcPeriodBelongToContractLine");
 						}
-						
+
 						//Check valid Contract Period
 						MRecognition recog =recogLine.getParent();
 						MContractProcPeriod recogPeriod = MContractProcPeriod.get(Env.getCtx(), recog.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-						if(recogPeriod.getStartDate().compareTo(recogLine_ContractProcPeriod.getStartDate()) > 0 
+						if(recogPeriod.getStartDate().compareTo(recogLine_ContractProcPeriod.getStartDate()) > 0
 								|| (recogPeriod.getEndDate() != null && recogPeriod.getEndDate().compareTo(recogLine_ContractProcPeriod.getEndDate()) < 0) )
 						{
 							//Outside the Contract Process Period.
 							return Msg.getMsg(Env.getCtx(), "JP_OutsideContractProcessPeriod") + " " + Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
 						}
 					}
-					
+
 				}else{
-					
+
 					if(po.get_ValueAsInt("JP_ContractProcPeriod_ID") != 0)
 					{
 						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
@@ -316,22 +316,26 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 							String contractPeriod = Msg.getElement(Env.getCtx(), "JP_ContractProcPeriod_ID");
 							String toBeConfirmed = Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed");//To Be Confirmed:
 							String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
-							
-							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+
+							try {
+								FDialog.info(0, null, "JP_ContractManagementInfo"
 									, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);
+							}catch(Exception e) {
+								;//ignore
+							}
 						}
 					}
-					
+
 				}
 			}
-			
+
 		}//if(type == ModelValidator.TYPE_BEFORE_NEW)
-		
-		
+
+
 		return null;
 	}
 
-	
+
 	private MRecognitionLine[] getRecognitionLinesWithContractLine(MRecognition recog)
 	{
 		String whereClauseFinal = "JP_Recognition_ID=? AND JP_ContractLine_ID IS NOT NULL ";
