@@ -82,6 +82,7 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 			log.log(Level.SEVERE, "", e);
 			setInitOK(false);
 		}
+		window.setStyle("width:50%");
 		AEnv.showWindow(window);
 	}
 

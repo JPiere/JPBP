@@ -428,28 +428,29 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 			if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue())
 			{
 				MProduct product = null;
-				//  variable values
-				BigDecimal QtyEntered = (BigDecimal)miniTable.getValueAt(i, 1);              //  1-Qty
-
-				KeyNamePair pp = (KeyNamePair)miniTable.getValueAt(i, 2);   //  2-UOM
+				//  1-Qty
+				BigDecimal QtyEntered = (BigDecimal)miniTable.getValueAt(i, 1);
+				//  2-UOM
+				KeyNamePair pp = (KeyNamePair)miniTable.getValueAt(i, 2);
 				int C_UOM_ID = pp.getKey();
-				//
-				pp = (KeyNamePair)miniTable.getValueAt(i, 4);               //  4-Product
+				//  4-Product
+				pp = (KeyNamePair)miniTable.getValueAt(i, 4);
 				int M_Product_ID = 0;
 				if (pp != null)
 					M_Product_ID = pp.getKey();
-				//
+				//  5-OrderLine
 				int C_OrderLine_ID = 0;
-				pp = (KeyNamePair)miniTable.getValueAt(i, 5);               //  5-OrderLine
+				pp = (KeyNamePair)miniTable.getValueAt(i, 5);
 				if (pp != null)
 					C_OrderLine_ID = pp.getKey();
+				//  6-Shipment
 				int M_InOutLine_ID = 0;
-				pp = (KeyNamePair)miniTable.getValueAt(i, 6);               //  6-Shipment
+				pp = (KeyNamePair)miniTable.getValueAt(i, 6);
 				if (pp != null)
 					M_InOutLine_ID = pp.getKey();
-				//
+				//  7-RMALine
 				int M_RMALine_ID = 0;
-				pp = (KeyNamePair)miniTable.getValueAt(i, 7);               //  7-RMALine
+				pp = (KeyNamePair)miniTable.getValueAt(i, 7);
 				if (pp != null)
 					M_RMALine_ID = pp.getKey();
 
