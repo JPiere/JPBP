@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -55,23 +56,30 @@ public class JPiereRMALineModelValidator implements ModelValidator {
 		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("QtyInvoiced") )
 		{
 			MRMALine ol = (MRMALine)po;
-			BigDecimal qtyOrdered = ol.getQty();
-			BigDecimal qtyInvoiced  = ol.getQtyInvoiced();
-
-			if(qtyOrdered.signum() >= 0)
+			if ( (ol.getParent().isSOTrx() && MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYINVOICED_C-RMA", false, ol.getAD_Client_ID(), ol.getAD_Org_ID()) )
+					  ||
+					 (!ol.getParent().isSOTrx()	&& MSysConfig.getBooleanValue("JP_CHECK_ORVER_QTYINVOICED_V-RMA", false, ol.getAD_Client_ID(), ol.getAD_Org_ID()) )
+			    )
 			{
-				if(qtyInvoiced.compareTo(qtyOrdered) > 0)
-				{
-					return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced");
-				}
+				BigDecimal qtyOrdered = ol.getQty();
+				BigDecimal qtyInvoiced  = ol.getQtyInvoiced();
 
-			}else {
-
-				if(qtyInvoiced.compareTo(qtyOrdered) < 0)
+				if(qtyOrdered.signum() >= 0)
 				{
-					return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced");
+					if(qtyInvoiced.compareTo(qtyOrdered) > 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced") + " : "+ ol.getParent().getDocumentNo() +  " - " + ol.getLine();
+					}
+
+				}else {
+
+					if(qtyInvoiced.compareTo(qtyOrdered) < 0)
+					{
+						return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced") + " : "+ ol.getParent().getDocumentNo() +  " - " + ol.getLine();
+					}
 				}
 			}
+
 		}
 
 

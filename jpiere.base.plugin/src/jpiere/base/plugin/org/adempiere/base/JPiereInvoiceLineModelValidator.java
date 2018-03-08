@@ -239,7 +239,8 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore
 						}
@@ -251,7 +252,8 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore
 						}
@@ -270,7 +272,8 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore
 						}
@@ -281,7 +284,8 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore
 						}
