@@ -144,13 +144,18 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		/**
 		 *  Selected        - 0
 		 *  Qty             - 1
-		 *  C_UOM_ID        - 2
-		 *  M_Locator_ID    - 3
-		 *  M_Product_ID    - 4
-		 *  VendorProductNo - 5
-		 *  OrderLine       - 6
-		 *  ShipmentLine    - 7
-		 *  InvoiceLine     - 8
+		 *  Multiplier		- 2
+		 *  C_UOM_ID        - 3
+		 *  UOM Symbol Name - 4
+		 *  M_Locator_ID    - 5
+		 *  Locator Value   - 6
+		 *  M_Product_ID    - 7
+		 *  Product or Chage Name - 8
+		 *  Product Value   - 9
+		 *  OrderLine       - 10
+		 *  ORder Line No   - 11
+		 *  JP_PhysicalWarehouse_ID - 12
+		 *  PhysicalWarehouse - Name
 		 */
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
 		p_order = new MOrder (Env.getCtx(), C_Order_ID, null);      //  save
@@ -158,7 +163,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT"
 				+ " l.QtyOrdered - l.QtyDelivered" //1
-				+ " ,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END "	//	2
+				+ " ,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END "	//	2 - multiplier
 				+ " ,l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name)"			//	3..4
 				+ " ,l.JP_Locator_ID, loc.Value " // 5..6
 				+ " ,COALESCE(l.M_Product_ID,0),COALESCE(p.Name,c.Name) " //	7..8
@@ -352,6 +357,22 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 
 	}
 
+	protected Vector<String> getOISColumnNames()
+	{
+		//  Header Info
+	    Vector<String> columnNames = new Vector<String>(8);
+	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "Line", true));
+	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
+	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "ProductValue", false));
+	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
+	    columnNames.add(Msg.getMsg(Env.getCtx(), "JP_ScheduledShipLocator"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "JP_PhysicalWarehouse_ID"));
+
+	    return columnNames;
+	}
+
 	/**
 	 *  Save - Create Invoice Lines
 	 *  @return true if saved
@@ -371,8 +392,8 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue())
 				{
 					KeyNamePair pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
-					int JP_ScheduledShipLocator＿ID = pp.getKey();
-					if(JP_ScheduledShipLocator＿ID == 0 && M_Locator_ID == 0)
+					int JP_ScheduledShipLocator_ID = pp.getKey();
+					if(JP_ScheduledShipLocator_ID == 0 && M_Locator_ID == 0)
 					{
 						pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
 
@@ -511,21 +532,6 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 
 	}   //  saveInvoice
 
-	protected Vector<String> getOISColumnNames()
-	{
-		//  Header Info
-	    Vector<String> columnNames = new Vector<String>(8);
-	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "Line", true));
-	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "ProductValue", false));
-	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
-	    columnNames.add(Msg.getMsg(Env.getCtx(), "JP_ScheduledShipLocator"));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "JP_PhysicalWarehouse_ID"));
-
-	    return columnNames;
-	}
 
 	protected Vector<Vector<Object>> getOrderData (int C_Order_ID, boolean forInvoice, int M_Locator_ID)
 	{

@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.webui.apps.form;
 
+import static org.compiere.model.SystemIDs.*;
+
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -38,9 +40,6 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
-
-import static org.compiere.model.SystemIDs.*;
-
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -54,21 +53,21 @@ import org.zkoss.zul.Space;
 
 /**
  * JPIERE-0296 : Create Invoice Transactions from PO Orders or Receipt
- * 
+ *
  * @author Hideaki Hagiwara
  *
  */
 public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implements EventListener<Event>, ValueChangeListener
 {
 	private WCreateFromWindow window;
-	
-	public JPiereCreateFromInvoiceUI(GridTab tab) 
+
+	public JPiereCreateFromInvoiceUI(GridTab tab)
 	{
 		super(tab);
 		log.info(getGridTab().toString());
-		
+
 		window = new WCreateFromWindow(this, getGridTab().getWindowNo());
-		
+
 		p_WindowNo = getGridTab().getWindowNo();
 
 		try
@@ -85,27 +84,27 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		}
 		AEnv.showWindow(window);
 	}
-	
+
 	/** Window No               */
 	private int p_WindowNo;
 
 	/**	Logger			*/
 	private CLogger log = CLogger.getCLogger(getClass());
-		
+
 	protected Label bPartnerLabel = new Label();
 	protected WEditor bPartnerField;
-	
+
 	protected Label orderLabel = new Label();
 	protected Listbox orderField = ListboxFactory.newDropdownListbox();
-	
+
 	protected Label shipmentLabel = new Label();
 	protected Listbox shipmentField = ListboxFactory.newDropdownListbox();
-    
+
     /** Label for the rma selection */
     protected Label rmaLabel = new Label();
     /** Combo box for selecting RMA document */
     protected Listbox rmaField = ListboxFactory.newDropdownListbox();
-	
+
 	/**
 	 *  Dynamic Init
 	 *  @throws Exception if Lookups cannot be initialized
@@ -114,9 +113,9 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 	public boolean dynInit() throws Exception
 	{
 		log.config("");
-		
+
 		super.dynInit();
-		
+
 		window.setTitle(getTitle());
 
 		// RMA Selection option should only be available for AP Credit Memo
@@ -127,26 +126,26 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 			rmaLabel.setVisible(false);
 		    rmaField.setVisible(false);
 		}
-		
+
 		initBPartner(true);
 		bPartnerField.addValueChangeListener(this);
-		
+
 		return true;
 	}   //  dynInit
-	
+
 	protected void zkInit() throws Exception
 	{
 		bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
 		orderLabel.setText(Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx));
 		shipmentLabel.setText(Msg.getElement(Env.getCtx(), "M_InOut_ID", isSOTrx));
         rmaLabel.setText(Msg.translate(Env.getCtx(), "M_RMA_ID"));
-        
+
 		Borderlayout parameterLayout = new Borderlayout();
 		ZKUpdateUtil.setHeight(parameterLayout, "110px");
 		ZKUpdateUtil.setWidth(parameterLayout, "100%");
     	Panel parameterPanel = window.getParameterPanel();
 		parameterPanel.appendChild(parameterLayout);
-		
+
 		Grid parameterStdLayout = GridFactory.newGridLayout();
     	Panel parameterStdPanel = new Panel();
 		parameterStdPanel.appendChild(parameterStdLayout);
@@ -154,7 +153,7 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		Center center = new Center();
 		parameterLayout.appendChild(center);
 		center.appendChild(parameterStdPanel);
-		
+
 		Rows rows = (Rows) parameterStdLayout.newRows();
 		Row row = rows.newRow();
 		row.appendChild(bPartnerLabel.rightAlign());
@@ -163,14 +162,14 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		row.appendChild(orderLabel.rightAlign());
 		ZKUpdateUtil.setHflex(orderField, "1");
 		row.appendChild(orderField);
-		
+
 		row = rows.newRow();
 		row.appendChild(new Space());
 		row.appendChild(new Space());
 		row.appendChild(shipmentLabel.rightAlign());
 		ZKUpdateUtil.setHflex(shipmentField, "1");
-		row.appendChild(shipmentField);				
-        
+		row.appendChild(shipmentField);
+
         // Add RMA document selection to panel
 		row = rows.newRow();
 		row.appendChild(new Space());
@@ -181,18 +180,18 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 	}
 
 	private boolean 	m_actionActive = false;
-	
+
 	/**
 	 *  Action Listener
 	 *  @param e event
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void onEvent(Event e) throws Exception
 	{
 		if (m_actionActive)
 			return;
 		m_actionActive = true;
-		
+
 		//  Order
 		if (e.getTarget().equals(orderField))
 		{
@@ -231,7 +230,7 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		}
 		m_actionActive = false;
 	}
-	
+
 	/**
 	 *  Change Listener
 	 *  @param e event
@@ -248,7 +247,7 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange
-	
+
 	/**************************************************************************
 	 *  Load BPartner Field
 	 *  @param forInvoice true if Invoices are to be created, false receipts
@@ -281,18 +280,27 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		orderField.removeActionListener(this);
 		orderField.removeAllItems();
 		orderField.addItem(pp);
-		
+
 		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, false);
+		int C_Order_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_Order_ID");
+		int i = 0;
 		for(KeyNamePair knp : list)
+		{
+			i++;
 			orderField.addItem(knp);
-		
-		orderField.setSelectedIndex(0);
+			if(knp.getKey()==C_Order_ID && C_Order_ID > 0)
+			{
+				orderField.setSelectedIndex(i);
+				loadOrder(C_Order_ID, true);
+			}
+		}
+
 		orderField.addActionListener(this);
 
 		initBPDetails(C_BPartner_ID);
 	}   //  initBPartnerOIS
-	
-	public void initBPDetails(int C_BPartner_ID) 
+
+	public void initBPDetails(int C_BPartner_ID)
 	{
 		initBPShipmentDetails(C_BPartner_ID);
 		initBPRMADetails(C_BPartner_ID);
@@ -312,15 +320,15 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		//	None
 		KeyNamePair pp = new KeyNamePair(0,"");
 		shipmentField.addItem(pp);
-		
+
 		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID);
 		for(KeyNamePair knp : list)
 			shipmentField.addItem(knp);
-		
+
 		shipmentField.setSelectedIndex(0);
 		shipmentField.addActionListener(this);
 	}
-	
+
 	/**
 	 * Load RMA that are candidates for shipment
 	 * @param C_BPartner_ID BPartner
@@ -332,11 +340,11 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 	    //  None
 	    KeyNamePair pp = new KeyNamePair(0,"");
 	    rmaField.addItem(pp);
-	    
+
 	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
 		for(KeyNamePair knp : list)
 			rmaField.addItem(knp);
-		
+
 	    rmaField.setSelectedIndex(0);
 	    rmaField.addActionListener(this);
 	}
@@ -350,17 +358,17 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 	{
 		loadTableOIS(getOrderData(C_Order_ID, forInvoice));
 	}   //  LoadOrder
-	
+
 	protected void loadRMA (int M_RMA_ID)
 	{
 		loadTableOIS(getRMAData(M_RMA_ID));
 	}
-	
+
 	protected void loadShipment (int M_InOut_ID)
 	{
 		loadTableOIS(getShipmentData(M_InOut_ID));
 	}
-	
+
 	/**
 	 *  Load Order/Invoice/Shipment data into Table
 	 *  @param data data
@@ -368,7 +376,7 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 	protected void loadTableOIS (Vector<?> data)
 	{
 		window.getWListbox().clear();
-		
+
 		//  Remove previous listeners
 		window.getWListbox().getModel().removeTableModelListener(window);
 		//  Set Model
@@ -376,15 +384,15 @@ public class JPiereCreateFromInvoiceUI extends JPiereCreateFromInvoice implement
 		model.addTableModelListener(window);
 		window.getWListbox().setData(model, getOISColumnNames());
 		//
-		
+
 		configureMiniTable(window.getWListbox());
 	}   //  loadOrder
-	
+
 	public void showWindow()
 	{
 		window.setVisible(true);
 	}
-	
+
 	public void closeWindow()
 	{
 		window.dispose();

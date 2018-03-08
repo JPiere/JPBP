@@ -200,8 +200,8 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 			sql.append("l.MovementQty-SUM(COALESCE(il.QtyInvoiced,0)),");
 		sql.append(" l.QtyEntered/l.MovementQty,"
 			+ " l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name),"			//  3..4
-			+ " l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line,"        //  5..9
-			+ " l.C_OrderLine_ID " //  10
+			+ " l.M_Product_ID, p.Name, p.Value, po.VendorProductNo, l.M_InOutLine_ID, l.Line,"        //  5..10
+			+ " l.C_OrderLine_ID " //  11
 			+ " FROM M_InOutLine l "
 			);
 		if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
@@ -221,7 +221,7 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 			.append(" WHERE l.M_InOut_ID=? AND l.MovementQty<>0 ")
 			.append("GROUP BY l.MovementQty, l.QtyEntered/l.MovementQty, "
 				+ "l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name), "
-				+ "l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line, l.C_OrderLine_ID ");
+				+ "l.M_Product_ID, p.Name, p.Value, po.VendorProductNo, l.M_InOutLine_ID, l.Line, l.C_OrderLine_ID ");
 		if(!isSOTrx)
 			sql.append(" HAVING l.MovementQty-SUM(COALESCE(mi.Qty, 0)) <>0");
 		else
@@ -237,24 +237,33 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 			while (rs.next())
 			{
 				Vector<Object> line = new Vector<Object>(7);
-				line.add(new Boolean(false));           //  0-Selection
+				//  0-Selection
+				line.add(new Boolean(false));
+				//  1-Qty
 				BigDecimal qtyMovement = rs.getBigDecimal(1);
 				BigDecimal multiplier = rs.getBigDecimal(2);
 				BigDecimal qtyEntered = qtyMovement.multiply(multiplier);
-				line.add(qtyEntered);  //  1-Qty
+				line.add(qtyEntered);
+				//  2-UOM
 				KeyNamePair pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
-				line.add(pp);                           //  2-UOM
+				line.add(pp);
+				// 3-Product Value
+				line.add(rs.getString(7));
+				// 4 - Product Name
 				pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
-				line.add(pp);                           //  3-Product
-				line.add(rs.getString(7));				// 4-VendorProductNo
-				int C_OrderLine_ID = rs.getInt(10);
+				line.add(pp);
+				//  5-Order
+				int C_OrderLine_ID = rs.getInt(11);
 				if (rs.wasNull())
-					line.add(null);                     //  5-Order
+					line.add(null);
 				else
 					line.add(new KeyNamePair(C_OrderLine_ID,"."));
-				pp = new KeyNamePair(rs.getInt(8), rs.getString(9));
-				line.add(pp);                           //  6-Ship
-				line.add(null);                     	//  7-RMA
+				//  6-Ship
+				pp = new KeyNamePair(rs.getInt(9), rs.getString(10));
+				line.add(pp);
+				//  7-RMA
+				line.add(null);
+
 				data.add(line);
 			}
 		}
@@ -284,7 +293,7 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 
 	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 	    StringBuilder sqlStmt = new StringBuilder();
-	    sqlStmt.append("SELECT rl.M_RMALine_ID, rl.line, rl.Qty - COALESCE(rl.QtyInvoiced, 0), iol.M_Product_ID, p.Name, uom.C_UOM_ID, COALESCE(uom.UOMSymbol,uom.Name) ");
+	    sqlStmt.append("SELECT rl.M_RMALine_ID, rl.line, rl.Qty - COALESCE(rl.QtyInvoiced, 0), iol.M_Product_ID, p.Name, p.Value, uom.C_UOM_ID, COALESCE(uom.UOMSymbol,uom.Name) ");
 	    sqlStmt.append("FROM M_RMALine rl INNER JOIN M_InOutLine iol ON rl.M_InOutLine_ID=iol.M_InOutLine_ID ");
 
 	    if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
@@ -328,17 +337,26 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 	        while (rs.next())
             {
 	            Vector<Object> line = new Vector<Object>(7);
-	            line.add(new Boolean(false));   // 0-Selection
-	            line.add(rs.getBigDecimal(3));  // 1-Qty
-	            KeyNamePair pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
-	            line.add(pp); // 2-UOM
+	            // 0-Selection
+	            line.add(new Boolean(false));
+	            // 1-Qty
+	            line.add(rs.getBigDecimal(3));
+	            // 2-UOM
+	            KeyNamePair pp = new KeyNamePair(rs.getInt(7), rs.getString(8));
+	            line.add(pp);
+	            // 3 Product Value
+	            line.add(null);
+	            // 4-Product Name
 	            pp = new KeyNamePair(rs.getInt(4), rs.getString(5));
-	            line.add(pp); // 3-Product
-	            line.add(null); //4-Vendor Product No
-	            line.add(null); //5-Order
+	            line.add(rs.getString(6));
+	            //5-Order
+	            line.add(null);
+	            //6-Ship
+	            line.add(null);
+	            //7-RMA
 	            pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
-	            line.add(null);   //6-Ship
-	            line.add(pp);   //7-RMA
+	            line.add(pp);
+
 	            data.add(line);
             }
 	    }
@@ -366,15 +384,31 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 	protected void configureMiniTable (IMiniTable miniTable)
 	{
 		miniTable.setColumnClass(0, Boolean.class, false);      //  0-Selection
-		miniTable.setColumnClass(1, BigDecimal.class, true);        //  1-Qty
+		miniTable.setColumnClass(1, BigDecimal.class, true);    //  1-Qty
 		miniTable.setColumnClass(2, String.class, true);        //  2-UOM
-		miniTable.setColumnClass(3, String.class, true);        //  3-Product
-		miniTable.setColumnClass(4, String.class, true);        //  4-VendorProductNo
+		miniTable.setColumnClass(3, String.class, true);        //  3-Product Value
+		miniTable.setColumnClass(4, String.class, true);        //  4-Product Name
 		miniTable.setColumnClass(5, String.class, true);        //  5-Order Line
 		miniTable.setColumnClass(6, String.class, true);        //  6-Ship Line
 		miniTable.setColumnClass(7, String.class, true);        //  7-Invoice Line
 		//  Table UI
 		miniTable.autoSize();
+	}
+
+	protected Vector<String> getOISColumnNames()
+	{
+		//  Header Info
+	    Vector<String> columnNames = new Vector<String>(7);
+	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
+	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
+	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "ProductValue", isSOTrx));
+	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "C_OrderLine_ID", isSOTrx));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "M_InOutLine_ID", isSOTrx));
+	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMALine_ID", isSOTrx));
+
+	    return columnNames;
 	}
 
 	/**
@@ -388,18 +422,6 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, trxName);
 		if (log.isLoggable(Level.CONFIG)) log.config(invoice.toString());
 
-		if (p_order != null)
-		{
-			invoice.setOrder(p_order);	//	overwrite header values
-			invoice.saveEx();
-		}
-
-		if (m_rma != null)
-		{
-			invoice.setM_RMA_ID(m_rma.getM_RMA_ID());
-			invoice.saveEx();
-		}
-
 		//  Lines
 		for (int i = 0; i < miniTable.getRowCount(); i++)
 		{
@@ -412,7 +434,7 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 				KeyNamePair pp = (KeyNamePair)miniTable.getValueAt(i, 2);   //  2-UOM
 				int C_UOM_ID = pp.getKey();
 				//
-				pp = (KeyNamePair)miniTable.getValueAt(i, 3);               //  3-Product
+				pp = (KeyNamePair)miniTable.getValueAt(i, 4);               //  4-Product
 				int M_Product_ID = 0;
 				if (pp != null)
 					M_Product_ID = pp.getKey();
@@ -564,9 +586,9 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 			}   //   if selected
 		}   //  for all rows
 
-		if (p_order != null) {
-			invoice.setPaymentRule(p_order.getPaymentRule());
-			invoice.setC_PaymentTerm_ID(p_order.getC_PaymentTerm_ID());
+		if (p_order != null && p_order.getC_Order_ID() != 0 && invoice.getC_Order_ID()==0)
+		{
+			invoice.setOrder(p_order);	//	overwrite header values
 			invoice.saveEx();
 			invoice.load(invoice.get_TrxName()); // refresh from DB
 			// copy payment schedule from order if invoice doesn't have a current payment schedule
@@ -599,25 +621,181 @@ public abstract class JPiereCreateFromInvoice extends CreateFrom
 				invoice.validatePaySchedule();
 				invoice.saveEx();
 			}
+
+		}else if (m_rma != null && m_rma.getM_RMA_ID() != 0 && invoice.getM_RMA_ID()==0)
+		{
+			invoice.setM_RMA_ID(m_rma.getM_RMA_ID());
+			invoice.saveEx();
 		}
+
 
 		return true;
 	}   //  saveInvoice
 
-	protected Vector<String> getOISColumnNames()
+	/**
+	 *  Load Data - Order
+	 *  @param C_Order_ID Order
+	 *  @param forInvoice true if for invoice vs. delivery qty
+	 */
+	protected Vector<Vector<Object>> getOrderData (int C_Order_ID, boolean forInvoice)
 	{
-		//  Header Info
-	    Vector<String> columnNames = new Vector<String>(7);
-	    columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "Quantity"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
-	    columnNames.add(Msg.translate(Env.getCtx(), "M_Product_ID"));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "VendorProductNo", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "C_OrderLine_ID", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_InOutLine_ID", isSOTrx));
-	    columnNames.add(Msg.getElement(Env.getCtx(), "M_RMALine_ID", isSOTrx));
 
-	    return columnNames;
+		//Objective of this SQL is to exclude Order Lines that are contained Shipment Lines already.
+		StringBuilder preSQL = new StringBuilder("SELECT il.C_OrderLine_ID, SUM(il.QtyEntered), il.C_UOM_ID FROM C_InvoiceLine il INNER JOIN C_Invoice i ON(i.C_Invoice_ID = il.C_Invoice_ID) "
+													+" WHERE il.C_Invoice_ID=? GROUP BY C_OrderLine_ID, C_UOM_ID");
+		PreparedStatement prePSTMT = null;
+		ResultSet preRS = null;
+		ArrayList<ILineOrderLineSummary> ILineOrderLineSummary_list = new ArrayList<ILineOrderLineSummary>();
+		int C_Invoice_ID = ((Integer) getGridTab().getValue("C_Invoice_ID")).intValue();
+		try{
+
+			prePSTMT = DB.prepareStatement(preSQL.toString(), null);
+			prePSTMT.setInt(1, C_Invoice_ID);
+			preRS = prePSTMT.executeQuery();
+			while (preRS.next())
+				ILineOrderLineSummary_list.add(new ILineOrderLineSummary (preRS.getInt(1), preRS.getBigDecimal(2), preRS.getInt(3)));
+
+		}catch (SQLException e){
+			log.log(Level.SEVERE, preSQL.toString(), e);
+//			throw new DBException(e, preSQL.toString());
+		}finally{
+			DB.close(preRS, prePSTMT);
+			preRS = null; prePSTMT = null;
+		}
+
+
+		/**
+		 *  Selected        - 0
+		 *  Qty             - 1
+		 *  Multiplier		- 2
+		 *  C_UOM_ID        - 3
+		 *  UOM Symbol Name - 4
+		 *  M_Product_ID    - 5
+		 *  Product or Chage Name - 6
+		 *  Product Value   - 7
+		 *  OrderLine       - 8
+		 *  ORder Line No   - 9
+		 */
+		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
+		p_order = new MOrder (Env.getCtx(), C_Order_ID, null);      //  save
+
+		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		StringBuilder sql = new StringBuilder("SELECT"
+				+ " l.QtyOrdered - l.QtyInvoiced" //1
+				+ " ,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END "	//	2 - multiplier
+				+ " ,l.C_UOM_ID,COALESCE(uom.UOMSymbol,uom.Name)"			//	3..4
+				+ " ,COALESCE(l.M_Product_ID,0),COALESCE(p.Name,c.Name) " //	5..6
+				+ " ,p.Value AS ProductValue " // 7
+				+ " ,l.C_OrderLine_ID,l.Line "	//	8..9
+				+ "FROM C_OrderLine l");
+		sql.append(" LEFT OUTER JOIN M_Product p ON (l.M_Product_ID=p.M_Product_ID)"
+				+ " LEFT OUTER JOIN C_Charge c ON (l.C_Charge_ID=c.C_Charge_ID)");
+		if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
+			sql.append(" LEFT OUTER JOIN C_UOM uom ON (l.C_UOM_ID=uom.C_UOM_ID)");
+		else
+			sql.append(" LEFT OUTER JOIN C_UOM_Trl uom ON (l.C_UOM_ID=uom.C_UOM_ID AND uom.AD_Language='")
+			.append(Env.getAD_Language(Env.getCtx())).append("')");
+		//
+		sql.append(" WHERE l.C_Order_ID=? ");		//	#1
+		sql.append(" ORDER BY l.Line ");
+		//
+		if (log.isLoggable(Level.FINER)) log.finer(sql.toString());
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), null);
+			pstmt.setInt(1, C_Order_ID);
+			rs = pstmt.executeQuery();
+			boolean isContain = false;
+			while (rs.next())
+			{
+				isContain = false;
+				for(ILineOrderLineSummary olSum : ILineOrderLineSummary_list)
+				{
+					if(olSum.C_OrderLine_ID == rs.getInt(8)
+							&& olSum.C_UOM_ID == rs.getInt(3) )
+					{
+						isContain = true;
+						BigDecimal qtyOrdered = rs.getBigDecimal(1);
+						BigDecimal multiplier = rs.getBigDecimal(2);
+						BigDecimal qtyEntered = qtyOrdered.multiply(multiplier).subtract(olSum.QtyEntered);
+						if(qtyEntered.compareTo(Env.ZERO)==0)
+							break;
+
+						Vector<Object> line = new Vector<Object>();
+						//  0-Selection
+						line.add(new Boolean(false));
+						//  1-Qty
+						line.add(qtyEntered);
+						//  2-UOM
+						KeyNamePair pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
+						line.add(pp);
+						// 3-Product Value
+						line.add(rs.getString(7));
+						// 4-Product Name
+						pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
+						line.add(pp);
+						//  5-OrderLine
+						pp = new KeyNamePair(rs.getInt(8), rs.getString(9));
+						line.add(pp);
+
+						data.add(line);
+						break;
+					}
+				}
+				if(isContain)
+					continue;
+
+
+				Vector<Object> line = new Vector<Object>();
+				//  0-Selection
+				line.add(new Boolean(false));
+				//  1-Qty
+				BigDecimal qtyOrdered = rs.getBigDecimal(1);
+				BigDecimal multiplier = rs.getBigDecimal(2);
+				BigDecimal qtyEntered = qtyOrdered.multiply(multiplier);
+				line.add(qtyEntered);
+				// 2-UOM
+				KeyNamePair  pp = new KeyNamePair(rs.getInt(3), rs.getString(4).trim());
+				line.add(pp);
+				// 3-Product Value
+				line.add(rs.getString(7));
+				// 4-Product Name
+				pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
+				line.add(pp);
+				//  5-OrderLine
+				pp = new KeyNamePair(rs.getInt(8), rs.getString(9));
+				line.add(pp);
+
+				data.add(line);
+			}
+		}
+		catch (SQLException e)
+		{
+			log.log(Level.SEVERE, sql.toString(), e);
+			//throw new DBException(e, sql.toString());
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		return data;
+	}   //  LoadOrder
+
+	private class ILineOrderLineSummary
+	{
+		int C_OrderLine_ID = 0;
+		BigDecimal QtyEntered = Env.ZERO;
+		int C_UOM_ID = 0;
+
+		public ILineOrderLineSummary(int C_OrderLine_ID, BigDecimal QtyEntered, int C_UOM_ID)
+		{
+			this. C_OrderLine_ID =  C_OrderLine_ID;
+			this.QtyEntered = QtyEntered;
+			this.C_UOM_ID = C_UOM_ID;
+		}
 	}
 
 }
