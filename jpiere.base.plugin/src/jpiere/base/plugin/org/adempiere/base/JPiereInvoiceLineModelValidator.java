@@ -232,7 +232,6 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 				BigDecimal orderQtyInvoiced = il.getC_OrderLine().getQtyInvoiced();
 				BigDecimal qtyOrdered = il.getC_OrderLine().getQtyOrdered();
 				BigDecimal qtyToInvoice = qtyOrdered.subtract(orderQtyInvoiced);
-				String docStatus = il.getParent().getDocStatus();
 				if(qtyOrdered.signum() >= 0)
 				{
 
