@@ -329,6 +329,31 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			}
 		}//JPIERE-0334
 
+
+		//JPIERE-0375:Check Over Qty Invoice
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("QtyInvoiced") )
+		{
+			MOrderLine ol = (MOrderLine)po;
+			BigDecimal qtyOrdered = ol.getQtyOrdered();
+			BigDecimal qtyInvoiced  = ol.getQtyInvoiced();
+
+			if(qtyOrdered.signum() >= 0)
+			{
+				if(qtyInvoiced.compareTo(qtyOrdered) > 0)
+				{
+					return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced");
+				}
+
+			}else {
+
+				if(qtyInvoiced.compareTo(qtyOrdered) < 0)
+				{
+					return Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced");
+				}
+			}
+		}
+
+
 		return null;
 	}
 

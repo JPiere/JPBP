@@ -15,6 +15,7 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
 
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MCharge;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
@@ -24,6 +25,7 @@ import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -64,7 +66,7 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 	@Override
 	public String modelChange(PO po, int type) throws Exception {
 
-		//JPIERE-0165:
+		//JPIERE-0165:Invoice Line Tax
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				(type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("LineNetAmt")|| po.is_ValueChanged("C_Tax_ID"))))
 		{
@@ -216,6 +218,78 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					}
 				}
 			}
+		}
+
+		//JPIERE-0375:Check Over Qty Invoice
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("QtyInvoiced") ) )
+		{
+			MInvoiceLine il = (MInvoiceLine)po;
+			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
+			if(pInfo == null && il.getC_OrderLine_ID() > 0)
+			{
+				BigDecimal invoiceQtyInvoiced  = il.getQtyInvoiced();
+				BigDecimal orderQtyInvoiced = il.getC_OrderLine().getQtyInvoiced();
+				BigDecimal qtyOrdered = il.getC_OrderLine().getQtyOrdered();
+				BigDecimal qtyToInvoice = qtyOrdered.subtract(orderQtyInvoiced);
+				String docStatus = il.getParent().getDocStatus();
+				if(qtyOrdered.signum() >= 0)
+				{
+
+					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+						}catch(Exception e) {
+							;//ignore
+						}
+
+					}
+
+				}else {
+
+					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}else if(pInfo == null && il.getM_RMALine_ID() > 0) {
+
+				BigDecimal invoiceQtyInvoiced  = il.getQtyInvoiced();
+				BigDecimal rmaQtyInvoiced = il.getM_RMALine().getQtyInvoiced();
+				BigDecimal qtyRMA = il.getM_RMALine().getQty();
+				BigDecimal qtyToInvoice = qtyRMA.subtract(rmaQtyInvoiced);
+
+				if(qtyRMA.signum() >= 0)
+				{
+					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+
+				}else {
+
+					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility"));
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}
+
 		}
 
 		return null;
