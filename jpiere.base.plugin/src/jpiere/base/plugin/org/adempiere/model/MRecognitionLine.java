@@ -1099,6 +1099,39 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			}
 		}//Tax Calculation
 
+
+		//JPIERE-0294 & 0295: Explode BOM
+		if(newRecord || (!newRecord && is_ValueChanged("M_Product_ID")) )
+		{
+			if(getM_Product_ID() == 0)
+			{
+				setJP_ProductExplodeBOM_ID(0);
+
+			}else if(getM_InOutLine_ID() > 0) {
+
+				MInOutLine iol = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+				if(iol.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(getM_Product_ID() == iol.getM_Product_ID())
+					{
+						setJP_ProductExplodeBOM_ID(iol.get_ValueAsInt("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						//Different between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), "M_InOutLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						String msg1 = Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
+						return false;
+					}
+				}else {
+					setJP_ProductExplodeBOM_ID(0);
+				}
+			}
+		}
+
+
+
 		//JPIERE-0377:Check Over Qty Recognized
 		if(newRecord || is_ValueChanged("QtyInvoiced") )
 		{

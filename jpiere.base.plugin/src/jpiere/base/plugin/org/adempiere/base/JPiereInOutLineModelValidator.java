@@ -22,6 +22,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MLocator;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -176,6 +177,56 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 				}
 			}
 		}
+
+
+		//JPIERE-0294: Explode BOM
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_Product_ID") ) )
+		{
+			MInOutLine iol = (MInOutLine)po;
+			if(iol.getM_Product_ID() == 0)
+			{
+				iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+
+			}else if(iol.getC_OrderLine_ID() > 0) {
+
+				MOrderLine ol = new MOrderLine(iol.getCtx(),iol.getC_OrderLine_ID(),iol.get_TrxName());
+				if(ol.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(iol.getM_Product_ID() == ol.getM_Product_ID())
+					{
+						iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ol.get_Value("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						return Msg.getMsg(iol.getCtx(), "JP_ProductOfOrderAndInOutDiffer");
+					}
+				}else {
+					iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+				}
+
+			}else if(iol.getM_RMALine_ID() > 0) {
+
+				MInOutLine originalIOLine = new MInOutLine(iol.getCtx(), iol.getM_RMALine().getM_InOutLine_ID(),iol.get_TrxName());
+				if(originalIOLine.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(iol.getM_Product_ID() == originalIOLine.getM_Product_ID())
+					{
+						iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", originalIOLine.get_Value("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						//Different between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), "M_RMALine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						String msg1 = Msg.getElement(Env.getCtx(), "M_InOutLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+					}
+				}else {
+					iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+				}
+			}
+		}
+
 
 		//JPIERE-0376:Check Over Qty Delivered
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
