@@ -20,7 +20,9 @@ import org.compiere.model.MCharge;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -220,6 +222,60 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			}
 		}
 
+
+		//JPIERE-0295: Explode BOM
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_Product_ID") ) )
+		{
+			MInvoiceLine il = (MInvoiceLine)po;
+			if(il.getM_Product_ID() == 0)
+			{
+				il.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+
+			}else if(il.getC_OrderLine_ID() > 0) {
+
+				MOrderLine ol = new MOrderLine(il.getCtx(),il.getC_OrderLine_ID(),il.get_TrxName());
+				if(ol.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(il.getM_Product_ID() == ol.getM_Product_ID())
+					{
+						il.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ol.get_Value("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						//Different between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), "C_OrderLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						String msg1 = Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+					}
+				}else {
+					il.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+				}
+
+			}else if(il.getM_InOutLine_ID() > 0) {
+
+				MInOutLine iol = new MInOutLine(il.getCtx(),il.getM_InOutLine_ID(),il.get_TrxName());
+				if(iol.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(il.getM_Product_ID() == iol.getM_Product_ID())
+					{
+						il.set_ValueNoCheck("JP_ProductExplodeBOM_ID", iol.get_Value("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						//Different between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), "M_InOutLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						String msg1 = Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+					}
+				}else {
+					il.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+				}
+			}
+		}
+
+
+
 		//JPIERE-0375:Check Over Qty Invoice
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("QtyInvoiced") ) )
@@ -232,7 +288,6 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 				BigDecimal orderQtyInvoiced = il.getC_OrderLine().getQtyInvoiced();
 				BigDecimal qtyOrdered = il.getC_OrderLine().getQtyOrdered();
 				BigDecimal qtyToInvoice = qtyOrdered.subtract(orderQtyInvoiced);
-				String docStatus = il.getParent().getDocStatus();
 				if(qtyOrdered.signum() >= 0)
 				{
 

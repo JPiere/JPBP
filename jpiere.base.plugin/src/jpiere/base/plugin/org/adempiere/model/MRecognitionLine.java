@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
@@ -40,6 +41,7 @@ import org.compiere.model.MTaxProvider;
 import org.compiere.model.MUOM;
 import org.compiere.model.Query;
 import org.compiere.model.Tax;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -1096,6 +1098,116 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 
 			}
 		}//Tax Calculation
+
+
+		//JPIERE-0294 & 0295: Explode BOM
+		if(newRecord || (!newRecord && is_ValueChanged("M_Product_ID")) )
+		{
+			if(getM_Product_ID() == 0)
+			{
+				setJP_ProductExplodeBOM_ID(0);
+
+			}else if(getM_InOutLine_ID() > 0) {
+
+				MInOutLine iol = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+				if(iol.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(getM_Product_ID() == iol.getM_Product_ID())
+					{
+						setJP_ProductExplodeBOM_ID(iol.get_ValueAsInt("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						//Different between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), "M_InOutLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						String msg1 = Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
+						return false;
+					}
+				}else {
+					setJP_ProductExplodeBOM_ID(0);
+				}
+			}
+		}
+
+
+
+		//JPIERE-0377:Check Over Qty Recognized
+		if(newRecord || is_ValueChanged("QtyInvoiced") )
+		{
+			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
+			if(pInfo == null && getC_OrderLine_ID() > 0)
+			{
+				BigDecimal qtyInvoiced  = getQtyInvoiced();
+				MOrderLine oline = new MOrderLine(getCtx(), getC_OrderLine_ID(), get_TrxName());
+				BigDecimal qtyRecognized = (BigDecimal)oline.get_Value("JP_QtyRecognized");
+				BigDecimal qtyOrdered = oline.getQtyOrdered();
+				BigDecimal qtyToRecognize = qtyOrdered.subtract(qtyRecognized);
+				if(qtyOrdered.signum() >= 0)
+				{
+
+					if(qtyInvoiced.compareTo(qtyToRecognize) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ oline.getParent().getDocumentNo() +  " - " + oline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+
+					}
+
+				}else {
+
+					if(qtyInvoiced.compareTo(qtyToRecognize) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ oline.getParent().getDocumentNo() +  " - " + oline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}else if(pInfo == null && getM_RMALine_ID() > 0) {
+
+				BigDecimal qtyInvoiced  = getQtyInvoiced();
+				MRMALine rmaline = new MRMALine(getCtx(), getM_RMALine_ID(), get_TrxName());
+				BigDecimal qtyRecognized = (BigDecimal)rmaline.get_Value("JP_QtyRecognized");
+				BigDecimal qtyRMA = rmaline.getQty();
+				BigDecimal qtyToRecognize = qtyRMA.subtract(qtyRecognized);
+
+				if(qtyRMA.signum() >= 0)
+				{
+					if(qtyInvoiced.compareTo(qtyToRecognize) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ rmaline.getParent().getDocumentNo() +  " - " + rmaline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+
+				}else {
+
+					if(qtyInvoiced.compareTo(qtyToRecognize) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+									+" : "+ rmaline.getParent().getDocumentNo() +  " - " + rmaline.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}
+
+		}//JPiere-0376
+
+
 
 		return true;
 	}	//	beforeSave

@@ -14,17 +14,23 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 
+import java.math.BigDecimal;
+
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MLocator;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 public class JPiereInOutLineModelValidator implements ModelValidator {
@@ -88,18 +94,18 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 
 					} else if(type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("QtyEntered")
 							&& !iol.getParent().getDocAction().equals(DocAction.ACTION_Void)){
-						
+
 						if(iol.getParent().getC_DocType().isSplitWhenDifference())
 						{
-							;// Can not check. Because, In Case of Split , InOut Cnfirm update QtyEntered When Complete. JPBP #108 -  2017/9/30 
+							;// Can not check. Because, In Case of Split , InOut Cnfirm update QtyEntered When Complete. JPBP #108 -  2017/9/30
 						}else{
 							return Msg.getMsg(iol.getCtx(), "JP_CanNotChangeQtyForConfirmations");//You can not change Qty because of Confirmations.
 						}
 					}
 				}
 			}
-			
-			
+
+
 			//JPIERE-0317 Physical Warehouse - check same physical warehouse between locator and document.
 			if(MSysConfig.getBooleanValue("JP_INOUT_PHYWH_LOCATOR_CHECK", true, iol.getAD_Client_ID(), iol.getAD_Org_ID()))
 			{
@@ -170,6 +176,131 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					}
 				}
 			}
+		}
+
+
+		//JPIERE-0294: Explode BOM
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_Product_ID") ) )
+		{
+			MInOutLine iol = (MInOutLine)po;
+			if(iol.getM_Product_ID() == 0)
+			{
+				iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+
+			}else if(iol.getC_OrderLine_ID() > 0) {
+
+				MOrderLine ol = new MOrderLine(iol.getCtx(),iol.getC_OrderLine_ID(),iol.get_TrxName());
+				if(ol.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(iol.getM_Product_ID() == ol.getM_Product_ID())
+					{
+						iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ol.get_Value("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						return Msg.getMsg(iol.getCtx(), "JP_ProductOfOrderAndInOutDiffer");
+					}
+				}else {
+					iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+				}
+
+			}else if(iol.getM_RMALine_ID() > 0) {
+
+				MInOutLine originalIOLine = new MInOutLine(iol.getCtx(), iol.getM_RMALine().getM_InOutLine_ID(),iol.get_TrxName());
+				if(originalIOLine.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(iol.getM_Product_ID() == originalIOLine.getM_Product_ID())
+					{
+						iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", originalIOLine.get_Value("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						//Different between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), "M_RMALine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						String msg1 = Msg.getElement(Env.getCtx(), "M_InOutLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+						return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+					}
+				}else {
+					iol.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+				}
+			}
+		}
+
+
+		//JPIERE-0376:Check Over Qty Delivered
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("MovementQty") ) )
+		{
+			MInOutLine iol = (MInOutLine)po;
+			ProcessInfo pInfo = Env.getProcessInfo(Env.getCtx());
+			if(pInfo == null && iol.getC_OrderLine_ID() > 0)
+			{
+				BigDecimal movementQty  = iol.getMovementQty();
+				BigDecimal qtyDelivered = iol.getC_OrderLine().getQtyDelivered();
+				BigDecimal qtyOrdered = iol.getC_OrderLine().getQtyOrdered();
+				BigDecimal qtyToDelivere = qtyOrdered.subtract(qtyDelivered);
+				if(qtyOrdered.signum() >= 0)
+				{
+
+					if(movementQty.compareTo(qtyToDelivere) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+
+					}
+
+				}else {
+
+					if(movementQty.compareTo(qtyToDelivere) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}else if(pInfo == null && iol.getM_RMALine_ID() > 0) {
+
+				BigDecimal movementQty  = iol.getMovementQty();
+				BigDecimal qtyDelivered = iol.getM_RMALine().getQtyDelivered();
+				BigDecimal qtyRMA = iol.getM_RMALine().getQty();
+				BigDecimal qtyToDeliver = qtyRMA.subtract(qtyDelivered);
+
+				if(qtyRMA.signum() >= 0)
+				{
+					if(movementQty.compareTo(qtyToDeliver) > 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+
+				}else {
+
+					if(movementQty.compareTo(qtyToDeliver) < 0)
+					{
+						try {
+							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
+						}catch(Exception e) {
+							;//ignore
+						}
+					}
+				}
+
+			}
+
 		}
 
 		return null;
