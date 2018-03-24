@@ -41,6 +41,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValAdjustCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValCalCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereInvoiceLineCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRecognitionCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
@@ -111,14 +112,14 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereEstimationCallout());
 				}
-				
+
 			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0227
-				
+
 				if(columnName.equals("JP_LocatorFrom_ID") || columnName.equals("JP_LocatorTo_ID"))
 				{
 					list.add(new JPiereEstimationCallout());
-				}	
-				
+				}
+
 			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
 				if(columnName.equals(MBankDataLine.COLUMNNAME_TrxAmt)
 						|| columnName.equals(MEstimation.COLUMNNAME_C_Invoice_ID)
@@ -128,34 +129,34 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 					list.add(new JPiereBankDataCallout());
 				}
 			}else if(tableName.equals(MContract.Table_Name)){	//JPIERE-0363
-				
+
 				if(columnName.equals("JP_ContractT_ID") || columnName.equals("JP_ContractPeriodDate_To")
 						|| columnName.equals("JP_ContractCancelTerm_ID") || columnName.equals("JP_ContractCancelDate") )
 				{
 					list.add(new JPiereContractCallout());
-				}	
+				}
 			}else if(tableName.equals(MContractContent.Table_Name)
 					||tableName.equals(MContractContentT.Table_Name) ){	//JPIERE-0363
-				
+
 				if(columnName.equals("JP_BaseDocDocType_ID") || columnName.equals("JP_ContractCalender_ID") )
 				{
 					list.add(new JPiereContractContentCallout());
 				}
-				
+
 			}else if(tableName.equals(MContractLine.Table_Name)){//JPIERE-0363
-				
+
 				if(columnName.equals("JP_ContractCalender_InOut_ID") || columnName.equals("JP_ContractCalender_Inv_ID") )
 				{
 					list.add(new JPiereContractLineCallout());
 				}
 			}else if(tableName.equals(MRecognition.Table_Name)){//JPIERE-036４
-				
+
 				if(columnName.equals("M_InOut_ID") )
 				{
 					list.add(new JPiereRecognitionCallout());
 				}
 			}
-			
+
 		}else{
 
 			if(tableName.equals(MPayment.Table_Name))
@@ -176,20 +177,20 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereDropShipBPartnerCallout());
 				}else if(columnName.equals("JP_Contract_ID") || columnName.equals("JP_ContractContent_ID")) { //JPIERE-0363
-					
+
 					list.add(new JPiereContractOrderCallout());
 				}
-			
+
 			}else if(tableName.equals(MOrderLine.Table_Name)){	//JPIERE-0227
-				
+
 				if(columnName.equals("JP_LocatorFrom_ID") || columnName.equals("JP_LocatorTo_ID"))
 				{
 					list.add(new JPiereOrderCallout());
-					
+
 				}else if(columnName.equals("JP_ContractLine_ID")) { //JPIERE-0363
-					
+
 					list.add(new JPiereContractOrderCallout());
-				}			
+				}
 
 			}else if(tableName.equals(MInOut.Table_Name)){
 
@@ -197,21 +198,25 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 					list.add(new JPiereInOutCallout());
 				else if(columnName.equals(MOrder.COLUMNNAME_DropShip_BPartner_ID))
 					list.add(new JPiereDropShipBPartnerCallout());
-			
+
 			}else if(tableName.equals(MInvoice.Table_Name)){
-				
+
 				if(columnName.equals("JP_Contract_ID") || columnName.equals("JP_ContractContent_ID")) { //JPIERE-0363
-					
+
 					list.add(new JPiereContractOrderCallout());
-				}		
-				
+				}
+
 			}else if(tableName.equals(MInvoiceLine.Table_Name)){
-				
+
 				if(columnName.equals("JP_ContractLine_ID")) { //JPIERE-0363
-					
+
 					list.add(new JPiereContractOrderCallout());
-				}		
-				
+
+				}else if (columnName.equals("C_OrderLine_ID")) { //JPIERE-0381
+
+					list.add(new JPiereInvoiceLineCallout());
+				}
+
 			}
 		}
 
