@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.math.BigDecimal;
 
 import org.compiere.model.MClient;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
@@ -144,6 +145,34 @@ public class JPiereRMALineModelValidator implements ModelValidator {
 
 		}//JPiere-0377
 
+		//JPIERE-0294: Explode BOM
+		if(type == ModelValidator.TYPE_BEFORE_NEW ||
+				(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_Product_ID") ) )
+		{
+			MRMALine rmaLine = (MRMALine)po;
+			if(rmaLine.getM_Product_ID() == 0)
+			{
+				rmaLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+
+			}else if(rmaLine.getM_InOutLine_ID() > 0) {
+
+				MInOutLine iol = new MInOutLine(rmaLine.getCtx(),rmaLine.getM_InOutLine_ID(),rmaLine.get_TrxName());
+				if(iol.get_Value("JP_ProductExplodeBOM_ID") != null)
+				{
+
+					if(rmaLine.getM_Product_ID() == iol.getM_Product_ID())
+					{
+						rmaLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", iol.get_Value("JP_ProductExplodeBOM_ID"));
+					}else {
+
+						return Msg.getMsg(rmaLine.getCtx(), "JP_ProductOfOrderAndInOutDiffer");
+					}
+				}else {
+					rmaLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", null);
+				}
+
+			}
+		}//JPiere-0294
 
 		return null;
 	}
