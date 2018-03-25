@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.math.BigDecimal;
+
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
@@ -407,10 +409,33 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				}
 
 			}
-
-			return null;
 		}
 
+		//JPIERE-0383:Processing Order
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE &&
+				( po.is_ValueChanged("QtyOrdered") || po.is_ValueChanged("QtyDelivered")
+						|| po.is_ValueChanged("QtyInvoiced") || po.is_ValueChanged("JP_QtyRecognized") )
+			)
+		{
+			BigDecimal qtyOrdered = (BigDecimal)po.get_Value("QtyOrdered");
+			BigDecimal qtyDelivered = (BigDecimal)po.get_Value("QtyDelivered");
+			BigDecimal qtyInvoiced = (BigDecimal)po.get_Value("QtyInvoiced");
+			BigDecimal qtyRecognized = (BigDecimal)po.get_Value("JP_QtyRecognized");
+
+			if(qtyOrdered.compareTo(qtyDelivered)==0 && qtyOrdered.compareTo(qtyInvoiced)==0
+					&& qtyOrdered.compareTo(qtyRecognized)==0)
+			{
+				po.set_ValueNoCheck("IsProcessingOrderJP", "N");
+			}else {
+				po.set_ValueNoCheck("IsProcessingOrderJP", "Y");
+			}
+
+			if(po.is_ValueChanged("QtyDelivered") || po.is_ValueChanged("QtyInvoiced") || po.is_ValueChanged("JP_QtyRecognized"))
+			{
+				return null;
+			}
+
+		}//JPiere-0383
 
 		/** Ref:JPiereContractInvoiceValidator */
 		if(type == ModelValidator.TYPE_BEFORE_NEW
