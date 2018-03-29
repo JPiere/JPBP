@@ -895,7 +895,7 @@ public class MContractLine extends X_JP_ContractLine {
 	{
 		if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
 		{
-			log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inｖ")}));
+			log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inv")}));
 			return false;
 		}
 
