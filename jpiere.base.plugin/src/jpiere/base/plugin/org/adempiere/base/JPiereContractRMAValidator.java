@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.math.BigDecimal;
+
 import org.compiere.model.MClient;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
@@ -46,7 +48,7 @@ public class JPiereContractRMAValidator implements ModelValidator {
 
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) 
+	public void initialize(ModelValidationEngine engine, MClient client)
 	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
@@ -77,26 +79,26 @@ public class JPiereContractRMAValidator implements ModelValidator {
 		if(po.get_TableName().equals(MRMA.Table_Name))
 		{
 			return rmaValidate(po, type);
-			
+
 		}else if(po.get_TableName().equals(MRMALine.Table_Name)){
-			
+
 			return rmaLineValidate(po, type);
 		}
-		
+
 		return null;
 	}
 
 	@Override
-	public String docValidate(PO po, int timing) 
+	public String docValidate(PO po, int timing)
 	{
-		
+
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Recognition Validate
-	 * 
+	 *
 	 * @param po
 	 * @param type
 	 * @return
@@ -104,20 +106,20 @@ public class JPiereContractRMAValidator implements ModelValidator {
 	private String rmaValidate(PO po, int type)
 	{
 
-		if( type == ModelValidator.TYPE_BEFORE_NEW 
+		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged(MRMA.COLUMNNAME_InOut_ID) ) )
 		{
-			
+
 			int M_InOut_ID = po.get_ValueAsInt(MRMA.COLUMNNAME_InOut_ID);
 			if(M_InOut_ID <= 0)
 			{
 				po.set_ValueNoCheck("JP_Contract_ID", null);
 				po.set_ValueNoCheck("JP_ContractContent_ID", null);
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
+
 				return null;
 			}
-			
+
 			MInOut io = new MInOut(Env.getCtx(),M_InOut_ID, po.get_TrxName());
 			int JP_Contract_ID = io.get_ValueAsInt("JP_Contract_ID");
 			if(JP_Contract_ID <= 0)
@@ -125,27 +127,27 @@ public class JPiereContractRMAValidator implements ModelValidator {
 				po.set_ValueNoCheck("JP_Contract_ID", null);
 				po.set_ValueNoCheck("JP_ContractContent_ID", null);
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
+
 				return null;
-				
+
 			}else{
-				
+
 				po.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
 				po.set_ValueNoCheck("JP_ContractContent_ID", io.get_ValueAsInt("JP_ContractContent_ID"));
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", io.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-				
+
 				po.set_ValueNoCheck("JP_Order_ID", io.getC_Order_ID());
-				
+
 			}
 		}
-		
+
 		return null;
 	}
 
-	
+
 	/**
 	 * Recognition Line Validate
-	 * 
+	 *
 	 * @param po
 	 * @param type
 	 * @return
@@ -155,66 +157,90 @@ public class JPiereContractRMAValidator implements ModelValidator {
 		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged(MRMALine.COLUMNNAME_QtyInvoiced))
 		{
 			MRMALine rmaLine = (MRMALine)po;
-			
+
 			int JP_ContractContent_ID = rmaLine.getParent().get_ValueAsInt("JP_ContractContent_ID");
 			if(JP_ContractContent_ID == 0)
 			{
 				rmaLine.set_ValueNoCheck("JP_QtyRecognized", rmaLine.getQtyInvoiced());
-			
+
 			}else{
-				
+
 				MContractContent contractContent = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
 				if(!contractContent.getJP_Contract_Acct().isPostingRecognitionDocJP())
 				{
 					rmaLine.set_ValueNoCheck("JP_QtyRecognized", rmaLine.getQtyInvoiced());
 				}
-				
+
 			}
-			
-			return null;	
 		}
-		
-		
-		if( type == ModelValidator.TYPE_BEFORE_NEW 
+
+		//JPIERE-0384:Processing RMA
+		if(type == ModelValidator.TYPE_BEFORE_CHANGE &&
+				( po.is_ValueChanged("Qty") || po.is_ValueChanged("QtyDelivered")
+						|| po.is_ValueChanged("QtyInvoiced") || po.is_ValueChanged("JP_QtyRecognized") )
+			)
+		{
+			BigDecimal qty = (BigDecimal)po.get_Value("Qty");
+			BigDecimal qtyDelivered = (BigDecimal)po.get_Value("QtyDelivered");
+			BigDecimal qtyInvoiced = (BigDecimal)po.get_Value("QtyInvoiced");
+			BigDecimal qtyRecognized = (BigDecimal)po.get_Value("JP_QtyRecognized");
+
+			if(qty.compareTo(qtyDelivered)==0 && qty.compareTo(qtyInvoiced)==0
+					&& qty.compareTo(qtyRecognized)==0)
+			{
+				po.set_ValueNoCheck("IsProcessingRMAJP", "N");
+			}else {
+				po.set_ValueNoCheck("IsProcessingRMAJP", "Y");
+			}
+
+			if(po.is_ValueChanged("QtyDelivered") || po.is_ValueChanged("QtyInvoiced") || po.is_ValueChanged("JP_QtyRecognized"))
+			{
+				return null;
+			}
+
+		}//JPiere-0383
+
+
+		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged(MRMALine.COLUMNNAME_M_InOutLine_ID) ) )
 		{
-			
+
 			int M_InOutLine_ID = po.get_ValueAsInt(MRMALine.COLUMNNAME_M_InOutLine_ID);
 			if(M_InOutLine_ID <= 0)
 			{
 				po.set_ValueNoCheck("JP_ContractLine_ID", null);
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
+
 				return null;
 			}
-			
+
 			MInOutLine ioLine = new MInOutLine(Env.getCtx(),M_InOutLine_ID, po.get_TrxName());
 			int JP_ContractLine_ID = ioLine.get_ValueAsInt("JP_ContractLine_ID");
 			if(JP_ContractLine_ID <= 0)
 			{
 				po.set_ValueNoCheck("JP_ContractLine_ID", null);
 				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
+
 				return null;
-				
+
 			}else{
-				
+
 				po.set_ValueNoCheck("JP_ContractLine_ID", ioLine.get_ValueAsInt("JP_ContractLine_ID"));
 				int JP_ContractProcPeriod_ID = ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID");
 				if(JP_ContractProcPeriod_ID > 0)
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
-				else 
+				else
 					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
-				
+
 				int JP_OrderLine_ID = ioLine.getC_OrderLine_ID();
 				if(JP_OrderLine_ID > 0)
 					po.set_ValueNoCheck("JP_OrderLine_ID", JP_OrderLine_ID);
 				else
 					po.set_ValueNoCheck("JP_OrderLine_ID", null);
-				
+
 			}
 		}
-		
+
 		return null;
 	}
 
