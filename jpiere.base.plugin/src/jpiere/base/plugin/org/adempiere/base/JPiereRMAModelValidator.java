@@ -21,7 +21,7 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 
 /**
- * JPIERE-0385:RMA Model Validator
+ * RMA Model Validator
  *
  * @author h.hagiwara
  *
@@ -54,12 +54,13 @@ public class JPiereRMAModelValidator implements ModelValidator {
 	@Override
 	public String modelChange(PO po, int type) throws Exception
 	{
+		//JPIERE-0385
 		if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("InOut_ID") )
 		{
 			MRMA rma = (MRMA)po;
 			MInOut m_inout = new MInOut (rma.getCtx(), rma.getInOut_ID(), rma.get_TrxName());
 			rma.setC_BPartner_ID(m_inout.getC_BPartner_ID());
-		}
+		}//JPiere-0385
 
 		return null;
 	}
