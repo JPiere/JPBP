@@ -20,8 +20,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.util.JPiereInvoiceUtil;
-
+import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MInvoice;
@@ -30,7 +29,18 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
+import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractBPAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.util.JPiereInvoiceUtil;
 
+/**
+ * JPIERE-0270,0271
+ *
+ *
+ * @author h.hagiwara
+ *
+ */
 public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 
 	private int		p_AD_PInstance_ID = 0;
@@ -46,7 +56,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 
 
 	@Override
-	protected void prepare() 
+	protected void prepare()
 	{
 		p_AD_PInstance_ID = getAD_PInstance_ID();
 		p_AD_Client_ID =getProcessInfo().getAD_Client_ID();
@@ -59,40 +69,40 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				;
 			}else if (name.equals("JP_PointOfTime")){
 				p_JP_PointOfTime = para[i].getParameterAsTimestamp();
-				
+
 			}else if (name.equals("AD_Org_ID")){
 				p_AD_Org_ID = para[i].getParameterAsInt();
-			
+
 			}else if (name.equals("C_BPartner_ID")){
 				p_C_BPartner_ID = para[i].getParameterAsInt();
 
 			}else if(name.equals("JP_Corporation_ID")){
 				p_JP_Corporation_ID = para[i].getParameterAsInt();
-				
+
 			}else if(name.equals("C_AcctSchema_ID")){
 				p_C_AcctSchema_ID = para[i].getParameterAsInt();
-			
+
 			}else if(name.equals("Account_ID")){
 				p_Account_ID = para[i].getParameterAsInt();
-				
+
 			}else if(name.equals("IsSOTrx")){
 				p_IsSOTrx = para[i].getParameterAsString().equals("Y");
-				
+
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if
 		}//for
 
 		m_MAcctSchema = MAcctSchema.get(getCtx(), p_C_AcctSchema_ID);
-		
+
 	}
 
 	@Override
 	protected String doIt() throws Exception {
-				
+
 		ArrayList<OpemAmtInvoice> list = new ArrayList<OpemAmtInvoice>();
-		
-		
+
+
 		/**
 		 * Get Data of IsPaid = 'N'
 		 */
@@ -104,14 +114,14 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 					+ " FROM C_Invoice i "
 					+ " INNER JOIN C_DocType dt ON (dt.C_DocType_ID = i.C_DocTypeTarget_ID)"
 					+ " INNER JOIN C_BPartner bp ON (bp.C_BPartner_ID = i.C_BPartner_ID)");
-		
+
 		if(p_IsSOTrx)
 		{
 			sql1.append(" INNER JOIN C_BP_Customer_Acct bpca ON (bp.C_BPartner_ID = bpca.C_BPartner_ID AND bpca.C_AcctSchema_ID = ?)"//1
 					    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");
 		}else{
 			sql1.append(" INNER JOIN C_BP_Vendor_Acct bpva ON (bp.C_BPartner_ID = bpva.C_BPartner_ID AND bpva.C_AcctSchema_ID = ?)"//1
-				    + " INNER JOIN C_ValidCombination vc ON (bpva.V_Liability_Acct = vc.C_ValidCombination_ID)");			
+				    + " INNER JOIN C_ValidCombination vc ON (bpva.V_Liability_Acct = vc.C_ValidCombination_ID)");
 		}
 
 		sql1.append(" WHERE i.IsPaid='N' AND i.AD_Client_ID = ? "//2 for use Table index
@@ -124,27 +134,28 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		{
 			sql1.append(" AND i.AD_Org_ID= ? ");
 		}
-		
+
 		if(p_C_BPartner_ID > 0)
 		{
 			sql1.append(" AND i.C_BPartner_ID= ? ");
 		}
-		
+
 		if(p_JP_Corporation_ID > 0)
 		{
 			sql1.append(" AND bp.JP_Corporation_ID= ? ");
 		}
-		
-		if(p_Account_ID > 0)
-		{
-			sql1.append(" AND vc.Account_ID= ? ");
-		}
 
-		
+		//Update: Comment out for JPIERE-0363:Contract Management
+//		if(p_Account_ID > 0)
+//		{
+//			sql1.append(" AND vc.Account_ID= ? ");
+//		}
+
+
 		PreparedStatement pstmt1 = null;
 		ResultSet rs1 = null;
-		
-		
+
+
 		try
 		{
 			pstmt1 = DB.prepareStatement(sql1.toString(), get_TrxName());
@@ -152,44 +163,80 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			pstmt1.setInt(2, p_AD_Client_ID);
 			pstmt1.setTimestamp(3, p_JP_PointOfTime);
 			pstmt1.setString(4, p_IsSOTrx==true? "Y": "N");
-			
+
 			int i = 4;
 			if(p_AD_Org_ID > 0)
 			{
 				i++;
 				pstmt1.setInt(i, p_AD_Org_ID);
 			}
-			
+
 			if(p_C_BPartner_ID > 0)
 			{
 				i++;
 				pstmt1.setInt(i, p_C_BPartner_ID);
 			}
-			
+
 			if(p_JP_Corporation_ID > 0)
 			{
 				i++;
 				pstmt1.setInt(i, p_JP_Corporation_ID);
-			}			
-			
-			if(p_Account_ID > 0)
-			{
-				i++;
-				pstmt1.setInt(i, p_Account_ID);
-			}			
-			
-			
+			}
+
+			//Update: Comment out for JPIERE-0363:Contract Management
+//			if(p_Account_ID > 0)
+//			{
+//				i++;
+//				pstmt1.setInt(i, p_Account_ID);
+//			}
+
+
 			rs1 = pstmt1.executeQuery();
+			MInvoice invoice = null;
+			int account_ID = 0;
+			MContractContent contractContent = null;
+			MContractAcct contractAcct = null;
+			MAccount acct = null;
 			while(rs1.next())
 			{
-				list.add(new OpemAmtInvoice(
-							new MInvoice(getCtx(), rs1, get_TrxName()) 	//MInvoice
-							,rs1.getString(1)							//docBaseType 
-							,rs1.getInt(2)								//JP_Corporation_ID
-							,rs1.getInt(3) 								// Account_ID
+				invoice = new MInvoice(getCtx(), rs1, get_TrxName());
+				account_ID = rs1.getInt(3) ;
+
+				//Update: Comment out for JPIERE-0363:Contract Management
+				if(invoice.get_ValueAsInt("JP_ContractContent_ID") > 0)
+				{
+					contractContent = MContractContent.get(getCtx(), invoice.get_ValueAsInt("JP_ContractContent_ID"));
+					contractAcct = MContractAcct.get(getCtx(), contractContent.getJP_Contract_Acct_ID());
+					if(contractAcct.isPostingContractAcctJP())
+					{
+						if(p_IsSOTrx)
+						{
+							acct = getReceivableAccount(contractAcct, p_C_AcctSchema_ID);
+							if(acct != null)
+							{
+								account_ID = acct.getAccount().getC_ElementValue_ID();
+							}
+						}else {
+							acct = getPayableAccount(contractAcct, p_C_AcctSchema_ID);
+							if(acct != null)
+							{
+								account_ID = acct.getAccount().getC_ElementValue_ID();
+							}
+						}
+
+					}
+				}
+
+				if(p_Account_ID != 0 && account_ID != p_Account_ID)
+					continue;
+
+				list.add(new OpemAmtInvoice(invoice 	//MInvoice
+							,rs1.getString(1)			//docBaseType
+							,rs1.getInt(2)				//JP_Corporation_ID
+							,account_ID 				// Account_ID
 							)
 						);
-				
+
 			}
 
 		}catch (Exception e){
@@ -199,9 +246,9 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			DB.close(rs1, pstmt1);
 			rs1 = null; pstmt1 = null;
 		}
-		
-		
-		
+
+
+
 		/**
 		 * Get Date of IsPaid = 'Y'
 		 */
@@ -215,16 +262,16 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 					        + " INNER JOIN C_AllocationHdr a ON (al.C_AllocationHdr_ID = a.C_AllocationHdr_ID)"
 					        + " INNER JOIN C_DocType dt ON (dt.C_DocType_ID = i.C_DocTypeTarget_ID)"
 					        + " INNER JOIN C_BPartner bp ON (bp.C_BPartner_ID = i.C_BPartner_ID)");
-					        
+
 		if(p_IsSOTrx)
 		{
 			sql2.append(" INNER JOIN C_BP_Customer_Acct bpca ON (bp.C_BPartner_ID = bpca.C_BPartner_ID AND bpca.C_AcctSchema_ID = ?)"//1
 					    + " INNER JOIN C_ValidCombination vc ON (bpca.c_receivable_Acct = vc.C_ValidCombination_ID)");
 		}else{
 			sql2.append(" INNER JOIN C_BP_Vendor_Acct bpva ON (bp.C_BPartner_ID = bpva.C_BPartner_ID AND bpva.C_AcctSchema_ID = ?)"//1
-				    + " INNER JOIN C_ValidCombination vc ON (bpva.V_Liability_Acct = vc.C_ValidCombination_ID)");			
+				    + " INNER JOIN C_ValidCombination vc ON (bpva.V_Liability_Acct = vc.C_ValidCombination_ID)");
 		}
-			    
+
 		sql2.append(" WHERE i.IsPaid='Y' AND i.AD_Client_ID = ? "//2 for use Table index
 								+ " AND i.DocStatus IN ('CO','CL','VO','RE') "
 								+ " AND i.DateAcct <= ?" //3
@@ -236,25 +283,26 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		{
 			sql2.append(" AND i.AD_Org_ID= ? ");
 		}
-		
+
 		if(p_C_BPartner_ID > 0)
 		{
 			sql2.append(" AND i.C_BPartner_ID= ? ");
 		}
-		
+
 		if(p_JP_Corporation_ID > 0)
 		{
 			sql2.append(" AND bp.JP_Corporation_ID= ? ");
 		}
-		
-		if(p_Account_ID > 0)
-		{
-			sql2.append(" AND vc.Account_ID= ? ");
-		}
-		
+
+		//Update: Comment out for JPIERE-0363:Contract Management
+//		if(p_Account_ID > 0)
+//		{
+//			sql2.append(" AND vc.Account_ID= ? ");
+//		}
+
 		PreparedStatement pstmt2 = null;
 		ResultSet rs2 = null;
-		
+
 
 		try
 		{
@@ -264,47 +312,83 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			pstmt2.setTimestamp(3, p_JP_PointOfTime);
 			pstmt2.setTimestamp(4, p_JP_PointOfTime);
 			pstmt2.setString(5, p_IsSOTrx==true? "Y": "N");
-			
+
 			int i = 5;
 			if(p_AD_Org_ID > 0)
 			{
 				i++;
 				pstmt2.setInt(i, p_AD_Org_ID);
 			}
-			
+
 			if(p_C_BPartner_ID > 0)
 			{
 				i++;
 				pstmt2.setInt(i, p_C_BPartner_ID);
 			}
-			
+
 			if(p_JP_Corporation_ID > 0)
 			{
 				i++;
 				pstmt2.setInt(i, p_JP_Corporation_ID);
-			}			
-			
-			if(p_Account_ID > 0)
-			{
-				i++;
-				pstmt2.setInt(i, p_Account_ID);
-			}	
-			
+			}
+
+			//Update: Comment out for JPIERE-0363:Contract Management
+//			if(p_Account_ID > 0)
+//			{
+//				i++;
+//				pstmt2.setInt(i, p_Account_ID);
+//			}
+
 			rs2 = pstmt2.executeQuery();
 			OpemAmtInvoice  openAmnInv =null;
+			MInvoice invoice2 = null;
+			int account_ID2 = 0;
+			MContractContent contractContent2 = null;
+			MContractAcct contractAcct2 = null;
+			MAccount acct2 = null;
 			while(rs2.next())
 			{
-				openAmnInv = new OpemAmtInvoice(
-								new MInvoice(getCtx(), rs2, get_TrxName()) 	//MInvoice
-								,rs2.getString(1)							//docBaseType 
+				invoice2 = new MInvoice(getCtx(), rs2, get_TrxName());
+				account_ID2 = rs2.getInt(3) ;
+
+				//Update: Comment out for JPIERE-0363:Contract Management
+				if(invoice2.get_ValueAsInt("JP_ContractContent_ID") > 0)
+				{
+					contractContent2 = MContractContent.get(getCtx(), invoice2.get_ValueAsInt("JP_ContractContent_ID"));
+					contractAcct2 = MContractAcct.get(getCtx(), contractContent2.getJP_Contract_Acct_ID());
+					if(contractAcct2.isPostingContractAcctJP())
+					{
+						if(p_IsSOTrx)
+						{
+							acct2 = getReceivableAccount(contractAcct2, p_C_AcctSchema_ID);
+							if(acct2 != null)
+							{
+								account_ID2 = acct2.getAccount().getC_ElementValue_ID();
+							}
+						}else {
+							acct2 = getPayableAccount(contractAcct2, p_C_AcctSchema_ID);
+							if(acct2 != null)
+							{
+								account_ID2 = acct2.getAccount().getC_ElementValue_ID();
+							}
+						}
+
+					}
+				}//for JPiere-0363
+
+				if(p_Account_ID != 0 && account_ID2 != p_Account_ID)
+					continue;
+
+				openAmnInv = new OpemAmtInvoice(invoice2				 	//MInvoice
+								,rs2.getString(1)							//docBaseType
 								,rs2.getInt(2)								//JP_Corporation_ID
-								,rs2.getInt(3) 								// Account_ID
+								,account_ID2								// Account_ID
 							);
 				if(openAmnInv.getJP_OpenAmtPointOfTime().compareTo(Env.ZERO) != 0)
 				{
-					list.add(openAmnInv);	
+					list.add(openAmnInv);
 				}
-				
+
 			}
 
 		}catch (Exception e){
@@ -314,12 +398,12 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			DB.close(rs2, pstmt2);
 			rs2 = null; pstmt2 = null;
 		}
-		
-		
+
+
 		/**
 		 * Insert to temporally teble
 		 */
-		
+
 		StringBuilder sql3 = new StringBuilder("INSERT INTO T_OpenInvPointOfTimeJP("
 				+ "AD_Pinstance_ID"			//1
 				+ ", C_Invoice_ID"			//2
@@ -355,10 +439,10 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				+ ", JP_PointOfTime"		//32
 				+ ")"
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,   ?, ?)");
-		
+
 		PreparedStatement pstmt3 = null;
 		ResultSet rs3 = null;
-		
+
 
 		try
 		{
@@ -375,18 +459,18 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				pstmt3.setInt(5, openAmtInv.getInvoice().getAD_Org_ID());
 				if(openAmtInv.getInvoice().getAD_OrgTrx_ID() > 0 )
 					pstmt3.setInt(6, openAmtInv.getInvoice().getAD_OrgTrx_ID());
-				else 
+				else
 					pstmt3.setNull(6, java.sql.Types.INTEGER);
 				pstmt3.setInt(7, openAmtInv.getInvoice().getC_BPartner_ID());
 				if(openAmtInv.getJP_Corporation_ID() > 0 )
 					pstmt3.setInt(8, openAmtInv.getJP_Corporation_ID());
-				else 
-					pstmt3.setNull(8, java.sql.Types.INTEGER);				
+				else
+					pstmt3.setNull(8, java.sql.Types.INTEGER);
 				pstmt3.setInt(9, openAmtInv.getInvoice().getC_Currency_ID());
 				if(openAmtInv.getInvoice().getSalesRep_ID() > 0 )
 					pstmt3.setInt(10, openAmtInv.getInvoice().getSalesRep_ID());
-				else 
-					pstmt3.setNull(10, java.sql.Types.INTEGER);						
+				else
+					pstmt3.setNull(10, java.sql.Types.INTEGER);
 				pstmt3.setInt(11, openAmtInv.getInvoice().getC_PaymentTerm_ID());
 				pstmt3.setInt(12, p_C_AcctSchema_ID);
 				pstmt3.setInt(13, openAmtInv.getAccount_ID());
@@ -406,18 +490,18 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 					pstmt3.setBigDecimal(24, openAmtInv.getInvoice().getGrandTotal());
 				pstmt3.setBigDecimal(25, openAmtInv.getOpenAmt());
 				pstmt3.setBigDecimal(26, openAmtInv.getJP_OpenAmtPointOfTime());
-				
+
 				//Foreign currency conversion
 				pstmt3.setInt(27, m_MAcctSchema.getC_Currency_ID());
 				if(openAmtInv.getInvoice().isCreditMemo())
 					pstmt3.setBigDecimal(28, openAmtInv.getJP_ExchangedGrandTotal().negate());
 				else
-					pstmt3.setBigDecimal(28, openAmtInv.getJP_ExchangedGrandTotal());				
-				
-				pstmt3.setBigDecimal(29, openAmtInv.getJP_ExchangedOpenAmt());			
-				pstmt3.setBigDecimal(30, openAmtInv.getJP_ExchangedOpenAmtPOT());	
+					pstmt3.setBigDecimal(28, openAmtInv.getJP_ExchangedGrandTotal());
+
+				pstmt3.setBigDecimal(29, openAmtInv.getJP_ExchangedOpenAmt());
+				pstmt3.setBigDecimal(30, openAmtInv.getJP_ExchangedOpenAmtPOT());
 				pstmt3.setBigDecimal(31, openAmtInv.getRate());
-				
+
 				pstmt3.setTimestamp(32, p_JP_PointOfTime);
 				pstmt3.executeUpdate();
 
@@ -430,27 +514,27 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			DB.close(rs3, pstmt3);
 			rs3 = null; pstmt3 = null;
 		}
-		
-		
+
+
 		return "OK";
-		
+
 	}
 
-	
+
 	private class OpemAmtInvoice
 	{
 		private MInvoice invoice = null;
 		private String DocBaseType = null;
 		private int JP_Corporation_ID = 0;
 		private int Account_ID = 0;
-		
+
 		private BigDecimal OpenAmt = Env.ZERO;
 		private BigDecimal JP_OpenAmtPointOfTime = Env.ZERO;
 		private BigDecimal JP_ExchangedGrandTotal  = Env.ZERO;
 		private BigDecimal JP_ExchangedOpenAmt  = Env.ZERO;
 		private BigDecimal JP_ExchangedOpenAmtPOT  = Env.ZERO;
 		private BigDecimal Rate = Env.ONE;
-		
+
 		public OpemAmtInvoice (MInvoice invoice, String DocBaseType,int JP_Corporation_ID, int Account_ID)
 		{
 			this.invoice = invoice;
@@ -459,14 +543,14 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			this.Account_ID = Account_ID;
 			OpenAmt =invoice.getOpenAmt(true, null);
 			JP_OpenAmtPointOfTime = JPiereInvoiceUtil.getOpenAmtPointOfTime(getCtx(), invoice, p_JP_PointOfTime, true, get_TrxName());
-			
-			
+
+
 			if(invoice.getC_Currency_ID() == m_MAcctSchema.getC_Currency_ID())
 			{
 				JP_ExchangedGrandTotal = invoice.getGrandTotal();
 				JP_ExchangedOpenAmt = OpenAmt;
 				JP_ExchangedOpenAmtPOT = JP_OpenAmtPointOfTime;
-				
+
 			}else{
 				JP_ExchangedGrandTotal= MConversionRate.convert (getCtx(),invoice.getGrandTotal(), invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(),
 														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
@@ -474,11 +558,11 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
 				JP_ExchangedOpenAmtPOT= MConversionRate.convert (getCtx(), JP_OpenAmtPointOfTime, invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(),
 														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
-				Rate = MConversionRate.getRate(invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(), 
+				Rate = MConversionRate.getRate(invoice.getC_Currency_ID(), m_MAcctSchema.getC_Currency_ID(),
 														invoice.getDateAcct(), invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
 			}
 		}
-		
+
 		public MInvoice getInvoice(){return invoice;}
 		public String getDocBaseType(){return DocBaseType;}
 		public int getJP_Corporation_ID(){return JP_Corporation_ID;}
@@ -490,6 +574,28 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 		public BigDecimal getJP_ExchangedOpenAmtPOT(){return JP_ExchangedOpenAmtPOT;}
 		public BigDecimal getRate(){return Rate;}
 	}//private class OpemAmtInvoice
-	
-}//public class OpenAmtInvoiceListPointOfTime 
+
+	private MAccount getReceivableAccount(MContractAcct contractAcct, int C_AcctSchema_ID)
+	{
+		MContractBPAcct bpAcct = contractAcct.getContractBPAcct(C_AcctSchema_ID, false);
+		if(bpAcct != null && bpAcct.getC_Receivable_Acct() > 0)
+		{
+			return MAccount.get(getCtx(),bpAcct.getC_Receivable_Acct());
+		}else{
+			return null;
+		}
+	}
+
+	private MAccount getPayableAccount(MContractAcct contractAcct, int C_AcctSchema_ID)
+	{
+		MContractBPAcct bpAcct = contractAcct.getContractBPAcct(C_AcctSchema_ID, false);
+		if(bpAcct != null && bpAcct.getV_Liability_Acct() > 0)
+		{
+			return MAccount.get(getCtx(),bpAcct.getV_Liability_Acct());
+		}else{
+			return null;
+		}
+	}
+
+}//public class OpenAmtInvoiceListPointOfTime
 
