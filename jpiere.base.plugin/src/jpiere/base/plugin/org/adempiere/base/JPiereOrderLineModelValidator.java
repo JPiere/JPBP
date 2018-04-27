@@ -441,7 +441,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 	//JPIERE-0202
 	private BigDecimal getProductCosts (MOrderLine ol, MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK)
 	{
-		ProductCost pc = getProductCost(ol);
+		ProductCost pc = new ProductCost (Env.getCtx(), ol.getM_Product_ID(), ol.getM_AttributeSetInstance_ID(), ol.get_TrxName());
 		pc.setQty(Env.ONE);
 		int C_OrderLine_ID = ol.getC_OrderLine_ID();
 		String costingMethod = null;
@@ -450,19 +450,5 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			return costs;
 		return Env.ZERO;
 	}//  getProductCosts
-
-	//JPIERE-0202
-	private ProductCost			m_productCost = null;
-
-	//JPIERE-0202
-	private ProductCost getProductCost(MOrderLine ol)
-	{
-		if(m_productCost == null)
-		{
-			m_productCost = new ProductCost (Env.getCtx(),
-						ol.getM_Product_ID(), ol.getM_AttributeSetInstance_ID(), ol.get_TrxName());
-		}
-		return m_productCost;
-	}	//	getProductCost
 
 }
