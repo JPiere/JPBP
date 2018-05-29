@@ -274,6 +274,19 @@ public interface I_I_OrgJP
 	  */
 	public int getCreatedBy();
 
+    /** Column name DUNS */
+    public static final String COLUMNNAME_DUNS = "DUNS";
+
+	/** Set D-U-N-S.
+	  * Dun & Bradstreet Number
+	  */
+	public void setDUNS (String DUNS);
+
+	/** Get D-U-N-S.
+	  * Dun & Bradstreet Number
+	  */
+	public String getDUNS();
+
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 
@@ -286,6 +299,32 @@ public interface I_I_OrgJP
 	  * Optional short description of the record
 	  */
 	public String getDescription();
+
+    /** Column name EMail */
+    public static final String COLUMNNAME_EMail = "EMail";
+
+	/** Set EMail Address.
+	  * Electronic Mail Address
+	  */
+	public void setEMail (String EMail);
+
+	/** Get EMail Address.
+	  * Electronic Mail Address
+	  */
+	public String getEMail();
+
+    /** Column name Fax */
+    public static final String COLUMNNAME_Fax = "Fax";
+
+	/** Set Fax.
+	  * Facsimile number
+	  */
+	public void setFax (String Fax);
+
+	/** Get Fax.
+	  * Facsimile number
+	  */
+	public String getFax();
 
     /** Column name I_ErrorMsg */
     public static final String COLUMNNAME_I_ErrorMsg = "I_ErrorMsg";
@@ -388,6 +427,32 @@ public interface I_I_OrgJP
 	  */
 	public String getName();
 
+    /** Column name Phone */
+    public static final String COLUMNNAME_Phone = "Phone";
+
+	/** Set Phone.
+	  * Identifies a telephone number
+	  */
+	public void setPhone (String Phone);
+
+	/** Get Phone.
+	  * Identifies a telephone number
+	  */
+	public String getPhone();
+
+    /** Column name Phone2 */
+    public static final String COLUMNNAME_Phone2 = "Phone2";
+
+	/** Set 2nd Phone.
+	  * Identifies an alternate telephone number.
+	  */
+	public void setPhone2 (String Phone2);
+
+	/** Get 2nd Phone.
+	  * Identifies an alternate telephone number.
+	  */
+	public String getPhone2();
+
     /** Column name Postal */
     public static final String COLUMNNAME_Postal = "Postal";
 
@@ -448,6 +513,19 @@ public interface I_I_OrgJP
 	  * Name of the Region
 	  */
 	public String getRegionName();
+
+    /** Column name TaxID */
+    public static final String COLUMNNAME_TaxID = "TaxID";
+
+	/** Set Tax ID.
+	  * Tax Identification
+	  */
+	public void setTaxID (String TaxID);
+
+	/** Get Tax ID.
+	  * Tax Identification
+	  */
+	public String getTaxID();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

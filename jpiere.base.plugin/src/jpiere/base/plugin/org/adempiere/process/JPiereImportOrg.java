@@ -149,6 +149,18 @@ public class JPiereImportOrg extends SvrProcess
 			{
 				MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
 				orgInfo.setAD_OrgType_ID(imp.getAD_OrgType_ID());
+				if(!Util.isEmpty(imp.getDUNS()))
+					orgInfo.setDUNS(imp.getDUNS());
+				if(!Util.isEmpty(imp.getTaxID()))
+					orgInfo.setDUNS(imp.getTaxID());
+				if(!Util.isEmpty(imp.getPhone()))
+					orgInfo.setDUNS(imp.getPhone());
+				if(!Util.isEmpty(imp.getPhone2()))
+					orgInfo.setDUNS(imp.getPhone2());
+				if(!Util.isEmpty(imp.getFax()))
+					orgInfo.setDUNS(imp.getFax());
+				if(!Util.isEmpty(imp.getEMail()))
+					orgInfo.setDUNS(imp.getEMail());
 
 				//Org Location
 				int C_Location_ID = 0;

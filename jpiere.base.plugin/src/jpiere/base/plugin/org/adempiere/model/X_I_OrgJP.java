@@ -375,6 +375,23 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_CountryCode);
 	}
 
+	/** Set D-U-N-S.
+		@param DUNS 
+		Dun & Bradstreet Number
+	  */
+	public void setDUNS (String DUNS)
+	{
+		set_Value (COLUMNNAME_DUNS, DUNS);
+	}
+
+	/** Get D-U-N-S.
+		@return Dun & Bradstreet Number
+	  */
+	public String getDUNS () 
+	{
+		return (String)get_Value(COLUMNNAME_DUNS);
+	}
+
 	/** Set Description.
 		@param Description 
 		Optional short description of the record
@@ -390,6 +407,40 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** Set EMail Address.
+		@param EMail 
+		Electronic Mail Address
+	  */
+	public void setEMail (String EMail)
+	{
+		set_Value (COLUMNNAME_EMail, EMail);
+	}
+
+	/** Get EMail Address.
+		@return Electronic Mail Address
+	  */
+	public String getEMail () 
+	{
+		return (String)get_Value(COLUMNNAME_EMail);
+	}
+
+	/** Set Fax.
+		@param Fax 
+		Facsimile number
+	  */
+	public void setFax (String Fax)
+	{
+		set_Value (COLUMNNAME_Fax, Fax);
+	}
+
+	/** Get Fax.
+		@return Facsimile number
+	  */
+	public String getFax () 
+	{
+		return (String)get_Value(COLUMNNAME_Fax);
 	}
 
 	/** Set Import Error Message.
@@ -536,6 +587,40 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
+	/** Set Phone.
+		@param Phone 
+		Identifies a telephone number
+	  */
+	public void setPhone (String Phone)
+	{
+		set_Value (COLUMNNAME_Phone, Phone);
+	}
+
+	/** Get Phone.
+		@return Identifies a telephone number
+	  */
+	public String getPhone () 
+	{
+		return (String)get_Value(COLUMNNAME_Phone);
+	}
+
+	/** Set 2nd Phone.
+		@param Phone2 
+		Identifies an alternate telephone number.
+	  */
+	public void setPhone2 (String Phone2)
+	{
+		set_Value (COLUMNNAME_Phone2, Phone2);
+	}
+
+	/** Get 2nd Phone.
+		@return Identifies an alternate telephone number.
+	  */
+	public String getPhone2 () 
+	{
+		return (String)get_Value(COLUMNNAME_Phone2);
+	}
+
 	/** Set ZIP.
 		@param Postal 
 		Postal code
@@ -559,7 +644,7 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
 	  */
 	public void setPostal_Add (String Postal_Add)
 	{
-		set_ValueNoCheck (COLUMNNAME_Postal_Add, Postal_Add);
+		set_Value (COLUMNNAME_Postal_Add, Postal_Add);
 	}
 
 	/** Get Additional Zip.
@@ -630,6 +715,23 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
 	public String getRegionName () 
 	{
 		return (String)get_Value(COLUMNNAME_RegionName);
+	}
+
+	/** Set Tax ID.
+		@param TaxID 
+		Tax Identification
+	  */
+	public void setTaxID (String TaxID)
+	{
+		set_Value (COLUMNNAME_TaxID, TaxID);
+	}
+
+	/** Get Tax ID.
+		@return Tax Identification
+	  */
+	public String getTaxID () 
+	{
+		return (String)get_Value(COLUMNNAME_TaxID);
 	}
 
 	/** Set Search Key.
