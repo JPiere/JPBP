@@ -18,6 +18,7 @@ CREATE TABLE adempiere.I_LocationJP
   Updated timestamp without time zone NOT NULL DEFAULT now(),
   UpdatedBy numeric(10,0) NOT NULL,
 
+  JP_OPrg_Value character varying(40) DEFAULT NULL::character varying,
    JP_Location_Label character varying(255) DEFAULT NULL::numeric,
    C_Location_ID numeric(10,0) DEFAULT NULL::numeric,
    CountryCode character varying(2),

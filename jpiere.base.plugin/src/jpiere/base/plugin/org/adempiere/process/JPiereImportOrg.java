@@ -22,6 +22,7 @@ import org.compiere.model.MOrgInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_OrgJP;
@@ -171,7 +172,7 @@ public class JPiereImportOrg extends SvrProcess
 					{
 						orgInfo.setC_Location_ID(C_Location_ID);
 
-					}else if(C_Location_ID == 0 || C_Location_ID == -1) {
+					}else if(C_Location_ID == 0) {
 
 						C_Location_ID = JPiereLocationUtil.createLocation(
 								getCtx()
@@ -190,6 +191,12 @@ public class JPiereImportOrg extends SvrProcess
 								,get_TrxName() );
 
 						orgInfo.setC_Location_ID(C_Location_ID);
+
+					}else {
+
+						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_UnexpectedError"));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
 					}
 
 				}else {

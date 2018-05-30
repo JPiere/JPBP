@@ -37,12 +37,6 @@ import org.compiere.util.Util;
  */
 public class JPiereLocationUtil {
 
-
-	//ロケーションを新規作成する
-	//ラベル検索を行う。なければ新規作成する。
-	//ラベル検索を行う。ない場合は新規作成しない。
-	//ラベル検索を行う。ある場合は、そのデータを更新する。なければ新規作成する。
-
 	/**
 	 *
 	 * Search Location
@@ -50,7 +44,7 @@ public class JPiereLocationUtil {
 	 * @param ctx
 	 * @param JP_Location_Label
 	 * @param trxName
-	 * @return int
+	 * @return int C_Location_ID
 	 */
 	public static int searchLocationByLabel (Properties ctx, String JP_Location_Label, String trxName )
 	{
@@ -63,11 +57,8 @@ public class JPiereLocationUtil {
 			return 0;
 		else if(C_Location_IDs.length == 1)
 			return C_Location_IDs[0];
-		else if(C_Location_IDs.length > 1)
+		else
 			return -1 ;
-
-
-		return 0;
 
 	}	//	createLocation
 
