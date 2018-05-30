@@ -87,7 +87,7 @@ public class JPiereImportOrg extends SvrProcess
 		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
 
 
-		//	Existing Oraganization ? Match Value
+		//	Existing Oraganization Type
 		sql = new StringBuilder ("UPDATE I_OrgJP i ")
 				.append(" SET AD_OrgType_ID=(SELECT t.AD_OrgType_ID FROM AD_OrgType t")
 				.append(" WHERE t.Name=i.JP_OrgType_Name AND t.AD_Client_ID=i.AD_Client_ID) ")
