@@ -20,8 +20,6 @@ import java.util.logging.Level;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
-import org.compiere.util.Msg;
-import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_LocationJP;
 import jpiere.base.plugin.util.JPiereLocationUtil;
@@ -79,11 +77,22 @@ public class JPiereImportLocation extends SvrProcess
 		//	Existing Oraganization ? Match Value
 		sql = new StringBuilder ("UPDATE I_LocationJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
-				.append(" WHERE i.JP_Org_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
 				.append(" WHERE i.AD_Org_ID = '0' AND i.JP_Org_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+
+
+		//Location
+		sql = new StringBuilder ("UPDATE I_LocationJP i ")
+				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
+				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+
 
 		//	Set Client, Org, IsActive, Created/Updated
 		sql = new StringBuilder ("UPDATE I_LocationJP ")
@@ -97,23 +106,52 @@ public class JPiereImportLocation extends SvrProcess
 		//
 		sql = new StringBuilder ("SELECT * FROM I_LocationJP WHERE I_IsImported='N'")
 					.append(clientCheck);
-		PreparedStatement pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
-		ResultSet rs = pstmt.executeQuery();
-		while (rs.next())
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try
 		{
-			X_I_LocationJP imp = new X_I_LocationJP (getCtx (), rs, get_TrxName());
+			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+			rs = pstmt.executeQuery();
 
-
-			//Org Location
-			int C_Location_ID = 0;
-			if(!Util.isEmpty(imp.getJP_Location_Label()))
+			while (rs.next())
 			{
-				C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), imp.getJP_Location_Label(), get_TrxName());
-				if(C_Location_ID > 0)
+				X_I_LocationJP imp = new X_I_LocationJP (getCtx (), rs, get_TrxName());
+
+				boolean isNew = true;
+				if(imp.getC_Location_ID()!=0){
+					isNew =false;
+				}
+
+				if(isNew)
 				{
+					int C_Location_ID = JPiereLocationUtil.createLocation(
+							getCtx()
+							,imp.getAD_Org_ID()
+							,imp.getJP_Location_Label()
+							,imp.getComments()
+							,imp.getCountryCode()
+							,imp.getPostal()
+							,imp.getPostal_Add()
+							,imp.getRegionName()
+							,imp.getCity()
+							,imp.getAddress1()
+							,imp.getAddress2()
+							,imp.getAddress3()
+							,imp.getAddress4()
+							,imp.getAddress5()
+							,get_TrxName() );
+
+					imp.setC_Location_ID(C_Location_ID);
+					imp.setI_ErrorMsg("Create Record");
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
+
+				}else {
 					boolean isOk =JPiereLocationUtil.updateLocation(
 							getCtx()
-							,C_Location_ID
+							,imp.getC_Location_ID()
+							,imp.getAD_Org_ID()
 							,imp.getComments()
 							,imp.getCountryCode()
 							,imp.getPostal()
@@ -137,74 +175,20 @@ public class JPiereImportLocation extends SvrProcess
 						imp.setI_IsImported(true);
 						imp.setProcessed(true);
 					}
-
-				}else if(C_Location_ID == 0) {
-
-					C_Location_ID = JPiereLocationUtil.createLocation(
-							getCtx()
-							,imp.getJP_Location_Label()
-							,imp.getComments()
-							,imp.getCountryCode()
-							,imp.getPostal()
-							,imp.getPostal_Add()
-							,imp.getRegionName()
-							,imp.getCity()
-							,imp.getAddress1()
-							,imp.getAddress2()
-							,imp.getAddress3()
-							,imp.getAddress4()
-							,imp.getAddress5()
-							,get_TrxName() );
-
-					imp.setI_ErrorMsg("Create Record");
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-
-				}else {
-
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_UnexpectedError"));
-					imp.setI_IsImported(false);
-					imp.setProcessed(false);
 				}
 
-				imp.setC_Location_ID(C_Location_ID);
-
-			}else {
-
-				if(!Util.isEmpty(imp.getCountryCode()) || !Util.isEmpty(imp.getPostal())  || !Util.isEmpty(imp.getPostal_Add())
-						|| !Util.isEmpty(imp.getRegionName())  || !Util.isEmpty(imp.getCity())
-						|| !Util.isEmpty(imp.getAddress1()) || !Util.isEmpty(imp.getAddress2()) || !Util.isEmpty(imp.getAddress3())
-						|| !Util.isEmpty(imp.getAddress4()) || !Util.isEmpty(imp.getAddress5()))
-				{
-					C_Location_ID = JPiereLocationUtil.createLocation(
-							getCtx()
-							,imp.getJP_Location_Label()
-							,imp.getComments()
-							,imp.getCountryCode()
-							,imp.getPostal()
-							,imp.getPostal_Add()
-							,imp.getRegionName()
-							,imp.getCity()
-							,imp.getAddress1()
-							,imp.getAddress2()
-							,imp.getAddress3()
-							,imp.getAddress4()
-							,imp.getAddress5()
-							,get_TrxName() );
-
-					imp.setC_Location_ID(C_Location_ID);
-					imp.setI_ErrorMsg("Create Record");
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-				}
+				imp.saveEx(get_TrxName());
 
 			}
 
-			imp.saveEx(get_TrxName());
 
+		}catch (Exception e){
+			log.log(Level.SEVERE, sql.toString(), e);
+		}finally{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
 		}
-
-
 
 		return "OK";
 	}	//	doIt

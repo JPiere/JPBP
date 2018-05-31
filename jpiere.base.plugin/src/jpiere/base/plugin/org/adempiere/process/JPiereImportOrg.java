@@ -22,7 +22,6 @@ import org.compiere.model.MOrgInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
-import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_OrgJP;
@@ -97,117 +96,100 @@ public class JPiereImportOrg extends SvrProcess
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
 
+
+		//Location
+		sql = new StringBuilder ("UPDATE I_OrgJP i ")
+				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
+				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+
 		commitEx();
 
 
 		//
 		sql = new StringBuilder ("SELECT * FROM I_OrgJP WHERE I_IsImported='N'")
 					.append(clientCheck);
-		PreparedStatement pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
-		ResultSet rs = pstmt.executeQuery();
-		while (rs.next())
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try
 		{
-			X_I_OrgJP imp = new X_I_OrgJP (getCtx (), rs, get_TrxName());
+			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				X_I_OrgJP imp = new X_I_OrgJP (getCtx (), rs, get_TrxName());
 
-			boolean isNew = true;
-			if(imp.getAD_Org_ID()!=0){
-				isNew =false;
-			}
-
-			if(isNew){
-				if(imp.getName()!=null && !imp.getName().isEmpty()){
-					MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
-					newOrg.setValue(imp.getValue());
-					newOrg.setName(imp.getName());
-					newOrg.setDescription(imp.getDescription());
-					newOrg.setIsSummary(imp.isSummary());
-					newOrg.saveEx(get_TrxName());
-					imp.setI_ErrorMsg("New Record");
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-					imp.setAD_Org_ID(newOrg.getAD_Org_ID());
-
-				}else{
-					imp.setI_ErrorMsg("No Name");
-					imp.setI_IsImported(false);
-					imp.setProcessed(false);
+				boolean isNew = true;
+				if(imp.getAD_Org_ID()!=0){
+					isNew =false;
 				}
 
-			}else{//Update
-				MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
-				updateOrg.setName(imp.getName());
-				updateOrg.setDescription(imp.getDescription());
-				updateOrg.saveEx(get_TrxName());
-
-				imp.setI_ErrorMsg("Update Record");
-				imp.setI_IsImported(true);
-				imp.setProcessed(true);
-
-			}
-
-			imp.saveEx();
-			if(imp.getAD_Org_ID() > 0)
-			{
-				MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
-				orgInfo.setAD_OrgType_ID(imp.getAD_OrgType_ID());
-				if(!Util.isEmpty(imp.getDUNS()))
-					orgInfo.setDUNS(imp.getDUNS());
-				if(!Util.isEmpty(imp.getTaxID()))
-					orgInfo.setDUNS(imp.getTaxID());
-				if(!Util.isEmpty(imp.getPhone()))
-					orgInfo.setDUNS(imp.getPhone());
-				if(!Util.isEmpty(imp.getPhone2()))
-					orgInfo.setDUNS(imp.getPhone2());
-				if(!Util.isEmpty(imp.getFax()))
-					orgInfo.setDUNS(imp.getFax());
-				if(!Util.isEmpty(imp.getEMail()))
-					orgInfo.setDUNS(imp.getEMail());
-
-				//Org Location
-				int C_Location_ID = 0;
-				if(!Util.isEmpty(imp.getJP_Location_Label()))
+				if(isNew)//Create
 				{
-					C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), imp.getJP_Location_Label(), get_TrxName());
-					if(C_Location_ID > 0)
-					{
-						orgInfo.setC_Location_ID(C_Location_ID);
+					if(imp.getName()!=null && !imp.getName().isEmpty()){
+						MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
+						newOrg.setValue(imp.getValue());
+						newOrg.setName(imp.getName());
+						newOrg.setDescription(imp.getDescription());
+						newOrg.setIsSummary(imp.isSummary());
+						newOrg.saveEx(get_TrxName());
 
-					}else if(C_Location_ID == 0) {
+						imp.setI_ErrorMsg("New Record");
+						imp.setI_IsImported(true);
+						imp.setProcessed(true);
+						imp.setAD_Org_ID(newOrg.getAD_Org_ID());
 
-						C_Location_ID = JPiereLocationUtil.createLocation(
-								getCtx()
-								,imp.getJP_Location_Label()
-								,imp.getComments()
-								,imp.getCountryCode()
-								,imp.getPostal()
-								,imp.getPostal_Add()
-								,imp.getRegionName()
-								,imp.getCity()
-								,imp.getAddress1()
-								,imp.getAddress2()
-								,imp.getAddress3()
-								,imp.getAddress4()
-								,imp.getAddress5()
-								,get_TrxName() );
-
-						orgInfo.setC_Location_ID(C_Location_ID);
-
-					}else {
-
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_UnexpectedError"));
+					}else{
+						imp.setI_ErrorMsg("No Name");
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 					}
 
-				}else {
+				}else{//Update
+					MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
+					updateOrg.setName(imp.getName());
+					updateOrg.setDescription(imp.getDescription());
+					updateOrg.saveEx(get_TrxName());
 
-					if(!Util.isEmpty(imp.getCountryCode()) || !Util.isEmpty(imp.getPostal())  || !Util.isEmpty(imp.getPostal_Add())
-							|| !Util.isEmpty(imp.getRegionName())  || !Util.isEmpty(imp.getCity())
-							|| !Util.isEmpty(imp.getAddress1()) || !Util.isEmpty(imp.getAddress2()) || !Util.isEmpty(imp.getAddress3())
-							|| !Util.isEmpty(imp.getAddress4()) || !Util.isEmpty(imp.getAddress5()))
+					imp.setI_ErrorMsg("Update Record");
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
+
+				}
+
+				imp.saveEx();
+				if(imp.getAD_Org_ID() > 0)
+				{
+					MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
+					orgInfo.setAD_OrgType_ID(imp.getAD_OrgType_ID());
+					if(!Util.isEmpty(imp.getDUNS()))
+						orgInfo.setDUNS(imp.getDUNS());
+					if(!Util.isEmpty(imp.getTaxID()))
+						orgInfo.setDUNS(imp.getTaxID());
+					if(!Util.isEmpty(imp.getPhone()))
+						orgInfo.setDUNS(imp.getPhone());
+					if(!Util.isEmpty(imp.getPhone2()))
+						orgInfo.setDUNS(imp.getPhone2());
+					if(!Util.isEmpty(imp.getFax()))
+						orgInfo.setDUNS(imp.getFax());
+					if(!Util.isEmpty(imp.getEMail()))
+						orgInfo.setDUNS(imp.getEMail());
+
+					//Org Location
+					int C_Location_ID = imp.getC_Location_ID();
+					if(C_Location_ID > 0)
 					{
+						orgInfo.setC_Location_ID(C_Location_ID);
+
+					}else if(!Util.isEmpty(imp.getJP_Location_Label())){
+
 						C_Location_ID = JPiereLocationUtil.createLocation(
 								getCtx()
+								,"0"
 								,imp.getJP_Location_Label()
 								,imp.getComments()
 								,imp.getCountryCode()
@@ -223,14 +205,23 @@ public class JPiereImportOrg extends SvrProcess
 								,get_TrxName() );
 
 						orgInfo.setC_Location_ID(C_Location_ID);
+
 					}
 
+					orgInfo.saveEx(get_TrxName());
+
 				}
+			}//while (rs.next())
 
-				orgInfo.saveEx(get_TrxName());
-
-			}
+		}catch (Exception e){
+			log.log(Level.SEVERE, sql.toString(), e);
+		}finally{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
 		}
+
+
 
 
 		return "";

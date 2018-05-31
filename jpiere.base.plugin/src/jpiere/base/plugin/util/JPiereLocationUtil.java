@@ -65,6 +65,54 @@ public class JPiereLocationUtil {
 
 
 	public static int createLocation (Properties ctx
+			,String JP_Org_Value
+			,String JP_Location_Label
+			,String Comments
+			,String CountryCode
+			,String Postal
+			,String Postal_Add
+			,String RegionName
+			,String City
+			,String Address1
+			,String Address2
+			,String Address3
+			,String Address4
+			,String Address5
+			,String trxName )
+	{
+
+		int AD_Org_ID = 0;
+		if(JP_Org_Value.equals("0"))
+		{
+			AD_Org_ID = 0;
+		}else {
+
+			AD_Org_ID = getAD_Org_ID(ctx,JP_Org_Value);
+		}
+
+
+		return createLocation(
+				ctx
+				,AD_Org_ID
+				,JP_Location_Label
+				,Comments
+				,CountryCode
+				,Postal
+				,Postal_Add
+				,RegionName
+				,City
+				,Address1
+				,Address2
+				,Address3
+				,Address4
+				,Address5
+				,trxName);
+
+	}
+
+
+	public static int createLocation (Properties ctx
+			,int AD_Org_ID
 			,String JP_Location_Label
 			,String Comments
 			,String CountryCode
@@ -81,6 +129,9 @@ public class JPiereLocationUtil {
 	{
 
 		MLocation location = new MLocation(ctx, 0, trxName);
+
+		location.setAD_Org_ID(AD_Org_ID);
+
 		if(!Util.isEmpty(JP_Location_Label))
 		{
 			location.set_ValueNoCheck("JP_Location_Label", JP_Location_Label);
@@ -250,6 +301,52 @@ public class JPiereLocationUtil {
 
 	public static boolean updateLocation (Properties ctx
 			,int C_Location_ID
+			,String JP_Org_Value
+			,String Comments
+			,String CountryCode
+			,String Postal
+			,String Postal_Add
+			,String RegionName
+			,String City
+			,String Address1
+			,String Address2
+			,String Address3
+			,String Address4
+			,String Address5
+			,String trxName )
+	{
+
+		int AD_Org_ID = 0;
+		if(JP_Org_Value.equals("0"))
+		{
+			AD_Org_ID = 0;
+		}else {
+
+			AD_Org_ID = getAD_Org_ID(ctx,JP_Org_Value);
+		}
+
+
+		return updateLocation(
+				ctx
+				,C_Location_ID
+				,AD_Org_ID
+				,Comments
+				,CountryCode
+				,Postal
+				,Postal_Add
+				,RegionName
+				,City
+				,Address1
+				,Address2
+				,Address3
+				,Address4
+				,Address5
+				,trxName);
+	}
+
+	public static boolean updateLocation (Properties ctx
+			,int C_Location_ID
+			,int AD_Org_ID
 			,String Comments
 			,String CountryCode
 			,String Postal
@@ -265,6 +362,9 @@ public class JPiereLocationUtil {
 	{
 
 		MLocation location = new MLocation(ctx, C_Location_ID, trxName);
+
+		location.setAD_Org_ID(AD_Org_ID);
+
 		if(!Util.isEmpty(Comments))
 		{
 			location.setComments(Comments);
@@ -430,5 +530,11 @@ public class JPiereLocationUtil {
 		return true;
 
 	}	//	createLocation
+
+	static private int getAD_Org_ID(Properties ctx, String JP_Org_Value)
+	{
+		//TODO
+		return 0;
+	}
 
 }
