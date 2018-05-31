@@ -270,6 +270,9 @@ public class JPiereImportWarehouse extends SvrProcess
 	private void setMWarehouseAcct(MWarehouse wh, X_I_WarehouseJP imp)
 	{
 		int C_ValidCombination_ID = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), imp.getC_AcctSchema_ID(), imp.getJP_W_Differences_Value(), get_TrxName());
+		if(C_ValidCombination_ID == -1)
+			return ;
+
 		imp.setW_Differences_Acct(C_ValidCombination_ID);
 
 		String WhereClause = " C_AcctSchema_ID=" +imp.getC_AcctSchema_ID() + " AND M_Warehouse_ID=" + wh.getM_Warehouse_ID() + " AND AD_Client_ID=" +Env.getAD_Client_ID(Env.getCtx());

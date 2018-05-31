@@ -77,7 +77,7 @@ public class JPiereImportOrg extends SvrProcess
 		}
 
 
-		//	Existing Oraganization ? Match Value
+		////Update AD_Org ID From Value
 		sql = new StringBuilder ("UPDATE I_OrgJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
 				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -87,7 +87,7 @@ public class JPiereImportOrg extends SvrProcess
 		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
 
 
-		//	Existing Oraganization Type
+		//Update AD_OrgType_ID From JP_OrgType_Name
 		sql = new StringBuilder ("UPDATE I_OrgJP i ")
 				.append(" SET AD_OrgType_ID=(SELECT t.AD_OrgType_ID FROM AD_OrgType t")
 				.append(" WHERE t.Name=i.JP_OrgType_Name AND t.AD_Client_ID=i.AD_Client_ID) ")
@@ -97,7 +97,7 @@ public class JPiereImportOrg extends SvrProcess
 		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
 
 
-		//Location
+		//Update C_Location_ID From JP_Location_Label
 		sql = new StringBuilder ("UPDATE I_OrgJP i ")
 				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
 				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -150,6 +150,7 @@ public class JPiereImportOrg extends SvrProcess
 					}
 
 				}else{//Update
+
 					MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
 					updateOrg.setName(imp.getName());
 					updateOrg.setDescription(imp.getDescription());
@@ -162,6 +163,7 @@ public class JPiereImportOrg extends SvrProcess
 				}
 
 				imp.saveEx();
+
 				if(imp.getAD_Org_ID() > 0)
 				{
 					MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
@@ -221,10 +223,7 @@ public class JPiereImportOrg extends SvrProcess
 			pstmt = null;
 		}
 
-
-
-
-		return "";
+		return "OK";
 	}	//	doIt
 
 }	//	ImportPayment

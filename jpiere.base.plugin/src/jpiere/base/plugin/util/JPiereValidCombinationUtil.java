@@ -46,7 +46,7 @@ public class JPiereValidCombinationUtil {
 		MAcctSchemaElement  ase =as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Account);
 		int C_Element_ID = ase.getC_Element_ID();
 
-		String WhereClause = " Value='" +ElementValue + "' AND C_Element_ID=" + C_Element_ID + " AND AD_Client_ID=" +Env.getAD_Client_ID(Env.getCtx());
+		String WhereClause = " Value='" +ElementValue + "' AND IsSummary='N' AND C_Element_ID=" + C_Element_ID + " AND AD_Client_ID=" +Env.getAD_Client_ID(Env.getCtx());
 
 		int[]  C_ElementValue_IDs = PO.getAllIDs("C_ElementValue", WhereClause, trxName);
 		if(C_ElementValue_IDs.length==0)

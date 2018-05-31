@@ -74,7 +74,7 @@ public class JPiereImportLocation extends SvrProcess
 		}
 
 
-		//	Existing Oraganization ? Match Value
+		//Update AD_Org_ID From JP_Org_Value
 		sql = new StringBuilder ("UPDATE I_LocationJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
 				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
@@ -84,7 +84,7 @@ public class JPiereImportLocation extends SvrProcess
 		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
 
 
-		//Location
+		//Update C_Location_ID From JP_Location_Label
 		sql = new StringBuilder ("UPDATE I_LocationJP i ")
 				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
 				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -93,12 +93,6 @@ public class JPiereImportLocation extends SvrProcess
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
 
-
-		//	Set Client, Org, IsActive, Created/Updated
-		sql = new StringBuilder ("UPDATE I_LocationJP ")
-				.append("SET AD_Org_ID = COALESCE (AD_Org_ID, 0)")
-						.append("WHERE I_IsImported<>'Y' OR I_IsImported IS NULL").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 
 		commitEx();
 
@@ -148,6 +142,7 @@ public class JPiereImportLocation extends SvrProcess
 					imp.setProcessed(true);
 
 				}else {
+
 					boolean isOk =JPiereLocationUtil.updateLocation(
 							getCtx()
 							,imp.getC_Location_ID()
@@ -179,7 +174,7 @@ public class JPiereImportLocation extends SvrProcess
 
 				imp.saveEx(get_TrxName());
 
-			}
+			}//while (rs.next())
 
 
 		}catch (Exception e){
