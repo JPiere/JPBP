@@ -56,11 +56,11 @@ public class JPiereValidCombinationUtil {
 		}else if(C_ElementValue_IDs.length == 1) {
 
 			int C_ElementValue_ID = C_ElementValue_IDs[0];
-			String WhereClause2 = "C_AcctSchema_ID="+ C_AcctSchema_ID +  " AND Accont_ID=" + C_ElementValue_ID + "AND AD_Org_ID =0 AND C_BPartner_ID IS NULL AND M_Product_ID IS NULL"
+			String WhereClause2 = "C_AcctSchema_ID="+ C_AcctSchema_ID +  " AND Account_ID=" + C_ElementValue_ID + " AND AD_Org_ID=0 AND C_BPartner_ID IS NULL AND M_Product_ID IS NULL "
 											+ " AND AD_Client_ID=" +Env.getAD_Client_ID(Env.getCtx());
 
 			int[]  C_ValidCombination_IDs = PO.getAllIDs("C_ValidCombination", WhereClause2, trxName);
-			if(C_ValidCombination_IDs.length == 0)
+			if(C_ValidCombination_IDs == null || C_ValidCombination_IDs.length == 0)
 			{
 				MElementValue ev = new MElementValue(ctx, C_ElementValue_ID, trxName);
 
