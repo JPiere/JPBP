@@ -71,7 +71,20 @@ public class JPiereLocationModelValidator implements ModelValidator {
 			String JP_Location_Label = location.get_ValueAsString("JP_Location_Label");
 			if(Util.isEmpty(JP_Location_Label))
 			{
-				JP_Location_Label = location.get_TrxName();
+				if(!Util.isEmpty(location.getAddress1()) && !Util.isEmpty(location.getAddress2()))
+				{
+					JP_Location_Label = location.getAddress1() + location.getAddress2();
+
+				}else if(!Util.isEmpty(location.getAddress1())){
+
+					JP_Location_Label = location.getAddress1();
+
+				}else{
+
+					JP_Location_Label = location.get_TrxName();
+				}
+
+
 				location.set_ValueNoCheck("JP_Location_Label", JP_Location_Label);
 			}
 
@@ -93,6 +106,7 @@ public class JPiereLocationModelValidator implements ModelValidator {
 			}
 		}
 
+		//JPIERE-0392
 		if(type == ModelValidator.TYPE_AFTER_NEW)
 		{
 
