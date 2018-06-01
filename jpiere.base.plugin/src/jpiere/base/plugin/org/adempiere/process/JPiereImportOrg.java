@@ -94,7 +94,7 @@ public class JPiereImportOrg extends SvrProcess
 				.append(" WHERE i.JP_OrgType_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		if (log.isLoggable(Level.FINE)) log.fine("Found Organization Type=" + no);
 
 
 		//Update C_Location_ID From JP_Location_Label
@@ -104,7 +104,7 @@ public class JPiereImportOrg extends SvrProcess
 				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
 
 		commitEx();
 

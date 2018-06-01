@@ -92,10 +92,10 @@ public class JPiereImportWarehouse extends SvrProcess
 		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
 				.append("SET M_Warehouse_ID=(SELECT M_Warehouse_ID FROM M_Warehouse p")
 				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.M_Warehouse_ID IS NULL AND i.JP_Org_Value IS NOT NULL")
+				.append(" WHERE i.M_Warehouse_ID IS NULL AND i.Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		if (log.isLoggable(Level.FINE)) log.fine("Found Warehouse=" + no);
 
 
 		//Update  C_AcctSchema_ID From JP_AcctSchema_Name
@@ -105,7 +105,7 @@ public class JPiereImportWarehouse extends SvrProcess
 				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		if (log.isLoggable(Level.FINE)) log.fine("Found Acct Schema=" + no);
 
 
 		//Update C_Location_ID From JP_Location_Label
@@ -115,7 +115,7 @@ public class JPiereImportWarehouse extends SvrProcess
 				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
 
 
 		//Update JP_LocationOrg_ID from JP_LocationOrg_Value

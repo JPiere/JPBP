@@ -91,11 +91,10 @@ public class JPiereImportLocation extends SvrProcess
 				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
 
 
 		commitEx();
-
 
 		//
 		sql = new StringBuilder ("SELECT * FROM I_LocationJP WHERE I_IsImported='N'")
