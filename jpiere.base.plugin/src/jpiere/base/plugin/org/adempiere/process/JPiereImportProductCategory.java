@@ -160,11 +160,60 @@ public class JPiereImportProductCategory extends SvrProcess
 
 				if(isNew)//Create
 				{
-					;//TODO
+					MProductCategory newProductCategory = new MProductCategory(getCtx(), 0, get_TrxName());
+					newProductCategory.setValue(imp.getValue());
+					newProductCategory.setValue(imp.getName());
+
+					if(!Util.isEmpty(imp.getDescription()))
+						newProductCategory.setValue(imp.getDescription());
+					newProductCategory.setIsDefault(imp.isDefault());
+					newProductCategory.setIsSelfService(imp.isSelfService());
+
+					if(imp.getJP_ProductCategoryL1_ID() > 0)
+						newProductCategory.set_ValueNoCheck("JP_ProductCategoryL1_ID", imp.getJP_ProductCategoryL1_ID());
+					newProductCategory.setMMPolicy(imp.getMMPolicy());
+
+					if(imp.getPlannedMargin()!=null)
+						newProductCategory.setPlannedMargin(imp.getPlannedMargin());
+
+					if(imp.getA_Asset_Group_ID() > 0)
+						newProductCategory.setA_Asset_Group_ID(imp.getA_Asset_Group_ID());
+
+					if(imp.getAD_PrintColor_ID() > 0)
+						newProductCategory.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
+
+					newProductCategory.saveEx(get_TrxName());
+
+					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
+						setProductCategoryAcct(newProductCategory, imp);
 
 				}else{//Update
 
-					;//TODO
+					MProductCategory updateProductCategory = new MProductCategory(getCtx(), imp.getM_Product_Category_ID(), get_TrxName());
+					updateProductCategory.setValue(imp.getName());
+
+					if(!Util.isEmpty(imp.getDescription()))
+						updateProductCategory.setValue(imp.getDescription());
+					updateProductCategory.setIsDefault(imp.isDefault());
+					updateProductCategory.setIsSelfService(imp.isSelfService());
+
+					if(imp.getJP_ProductCategoryL1_ID() > 0)
+						updateProductCategory.set_ValueNoCheck("JP_ProductCategoryL1_ID", imp.getJP_ProductCategoryL1_ID());
+					updateProductCategory.setMMPolicy(imp.getMMPolicy());
+
+					if(imp.getPlannedMargin()!=null)
+						updateProductCategory.setPlannedMargin(imp.getPlannedMargin());
+
+					if(imp.getA_Asset_Group_ID() > 0)
+						updateProductCategory.setA_Asset_Group_ID(imp.getA_Asset_Group_ID());
+
+					if(imp.getAD_PrintColor_ID() > 0)
+						updateProductCategory.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
+
+					updateProductCategory.saveEx(get_TrxName());
+
+					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
+						setProductCategoryAcct(updateProductCategory, imp);
 
 				}
 
@@ -361,7 +410,6 @@ public class JPiereImportProductCategory extends SvrProcess
 			}
 		}
 
-		imp.saveEx(get_TrxName());
 		acct.saveEx(get_TrxName());
 
 	}
