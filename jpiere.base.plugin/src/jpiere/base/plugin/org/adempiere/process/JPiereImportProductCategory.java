@@ -23,6 +23,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_ProductCategoryJP;
@@ -81,10 +82,18 @@ public class JPiereImportProductCategory extends SvrProcess
 		sql = new StringBuilder ("UPDATE I_ProductCategoryJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
 				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
-				.append(" WHERE i.AD_Org_ID = '0' AND i.JP_Org_Value IS NOT NULL")
+				.append(" WHERE i.JP_Org_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_Org_ID From JP_Org_Value");
+
+		}
 
 
 		//Update M_Product_Category_ID From Value
@@ -93,8 +102,17 @@ public class JPiereImportProductCategory extends SvrProcess
 				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.M_Product_Category_ID IS NULL AND i.Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Product Category=" + no);
+		try {
+
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Product Category=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update M_Product_Category_ID From Value");
+
+		}
 
 
 		//Update JP_ProductCategoryL1_ID From JP_ProductCategoryL1_Value
@@ -103,29 +121,56 @@ public class JPiereImportProductCategory extends SvrProcess
 				.append(" WHERE i.JP_ProductCategoryL1_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_ProductCategoryL1_ID IS NULL AND i.JP_ProductCategoryL1_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Product Category L1=" + no);
+		try {
+
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Product Category L1=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update JP_ProductCategoryL1_ID From JP_ProductCategoryL1_Value");
+
+		}
 
 
-		//Update A_Asset_Gropup_ID From JP_Asset_Group_Name
+		//Update A_Asset_Group_ID From JP_Asset_Group_Name
 		sql = new StringBuilder ("UPDATE I_ProductCategoryJP i ")
-				.append("SET A_Asset_Gropup_ID=(SELECT A_Asset_Gropup_ID FROM A_Asset_Gropup p")
+				.append("SET A_Asset_Group_ID=(SELECT A_Asset_Group_ID FROM A_Asset_Group p")
 				.append(" WHERE i.JP_Asset_Group_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.A_Asset_Gropup_ID IS NULL AND i.JP_Asset_Group_Name IS NOT NULL")
+				.append(" WHERE i.A_Asset_Group_ID IS NULL AND i.JP_Asset_Group_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Asset Group=" + no);
+		try {
+
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Asset Group=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update A_Asset_Group_ID From JP_Asset_Group_Name");
+
+		}
+
 
 
 		//Update AD_PrintColor_ID From JP_PrintColor_Name
 		sql = new StringBuilder ("UPDATE I_ProductCategoryJP i ")
 				.append("SET AD_PrintColor_ID=(SELECT AD_PrintColor_ID FROM AD_PrintColor p")
-				.append(" WHERE i.JP_PrintColor_Name=p.Name AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ) ")
+				.append(" WHERE i.JP_PrintColor_Name=p.Name AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
 				.append(" WHERE i.AD_PrintColor_ID IS NULL AND i.JP_PrintColor_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Print Color=" + no);
+		try {
 
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Print Color=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_PrintColor_ID From JP_PrintColor_Name");
+
+		}
 
 		//Update AD_AcctSchema_ID From JP_AcctSchema_Name
 		sql = new StringBuilder ("UPDATE I_ProductCategoryJP i ")
@@ -133,8 +178,17 @@ public class JPiereImportProductCategory extends SvrProcess
 				.append(" WHERE i.JP_AcctSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Acct Schema=" + no);
+		try {
+
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Acct Schema=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_AcctSchema_ID From JP_AcctSchema_Name");
+
+		}
 
 
 		commitEx();
@@ -161,8 +215,9 @@ public class JPiereImportProductCategory extends SvrProcess
 				if(isNew)//Create
 				{
 					MProductCategory newProductCategory = new MProductCategory(getCtx(), 0, get_TrxName());
+					newProductCategory.setAD_Org_ID(imp.getAD_Org_ID());
 					newProductCategory.setValue(imp.getValue());
-					newProductCategory.setValue(imp.getName());
+					newProductCategory.setName(imp.getName());
 
 					if(!Util.isEmpty(imp.getDescription()))
 						newProductCategory.setValue(imp.getDescription());
@@ -184,13 +239,19 @@ public class JPiereImportProductCategory extends SvrProcess
 
 					newProductCategory.saveEx(get_TrxName());
 
+					imp.setM_Product_Category_ID(newProductCategory.getM_Product_Category_ID());
+					imp.setI_ErrorMsg("New Record");
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
+
 					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 						setProductCategoryAcct(newProductCategory, imp);
 
 				}else{//Update
 
 					MProductCategory updateProductCategory = new MProductCategory(getCtx(), imp.getM_Product_Category_ID(), get_TrxName());
-					updateProductCategory.setValue(imp.getName());
+					updateProductCategory.setAD_Org_ID(imp.getAD_Org_ID());
+					updateProductCategory.setName(imp.getName());
 
 					if(!Util.isEmpty(imp.getDescription()))
 						updateProductCategory.setValue(imp.getDescription());
@@ -214,6 +275,10 @@ public class JPiereImportProductCategory extends SvrProcess
 
 					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 						setProductCategoryAcct(updateProductCategory, imp);
+
+					imp.setI_ErrorMsg("Update Record");
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
 
 				}
 
@@ -266,6 +331,13 @@ public class JPiereImportProductCategory extends SvrProcess
 
 		if(acct == null)
 			return ;
+
+
+		if(!Util.isEmpty(imp.getCostingMethod()))
+				acct.setCostingMethod(imp.getCostingMethod());
+
+		if(!Util.isEmpty(imp.getCostingLevel()))
+			acct.setCostingLevel(imp.getCostingLevel());
 
 		//P_Asset_Acct
 		if(!Util.isEmpty(imp.getJP_P_Asset_Acct_Value()))
