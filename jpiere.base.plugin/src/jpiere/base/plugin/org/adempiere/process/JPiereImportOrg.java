@@ -22,6 +22,7 @@ import org.compiere.model.MOrgInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_OrgJP;
@@ -83,8 +84,16 @@ public class JPiereImportOrg extends SvrProcess
 				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE AD_Org_ID = '0' AND Value IS NOT NULL")
 				.append(" AND I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_Org_ID From Value");
+
+		}
 
 
 		//Update AD_OrgType_ID From JP_OrgType_Name
@@ -93,8 +102,15 @@ public class JPiereImportOrg extends SvrProcess
 				.append(" WHERE t.Name=i.JP_OrgType_Name AND t.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_OrgType_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization Type=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Organization Type=" + no);
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_OrgType_ID From JP_OrgType_Name");
+
+		}
 
 
 		//Update C_Location_ID From JP_Location_Label
@@ -103,13 +119,18 @@ public class JPiereImportOrg extends SvrProcess
 				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update C_Location_ID From JP_Location_Label");
+
+		}
 
 		commitEx();
 
-
-		//
 		sql = new StringBuilder ("SELECT * FROM I_OrgJP WHERE I_IsImported='N'")
 					.append(clientCheck);
 		PreparedStatement pstmt = null;
