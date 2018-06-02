@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_LocationJP;
 import jpiere.base.plugin.util.JPiereLocationUtil;
@@ -78,10 +79,18 @@ public class JPiereImportLocation extends SvrProcess
 		sql = new StringBuilder ("UPDATE I_LocationJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
 				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
-				.append(" WHERE i.AD_Org_ID = '0' AND i.JP_Org_Value IS NOT NULL")
+				.append(" WHERE i.JP_Org_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_Org_ID From JP_Org_Value");
+
+		}
 
 
 		//Update C_Location_ID From JP_Location_Label
@@ -90,8 +99,14 @@ public class JPiereImportLocation extends SvrProcess
 				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update C_Location_ID From JP_Location_Label");
+		}
 
 
 		commitEx();
