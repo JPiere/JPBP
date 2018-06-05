@@ -49,7 +49,7 @@ CREATE TABLE adempiere.I_BankAccountJP
   JP_AcctSchema_Name character varying(60),
   C_AcctSchema_ID numeric(10,0),
 
-  JP_Asset_Acct_Value character varying(40),
+  JP_B_Asset_Acct_Value character varying(40),
   B_Asset_Acct numeric(10,0),
  
   JP_InTransit_Acct_Value character varying(40),

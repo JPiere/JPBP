@@ -32,7 +32,7 @@ public class X_I_BankAccountJP extends PO implements I_I_BankAccountJP, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180604L;
+	private static final long serialVersionUID = 20180605L;
 
     /** Standard Constructor */
     public X_I_BankAccountJP (Properties ctx, int I_BankAccountJP_ID, String trxName)
@@ -610,17 +610,17 @@ public class X_I_BankAccountJP extends PO implements I_I_BankAccountJP, I_Persis
 	}
 
 	/** Set Bank Asset(Search key).
-		@param JP_Asset_Acct_Value Bank Asset(Search key)	  */
-	public void setJP_Asset_Acct_Value (String JP_Asset_Acct_Value)
+		@param JP_B_Asset_Acct_Value Bank Asset(Search key)	  */
+	public void setJP_B_Asset_Acct_Value (String JP_B_Asset_Acct_Value)
 	{
-		set_Value (COLUMNNAME_JP_Asset_Acct_Value, JP_Asset_Acct_Value);
+		set_Value (COLUMNNAME_JP_B_Asset_Acct_Value, JP_B_Asset_Acct_Value);
 	}
 
 	/** Get Bank Asset(Search key).
 		@return Bank Asset(Search key)	  */
-	public String getJP_Asset_Acct_Value () 
+	public String getJP_B_Asset_Acct_Value () 
 	{
-		return (String)get_Value(COLUMNNAME_JP_Asset_Acct_Value);
+		return (String)get_Value(COLUMNNAME_JP_B_Asset_Acct_Value);
 	}
 
 	/** Set Bank Name.

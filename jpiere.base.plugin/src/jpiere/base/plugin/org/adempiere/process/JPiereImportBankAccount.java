@@ -420,9 +420,9 @@ public class JPiereImportBankAccount extends SvrProcess
 			return ;
 
 		//B_Asset_Acct
-		if(!Util.isEmpty(imp.getJP_Asset_Acct_Value()))
+		if(!Util.isEmpty(imp.getJP_B_Asset_Acct_Value()))
 		{
-			int B_Asset_Acct = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), imp.getC_AcctSchema_ID(), imp.getJP_Asset_Acct_Value(), get_TrxName());
+			int B_Asset_Acct = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), imp.getC_AcctSchema_ID(), imp.getJP_B_Asset_Acct_Value(), get_TrxName());
 			if(B_Asset_Acct > 0)
 			{
 				imp.setB_Asset_Acct(B_Asset_Acct);

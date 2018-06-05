@@ -413,14 +413,14 @@ public interface I_I_BankAccountJP
 	/** Get Accounting Schema(Name)	  */
 	public String getJP_AcctSchema_Name();
 
-    /** Column name JP_Asset_Acct_Value */
-    public static final String COLUMNNAME_JP_Asset_Acct_Value = "JP_Asset_Acct_Value";
+    /** Column name JP_B_Asset_Acct_Value */
+    public static final String COLUMNNAME_JP_B_Asset_Acct_Value = "JP_B_Asset_Acct_Value";
 
 	/** Set Bank Asset(Search key)	  */
-	public void setJP_Asset_Acct_Value (String JP_Asset_Acct_Value);
+	public void setJP_B_Asset_Acct_Value (String JP_B_Asset_Acct_Value);
 
 	/** Get Bank Asset(Search key)	  */
-	public String getJP_Asset_Acct_Value();
+	public String getJP_B_Asset_Acct_Value();
 
     /** Column name JP_Bank_Name */
     public static final String COLUMNNAME_JP_Bank_Name = "JP_Bank_Name";
