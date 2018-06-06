@@ -184,7 +184,7 @@ public class JPiereImportWarehouse extends SvrProcess
 
 				if(isNew)//Create
 				{
-					if(!Util.isEmpty(imp.getName()) && imp.getAD_Org_ID() != 0)
+					if(!Util.isEmpty(imp.getName()) && imp.get_ValueAsInt("AD_Org_ID") != 0)
 					{
 						MWarehouse newWarehouse = new MWarehouse(getCtx (), 0, get_TrxName());
 						newWarehouse.setAD_Org_ID(imp.getAD_Org_ID());
@@ -285,6 +285,7 @@ public class JPiereImportWarehouse extends SvrProcess
 				}
 
 				imp.saveEx(get_TrxName());
+				commitEx();
 
 			}//while (rs.next())
 

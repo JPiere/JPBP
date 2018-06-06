@@ -268,7 +268,7 @@ public class JPiereImportBPGroup extends SvrProcess
 					newBPGroup.setName(imp.getName());
 
 					if(!Util.isEmpty(imp.getDescription()))
-						newBPGroup.setValue(imp.getDescription());
+						newBPGroup.setDescription(imp.getDescription());
 
 					newBPGroup.setIsDefault(imp.isDefault());
 					newBPGroup.setIsConfidentialInfo(imp.isConfidentialInfo());
