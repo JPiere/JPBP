@@ -65,6 +65,7 @@ public class JPiereValidCombinationUtil {
 				MElementValue ev = new MElementValue(ctx, C_ElementValue_ID, trxName);
 
 				X_C_ValidCombination vc = new X_C_ValidCombination(ctx, 0, trxName);
+				vc.setC_AcctSchema_ID(C_AcctSchema_ID);
 				vc.setCombination("*-"+ev.getValue()+"-_-_");
 				vc.setDescription("*-"+ev.getName()+"-_-_");
 				vc.setAD_Org_ID(0);

@@ -290,6 +290,7 @@ public class JPiereImportBankAccount extends SvrProcess
 					if(!Util.isEmpty(imp.getJP_BranchName_Kana()))
 					{
 						String jp_BranchName_Kana = imp.getJP_BranchName_Kana();
+						boolean isOK = true;
 						for(int i = 0; i < jp_BranchName_Kana.length(); i++)
 						{
 							if(!ZenginCheck.charCheck(jp_BranchName_Kana.charAt(i)))
@@ -301,10 +302,13 @@ public class JPiereImportBankAccount extends SvrProcess
 								imp.setProcessed(false);
 								imp.saveEx(get_TrxName());
 								commitEx();
-
+								isOK = false;
+								break;
 							}
 						}//for
 
+						if(!isOK)
+							continue;
 
 						if(jp_BranchName_Kana.length() > ZenginCheck.JP_BranchName_Kana)
 						{
@@ -366,6 +370,7 @@ public class JPiereImportBankAccount extends SvrProcess
 					if(!Util.isEmpty(imp.getJP_RequesterName()))
 					{
 						String jp_RequesterName = imp.getJP_RequesterName();
+						boolean isOK = true;
 						for(int i = 0; i < jp_RequesterName.length(); i++)
 						{
 							if(!ZenginCheck.charCheck(jp_RequesterName.charAt(i)))
@@ -377,9 +382,13 @@ public class JPiereImportBankAccount extends SvrProcess
 								imp.setProcessed(false);
 								imp.saveEx(get_TrxName());
 								commitEx();
-								continue;
+								isOK = false;
+								break;
 							}
 						}//for
+
+						if(!isOK)
+							continue;
 
 						if(jp_RequesterName.length() > ZenginCheck.JP_RequesterName)
 						{
