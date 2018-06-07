@@ -262,6 +262,30 @@ public class JPiereImportBPGroup extends SvrProcess
 
 				if(isNew)//Create
 				{
+					//Check Mandatory - Value
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					//Check Mandatory - Name
+					if(Util.isEmpty(imp.getName()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
 					MBPGroup newBPGroup = new MBPGroup(getCtx(), 0, get_TrxName());
 					newBPGroup.setAD_Org_ID(imp.getAD_Org_ID());
 					newBPGroup.setValue(imp.getValue());
@@ -297,7 +321,9 @@ public class JPiereImportBPGroup extends SvrProcess
 					if(imp.getC_Dunning_ID() > 0)
 						newBPGroup.setC_Dunning_ID(imp.getC_Dunning_ID());
 
+					newBPGroup.setIsActive(imp.isI_IsActiveJP());
 					newBPGroup.saveEx(get_TrxName());
+					commitEx();
 
 					imp.setC_BP_Group_ID(newBPGroup.getC_BP_Group_ID());
 					imp.setI_ErrorMsg("New Record");
@@ -309,12 +335,27 @@ public class JPiereImportBPGroup extends SvrProcess
 
 				}else{//Update
 
+					//Check Mandatory - Value
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
 					MBPGroup updateBPGroup = new MBPGroup(getCtx(), imp.getC_BP_Group_ID(), get_TrxName());
 					updateBPGroup.setAD_Org_ID(imp.getAD_Org_ID());
-					updateBPGroup.setName(imp.getName());
+
+					if(!Util.isEmpty(imp.getName()))
+						updateBPGroup.setName(imp.getName());
 
 					if(!Util.isEmpty(imp.getDescription()))
 						updateBPGroup.setValue(imp.getDescription());
+
 					updateBPGroup.setIsDefault(imp.isDefault());
 					updateBPGroup.setIsConfidentialInfo(imp.isConfidentialInfo());
 
@@ -342,7 +383,9 @@ public class JPiereImportBPGroup extends SvrProcess
 					if(imp.getC_Dunning_ID() > 0)
 						updateBPGroup.setC_Dunning_ID(imp.getC_Dunning_ID());
 
+					updateBPGroup.setIsActive(imp.isI_IsActiveJP());
 					updateBPGroup.saveEx(get_TrxName());
+					commitEx();
 
 					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 						setBPGroupAcct(updateBPGroup, imp);
@@ -354,6 +397,7 @@ public class JPiereImportBPGroup extends SvrProcess
 				}
 
 				imp.saveEx(get_TrxName());
+				commitEx();
 
 			}//while (rs.next())
 
