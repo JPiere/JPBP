@@ -85,6 +85,7 @@ CREATE TABLE adempiere.I_ProductCategoryJP
 
   JP_LandedCostClearing_Value character varying(40),
   P_LandedCostClearing_Acct   numeric(10,0),
+ I_IsActiveJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
 
   CONSTRAINT I_ProductCategoryJP_pkey PRIMARY KEY (I_ProductCategoryJP_ID)
 )

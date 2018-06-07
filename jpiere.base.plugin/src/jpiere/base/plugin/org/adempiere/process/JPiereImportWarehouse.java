@@ -184,68 +184,93 @@ public class JPiereImportWarehouse extends SvrProcess
 
 				if(isNew)//Create
 				{
-					if(!Util.isEmpty(imp.getName()) && imp.get_ValueAsInt("AD_Org_ID") != 0)
+					if(imp.getAD_Org_ID() <= 0)
 					{
-						MWarehouse newWarehouse = new MWarehouse(getCtx (), 0, get_TrxName());
-						newWarehouse.setAD_Org_ID(imp.getAD_Org_ID());
-						newWarehouse.setValue(imp.getValue());
-						newWarehouse.setName(imp.getName());
-						newWarehouse.setDescription(imp.getDescription());
-						newWarehouse.setIsInTransit(imp.isInTransit());
-						newWarehouse.setIsDisallowNegativeInv(imp.isDisallowNegativeInv());
-						if(!Util.isEmpty(imp.getSeparator()))
-							newWarehouse.setSeparator(imp.getSeparator());
-						if(!Util.isEmpty(imp.getReplenishmentClass()))
-							newWarehouse.setReplenishmentClass(imp.getReplenishmentClass());
-
-						//Location
-						if(imp.getC_Location_ID() > 0)
-						{
-							newWarehouse.setC_Location_ID(imp.getC_Location_ID());
-
-						}else {
-							int C_Location_ID = JPiereLocationUtil.createLocation(
-									getCtx()
-									,imp.getJP_LocationOrg_ID()
-									,imp.getJP_Location_Label()
-									,imp.getComments()
-									,imp.getCountryCode()
-									,imp.getPostal()
-									,imp.getPostal_Add()
-									,imp.getRegionName()
-									,imp.getCity()
-									,imp.getAddress1()
-									,imp.getAddress2()
-									,imp.getAddress3()
-									,imp.getAddress4()
-									,imp.getAddress5()
-									,get_TrxName() );
-							newWarehouse.setC_Location_ID(C_Location_ID);
-						}
-
-						newWarehouse.saveEx(get_TrxName());
-
-						//Account Info
-						if(!Util.isEmpty(imp.getJP_W_Differences_Value()) && imp.getC_AcctSchema_ID() > 0)
-						{
-
-							setMWarehouseAcct(newWarehouse, imp);
-						}
-
-						imp.setI_ErrorMsg("New Record");
-						imp.setI_IsImported(true);
-						imp.setProcessed(true);
-						imp.setM_Warehouse_ID(newWarehouse.getM_Warehouse_ID());
-
-					}else{
-						if(Util.isEmpty(imp.getName()))
-							imp.setI_ErrorMsg("No Name");
-						else if(imp.getAD_Org_ID() == 0)
-							imp.setI_ErrorMsg("Organization Value 0");
-
+						imp.setI_ErrorMsg("Organization Value 0");
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
 					}
+
+					//Check Mandatory - Value
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					//Check Mandatory - Name
+					if(Util.isEmpty(imp.getName()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+
+					MWarehouse newWarehouse = new MWarehouse(getCtx (), 0, get_TrxName());
+					newWarehouse.setAD_Org_ID(imp.getAD_Org_ID());
+					newWarehouse.setValue(imp.getValue());
+					newWarehouse.setName(imp.getName());
+					if(!Util.isEmpty(imp.getDescription()))
+						newWarehouse.setDescription(imp.getDescription());
+					newWarehouse.setIsInTransit(imp.isInTransit());
+					newWarehouse.setIsDisallowNegativeInv(imp.isDisallowNegativeInv());
+					if(!Util.isEmpty(imp.getSeparator()))
+						newWarehouse.setSeparator(imp.getSeparator());
+					if(!Util.isEmpty(imp.getReplenishmentClass()))
+						newWarehouse.setReplenishmentClass(imp.getReplenishmentClass());
+
+					//Location
+					if(imp.getC_Location_ID() > 0)
+					{
+						newWarehouse.setC_Location_ID(imp.getC_Location_ID());
+
+					}else {
+						int C_Location_ID = JPiereLocationUtil.createLocation(
+								getCtx()
+								,imp.getJP_LocationOrg_ID()
+								,imp.getJP_Location_Label()
+								,imp.getComments()
+								,imp.getCountryCode()
+								,imp.getPostal()
+								,imp.getPostal_Add()
+								,imp.getRegionName()
+								,imp.getCity()
+								,imp.getAddress1()
+								,imp.getAddress2()
+								,imp.getAddress3()
+								,imp.getAddress4()
+								,imp.getAddress5()
+								,get_TrxName() );
+						newWarehouse.setC_Location_ID(C_Location_ID);
+					}
+
+					newWarehouse.saveEx(get_TrxName());
+
+					//Account Info
+					if(!Util.isEmpty(imp.getJP_W_Differences_Value()) && imp.getC_AcctSchema_ID() > 0)
+					{
+
+						setMWarehouseAcct(newWarehouse, imp);
+					}
+
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
+					imp.setM_Warehouse_ID(newWarehouse.getM_Warehouse_ID());
+
 
 				}else{//Update
 
@@ -278,7 +303,7 @@ public class JPiereImportWarehouse extends SvrProcess
 						setMWarehouseAcct(updateWarehouse, imp);
 					}
 
-					imp.setI_ErrorMsg("Update Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 

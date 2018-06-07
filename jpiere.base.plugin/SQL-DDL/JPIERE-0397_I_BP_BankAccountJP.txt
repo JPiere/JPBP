@@ -66,6 +66,7 @@ CREATE TABLE adempiere.I_BankAccountJP
 
   JP_UnallocatedCash_Value character varying(40),
   B_UnallocatedCash_Acct numeric(10,0),
+ I_IsActiveJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
 
   CONSTRAINT I_BankAccountJP_pkey PRIMARY KEY (I_BankAccountJP_ID)
 );

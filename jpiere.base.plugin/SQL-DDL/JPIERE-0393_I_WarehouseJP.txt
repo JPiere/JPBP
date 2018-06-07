@@ -53,6 +53,7 @@ CREATE TABLE adempiere.I_WarehouseJP
   Address5 character varying(60) DEFAULT NULL::character varying,
   Comments character varying(2000) DEFAULT NULL::character varying,
   JP_LocationOrg_ID numeric(10,0) DEFAULT NULL::numeric,
+ I_IsActiveJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
 
   CONSTRAINT I_WarehouseJP_pkey PRIMARY KEY (I_WarehouseJP_ID)
 )

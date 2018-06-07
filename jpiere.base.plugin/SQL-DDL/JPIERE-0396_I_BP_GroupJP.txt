@@ -75,6 +75,7 @@ CREATE TABLE adempiere.I_BP_GroupJP
 
   JP_NotInvoicedReceipts_Value character varying(40),
   NotInvoicedReceipts_Acct numeric(10,0) NOT NULL,
+ I_IsActiveJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
 
   CONSTRAINT I_BP_GroupJP_pkey PRIMARY KEY (I_BP_GroupJP_ID)
 )

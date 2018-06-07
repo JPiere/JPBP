@@ -285,6 +285,19 @@ public interface I_I_WarehouseJP
 	  */
 	public String getI_ErrorMsg();
 
+    /** Column name I_IsActiveJP */
+    public static final String COLUMNNAME_I_IsActiveJP = "I_IsActiveJP";
+
+	/** Set Active(For Import).
+	  * Active flag for Import Date
+	  */
+	public void setI_IsActiveJP (boolean I_IsActiveJP);
+
+	/** Get Active(For Import).
+	  * Active flag for Import Date
+	  */
+	public boolean isI_IsActiveJP();
+
     /** Column name I_IsImported */
     public static final String COLUMNNAME_I_IsImported = "I_IsImported";
 
