@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
+import org.compiere.model.MLocation;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -150,8 +151,15 @@ public class JPiereImportLocation extends SvrProcess
 							,imp.getAddress5()
 							,get_TrxName() );
 
+					if(!imp.isI_IsActiveJP())
+					{
+						MLocation location = new MLocation(getCtx(),C_Location_ID,get_TrxName());
+						location.setIsActive(false);
+						location.saveEx(get_TrxName());
+					}
+
 					imp.setC_Location_ID(C_Location_ID);
-					imp.setI_ErrorMsg("Create Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 
@@ -172,15 +180,16 @@ public class JPiereImportLocation extends SvrProcess
 							,imp.getAddress3()
 							,imp.getAddress4()
 							,imp.getAddress5()
+							,imp.isI_IsActiveJP()
 							,get_TrxName() );
 
 					if(!isOk)
 					{
-						imp.setI_ErrorMsg("Update Error");
+						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_CouldNotUpdate"));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 					}else {
-						imp.setI_ErrorMsg("Update Record");
+						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 						imp.setI_IsImported(true);
 						imp.setProcessed(true);
 					}

@@ -313,6 +313,7 @@ public class JPiereLocationUtil {
 			,String Address3
 			,String Address4
 			,String Address5
+			,boolean IsActive
 			,String trxName )
 	{
 
@@ -341,6 +342,7 @@ public class JPiereLocationUtil {
 				,Address3
 				,Address4
 				,Address5
+				,IsActive
 				,trxName);
 	}
 
@@ -358,6 +360,7 @@ public class JPiereLocationUtil {
 			,String Address3
 			,String Address4
 			,String Address5
+			,boolean IsActive
 			,String trxName )
 	{
 
@@ -519,6 +522,8 @@ public class JPiereLocationUtil {
 		{
 			location.setAddress5(Address5);
 		}
+
+		location.setIsActive(IsActive);
 
 		try {
 			location.saveEx(trxName);

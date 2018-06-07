@@ -30,7 +30,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180530L;
+	private static final long serialVersionUID = 20180607L;
 
     /** Standard Constructor */
     public X_I_LocationJP (Properties ctx, int I_LocationJP_ID, String trxName)
@@ -38,6 +38,8 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
       super (ctx, I_LocationJP_ID, trxName);
       /** if (I_LocationJP_ID == 0)
         {
+			setI_IsActiveJP (true);
+// Y
 			setI_LocationJP_ID (0);
         } */
     }
@@ -76,7 +78,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	  */
 	public void setAddress1 (String Address1)
 	{
-		set_ValueNoCheck (COLUMNNAME_Address1, Address1);
+		set_Value (COLUMNNAME_Address1, Address1);
 	}
 
 	/** Get Address 1.
@@ -93,7 +95,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	  */
 	public void setAddress2 (String Address2)
 	{
-		set_ValueNoCheck (COLUMNNAME_Address2, Address2);
+		set_Value (COLUMNNAME_Address2, Address2);
 	}
 
 	/** Get Address 2.
@@ -110,7 +112,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	  */
 	public void setAddress3 (String Address3)
 	{
-		set_ValueNoCheck (COLUMNNAME_Address3, Address3);
+		set_Value (COLUMNNAME_Address3, Address3);
 	}
 
 	/** Get Address 3.
@@ -127,7 +129,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	  */
 	public void setAddress4 (String Address4)
 	{
-		set_ValueNoCheck (COLUMNNAME_Address4, Address4);
+		set_Value (COLUMNNAME_Address4, Address4);
 	}
 
 	/** Get Address 4.
@@ -167,9 +169,9 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	public void setC_City_ID (int C_City_ID)
 	{
 		if (C_City_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_City_ID, null);
+			set_Value (COLUMNNAME_C_City_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_City_ID, Integer.valueOf(C_City_ID));
+			set_Value (COLUMNNAME_C_City_ID, Integer.valueOf(C_City_ID));
 	}
 
 	/** Get City.
@@ -251,9 +253,9 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	public void setC_Region_ID (int C_Region_ID)
 	{
 		if (C_Region_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Region_ID, null);
+			set_Value (COLUMNNAME_C_Region_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Region_ID, Integer.valueOf(C_Region_ID));
+			set_Value (COLUMNNAME_C_Region_ID, Integer.valueOf(C_Region_ID));
 	}
 
 	/** Get Region.
@@ -273,7 +275,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	  */
 	public void setCity (String City)
 	{
-		set_ValueNoCheck (COLUMNNAME_City, City);
+		set_Value (COLUMNNAME_City, City);
 	}
 
 	/** Get City.
@@ -333,6 +335,30 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	public String getI_ErrorMsg () 
 	{
 		return (String)get_Value(COLUMNNAME_I_ErrorMsg);
+	}
+
+	/** Set Active(For Import).
+		@param I_IsActiveJP 
+		Active flag for Import Date
+	  */
+	public void setI_IsActiveJP (boolean I_IsActiveJP)
+	{
+		set_Value (COLUMNNAME_I_IsActiveJP, Boolean.valueOf(I_IsActiveJP));
+	}
+
+	/** Get Active(For Import).
+		@return Active flag for Import Date
+	  */
+	public boolean isI_IsActiveJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_I_IsActiveJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Imported.
@@ -397,7 +423,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 		@param JP_Location_Label Location Label	  */
 	public void setJP_Location_Label (String JP_Location_Label)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_Location_Label, JP_Location_Label);
+		set_Value (COLUMNNAME_JP_Location_Label, JP_Location_Label);
 	}
 
 	/** Get Location Label.
@@ -411,7 +437,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 		@param JP_Org_Value Organization(Search Key)	  */
 	public void setJP_Org_Value (String JP_Org_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_Org_Value, JP_Org_Value);
+		set_Value (COLUMNNAME_JP_Org_Value, JP_Org_Value);
 	}
 
 	/** Get Organization(Search Key).
@@ -444,7 +470,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	  */
 	public void setPostal_Add (String Postal_Add)
 	{
-		set_ValueNoCheck (COLUMNNAME_Postal_Add, Postal_Add);
+		set_Value (COLUMNNAME_Postal_Add, Postal_Add);
 	}
 
 	/** Get Additional Zip.
@@ -506,7 +532,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	  */
 	public void setRegionName (String RegionName)
 	{
-		set_ValueNoCheck (COLUMNNAME_RegionName, RegionName);
+		set_Value (COLUMNNAME_RegionName, RegionName);
 	}
 
 	/** Get Region.

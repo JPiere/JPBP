@@ -21,7 +21,7 @@ CREATE TABLE adempiere.I_BP_GroupJP
   UpdatedBy numeric(10,0) NOT NULL,
 
   JP_Org_Value character varying(40) DEFAULT NULL::character varying,
-  Value character varying(40) NOT NULL,
+  Value character varying(40) ,
   C_BP_Group_ID numeric(10,0),
   Name character varying(60),
   Description character varying(255) ,

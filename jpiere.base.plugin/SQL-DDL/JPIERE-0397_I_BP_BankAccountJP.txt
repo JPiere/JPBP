@@ -21,10 +21,10 @@ CREATE TABLE adempiere.I_BankAccountJP
   UpdatedBy numeric(10,0) NOT NULL,
 
   JP_Org_Value character varying(40) DEFAULT NULL::character varying,
-  JP_Bank_Name character varying(60) NOT NULL,
+  JP_Bank_Name character varying(60) ,
   C_Bank_ID numeric(10,0),
 
-  Value character varying(40) NOT NULL,
+  Value character varying(40) ,
   C_BankAccount_ID numeric(10,0),
   Name character varying(60),
   IsDefault character(1)  NOT NULL DEFAULT 'N'::bpchar,

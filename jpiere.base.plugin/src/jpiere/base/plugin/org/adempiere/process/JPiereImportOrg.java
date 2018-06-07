@@ -22,6 +22,7 @@ import org.compiere.model.MOrgInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -151,33 +152,48 @@ public class JPiereImportOrg extends SvrProcess
 
 				if(isNew)//Create
 				{
-					if(imp.getName()!=null && !imp.getName().isEmpty()){
-						MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
-						newOrg.setValue(imp.getValue());
-						newOrg.setName(imp.getName());
-						newOrg.setDescription(imp.getDescription());
-						newOrg.setIsSummary(imp.isSummary());
-						newOrg.saveEx(get_TrxName());
-
-						imp.setI_ErrorMsg("New Record");
-						imp.setI_IsImported(true);
-						imp.setProcessed(true);
-						imp.setAD_Org_ID(newOrg.getAD_Org_ID());
-
-					}else{
-						imp.setI_ErrorMsg("No Name");
+					//Check Mandatory
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 					}
+
+					if(Util.isEmpty(imp.getName()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+					}
+
+					//New Record
+					MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
+					newOrg.setValue(imp.getValue());
+					newOrg.setName(imp.getName());
+					newOrg.setDescription(imp.getDescription());
+					newOrg.setIsActive(imp.isI_IsActiveJP());
+					newOrg.setIsSummary(imp.isSummary());
+					newOrg.saveEx(get_TrxName());
+
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
+					imp.setAD_Org_ID(newOrg.getAD_Org_ID());
+
+
 
 				}else{//Update
 
 					MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
 					updateOrg.setName(imp.getName());
 					updateOrg.setDescription(imp.getDescription());
+					updateOrg.setIsActive(imp.isI_IsActiveJP());
 					updateOrg.saveEx(get_TrxName());
 
-					imp.setI_ErrorMsg("Update Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 
@@ -244,7 +260,7 @@ public class JPiereImportOrg extends SvrProcess
 			pstmt = null;
 		}
 
-		return "OK";
+		return Msg.getMsg(getCtx(), "Success");
 	}	//	doIt
 
 }	//	ImportPayment

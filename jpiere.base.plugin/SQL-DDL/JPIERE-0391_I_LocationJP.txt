@@ -37,6 +37,7 @@ CREATE TABLE adempiere.I_LocationJP
    Comments character varying(2000) DEFAULT NULL::character varying,
 
   I_LocationJP_UU character varying(36) DEFAULT NULL::character varying,
+  I_IsActiveJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
 
   CONSTRAINT I_LocationJP_pkey PRIMARY KEY (I_LocationJP_ID)
 )
