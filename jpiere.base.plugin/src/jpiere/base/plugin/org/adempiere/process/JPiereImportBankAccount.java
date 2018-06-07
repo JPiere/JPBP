@@ -28,6 +28,7 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_BankAccountJP;
 import jpiere.base.plugin.util.JPiereValidCombinationUtil;
+import jpiere.base.plugin.util.ZenginCheck;
 
 /**
  * 	JPIERE-0397:Import Bank Account
@@ -81,7 +82,7 @@ public class JPiereImportBankAccount extends SvrProcess
 		//Update AD_Org ID From JP_Org_Value
 		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
-				.append(" WHERE i.JP_Org_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID ) ")
+				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) )")
 				.append(" WHERE i.JP_Org_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
 		try {
@@ -195,6 +196,8 @@ public class JPiereImportBankAccount extends SvrProcess
 				if(isNew)//Create
 				{
 					MBankAccount newBankAccount = new MBankAccount(getCtx(), 0, get_TrxName());
+
+					//AD_Org_ID
 					if(imp.getAD_Org_ID() > 0)
 					{
 						newBankAccount.setAD_Org_ID(imp.getAD_Org_ID());
@@ -206,6 +209,7 @@ public class JPiereImportBankAccount extends SvrProcess
 						continue;
 					}
 
+					//C_Bank_ID
 					if(imp.getC_Bank_ID() > 0)
 					{
 						newBankAccount.setC_Bank_ID(imp.getC_Bank_ID());
@@ -217,6 +221,7 @@ public class JPiereImportBankAccount extends SvrProcess
 						continue;
 					}
 
+					//Value
 					if(!Util.isEmpty(imp.getValue()))
 					{
 						newBankAccount.setValue(imp.getValue());
@@ -230,6 +235,7 @@ public class JPiereImportBankAccount extends SvrProcess
 						continue;
 					}
 
+					//Name
 					if(!Util.isEmpty(imp.getName()))
 					{
 						newBankAccount.setName(imp.getName());
@@ -243,17 +249,78 @@ public class JPiereImportBankAccount extends SvrProcess
 						continue;
 					}
 
+					//Description
 					if(!Util.isEmpty(imp.getDescription()))
 						newBankAccount.setValue(imp.getDescription());
 
+					//IsDefault
 					newBankAccount.setIsDefault(imp.isDefault());
 
+					//JP_BranchCode
 					if(!Util.isEmpty(imp.getJP_BranchCode()))
+					{
+						String jp_BranchCode = imp.getJP_BranchCode();
+						if(jp_BranchCode.length()!=ZenginCheck.JP_BranchCode)
+						{
+							//{0} is {1} characters.
+							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BranchCode"),ZenginCheck.JP_BranchCode};
+							imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Characters",objs));
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							commitEx();
+							continue;
+						}
+
+						if(!ZenginCheck.numStringCheck(jp_BranchCode))
+						{
+							//You can not use this String : {0}.
+							Object[] objs = new Object[]{jp_BranchCode};
+							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs));
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							imp.saveEx(get_TrxName());
+							commitEx();
+							continue;
+						}
+
 						newBankAccount.set_ValueNoCheck("JP_BranchCode", imp.getJP_BranchCode());
+					}
 
+					//JP_BranchName_Kana
 					if(!Util.isEmpty(imp.getJP_BranchName_Kana()))
-						newBankAccount.set_ValueNoCheck("JP_BranchName_Kana", imp.getJP_BranchName_Kana());
+					{
+						String jp_BranchName_Kana = imp.getJP_BranchName_Kana();
+						for(int i = 0; i < jp_BranchName_Kana.length(); i++)
+						{
+							if(!ZenginCheck.charCheck(jp_BranchName_Kana.charAt(i)))
+							{
+								//You can not use this character : {0}.
+								Object[] objs = new Object[]{jp_BranchName_Kana.charAt(i)};
+								imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchName_Kana") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs));
+								imp.setI_IsImported(false);
+								imp.setProcessed(false);
+								imp.saveEx(get_TrxName());
+								commitEx();
 
+							}
+						}//for
+
+
+						if(jp_BranchName_Kana.length() > ZenginCheck.JP_BranchName_Kana)
+						{
+							//{0} is less than {1} characters.
+							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_BranchName_Kana};
+							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchName_Kana") + " : " + Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs));
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							commitEx();
+							continue;
+						}
+
+						newBankAccount.set_ValueNoCheck("JP_BranchName_Kana", imp.getJP_BranchName_Kana());
+					}
+
+					//AccountNo
 					if(!Util.isEmpty(imp.getAccountNo()))
 					{
 						newBankAccount.setAccountNo(imp.getAccountNo());
@@ -265,18 +332,78 @@ public class JPiereImportBankAccount extends SvrProcess
 						continue;
 					}
 
+					//JP_RequesterCode
 					if(!Util.isEmpty(imp.getJP_RequesterCode()))
+					{
+						String jp_RequesterCode = imp.getJP_RequesterCode();
+						if(jp_RequesterCode.length()!=ZenginCheck.JP_RequesterCode)
+						{
+							//{0} is {1} characters.
+							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_RequesterCode"),ZenginCheck.JP_RequesterCode};
+							imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Characters",objs));
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							commitEx();
+							continue;
+						}
+
+						if(!ZenginCheck.numStringCheck(jp_RequesterCode))
+						{
+							//You can not use this String : {0}.
+							Object[] objs = new Object[]{jp_RequesterCode};
+							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs));
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							imp.saveEx(get_TrxName());
+							commitEx();
+							continue;
+						}
+
 						newBankAccount.set_ValueNoCheck("JP_RequesterCode", imp.getJP_RequesterCode());
+					}
 
+					//JP_RequesterName
 					if(!Util.isEmpty(imp.getJP_RequesterName()))
-						newBankAccount.set_ValueNoCheck("JP_RequesterName", imp.getJP_RequesterName());
+					{
+						String jp_RequesterName = imp.getJP_RequesterName();
+						for(int i = 0; i < jp_RequesterName.length(); i++)
+						{
+							if(!ZenginCheck.charCheck(jp_RequesterName.charAt(i)))
+							{
+								//You can not use this character : {0}.
+								Object[] objs = new Object[]{jp_RequesterName.charAt(i)};
+								imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterName") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs));
+								imp.setI_IsImported(false);
+								imp.setProcessed(false);
+								imp.saveEx(get_TrxName());
+								commitEx();
+								continue;
+							}
+						}//for
 
+						if(jp_RequesterName.length() > ZenginCheck.JP_RequesterName)
+						{
+							//{0} is less than {1} characters.
+							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_RequesterName};
+							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterName") + " : " + Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs));
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							commitEx();
+							continue;
+						}
+
+						newBankAccount.set_ValueNoCheck("JP_RequesterName", imp.getJP_RequesterName());
+					}
+
+					//BBAN
 					if(!Util.isEmpty(imp.getBBAN()))
 						newBankAccount.setBBAN(imp.getBBAN());
 
+					//IBAN
 					if(!Util.isEmpty(imp.getIBAN()))
 						newBankAccount.setIBAN(imp.getIBAN());
 
+					//C_Currency_ID
 					if(imp.getC_Currency_ID() > 0) {
 						newBankAccount.setC_Currency_ID(imp.getC_Currency_ID());
 					}else {
@@ -289,6 +416,7 @@ public class JPiereImportBankAccount extends SvrProcess
 						continue;
 					}
 
+					//BankAccountType
 					if(!Util.isEmpty(imp.getBankAccountType()))
 					{
 						newBankAccount.setBankAccountType(imp.getBankAccountType());
@@ -302,12 +430,15 @@ public class JPiereImportBankAccount extends SvrProcess
 						continue;
 					}
 
+					//CreditLimit
 					if(imp.getCreditLimit().compareTo(Env.ZERO)> 0)
 						newBankAccount.setCreditLimit(imp.getCreditLimit());
 
+					//CurrentBalance
 					if(imp.getCurrentBalance().compareTo(Env.ZERO)> 0)
 						newBankAccount.setCurrentBalance(imp.getCurrentBalance());
 
+					//IsActive
 					newBankAccount.setIsActive(imp.isI_IsActiveJP());
 					newBankAccount.saveEx(get_TrxName());
 

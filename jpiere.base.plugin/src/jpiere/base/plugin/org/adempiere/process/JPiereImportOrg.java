@@ -152,17 +152,6 @@ public class JPiereImportOrg extends SvrProcess
 
 				if(isNew)//Create
 				{
-					//Check AD_Org_ID
-					if(imp.getAD_Org_ID() <= 0)
-					{
-						imp.setI_ErrorMsg("Check Organization Value");
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					//Check Mandatory
 					if(Util.isEmpty(imp.getValue()))
 					{
@@ -203,17 +192,6 @@ public class JPiereImportOrg extends SvrProcess
 
 
 				}else{//Update
-
-					//Check AD_Org_ID
-					if(imp.getAD_Org_ID() <= 0)
-					{
-						imp.setI_ErrorMsg("Check Organization Value");
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
 
 					//Check Mandatory
 					if(Util.isEmpty(imp.getValue()))
