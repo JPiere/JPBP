@@ -316,7 +316,7 @@ public class JPiereImportProductCategory extends SvrProcess
 					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 						setProductCategoryAcct(updateProductCategory, imp);
 
-					imp.setI_ErrorMsg("Update Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 

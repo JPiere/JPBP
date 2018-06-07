@@ -32,7 +32,7 @@ public class X_I_BankAccountJP extends PO implements I_I_BankAccountJP, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180605L;
+	private static final long serialVersionUID = 20180607L;
 
     /** Standard Constructor */
     public X_I_BankAccountJP (Properties ctx, int I_BankAccountJP_ID, String trxName)
@@ -45,9 +45,9 @@ public class X_I_BankAccountJP extends PO implements I_I_BankAccountJP, I_Persis
 			setCurrentBalance (Env.ZERO);
 // 0
 			setI_BankAccountJP_ID (0);
+			setI_IsActiveJP (true);
+// Y
 			setIsDefault (false);
-			setJP_Bank_Name (null);
-			setValue (null);
         } */
     }
 
@@ -545,6 +545,30 @@ public class X_I_BankAccountJP extends PO implements I_I_BankAccountJP, I_Persis
 	public String getI_ErrorMsg () 
 	{
 		return (String)get_Value(COLUMNNAME_I_ErrorMsg);
+	}
+
+	/** Set Active(For Import).
+		@param I_IsActiveJP 
+		Active flag for Import Date
+	  */
+	public void setI_IsActiveJP (boolean I_IsActiveJP)
+	{
+		set_Value (COLUMNNAME_I_IsActiveJP, Boolean.valueOf(I_IsActiveJP));
+	}
+
+	/** Get Active(For Import).
+		@return Active flag for Import Date
+	  */
+	public boolean isI_IsActiveJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_I_IsActiveJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Imported.

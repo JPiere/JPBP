@@ -221,10 +221,12 @@ public class JPiereImportBankAccount extends SvrProcess
 					{
 						newBankAccount.setValue(imp.getValue());
 					}else {
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " Value is Empty");
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
+						commitEx();
 						continue;
 					}
 
@@ -232,10 +234,12 @@ public class JPiereImportBankAccount extends SvrProcess
 					{
 						newBankAccount.setName(imp.getName());
 					}else {
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " Name is Empty");
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
+						commitEx();
 						continue;
 					}
 
@@ -276,10 +280,12 @@ public class JPiereImportBankAccount extends SvrProcess
 					if(imp.getC_Currency_ID() > 0) {
 						newBankAccount.setC_Currency_ID(imp.getC_Currency_ID());
 					}else {
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " C_Currency_ID = 0");
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_Currency_ID")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
+						commitEx();
 						continue;
 					}
 
@@ -287,10 +293,12 @@ public class JPiereImportBankAccount extends SvrProcess
 					{
 						newBankAccount.setBankAccountType(imp.getBankAccountType());
 					}else {
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " Bank Account Type is Empty");
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "BankAccountType")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
+						commitEx();
 						continue;
 					}
 
@@ -300,10 +308,11 @@ public class JPiereImportBankAccount extends SvrProcess
 					if(imp.getCurrentBalance().compareTo(Env.ZERO)> 0)
 						newBankAccount.setCurrentBalance(imp.getCurrentBalance());
 
+					newBankAccount.setIsActive(imp.isI_IsActiveJP());
 					newBankAccount.saveEx(get_TrxName());
 
 					imp.setC_BankAccount_ID(newBankAccount.getC_BankAccount_ID());
-					imp.setI_ErrorMsg("New Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 
@@ -312,10 +321,22 @@ public class JPiereImportBankAccount extends SvrProcess
 
 				}else{//Update
 
+					//Check Mandatory - Value
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
 					MBankAccount updateBankAccount = new MBankAccount(getCtx(), imp.getC_BankAccount_ID(), get_TrxName());
 
-					if(imp.getAD_Org_ID() > 0)
-						updateBankAccount.setAD_Org_ID(imp.getAD_Org_ID());
+//					if(imp.getAD_Org_ID() > 0)
+//						updateBankAccount.setAD_Org_ID(imp.getAD_Org_ID());
 
 					if(!Util.isEmpty(imp.getName()))
 						updateBankAccount.setName(imp.getName());
@@ -358,18 +379,20 @@ public class JPiereImportBankAccount extends SvrProcess
 					if(imp.getCurrentBalance().compareTo(Env.ZERO)> 0)
 						updateBankAccount.setCurrentBalance(imp.getCurrentBalance());
 
+					updateBankAccount.setIsActive(imp.isI_IsActiveJP());
 					updateBankAccount.saveEx(get_TrxName());
 
 					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 						setBankAccountAcct(updateBankAccount, imp);
 
-					imp.setI_ErrorMsg("Update Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 
 				}
 
 				imp.saveEx(get_TrxName());
+				commitEx();
 
 			}//while (rs.next())
 

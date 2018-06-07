@@ -326,7 +326,7 @@ public class JPiereImportBPGroup extends SvrProcess
 					commitEx();
 
 					imp.setC_BP_Group_ID(newBPGroup.getC_BP_Group_ID());
-					imp.setI_ErrorMsg("New Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 
@@ -390,7 +390,7 @@ public class JPiereImportBPGroup extends SvrProcess
 					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 						setBPGroupAcct(updateBPGroup, imp);
 
-					imp.setI_ErrorMsg("Update Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 
