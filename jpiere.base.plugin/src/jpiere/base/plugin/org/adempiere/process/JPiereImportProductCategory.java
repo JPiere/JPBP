@@ -214,6 +214,30 @@ public class JPiereImportProductCategory extends SvrProcess
 
 				if(isNew)//Create
 				{
+					//Check Mandatory - Value
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					//Check Mandatory - Name
+					if(Util.isEmpty(imp.getName()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
 					MProductCategory newProductCategory = new MProductCategory(getCtx(), 0, get_TrxName());
 					newProductCategory.setAD_Org_ID(imp.getAD_Org_ID());
 					newProductCategory.setValue(imp.getValue());
@@ -237,10 +261,12 @@ public class JPiereImportProductCategory extends SvrProcess
 					if(imp.getAD_PrintColor_ID() > 0)
 						newProductCategory.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
 
+					newProductCategory.setIsActive(imp.isI_IsActiveJP());
 					newProductCategory.saveEx(get_TrxName());
+					commitEx();
 
 					imp.setM_Product_Category_ID(newProductCategory.getM_Product_Category_ID());
-					imp.setI_ErrorMsg("New Record");
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
 
@@ -248,6 +274,18 @@ public class JPiereImportProductCategory extends SvrProcess
 						setProductCategoryAcct(newProductCategory, imp);
 
 				}else{//Update
+
+					//Check Mandatory - Value
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
 
 					MProductCategory updateProductCategory = new MProductCategory(getCtx(), imp.getM_Product_Category_ID(), get_TrxName());
 					updateProductCategory.setAD_Org_ID(imp.getAD_Org_ID());
@@ -271,7 +309,9 @@ public class JPiereImportProductCategory extends SvrProcess
 					if(imp.getAD_PrintColor_ID() > 0)
 						updateProductCategory.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
 
+					updateProductCategory.setIsActive(imp.isI_IsActiveJP());
 					updateProductCategory.saveEx(get_TrxName());
+					commitEx();
 
 					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 						setProductCategoryAcct(updateProductCategory, imp);
@@ -283,6 +323,7 @@ public class JPiereImportProductCategory extends SvrProcess
 				}
 
 				imp.saveEx(get_TrxName());
+				commitEx();
 
 			}//while (rs.next())
 

@@ -32,7 +32,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180601L;
+	private static final long serialVersionUID = 20180607L;
 
     /** Standard Constructor */
     public X_I_ProductCategoryJP (Properties ctx, int I_ProductCategoryJP_ID, String trxName)
@@ -40,13 +40,14 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
       super (ctx, I_ProductCategoryJP_ID, trxName);
       /** if (I_ProductCategoryJP_ID == 0)
         {
+			setI_IsActiveJP (true);
+// Y
 			setI_ProductCategoryJP_ID (0);
 			setIsDefault (false);
 			setIsSelfService (false);
 			setMMPolicy (null);
 // F
 			setPlannedMargin (Env.ZERO);
-			setValue (null);
         } */
     }
 
@@ -118,9 +119,9 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 	public void setA_Asset_Group_ID (int A_Asset_Group_ID)
 	{
 		if (A_Asset_Group_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_A_Asset_Group_ID, null);
+			set_Value (COLUMNNAME_A_Asset_Group_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_A_Asset_Group_ID, Integer.valueOf(A_Asset_Group_ID));
+			set_Value (COLUMNNAME_A_Asset_Group_ID, Integer.valueOf(A_Asset_Group_ID));
 	}
 
 	/** Get Asset Group.
@@ -146,9 +147,9 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 	public void setC_AcctSchema_ID (int C_AcctSchema_ID)
 	{
 		if (C_AcctSchema_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_AcctSchema_ID, null);
+			set_Value (COLUMNNAME_C_AcctSchema_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_AcctSchema_ID, Integer.valueOf(C_AcctSchema_ID));
+			set_Value (COLUMNNAME_C_AcctSchema_ID, Integer.valueOf(C_AcctSchema_ID));
 	}
 
 	/** Get Accounting Schema.
@@ -260,6 +261,30 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		return (String)get_Value(COLUMNNAME_I_ErrorMsg);
 	}
 
+	/** Set Active(For Import).
+		@param I_IsActiveJP 
+		Active flag for Import Date
+	  */
+	public void setI_IsActiveJP (boolean I_IsActiveJP)
+	{
+		set_Value (COLUMNNAME_I_IsActiveJP, Boolean.valueOf(I_IsActiveJP));
+	}
+
+	/** Get Active(For Import).
+		@return Active flag for Import Date
+	  */
+	public boolean isI_IsActiveJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_I_IsActiveJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Imported.
 		@param I_IsImported 
 		Has this import been processed
@@ -348,7 +373,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 	  */
 	public void setIsSelfService (boolean IsSelfService)
 	{
-		set_ValueNoCheck (COLUMNNAME_IsSelfService, Boolean.valueOf(IsSelfService));
+		set_Value (COLUMNNAME_IsSelfService, Boolean.valueOf(IsSelfService));
 	}
 
 	/** Get Self-Service.
@@ -398,7 +423,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_AverageCostVariance_Value Average Cost Variance(Search key)	  */
 	public void setJP_AverageCostVariance_Value (String JP_AverageCostVariance_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_AverageCostVariance_Value, JP_AverageCostVariance_Value);
+		set_Value (COLUMNNAME_JP_AverageCostVariance_Value, JP_AverageCostVariance_Value);
 	}
 
 	/** Get Average Cost Variance(Search key).
@@ -412,7 +437,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_COGS_Acct_Value Product COGS(Search key)	  */
 	public void setJP_COGS_Acct_Value (String JP_COGS_Acct_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_COGS_Acct_Value, JP_COGS_Acct_Value);
+		set_Value (COLUMNNAME_JP_COGS_Acct_Value, JP_COGS_Acct_Value);
 	}
 
 	/** Get Product COGS(Search key).
@@ -426,7 +451,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_CostAdjustment_Value Cost Adjustment(Search Key)	  */
 	public void setJP_CostAdjustment_Value (String JP_CostAdjustment_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_CostAdjustment_Value, JP_CostAdjustment_Value);
+		set_Value (COLUMNNAME_JP_CostAdjustment_Value, JP_CostAdjustment_Value);
 	}
 
 	/** Get Cost Adjustment(Search Key).
@@ -440,7 +465,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_InventoryClearing_Value Inventory Clearing(Search Key)	  */
 	public void setJP_InventoryClearing_Value (String JP_InventoryClearing_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_InventoryClearing_Value, JP_InventoryClearing_Value);
+		set_Value (COLUMNNAME_JP_InventoryClearing_Value, JP_InventoryClearing_Value);
 	}
 
 	/** Get Inventory Clearing(Search Key).
@@ -454,7 +479,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_InvoicePriceVariance_Value Invoice Price Variance(Search Key)	  */
 	public void setJP_InvoicePriceVariance_Value (String JP_InvoicePriceVariance_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_InvoicePriceVariance_Value, JP_InvoicePriceVariance_Value);
+		set_Value (COLUMNNAME_JP_InvoicePriceVariance_Value, JP_InvoicePriceVariance_Value);
 	}
 
 	/** Get Invoice Price Variance(Search Key).
@@ -468,7 +493,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_LandedCostClearing_Value Landed Cost Clearing(Search Key)	  */
 	public void setJP_LandedCostClearing_Value (String JP_LandedCostClearing_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_LandedCostClearing_Value, JP_LandedCostClearing_Value);
+		set_Value (COLUMNNAME_JP_LandedCostClearing_Value, JP_LandedCostClearing_Value);
 	}
 
 	/** Get Landed Cost Clearing(Search Key).
@@ -482,7 +507,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_Org_Value Organization(Search Key)	  */
 	public void setJP_Org_Value (String JP_Org_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_Org_Value, JP_Org_Value);
+		set_Value (COLUMNNAME_JP_Org_Value, JP_Org_Value);
 	}
 
 	/** Get Organization(Search Key).
@@ -496,7 +521,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_PO_PriceVariance_Value Purchase Price Variance(Search Key)	  */
 	public void setJP_PO_PriceVariance_Value (String JP_PO_PriceVariance_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_PO_PriceVariance_Value, JP_PO_PriceVariance_Value);
+		set_Value (COLUMNNAME_JP_PO_PriceVariance_Value, JP_PO_PriceVariance_Value);
 	}
 
 	/** Get Purchase Price Variance(Search Key).
@@ -510,7 +535,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_P_Asset_Acct_Value Product Asset(Search Key)	  */
 	public void setJP_P_Asset_Acct_Value (String JP_P_Asset_Acct_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_P_Asset_Acct_Value, JP_P_Asset_Acct_Value);
+		set_Value (COLUMNNAME_JP_P_Asset_Acct_Value, JP_P_Asset_Acct_Value);
 	}
 
 	/** Get Product Asset(Search Key).
@@ -524,7 +549,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_P_Expense_Acct_Value Product Expense(Search Key)	  */
 	public void setJP_P_Expense_Acct_Value (String JP_P_Expense_Acct_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_P_Expense_Acct_Value, JP_P_Expense_Acct_Value);
+		set_Value (COLUMNNAME_JP_P_Expense_Acct_Value, JP_P_Expense_Acct_Value);
 	}
 
 	/** Get Product Expense(Search Key).
@@ -538,7 +563,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_P_Revenue_Acct_Value Product Revenue(Search Key)	  */
 	public void setJP_P_Revenue_Acct_Value (String JP_P_Revenue_Acct_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_P_Revenue_Acct_Value, JP_P_Revenue_Acct_Value);
+		set_Value (COLUMNNAME_JP_P_Revenue_Acct_Value, JP_P_Revenue_Acct_Value);
 	}
 
 	/** Get Product Revenue(Search Key).
@@ -552,7 +577,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_P_TradeDiscountGrant_Value Trade Discount Granted(Search Key)	  */
 	public void setJP_P_TradeDiscountGrant_Value (String JP_P_TradeDiscountGrant_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_P_TradeDiscountGrant_Value, JP_P_TradeDiscountGrant_Value);
+		set_Value (COLUMNNAME_JP_P_TradeDiscountGrant_Value, JP_P_TradeDiscountGrant_Value);
 	}
 
 	/** Get Trade Discount Granted(Search Key).
@@ -566,7 +591,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_P_TradeDiscountRec_Value Trade Discount Received(Search Key)	  */
 	public void setJP_P_TradeDiscountRec_Value (String JP_P_TradeDiscountRec_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_P_TradeDiscountRec_Value, JP_P_TradeDiscountRec_Value);
+		set_Value (COLUMNNAME_JP_P_TradeDiscountRec_Value, JP_P_TradeDiscountRec_Value);
 	}
 
 	/** Get Trade Discount Received(Search Key).
@@ -600,9 +625,9 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 	public void setJP_ProductCategoryL1_ID (int JP_ProductCategoryL1_ID)
 	{
 		if (JP_ProductCategoryL1_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ProductCategoryL1_ID, null);
+			set_Value (COLUMNNAME_JP_ProductCategoryL1_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ProductCategoryL1_ID, Integer.valueOf(JP_ProductCategoryL1_ID));
+			set_Value (COLUMNNAME_JP_ProductCategoryL1_ID, Integer.valueOf(JP_ProductCategoryL1_ID));
 	}
 
 	/** Get Product Category Level1.
@@ -619,7 +644,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_ProductCategoryL1_Value Product Category Lv1(Search Key)	  */
 	public void setJP_ProductCategoryL1_Value (String JP_ProductCategoryL1_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_ProductCategoryL1_Value, JP_ProductCategoryL1_Value);
+		set_Value (COLUMNNAME_JP_ProductCategoryL1_Value, JP_ProductCategoryL1_Value);
 	}
 
 	/** Get Product Category Lv1(Search Key).
@@ -633,7 +658,7 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 		@param JP_RateVariance_Acct_Value Rate Variance(Search Key)	  */
 	public void setJP_RateVariance_Acct_Value (String JP_RateVariance_Acct_Value)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_RateVariance_Acct_Value, JP_RateVariance_Acct_Value);
+		set_Value (COLUMNNAME_JP_RateVariance_Acct_Value, JP_RateVariance_Acct_Value);
 	}
 
 	/** Get Rate Variance(Search Key).
@@ -679,9 +704,9 @@ public class X_I_ProductCategoryJP extends PO implements I_I_ProductCategoryJP, 
 	public void setM_Product_Category_ID (int M_Product_Category_ID)
 	{
 		if (M_Product_Category_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_Product_Category_ID, null);
+			set_Value (COLUMNNAME_M_Product_Category_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_M_Product_Category_ID, Integer.valueOf(M_Product_Category_ID));
+			set_Value (COLUMNNAME_M_Product_Category_ID, Integer.valueOf(M_Product_Category_ID));
 	}
 
 	/** Get Product Category.

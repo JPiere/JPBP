@@ -156,6 +156,7 @@ public class JPiereImportLocation extends SvrProcess
 						MLocation location = new MLocation(getCtx(),C_Location_ID,get_TrxName());
 						location.setIsActive(false);
 						location.saveEx(get_TrxName());
+						commitEx();
 					}
 
 					imp.setC_Location_ID(C_Location_ID);
@@ -196,6 +197,7 @@ public class JPiereImportLocation extends SvrProcess
 				}
 
 				imp.saveEx(get_TrxName());
+				commitEx();
 
 			}//while (rs.next())
 

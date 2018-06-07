@@ -184,9 +184,10 @@ public class JPiereImportWarehouse extends SvrProcess
 
 				if(isNew)//Create
 				{
+					//Check AD_Org_ID
 					if(imp.getAD_Org_ID() <= 0)
 					{
-						imp.setI_ErrorMsg("Organization Value 0");
+						imp.setI_ErrorMsg("Check Organization Value");
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
@@ -257,7 +258,9 @@ public class JPiereImportWarehouse extends SvrProcess
 						newWarehouse.setC_Location_ID(C_Location_ID);
 					}
 
+					newWarehouse.setIsActive(imp.isI_IsActiveJP());
 					newWarehouse.saveEx(get_TrxName());
+					commitEx();
 
 					//Account Info
 					if(!Util.isEmpty(imp.getJP_W_Differences_Value()) && imp.getC_AcctSchema_ID() > 0)
@@ -266,15 +269,27 @@ public class JPiereImportWarehouse extends SvrProcess
 						setMWarehouseAcct(newWarehouse, imp);
 					}
 
+					imp.setM_Warehouse_ID(newWarehouse.getM_Warehouse_ID());
 					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
-					imp.setM_Warehouse_ID(newWarehouse.getM_Warehouse_ID());
 
 
 				}else{//Update
 
-					MWarehouse updateWarehouse = new MWarehouse(getCtx (), imp.getAD_Org_ID(), get_TrxName());
+					//Check Mandatory - Value
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					MWarehouse updateWarehouse = new MWarehouse(getCtx (), imp.getM_Warehouse_ID(), get_TrxName());
 					if(!Util.isEmpty(imp.getName()))
 						updateWarehouse.setName(imp.getName());
 					if(!Util.isEmpty(imp.getDescription()))
@@ -294,7 +309,9 @@ public class JPiereImportWarehouse extends SvrProcess
 						;//Noting to do;
 					}
 
+					updateWarehouse.setIsActive(imp.isI_IsActiveJP());
 					updateWarehouse.saveEx(get_TrxName());
+					commitEx();
 
 					//Account Info
 					if(!Util.isEmpty(imp.getJP_W_Differences_Value()) && imp.getC_AcctSchema_ID() > 0)
@@ -349,6 +366,7 @@ public class JPiereImportWarehouse extends SvrProcess
 				X_M_Warehouse_Acct acct = new X_M_Warehouse_Acct (getCtx (), rs, get_TrxName());
 				acct.setW_Differences_Acct(C_ValidCombination_ID);
 				acct.saveEx(get_TrxName());
+				commitEx();
 			}
 
 		}catch (Exception e){

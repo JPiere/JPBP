@@ -152,6 +152,17 @@ public class JPiereImportOrg extends SvrProcess
 
 				if(isNew)//Create
 				{
+					//Check AD_Org_ID
+					if(imp.getAD_Org_ID() <= 0)
+					{
+						imp.setI_ErrorMsg("Check Organization Value");
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
 					//Check Mandatory
 					if(Util.isEmpty(imp.getValue()))
 					{
@@ -159,6 +170,9 @@ public class JPiereImportOrg extends SvrProcess
 						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
 					}
 
 					if(Util.isEmpty(imp.getName()))
@@ -167,6 +181,9 @@ public class JPiereImportOrg extends SvrProcess
 						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 						imp.setI_IsImported(false);
 						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
 					}
 
 					//New Record
@@ -177,21 +194,45 @@ public class JPiereImportOrg extends SvrProcess
 					newOrg.setIsActive(imp.isI_IsActiveJP());
 					newOrg.setIsSummary(imp.isSummary());
 					newOrg.saveEx(get_TrxName());
+					commitEx();
 
+					imp.setAD_Org_ID(newOrg.getAD_Org_ID());
 					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
-					imp.setAD_Org_ID(newOrg.getAD_Org_ID());
-
 
 
 				}else{//Update
+
+					//Check AD_Org_ID
+					if(imp.getAD_Org_ID() <= 0)
+					{
+						imp.setI_ErrorMsg("Check Organization Value");
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					//Check Mandatory
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
 
 					MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
 					updateOrg.setName(imp.getName());
 					updateOrg.setDescription(imp.getDescription());
 					updateOrg.setIsActive(imp.isI_IsActiveJP());
 					updateOrg.saveEx(get_TrxName());
+					commitEx();
 
 					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 					imp.setI_IsImported(true);
@@ -200,6 +241,7 @@ public class JPiereImportOrg extends SvrProcess
 				}
 
 				imp.saveEx();
+				commitEx();
 
 				if(imp.getAD_Org_ID() > 0)
 				{
@@ -248,6 +290,7 @@ public class JPiereImportOrg extends SvrProcess
 					}
 
 					orgInfo.saveEx(get_TrxName());
+					commitEx();
 
 				}
 			}//while (rs.next())
