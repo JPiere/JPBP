@@ -13,8 +13,6 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
-import jpiere.base.plugin.util.ZenginCheck;
-
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MClient;
 import org.compiere.model.ModelValidationEngine;
@@ -24,6 +22,8 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+
+import jpiere.base.plugin.util.ZenginCheck;
 
 public class JPiereBankAccountModelValidator implements ModelValidator {
 
@@ -68,30 +68,38 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 				{
 					if(!ZenginCheck.charCheck(jp_RequesterName.charAt(i)))
 					{
-						return "「" + jp_RequesterName.charAt(i) + "」は使えない文字です。";
+						Object[] objs = new Object[]{jp_RequesterName.charAt(i)};
+						return Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs);//You can not use this character : {0}.
 					}
 				}//for
 
 				if(jp_RequesterName.length() > ZenginCheck.JP_RequesterName)
 				{
-					return Msg.getElement(Env.getCtx(), "JP_BankName_Kana") + "は" + ZenginCheck.JP_RequesterName + "以内です。";
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_RequesterName};
+					return Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs);//{0} is less than {1} characters.
 				}
 
 
 				String jp_RequesterCode = (String)bankAcct.get_Value("JP_RequesterCode");
 				if(Util.isEmpty(jp_RequesterCode))
 				{
-					return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "が入力されていません。";
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_RequesterCode")};
+					return Msg.getMsg(Env.getCtx(),"JP_NOT-INOUT",objs);//It is not input in {0}
+
 				}else{
 
 					if(jp_RequesterCode.length()!=ZenginCheck.JP_RequesterCode)
 					{
-						return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "は" + ZenginCheck.JP_RequesterCode + "桁です。";
+						//{0} is {1} characters.
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_RequesterCode"),ZenginCheck.JP_RequesterCode};
+						return Msg.getMsg(Env.getCtx(),"JP_Characters",objs);
 					}
 
 					if(!ZenginCheck.numStringCheck(jp_RequesterCode))
 					{
-						return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + "に半角数値以外の文字が使用されています。";
+						//You can not use this String : {0}.
+						Object[] objs = new Object[]{jp_RequesterCode};
+						return Msg.getElement(Env.getCtx(), "JP_RequesterCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs);
 					}
 				}
 
@@ -99,16 +107,22 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 				String jp_BranchCode = (String)bankAcct.get_Value("JP_BranchCode");
 				if(Util.isEmpty(jp_BranchCode))
 				{
-					return Msg.getElement(Env.getCtx(), "jp_BranchCode")  + "が入力されていません。";
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BranchCode")};
+					return Msg.getMsg(Env.getCtx(),"JP_NOT-INOUT",objs);//It is not input in {0}
+
 				}else{
 					if(jp_BranchCode.length()!=ZenginCheck.JP_BranchCode)
 					{
-						return Msg.getElement(Env.getCtx(), "JP_BranchCode") + "は" + ZenginCheck.JP_BranchCode + "桁です。";
+						//{0} is {1} characters.
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BranchCode"),ZenginCheck.JP_BranchCode};
+						return Msg.getMsg(Env.getCtx(),"JP_Characters",objs);
 					}
 
 					if(!ZenginCheck.numStringCheck(jp_BranchCode))
 					{
-						return Msg.getElement(Env.getCtx(), "JP_BranchCode") + "に半角数値以外の文字が使用されています。";
+						//You can not use this String : {0}.
+						Object[] objs = new Object[]{jp_BranchCode};
+						return Msg.getElement(Env.getCtx(), "JP_BranchCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs);
 					}
 				}
 
@@ -116,19 +130,23 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 				String jp_BranchName_Kana = (String)bankAcct.get_Value("JP_BranchName_Kana");
 				if(Util.isEmpty(jp_BranchName_Kana))
 				{
-					return Msg.getElement(Env.getCtx(), "jp_BranchName_Kana")  + "が入力されていません。";
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BranchName_Kana")};
+					return Msg.getMsg(Env.getCtx(),"JP_NOT-INOUT",objs);//It is not input in {0}
+
 				}else{
 					for(int i = 0; i < jp_BranchName_Kana.length(); i++)
 					{
 						if(!ZenginCheck.charCheck(jp_BranchName_Kana.charAt(i)))
 						{
-							return "「" + jp_BranchName_Kana.charAt(i) + "」は使えない文字です。";
+							Object[] objs = new Object[]{jp_BranchName_Kana.charAt(i)};
+							return Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs);//You can not use this character : {0}.
 						}
 					}//for
 
 					if(jp_BranchName_Kana.length() > ZenginCheck.JP_BranchName_Kana)
 					{
-						return Msg.getElement(Env.getCtx(), "jp_BranchName_Kana") + "は" + ZenginCheck.JP_BranchName_Kana + "以内です。";
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BranchName_Kana"),ZenginCheck.JP_BranchName_Kana};
+						return Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs);//{0} is less than {1} characters.
 					}
 
 				}
@@ -136,16 +154,23 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 				String accountNo = (String)bankAcct.getAccountNo();
 				if(Util.isEmpty(accountNo))
 				{
-					return Msg.getElement(Env.getCtx(), "accountNo")  + "が入力されていません。";
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "AccountNo")};
+					return Msg.getMsg(Env.getCtx(),"JP_NOT-INOUT",objs);//It is not input in {0}
+
 				}else{
+
 					if(accountNo.length()!=ZenginCheck.JP_AccountNo)
 					{
-						return Msg.getElement(Env.getCtx(), "AccountNo") + "は" + ZenginCheck.JP_AccountNo + "桁です。";
+						//{0} is {1} characters.
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "AccountNo"),ZenginCheck.JP_AccountNo};
+						return Msg.getMsg(Env.getCtx(),"JP_Characters",objs);
 					}
 
 					if(!ZenginCheck.numStringCheck(accountNo))
 					{
-						return Msg.getElement(Env.getCtx(), "AccountNo") + "に半角数値以外の文字が使用されています。";
+						//You can not use this String : {0}.
+						Object[] objs = new Object[]{accountNo};
+						return Msg.getElement(Env.getCtx(), "AccountNo") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs);
 					}
 				}
 

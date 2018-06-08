@@ -19,7 +19,6 @@ import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MOrder;
-import org.compiere.util.Env;
 
 /**
  *
@@ -35,15 +34,6 @@ public class JPiereInOutCallout implements IColumnCallout {
 	@Override
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
-
-		//Jugement of Shipment1
-		boolean IsSOTrx = "Y".equals(Env.getContext(ctx, WindowNo, "IsSOTrx"));
-		if(!IsSOTrx)
-			return "";
-
-		//Jugement of Shipment2
-		if(mTab.getValue("MovementType") == null || !mTab.getValue("MovementType").toString().equals("C-"))
-			return "";
 
 		Integer C_Order_ID = (Integer)value;
 		if (C_Order_ID == null || C_Order_ID.intValue() == 0)

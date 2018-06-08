@@ -19,7 +19,7 @@ CREATE TABLE adempiere.I_LocationJP
   UpdatedBy numeric(10,0) NOT NULL,
 
   JP_OPrg_Value character varying(40) DEFAULT NULL::character varying,
-   JP_Location_Label character varying(255) DEFAULT NULL::numeric,
+   JP_Location_Label character varying(255) ,
    C_Location_ID numeric(10,0) DEFAULT NULL::numeric,
    CountryCode character varying(2),
    C_Country_ID numeric(10,0) DEFAULT NULL::numeric,
@@ -37,6 +37,7 @@ CREATE TABLE adempiere.I_LocationJP
    Comments character varying(2000) DEFAULT NULL::character varying,
 
   I_LocationJP_UU character varying(36) DEFAULT NULL::character varying,
+  I_IsActiveJP character(1) NOT NULL DEFAULT 'Y'::bpchar,
 
   CONSTRAINT I_LocationJP_pkey PRIMARY KEY (I_LocationJP_ID)
 )

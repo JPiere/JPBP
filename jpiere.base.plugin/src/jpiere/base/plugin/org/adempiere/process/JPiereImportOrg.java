@@ -22,6 +22,7 @@ import org.compiere.model.MOrgInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -78,104 +79,176 @@ public class JPiereImportOrg extends SvrProcess
 		}
 
 
-		//	Existing Oraganization ? Match Value
+		////Update AD_Org ID From Value
 		sql = new StringBuilder ("UPDATE I_OrgJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
 				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE AD_Org_ID = '0' AND Value IS NOT NULL")
 				.append(" AND I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_Org_ID From Value");
+
+		}
 
 
-		//	Existing Oraganization Type
+		//Update AD_OrgType_ID From JP_OrgType_Name
 		sql = new StringBuilder ("UPDATE I_OrgJP i ")
 				.append(" SET AD_OrgType_ID=(SELECT t.AD_OrgType_ID FROM AD_OrgType t")
 				.append(" WHERE t.Name=i.JP_OrgType_Name AND t.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_OrgType_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Organization Type=" + no);
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update AD_OrgType_ID From JP_OrgType_Name");
+
+		}
+
+
+		//Update C_Location_ID From JP_Location_Label
+		sql = new StringBuilder ("UPDATE I_OrgJP i ")
+				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
+				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(clientCheck);
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
+		}catch(Exception e) {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
+					+ "Update C_Location_ID From JP_Location_Label");
+
+		}
 
 		commitEx();
 
-
-		//
 		sql = new StringBuilder ("SELECT * FROM I_OrgJP WHERE I_IsImported='N'")
 					.append(clientCheck);
-		PreparedStatement pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
-		ResultSet rs = pstmt.executeQuery();
-		while (rs.next())
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try
 		{
-			X_I_OrgJP imp = new X_I_OrgJP (getCtx (), rs, get_TrxName());
+			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				X_I_OrgJP imp = new X_I_OrgJP (getCtx (), rs, get_TrxName());
 
-			boolean isNew = true;
-			if(imp.getAD_Org_ID()!=0){
-				isNew =false;
-			}
+				boolean isNew = true;
+				if(imp.getAD_Org_ID()!=0){
+					isNew =false;
+				}
 
-			if(isNew){
-				if(imp.getName()!=null && !imp.getName().isEmpty()){
+				if(isNew)//Create
+				{
+					//Check Mandatory
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					if(Util.isEmpty(imp.getName()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					//New Record
 					MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
 					newOrg.setValue(imp.getValue());
 					newOrg.setName(imp.getName());
 					newOrg.setDescription(imp.getDescription());
+					newOrg.setIsActive(imp.isI_IsActiveJP());
 					newOrg.setIsSummary(imp.isSummary());
 					newOrg.saveEx(get_TrxName());
-					imp.setI_ErrorMsg("New Record");
+					commitEx();
+
+					imp.setAD_Org_ID(newOrg.getAD_Org_ID());
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 					imp.setI_IsImported(true);
 					imp.setProcessed(true);
-					imp.setAD_Org_ID(newOrg.getAD_Org_ID());
 
-				}else{
-					imp.setI_ErrorMsg("No Name");
-					imp.setI_IsImported(false);
-					imp.setProcessed(false);
+
+				}else{//Update
+
+					//Check Mandatory
+					if(Util.isEmpty(imp.getValue()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+					}
+
+					MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
+					updateOrg.setName(imp.getName());
+					updateOrg.setDescription(imp.getDescription());
+					updateOrg.setIsActive(imp.isI_IsActiveJP());
+					updateOrg.saveEx(get_TrxName());
+					commitEx();
+
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
+
 				}
 
-			}else{//Update
-				MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
-				updateOrg.setName(imp.getName());
-				updateOrg.setDescription(imp.getDescription());
-				updateOrg.saveEx(get_TrxName());
+				imp.saveEx();
+				commitEx();
 
-				imp.setI_ErrorMsg("Update Record");
-				imp.setI_IsImported(true);
-				imp.setProcessed(true);
-
-			}
-
-			imp.saveEx();
-			if(imp.getAD_Org_ID() > 0)
-			{
-				MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
-				orgInfo.setAD_OrgType_ID(imp.getAD_OrgType_ID());
-				if(!Util.isEmpty(imp.getDUNS()))
-					orgInfo.setDUNS(imp.getDUNS());
-				if(!Util.isEmpty(imp.getTaxID()))
-					orgInfo.setDUNS(imp.getTaxID());
-				if(!Util.isEmpty(imp.getPhone()))
-					orgInfo.setDUNS(imp.getPhone());
-				if(!Util.isEmpty(imp.getPhone2()))
-					orgInfo.setDUNS(imp.getPhone2());
-				if(!Util.isEmpty(imp.getFax()))
-					orgInfo.setDUNS(imp.getFax());
-				if(!Util.isEmpty(imp.getEMail()))
-					orgInfo.setDUNS(imp.getEMail());
-
-				//Org Location
-				int C_Location_ID = 0;
-				if(!Util.isEmpty(imp.getJP_Location_Label()))
+				if(imp.getAD_Org_ID() > 0)
 				{
-					C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), imp.getJP_Location_Label(), get_TrxName());
+					MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
+					orgInfo.setAD_OrgType_ID(imp.getAD_OrgType_ID());
+					if(!Util.isEmpty(imp.getDUNS()))
+						orgInfo.setDUNS(imp.getDUNS());
+					if(!Util.isEmpty(imp.getTaxID()))
+						orgInfo.setDUNS(imp.getTaxID());
+					if(!Util.isEmpty(imp.getPhone()))
+						orgInfo.setDUNS(imp.getPhone());
+					if(!Util.isEmpty(imp.getPhone2()))
+						orgInfo.setDUNS(imp.getPhone2());
+					if(!Util.isEmpty(imp.getFax()))
+						orgInfo.setDUNS(imp.getFax());
+					if(!Util.isEmpty(imp.getEMail()))
+						orgInfo.setDUNS(imp.getEMail());
+
+					//Org Location
+					int C_Location_ID = imp.getC_Location_ID();
 					if(C_Location_ID > 0)
 					{
 						orgInfo.setC_Location_ID(C_Location_ID);
 
-					}else if(C_Location_ID == 0) {
+					}else if(!Util.isEmpty(imp.getJP_Location_Label())){
 
 						C_Location_ID = JPiereLocationUtil.createLocation(
 								getCtx()
+								,"0"
 								,imp.getJP_Location_Label()
 								,imp.getComments()
 								,imp.getCountryCode()
@@ -192,48 +265,23 @@ public class JPiereImportOrg extends SvrProcess
 
 						orgInfo.setC_Location_ID(C_Location_ID);
 
-					}else {
-
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_UnexpectedError"));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
 					}
 
-				}else {
-
-					if(!Util.isEmpty(imp.getCountryCode()) || !Util.isEmpty(imp.getPostal())  || !Util.isEmpty(imp.getPostal_Add())
-							|| !Util.isEmpty(imp.getRegionName())  || !Util.isEmpty(imp.getCity())
-							|| !Util.isEmpty(imp.getAddress1()) || !Util.isEmpty(imp.getAddress2()) || !Util.isEmpty(imp.getAddress3())
-							|| !Util.isEmpty(imp.getAddress4()) || !Util.isEmpty(imp.getAddress5()))
-					{
-						C_Location_ID = JPiereLocationUtil.createLocation(
-								getCtx()
-								,imp.getJP_Location_Label()
-								,imp.getComments()
-								,imp.getCountryCode()
-								,imp.getPostal()
-								,imp.getPostal_Add()
-								,imp.getRegionName()
-								,imp.getCity()
-								,imp.getAddress1()
-								,imp.getAddress2()
-								,imp.getAddress3()
-								,imp.getAddress4()
-								,imp.getAddress5()
-								,get_TrxName() );
-
-						orgInfo.setC_Location_ID(C_Location_ID);
-					}
+					orgInfo.saveEx(get_TrxName());
+					commitEx();
 
 				}
+			}//while (rs.next())
 
-				orgInfo.saveEx(get_TrxName());
-
-			}
+		}catch (Exception e){
+			log.log(Level.SEVERE, sql.toString(), e);
+		}finally{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
 		}
 
-
-		return "";
+		return Msg.getMsg(getCtx(), "Success");
 	}	//	doIt
 
 }	//	ImportPayment

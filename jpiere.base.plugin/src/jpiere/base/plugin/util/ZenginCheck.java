@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 public class ZenginCheck {
 
-	//文字列の長さ
+	//length of String
 	public static final int     JP_RoutingNo = 4;
 
 	public static final int     JP_BankName_Kana = 15;

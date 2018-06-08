@@ -30,7 +30,7 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180529L;
+	private static final long serialVersionUID = 20180607L;
 
     /** Standard Constructor */
     public X_I_OrgJP (Properties ctx, int I_OrgJP_ID, String trxName)
@@ -38,6 +38,8 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
       super (ctx, I_OrgJP_ID, trxName);
       /** if (I_OrgJP_ID == 0)
         {
+			setI_IsActiveJP (true);
+// Y
 			setI_OrgJP_ID (0);
 			setIsSummary (false);
         } */
@@ -458,6 +460,30 @@ public class X_I_OrgJP extends PO implements I_I_OrgJP, I_Persistent
 	public String getI_ErrorMsg () 
 	{
 		return (String)get_Value(COLUMNNAME_I_ErrorMsg);
+	}
+
+	/** Set Active(For Import).
+		@param I_IsActiveJP 
+		Active flag for Import Date
+	  */
+	public void setI_IsActiveJP (boolean I_IsActiveJP)
+	{
+		set_Value (COLUMNNAME_I_IsActiveJP, Boolean.valueOf(I_IsActiveJP));
+	}
+
+	/** Get Active(For Import).
+		@return Active flag for Import Date
+	  */
+	public boolean isI_IsActiveJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_I_IsActiveJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Imported.

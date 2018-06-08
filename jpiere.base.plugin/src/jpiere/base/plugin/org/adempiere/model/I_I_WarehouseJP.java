@@ -21,25 +21,25 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for I_LocationJP
+/** Generated Interface for I_WarehouseJP
  *  @author iDempiere (generated) 
  *  @version Release 5.1
  */
 @SuppressWarnings("all")
-public interface I_I_LocationJP 
+public interface I_I_WarehouseJP 
 {
 
-    /** TableName=I_LocationJP */
-    public static final String Table_Name = "I_LocationJP";
+    /** TableName=I_WarehouseJP */
+    public static final String Table_Name = "I_WarehouseJP";
 
-    /** AD_Table_ID=1000206 */
+    /** AD_Table_ID=1000207 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 7 - System - Client - Org 
+    /** AccessLevel = 3 - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(7);
+    BigDecimal accessLevel = BigDecimal.valueOf(3);
 
     /** Load Meta Data */
 
@@ -128,6 +128,21 @@ public interface I_I_LocationJP
 	  * Address Line 5 for the location
 	  */
 	public String getAddress5();
+
+    /** Column name C_AcctSchema_ID */
+    public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
+
+	/** Set Accounting Schema.
+	  * Rules for accounting
+	  */
+	public void setC_AcctSchema_ID (int C_AcctSchema_ID);
+
+	/** Get Accounting Schema.
+	  * Rules for accounting
+	  */
+	public int getC_AcctSchema_ID();
+
+	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException;
 
     /** Column name C_City_ID */
     public static final String COLUMNNAME_C_City_ID = "C_City_ID";
@@ -244,6 +259,19 @@ public interface I_I_LocationJP
 	  */
 	public int getCreatedBy();
 
+    /** Column name Description */
+    public static final String COLUMNNAME_Description = "Description";
+
+	/** Set Description.
+	  * Optional short description of the record
+	  */
+	public void setDescription (String Description);
+
+	/** Get Description.
+	  * Optional short description of the record
+	  */
+	public String getDescription();
+
     /** Column name I_ErrorMsg */
     public static final String COLUMNNAME_I_ErrorMsg = "I_ErrorMsg";
 
@@ -283,23 +311,23 @@ public interface I_I_LocationJP
 	  */
 	public boolean isI_IsImported();
 
-    /** Column name I_LocationJP_ID */
-    public static final String COLUMNNAME_I_LocationJP_ID = "I_LocationJP_ID";
+    /** Column name I_WarehouseJP_ID */
+    public static final String COLUMNNAME_I_WarehouseJP_ID = "I_WarehouseJP_ID";
 
-	/** Set I_LocationJP	  */
-	public void setI_LocationJP_ID (int I_LocationJP_ID);
+	/** Set I_WarehouseJP	  */
+	public void setI_WarehouseJP_ID (int I_WarehouseJP_ID);
 
-	/** Get I_LocationJP	  */
-	public int getI_LocationJP_ID();
+	/** Get I_WarehouseJP	  */
+	public int getI_WarehouseJP_ID();
 
-    /** Column name I_LocationJP_UU */
-    public static final String COLUMNNAME_I_LocationJP_UU = "I_LocationJP_UU";
+    /** Column name I_WarehouseJP_UU */
+    public static final String COLUMNNAME_I_WarehouseJP_UU = "I_WarehouseJP_UU";
 
-	/** Set I_LocationJP_UU	  */
-	public void setI_LocationJP_UU (String I_LocationJP_UU);
+	/** Set I_WarehouseJP_UU	  */
+	public void setI_WarehouseJP_UU (String I_WarehouseJP_UU);
 
-	/** Get I_LocationJP_UU	  */
-	public String getI_LocationJP_UU();
+	/** Get I_WarehouseJP_UU	  */
+	public String getI_WarehouseJP_UU();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -313,6 +341,59 @@ public interface I_I_LocationJP
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsDisallowNegativeInv */
+    public static final String COLUMNNAME_IsDisallowNegativeInv = "IsDisallowNegativeInv";
+
+	/** Set Disallow Negative Inventory.
+	  * Negative Inventory is not allowed in this warehouse
+	  */
+	public void setIsDisallowNegativeInv (boolean IsDisallowNegativeInv);
+
+	/** Get Disallow Negative Inventory.
+	  * Negative Inventory is not allowed in this warehouse
+	  */
+	public boolean isDisallowNegativeInv();
+
+    /** Column name IsInTransit */
+    public static final String COLUMNNAME_IsInTransit = "IsInTransit";
+
+	/** Set In Transit.
+	  * Movement is in transit
+	  */
+	public void setIsInTransit (boolean IsInTransit);
+
+	/** Get In Transit.
+	  * Movement is in transit
+	  */
+	public boolean isInTransit();
+
+    /** Column name JP_AcctSchema_Name */
+    public static final String COLUMNNAME_JP_AcctSchema_Name = "JP_AcctSchema_Name";
+
+	/** Set Accounting Schema(Name)	  */
+	public void setJP_AcctSchema_Name (String JP_AcctSchema_Name);
+
+	/** Get Accounting Schema(Name)	  */
+	public String getJP_AcctSchema_Name();
+
+    /** Column name JP_LocationOrg_ID */
+    public static final String COLUMNNAME_JP_LocationOrg_ID = "JP_LocationOrg_ID";
+
+	/** Set Org of Location	  */
+	public void setJP_LocationOrg_ID (int JP_LocationOrg_ID);
+
+	/** Get Org of Location	  */
+	public int getJP_LocationOrg_ID();
+
+    /** Column name JP_LocationOrg_Value */
+    public static final String COLUMNNAME_JP_LocationOrg_Value = "JP_LocationOrg_Value";
+
+	/** Set Org of Location(Search key)	  */
+	public void setJP_LocationOrg_Value (String JP_LocationOrg_Value);
+
+	/** Get Org of Location(Search key)	  */
+	public String getJP_LocationOrg_Value();
 
     /** Column name JP_Location_Label */
     public static final String COLUMNNAME_JP_Location_Label = "JP_Location_Label";
@@ -331,6 +412,43 @@ public interface I_I_LocationJP
 
 	/** Get Organization(Search Key)	  */
 	public String getJP_Org_Value();
+
+    /** Column name JP_W_Differences_Value */
+    public static final String COLUMNNAME_JP_W_Differences_Value = "JP_W_Differences_Value";
+
+	/** Set Warehouse Differences(Search Key)	  */
+	public void setJP_W_Differences_Value (String JP_W_Differences_Value);
+
+	/** Get Warehouse Differences(Search Key)	  */
+	public String getJP_W_Differences_Value();
+
+    /** Column name M_Warehouse_ID */
+    public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
+
+	/** Set Org Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public void setM_Warehouse_ID (int M_Warehouse_ID);
+
+	/** Get Org Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID();
+
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
+
+    /** Column name Name */
+    public static final String COLUMNNAME_Name = "Name";
+
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public void setName (String Name);
+
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public String getName();
 
     /** Column name Postal */
     public static final String COLUMNNAME_Postal = "Postal";
@@ -393,6 +511,32 @@ public interface I_I_LocationJP
 	  */
 	public String getRegionName();
 
+    /** Column name ReplenishmentClass */
+    public static final String COLUMNNAME_ReplenishmentClass = "ReplenishmentClass";
+
+	/** Set Replenishment Class.
+	  * Custom class to calculate Quantity to Order
+	  */
+	public void setReplenishmentClass (String ReplenishmentClass);
+
+	/** Get Replenishment Class.
+	  * Custom class to calculate Quantity to Order
+	  */
+	public String getReplenishmentClass();
+
+    /** Column name Separator */
+    public static final String COLUMNNAME_Separator = "Separator";
+
+	/** Set Element Separator.
+	  * Element Separator
+	  */
+	public void setSeparator (String Separator);
+
+	/** Get Element Separator.
+	  * Element Separator
+	  */
+	public String getSeparator();
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 
@@ -408,4 +552,32 @@ public interface I_I_LocationJP
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name Value */
+    public static final String COLUMNNAME_Value = "Value";
+
+	/** Set Search Key.
+	  * Search key for the record in the format required - must be unique
+	  */
+	public void setValue (String Value);
+
+	/** Get Search Key.
+	  * Search key for the record in the format required - must be unique
+	  */
+	public String getValue();
+
+    /** Column name W_Differences_Acct */
+    public static final String COLUMNNAME_W_Differences_Acct = "W_Differences_Acct";
+
+	/** Set Warehouse Differences.
+	  * Warehouse Differences Account
+	  */
+	public void setW_Differences_Acct (int W_Differences_Acct);
+
+	/** Get Warehouse Differences.
+	  * Warehouse Differences Account
+	  */
+	public int getW_Differences_Acct();
+
+	public I_C_ValidCombination getW_Differences_A() throws RuntimeException;
 }

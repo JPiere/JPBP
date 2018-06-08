@@ -21,10 +21,10 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for I_LocationJP
+/** Generated Model for I_WarehouseJP
  *  @author iDempiere (generated) 
  *  @version Release 5.1 - $Id$ */
-public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent 
+public class X_I_WarehouseJP extends PO implements I_I_WarehouseJP, I_Persistent 
 {
 
 	/**
@@ -33,25 +33,26 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	private static final long serialVersionUID = 20180607L;
 
     /** Standard Constructor */
-    public X_I_LocationJP (Properties ctx, int I_LocationJP_ID, String trxName)
+    public X_I_WarehouseJP (Properties ctx, int I_WarehouseJP_ID, String trxName)
     {
-      super (ctx, I_LocationJP_ID, trxName);
-      /** if (I_LocationJP_ID == 0)
+      super (ctx, I_WarehouseJP_ID, trxName);
+      /** if (I_WarehouseJP_ID == 0)
         {
 			setI_IsActiveJP (true);
 // Y
-			setI_LocationJP_ID (0);
+			setI_WarehouseJP_ID (0);
+			setIsDisallowNegativeInv (false);
         } */
     }
 
     /** Load Constructor */
-    public X_I_LocationJP (Properties ctx, ResultSet rs, String trxName)
+    public X_I_WarehouseJP (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 3 - Client - Org 
       */
     protected int get_AccessLevel()
     {
@@ -67,7 +68,7 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_I_LocationJP[")
+      StringBuffer sb = new StringBuffer ("X_I_WarehouseJP[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -155,6 +156,34 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	public String getAddress5 () 
 	{
 		return (String)get_Value(COLUMNNAME_Address5);
+	}
+
+	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_AcctSchema)MTable.get(getCtx(), org.compiere.model.I_C_AcctSchema.Table_Name)
+			.getPO(getC_AcctSchema_ID(), get_TrxName());	}
+
+	/** Set Accounting Schema.
+		@param C_AcctSchema_ID 
+		Rules for accounting
+	  */
+	public void setC_AcctSchema_ID (int C_AcctSchema_ID)
+	{
+		if (C_AcctSchema_ID < 1) 
+			set_Value (COLUMNNAME_C_AcctSchema_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_AcctSchema_ID, Integer.valueOf(C_AcctSchema_ID));
+	}
+
+	/** Get Accounting Schema.
+		@return Rules for accounting
+	  */
+	public int getC_AcctSchema_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_AcctSchema_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_City getC_City() throws RuntimeException
@@ -320,6 +349,23 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_CountryCode);
 	}
 
+	/** Set Description.
+		@param Description 
+		Optional short description of the record
+	  */
+	public void setDescription (String Description)
+	{
+		set_Value (COLUMNNAME_Description, Description);
+	}
+
+	/** Get Description.
+		@return Optional short description of the record
+	  */
+	public String getDescription () 
+	{
+		return (String)get_Value(COLUMNNAME_Description);
+	}
+
 	/** Set Import Error Message.
 		@param I_ErrorMsg 
 		Messages generated from import process
@@ -385,38 +431,134 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 		return false;
 	}
 
-	/** Set I_LocationJP.
-		@param I_LocationJP_ID I_LocationJP	  */
-	public void setI_LocationJP_ID (int I_LocationJP_ID)
+	/** Set I_WarehouseJP.
+		@param I_WarehouseJP_ID I_WarehouseJP	  */
+	public void setI_WarehouseJP_ID (int I_WarehouseJP_ID)
 	{
-		if (I_LocationJP_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_I_LocationJP_ID, null);
+		if (I_WarehouseJP_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_I_WarehouseJP_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_I_LocationJP_ID, Integer.valueOf(I_LocationJP_ID));
+			set_ValueNoCheck (COLUMNNAME_I_WarehouseJP_ID, Integer.valueOf(I_WarehouseJP_ID));
 	}
 
-	/** Get I_LocationJP.
-		@return I_LocationJP	  */
-	public int getI_LocationJP_ID () 
+	/** Get I_WarehouseJP.
+		@return I_WarehouseJP	  */
+	public int getI_WarehouseJP_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_I_LocationJP_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_I_WarehouseJP_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set I_LocationJP_UU.
-		@param I_LocationJP_UU I_LocationJP_UU	  */
-	public void setI_LocationJP_UU (String I_LocationJP_UU)
+	/** Set I_WarehouseJP_UU.
+		@param I_WarehouseJP_UU I_WarehouseJP_UU	  */
+	public void setI_WarehouseJP_UU (String I_WarehouseJP_UU)
 	{
-		set_ValueNoCheck (COLUMNNAME_I_LocationJP_UU, I_LocationJP_UU);
+		set_ValueNoCheck (COLUMNNAME_I_WarehouseJP_UU, I_WarehouseJP_UU);
 	}
 
-	/** Get I_LocationJP_UU.
-		@return I_LocationJP_UU	  */
-	public String getI_LocationJP_UU () 
+	/** Get I_WarehouseJP_UU.
+		@return I_WarehouseJP_UU	  */
+	public String getI_WarehouseJP_UU () 
 	{
-		return (String)get_Value(COLUMNNAME_I_LocationJP_UU);
+		return (String)get_Value(COLUMNNAME_I_WarehouseJP_UU);
+	}
+
+	/** Set Disallow Negative Inventory.
+		@param IsDisallowNegativeInv 
+		Negative Inventory is not allowed in this warehouse
+	  */
+	public void setIsDisallowNegativeInv (boolean IsDisallowNegativeInv)
+	{
+		set_Value (COLUMNNAME_IsDisallowNegativeInv, Boolean.valueOf(IsDisallowNegativeInv));
+	}
+
+	/** Get Disallow Negative Inventory.
+		@return Negative Inventory is not allowed in this warehouse
+	  */
+	public boolean isDisallowNegativeInv () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsDisallowNegativeInv);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set In Transit.
+		@param IsInTransit 
+		Movement is in transit
+	  */
+	public void setIsInTransit (boolean IsInTransit)
+	{
+		set_Value (COLUMNNAME_IsInTransit, Boolean.valueOf(IsInTransit));
+	}
+
+	/** Get In Transit.
+		@return Movement is in transit
+	  */
+	public boolean isInTransit () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsInTransit);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accounting Schema(Name).
+		@param JP_AcctSchema_Name Accounting Schema(Name)	  */
+	public void setJP_AcctSchema_Name (String JP_AcctSchema_Name)
+	{
+		set_Value (COLUMNNAME_JP_AcctSchema_Name, JP_AcctSchema_Name);
+	}
+
+	/** Get Accounting Schema(Name).
+		@return Accounting Schema(Name)	  */
+	public String getJP_AcctSchema_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_AcctSchema_Name);
+	}
+
+	/** Set Org of Location.
+		@param JP_LocationOrg_ID Org of Location	  */
+	public void setJP_LocationOrg_ID (int JP_LocationOrg_ID)
+	{
+		if (JP_LocationOrg_ID < 1) 
+			set_Value (COLUMNNAME_JP_LocationOrg_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_LocationOrg_ID, Integer.valueOf(JP_LocationOrg_ID));
+	}
+
+	/** Get Org of Location.
+		@return Org of Location	  */
+	public int getJP_LocationOrg_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_LocationOrg_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Org of Location(Search key).
+		@param JP_LocationOrg_Value Org of Location(Search key)	  */
+	public void setJP_LocationOrg_Value (String JP_LocationOrg_Value)
+	{
+		set_Value (COLUMNNAME_JP_LocationOrg_Value, JP_LocationOrg_Value);
+	}
+
+	/** Get Org of Location(Search key).
+		@return Org of Location(Search key)	  */
+	public String getJP_LocationOrg_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_LocationOrg_Value);
 	}
 
 	/** Set Location Label.
@@ -445,6 +587,65 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	public String getJP_Org_Value () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Org_Value);
+	}
+
+	/** Set Warehouse Differences(Search Key).
+		@param JP_W_Differences_Value Warehouse Differences(Search Key)	  */
+	public void setJP_W_Differences_Value (String JP_W_Differences_Value)
+	{
+		set_Value (COLUMNNAME_JP_W_Differences_Value, JP_W_Differences_Value);
+	}
+
+	/** Get Warehouse Differences(Search Key).
+		@return Warehouse Differences(Search Key)	  */
+	public String getJP_W_Differences_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_W_Differences_Value);
+	}
+
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
+			.getPO(getM_Warehouse_ID(), get_TrxName());	}
+
+	/** Set Org Warehouse.
+		@param M_Warehouse_ID 
+		Storage Warehouse and Service Point
+	  */
+	public void setM_Warehouse_ID (int M_Warehouse_ID)
+	{
+		if (M_Warehouse_ID < 1) 
+			set_Value (COLUMNNAME_M_Warehouse_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+	}
+
+	/** Get Org Warehouse.
+		@return Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Name.
+		@param Name 
+		Alphanumeric identifier of the entity
+	  */
+	public void setName (String Name)
+	{
+		set_Value (COLUMNNAME_Name, Name);
+	}
+
+	/** Get Name.
+		@return Alphanumeric identifier of the entity
+	  */
+	public String getName () 
+	{
+		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set ZIP.
@@ -541,5 +742,81 @@ public class X_I_LocationJP extends PO implements I_I_LocationJP, I_Persistent
 	public String getRegionName () 
 	{
 		return (String)get_Value(COLUMNNAME_RegionName);
+	}
+
+	/** Set Replenishment Class.
+		@param ReplenishmentClass 
+		Custom class to calculate Quantity to Order
+	  */
+	public void setReplenishmentClass (String ReplenishmentClass)
+	{
+		set_Value (COLUMNNAME_ReplenishmentClass, ReplenishmentClass);
+	}
+
+	/** Get Replenishment Class.
+		@return Custom class to calculate Quantity to Order
+	  */
+	public String getReplenishmentClass () 
+	{
+		return (String)get_Value(COLUMNNAME_ReplenishmentClass);
+	}
+
+	/** Set Element Separator.
+		@param Separator 
+		Element Separator
+	  */
+	public void setSeparator (String Separator)
+	{
+		set_Value (COLUMNNAME_Separator, Separator);
+	}
+
+	/** Get Element Separator.
+		@return Element Separator
+	  */
+	public String getSeparator () 
+	{
+		return (String)get_Value(COLUMNNAME_Separator);
+	}
+
+	/** Set Search Key.
+		@param Value 
+		Search key for the record in the format required - must be unique
+	  */
+	public void setValue (String Value)
+	{
+		set_Value (COLUMNNAME_Value, Value);
+	}
+
+	/** Get Search Key.
+		@return Search key for the record in the format required - must be unique
+	  */
+	public String getValue () 
+	{
+		return (String)get_Value(COLUMNNAME_Value);
+	}
+
+	public I_C_ValidCombination getW_Differences_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getW_Differences_Acct(), get_TrxName());	}
+
+	/** Set Warehouse Differences.
+		@param W_Differences_Acct 
+		Warehouse Differences Account
+	  */
+	public void setW_Differences_Acct (int W_Differences_Acct)
+	{
+		set_Value (COLUMNNAME_W_Differences_Acct, Integer.valueOf(W_Differences_Acct));
+	}
+
+	/** Get Warehouse Differences.
+		@return Warehouse Differences Account
+	  */
+	public int getW_Differences_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_W_Differences_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

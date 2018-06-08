@@ -21,25 +21,25 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for I_LocationJP
+/** Generated Interface for I_CityJP
  *  @author iDempiere (generated) 
  *  @version Release 5.1
  */
 @SuppressWarnings("all")
-public interface I_I_LocationJP 
+public interface I_I_CityJP 
 {
 
-    /** TableName=I_LocationJP */
-    public static final String Table_Name = "I_LocationJP";
+    /** TableName=I_CityJP */
+    public static final String Table_Name = "I_CityJP";
 
-    /** AD_Table_ID=1000206 */
+    /** AD_Table_ID=1000019 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 7 - System - Client - Org 
+    /** AccessLevel = 4 - System 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(7);
+    BigDecimal accessLevel = BigDecimal.valueOf(4);
 
     /** Load Meta Data */
 
@@ -64,70 +64,18 @@ public interface I_I_LocationJP
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name Address1 */
-    public static final String COLUMNNAME_Address1 = "Address1";
+    /** Column name AreaCode */
+    public static final String COLUMNNAME_AreaCode = "AreaCode";
 
-	/** Set Address 1.
-	  * Address line 1 for this location
+	/** Set Area Code.
+	  * Phone Area Code
 	  */
-	public void setAddress1 (String Address1);
+	public void setAreaCode (String AreaCode);
 
-	/** Get Address 1.
-	  * Address line 1 for this location
+	/** Get Area Code.
+	  * Phone Area Code
 	  */
-	public String getAddress1();
-
-    /** Column name Address2 */
-    public static final String COLUMNNAME_Address2 = "Address2";
-
-	/** Set Address 2.
-	  * Address line 2 for this location
-	  */
-	public void setAddress2 (String Address2);
-
-	/** Get Address 2.
-	  * Address line 2 for this location
-	  */
-	public String getAddress2();
-
-    /** Column name Address3 */
-    public static final String COLUMNNAME_Address3 = "Address3";
-
-	/** Set Address 3.
-	  * Address Line 3 for the location
-	  */
-	public void setAddress3 (String Address3);
-
-	/** Get Address 3.
-	  * Address Line 3 for the location
-	  */
-	public String getAddress3();
-
-    /** Column name Address4 */
-    public static final String COLUMNNAME_Address4 = "Address4";
-
-	/** Set Address 4.
-	  * Address Line 4 for the location
-	  */
-	public void setAddress4 (String Address4);
-
-	/** Get Address 4.
-	  * Address Line 4 for the location
-	  */
-	public String getAddress4();
-
-    /** Column name Address5 */
-    public static final String COLUMNNAME_Address5 = "Address5";
-
-	/** Set Address 5.
-	  * Address Line 5 for the location
-	  */
-	public void setAddress5 (String Address5);
-
-	/** Get Address 5.
-	  * Address Line 5 for the location
-	  */
-	public String getAddress5();
+	public String getAreaCode();
 
     /** Column name C_City_ID */
     public static final String COLUMNNAME_C_City_ID = "C_City_ID";
@@ -159,21 +107,6 @@ public interface I_I_LocationJP
 
 	public org.compiere.model.I_C_Country getC_Country() throws RuntimeException;
 
-    /** Column name C_Location_ID */
-    public static final String COLUMNNAME_C_Location_ID = "C_Location_ID";
-
-	/** Set Address.
-	  * Location or Address
-	  */
-	public void setC_Location_ID (int C_Location_ID);
-
-	/** Get Address.
-	  * Location or Address
-	  */
-	public int getC_Location_ID();
-
-	public org.compiere.model.I_C_Location getC_Location() throws RuntimeException;
-
     /** Column name C_Region_ID */
     public static final String COLUMNNAME_C_Region_ID = "C_Region_ID";
 
@@ -189,44 +122,31 @@ public interface I_I_LocationJP
 
 	public org.compiere.model.I_C_Region getC_Region() throws RuntimeException;
 
-    /** Column name City */
-    public static final String COLUMNNAME_City = "City";
+    /** Column name Coordinates */
+    public static final String COLUMNNAME_Coordinates = "Coordinates";
 
-	/** Set City.
-	  * Identifies a City
+	/** Set Coordinates.
+	  * Location coordinate
 	  */
-	public void setCity (String City);
+	public void setCoordinates (String Coordinates);
 
-	/** Get City.
-	  * Identifies a City
+	/** Get Coordinates.
+	  * Location coordinate
 	  */
-	public String getCity();
+	public String getCoordinates();
 
-    /** Column name Comments */
-    public static final String COLUMNNAME_Comments = "Comments";
+    /** Column name CountryName */
+    public static final String COLUMNNAME_CountryName = "CountryName";
 
-	/** Set Comments.
-	  * Comments or additional information
+	/** Set Country.
+	  * Country Name
 	  */
-	public void setComments (String Comments);
+	public void setCountryName (String CountryName);
 
-	/** Get Comments.
-	  * Comments or additional information
+	/** Get Country.
+	  * Country Name
 	  */
-	public String getComments();
-
-    /** Column name CountryCode */
-    public static final String COLUMNNAME_CountryCode = "CountryCode";
-
-	/** Set ISO Country Code.
-	  * Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
-	  */
-	public void setCountryCode (String CountryCode);
-
-	/** Get ISO Country Code.
-	  * Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
-	  */
-	public String getCountryCode();
+	public String getCountryName();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -244,6 +164,24 @@ public interface I_I_LocationJP
 	  */
 	public int getCreatedBy();
 
+    /** Column name I_CityJP_ID */
+    public static final String COLUMNNAME_I_CityJP_ID = "I_CityJP_ID";
+
+	/** Set JPiere Import City	  */
+	public void setI_CityJP_ID (int I_CityJP_ID);
+
+	/** Get JPiere Import City	  */
+	public int getI_CityJP_ID();
+
+    /** Column name I_CityJP_UU */
+    public static final String COLUMNNAME_I_CityJP_UU = "I_CityJP_UU";
+
+	/** Set I_CityJP_UU	  */
+	public void setI_CityJP_UU (String I_CityJP_UU);
+
+	/** Get I_CityJP_UU	  */
+	public String getI_CityJP_UU();
+
     /** Column name I_ErrorMsg */
     public static final String COLUMNNAME_I_ErrorMsg = "I_ErrorMsg";
 
@@ -256,19 +194,6 @@ public interface I_I_LocationJP
 	  * Messages generated from import process
 	  */
 	public String getI_ErrorMsg();
-
-    /** Column name I_IsActiveJP */
-    public static final String COLUMNNAME_I_IsActiveJP = "I_IsActiveJP";
-
-	/** Set Active(For Import).
-	  * Active flag for Import Date
-	  */
-	public void setI_IsActiveJP (boolean I_IsActiveJP);
-
-	/** Get Active(For Import).
-	  * Active flag for Import Date
-	  */
-	public boolean isI_IsActiveJP();
 
     /** Column name I_IsImported */
     public static final String COLUMNNAME_I_IsImported = "I_IsImported";
@@ -283,24 +208,6 @@ public interface I_I_LocationJP
 	  */
 	public boolean isI_IsImported();
 
-    /** Column name I_LocationJP_ID */
-    public static final String COLUMNNAME_I_LocationJP_ID = "I_LocationJP_ID";
-
-	/** Set I_LocationJP	  */
-	public void setI_LocationJP_ID (int I_LocationJP_ID);
-
-	/** Get I_LocationJP	  */
-	public int getI_LocationJP_ID();
-
-    /** Column name I_LocationJP_UU */
-    public static final String COLUMNNAME_I_LocationJP_UU = "I_LocationJP_UU";
-
-	/** Set I_LocationJP_UU	  */
-	public void setI_LocationJP_UU (String I_LocationJP_UU);
-
-	/** Get I_LocationJP_UU	  */
-	public String getI_LocationJP_UU();
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -314,23 +221,31 @@ public interface I_I_LocationJP
 	  */
 	public boolean isActive();
 
-    /** Column name JP_Location_Label */
-    public static final String COLUMNNAME_JP_Location_Label = "JP_Location_Label";
+    /** Column name Locode */
+    public static final String COLUMNNAME_Locode = "Locode";
 
-	/** Set Location Label	  */
-	public void setJP_Location_Label (String JP_Location_Label);
+	/** Set Locode.
+	  * Location code - UN/LOCODE 
+	  */
+	public void setLocode (String Locode);
 
-	/** Get Location Label	  */
-	public String getJP_Location_Label();
+	/** Get Locode.
+	  * Location code - UN/LOCODE 
+	  */
+	public String getLocode();
 
-    /** Column name JP_Org_Value */
-    public static final String COLUMNNAME_JP_Org_Value = "JP_Org_Value";
+    /** Column name Name */
+    public static final String COLUMNNAME_Name = "Name";
 
-	/** Set Organization(Search Key)	  */
-	public void setJP_Org_Value (String JP_Org_Value);
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public void setName (String Name);
 
-	/** Get Organization(Search Key)	  */
-	public String getJP_Org_Value();
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public String getName();
 
     /** Column name Postal */
     public static final String COLUMNNAME_Postal = "Postal";
@@ -344,19 +259,6 @@ public interface I_I_LocationJP
 	  * Postal code
 	  */
 	public String getPostal();
-
-    /** Column name Postal_Add */
-    public static final String COLUMNNAME_Postal_Add = "Postal_Add";
-
-	/** Set Additional Zip.
-	  * Additional ZIP or Postal code
-	  */
-	public void setPostal_Add (String Postal_Add);
-
-	/** Get Additional Zip.
-	  * Additional ZIP or Postal code
-	  */
-	public String getPostal_Add();
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
