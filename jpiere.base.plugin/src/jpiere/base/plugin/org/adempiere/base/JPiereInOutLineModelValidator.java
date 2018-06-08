@@ -145,8 +145,18 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 
 					if(!iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
 					{
-						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
-								Msg.getMsg(iol.getCtx(), "JP_MMS_MATCH_SOO_ONLY");//MMS of Doc Base Type can match SOO of Doc Base type only.
+
+						if(iol.getParent().isDropShip() && iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder)
+								&& iol.getC_OrderLine().getLink_OrderLine_ID() > 0) //Progress on Dropship process.
+						{
+							;//Noting to do. besause This check is not covered Dropship process. - 2018/6/8
+
+						}else {
+
+							return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
+									Msg.getMsg(iol.getCtx(), "JP_MMS_MATCH_SOO_ONLY");//MMS of Doc Base Type can match SOO of Doc Base type only.
+						}
+
 					}
 				}
 

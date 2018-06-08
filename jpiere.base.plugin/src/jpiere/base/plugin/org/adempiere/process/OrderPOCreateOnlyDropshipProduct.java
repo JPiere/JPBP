@@ -50,6 +50,8 @@ public class OrderPOCreateOnlyDropshipProduct extends SvrProcess
 	/**	Sales Order			*/
 	private int			p_C_Order_ID;
 
+	private int			p_C_DocTypeTarget_ID = 0;
+
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -73,6 +75,8 @@ public class OrderPOCreateOnlyDropshipProduct extends SvrProcess
 				p_Vendor_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else if (name.equals("C_Order_ID"))
 				p_C_Order_ID = ((BigDecimal)para[i].getParameter()).intValue();
+			else if (name.equals("C_DocTypeTarget_ID"))
+				p_C_DocTypeTarget_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -268,6 +272,10 @@ public class OrderPOCreateOnlyDropshipProduct extends SvrProcess
 		po.setIsSOTrx(false);
 		po.setC_DocTypeTarget_ID();
 		//
+
+		if(p_C_DocTypeTarget_ID > 0)
+			po.setC_DocTypeTarget_ID(p_C_DocTypeTarget_ID);
+
 		po.setDescription(so.getDescription());
 		po.setPOReference(so.getDocumentNo());
 		po.setPriorityRule(so.getPriorityRule());
