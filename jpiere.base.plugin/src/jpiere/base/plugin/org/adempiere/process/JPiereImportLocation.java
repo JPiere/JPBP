@@ -27,7 +27,6 @@ import org.compiere.util.DB;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_LocationJP;
-import jpiere.base.plugin.org.adempiere.model.X_I_ProductJP;
 import jpiere.base.plugin.util.JPiereLocationUtil;
 
 /**
@@ -198,7 +197,7 @@ public class JPiereImportLocation extends SvrProcess implements ImportProcess
 
 	@Override
 	public String getImportTableName() {
-		return X_I_ProductJP.Table_Name;
+		return X_I_LocationJP.Table_Name;
 	}
 
 

@@ -30,7 +30,6 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_ProductCategoryJP;
-import jpiere.base.plugin.org.adempiere.model.X_I_ProductJP;
 import jpiere.base.plugin.util.JPiereValidCombinationUtil;
 
 /**
@@ -447,7 +446,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 
 	@Override
 	public String getImportTableName() {
-		return X_I_ProductJP.Table_Name;
+		return X_I_ProductCategoryJP.Table_Name;
 	}
 
 
