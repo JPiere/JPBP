@@ -497,6 +497,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 					return false;
 				}
 
+				int aa = iol.getLine();
 				iol.saveEx();
 
 			}   //   if selected
