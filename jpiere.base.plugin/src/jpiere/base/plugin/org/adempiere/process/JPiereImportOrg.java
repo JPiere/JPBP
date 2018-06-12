@@ -17,8 +17,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
+import org.adempiere.model.ImportValidator;
+import org.adempiere.process.ImportProcess;
 import org.compiere.model.MOrg;
 import org.compiere.model.MOrgInfo;
+import org.compiere.model.ModelValidationEngine;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -27,6 +30,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_OrgJP;
+import jpiere.base.plugin.org.adempiere.model.X_I_ProductJP;
 import jpiere.base.plugin.util.JPiereLocationUtil;
 
 /**
@@ -36,8 +40,11 @@ import jpiere.base.plugin.util.JPiereLocationUtil;
  *  @version $Id: ImportOrg.java,v 1.0 2015/01/02 $
  *
  */
-public class JPiereImportOrg extends SvrProcess
+public class JPiereImportOrg extends SvrProcess implements ImportProcess
 {
+
+	/**	Client to be imported to		*/
+	private int				m_AD_Client_ID = 0;
 
 	private boolean p_deleteOldImported = false;
 
@@ -55,6 +62,8 @@ public class JPiereImportOrg extends SvrProcess
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
+
+		m_AD_Client_ID = getProcessInfo().getAD_Client_ID();
 	}	//	prepare
 
 	/**
@@ -78,59 +87,17 @@ public class JPiereImportOrg extends SvrProcess
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
 		}
 
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
-		////Update AD_Org ID From Value
-		sql = new StringBuilder ("UPDATE I_OrgJP i ")
-				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
-				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE AD_Org_ID = '0' AND Value IS NOT NULL")
-				.append(" AND I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		//Reverse Lookup Surrogate Key
+		reverseLookupAD_Org_ID();
+		reverseLookupAD_OrgType_ID();
+		reverseLookupC_Location_ID();
 
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_Org_ID From Value");
-
-		}
-
-
-		//Update AD_OrgType_ID From JP_OrgType_Name
-		sql = new StringBuilder ("UPDATE I_OrgJP i ")
-				.append(" SET AD_OrgType_ID=(SELECT t.AD_OrgType_ID FROM AD_OrgType t")
-				.append(" WHERE t.Name=i.JP_OrgType_Name AND t.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.JP_OrgType_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Organization Type=" + no);
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_OrgType_ID From JP_OrgType_Name");
-
-		}
-
-
-		//Update C_Location_ID From JP_Location_Label
-		sql = new StringBuilder ("UPDATE I_OrgJP i ")
-				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
-				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update C_Location_ID From JP_Location_Label");
-
-		}
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
+
 
 		sql = new StringBuilder ("SELECT * FROM I_OrgJP WHERE I_IsImported='N'")
 					.append(clientCheck);
@@ -177,10 +144,15 @@ public class JPiereImportOrg extends SvrProcess
 
 					//New Record
 					MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
+					ModelValidationEngine.get().fireImportValidate(this, imp, newOrg, ImportValidator.TIMING_BEFORE_IMPORT);
+
 					newOrg.setValue(imp.getValue());
 					newOrg.setName(imp.getName());
 					newOrg.setDescription(imp.getDescription());
 					newOrg.setIsActive(imp.isI_IsActiveJP());
+
+					ModelValidationEngine.get().fireImportValidate(this, imp, newOrg, ImportValidator.TIMING_AFTER_IMPORT);
+
 					newOrg.setIsSummary(imp.isSummary());
 					newOrg.saveEx(get_TrxName());
 					commitEx();
@@ -206,9 +178,14 @@ public class JPiereImportOrg extends SvrProcess
 					}
 
 					MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
+					ModelValidationEngine.get().fireImportValidate(this, imp, updateOrg, ImportValidator.TIMING_BEFORE_IMPORT);
+
 					updateOrg.setName(imp.getName());
 					updateOrg.setDescription(imp.getDescription());
 					updateOrg.setIsActive(imp.isI_IsActiveJP());
+
+					ModelValidationEngine.get().fireImportValidate(this, imp, updateOrg, ImportValidator.TIMING_AFTER_IMPORT);
+
 					updateOrg.saveEx(get_TrxName());
 					commitEx();
 
@@ -224,19 +201,21 @@ public class JPiereImportOrg extends SvrProcess
 				if(imp.getAD_Org_ID() > 0)
 				{
 					MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
+					ModelValidationEngine.get().fireImportValidate(this, imp, orgInfo, ImportValidator.TIMING_BEFORE_IMPORT);
+
 					orgInfo.setAD_OrgType_ID(imp.getAD_OrgType_ID());
 					if(!Util.isEmpty(imp.getDUNS()))
 						orgInfo.setDUNS(imp.getDUNS());
 					if(!Util.isEmpty(imp.getTaxID()))
-						orgInfo.setDUNS(imp.getTaxID());
+						orgInfo.setTaxID(imp.getTaxID());
 					if(!Util.isEmpty(imp.getPhone()))
-						orgInfo.setDUNS(imp.getPhone());
+						orgInfo.setPhone(imp.getPhone());
 					if(!Util.isEmpty(imp.getPhone2()))
-						orgInfo.setDUNS(imp.getPhone2());
+						orgInfo.setPhone2(imp.getPhone2());
 					if(!Util.isEmpty(imp.getFax()))
-						orgInfo.setDUNS(imp.getFax());
+						orgInfo.setFax(imp.getFax());
 					if(!Util.isEmpty(imp.getEMail()))
-						orgInfo.setDUNS(imp.getEMail());
+						orgInfo.setEMail(imp.getEMail());
 
 					//Org Location
 					int C_Location_ID = imp.getC_Location_ID();
@@ -267,6 +246,8 @@ public class JPiereImportOrg extends SvrProcess
 
 					}
 
+					ModelValidationEngine.get().fireImportValidate(this, imp, orgInfo, ImportValidator.TIMING_AFTER_IMPORT);
+
 					orgInfo.saveEx(get_TrxName());
 					commitEx();
 
@@ -283,5 +264,152 @@ public class JPiereImportOrg extends SvrProcess
 
 		return Msg.getMsg(getCtx(), "Success");
 	}	//	doIt
+
+	@Override
+	public String getImportTableName() {
+		return X_I_ProductJP.Table_Name;
+	}
+
+
+	@Override
+	public String getWhereClause() {
+		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
+		return msgreturn.toString();
+	}
+
+	/**
+	 * Reverse Look up AD_Org ID From Value
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupAD_Org_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverse Look up AD_Org ID From Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
+		sql = new StringBuilder ("UPDATE I_OrgJP i ")
+				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE AD_Org_ID = '0' AND Value IS NOT NULL")
+				.append(" AND I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//New Record : Set AD_Org_ID = 0
+		msg = Msg.getMsg(getCtx(), "NewRecord");
+		sql = new StringBuilder ("UPDATE I_OrgJP ")
+			.append("SET AD_Org_ID=0")
+			.append(" WHERE AD_Org_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		//Error : Search Key is null
+		msg = Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "Value");
+		sql = new StringBuilder ("UPDATE I_OrgJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE Value IS NULL AND AD_Org_ID = 0 ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_Org_ID
+
+	/**
+	 * Reverse Look up AD_OrgType_ID From JP_OrgType_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupAD_OrgType_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverse Look up AD_OrgType_ID From JP_OrgType_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_OrgType_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_OrgType_Name") ;
+		sql = new StringBuilder ("UPDATE I_OrgJP i ")
+				.append(" SET AD_OrgType_ID=(SELECT t.AD_OrgType_ID FROM AD_OrgType t")
+				.append(" WHERE t.Name=i.JP_OrgType_Name AND t.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.JP_OrgType_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_OrgType_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_OrgType_Name");
+		sql = new StringBuilder ("UPDATE I_OrgJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_OrgType_Name IS NOT NULL AND AD_OrgType_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}
+
+	/**
+	 * Reverse Loog up C_Location_ID From JP_Location_Label
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_Location_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverse Loog up C_Location_ID From JP_Location_Label
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Location_Label") ;
+		sql = new StringBuilder ("UPDATE I_OrgJP i ")
+				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
+				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+	}
 
 }	//	ImportPayment

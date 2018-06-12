@@ -962,6 +962,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 		PO.copyValues(importProduct, newProduct);
 		newProduct.setIsActive(importProduct.isI_IsActiveJP());
+		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProduct, ImportValidator.TIMING_AFTER_IMPORT);
 
 		newProduct.saveEx(get_TrxName());
 
@@ -977,7 +978,6 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		importProduct.saveEx(get_TrxName());
 		commitEx();
 
-		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProduct, ImportValidator.TIMING_AFTER_IMPORT);
 	}
 
 	/**
@@ -1064,6 +1064,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		}//for i
 
 		updateProduct.setIsActive(importProduct.isI_IsActiveJP());
+		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProduct, ImportValidator.TIMING_AFTER_IMPORT);
+
 		updateProduct.saveEx(get_TrxName());
 
 		//Update Product Purchase Order Info
@@ -1093,18 +1095,20 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		importProduct.saveEx(get_TrxName());
 		commitEx();
 
-		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProduct, ImportValidator.TIMING_AFTER_IMPORT);
 	}
 
 	private void createProductPOInfo(X_I_ProductJP importProduct, int M_Product_ID)
 	{
 		MProductPO newProductPO = new MProductPO(getCtx(), 0, get_TrxName());
+		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProductPO, ImportValidator.TIMING_BEFORE_IMPORT);
+
 		PO.copyValues(importProduct, newProductPO);
 		newProductPO.setC_BPartner_ID(importProduct.getC_BPartner_ID());
 		newProductPO.setM_Product_ID(importProduct.getM_Product_ID());
 		newProductPO.setUPC(importProduct.getJP_VendorUPC());
 		newProductPO.setC_UOM_ID(importProduct.getJP_VendorUOM_ID());
 		newProductPO.setIsActive(importProduct.isI_IsActiveJP());
+		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProductPO, ImportValidator.TIMING_AFTER_IMPORT);
 
 		newProductPO.saveEx(get_TrxName());
 	}
@@ -1113,6 +1117,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 	private void updateProductPOInfo(X_I_ProductJP importProduct, MProductPO updateProductPO)
 	{
+		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProductPO, ImportValidator.TIMING_BEFORE_IMPORT);
+
 		//Update Product Info
 		MTable M_ProductPO_Table = MTable.get(getCtx(), MProductPO.Table_ID, get_TrxName());
 		MColumn[] M_ProductPO_Columns = M_ProductPO_Table.getColumns(true);
@@ -1180,6 +1186,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		}//for i
 
 		updateProductPO.setIsActive(importProduct.isI_IsActiveJP());
+		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProductPO, ImportValidator.TIMING_AFTER_IMPORT);
+
 		updateProductPO.saveEx(get_TrxName());
 	}
 
