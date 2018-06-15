@@ -121,8 +121,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 		commitEx();
 
-		sql = new StringBuilder ("SELECT * FROM I_ProductJP WHERE I_IsImported='N'")
-				.append(clientCheck);
+		sql = new StringBuilder ("SELECT * FROM I_ProductJP WHERE I_IsImported='N' ")
+				.append(clientCheck).append(" ORDER BY Value ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

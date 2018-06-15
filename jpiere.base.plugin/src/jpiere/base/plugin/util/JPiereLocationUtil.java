@@ -292,9 +292,7 @@ public class JPiereLocationUtil {
 			location.setAddress5(Address5);
 		}
 
-		int aaa = location.getAD_Org_ID();
 		location.saveEx(trxName);
-		int bbb = location.getAD_Org_ID();
 
 		return location.getC_Location_ID();
 
