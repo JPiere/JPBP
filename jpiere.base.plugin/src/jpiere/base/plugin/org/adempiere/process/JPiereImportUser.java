@@ -223,7 +223,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -236,7 +236,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -244,7 +244,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no );
 		}
 
 
@@ -284,7 +284,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -292,7 +292,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
 	}//reverseLookupC_BPartner_ID
@@ -336,7 +336,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -344,7 +344,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no );
 		}
 
 	}//reverseLookupC_BPartner_ID
@@ -369,7 +369,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		sql = new StringBuilder ("UPDATE I_UserJP i ")
 			.append("SET C_BPartner_Location_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location p")
 			.append(" WHERE i.JP_BPartner_Location_Name=p.Name AND i.C_Bpartner_ID =p.C_BPartner_ID) ")
-			.append("WHERE i.C_BPartner_Location_ID IS NULL AND i.JP_BPartner_Location_Name IS NOT NULL ")
+			.append(" WHERE i.C_BPartner_Location_ID IS NULL AND i.JP_BPartner_Location_Name IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -386,7 +386,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -394,7 +394,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + no + " : " + no );
 		}
 
 	}//reverseLookupC_BPartner_ID
@@ -437,7 +437,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -445,7 +445,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
 	}//reverseLookupAD_Org_ID
@@ -487,7 +487,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -495,7 +495,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg  + " : " + no );
 		}
 
 	}//reverseLookupAD_OrgTrx_ID
@@ -539,7 +539,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -547,7 +547,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
 	}//reverseLookupC_Job_ID
@@ -591,7 +591,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -599,7 +599,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
 	}//reverseLookupSupervisor_ID
@@ -650,7 +650,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
 	}//reverseLookupR_DefaultMailText_ID
@@ -701,7 +701,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 	}
 
@@ -752,7 +752,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(no > 0)
 		{
 			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
 	}//reverseLookupSalesRep_ID
