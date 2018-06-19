@@ -113,7 +113,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		reverseLookupS_ExpenseType_ID();
 		reverseLookupS_Resource_ID();
 		reverseLookupM_AttributeSet_ID();
-		reverseSalesRep_ID();
+		reverseLookupSalesRep_ID();
 		reverseLookupR_MailText_ID();
 		reverseLookupM_Locator_ID();
 
@@ -708,7 +708,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Lookup S_Resource_ID From JP_Resource_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "S_Resource_ID=")
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "S_Resource_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Resource_Value") ;
 		sql = new StringBuilder ("UPDATE I_ProductJP i ")
 				.append("SET S_Resource_ID=(SELECT S_Resource_ID FROM S_Resource p")
@@ -759,7 +759,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverse Look up M_AttributeSet_ID From JP_AttributeSet_Name
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_AttributeSet_ID=")
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_AttributeSet_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_AttributeSet_Name") ;
 		sql = new StringBuilder ("UPDATE I_ProductJP i ")
 				.append("SET M_AttributeSet_ID=(SELECT M_AttributeSet_ID FROM M_AttributeSet p")
@@ -799,7 +799,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseSalesRep_ID() throws Exception
+	private void reverseLookupSalesRep_ID() throws Exception
 	{
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
@@ -809,7 +809,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverse Look up SalesRep_ID From JP_User_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID=")
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") ;
 		sql = new StringBuilder ("UPDATE I_ProductJP i ")
 				.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
@@ -860,7 +860,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverse Look up R_MailText_ID From JP_MailText_Name
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "R_MailText_ID=")
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "R_MailText_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_MailText_Name") ;
 		sql = new StringBuilder ("UPDATE I_ProductJP i ")
 				.append("SET R_MailText_ID=(SELECT R_MailText_ID FROM R_MailText p")
@@ -911,7 +911,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverse Look up M_Locator_ID From JP_Locator_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_Locator_ID=")
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_Locator_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Locator_Value") ;
 		sql = new StringBuilder ("UPDATE I_ProductJP i ")
 				.append("SET M_Locator_ID=(SELECT M_Locator_ID FROM M_Locator p")
