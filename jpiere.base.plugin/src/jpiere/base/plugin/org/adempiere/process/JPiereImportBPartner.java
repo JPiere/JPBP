@@ -143,6 +143,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		reverseLookupC_SalesRegion_ID();
 		reverseLookupAD_User_ID();
 		reverseLookupR_InterestArea_ID();
+		reverseLookupInvoice_PrintFormat_ID();
+
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
@@ -1367,6 +1369,56 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 	}//reverseLookupR_InterestArea_ID
 
+
+	/**
+	 * Reverse Look up Invoice_PrintFormat_ID From JP_Invoice_PrintFormat_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupInvoice_PrintFormat_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "Invoice_PrintFormat_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverse Look up Invoice_PrintFormat_ID From JP_Invoice_PrintFormat_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "Invoice_PrintFormat_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Invoice_PrintFormat_Name") ;
+		sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
+				.append("SET Invoice_PrintFormat_ID=(SELECT AD_PrintFormat_ID FROM AD_PrintFormat p")
+				.append(" WHERE i.JP_Invoice_PrintFormat_Name=p.Name AND (p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID= 0) )")
+				.append(" WHERE i.JP_Invoice_PrintFormat_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		//Invalid InterestAreaName
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Invoice_PrintFormat_Name");
+		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_Invoice_PrintFormat_Name IS NOT NULL AND Invoice_PrintFormat_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+		}
+
+	}//reverseLookupInvoice_PrintFormat_ID
 
 
 	/**
