@@ -17,7 +17,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
+import org.adempiere.model.ImportValidator;
+import org.adempiere.process.ImportProcess;
 import org.compiere.model.MBankAccount;
+import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_C_BankAccount_Acct;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -36,8 +39,10 @@ import jpiere.base.plugin.util.ZenginCheck;
  *  @author Hideaki Hagiwara
  *
  */
-public class JPiereImportBankAccount extends SvrProcess
+public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 {
+	/**	Client to be imported to		*/
+	private int				m_AD_Client_ID = 0;
 
 	private boolean p_deleteOldImported = false;
 
@@ -55,7 +60,22 @@ public class JPiereImportBankAccount extends SvrProcess
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
+
+		m_AD_Client_ID = getProcessInfo().getAD_Client_ID();
+
 	}	//	prepare
+
+	@Override
+	public String getImportTableName() {
+		return X_I_BankAccountJP.Table_Name;
+	}
+
+
+	@Override
+	public String getWhereClause() {
+		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
+		return msgreturn.toString();
+	}
 
 	/**
 	 * 	Process
@@ -78,80 +98,15 @@ public class JPiereImportBankAccount extends SvrProcess
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
 		}
 
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
-		//Update AD_Org ID From JP_Org_Value
-		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
-				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
-				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) )")
-				.append(" WHERE i.JP_Org_Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		//Reverse Lookup Surrogate Key
+		reverseLookupAD_Org_ID();
+		reverseLookupC_Bank_ID();
+		reverseLookupC_BankAccount_ID();
+		reverseLookupC_Currency_ID();
+		reverseLookupC_AcctSchema_ID();
 
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_Org_ID From JP_Org_Value");
-
-		}
-
-
-		//Update C_Bank_ID From JP_Bank_Name
-		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
-				.append("SET C_Bank_ID=(SELECT C_Bank_ID FROM C_Bank p")
-				.append(" WHERE i.JP_Bank_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_Bank_ID IS NULL AND JP_Bank_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Bank=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update C_Bank_ID From JP_Bank_Name");
-
-		}
-
-
-		//Update C_BankAccount_ID From Value
-		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
-				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
-				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_BankAccount_ID IS NULL AND Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Bank Account=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update C_BankAccount_ID From Value");
-
-		}
-
-
-		//Update C_Currency_ID From ISO_Code
-		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
-				.append("SET C_Currency_ID=(SELECT C_Currency_ID FROM C_Currency p")
-				.append(" WHERE i.ISO_Code=p.ISO_Code AND (p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0) ) ")
-				.append(" WHERE i.C_Currency_ID IS NULL AND ISO_Code IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Currency=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update C_Currency_ID From ISO_Code");
-
-		}
 
 		//Update AD_AcctSchema_ID From JP_AcctSchema_Name
 		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
@@ -652,5 +607,221 @@ public class JPiereImportBankAccount extends SvrProcess
 
 	}
 
+
+	/**
+	 * Reverse Look up Organization From JP_Org_Value
+	 *
+	 **/
+	private void reverseLookupAD_Org_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverese Look up AD_Org ID From JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Org_Value") ;
+		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
+				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) )")
+				.append(" WHERE i.JP_Org_Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
+		sql = new StringBuilder ("UPDATE I_BankAccountJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE AD_Org_ID = 0 AND JP_Org_Value IS NOT NULL AND JP_Org_Value <> '0' ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_Org_ID
+
+	/**
+	 * Reverese Look up C_Bank_ID From JP_Bank_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_Bank_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverese Look up C_Bank_ID From JP_Bank_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Bank_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Bank_Name") ;
+		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
+				.append("SET C_Bank_ID=(SELECT C_Bank_ID FROM C_Bank p")
+				.append(" WHERE i.JP_Bank_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_Bank_ID IS NULL AND JP_Bank_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Bank_Name");
+		sql = new StringBuilder ("UPDATE I_BankAccountJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE C_Bank_ID IS NULL AND JP_Bank_Name IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupC_Bank_ID
+
+	/**
+	 * Reverese Look up C_BankAccount_ID From Value
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_BankAccount_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverese Look up C_BankAccount_ID From Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BankAccount_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
+		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
+				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
+				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_BankAccount_ID IS NULL AND Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+	}//reverseLookupC_BankAccount_ID
+
+	/**
+	 *
+	 * Reverese Look up C_Currency_ID From ISO_Code
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_Currency_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverese Look up C_Currency_ID From ISO_Code
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Currency_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "ISO_Code") ;
+		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
+				.append("SET C_Currency_ID=(SELECT C_Currency_ID FROM C_Currency p")
+				.append(" WHERE i.ISO_Code=p.ISO_Code AND (p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0) ) ")
+				.append(" WHERE i.C_Currency_ID IS NULL AND ISO_Code IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid ISO_Code
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "ISO_Code");
+		sql = new StringBuilder ("UPDATE I_BankAccountJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE C_Currency_ID IS NULL AND ISO_Code IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupC_Bank_ID
+
+	/**
+	 * Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_AcctSchema_ID()throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_AcctSchema_Name") ;
+		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
+				.append("SET C_AcctSchema_ID=(SELECT C_AcctSchema_ID FROM C_AcctSchema p")
+				.append(" WHERE i.JP_AcctSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_AcctSchema_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_AcctSchema_Name");
+		sql = new StringBuilder ("UPDATE I_BankAccountJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}
 
 }	//	ImportPayment

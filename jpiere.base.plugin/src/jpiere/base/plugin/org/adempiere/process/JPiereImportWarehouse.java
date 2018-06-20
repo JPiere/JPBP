@@ -17,7 +17,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
+import org.adempiere.model.ImportValidator;
+import org.adempiere.process.ImportProcess;
 import org.compiere.model.MWarehouse;
+import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_M_Warehouse_Acct;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -36,8 +39,10 @@ import jpiere.base.plugin.util.JPiereValidCombinationUtil;
  *  @author Hideaki Hagiwara
  *
  */
-public class JPiereImportWarehouse extends SvrProcess
+public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 {
+	/**	Client to be imported to		*/
+	private int				m_AD_Client_ID = 0;
 
 	private boolean p_deleteOldImported = false;
 
@@ -55,6 +60,9 @@ public class JPiereImportWarehouse extends SvrProcess
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
+
+		m_AD_Client_ID = getProcessInfo().getAD_Client_ID();
+
 	}	//	prepare
 
 	/**
@@ -66,7 +74,7 @@ public class JPiereImportWarehouse extends SvrProcess
 	{
 		StringBuilder sql = null;
 		int no = 0;
-		StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID=").append(getAD_Client_ID());
+		String clientCheck = getWhereClause();
 
 
 		//Delete Old Imported data
@@ -78,87 +86,16 @@ public class JPiereImportWarehouse extends SvrProcess
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
 		}
 
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
-		//Update AD_Org ID From JP_Org_Value
-		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
-				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
-				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
-				.append(" WHERE i.JP_Org_Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
+		//Reverse Lookup Surrogate Key
+		reverseLookupM_Warehouse_ID();
+		reverseLookupAD_Org_ID();
+		reverseLookupC_AcctSchema_ID();
+		reverseLookupC_Location_ID();
+		reverseLookupLocationAD_Org_ID();
 
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_Org_ID From JP_Org_Value");
-
-		}
-
-		//Update M_Warehouse_ID From Value
-		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
-				.append("SET M_Warehouse_ID=(SELECT M_Warehouse_ID FROM M_Warehouse p")
-				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.M_Warehouse_ID IS NULL AND i.Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Warehouse=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update M_Warehouse_ID From Value");
-		}
-
-
-		//Update  C_AcctSchema_ID From JP_AcctSchema_Name
-		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
-				.append("SET C_AcctSchema_ID=(SELECT C_AcctSchema_ID FROM C_AcctSchema p")
-				.append(" WHERE i.JP_AcctSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Acct Schema=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update  C_AcctSchema_ID From JP_AcctSchema_Name");
-		}
-
-		//Update C_Location_ID From JP_Location_Label
-		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
-				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
-				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update C_Location_ID From JP_Location_Label");
-		}
-
-		//Update JP_LocationOrg_ID from JP_LocationOrg_Value
-		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
-				.append("SET JP_LocationOrg_ID=(SELECT AD_Org_ID FROM AD_org p")
-				.append(" WHERE i.JP_LocationOrg_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
-				.append(" WHERE i.JP_LocationOrg_ID IS NULL AND i.JP_LocationOrg_Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update JP_LocationOrg_ID from JP_LocationOrg_Value");
-		}
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
 
@@ -221,6 +158,8 @@ public class JPiereImportWarehouse extends SvrProcess
 
 
 					MWarehouse newWarehouse = new MWarehouse(getCtx (), 0, get_TrxName());
+					ModelValidationEngine.get().fireImportValidate(this, imp, newWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
+
 					newWarehouse.setAD_Org_ID(imp.getAD_Org_ID());
 					newWarehouse.setValue(imp.getValue());
 					newWarehouse.setName(imp.getName());
@@ -259,6 +198,8 @@ public class JPiereImportWarehouse extends SvrProcess
 					}
 
 					newWarehouse.setIsActive(imp.isI_IsActiveJP());
+					ModelValidationEngine.get().fireImportValidate(this, imp, newWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
+
 					newWarehouse.saveEx(get_TrxName());
 					commitEx();
 
@@ -290,6 +231,8 @@ public class JPiereImportWarehouse extends SvrProcess
 					}
 
 					MWarehouse updateWarehouse = new MWarehouse(getCtx (), imp.getM_Warehouse_ID(), get_TrxName());
+					ModelValidationEngine.get().fireImportValidate(this, imp, updateWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
+
 					if(!Util.isEmpty(imp.getName()))
 						updateWarehouse.setName(imp.getName());
 					if(!Util.isEmpty(imp.getDescription()))
@@ -311,6 +254,8 @@ public class JPiereImportWarehouse extends SvrProcess
 
 					updateWarehouse.setIsActive(imp.isI_IsActiveJP());
 					updateWarehouse.saveEx(get_TrxName());
+					ModelValidationEngine.get().fireImportValidate(this, imp, updateWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
+
 					commitEx();
 
 					//Account Info
@@ -342,7 +287,223 @@ public class JPiereImportWarehouse extends SvrProcess
 		return "";
 	}	//	doIt
 
+	@Override
+	public String getImportTableName() {
+		return X_I_WarehouseJP.Table_Name;
+	}
 
+
+	@Override
+	public String getWhereClause() {
+		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
+		return msgreturn.toString();
+	}
+
+	/**
+	 * Reverese Look up  M_Warehouse_ID From Value
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupM_Warehouse_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverese Look up  M_Warehouse_ID From Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_Warehouse_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
+		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
+				.append("SET M_Warehouse_ID=(SELECT M_Warehouse_ID FROM M_Warehouse p")
+				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.M_Warehouse_ID IS NULL AND i.Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+	}
+
+	/**
+	 * Reverse Look up Organization From JP_Org_Value
+	 *
+	 **/
+	private void reverseLookupAD_Org_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverese Look up AD_Org ID From JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Org_Value") ;
+		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
+				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N' ) ")
+				.append(" WHERE i.JP_Org_Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
+		sql = new StringBuilder ("UPDATE I_WarehouseJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE AD_Org_ID = 0 AND JP_Org_Value IS NOT NULL AND JP_Org_Value <> '0' ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_Org_ID
+
+
+	/**
+	 * Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_AcctSchema_ID()throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_AcctSchema_Name") ;
+		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
+				.append("SET C_AcctSchema_ID=(SELECT C_AcctSchema_ID FROM C_AcctSchema p")
+				.append(" WHERE i.JP_AcctSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_AcctSchema_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_AcctSchema_Name");
+		sql = new StringBuilder ("UPDATE I_WarehouseJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}
+
+	/**
+	 * Reverse Loog up C_Location_ID From JP_Location_Label
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_Location_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverse Loog up C_Location_ID From JP_Location_Label
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Location_Label") ;
+		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
+				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
+				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+	}
+
+	/**
+	 * Reverese Look up AD_Org ID From JP_LocationOrg_Value
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupLocationAD_Org_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		//Reverese Look up AD_Org ID From JP_LocationOrg_Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_LocationOrg_Value") ;
+		//Update JP_LocationOrg_ID from JP_LocationOrg_Value
+		sql = new StringBuilder ("UPDATE I_WarehouseJP i ")
+				.append("SET JP_LocationOrg_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append(" WHERE i.JP_LocationOrg_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
+				.append(" WHERE i.JP_LocationOrg_ID IS NULL AND i.JP_LocationOrg_Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_LocationOrg_Value
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_LocationOrg_Value");
+		sql = new StringBuilder ("UPDATE I_WarehouseJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_LocationOrg_ID = 0 AND JP_LocationOrg_Value IS NOT NULL AND JP_LocationOrg_Value <> '0' ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_Org_ID
+
+
+	/**
+	 * Set Warehouse Acct
+	 *
+	 * @param wh
+	 * @param imp
+	 */
 	private void setMWarehouseAcct(MWarehouse wh, X_I_WarehouseJP imp)
 	{
 		int C_ValidCombination_ID = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), imp.getC_AcctSchema_ID(), imp.getJP_W_Differences_Value(), get_TrxName());
@@ -364,7 +525,12 @@ public class JPiereImportWarehouse extends SvrProcess
 			if (rs.next())
 			{
 				X_M_Warehouse_Acct acct = new X_M_Warehouse_Acct (getCtx (), rs, get_TrxName());
+				ModelValidationEngine.get().fireImportValidate(this, imp, acct, ImportValidator.TIMING_BEFORE_IMPORT);
+
 				acct.setW_Differences_Acct(C_ValidCombination_ID);
+
+				ModelValidationEngine.get().fireImportValidate(this, imp, acct, ImportValidator.TIMING_AFTER_IMPORT);
+
 				acct.saveEx(get_TrxName());
 				commitEx();
 			}
