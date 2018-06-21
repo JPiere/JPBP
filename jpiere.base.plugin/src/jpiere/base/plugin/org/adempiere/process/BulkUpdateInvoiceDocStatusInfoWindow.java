@@ -36,7 +36,7 @@ import org.compiere.util.Msg;
 public class BulkUpdateInvoiceDocStatusInfoWindow extends SvrProcess {
 
 	String p_DocAction = DocAction.ACTION_Complete;
-	
+
 	@Override
 	protected void prepare() {
 		ProcessInfoParameter[] para = getParameter();
@@ -65,31 +65,36 @@ public class BulkUpdateInvoiceDocStatusInfoWindow extends SvrProcess {
 
 		int successNo = 0;
 		int failureNo = 0;
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+
 		for(PO po : genericPOs)
 		{
+			MInvoice inv = new MInvoice(getCtx(), po.get_ID(),get_TrxName());
 			try
 			{
-				MInvoice inv = new MInvoice(getCtx(), po.get_ID(),get_TrxName());
 				if(inv.isProcessed())
 					continue;
-					
+
 				if(inv.processIt(p_DocAction))
+				{
 					successNo++;
-				else
+					inv.saveEx(get_TrxName());
+					addBufferLog(0, null, null, success +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+				}else {
 					failureNo++;
-				
-				inv.saveEx(get_TrxName());
-				commitEx();
+					inv.saveEx(get_TrxName());
+					addBufferLog(0, null, null, failure +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+				}
+
 			}catch(Exception e){
 				failureNo++;
+				addBufferLog(0, null, null, failure +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
 			}
 
 		}
 
 
-		String success = Msg.getMsg(getCtx(), "Success");//Process completed successfully
-		String failure = Msg.getMsg(getCtx(), "Failure");//Process failed: 
-		
 		return success + " : " + successNo + "  /  " +  failure + " " + failureNo;
 	}
 
