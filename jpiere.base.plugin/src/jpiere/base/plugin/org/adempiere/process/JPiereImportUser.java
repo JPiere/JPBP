@@ -23,6 +23,7 @@ import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MColumn;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
@@ -86,14 +87,29 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		int no = 0;
 		String clientCheck = getWhereClause();
 
+		//Delete Old Imported
 		if (m_deleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE I_UserJP ")
 				.append("WHERE I_IsImported='Y'").append(clientCheck);
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.INFO)) log.info("Delete Old Imported =" + no);
+			try {
+				no = DB.executeUpdate(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.INFO)) log.info("Delete Old Imported =" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			}
 		}
 
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_UserJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
@@ -115,23 +131,36 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 		commitEx();
 
+		//Register & Update User
+		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "AD_User_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		sql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' ")
 				.append(clientCheck).append(" ORDER BY Value ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNum = 0;
+		int failureNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery();
 			String preValue = "";
+			MUser user = null;
+
 			while (rs.next())
 			{
 				X_I_UserJP imp = new X_I_UserJP (getCtx (), rs, get_TrxName());
 
 				boolean isNew = true;
-				if(imp.getAD_User_ID()!=0)
+				if(imp.getAD_User_ID() != 0)
 				{
 					isNew =false;
+					user = new MUser(getCtx(), imp.getAD_User_ID(), get_TrxName());
 
 				}else{
 
@@ -149,18 +178,32 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 				if(isNew)
 				{
-					createNewUser(imp);
+					user = new MUser(getCtx(), 0, get_TrxName());
+					if(createNewUser(imp, user))
+						successNum++;
+					else
+						failureNum++;
 
 				}else{
 
-					updateUser(imp);
+					if(updateUser(imp, user))
+						successNum++;
+					else
+						failureNum++;
+
 				}
+
+				commitEx();
+
+				recordsNum++;
+				if (processMonitor != null)	processMonitor.statusUpdate(success + " : " + successNum + "  /  " +  failure + " : " + failureNum);
 
 			}//while
 
 		}catch (Exception e) {
 
 			log.log(Level.SEVERE, e.toString(), e);
+			throw e;
 
 		}finally{
 			DB.close(rs, pstmt);
@@ -169,7 +212,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		}
 
 
-		return "";
+		return records + recordsNum + " = "+ success + " : " + successNum + "  /  " +  failure + " : " + failureNum;
 	}	//	doIt
 
 
@@ -816,24 +859,59 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 * @param importUser
 	 * @throws SQLException
 	 */
-	private void createNewUser(X_I_UserJP importUser) throws SQLException
+	private boolean createNewUser(X_I_UserJP importUser, MUser newUser) throws SQLException
 	{
-		MUser newUser = new MUser(getCtx(), 0, get_TrxName());
-
 		ModelValidationEngine.get().fireImportValidate(this, importUser, newUser, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		boolean isEMailLogin =  MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false, getAD_Client_ID());
+		if(isEMailLogin)
+		{
+			if(!Util.isEmpty(importUser.getPassword()) && Util.isEmpty(importUser.getEMail()))
+			{
+
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "EMail")};
+				importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+				importUser.setI_IsImported(false);
+				importUser.setProcessed(false);
+				importUser.saveEx(get_TrxName());
+				return false;
+			}
+		}
+
+		if(!Util.isEmpty(importUser.getEMail()))
+		{
+			String email = importUser.getEMail();
+			if(email.indexOf("@") == -1)
+			{
+				importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "EMail"));
+				importUser.setI_IsImported(false);
+				importUser.setProcessed(false);
+				importUser.saveEx(get_TrxName());
+				return false;
+			}
+		}
 
 		PO.copyValues(importUser, newUser);
 		newUser.setIsActive(importUser.isI_IsActiveJP());
 		ModelValidationEngine.get().fireImportValidate(this, importUser, newUser, ImportValidator.TIMING_AFTER_IMPORT);
 
-		newUser.saveEx(get_TrxName());
+		try {
+			newUser.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importUser.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "AD_User_ID"));
+			importUser.setI_IsImported(false);
+			importUser.setProcessed(false);
+			importUser.saveEx(get_TrxName());
+			return false;
+		}
 
 		importUser.setAD_User_ID(newUser.getAD_User_ID());
 		importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 		importUser.setI_IsImported(true);
 		importUser.setProcessed(true);
 		importUser.saveEx(get_TrxName());
-		commitEx();
+
+		return true;
 
 	}
 
@@ -844,10 +922,8 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 * @param importUser
 	 * @throws SQLException
 	 */
-	private void updateUser(X_I_UserJP importUser) throws SQLException
+	private boolean updateUser(X_I_UserJP importUser, MUser updateUser) throws SQLException
 	{
-		MUser updateUser = new MUser(getCtx(), importUser.getAD_User_ID(), get_TrxName());
-
 		ModelValidationEngine.get().fireImportValidate(this, importUser, updateUser, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		//Update Product
@@ -865,8 +941,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				continue;//i
 
 			if(i_Column.getColumnName().equals("IsActive")
-				|| i_Column.getColumnName().equals("IsStocked")
-				|| i_Column.getColumnName().equals("ProductType")
+				|| i_Column.getColumnName().equals("EMail") //Can not Update EMail
 				|| i_Column.getColumnName().equals("AD_Client_ID")
 				|| i_Column.getColumnName().equals("Value")
 				|| i_Column.getColumnName().equals("Processing")
@@ -913,7 +988,20 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 							break;
 					}
 
-					updateUser.set_ValueNoCheck(i_Column.getColumnName(), importValue);
+					if(importValue != null)
+					{
+						try {
+							updateUser.set_ValueNoCheck(i_Column.getColumnName(), importValue);
+						}catch (Exception e) {
+
+							importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + " Column = " + i_Column.getColumnName() + " & " + "Value = " +importValue.toString());
+							importUser.setI_IsImported(false);
+							importUser.setProcessed(false);
+							importUser.saveEx(get_TrxName());
+							return false;
+						}
+					}
+
 					break;
 				}
 			}//for j
@@ -923,13 +1011,25 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		updateUser.setIsActive(importUser.isI_IsActiveJP());
 		ModelValidationEngine.get().fireImportValidate(this, importUser, updateUser, ImportValidator.TIMING_AFTER_IMPORT);
 
-		updateUser.saveEx(get_TrxName());
+		try {
+			updateUser.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importUser.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "AD_User_ID"));
+			importUser.setI_IsImported(false);
+			importUser.setProcessed(false);
+			importUser.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(importUser.getAD_User_ID() == 0)
+			importUser.setAD_User_ID(updateUser.getAD_User_ID());
 
 		importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 		importUser.setI_IsImported(true);
 		importUser.setProcessed(true);
 		importUser.saveEx(get_TrxName());
-		commitEx();
+
+		return true;
 
 	}
 

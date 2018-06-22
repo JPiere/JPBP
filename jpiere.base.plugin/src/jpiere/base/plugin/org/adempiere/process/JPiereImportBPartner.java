@@ -115,8 +115,12 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		{
 			sql = new StringBuilder ("DELETE I_BPartnerJP ")
 					.append("WHERE I_IsImported='Y'").append(clientCheck);
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			}
 		}
 
 		//Reset Message
@@ -167,6 +171,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}
 
 
+		//Register & Update Business Partner
 		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "C_BPartner_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
@@ -1510,7 +1515,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					importBPartner.setI_ErrorMsg(msg);
 				}
 
-				importBPartner.setI_IsImported(false);
+				importBPartner.setI_IsImported(true);
 				importBPartner.setProcessed(false);
 				importBPartner.saveEx(get_TrxName());
 				return false;
@@ -1544,7 +1549,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		if(!Util.isEmpty(importBPartner.getI_ErrorMsg()))
 		{
-			importBPartner.setI_IsImported(false);
+			importBPartner.setI_IsImported(true);
 			importBPartner.setProcessed(false);
 			importBPartner.saveEx(get_TrxName());
 			return false;
@@ -1632,7 +1637,10 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 						if(p_key.intValue() <= 0)
 							break;
 
-					}else if(importValue != null) {
+					}
+
+					if(importValue != null)
+					{
 
 						try {
 							updateBPartner.set_ValueNoCheck(i_Column.getColumnName(), importValue);
@@ -1642,7 +1650,6 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 							importBPartner.setI_IsImported(false);
 							importBPartner.setProcessed(false);
 							importBPartner.saveEx(get_TrxName());
-							commitEx();
 							return false;
 						}
 
@@ -1657,7 +1664,15 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		updateBPartner.setIsActive(importBPartner.isI_IsActiveJP());
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, updateBPartner, ImportValidator.TIMING_AFTER_IMPORT);
 
-		updateBPartner.saveEx(get_TrxName());
+		try {
+			updateBPartner.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "C_BPartner_ID"));
+			importBPartner.setI_IsImported(false);
+			importBPartner.setProcessed(false);
+			importBPartner.saveEx(get_TrxName());
+			return false;
+		}
 
 		//Business Partner Location
 		if(!Util.isEmpty(importBPartner.getJP_BPartner_Location_Name()))
@@ -1896,6 +1911,16 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "EMail")};
 				importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
 
+				return 0;
+			}
+		}
+
+		if(!Util.isEmpty(importBPartner.getEMail()))
+		{
+			String email = importBPartner.getEMail();
+			if(email.indexOf("@") == -1)
+			{
+				importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "EMail"));
 				return 0;
 			}
 		}
