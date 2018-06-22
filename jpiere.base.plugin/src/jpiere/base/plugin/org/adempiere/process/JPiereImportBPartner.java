@@ -26,6 +26,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MColumn;
 import org.compiere.model.MContactInterest;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
@@ -118,6 +119,17 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
 		}
 
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
 		//Reverse Lookup Surrogate Key
@@ -155,11 +167,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}
 
 
+		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "C_BPartner_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		sql = new StringBuilder ("SELECT * FROM I_BPartnerJP WHERE I_IsImported='N' ")
 				.append(clientCheck).append(" ORDER BY Value, ContactName, EMail ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		int i = 0;
+		int recordsNum = 0;
+		int successNum = 0;
+		int failureNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
@@ -178,13 +198,15 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					imp.setI_IsImported(false);
 					imp.setProcessed(false);
 					imp.saveEx(get_TrxName());
+					failureNum++;
 					continue;
 				}
 
 				boolean isNew = true;
-				if(imp.getC_BPartner_ID()!=0)
+				if(imp.getC_BPartner_ID() != 0)
 				{
 					isNew =false;
+					bpartner = new MBPartner(getCtx(), imp.getC_BPartner_ID(), get_TrxName());
 
 				}else{
 
@@ -203,23 +225,30 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				if(isNew)
 				{
 					bpartner = new MBPartner(getCtx(), 0, get_TrxName());
-					createNewBPartner(imp,bpartner);
+					if(createNewBPartner(imp,bpartner))
+						successNum++;
+					else
+						failureNum++;
 
 				}else{
 
-					updateBPartner(imp, bpartner);
+					if(updateBPartner(imp, bpartner))
+						successNum++;
+					else
+						failureNum++;
 				}
 
 				commitEx();
 
-				i++;
-				if (processMonitor != null)	processMonitor.statusUpdate(String.valueOf(i));
+				recordsNum++;
+				if (processMonitor != null)	processMonitor.statusUpdate(success + " : " + successNum + "  /  " +  failure + " : " + failureNum);
 
 			}//while
 
 		}catch (Exception e) {
 
 			log.log(Level.SEVERE, e.toString(), e);
+			throw e;
 
 		}finally{
 			DB.close(rs, pstmt);
@@ -227,7 +256,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
-		return Msg.getMsg(getCtx(), "Success") + " : " + i ;
+		return records + recordsNum + " = "+ success + " : " + successNum + "  /  " +  failure + " : " + failureNum;
 	}	//	doIt
 
 
@@ -1427,7 +1456,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 * @param importBpartner
 	 * @throws Exception
 	 */
-	private void createNewBPartner(X_I_BPartnerJP importBPartner, MBPartner newBPartner) throws Exception
+	private boolean createNewBPartner(X_I_BPartnerJP importBPartner, MBPartner newBPartner) throws Exception
 	{
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartner, ImportValidator.TIMING_BEFORE_IMPORT);
 
@@ -1438,7 +1467,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			importBPartner.setI_IsImported(false);
 			importBPartner.setProcessed(false);
 			importBPartner.saveEx(get_TrxName());
-			return ;
+			return false;
 		}
 
 
@@ -1449,7 +1478,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			importBPartner.setI_IsImported(false);
 			importBPartner.setProcessed(false);
 			importBPartner.saveEx(get_TrxName());
-			return ;
+			return false;
 		}
 
 		PO.copyValues(importBPartner, newBPartner);
@@ -1457,22 +1486,41 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartner, ImportValidator.TIMING_AFTER_IMPORT);
 
-		newBPartner.saveEx(get_TrxName());
+		try {
+			newBPartner.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_BPartner_ID"));
+			importBPartner.setI_IsImported(false);
+			importBPartner.setProcessed(false);
+			importBPartner.saveEx(get_TrxName());
+			return false;
+		}
 
-		String processLocationMsg = null;
+		importBPartner.setC_BPartner_ID(newBPartner.getC_BPartner_ID());
+
+		//Create C_BPartner_Location
 		if(!Util.isEmpty(importBPartner.getJP_BPartner_Location_Name()) || !Util.isEmpty(importBPartner.getJP_Location_Label()) )
 		{
 			int C_BPartner_Location_ID = createBPartnerLocation(importBPartner);
 			if(C_BPartner_Location_ID == 0)
 			{
-				processLocationMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
+				String msg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
+				if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
+				{
+					importBPartner.setI_ErrorMsg(msg);
+				}
+
+				importBPartner.setI_IsImported(false);
+				importBPartner.setProcessed(false);
+				importBPartner.saveEx(get_TrxName());
+				return false;
 
 			}else {
 				importBPartner.setC_BPartner_Location_ID(C_BPartner_Location_ID);
 			}
 		}
 
-		String processUserMsg = null;
+		//Craete User
 		if(importBPartner.getAD_User_ID() > 0 )
 		{
 			updateUser(importBPartner, newBPartner.getC_BPartner_ID());
@@ -1482,7 +1530,11 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			int AD_User_ID = createNewUser(importBPartner, newBPartner.getC_BPartner_ID());
 			if(AD_User_ID == 0)
 			{
-				processUserMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
+				String msg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
+				if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
+				{
+					importBPartner.setI_ErrorMsg(msg);
+				}
 
 			}else {
 				importBPartner.setAD_User_ID(AD_User_ID);
@@ -1490,16 +1542,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		}
 
-		importBPartner.setC_BPartner_ID(newBPartner.getC_BPartner_ID());
+		if(!Util.isEmpty(importBPartner.getI_ErrorMsg()))
+		{
+			importBPartner.setI_IsImported(false);
+			importBPartner.setProcessed(false);
+			importBPartner.saveEx(get_TrxName());
+			return false;
+		}
+
+
 		StringBuilder msg = new StringBuilder(Msg.getMsg(getCtx(), "NewRecord"));
-		if(!Util.isEmpty(processLocationMsg))
-			msg.append(" -> ").append(processLocationMsg);
-		if(!Util.isEmpty(processUserMsg))
-			msg.append(" -> ").append(processUserMsg);
 		importBPartner.setI_ErrorMsg(msg.toString());
 		importBPartner.setI_IsImported(true);
 		importBPartner.setProcessed(true);
 		importBPartner.saveEx(get_TrxName());
+		return true;
 	}
 
 
@@ -1510,7 +1567,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 * @param updateBPartner
 	 * @throws Exception
 	 */
-	private void updateBPartner(X_I_BPartnerJP importBPartner, MBPartner updateBPartner) throws Exception
+	private boolean updateBPartner(X_I_BPartnerJP importBPartner, MBPartner updateBPartner) throws Exception
 	{
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, updateBPartner, ImportValidator.TIMING_BEFORE_IMPORT);
@@ -1574,10 +1631,22 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 						Integer p_key = (Integer)importValue;
 						if(p_key.intValue() <= 0)
 							break;
-					}
 
-					if(importValue != null)
-						updateBPartner.set_ValueNoCheck(i_Column.getColumnName(), importValue);
+					}else if(importValue != null) {
+
+						try {
+							updateBPartner.set_ValueNoCheck(i_Column.getColumnName(), importValue);
+						}catch (Exception e) {
+
+							importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + " Column = " + i_Column.getColumnName() + " & " + "Value = " +importValue.toString());
+							importBPartner.setI_IsImported(false);
+							importBPartner.setProcessed(false);
+							importBPartner.saveEx(get_TrxName());
+							commitEx();
+							return false;
+						}
+
+					}
 
 					break;
 				}
@@ -1591,7 +1660,6 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		updateBPartner.saveEx(get_TrxName());
 
 		//Business Partner Location
-		String processLocationMsg = null;
 		if(!Util.isEmpty(importBPartner.getJP_BPartner_Location_Name()))
 		{
 			MBPartnerLocation bpLocation = getMBPartnerLocation(importBPartner.getC_BPartner_ID(), importBPartner.getJP_BPartner_Location_Name());
@@ -1600,11 +1668,22 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				int C_BPartner_Location_ID = createBPartnerLocation(importBPartner);
 				if(C_BPartner_Location_ID == 0)
 				{
-					processLocationMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
+					String msg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
+					if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
+					{
+						importBPartner.setI_ErrorMsg(msg);
+					}
+
+					importBPartner.setI_IsImported(false);
+					importBPartner.setProcessed(false);
+					importBPartner.saveEx(get_TrxName());
+					return false;
 
 				}else {
 					importBPartner.setC_BPartner_Location_ID(C_BPartner_Location_ID);
 				}
+
+
 
 			}else {
 				updateBPartnerLocation(importBPartner,bpLocation);
@@ -1612,7 +1691,6 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}
 
 		//User
-		String processUserMsg = null;
 		if(importBPartner.getAD_User_ID() > 0 )
 		{
 			updateUser(importBPartner, updateBPartner.getC_BPartner_ID());
@@ -1625,7 +1703,11 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				int AD_User_ID = createNewUser(importBPartner, updateBPartner.getC_BPartner_ID());
 				if(AD_User_ID == 0)
 				{
-					processUserMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
+					String msg = Msg.getMsg(getCtx(), "JP_CouldNotCreate") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
+					if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
+					{
+						importBPartner.setI_ErrorMsg(msg);
+					}
 
 				}else {
 					importBPartner.setAD_User_ID(AD_User_ID);
@@ -1636,17 +1718,22 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		}
 
+		if(!Util.isEmpty(importBPartner.getI_ErrorMsg()))
+		{
+			importBPartner.setI_IsImported(false);
+			importBPartner.setProcessed(false);
+			importBPartner.saveEx(get_TrxName());
+			return false;
+		}
+
 		StringBuilder msg = new StringBuilder(Msg.getMsg(getCtx(), "Update"));
-		if(!Util.isEmpty(processLocationMsg))
-			msg.append(" -> ").append(processLocationMsg);
-		if(!Util.isEmpty(processUserMsg))
-			msg.append(" -> ").append(processUserMsg);
 		importBPartner.setI_ErrorMsg(msg.toString());
 		importBPartner.setI_IsImported(true);
 		importBPartner.setProcessed(true);
 		importBPartner.saveEx(get_TrxName());
 		commitEx();
 
+		return true;
 	}
 
 
@@ -1800,6 +1887,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, user, ImportValidator.TIMING_BEFORE_IMPORT);
 
+		boolean isEMailLogin =  MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false, getAD_Client_ID());
+		if(isEMailLogin)
+		{
+			if(!Util.isEmpty(importBPartner.getPassword()) && Util.isEmpty(importBPartner.getEMail()))
+			{
+
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "EMail")};
+				importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+
+				return 0;
+			}
+		}
+
 		user.setName(importBPartner.getContactName());
 		user.setC_BPartner_ID(C_BPartner_ID);
 		if(importBPartner.getJP_Corporation_ID() > 0)
@@ -1837,7 +1937,12 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, user, ImportValidator.TIMING_AFTER_IMPORT);
 
-		user.saveEx(get_TrxName());
+		try {
+			user.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") +" : " +Msg.getElement(getCtx(), "AD_User_ID"));
+			return 0;
+		}
 
 		if(importBPartner.getR_InterestArea_ID() > 0)
 			createContactInterest(importBPartner,user.getAD_User_ID());
@@ -1851,7 +1956,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 * @param importBPartner
 	 * @param C_BPartner_ID
 	 */
-	private void updateUser(X_I_BPartnerJP importBPartner, int C_BPartner_ID)
+	private boolean updateUser(X_I_BPartnerJP importBPartner, int C_BPartner_ID)
 	{
 		MUser user = new MUser(getCtx(), importBPartner.getAD_User_ID(), get_TrxName());
 
@@ -1892,11 +1997,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, user, ImportValidator.TIMING_AFTER_IMPORT);
 
-		user.saveEx(get_TrxName());
+		try {
+			user.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "AD_User_ID"));
+			return false;
+		}
+
 
 
 		if(importBPartner.getR_InterestArea_ID() > 0)
 			createContactInterest(importBPartner,user.getAD_User_ID());
+
+		return true;
 	}
 
 	/**
