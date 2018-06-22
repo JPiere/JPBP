@@ -1662,6 +1662,9 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}//for i
 
 		updateBPartner.setIsActive(importBPartner.isI_IsActiveJP());
+		if(importBPartner.getC_BPartner_ID() == 0)
+			importBPartner.setC_BPartner_ID(updateBPartner.getC_BPartner_ID());
+
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, updateBPartner, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {

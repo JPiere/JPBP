@@ -91,14 +91,29 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		int no = 0;
 		String clientCheck = getWhereClause();
 
+		//Delete Old Imported
 		if (m_deleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE I_ProductJP ")
 				.append("WHERE I_IsImported='Y'").append(clientCheck);
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.INFO)) log.info("Delete Old Imported =" + no);
+			try {
+				no = DB.executeUpdate(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.INFO)) log.info("Delete Old Imported =" + no);
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			}
 		}
 
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_ProductJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
@@ -121,23 +136,47 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 		commitEx();
 
+		//Register & Update Product
+		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "M_Product_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		sql = new StringBuilder ("SELECT * FROM I_ProductJP WHERE I_IsImported='N' ")
 				.append(clientCheck).append(" ORDER BY Value ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNum = 0;
+		int failureNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery();
 			String preValue = "";
+			MProduct product = null;
+
 			while (rs.next())
 			{
 				X_I_ProductJP imp = new X_I_ProductJP (getCtx (), rs, get_TrxName());
+
+				if(Util.isEmpty(imp.getValue()))
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+					imp.setI_IsImported(false);
+					imp.setProcessed(false);
+					imp.saveEx(get_TrxName());
+					failureNum++;
+					continue;
+				}
 
 				boolean isNew = true;
 				if(imp.getM_Product_ID()!=0)
 				{
 					isNew =false;
+					product = new MProduct(getCtx(), imp.getM_Product_ID(), get_TrxName());
 
 				}else{
 
@@ -155,18 +194,32 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 				if(isNew)
 				{
-					createNewProduct(imp);
+					product = new MProduct(getCtx(), 0, get_TrxName());
+					if(createNewProduct(imp,product))
+						successNum++;
+					else
+						failureNum++;
 
 				}else{
 
-					updateProduct(imp);
+					if(updateProduct(imp,product))
+						successNum++;
+					else
+						failureNum++;
+
 				}
+
+				commitEx();
+
+				recordsNum++;
+				if (processMonitor != null)	processMonitor.statusUpdate(success + " : " + successNum + "  /  " +  failure + " : " + failureNum);
 
 			}//while
 
 		}catch (Exception e) {
 
 			log.log(Level.SEVERE, e.toString(), e);
+			throw e;
 
 		}finally{
 			DB.close(rs, pstmt);
@@ -174,8 +227,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
+		return records + recordsNum + " = "+ success + " : " + successNum + "  /  " +  failure + " : " + failureNum;
 
-		return "";
 	}	//	doIt
 
 
@@ -954,29 +1007,97 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	 * @param importProduct
 	 * @throws SQLException
 	 */
-	private void createNewProduct(X_I_ProductJP importProduct) throws SQLException
+	private boolean createNewProduct(X_I_ProductJP importProduct, MProduct newProduct) throws SQLException
 	{
-		MProduct newProduct = new MProduct(getCtx(), 0, get_TrxName());
-
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProduct, ImportValidator.TIMING_BEFORE_IMPORT);
 
+		//Mandatory Check!
+		if(Util.isEmpty(importProduct.getName()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(importProduct.getM_Product_Category_ID() == 0)
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "M_Product_Category_ID")};
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(importProduct.getC_TaxCategory_ID() == 0)
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_TaxCategory_ID")};
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(importProduct.getC_UOM_ID() == 0)
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_UOM_ID")};
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(Util.isEmpty(importProduct.getProductType()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "ProductType")};
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Copy
 		PO.copyValues(importProduct, newProduct);
 		newProduct.setIsActive(importProduct.isI_IsActiveJP());
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProduct, ImportValidator.TIMING_AFTER_IMPORT);
 
-		newProduct.saveEx(get_TrxName());
-
-		if(importProduct.getC_BPartner_ID()> 0 )
-		{
-			createProductPOInfo(importProduct, newProduct.getM_Product_ID());
+		try {
+			newProduct.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "M_Product_ID"));
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
 		}
 
 		importProduct.setM_Product_ID(newProduct.getM_Product_ID());
+
+		if(importProduct.getC_BPartner_ID()> 0 )
+		{
+			if(!createProductPOInfo(importProduct, newProduct.getM_Product_ID()))
+			{
+				if(Util.isEmpty(importProduct.getI_ErrorMsg()))
+					importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + "Product PO Info");
+				importProduct.setI_IsImported(true);
+				importProduct.setProcessed(false);
+				importProduct.saveEx(get_TrxName());
+				return false;
+			}
+		}
+
 		importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 		importProduct.setI_IsImported(true);
 		importProduct.setProcessed(true);
 		importProduct.saveEx(get_TrxName());
-		commitEx();
+
+		return true;
 
 	}
 
@@ -987,10 +1108,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	 * @param importProduct
 	 * @throws SQLException
 	 */
-	private void updateProduct(X_I_ProductJP importProduct) throws SQLException
+	private boolean updateProduct(X_I_ProductJP importProduct, MProduct updateProduct) throws SQLException
 	{
-		MProduct updateProduct = new MProduct(getCtx(), importProduct.getM_Product_ID(), get_TrxName());
-
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProduct, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		//Update Product
@@ -1010,6 +1129,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			if(i_Column.getColumnName().equals("IsActive")
 				|| i_Column.getColumnName().equals("IsStocked")
 				|| i_Column.getColumnName().equals("ProductType")
+				|| i_Column.getColumnName().equals("C_UOM_ID")
 				|| i_Column.getColumnName().equals("AD_Client_ID")
 				|| i_Column.getColumnName().equals("Value")
 				|| i_Column.getColumnName().equals("Processing")
@@ -1056,17 +1176,45 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 							break;
 					}
 
-					updateProduct.set_ValueNoCheck(i_Column.getColumnName(), importValue);
+					if(importValue != null)
+					{
+						try {
+							updateProduct.set_ValueNoCheck(i_Column.getColumnName(), importValue);
+						}catch (Exception e) {
+
+							importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + " Column = " + i_Column.getColumnName() + " & " + "Value = " +importValue.toString());
+							importProduct.setI_IsImported(false);
+							importProduct.setProcessed(false);
+							importProduct.saveEx(get_TrxName());
+							return false;
+						}
+					}
+
 					break;
 				}
 			}//for j
 
 		}//for i
 
-		updateProduct.setIsActive(importProduct.isI_IsActiveJP());
+		if(!importProduct.isI_IsActiveJP())
+			updateProduct.setIsActive(importProduct.isI_IsActiveJP());
+
+		if(importProduct.getM_Product_ID() == 0)
+			importProduct.setM_Product_ID(updateProduct.getM_Product_ID());
+
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProduct, ImportValidator.TIMING_AFTER_IMPORT);
 
-		updateProduct.saveEx(get_TrxName());
+		try {
+			updateProduct.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "M_Product_ID")+" :  " + e.toString());
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
+		}
+
+
 
 		//Update Product Purchase Order Info
 		if(importProduct.getC_BPartner_ID()> 0 )
@@ -1077,7 +1225,16 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			{
 				if(productPOs[i].getC_BPartner_ID() == importProduct.getC_BPartner_ID())
 				{
-					updateProductPOInfo(importProduct, productPOs[i]);
+					if(!updateProductPOInfo(importProduct, productPOs[i]))
+					{
+						if(Util.isEmpty(importProduct.getI_ErrorMsg()))
+							importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + "Product PO Info");
+						importProduct.setI_IsImported(true);
+						importProduct.setProcessed(false);
+						importProduct.saveEx(get_TrxName());
+						return false;
+					}
+
 					isNew = false;
 					break;
 				}
@@ -1085,7 +1242,15 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 			if(isNew)
 			{
-				createProductPOInfo(importProduct,importProduct.getM_Product_ID());
+				if(!createProductPOInfo(importProduct,importProduct.getM_Product_ID()))
+				{
+					if(Util.isEmpty(importProduct.getI_ErrorMsg()))
+						importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + "Product PO Info");
+					importProduct.setI_IsImported(true);
+					importProduct.setProcessed(false);
+					importProduct.saveEx(get_TrxName());
+					return false;
+				}
 			}
 		}
 
@@ -1093,29 +1258,46 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		importProduct.setI_IsImported(true);
 		importProduct.setProcessed(true);
 		importProduct.saveEx(get_TrxName());
-		commitEx();
+
+		return true;
 
 	}
 
-	private void createProductPOInfo(X_I_ProductJP importProduct, int M_Product_ID)
+	private boolean createProductPOInfo(X_I_ProductJP importProduct, int M_Product_ID)
 	{
 		MProductPO newProductPO = new MProductPO(getCtx(), 0, get_TrxName());
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProductPO, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(importProduct, newProductPO);
+
 		newProductPO.setC_BPartner_ID(importProduct.getC_BPartner_ID());
 		newProductPO.setM_Product_ID(importProduct.getM_Product_ID());
 		newProductPO.setUPC(importProduct.getJP_VendorUPC());
 		newProductPO.setC_UOM_ID(importProduct.getJP_VendorUOM_ID());
 		newProductPO.setIsActive(importProduct.isI_IsActiveJP());
+
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProductPO, ImportValidator.TIMING_AFTER_IMPORT);
 
-		newProductPO.saveEx(get_TrxName());
+		try {
+			newProductPO.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + "Product PO Info : " + e.toString());
+			return false;
+		}
+
+		return true;
 	}
 
 
 
-	private void updateProductPOInfo(X_I_ProductJP importProduct, MProductPO updateProductPO)
+	/**
+	 * Update Product PO Info
+	 *
+	 * @param importProduct
+	 * @param updateProductPO
+	 * @return
+	 */
+	private boolean updateProductPOInfo(X_I_ProductJP importProduct, MProductPO updateProductPO)
 	{
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProductPO, ImportValidator.TIMING_BEFORE_IMPORT);
 
@@ -1177,8 +1359,17 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 						if(p_key.intValue() <= 0)
 							break;
 					}
+					if(importValue != null)
+					{
+						try {
+							updateProductPO.set_ValueNoCheck(i_Column.getColumnName(), importProduct.get_Value(j_Column.getColumnName()));
+						}catch (Exception e) {
 
-					updateProductPO.set_ValueNoCheck(i_Column.getColumnName(), importProduct.get_Value(j_Column.getColumnName()));
+							importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + " Column = " + i_Column.getColumnName() + " & " + "Value = " +importValue.toString());
+							return false;
+						}
+
+					}
 					break;
 				}
 			}//for j
@@ -1188,7 +1379,14 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		updateProductPO.setIsActive(importProduct.isI_IsActiveJP());
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, updateProductPO, ImportValidator.TIMING_AFTER_IMPORT);
 
-		updateProductPO.saveEx(get_TrxName());
+		try {
+			updateProductPO.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "Product PO Info"));
+			return false;
+		}
+
+		return true;
 	}
 
 }	//	ImportProduct

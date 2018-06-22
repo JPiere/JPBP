@@ -1009,6 +1009,9 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		}//for i
 
 		updateUser.setIsActive(importUser.isI_IsActiveJP());
+		if(importUser.getAD_User_ID() == 0)
+			importUser.setAD_User_ID(updateUser.getAD_User_ID());
+
 		ModelValidationEngine.get().fireImportValidate(this, importUser, updateUser, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {
@@ -1020,9 +1023,6 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			importUser.saveEx(get_TrxName());
 			return false;
 		}
-
-		if(importUser.getAD_User_ID() == 0)
-			importUser.setAD_User_ID(updateUser.getAD_User_ID());
 
 		importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 		importUser.setI_IsImported(true);
