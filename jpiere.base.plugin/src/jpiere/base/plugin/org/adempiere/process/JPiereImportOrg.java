@@ -217,6 +217,7 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 		}catch (Exception e){
 			log.log(Level.SEVERE, sql.toString(), e);
+			throw e;
 		}finally{
 			DB.close(rs, pstmt);
 			rs = null;

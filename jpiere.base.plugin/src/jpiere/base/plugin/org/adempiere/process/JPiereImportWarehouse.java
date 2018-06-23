@@ -19,6 +19,7 @@ import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_M_Warehouse_Acct;
@@ -46,6 +47,8 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 
 	private boolean p_deleteOldImported = false;
 
+	private IProcessUI processMonitor = null;
+
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -72,6 +75,8 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 	 */
 	protected String doIt() throws Exception
 	{
+		processMonitor = Env.getProcessUI(getCtx());
+
 		StringBuilder sql = null;
 		int no = 0;
 		String clientCheck = getWhereClause();
@@ -84,6 +89,17 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+		}
+
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_WarehouseJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
@@ -99,12 +115,21 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 
 		commitEx();
 
-
 		//
 		sql = new StringBuilder ("SELECT * FROM I_WarehouseJP WHERE I_IsImported='N'")
 					.append(clientCheck);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
 
 		try
 		{
@@ -158,63 +183,10 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 
 
 					MWarehouse newWarehouse = new MWarehouse(getCtx (), 0, get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, newWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
-
-					newWarehouse.setAD_Org_ID(imp.getAD_Org_ID());
-					newWarehouse.setValue(imp.getValue());
-					newWarehouse.setName(imp.getName());
-					if(!Util.isEmpty(imp.getDescription()))
-						newWarehouse.setDescription(imp.getDescription());
-					newWarehouse.setIsInTransit(imp.isInTransit());
-					newWarehouse.setIsDisallowNegativeInv(imp.isDisallowNegativeInv());
-					if(!Util.isEmpty(imp.getSeparator()))
-						newWarehouse.setSeparator(imp.getSeparator());
-					if(!Util.isEmpty(imp.getReplenishmentClass()))
-						newWarehouse.setReplenishmentClass(imp.getReplenishmentClass());
-
-					//Location
-					if(imp.getC_Location_ID() > 0)
-					{
-						newWarehouse.setC_Location_ID(imp.getC_Location_ID());
-
-					}else {
-						int C_Location_ID = JPiereLocationUtil.createLocation(
-								getCtx()
-								,imp.getJP_LocationOrg_ID()
-								,imp.getJP_Location_Label()
-								,imp.getComments()
-								,imp.getCountryCode()
-								,imp.getPostal()
-								,imp.getPostal_Add()
-								,imp.getRegionName()
-								,imp.getCity()
-								,imp.getAddress1()
-								,imp.getAddress2()
-								,imp.getAddress3()
-								,imp.getAddress4()
-								,imp.getAddress5()
-								,get_TrxName() );
-						newWarehouse.setC_Location_ID(C_Location_ID);
-					}
-
-					newWarehouse.setIsActive(imp.isI_IsActiveJP());
-					ModelValidationEngine.get().fireImportValidate(this, imp, newWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
-
-					newWarehouse.saveEx(get_TrxName());
-					commitEx();
-
-					//Account Info
-					if(!Util.isEmpty(imp.getJP_W_Differences_Value()) && imp.getC_AcctSchema_ID() > 0)
-					{
-
-						setMWarehouseAcct(newWarehouse, imp);
-					}
-
-					imp.setM_Warehouse_ID(newWarehouse.getM_Warehouse_ID());
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-
+					if(createNewWarehouse(imp,newWarehouse))
+						successNewNum++;
+					else
+						failureNewNum++;
 
 				}else{//Update
 
@@ -231,60 +203,38 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 					}
 
 					MWarehouse updateWarehouse = new MWarehouse(getCtx (), imp.getM_Warehouse_ID(), get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, updateWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
-
-					if(!Util.isEmpty(imp.getName()))
-						updateWarehouse.setName(imp.getName());
-					if(!Util.isEmpty(imp.getDescription()))
-						updateWarehouse.setDescription(imp.getDescription());
-					updateWarehouse.setIsInTransit(imp.isInTransit());
-					updateWarehouse.setIsDisallowNegativeInv(imp.isDisallowNegativeInv());
-					if(!Util.isEmpty(imp.getSeparator()))
-						updateWarehouse.setSeparator(imp.getSeparator());
-					if(!Util.isEmpty(imp.getReplenishmentClass()))
-						updateWarehouse.setReplenishmentClass(imp.getReplenishmentClass());
-
-					//Location
-					if(imp.getC_Location_ID() > 0)
-					{
-						updateWarehouse.setC_Location_ID(imp.getC_Location_ID());
-					}else {
-						;//Noting to do;
-					}
-
-					updateWarehouse.setIsActive(imp.isI_IsActiveJP());
-					updateWarehouse.saveEx(get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, updateWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
-
-					commitEx();
-
-					//Account Info
-					if(!Util.isEmpty(imp.getJP_W_Differences_Value()) && imp.getC_AcctSchema_ID() > 0)
-					{
-
-						setMWarehouseAcct(updateWarehouse, imp);
-					}
-
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-
+					if(updateWarehouse(imp,updateWarehouse))
+						successUpdateNum++;
+					else
+						failureUpdateNum++;
 				}
 
-				imp.saveEx(get_TrxName());
 				commitEx();
+
+				recordsNum++;
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
 
 			}//while (rs.next())
 
 		}catch (Exception e){
 			log.log(Level.SEVERE, sql.toString(), e);
+			throw e;
 		}finally{
 			DB.close(rs, pstmt);
 			rs = null;
 			pstmt = null;
 		}
 
-		return "";
+		return records + recordsNum + " = "	+
+		newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+		+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
 	}	//	doIt
 
 	@Override
@@ -309,6 +259,9 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
 		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_Warehouse_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverese Look up  M_Warehouse_ID From Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_Warehouse_ID")
@@ -336,6 +289,9 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
 		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverese Look up AD_Org ID From JP_Org_Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
@@ -385,6 +341,9 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		String msg = new String();
 		int no = 0;
 
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		//Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_AcctSchema_Name") ;
@@ -432,6 +391,10 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		String msg = new String();
 		int no = 0;
 
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+
 		//Reverse Loog up C_Location_ID From JP_Location_Label
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Location_Label") ;
@@ -459,6 +422,9 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
 		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_LocationOrg_Value");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverese Look up AD_Org ID From JP_LocationOrg_Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
@@ -544,6 +510,143 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 			rs = null;
 			pstmt = null;
 		}
+	}
+
+	/**
+	 * Create Warehouse
+	 *
+	 * @param impWarehouse
+	 * @param newWarehouse
+	 * @return
+	 */
+	private boolean createNewWarehouse(X_I_WarehouseJP impWarehouse, MWarehouse newWarehouse)
+	{
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, newWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		newWarehouse.setAD_Org_ID(impWarehouse.getAD_Org_ID());
+		newWarehouse.setValue(impWarehouse.getValue());
+		newWarehouse.setName(impWarehouse.getName());
+		if(!Util.isEmpty(impWarehouse.getDescription()))
+			newWarehouse.setDescription(impWarehouse.getDescription());
+		newWarehouse.setIsInTransit(impWarehouse.isInTransit());
+		newWarehouse.setIsDisallowNegativeInv(impWarehouse.isDisallowNegativeInv());
+		if(!Util.isEmpty(impWarehouse.getSeparator()))
+			newWarehouse.setSeparator(impWarehouse.getSeparator());
+		if(!Util.isEmpty(impWarehouse.getReplenishmentClass()))
+			newWarehouse.setReplenishmentClass(impWarehouse.getReplenishmentClass());
+
+		//Location
+		if(impWarehouse.getC_Location_ID() > 0)
+		{
+			newWarehouse.setC_Location_ID(impWarehouse.getC_Location_ID());
+
+		}else {
+			int C_Location_ID = JPiereLocationUtil.createLocation(
+					getCtx()
+					,impWarehouse.getJP_LocationOrg_ID()
+					,impWarehouse.getJP_Location_Label()
+					,impWarehouse.getComments()
+					,impWarehouse.getCountryCode()
+					,impWarehouse.getPostal()
+					,impWarehouse.getPostal_Add()
+					,impWarehouse.getRegionName()
+					,impWarehouse.getCity()
+					,impWarehouse.getAddress1()
+					,impWarehouse.getAddress2()
+					,impWarehouse.getAddress3()
+					,impWarehouse.getAddress4()
+					,impWarehouse.getAddress5()
+					,get_TrxName() );
+			newWarehouse.setC_Location_ID(C_Location_ID);
+			impWarehouse.setC_Location_ID(C_Location_ID);
+		}
+
+		newWarehouse.setIsActive(impWarehouse.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, newWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			newWarehouse.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "M_Warehouse_ID"));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		impWarehouse.setM_Warehouse_ID(newWarehouse.getM_Warehouse_ID());
+
+		//Account Info
+		if(!Util.isEmpty(impWarehouse.getJP_W_Differences_Value()) && impWarehouse.getC_AcctSchema_ID() > 0)
+		{
+
+			setMWarehouseAcct(newWarehouse, impWarehouse);
+		}
+
+
+		impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		impWarehouse.setI_IsImported(true);
+		impWarehouse.setProcessed(true);
+		impWarehouse.saveEx(get_TrxName());
+		return true;
+	}
+
+	/**
+	 * Update Warehouse
+	 *
+	 * @param impWarehouse
+	 * @param updateWarehouse
+	 * @return
+	 */
+	private boolean updateWarehouse(X_I_WarehouseJP impWarehouse, MWarehouse updateWarehouse)
+	{
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, updateWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		if(!Util.isEmpty(impWarehouse.getName()))
+			updateWarehouse.setName(impWarehouse.getName());
+		if(!Util.isEmpty(impWarehouse.getDescription()))
+			updateWarehouse.setDescription(impWarehouse.getDescription());
+		updateWarehouse.setIsInTransit(impWarehouse.isInTransit());
+		updateWarehouse.setIsDisallowNegativeInv(impWarehouse.isDisallowNegativeInv());
+		if(!Util.isEmpty(impWarehouse.getSeparator()))
+			updateWarehouse.setSeparator(impWarehouse.getSeparator());
+		if(!Util.isEmpty(impWarehouse.getReplenishmentClass()))
+			updateWarehouse.setReplenishmentClass(impWarehouse.getReplenishmentClass());
+
+		//Location
+		if(impWarehouse.getC_Location_ID() > 0)
+		{
+			updateWarehouse.setC_Location_ID(impWarehouse.getC_Location_ID());
+		}else {
+			;//Noting to do;
+		}
+
+		updateWarehouse.setIsActive(impWarehouse.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, updateWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			updateWarehouse.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "M_Warehouse_ID")+" :  " + e.toString());
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+		//Account Info
+		if(!Util.isEmpty(impWarehouse.getJP_W_Differences_Value()) && impWarehouse.getC_AcctSchema_ID() > 0)
+		{
+
+			setMWarehouseAcct(updateWarehouse, impWarehouse);
+		}
+
+		impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		impWarehouse.setI_IsImported(true);
+		impWarehouse.setProcessed(true);
+		impWarehouse.saveEx(get_TrxName());
+		return true;
 	}
 
 }	//	ImportPayment
