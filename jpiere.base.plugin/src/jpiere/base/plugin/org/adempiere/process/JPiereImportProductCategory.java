@@ -85,8 +85,12 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 		{
 			sql = new StringBuilder ("DELETE I_ProductCategoryJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			try {
+				no = DB.executeUpdate(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			}
 		}
 
 		//Reset Message

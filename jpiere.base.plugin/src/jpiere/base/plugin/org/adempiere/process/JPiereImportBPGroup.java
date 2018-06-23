@@ -17,7 +17,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
+import org.adempiere.model.ImportValidator;
+import org.adempiere.process.ImportProcess;
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MBPGroup;
+import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_C_BP_Group_Acct;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -35,10 +39,13 @@ import jpiere.base.plugin.util.JPiereValidCombinationUtil;
  *  @author Hideaki Hagiwara
  *
  */
-public class JPiereImportBPGroup extends SvrProcess
+public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 {
+	private int	m_AD_Client_ID = 0;
 
 	private boolean p_deleteOldImported = false;
+
+	private IProcessUI processMonitor = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -54,6 +61,9 @@ public class JPiereImportBPGroup extends SvrProcess
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
+
+		m_AD_Client_ID = getProcessInfo().getAD_Client_ID();
+
 	}	//	prepare
 
 	/**
@@ -63,189 +73,67 @@ public class JPiereImportBPGroup extends SvrProcess
 	 */
 	protected String doIt() throws Exception
 	{
+		processMonitor = Env.getProcessUI(getCtx());
+
 		StringBuilder sql = null;
 		int no = 0;
 		StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID=").append(getAD_Client_ID());
-
 
 		//Delete Old Imported data
 		if (p_deleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE I_BP_GroupJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			try {
+				no = DB.executeUpdate(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			}
 		}
 
-
-		//Update AD_Org ID From JP_Org_Value
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
-				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
-				.append(" WHERE i.JP_Org_Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Organization=" + no);
-
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
 		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_Org_ID From JP_Org_Value");
-
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
 
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
-		//Update C_BP_Group_ID From Value
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET C_BP_Group_ID=(SELECT C_BP_Group_ID FROM C_BP_Group p")
-				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_BP_Group_ID IS NULL AND i.Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
+		//Reverse Lookup Surrogate Key
+		reverseLookupAD_Org_ID();
+		reverseLookupC_BP_Group_ID();
+		reverseLookupAD_PrintColor_ID();
+		reverseLookupM_PriceList_ID();
+		reverseLookupPO_PriceList_ID();
+		reverseLookupM_DiscountSchema_ID();
+		reverseLookupPO_DiscountSchema_ID();
+		reverseLookupC_Dunning_ID();
+		reverseLookupC_AcctSchema_ID();
 
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Business Partner Group=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update C_BP_Group_ID From Value");
-
-		}
-
-		//Update AD_PrintColor_ID From JP_PrintColor_Name
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET AD_PrintColor_ID=(SELECT AD_PrintColor_ID FROM AD_PrintColor p")
-				.append(" WHERE i.JP_PrintColor_Name=p.Name AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
-				.append(" WHERE i.AD_PrintColor_ID IS NULL AND i.JP_PrintColor_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Print Color=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_PrintColor_ID From JP_PrintColor_Name");
-
-		}
-
-		//Update M_PriceList_ID From JP_PriceList_Name
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET M_PriceList_ID=(SELECT M_PriceList_ID FROM M_PriceList p")
-				.append(" WHERE i.JP_PriceList_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
-				.append(" WHERE i.M_PriceList_ID IS NULL AND i.JP_PriceList_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found PriceList=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update M_PriceList_ID From JP_PriceList_Name");
-		}
-
-		//Update PO_PriceList_ID From JP_PO_PriceList_Name
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET PO_PriceList_ID=(SELECT M_PriceList_ID FROM M_PriceList p")
-				.append(" WHERE i.JP_PO_PriceList_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
-				.append(" WHERE i.PO_PriceList_ID IS NULL AND i.JP_PO_PriceList_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found PO PriceList=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update PO_PriceList_ID From JP_PO_PriceList_Name");
-		}
-
-
-		//Update M_DiscountSchema_ID From JP_DiscountSchema_Name
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET M_DiscountSchema_ID=(SELECT M_DiscountSchema_ID FROM M_DiscountSchema p")
-				.append(" WHERE i.JP_DiscountSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
-				.append(" WHERE i.M_DiscountSchema_ID IS NULL AND i.JP_DiscountSchema_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Discount Schema=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update M_DiscountSchema_ID From JP_DiscountSchema_Name");
-		}
-
-
-		//Update PO_DiscountSchema_ID From JP_PO_DiscountSchema_Name
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET PO_DiscountSchema_ID=(SELECT M_DiscountSchema_ID FROM M_DiscountSchema p")
-				.append(" WHERE i.JP_PO_DiscountSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
-				.append(" WHERE i.PO_DiscountSchema_ID IS NULL AND i.JP_PO_DiscountSchema_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found PO Discount Schema=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update PO_DiscountSchema_ID From JP_PO_DiscountSchema_Name");
-		}
-
-		//Update C_Dunning_ID From JP_Dunning_Name
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET C_Dunning_ID=(SELECT C_Dunning_ID FROM C_Dunning p")
-				.append(" WHERE i.JP_Dunning_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
-				.append(" WHERE i.C_Dunning_ID IS NULL AND i.JP_Dunning_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found PO Discount Schema=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update C_Dunning_ID From JP_Dunning_Name");
-		}
-
-
-		//Update AD_AcctSchema_ID From JP_AcctSchema_Name
-		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
-				.append("SET C_AcctSchema_ID=(SELECT C_AcctSchema_ID FROM C_AcctSchema p")
-				.append(" WHERE i.JP_AcctSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Acct Schema=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_AcctSchema_ID From JP_AcctSchema_Name");
-
-		}
-
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
 
-		//
 		sql = new StringBuilder ("SELECT * FROM I_BP_GroupJP WHERE I_IsImported='N'")
 					.append(clientCheck);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
 
 		try
 		{
@@ -262,157 +150,71 @@ public class JPiereImportBPGroup extends SvrProcess
 
 				if(isNew)//Create
 				{
-					//Check Mandatory - Value
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//Check Mandatory - Name
-					if(Util.isEmpty(imp.getName()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					MBPGroup newBPGroup = new MBPGroup(getCtx(), 0, get_TrxName());
-					newBPGroup.setAD_Org_ID(imp.getAD_Org_ID());
-					newBPGroup.setValue(imp.getValue());
-					newBPGroup.setName(imp.getName());
+					if(createNewBPGroup(imp, newBPGroup))
+						successNewNum++;
+					else
+						failureNewNum++;
 
-					if(!Util.isEmpty(imp.getDescription()))
-						newBPGroup.setDescription(imp.getDescription());
-
-					newBPGroup.setIsDefault(imp.isDefault());
-					newBPGroup.setIsConfidentialInfo(imp.isConfidentialInfo());
-
-					if(imp.getAD_PrintColor_ID() > 0)
-						newBPGroup.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
-
-					if(imp.getM_PriceList_ID() > 0)
-						newBPGroup.setM_PriceList_ID(imp.getM_PriceList_ID());
-
-					if(imp.getPO_PriceList_ID() > 0)
-						newBPGroup.setPO_PriceList_ID(imp.getPO_PriceList_ID());
-
-					if(imp.getM_DiscountSchema_ID() > 0)
-						newBPGroup.setM_DiscountSchema_ID(imp.getM_DiscountSchema_ID());
-
-					if(imp.getPO_DiscountSchema_ID() > 0)
-						newBPGroup.setPO_DiscountSchema_ID(imp.getPO_DiscountSchema_ID());
-
-					if(imp.getCreditWatchPercent() != null)
-						newBPGroup.setCreditWatchPercent(imp.getCreditWatchPercent());
-
-					if(imp.getPriceMatchTolerance() != null)
-						newBPGroup.setPriceMatchTolerance(imp.getPriceMatchTolerance());
-
-					if(imp.getC_Dunning_ID() > 0)
-						newBPGroup.setC_Dunning_ID(imp.getC_Dunning_ID());
-
-					newBPGroup.setIsActive(imp.isI_IsActiveJP());
-					newBPGroup.saveEx(get_TrxName());
-					commitEx();
-
-					imp.setC_BP_Group_ID(newBPGroup.getC_BP_Group_ID());
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-
-					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
-						setBPGroupAcct(newBPGroup, imp);
 
 				}else{//Update
 
-					//Check Mandatory - Value
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					MBPGroup updateBPGroup = new MBPGroup(getCtx(), imp.getC_BP_Group_ID(), get_TrxName());
-					updateBPGroup.setAD_Org_ID(imp.getAD_Org_ID());
-
-					if(!Util.isEmpty(imp.getName()))
-						updateBPGroup.setName(imp.getName());
-
-					if(!Util.isEmpty(imp.getDescription()))
-						updateBPGroup.setDescription(imp.getDescription());
-
-					updateBPGroup.setIsDefault(imp.isDefault());
-					updateBPGroup.setIsConfidentialInfo(imp.isConfidentialInfo());
-
-					if(imp.getAD_PrintColor_ID() > 0)
-						updateBPGroup.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
-
-					if(imp.getM_PriceList_ID() > 0)
-						updateBPGroup.setM_PriceList_ID(imp.getM_PriceList_ID());
-
-					if(imp.getPO_PriceList_ID() > 0)
-						updateBPGroup.setPO_PriceList_ID(imp.getPO_PriceList_ID());
-
-					if(imp.getM_DiscountSchema_ID() > 0)
-						updateBPGroup.setM_DiscountSchema_ID(imp.getM_DiscountSchema_ID());
-
-					if(imp.getPO_DiscountSchema_ID() > 0)
-						updateBPGroup.setPO_DiscountSchema_ID(imp.getPO_DiscountSchema_ID());
-
-					if(imp.getCreditWatchPercent() != null)
-						updateBPGroup.setCreditWatchPercent(imp.getCreditWatchPercent());
-
-					if(imp.getPriceMatchTolerance() != null)
-						updateBPGroup.setPriceMatchTolerance(imp.getPriceMatchTolerance());
-
-					if(imp.getC_Dunning_ID() > 0)
-						updateBPGroup.setC_Dunning_ID(imp.getC_Dunning_ID());
-
-					updateBPGroup.setIsActive(imp.isI_IsActiveJP());
-					updateBPGroup.saveEx(get_TrxName());
-					commitEx();
-
-					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
-						setBPGroupAcct(updateBPGroup, imp);
-
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
+					if(updateBPGroup(imp,updateBPGroup))
+						successUpdateNum++;
+					else
+						failureUpdateNum++;
 
 				}
 
-				imp.saveEx(get_TrxName());
 				commitEx();
+				recordsNum++;
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
 
 			}//while (rs.next())
 
 		}catch (Exception e){
+
 			log.log(Level.SEVERE, sql.toString(), e);
+			throw e;
+
 		}finally{
 			DB.close(rs, pstmt);
 			rs = null;
 			pstmt = null;
 		}
 
-		return "";
+		return records + recordsNum + " = "	+
+					newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+					+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
 	}	//	doIt
 
+	@Override
+	public String getImportTableName() {
+		return X_I_BP_GroupJP.Table_Name;
+	}
 
+
+	@Override
+	public String getWhereClause() {
+		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
+		return msgreturn.toString();
+	}
+
+
+	/**
+	 *
+	 *
+	 * @param pc
+	 * @param imp
+	 */
 	private void setBPGroupAcct(MBPGroup pc, X_I_BP_GroupJP imp)
 	{
 
@@ -540,5 +342,602 @@ public class JPiereImportBPGroup extends SvrProcess
 
 	}
 
+	/**
+	 * Reverse Look up Organization From JP_Org_Value
+	 *
+	 **/
+	private void reverseLookupAD_Org_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverese Look up AD_Org ID From JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Org_Value") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N' ) ")
+				.append(" WHERE i.JP_Org_Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE AD_Org_ID = 0 AND JP_Org_Value IS NOT NULL AND JP_Org_Value <> '0' ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_Org_ID
+
+	/**
+	 * Reverese Look up C_BP_Group_ID From Value
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_BP_Group_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BP_Group_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverese Look up C_BP_Group_ID From Value
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET C_BP_Group_ID=(SELECT C_BP_Group_ID FROM C_BP_Group p")
+				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_BP_Group_ID IS NULL AND i.Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+	}
+
+	/**
+	 * Reverese Look up AD_PrintColor_ID ID From JP_PrintColor_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupAD_PrintColor_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_PrintColor_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverese Look up AD_PrintColor_ID ID From JP_PrintColor_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_PrintColor_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_PrintColor_Name") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET AD_PrintColor_ID=(SELECT AD_PrintColor_ID FROM AD_PrintColor p")
+				.append(" WHERE i.JP_PrintColor_Name=p.Name AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
+				.append(" WHERE i.AD_PrintColor_ID IS NULL AND i.JP_PrintColor_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_PrintColor_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_PrintColor_Name");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE AD_PrintColor_ID IS NULL AND JP_PrintColor_Name IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_PrintColor_ID
+
+	/**
+	 * Reverse Look up M_PriceList_ID From JP_PriceList_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupM_PriceList_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_PriceList_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverse Look up M_PriceList_ID From JP_PriceList_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_PriceList_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_PriceList_Name") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET M_PriceList_ID=(SELECT M_PriceList_ID FROM M_PriceList p")
+				.append(" WHERE i.JP_PriceList_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
+				.append(" WHERE i.M_PriceList_ID IS NULL AND i.JP_PriceList_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		//Invalid JP_PriceList_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_PriceList_Name");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_PriceList_Name IS NOT NULL AND M_PriceList_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupM_PriceList_ID
+
+	/**
+	 * Reverse Look up PO_PriceList_ID From JP_PO_PriceList_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupPO_PriceList_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "PO_PriceList_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverse Look up PO_PriceList_ID From JP_PO_PriceList_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "PO_PriceList_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_PO_PriceList_Name") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET PO_PriceList_ID=(SELECT M_PriceList_ID FROM M_PriceList p")
+				.append(" WHERE i.JP_PO_PriceList_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
+				.append(" WHERE i.PO_PriceList_ID IS NULL AND i.JP_PO_PriceList_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		//Invalid JP_PO_PriceList_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_PO_PriceList_Name");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_PO_PriceList_Name IS NOT NULL AND PO_PriceList_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupPO_PriceList_ID
+
+	/**
+	 * Reverse Look up M_DiscountSchema_ID From JP_DiscountSchema_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupM_DiscountSchema_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_DiscountSchema_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverse Look up M_DiscountSchema_ID From JP_DiscountSchema_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_DiscountSchema_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_DiscountSchema_Name") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET M_DiscountSchema_ID=(SELECT M_DiscountSchema_ID FROM M_DiscountSchema p")
+				.append(" WHERE i.JP_DiscountSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
+				.append(" WHERE i.M_DiscountSchema_ID IS NULL AND i.JP_DiscountSchema_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		//Invalid JP_DiscountSchema_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_DiscountSchema_Name");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_DiscountSchema_Name IS NOT NULL AND M_DiscountSchema_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupM_DiscountSchema_ID
+
+
+	/**
+	 * Reverse Look up PO_DiscountSchema_ID From JP_PO_DiscountSchema_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupPO_DiscountSchema_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "PO_DiscountSchema_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverse Look up PO_DiscountSchema_ID From JP_PO_DiscountSchema_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "PO_DiscountSchema_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_PO_DiscountSchema_Name") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET PO_DiscountSchema_ID=(SELECT M_DiscountSchema_ID FROM M_DiscountSchema p")
+				.append(" WHERE i.JP_PO_DiscountSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
+				.append(" WHERE i.PO_DiscountSchema_ID IS NULL AND i.JP_PO_DiscountSchema_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		//Invalid JP_DiscountSchema_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_PO_DiscountSchema_Name");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_PO_DiscountSchema_Name IS NOT NULL AND PO_DiscountSchema_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupPO_DiscountSchema_ID
+
+	/**
+	 * Reverse Look up C_Dunning_ID From JP_Dunning_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_Dunning_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Dunning_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverse Look up C_Dunning_ID From JP_Dunning_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Dunning_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Dunning_Name") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET C_Dunning_ID=(SELECT C_Dunning_ID FROM C_Dunning p")
+				.append(" WHERE i.JP_Dunning_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
+				.append(" WHERE i.C_Dunning_ID IS NULL AND i.JP_Dunning_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+
+		//Invalid JP_Dunning_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Dunning_Name");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_Dunning_Name IS NOT NULL AND C_Dunning_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupC_Dunning_ID
+
+
+	/**
+	 * Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_AcctSchema_ID()throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_AcctSchema_Name") ;
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP i ")
+				.append("SET C_AcctSchema_ID=(SELECT C_AcctSchema_ID FROM C_AcctSchema p")
+				.append(" WHERE i.JP_AcctSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_AcctSchema_Name
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_AcctSchema_Name");
+		sql = new StringBuilder ("UPDATE I_BP_GroupJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupC_AcctSchema_ID
+
+	/**
+	 * Create Business Partner
+	 *
+	 * @param impBPGroup
+	 * @param newBPGroup
+	 * @return
+	 */
+	private boolean createNewBPGroup(X_I_BP_GroupJP impBPGroup, MBPGroup newBPGroup)
+	{
+		//Check Mandatory - Value
+		if(Util.isEmpty(impBPGroup.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impBPGroup.setI_IsImported(false);
+			impBPGroup.setProcessed(false);
+			impBPGroup.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Check Mandatory - Name
+		if(Util.isEmpty(impBPGroup.getName()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impBPGroup.setI_IsImported(false);
+			impBPGroup.setProcessed(false);
+			impBPGroup.saveEx(get_TrxName());
+			return false;
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, impBPGroup, newBPGroup, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		newBPGroup.setAD_Org_ID(impBPGroup.getAD_Org_ID());
+		newBPGroup.setValue(impBPGroup.getValue());
+		newBPGroup.setName(impBPGroup.getName());
+
+		if(!Util.isEmpty(impBPGroup.getDescription()))
+			newBPGroup.setDescription(impBPGroup.getDescription());
+
+		newBPGroup.setIsDefault(impBPGroup.isDefault());
+		newBPGroup.setIsConfidentialInfo(impBPGroup.isConfidentialInfo());
+
+		if(impBPGroup.getAD_PrintColor_ID() > 0)
+			newBPGroup.setAD_PrintColor_ID(impBPGroup.getAD_PrintColor_ID());
+
+		if(impBPGroup.getM_PriceList_ID() > 0)
+			newBPGroup.setM_PriceList_ID(impBPGroup.getM_PriceList_ID());
+
+		if(impBPGroup.getPO_PriceList_ID() > 0)
+			newBPGroup.setPO_PriceList_ID(impBPGroup.getPO_PriceList_ID());
+
+		if(impBPGroup.getM_DiscountSchema_ID() > 0)
+			newBPGroup.setM_DiscountSchema_ID(impBPGroup.getM_DiscountSchema_ID());
+
+		if(impBPGroup.getPO_DiscountSchema_ID() > 0)
+			newBPGroup.setPO_DiscountSchema_ID(impBPGroup.getPO_DiscountSchema_ID());
+
+		if(impBPGroup.getCreditWatchPercent() != null)
+			newBPGroup.setCreditWatchPercent(impBPGroup.getCreditWatchPercent());
+
+		if(impBPGroup.getPriceMatchTolerance() != null)
+			newBPGroup.setPriceMatchTolerance(impBPGroup.getPriceMatchTolerance());
+
+		if(impBPGroup.getC_Dunning_ID() > 0)
+			newBPGroup.setC_Dunning_ID(impBPGroup.getC_Dunning_ID());
+
+		newBPGroup.setIsActive(impBPGroup.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, impBPGroup, newBPGroup, ImportValidator.TIMING_AFTER_IMPORT);
+
+
+		try {
+			newBPGroup.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_BP_Group_ID"));
+			impBPGroup.setI_IsImported(false);
+			impBPGroup.setProcessed(false);
+			impBPGroup.saveEx(get_TrxName());
+			return false;
+		}
+
+		impBPGroup.setC_BP_Group_ID(newBPGroup.getC_BP_Group_ID());
+
+		if(!Util.isEmpty(impBPGroup.getJP_AcctSchema_Name()) && impBPGroup.getC_AcctSchema_ID() > 0)
+			setBPGroupAcct(newBPGroup, impBPGroup);
+
+		impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		impBPGroup.setI_IsImported(true);
+		impBPGroup.setProcessed(true);
+		impBPGroup.saveEx(get_TrxName());
+
+		return true;
+	}
+
+	/**
+	 * Update Business Partner Group
+	 *
+	 * @param impBPGroup
+	 * @param updateBPGroup
+	 * @return
+	 */
+	private boolean updateBPGroup(X_I_BP_GroupJP impBPGroup, MBPGroup updateBPGroup)
+	{
+		ModelValidationEngine.get().fireImportValidate(this, impBPGroup, updateBPGroup, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		updateBPGroup.setAD_Org_ID(impBPGroup.getAD_Org_ID());
+
+		if(!Util.isEmpty(impBPGroup.getName()))
+			updateBPGroup.setName(impBPGroup.getName());
+
+		if(!Util.isEmpty(impBPGroup.getDescription()))
+			updateBPGroup.setDescription(impBPGroup.getDescription());
+
+		updateBPGroup.setIsDefault(impBPGroup.isDefault());
+		updateBPGroup.setIsConfidentialInfo(impBPGroup.isConfidentialInfo());
+
+		if(impBPGroup.getAD_PrintColor_ID() > 0)
+			updateBPGroup.setAD_PrintColor_ID(impBPGroup.getAD_PrintColor_ID());
+
+		if(impBPGroup.getM_PriceList_ID() > 0)
+			updateBPGroup.setM_PriceList_ID(impBPGroup.getM_PriceList_ID());
+
+		if(impBPGroup.getPO_PriceList_ID() > 0)
+			updateBPGroup.setPO_PriceList_ID(impBPGroup.getPO_PriceList_ID());
+
+		if(impBPGroup.getM_DiscountSchema_ID() > 0)
+			updateBPGroup.setM_DiscountSchema_ID(impBPGroup.getM_DiscountSchema_ID());
+
+		if(impBPGroup.getPO_DiscountSchema_ID() > 0)
+			updateBPGroup.setPO_DiscountSchema_ID(impBPGroup.getPO_DiscountSchema_ID());
+
+		if(impBPGroup.getCreditWatchPercent() != null)
+			updateBPGroup.setCreditWatchPercent(impBPGroup.getCreditWatchPercent());
+
+		if(impBPGroup.getPriceMatchTolerance() != null)
+			updateBPGroup.setPriceMatchTolerance(impBPGroup.getPriceMatchTolerance());
+
+		if(impBPGroup.getC_Dunning_ID() > 0)
+			updateBPGroup.setC_Dunning_ID(impBPGroup.getC_Dunning_ID());
+
+		updateBPGroup.setIsActive(impBPGroup.isI_IsActiveJP());
+
+
+		ModelValidationEngine.get().fireImportValidate(this, impBPGroup, updateBPGroup, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			updateBPGroup.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "C_BP_Group_ID")+" :  " + e.toString());
+			impBPGroup.setI_IsImported(false);
+			impBPGroup.setProcessed(false);
+			impBPGroup.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(!Util.isEmpty(impBPGroup.getJP_AcctSchema_Name()) && impBPGroup.getC_AcctSchema_ID() > 0)
+			setBPGroupAcct(updateBPGroup, impBPGroup);
+
+		impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		impBPGroup.setI_IsImported(true);
+		impBPGroup.setProcessed(true);
+		impBPGroup.saveEx(get_TrxName());
+
+		return true;
+	}
 
 }	//	ImportPayment
