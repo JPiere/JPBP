@@ -180,11 +180,16 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
-		int successNum = 0;
-		int failureNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
 		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
 		String success = Msg.getMsg(getCtx(), "JP_Success");
 		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
+
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
@@ -195,17 +200,6 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			while (rs.next())
 			{
 				X_I_BPartnerJP imp = new X_I_BPartnerJP (getCtx (), rs, get_TrxName());
-
-				if(Util.isEmpty(imp.getValue()))
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-					imp.setI_IsImported(false);
-					imp.setProcessed(false);
-					imp.saveEx(get_TrxName());
-					failureNum++;
-					continue;
-				}
 
 				boolean isNew = true;
 				if(imp.getC_BPartner_ID() != 0)
@@ -231,22 +225,29 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				{
 					bpartner = new MBPartner(getCtx(), 0, get_TrxName());
 					if(createNewBPartner(imp,bpartner))
-						successNum++;
+						successNewNum++;
 					else
-						failureNum++;
+						failureNewNum++;
 
 				}else{
 
 					if(updateBPartner(imp, bpartner))
-						successNum++;
+						successUpdateNum++;
 					else
-						failureNum++;
+						failureUpdateNum++;
+
 				}
 
 				commitEx();
 
 				recordsNum++;
-				if (processMonitor != null)	processMonitor.statusUpdate(success + " : " + successNum + "  /  " +  failure + " : " + failureNum);
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
 
 			}//while
 
@@ -261,7 +262,10 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
-		return records + recordsNum + " = "+ success + " : " + successNum + "  /  " +  failure + " : " + failureNum;
+		return records + recordsNum + " = "	+
+		newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+		+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
 	}	//	doIt
 
 
@@ -1463,7 +1467,15 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 */
 	private boolean createNewBPartner(X_I_BPartnerJP importBPartner, MBPartner newBPartner) throws Exception
 	{
-		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartner, ImportValidator.TIMING_BEFORE_IMPORT);
+		if(Util.isEmpty(importBPartner.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importBPartner.setI_IsImported(false);
+			importBPartner.setProcessed(false);
+			importBPartner.saveEx(get_TrxName());
+			return false;
+		}
 
 		if(Util.isEmpty(importBPartner.getName()))
 		{
@@ -1485,6 +1497,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			importBPartner.saveEx(get_TrxName());
 			return false;
 		}
+
+		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartner, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(importBPartner, newBPartner);
 		newBPartner.setIsActive(importBPartner.isI_IsActiveJP());

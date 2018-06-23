@@ -19,6 +19,7 @@ import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MProductCategory;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_M_Product_Category_Acct;
@@ -44,6 +45,8 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 	private int	m_AD_Client_ID = 0;
 
 	private boolean p_deleteOldImported = false;
+
+	private IProcessUI processMonitor = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -71,10 +74,11 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 	 */
 	protected String doIt() throws Exception
 	{
+		processMonitor = Env.getProcessUI(getCtx());
+
 		StringBuilder sql = null;
 		int no = 0;
 		String clientCheck = getWhereClause();
-
 
 		//Delete Old Imported data
 		if (p_deleteOldImported)
@@ -83,6 +87,17 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+		}
+
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_ProductCategoryJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
@@ -104,6 +119,16 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 					.append(clientCheck);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
 
 		try
 		{
@@ -120,140 +145,60 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 
 				if(isNew)//Create
 				{
-					//Check Mandatory - Value
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//Check Mandatory - Name
-					if(Util.isEmpty(imp.getName()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					MProductCategory newProductCategory = new MProductCategory(getCtx(), 0, get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, newProductCategory, ImportValidator.TIMING_BEFORE_IMPORT);
 
-					newProductCategory.setAD_Org_ID(imp.getAD_Org_ID());
-					newProductCategory.setValue(imp.getValue());
-					newProductCategory.setName(imp.getName());
+					if(createNewProductCategory(imp, newProductCategory))
+						successNewNum++;
+					else
+						failureNewNum++;
 
-					if(!Util.isEmpty(imp.getDescription()))
-						newProductCategory.setValue(imp.getDescription());
-					newProductCategory.setIsDefault(imp.isDefault());
-					newProductCategory.setIsSelfService(imp.isSelfService());
-
-					if(imp.getJP_ProductCategoryL1_ID() > 0)
-						newProductCategory.set_ValueNoCheck("JP_ProductCategoryL1_ID", imp.getJP_ProductCategoryL1_ID());
-					newProductCategory.setMMPolicy(imp.getMMPolicy());
-
-					if(imp.getPlannedMargin()!=null)
-						newProductCategory.setPlannedMargin(imp.getPlannedMargin());
-
-					if(imp.getA_Asset_Group_ID() > 0)
-						newProductCategory.setA_Asset_Group_ID(imp.getA_Asset_Group_ID());
-
-					if(imp.getAD_PrintColor_ID() > 0)
-						newProductCategory.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
-
-					newProductCategory.setIsActive(imp.isI_IsActiveJP());
-					ModelValidationEngine.get().fireImportValidate(this, imp, newProductCategory, ImportValidator.TIMING_AFTER_IMPORT);
-
-					newProductCategory.saveEx(get_TrxName());
-					commitEx();
-
-					imp.setM_Product_Category_ID(newProductCategory.getM_Product_Category_ID());
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-
-					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
-						setProductCategoryAcct(newProductCategory, imp);
 
 				}else{//Update
 
-					//Check Mandatory - Value
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					MProductCategory updateProductCategory = new MProductCategory(getCtx(), imp.getM_Product_Category_ID(), get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, updateProductCategory, ImportValidator.TIMING_BEFORE_IMPORT);
-
-
-					updateProductCategory.setAD_Org_ID(imp.getAD_Org_ID());
-					updateProductCategory.setName(imp.getName());
-
-					if(!Util.isEmpty(imp.getDescription()))
-						updateProductCategory.setValue(imp.getDescription());
-					updateProductCategory.setIsDefault(imp.isDefault());
-					updateProductCategory.setIsSelfService(imp.isSelfService());
-
-					if(imp.getJP_ProductCategoryL1_ID() > 0)
-						updateProductCategory.set_ValueNoCheck("JP_ProductCategoryL1_ID", imp.getJP_ProductCategoryL1_ID());
-					updateProductCategory.setMMPolicy(imp.getMMPolicy());
-
-					if(imp.getPlannedMargin()!=null)
-						updateProductCategory.setPlannedMargin(imp.getPlannedMargin());
-
-					if(imp.getA_Asset_Group_ID() > 0)
-						updateProductCategory.setA_Asset_Group_ID(imp.getA_Asset_Group_ID());
-
-					if(imp.getAD_PrintColor_ID() > 0)
-						updateProductCategory.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
-
-					updateProductCategory.setIsActive(imp.isI_IsActiveJP());
-					ModelValidationEngine.get().fireImportValidate(this, imp, updateProductCategory, ImportValidator.TIMING_AFTER_IMPORT);
-
-					updateProductCategory.saveEx(get_TrxName());
-					commitEx();
-
-					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
-						setProductCategoryAcct(updateProductCategory, imp);
-
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
+					if(updateProductCategory(imp,updateProductCategory))
+						successUpdateNum++;
+					else
+						failureUpdateNum++;
 
 				}
 
-				imp.saveEx(get_TrxName());
 				commitEx();
+
+				recordsNum++;
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
 
 			}//while (rs.next())
 
 		}catch (Exception e){
+
 			log.log(Level.SEVERE, sql.toString(), e);
+			throw e;
+
 		}finally{
 			DB.close(rs, pstmt);
 			rs = null;
 			pstmt = null;
 		}
 
-		return "";
+		return records + recordsNum + " = "	+
+					newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+					+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
 	}	//	doIt
 
-
+	/**
+	 *
+	 *
+	 * @param pc
+	 * @param imp
+	 */
 	private void setProductCategoryAcct(MProductCategory pc, X_I_ProductCategoryJP imp)
 	{
 
@@ -467,7 +412,12 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 		String msg = new String();
 		int no = 0;
 
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_Product_Category_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		//Reverse M_Product_Category_ID From Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "M_Product_Category_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
 		sql = new StringBuilder ("UPDATE I_ProductCategoryJP i ")
 				.append("SET M_Product_Category_ID=(SELECT M_Product_Category_ID FROM M_Product_Category p")
 				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -475,7 +425,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -492,6 +442,9 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 		String msg = new String();
 		int no = 0;
 
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		//Reverese Look up AD_Org ID From JP_Org_Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Org_Value") ;
@@ -502,7 +455,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -515,7 +468,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -528,11 +481,19 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 
 	}//reverseLookupAD_Org_ID
 
+	/**
+	 * Reverese Look up JP_ProductCategoryL1_ID ID From JP_ProductCategoryL1_Value
+	 *
+	 * @throws Exception
+	 */
 	private void reverseLookupJP_ProductCategoryL1_ID() throws Exception
 	{
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
 		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_ProductCategoryL1_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverese Look up JP_ProductCategoryL1_ID ID From JP_ProductCategoryL1_Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_ProductCategoryL1_ID")
@@ -544,7 +505,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -557,7 +518,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -570,11 +531,19 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 
 	}//reverseLookupJP_ProductCategoryL1_ID
 
+	/**
+	 * Reverese Look up A_Asset_Group_ID ID From JP_Asset_Group_Name
+	 *
+	 * @throws Exception
+	 */
 	private void reverseLookupA_Asset_Group_ID() throws Exception
 	{
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
 		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "A_Asset_Group_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverese Look up A_Asset_Group_ID ID From JP_Asset_Group_Name
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "A_Asset_Group_ID")
@@ -587,7 +556,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -600,7 +569,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -613,11 +582,20 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 
 	}//reverseLookupA_Asset_Group_ID
 
+	/**
+	 * Reverese Look up AD_PrintColor_ID ID From JP_PrintColor_Name
+	 *
+	 *
+	 * @throws Exception
+	 */
 	private void reverseLookupAD_PrintColor_ID() throws Exception
 	{
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
 		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_PrintColor_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverese Look up AD_PrintColor_ID ID From JP_PrintColor_Name
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_PrintColor_ID")
@@ -629,7 +607,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -642,7 +620,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -666,6 +644,9 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 		String msg = new String();
 		int no = 0;
 
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		//Reverse look Up  C_AcctSchema_ID From JP_AcctSchema_Name
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_AcctSchema_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_AcctSchema_Name") ;
@@ -676,7 +657,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -689,7 +670,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -702,4 +683,143 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 
 	}//reverseLookupC_AcctSchema_ID
 
-}	//	ImportPayment
+	/**
+	 * Create New Product Category
+	 *
+	 * @param impProductCategory
+	 * @param newProductCategory
+	 * @return
+	 */
+	private boolean createNewProductCategory(X_I_ProductCategoryJP impProductCategory, MProductCategory newProductCategory)
+	{
+		//Check Mandatory - Value
+		if(Util.isEmpty(impProductCategory.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			impProductCategory.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impProductCategory.setI_IsImported(false);
+			impProductCategory.setProcessed(false);
+			impProductCategory.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Check Mandatory - Name
+		if(Util.isEmpty(impProductCategory.getName()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+			impProductCategory.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impProductCategory.setI_IsImported(false);
+			impProductCategory.setProcessed(false);
+			impProductCategory.saveEx(get_TrxName());
+			return false;
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, impProductCategory, newProductCategory, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		newProductCategory.setAD_Org_ID(impProductCategory.getAD_Org_ID());
+		newProductCategory.setValue(impProductCategory.getValue());
+		newProductCategory.setName(impProductCategory.getName());
+
+		if(!Util.isEmpty(impProductCategory.getDescription()))
+			newProductCategory.setValue(impProductCategory.getDescription());
+		newProductCategory.setIsDefault(impProductCategory.isDefault());
+		newProductCategory.setIsSelfService(impProductCategory.isSelfService());
+
+		if(impProductCategory.getJP_ProductCategoryL1_ID() > 0)
+			newProductCategory.set_ValueNoCheck("JP_ProductCategoryL1_ID", impProductCategory.getJP_ProductCategoryL1_ID());
+		newProductCategory.setMMPolicy(impProductCategory.getMMPolicy());
+
+		if(impProductCategory.getPlannedMargin()!=null)
+			newProductCategory.setPlannedMargin(impProductCategory.getPlannedMargin());
+
+		if(impProductCategory.getA_Asset_Group_ID() > 0)
+			newProductCategory.setA_Asset_Group_ID(impProductCategory.getA_Asset_Group_ID());
+
+		if(impProductCategory.getAD_PrintColor_ID() > 0)
+			newProductCategory.setAD_PrintColor_ID(impProductCategory.getAD_PrintColor_ID());
+
+		newProductCategory.setIsActive(impProductCategory.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, impProductCategory, newProductCategory, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			newProductCategory.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impProductCategory.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "M_Product_Category_ID"));
+			impProductCategory.setI_IsImported(false);
+			impProductCategory.setProcessed(false);
+			impProductCategory.saveEx(get_TrxName());
+			return false;
+		}
+
+		impProductCategory.setM_Product_Category_ID(newProductCategory.getM_Product_Category_ID());
+
+		if(!Util.isEmpty(impProductCategory.getJP_AcctSchema_Name()) && impProductCategory.getC_AcctSchema_ID() > 0)
+			setProductCategoryAcct(newProductCategory, impProductCategory);
+
+		impProductCategory.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		impProductCategory.setI_IsImported(true);
+		impProductCategory.setProcessed(true);
+		impProductCategory.saveEx(get_TrxName());
+		return true;
+	}
+
+	/**
+	 * Update Product Category
+	 *
+	 * @param imp
+	 * @param updateProductCategory
+	 * @return
+	 */
+	private boolean updateProductCategory(X_I_ProductCategoryJP imp, MProductCategory updateProductCategory)
+	{
+		ModelValidationEngine.get().fireImportValidate(this, imp, updateProductCategory, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		updateProductCategory.setAD_Org_ID(imp.getAD_Org_ID());
+		updateProductCategory.setName(imp.getName());
+
+		if(!Util.isEmpty(imp.getDescription()))
+			updateProductCategory.setValue(imp.getDescription());
+		updateProductCategory.setIsDefault(imp.isDefault());
+		updateProductCategory.setIsSelfService(imp.isSelfService());
+
+		if(imp.getJP_ProductCategoryL1_ID() > 0)
+			updateProductCategory.set_ValueNoCheck("JP_ProductCategoryL1_ID", imp.getJP_ProductCategoryL1_ID());
+		updateProductCategory.setMMPolicy(imp.getMMPolicy());
+
+		if(imp.getPlannedMargin()!=null)
+			updateProductCategory.setPlannedMargin(imp.getPlannedMargin());
+
+		if(imp.getA_Asset_Group_ID() > 0)
+			updateProductCategory.setA_Asset_Group_ID(imp.getA_Asset_Group_ID());
+
+		if(imp.getAD_PrintColor_ID() > 0)
+			updateProductCategory.setAD_PrintColor_ID(imp.getAD_PrintColor_ID());
+
+		updateProductCategory.setIsActive(imp.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, imp, updateProductCategory, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			updateProductCategory.saveEx(get_TrxName());
+		}catch (Exception e) {
+			imp.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "M_Product_Category_ID")+" :  " + e.toString());
+			imp.setI_IsImported(false);
+			imp.setProcessed(false);
+			imp.saveEx(get_TrxName());
+			return false;
+		}
+
+
+		if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
+			setProductCategoryAcct(updateProductCategory, imp);
+
+		imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		imp.setI_IsImported(true);
+		imp.setProcessed(true);
+		imp.saveEx(get_TrxName());
+
+		return true;
+	}
+
+}	//	Import Product Category
