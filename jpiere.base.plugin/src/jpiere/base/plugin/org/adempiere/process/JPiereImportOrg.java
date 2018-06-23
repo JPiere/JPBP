@@ -542,4 +542,4 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 		return true;
 	}
-}	//	ImportPayment
+}	//	Import Oraganization

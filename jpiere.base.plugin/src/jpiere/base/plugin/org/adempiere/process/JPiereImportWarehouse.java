@@ -568,7 +568,7 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		try {
 			newWarehouse.saveEx(get_TrxName());
 		}catch (Exception e) {
-			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "M_Warehouse_ID"));
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "M_Warehouse_ID") +" : " + e.toString());
 			impWarehouse.setI_IsImported(false);
 			impWarehouse.setProcessed(false);
 			impWarehouse.saveEx(get_TrxName());
@@ -649,4 +649,4 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		return true;
 	}
 
-}	//	ImportPayment
+}	//	Import Warehouse

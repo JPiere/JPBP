@@ -19,6 +19,7 @@ import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MBankAccount;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_C_BankAccount_Acct;
@@ -45,6 +46,8 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 	private int				m_AD_Client_ID = 0;
 
 	private boolean p_deleteOldImported = false;
+
+	private IProcessUI processMonitor = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -84,6 +87,8 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 	 */
 	protected String doIt() throws Exception
 	{
+		processMonitor = Env.getProcessUI(getCtx());
+
 		StringBuilder sql = null;
 		int no = 0;
 		StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID=").append(getAD_Client_ID());
@@ -98,6 +103,17 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
 		}
 
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_BankAccountJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
 		//Reverse Lookup Surrogate Key
@@ -107,25 +123,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		reverseLookupC_Currency_ID();
 		reverseLookupC_AcctSchema_ID();
 
-
-		//Update AD_AcctSchema_ID From JP_AcctSchema_Name
-		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
-				.append("SET C_AcctSchema_ID=(SELECT C_AcctSchema_ID FROM C_AcctSchema p")
-				.append(" WHERE i.JP_AcctSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_AcctSchema_ID IS NULL AND JP_AcctSchema_Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(clientCheck);
-		try {
-
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Found Acct Schema=" + no);
-
-		}catch(Exception e) {
-
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_CouldNotUpdate")
-					+ "Update AD_AcctSchema_ID From JP_AcctSchema_Name");
-
-		}
-
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
 
@@ -134,6 +132,16 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 					.append(clientCheck);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
 
 		try
 		{
@@ -151,268 +159,11 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				if(isNew)//Create
 				{
 					MBankAccount newBankAccount = new MBankAccount(getCtx(), 0, get_TrxName());
+					if(createNewBankAccount(imp,newBankAccount))
+						successNewNum++;
+					else
+						failureNewNum++;
 
-					//AD_Org_ID
-					if(imp.getAD_Org_ID() > 0)
-					{
-						newBankAccount.setAD_Org_ID(imp.getAD_Org_ID());
-					}else {
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " AD_Org_ID = 0");
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						continue;
-					}
-
-					//C_Bank_ID
-					if(imp.getC_Bank_ID() > 0)
-					{
-						newBankAccount.setC_Bank_ID(imp.getC_Bank_ID());
-					}else {
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " C_Bank_ID = 0");
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						continue;
-					}
-
-					//Value
-					if(!Util.isEmpty(imp.getValue()))
-					{
-						newBankAccount.setValue(imp.getValue());
-					}else {
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//Name
-					if(!Util.isEmpty(imp.getName()))
-					{
-						newBankAccount.setName(imp.getName());
-					}else {
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//Description
-					if(!Util.isEmpty(imp.getDescription()))
-						newBankAccount.setValue(imp.getDescription());
-
-					//IsDefault
-					newBankAccount.setIsDefault(imp.isDefault());
-
-					//JP_BranchCode
-					if(!Util.isEmpty(imp.getJP_BranchCode()))
-					{
-						String jp_BranchCode = imp.getJP_BranchCode();
-						if(jp_BranchCode.length()!=ZenginCheck.JP_BranchCode)
-						{
-							//{0} is {1} characters.
-							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BranchCode"),ZenginCheck.JP_BranchCode};
-							imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Characters",objs));
-							imp.setI_IsImported(false);
-							imp.setProcessed(false);
-							commitEx();
-							continue;
-						}
-
-						if(!ZenginCheck.numStringCheck(jp_BranchCode))
-						{
-							//You can not use this String : {0}.
-							Object[] objs = new Object[]{jp_BranchCode};
-							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs));
-							imp.setI_IsImported(false);
-							imp.setProcessed(false);
-							imp.saveEx(get_TrxName());
-							commitEx();
-							continue;
-						}
-
-						newBankAccount.set_ValueNoCheck("JP_BranchCode", imp.getJP_BranchCode());
-					}
-
-					//JP_BranchName_Kana
-					if(!Util.isEmpty(imp.getJP_BranchName_Kana()))
-					{
-						String jp_BranchName_Kana = imp.getJP_BranchName_Kana();
-						boolean isOK = true;
-						for(int i = 0; i < jp_BranchName_Kana.length(); i++)
-						{
-							if(!ZenginCheck.charCheck(jp_BranchName_Kana.charAt(i)))
-							{
-								//You can not use this character : {0}.
-								Object[] objs = new Object[]{jp_BranchName_Kana.charAt(i)};
-								imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchName_Kana") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs));
-								imp.setI_IsImported(false);
-								imp.setProcessed(false);
-								imp.saveEx(get_TrxName());
-								commitEx();
-								isOK = false;
-								break;
-							}
-						}//for
-
-						if(!isOK)
-							continue;
-
-						if(jp_BranchName_Kana.length() > ZenginCheck.JP_BranchName_Kana)
-						{
-							//{0} is less than {1} characters.
-							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_BranchName_Kana};
-							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchName_Kana") + " : " + Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs));
-							imp.setI_IsImported(false);
-							imp.setProcessed(false);
-							commitEx();
-							continue;
-						}
-
-						newBankAccount.set_ValueNoCheck("JP_BranchName_Kana", imp.getJP_BranchName_Kana());
-					}
-
-					//AccountNo
-					if(!Util.isEmpty(imp.getAccountNo()))
-					{
-						newBankAccount.setAccountNo(imp.getAccountNo());
-					}else {
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " Account No is Empty");
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						continue;
-					}
-
-					//JP_RequesterCode
-					if(!Util.isEmpty(imp.getJP_RequesterCode()))
-					{
-						String jp_RequesterCode = imp.getJP_RequesterCode();
-						if(jp_RequesterCode.length()!=ZenginCheck.JP_RequesterCode)
-						{
-							//{0} is {1} characters.
-							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_RequesterCode"),ZenginCheck.JP_RequesterCode};
-							imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Characters",objs));
-							imp.setI_IsImported(false);
-							imp.setProcessed(false);
-							commitEx();
-							continue;
-						}
-
-						if(!ZenginCheck.numStringCheck(jp_RequesterCode))
-						{
-							//You can not use this String : {0}.
-							Object[] objs = new Object[]{jp_RequesterCode};
-							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs));
-							imp.setI_IsImported(false);
-							imp.setProcessed(false);
-							imp.saveEx(get_TrxName());
-							commitEx();
-							continue;
-						}
-
-						newBankAccount.set_ValueNoCheck("JP_RequesterCode", imp.getJP_RequesterCode());
-					}
-
-					//JP_RequesterName
-					if(!Util.isEmpty(imp.getJP_RequesterName()))
-					{
-						String jp_RequesterName = imp.getJP_RequesterName();
-						boolean isOK = true;
-						for(int i = 0; i < jp_RequesterName.length(); i++)
-						{
-							if(!ZenginCheck.charCheck(jp_RequesterName.charAt(i)))
-							{
-								//You can not use this character : {0}.
-								Object[] objs = new Object[]{jp_RequesterName.charAt(i)};
-								imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterName") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs));
-								imp.setI_IsImported(false);
-								imp.setProcessed(false);
-								imp.saveEx(get_TrxName());
-								commitEx();
-								isOK = false;
-								break;
-							}
-						}//for
-
-						if(!isOK)
-							continue;
-
-						if(jp_RequesterName.length() > ZenginCheck.JP_RequesterName)
-						{
-							//{0} is less than {1} characters.
-							Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_RequesterName};
-							imp.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterName") + " : " + Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs));
-							imp.setI_IsImported(false);
-							imp.setProcessed(false);
-							commitEx();
-							continue;
-						}
-
-						newBankAccount.set_ValueNoCheck("JP_RequesterName", imp.getJP_RequesterName());
-					}
-
-					//BBAN
-					if(!Util.isEmpty(imp.getBBAN()))
-						newBankAccount.setBBAN(imp.getBBAN());
-
-					//IBAN
-					if(!Util.isEmpty(imp.getIBAN()))
-						newBankAccount.setIBAN(imp.getIBAN());
-
-					//C_Currency_ID
-					if(imp.getC_Currency_ID() > 0) {
-						newBankAccount.setC_Currency_ID(imp.getC_Currency_ID());
-					}else {
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_Currency_ID")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//BankAccountType
-					if(!Util.isEmpty(imp.getBankAccountType()))
-					{
-						newBankAccount.setBankAccountType(imp.getBankAccountType());
-					}else {
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "BankAccountType")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//CreditLimit
-					if(imp.getCreditLimit().compareTo(Env.ZERO)> 0)
-						newBankAccount.setCreditLimit(imp.getCreditLimit());
-
-					//CurrentBalance
-					if(imp.getCurrentBalance().compareTo(Env.ZERO)> 0)
-						newBankAccount.setCurrentBalance(imp.getCurrentBalance());
-
-					//IsActive
-					newBankAccount.setIsActive(imp.isI_IsActiveJP());
-					newBankAccount.saveEx(get_TrxName());
-
-					imp.setC_BankAccount_ID(newBankAccount.getC_BankAccount_ID());
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-
-					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
-						setBankAccountAcct(newBankAccount, imp);
 
 				}else{//Update
 
@@ -430,76 +181,39 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 
 					MBankAccount updateBankAccount = new MBankAccount(getCtx(), imp.getC_BankAccount_ID(), get_TrxName());
 
-//					if(imp.getAD_Org_ID() > 0)
-//						updateBankAccount.setAD_Org_ID(imp.getAD_Org_ID());
-
-					if(!Util.isEmpty(imp.getName()))
-						updateBankAccount.setName(imp.getName());
-
-					if(!Util.isEmpty(imp.getDescription()))
-						updateBankAccount.setValue(imp.getDescription());
-
-					updateBankAccount.setIsDefault(imp.isDefault());
-
-					if(!Util.isEmpty(imp.getJP_BranchCode()))
-						updateBankAccount.set_ValueNoCheck("JP_BranchCode", imp.getJP_BranchCode());
-
-					if(!Util.isEmpty(imp.getJP_BranchName_Kana()))
-						updateBankAccount.set_ValueNoCheck("JP_BranchName_Kana", imp.getJP_BranchName_Kana());
-
-					if(!Util.isEmpty(imp.getAccountNo()))
-						updateBankAccount.setAccountNo(imp.getAccountNo());
-
-					if(!Util.isEmpty(imp.getJP_RequesterCode()))
-						updateBankAccount.set_ValueNoCheck("JP_RequesterCode", imp.getJP_RequesterCode());
-
-					if(!Util.isEmpty(imp.getJP_RequesterName()))
-						updateBankAccount.set_ValueNoCheck("JP_RequesterName", imp.getJP_RequesterName());
-
-					if(!Util.isEmpty(imp.getBBAN()))
-						updateBankAccount.setBBAN(imp.getBBAN());
-
-					if(!Util.isEmpty(imp.getIBAN()))
-						updateBankAccount.setIBAN(imp.getIBAN());
-
-					if(imp.getC_Currency_ID() > 0)
-						updateBankAccount.setC_Currency_ID(imp.getC_Currency_ID());
-
-					if(!Util.isEmpty(imp.getBankAccountType()))
-						updateBankAccount.setBankAccountType(imp.getBankAccountType());
-
-					if(imp.getCreditLimit().compareTo(Env.ZERO)> 0)
-						updateBankAccount.setCreditLimit(imp.getCreditLimit());
-
-					if(imp.getCurrentBalance().compareTo(Env.ZERO)> 0)
-						updateBankAccount.setCurrentBalance(imp.getCurrentBalance());
-
-					updateBankAccount.setIsActive(imp.isI_IsActiveJP());
-					updateBankAccount.saveEx(get_TrxName());
-
-					if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
-						setBankAccountAcct(updateBankAccount, imp);
-
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
+					if(updateBankAccount(imp,updateBankAccount))
+						successUpdateNum++;
+					else
+						failureUpdateNum++;
 
 				}
 
-				imp.saveEx(get_TrxName());
 				commitEx();
+
+				recordsNum++;
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
 
 			}//while (rs.next())
 
 		}catch (Exception e){
 			log.log(Level.SEVERE, sql.toString(), e);
+			throw e;
 		}finally{
 			DB.close(rs, pstmt);
 			rs = null;
 			pstmt = null;
 		}
 
-		return "";
+		return records + recordsNum + " = "	+
+		newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+		+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
 	}	//	doIt
 
 
@@ -811,7 +525,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -824,4 +538,358 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 
 	}
 
-}	//	ImportPayment
+
+	/**
+	 * Creaet New Bank Account
+	 *
+	 * @param importBankAccount
+	 * @param newBankAccount
+	 * @return
+	 */
+	private boolean createNewBankAccount(X_I_BankAccountJP importBankAccount, MBankAccount newBankAccount)
+	{
+		ModelValidationEngine.get().fireImportValidate(this, importBankAccount, newBankAccount, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		//AD_Org_ID
+		if(importBankAccount.getAD_Org_ID() > 0)
+		{
+			newBankAccount.setAD_Org_ID(importBankAccount.getAD_Org_ID());
+		}else {
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " AD_Org_ID = 0");
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		//C_Bank_ID
+		if(importBankAccount.getC_Bank_ID() > 0)
+		{
+			newBankAccount.setC_Bank_ID(importBankAccount.getC_Bank_ID());
+		}else {
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " C_Bank_ID = 0");
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Value
+		if(!Util.isEmpty(importBankAccount.getValue()))
+		{
+			newBankAccount.setValue(importBankAccount.getValue());
+		}else {
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Name
+		if(!Util.isEmpty(importBankAccount.getName()))
+		{
+			newBankAccount.setName(importBankAccount.getName());
+		}else {
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Description
+		if(!Util.isEmpty(importBankAccount.getDescription()))
+			newBankAccount.setValue(importBankAccount.getDescription());
+
+		//IsDefault
+		newBankAccount.setIsDefault(importBankAccount.isDefault());
+
+		//JP_BranchCode
+		if(!Util.isEmpty(importBankAccount.getJP_BranchCode()))
+		{
+			String jp_BranchCode = importBankAccount.getJP_BranchCode();
+			if(jp_BranchCode.length()!=ZenginCheck.JP_BranchCode)
+			{
+				//{0} is {1} characters.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BranchCode"),ZenginCheck.JP_BranchCode};
+				importBankAccount.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Characters",objs));
+				importBankAccount.setI_IsImported(false);
+				importBankAccount.setProcessed(false);
+				return false;
+			}
+
+			if(!ZenginCheck.numStringCheck(jp_BranchCode))
+			{
+				//You can not use this String : {0}.
+				Object[] objs = new Object[]{jp_BranchCode};
+				importBankAccount.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs));
+				importBankAccount.setI_IsImported(false);
+				importBankAccount.setProcessed(false);
+				importBankAccount.saveEx(get_TrxName());
+				return false;
+			}
+
+			newBankAccount.set_ValueNoCheck("JP_BranchCode", importBankAccount.getJP_BranchCode());
+		}
+
+		//JP_BranchName_Kana
+		if(!Util.isEmpty(importBankAccount.getJP_BranchName_Kana()))
+		{
+			String jp_BranchName_Kana = importBankAccount.getJP_BranchName_Kana();
+			boolean isOK = true;
+			for(int i = 0; i < jp_BranchName_Kana.length(); i++)
+			{
+				if(!ZenginCheck.charCheck(jp_BranchName_Kana.charAt(i)))
+				{
+					//You can not use this character : {0}.
+					Object[] objs = new Object[]{jp_BranchName_Kana.charAt(i)};
+					importBankAccount.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchName_Kana") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs));
+					importBankAccount.setI_IsImported(false);
+					importBankAccount.setProcessed(false);
+					importBankAccount.saveEx(get_TrxName());
+					isOK = false;
+					break;
+				}
+			}//for
+
+			if(!isOK)
+				return false;
+
+			if(jp_BranchName_Kana.length() > ZenginCheck.JP_BranchName_Kana)
+			{
+				//{0} is less than {1} characters.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_BranchName_Kana};
+				importBankAccount.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_BranchName_Kana") + " : " + Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs));
+				importBankAccount.setI_IsImported(false);
+				importBankAccount.setProcessed(false);
+				return false;
+			}
+
+			newBankAccount.set_ValueNoCheck("JP_BranchName_Kana", importBankAccount.getJP_BranchName_Kana());
+		}
+
+		//AccountNo
+		if(!Util.isEmpty(importBankAccount.getAccountNo()))
+		{
+			newBankAccount.setAccountNo(importBankAccount.getAccountNo());
+		}else {
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error")+ " Account No is Empty");
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		//JP_RequesterCode
+		if(!Util.isEmpty(importBankAccount.getJP_RequesterCode()))
+		{
+			String jp_RequesterCode = importBankAccount.getJP_RequesterCode();
+			if(jp_RequesterCode.length()!=ZenginCheck.JP_RequesterCode)
+			{
+				//{0} is {1} characters.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_RequesterCode"),ZenginCheck.JP_RequesterCode};
+				importBankAccount.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Characters",objs));
+				importBankAccount.setI_IsImported(false);
+				importBankAccount.setProcessed(false);
+				return false;
+			}
+
+			if(!ZenginCheck.numStringCheck(jp_RequesterCode))
+			{
+				//You can not use this String : {0}.
+				Object[] objs = new Object[]{jp_RequesterCode};
+				importBankAccount.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterCode") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs));
+				importBankAccount.setI_IsImported(false);
+				importBankAccount.setProcessed(false);
+				importBankAccount.saveEx(get_TrxName());
+				return false;
+			}
+
+			newBankAccount.set_ValueNoCheck("JP_RequesterCode", importBankAccount.getJP_RequesterCode());
+		}
+
+		//JP_RequesterName
+		if(!Util.isEmpty(importBankAccount.getJP_RequesterName()))
+		{
+			String jp_RequesterName = importBankAccount.getJP_RequesterName();
+			boolean isOK = true;
+			for(int i = 0; i < jp_RequesterName.length(); i++)
+			{
+				if(!ZenginCheck.charCheck(jp_RequesterName.charAt(i)))
+				{
+					//You can not use this character : {0}.
+					Object[] objs = new Object[]{jp_RequesterName.charAt(i)};
+					importBankAccount.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterName") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs));
+					importBankAccount.setI_IsImported(false);
+					importBankAccount.setProcessed(false);
+					importBankAccount.saveEx(get_TrxName());
+					isOK = false;
+					break;
+				}
+			}//for
+
+			if(!isOK)
+				return false;
+
+			if(jp_RequesterName.length() > ZenginCheck.JP_RequesterName)
+			{
+				//{0} is less than {1} characters.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_RequesterName};
+				importBankAccount.setI_ErrorMsg(Msg.getElement(getCtx(), "JP_RequesterName") + " : " + Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs));
+				importBankAccount.setI_IsImported(false);
+				importBankAccount.setProcessed(false);
+				return false;
+			}
+
+			newBankAccount.set_ValueNoCheck("JP_RequesterName", importBankAccount.getJP_RequesterName());
+		}
+
+		//BBAN
+		if(!Util.isEmpty(importBankAccount.getBBAN()))
+			newBankAccount.setBBAN(importBankAccount.getBBAN());
+
+		//IBAN
+		if(!Util.isEmpty(importBankAccount.getIBAN()))
+			newBankAccount.setIBAN(importBankAccount.getIBAN());
+
+		//C_Currency_ID
+		if(importBankAccount.getC_Currency_ID() > 0) {
+			newBankAccount.setC_Currency_ID(importBankAccount.getC_Currency_ID());
+		}else {
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "C_Currency_ID")};
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		//BankAccountType
+		if(!Util.isEmpty(importBankAccount.getBankAccountType()))
+		{
+			newBankAccount.setBankAccountType(importBankAccount.getBankAccountType());
+		}else {
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "BankAccountType")};
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		//CreditLimit
+		if(importBankAccount.getCreditLimit().compareTo(Env.ZERO)> 0)
+			newBankAccount.setCreditLimit(importBankAccount.getCreditLimit());
+
+		//CurrentBalance
+		if(importBankAccount.getCurrentBalance().compareTo(Env.ZERO)> 0)
+			newBankAccount.setCurrentBalance(importBankAccount.getCurrentBalance());
+
+		//IsActive
+		newBankAccount.setIsActive(importBankAccount.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, importBankAccount, newBankAccount, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			newBankAccount.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_BankAccount_ID") +" : " + e.toString());
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		importBankAccount.setC_BankAccount_ID(newBankAccount.getC_BankAccount_ID());
+		importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		importBankAccount.setI_IsImported(true);
+		importBankAccount.setProcessed(true);
+
+		if(!Util.isEmpty(importBankAccount.getJP_AcctSchema_Name()) && importBankAccount.getC_AcctSchema_ID() > 0)
+			setBankAccountAcct(newBankAccount, importBankAccount);
+
+
+		return true;
+	}
+
+	/**
+	 * Update Bank Account
+	 *
+	 *
+	 * @param importBankAccount
+	 * @param newBankAccount
+	 * @return
+	 */
+	private boolean updateBankAccount(X_I_BankAccountJP importBankAccount, MBankAccount updateBankAccount)
+	{
+		if(importBankAccount.getAD_Org_ID() > 0)
+//			updateBankAccount.setAD_Org_ID(imp.getAD_Org_ID());
+
+		if(!Util.isEmpty(importBankAccount.getName()))
+			updateBankAccount.setName(importBankAccount.getName());
+
+		if(!Util.isEmpty(importBankAccount.getDescription()))
+			updateBankAccount.setValue(importBankAccount.getDescription());
+
+		updateBankAccount.setIsDefault(importBankAccount.isDefault());
+
+		if(!Util.isEmpty(importBankAccount.getJP_BranchCode()))
+			updateBankAccount.set_ValueNoCheck("JP_BranchCode", importBankAccount.getJP_BranchCode());
+
+		if(!Util.isEmpty(importBankAccount.getJP_BranchName_Kana()))
+			updateBankAccount.set_ValueNoCheck("JP_BranchName_Kana", importBankAccount.getJP_BranchName_Kana());
+
+		if(!Util.isEmpty(importBankAccount.getAccountNo()))
+			updateBankAccount.setAccountNo(importBankAccount.getAccountNo());
+
+		if(!Util.isEmpty(importBankAccount.getJP_RequesterCode()))
+			updateBankAccount.set_ValueNoCheck("JP_RequesterCode", importBankAccount.getJP_RequesterCode());
+
+		if(!Util.isEmpty(importBankAccount.getJP_RequesterName()))
+			updateBankAccount.set_ValueNoCheck("JP_RequesterName", importBankAccount.getJP_RequesterName());
+
+		if(!Util.isEmpty(importBankAccount.getBBAN()))
+			updateBankAccount.setBBAN(importBankAccount.getBBAN());
+
+		if(!Util.isEmpty(importBankAccount.getIBAN()))
+			updateBankAccount.setIBAN(importBankAccount.getIBAN());
+
+		if(importBankAccount.getC_Currency_ID() > 0)
+			updateBankAccount.setC_Currency_ID(importBankAccount.getC_Currency_ID());
+
+		if(!Util.isEmpty(importBankAccount.getBankAccountType()))
+			updateBankAccount.setBankAccountType(importBankAccount.getBankAccountType());
+
+		if(importBankAccount.getCreditLimit().compareTo(Env.ZERO)> 0)
+			updateBankAccount.setCreditLimit(importBankAccount.getCreditLimit());
+
+		if(importBankAccount.getCurrentBalance().compareTo(Env.ZERO)> 0)
+			updateBankAccount.setCurrentBalance(importBankAccount.getCurrentBalance());
+
+		updateBankAccount.setIsActive(importBankAccount.isI_IsActiveJP());
+
+		try {
+			updateBankAccount.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "C_BankAccount_ID")+" :  " + e.toString());
+			importBankAccount.setI_IsImported(false);
+			importBankAccount.setProcessed(false);
+			importBankAccount.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(!Util.isEmpty(importBankAccount.getJP_AcctSchema_Name()) && importBankAccount.getC_AcctSchema_ID() > 0)
+			setBankAccountAcct(updateBankAccount, importBankAccount);
+
+		importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		importBankAccount.setI_IsImported(true);
+		importBankAccount.setProcessed(true);
+		importBankAccount.saveEx(get_TrxName());
+
+		return true;
+	}
+
+}	//	Import Bank Account
