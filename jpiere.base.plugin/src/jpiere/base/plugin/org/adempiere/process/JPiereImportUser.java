@@ -140,11 +140,16 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
-		int successNum = 0;
-		int failureNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
 		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
 		String success = Msg.getMsg(getCtx(), "JP_Success");
 		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
+
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
@@ -180,23 +185,29 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				{
 					user = new MUser(getCtx(), 0, get_TrxName());
 					if(createNewUser(imp, user))
-						successNum++;
+						successNewNum++;
 					else
-						failureNum++;
+						failureNewNum++;
 
 				}else{
 
 					if(updateUser(imp, user))
-						successNum++;
+						successUpdateNum++;
 					else
-						failureNum++;
+						failureUpdateNum++;
 
 				}
 
 				commitEx();
 
 				recordsNum++;
-				if (processMonitor != null)	processMonitor.statusUpdate(success + " : " + successNum + "  /  " +  failure + " : " + failureNum);
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
 
 			}//while
 
@@ -212,7 +223,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		}
 
 
-		return records + recordsNum + " = "+ success + " : " + successNum + "  /  " +  failure + " : " + failureNum;
+		return records + recordsNum + " = "	+
+					newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+					+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
 	}	//	doIt
 
 
@@ -305,7 +319,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		String msg = new String();
 		int no = 0;
 
-		//Reverse lookup C_BPartner_ID From JP_BPartner_Value
+		//Reverse lookup JP_Corporation_ID From JP_Corporation_Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Corporation_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Corporation_Value") ;
 		sql = new StringBuilder ("UPDATE I_UserJP i ")
@@ -320,7 +334,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
 
-		//Invalid BPartner_Value
+		//Invalid JP_Corporation_Value
 		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Corporation_Value");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
 			.append("SET I_ErrorMsg='"+ msg + "'")
@@ -333,11 +347,11 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
 
-		if(no > 0)
-		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
-		}
+//		if(no > 0)
+//		{
+//			commitEx();
+//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+//		}
 
 	}//reverseLookupC_BPartner_ID
 
@@ -385,11 +399,11 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
 
-		if(no > 0)
-		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no );
-		}
+//		if(no > 0)
+//		{
+//			commitEx();
+//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no );
+//		}
 
 	}//reverseLookupC_BPartner_ID
 
@@ -426,7 +440,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_BPartner_Location_Name");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
 			.append("SET I_ErrorMsg='"+ msg + "'")
-			.append("WHERE C_BPartner_Location_ID IS NULL AND JP_BPartner_Location_Name IS NOT NULL")
+			.append("WHERE C_BPartner_Location_ID IS NULL AND JP_BPartner_Location_Name IS NOT NULL AND C_BPartner_ID IS NOT NULL")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
