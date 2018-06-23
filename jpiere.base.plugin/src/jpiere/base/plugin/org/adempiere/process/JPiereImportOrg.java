@@ -15,10 +15,12 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MOrg;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.ModelValidationEngine;
@@ -47,6 +49,8 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 	private boolean p_deleteOldImported = false;
 
+	private IProcessUI processMonitor = null;
+
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -72,6 +76,8 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 	 */
 	protected String doIt() throws Exception
 	{
+		processMonitor = Env.getProcessUI(getCtx());
+
 		StringBuilder sql = null;
 		int no = 0;
 		StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID=").append(getAD_Client_ID());
@@ -82,8 +88,23 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 		{
 			sql = new StringBuilder ("DELETE I_OrgJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			try {
+				no = DB.executeUpdate(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			}
+		}
+
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_OrgJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
@@ -102,6 +123,16 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 					.append(clientCheck);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
 
 		try
 		{
@@ -143,24 +174,10 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 					//New Record
 					MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, newOrg, ImportValidator.TIMING_BEFORE_IMPORT);
-
-					newOrg.setValue(imp.getValue());
-					newOrg.setName(imp.getName());
-					newOrg.setDescription(imp.getDescription());
-					newOrg.setIsActive(imp.isI_IsActiveJP());
-
-					ModelValidationEngine.get().fireImportValidate(this, imp, newOrg, ImportValidator.TIMING_AFTER_IMPORT);
-
-					newOrg.setIsSummary(imp.isSummary());
-					newOrg.saveEx(get_TrxName());
-					commitEx();
-
-					imp.setAD_Org_ID(newOrg.getAD_Org_ID());
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
-
+					if(createNewOrg(imp,newOrg))
+						successNewNum++;
+					else
+						failureNewNum++;
 
 				}else{//Update
 
@@ -177,80 +194,25 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 					}
 
 					MOrg updateOrg = new MOrg(getCtx (), imp.getAD_Org_ID(), get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, updateOrg, ImportValidator.TIMING_BEFORE_IMPORT);
 
-					updateOrg.setName(imp.getName());
-					updateOrg.setDescription(imp.getDescription());
-					updateOrg.setIsActive(imp.isI_IsActiveJP());
-
-					ModelValidationEngine.get().fireImportValidate(this, imp, updateOrg, ImportValidator.TIMING_AFTER_IMPORT);
-
-					updateOrg.saveEx(get_TrxName());
-					commitEx();
-
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
-					imp.setI_IsImported(true);
-					imp.setProcessed(true);
+					if(updateOrg(imp,updateOrg))
+						successUpdateNum++;
+					else
+						failureUpdateNum++;
 
 				}
 
-				imp.saveEx();
 				commitEx();
 
-				if(imp.getAD_Org_ID() > 0)
+				recordsNum++;
+				if (processMonitor != null)
 				{
-					MOrgInfo orgInfo = MOrgInfo.get(getCtx(), imp.getAD_Org_ID(), get_TrxName());
-					ModelValidationEngine.get().fireImportValidate(this, imp, orgInfo, ImportValidator.TIMING_BEFORE_IMPORT);
-
-					orgInfo.setAD_OrgType_ID(imp.getAD_OrgType_ID());
-					if(!Util.isEmpty(imp.getDUNS()))
-						orgInfo.setDUNS(imp.getDUNS());
-					if(!Util.isEmpty(imp.getTaxID()))
-						orgInfo.setTaxID(imp.getTaxID());
-					if(!Util.isEmpty(imp.getPhone()))
-						orgInfo.setPhone(imp.getPhone());
-					if(!Util.isEmpty(imp.getPhone2()))
-						orgInfo.setPhone2(imp.getPhone2());
-					if(!Util.isEmpty(imp.getFax()))
-						orgInfo.setFax(imp.getFax());
-					if(!Util.isEmpty(imp.getEMail()))
-						orgInfo.setEMail(imp.getEMail());
-
-					//Org Location
-					int C_Location_ID = imp.getC_Location_ID();
-					if(C_Location_ID > 0)
-					{
-						orgInfo.setC_Location_ID(C_Location_ID);
-
-					}else if(!Util.isEmpty(imp.getJP_Location_Label())){
-
-						C_Location_ID = JPiereLocationUtil.createLocation(
-								getCtx()
-								,"0"
-								,imp.getJP_Location_Label()
-								,imp.getComments()
-								,imp.getCountryCode()
-								,imp.getPostal()
-								,imp.getPostal_Add()
-								,imp.getRegionName()
-								,imp.getCity()
-								,imp.getAddress1()
-								,imp.getAddress2()
-								,imp.getAddress3()
-								,imp.getAddress4()
-								,imp.getAddress5()
-								,get_TrxName() );
-
-						orgInfo.setC_Location_ID(C_Location_ID);
-
-					}
-
-					ModelValidationEngine.get().fireImportValidate(this, imp, orgInfo, ImportValidator.TIMING_AFTER_IMPORT);
-
-					orgInfo.saveEx(get_TrxName());
-					commitEx();
-
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
 				}
+
 			}//while (rs.next())
 
 		}catch (Exception e){
@@ -261,7 +223,10 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
-		return Msg.getMsg(getCtx(), "Success");
+		return records + recordsNum + " = "	+
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
 	}	//	doIt
 
 	@Override
@@ -287,6 +252,9 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 		String msg = new String();
 		int no = 0;
 
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		//Reverse Look up AD_Org ID From Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
@@ -297,7 +265,7 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 				.append(" AND I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -323,7 +291,7 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -346,6 +314,9 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 		StringBuilder sql = new StringBuilder();
 		String msg = new String();
 		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_OrgType_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverse Look up AD_OrgType_ID From JP_OrgType_Name
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_OrgType_ID")
@@ -370,7 +341,7 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -394,6 +365,9 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 		String msg = new String();
 		int no = 0;
 
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
 		//Reverse Loog up C_Location_ID From JP_Location_Label
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Location_Label") ;
@@ -404,11 +378,167 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
 
 	}
 
+	/**
+	 *
+	 * Create Organization
+	 *
+	 * @param importOrg
+	 * @param newOrg
+	 * @return
+	 * @throws SQLException
+	 */
+	private boolean createNewOrg(X_I_OrgJP importOrg, MOrg newOrg) throws SQLException
+	{
+		ModelValidationEngine.get().fireImportValidate(this, importOrg, newOrg, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		newOrg.setValue(importOrg.getValue());
+		newOrg.setName(importOrg.getName());
+		newOrg.setDescription(importOrg.getDescription());
+		newOrg.setIsActive(importOrg.isI_IsActiveJP());
+		newOrg.setIsSummary(importOrg.isSummary());
+
+		ModelValidationEngine.get().fireImportValidate(this, importOrg, newOrg, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			newOrg.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importOrg.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "AD_Org_ID"));
+			importOrg.setI_IsImported(false);
+			importOrg.setProcessed(false);
+			importOrg.saveEx(get_TrxName());
+			return false;
+		}
+
+		importOrg.setAD_Org_ID(newOrg.getAD_Org_ID());
+
+		if(updateOrgInfo(importOrg,newOrg))
+		{
+			importOrg.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+			importOrg.setI_IsImported(true);
+			importOrg.setProcessed(true);
+			importOrg.saveEx(get_TrxName());
+			return true;
+		}else {
+			importOrg.setI_IsImported(true);
+			importOrg.setProcessed(false);
+			importOrg.saveEx(get_TrxName());
+			return false;
+		}
+
+	}//createNewOrg
+
+	/**
+	 * Update Organization
+	 *
+	 * @param importOrg
+	 * @param updateOrg
+	 * @return
+	 * @throws SQLException
+	 */
+	private boolean updateOrg(X_I_OrgJP importOrg, MOrg updateOrg) throws SQLException
+	{
+		ModelValidationEngine.get().fireImportValidate(this, importOrg, updateOrg, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		updateOrg.setName(importOrg.getName());
+		updateOrg.setDescription(importOrg.getDescription());
+		updateOrg.setIsActive(importOrg.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, importOrg, updateOrg, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			updateOrg.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importOrg.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "AD_Org_ID")+" :  " + e.toString());
+			importOrg.setI_IsImported(false);
+			importOrg.setProcessed(false);
+			importOrg.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(updateOrgInfo(importOrg,updateOrg))
+		{
+			importOrg.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+			importOrg.setI_IsImported(true);
+			importOrg.setProcessed(true);
+			importOrg.saveEx(get_TrxName());
+			return true;
+
+		}else {
+			importOrg.setI_IsImported(true);
+			importOrg.setProcessed(false);
+			importOrg.saveEx(get_TrxName());
+			return false;
+		}
+
+	}//updateOrg
+
+	private boolean updateOrgInfo(X_I_OrgJP importOrg, MOrg org)
+	{
+		MOrgInfo orgInfo = MOrgInfo.get(getCtx(), org.getAD_Org_ID(), get_TrxName());
+
+		ModelValidationEngine.get().fireImportValidate(this, importOrg, orgInfo, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		if(importOrg.getAD_OrgType_ID() > 0)
+			orgInfo.setAD_OrgType_ID(importOrg.getAD_OrgType_ID());
+		if(!Util.isEmpty(importOrg.getDUNS()))
+			orgInfo.setDUNS(importOrg.getDUNS());
+		if(!Util.isEmpty(importOrg.getTaxID()))
+			orgInfo.setTaxID(importOrg.getTaxID());
+		if(!Util.isEmpty(importOrg.getPhone()))
+			orgInfo.setPhone(importOrg.getPhone());
+		if(!Util.isEmpty(importOrg.getPhone2()))
+			orgInfo.setPhone2(importOrg.getPhone2());
+		if(!Util.isEmpty(importOrg.getFax()))
+			orgInfo.setFax(importOrg.getFax());
+		if(!Util.isEmpty(importOrg.getEMail()))
+			orgInfo.setEMail(importOrg.getEMail());
+
+		//Org Location
+		int C_Location_ID = importOrg.getC_Location_ID();
+		if(C_Location_ID > 0)
+		{
+			orgInfo.setC_Location_ID(C_Location_ID);
+
+		}else if(!Util.isEmpty(importOrg.getJP_Location_Label())){
+
+			C_Location_ID = JPiereLocationUtil.createLocation(
+					getCtx()
+					,"0"
+					,importOrg.getJP_Location_Label()
+					,importOrg.getComments()
+					,importOrg.getCountryCode()
+					,importOrg.getPostal()
+					,importOrg.getPostal_Add()
+					,importOrg.getRegionName()
+					,importOrg.getCity()
+					,importOrg.getAddress1()
+					,importOrg.getAddress2()
+					,importOrg.getAddress3()
+					,importOrg.getAddress4()
+					,importOrg.getAddress5()
+					,get_TrxName() );
+
+			orgInfo.setC_Location_ID(C_Location_ID);
+			importOrg.setC_Location_ID(C_Location_ID);
+
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, importOrg, orgInfo, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			orgInfo.saveEx(get_TrxName());
+		}catch (Exception e) {
+			importOrg.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "AD_OrgInfo_ID")+" :  " + e.toString());
+			return false;
+		}
+
+		return true;
+	}
 }	//	ImportPayment
