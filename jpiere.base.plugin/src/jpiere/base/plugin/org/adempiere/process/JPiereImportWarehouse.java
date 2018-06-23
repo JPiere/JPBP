@@ -146,64 +146,16 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 
 				if(isNew)//Create
 				{
-					//Check AD_Org_ID
-					if(imp.getAD_Org_ID() <= 0)
-					{
-						imp.setI_ErrorMsg("Check Organization Value");
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//Check Mandatory - Value
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					//Check Mandatory - Name
-					if(Util.isEmpty(imp.getName()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-
 					MWarehouse newWarehouse = new MWarehouse(getCtx (), 0, get_TrxName());
-					if(createNewWarehouse(imp,newWarehouse))
+					if(createNewWarehouse(imp, newWarehouse))
 						successNewNum++;
 					else
 						failureNewNum++;
 
 				}else{//Update
 
-					//Check Mandatory - Value
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					MWarehouse updateWarehouse = new MWarehouse(getCtx (), imp.getM_Warehouse_ID(), get_TrxName());
-					if(updateWarehouse(imp,updateWarehouse))
+					if(updateWarehouse(imp, updateWarehouse))
 						successUpdateNum++;
 					else
 						failureUpdateNum++;
@@ -521,6 +473,38 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 	 */
 	private boolean createNewWarehouse(X_I_WarehouseJP impWarehouse, MWarehouse newWarehouse)
 	{
+		//Check AD_Org_ID
+		if(impWarehouse.getAD_Org_ID() <= 0)
+		{
+			impWarehouse.setI_ErrorMsg("Check Organization Value");
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Check Mandatory - Value
+		if(Util.isEmpty(impWarehouse.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Check Mandatory - Name
+		if(Util.isEmpty(impWarehouse.getName()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
 		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, newWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		newWarehouse.setAD_Org_ID(impWarehouse.getAD_Org_ID());
@@ -601,6 +585,17 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 	 */
 	private boolean updateWarehouse(X_I_WarehouseJP impWarehouse, MWarehouse updateWarehouse)
 	{
+		//Check Mandatory - Value
+		if(Util.isEmpty(impWarehouse.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
 		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, updateWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		if(!Util.isEmpty(impWarehouse.getName()))

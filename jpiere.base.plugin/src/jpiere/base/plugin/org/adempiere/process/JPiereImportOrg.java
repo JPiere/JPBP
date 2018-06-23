@@ -149,29 +149,6 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 				if(isNew)//Create
 				{
-					//Check Mandatory
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
-					if(Util.isEmpty(imp.getName()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					//New Record
 					MOrg newOrg = new MOrg(getCtx (), 0, get_TrxName());
 					if(createNewOrg(imp,newOrg))
@@ -397,6 +374,27 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 	 */
 	private boolean createNewOrg(X_I_OrgJP importOrg, MOrg newOrg) throws SQLException
 	{
+		//Check Mandatory
+		if(Util.isEmpty(importOrg.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			importOrg.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importOrg.setI_IsImported(false);
+			importOrg.setProcessed(false);
+			importOrg.saveEx(get_TrxName());
+			return false;
+		}
+
+		if(Util.isEmpty(importOrg.getName()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+			importOrg.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importOrg.setI_IsImported(false);
+			importOrg.setProcessed(false);
+			importOrg.saveEx(get_TrxName());
+			return false;
+		}
+
 		ModelValidationEngine.get().fireImportValidate(this, importOrg, newOrg, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		newOrg.setValue(importOrg.getValue());

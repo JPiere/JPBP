@@ -145,11 +145,16 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
-		int successNum = 0;
-		int failureNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
 		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
 		String success = Msg.getMsg(getCtx(), "JP_Success");
 		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
+
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
@@ -160,17 +165,6 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			while (rs.next())
 			{
 				X_I_ProductJP imp = new X_I_ProductJP (getCtx (), rs, get_TrxName());
-
-				if(Util.isEmpty(imp.getValue()))
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-					imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-					imp.setI_IsImported(false);
-					imp.setProcessed(false);
-					imp.saveEx(get_TrxName());
-					failureNum++;
-					continue;
-				}
 
 				boolean isNew = true;
 				if(imp.getM_Product_ID()!=0)
@@ -196,23 +190,29 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 				{
 					product = new MProduct(getCtx(), 0, get_TrxName());
 					if(createNewProduct(imp,product))
-						successNum++;
+						successNewNum++;
 					else
-						failureNum++;
+						failureNewNum++;
 
 				}else{
 
 					if(updateProduct(imp,product))
-						successNum++;
+						successUpdateNum++;
 					else
-						failureNum++;
+						failureUpdateNum++;
 
 				}
 
 				commitEx();
 
 				recordsNum++;
-				if (processMonitor != null)	processMonitor.statusUpdate(success + " : " + successNum + "  /  " +  failure + " : " + failureNum);
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
 
 			}//while
 
@@ -227,7 +227,9 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
-		return records + recordsNum + " = "+ success + " : " + successNum + "  /  " +  failure + " : " + failureNum;
+		return records + recordsNum + " = "	+
+					newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+					+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
 
 	}	//	doIt
 
@@ -1009,9 +1011,17 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	 */
 	private boolean createNewProduct(X_I_ProductJP importProduct, MProduct newProduct) throws SQLException
 	{
-		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProduct, ImportValidator.TIMING_BEFORE_IMPORT);
-
 		//Mandatory Check!
+		if(Util.isEmpty(importProduct.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			importProduct.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			importProduct.setI_IsImported(false);
+			importProduct.setProcessed(false);
+			importProduct.saveEx(get_TrxName());
+			return false;
+		}
+
 		if(Util.isEmpty(importProduct.getName()))
 		{
 			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
@@ -1062,9 +1072,12 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			return false;
 		}
 
+		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProduct, ImportValidator.TIMING_BEFORE_IMPORT);
+
 		//Copy
 		PO.copyValues(importProduct, newProduct);
 		newProduct.setIsActive(importProduct.isI_IsActiveJP());
+
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProduct, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {

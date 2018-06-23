@@ -875,8 +875,6 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean createNewUser(X_I_UserJP importUser, MUser newUser) throws SQLException
 	{
-		ModelValidationEngine.get().fireImportValidate(this, importUser, newUser, ImportValidator.TIMING_BEFORE_IMPORT);
-
 		boolean isEMailLogin =  MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false, getAD_Client_ID());
 		if(isEMailLogin)
 		{
@@ -905,8 +903,11 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			}
 		}
 
+		ModelValidationEngine.get().fireImportValidate(this, importUser, newUser, ImportValidator.TIMING_BEFORE_IMPORT);
+
 		PO.copyValues(importUser, newUser);
 		newUser.setIsActive(importUser.isI_IsActiveJP());
+
 		ModelValidationEngine.get().fireImportValidate(this, importUser, newUser, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {
@@ -958,6 +959,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				|| i_Column.getColumnName().equals("EMail") //Can not Update EMail
 				|| i_Column.getColumnName().equals("AD_Client_ID")
 				|| i_Column.getColumnName().equals("Value")
+				|| i_Column.getColumnName().equals("Name")
 				|| i_Column.getColumnName().equals("Processing")
 				|| i_Column.getColumnName().equals("Created")
 				|| i_Column.getColumnName().equals("CreatedBy")
