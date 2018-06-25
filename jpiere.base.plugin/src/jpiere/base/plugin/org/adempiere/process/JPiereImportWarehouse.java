@@ -420,17 +420,17 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 	 * Set Warehouse Acct
 	 *
 	 * @param wh
-	 * @param imp
+	 * @param impWarehouse
 	 */
-	private void setMWarehouseAcct(MWarehouse wh, X_I_WarehouseJP imp)
+	private void setMWarehouseAcct(MWarehouse wh, X_I_WarehouseJP impWarehouse)
 	{
-		int C_ValidCombination_ID = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), imp.getC_AcctSchema_ID(), imp.getJP_W_Differences_Value(), get_TrxName());
+		int C_ValidCombination_ID = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), impWarehouse.getC_AcctSchema_ID(), impWarehouse.getJP_W_Differences_Value(), get_TrxName());
 		if(C_ValidCombination_ID == -1)
 			return ;
 
-		imp.setW_Differences_Acct(C_ValidCombination_ID);
+		impWarehouse.setW_Differences_Acct(C_ValidCombination_ID);
 
-		String WhereClause = " C_AcctSchema_ID=" +imp.getC_AcctSchema_ID() + " AND M_Warehouse_ID=" + wh.getM_Warehouse_ID() + " AND AD_Client_ID=" +Env.getAD_Client_ID(Env.getCtx());
+		String WhereClause = " C_AcctSchema_ID=" +impWarehouse.getC_AcctSchema_ID() + " AND M_Warehouse_ID=" + wh.getM_Warehouse_ID() + " AND AD_Client_ID=" +Env.getAD_Client_ID(Env.getCtx());
 
 		StringBuilder sql = new StringBuilder ("SELECT * FROM M_Warehouse_Acct WHERE " + WhereClause);
 		PreparedStatement pstmt = null;
@@ -443,11 +443,22 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 			if (rs.next())
 			{
 				X_M_Warehouse_Acct acct = new X_M_Warehouse_Acct (getCtx (), rs, get_TrxName());
-				ModelValidationEngine.get().fireImportValidate(this, imp, acct, ImportValidator.TIMING_BEFORE_IMPORT);
+				ModelValidationEngine.get().fireImportValidate(this, impWarehouse, acct, ImportValidator.TIMING_BEFORE_IMPORT);
 
-				acct.setW_Differences_Acct(C_ValidCombination_ID);
+				if(acct.getW_Differences_Acct() != C_ValidCombination_ID)
+				{
+					acct.setW_Differences_Acct(C_ValidCombination_ID);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "W_Differences_Acct");
 
-				ModelValidationEngine.get().fireImportValidate(this, imp, acct, ImportValidator.TIMING_AFTER_IMPORT);
+					if(Util.isEmpty(impWarehouse.getI_ErrorMsg()))
+					{
+						impWarehouse.setI_ErrorMsg(msg);
+					}else {
+						impWarehouse.setI_ErrorMsg(impWarehouse.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
+
+				ModelValidationEngine.get().fireImportValidate(this, impWarehouse, acct, ImportValidator.TIMING_AFTER_IMPORT);
 
 				acct.saveEx(get_TrxName());
 				commitEx();
@@ -476,7 +487,7 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		//Check AD_Org_ID
 		if(impWarehouse.getAD_Org_ID() <= 0)
 		{
-			impWarehouse.setI_ErrorMsg("Check Organization Value");
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value"));
 			impWarehouse.setI_IsImported(false);
 			impWarehouse.setProcessed(false);
 			impWarehouse.saveEx(get_TrxName());
@@ -569,7 +580,13 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		}
 
 
-		impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		if(Util.isEmpty(impWarehouse.getI_ErrorMsg()))
+		{
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		}else {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord")+ " / " +impWarehouse.getI_ErrorMsg());
+		}
+
 		impWarehouse.setI_IsImported(true);
 		impWarehouse.setProcessed(true);
 		impWarehouse.saveEx(get_TrxName());
@@ -637,7 +654,13 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 			setMWarehouseAcct(updateWarehouse, impWarehouse);
 		}
 
-		impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		if(Util.isEmpty(impWarehouse.getI_ErrorMsg()))
+		{
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		}else {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update")+ " / " +impWarehouse.getI_ErrorMsg());
+		}
+
 		impWarehouse.setI_IsImported(true);
 		impWarehouse.setProcessed(true);
 		impWarehouse.saveEx(get_TrxName());
