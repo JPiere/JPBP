@@ -167,18 +167,6 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 
 				}else{//Update
 
-					//Check Mandatory - Value
-					if(Util.isEmpty(imp.getValue()))
-					{
-						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
-						imp.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
-					}
-
 					MBankAccount updateBankAccount = new MBankAccount(getCtx(), imp.getC_BankAccount_ID(), get_TrxName());
 
 					if(updateBankAccount(imp,updateBankAccount))
@@ -258,7 +246,19 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			if(B_Asset_Acct > 0)
 			{
 				imp.setB_Asset_Acct(B_Asset_Acct);
-				acct.setB_Asset_Acct(B_Asset_Acct);
+
+				if(acct.getB_Asset_Acct() != B_Asset_Acct)
+				{
+					acct.setB_Asset_Acct(B_Asset_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_Asset_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -269,7 +269,18 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			if(B_InTransit_Acct > 0)
 			{
 				imp.setB_InTransit_Acct(B_InTransit_Acct);
-				acct.setB_InTransit_Acct(B_InTransit_Acct);
+				if(acct.getB_InTransit_Acct() != B_InTransit_Acct)
+				{
+					acct.setB_Asset_Acct(B_InTransit_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_InTransit_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -280,7 +291,18 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			if(B_PaymentSelect_Acct > 0)
 			{
 				imp.setB_PaymentSelect_Acct(B_PaymentSelect_Acct);
-				acct.setB_PaymentSelect_Acct(B_PaymentSelect_Acct);
+				if(acct.getB_PaymentSelect_Acct() != B_PaymentSelect_Acct)
+				{
+					acct.setB_Asset_Acct(B_PaymentSelect_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_PaymentSelect_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -291,7 +313,18 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			if(B_UnallocatedCash_Acct > 0)
 			{
 				imp.setB_UnallocatedCash_Acct(B_UnallocatedCash_Acct);
-				acct.setB_UnallocatedCash_Acct(B_UnallocatedCash_Acct);
+				if(acct.getB_UnallocatedCash_Acct() != B_UnallocatedCash_Acct)
+				{
+					acct.setB_Asset_Acct(B_UnallocatedCash_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_UnallocatedCash_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -302,7 +335,18 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			if(B_InterestExp_Acct > 0)
 			{
 				imp.setB_InterestExp_Acct(B_InterestExp_Acct);
-				acct.setB_InterestExp_Acct(B_InterestExp_Acct);
+				if(acct.getB_InterestExp_Acct() != B_InterestExp_Acct)
+				{
+					acct.setB_Asset_Acct(B_InterestExp_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_InterestExp_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -313,7 +357,18 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			if(B_InterestRev_Acct > 0)
 			{
 				imp.setB_InterestRev_Acct(B_InterestRev_Acct);
-				acct.setB_InterestRev_Acct(B_InterestRev_Acct);
+				if(acct.getB_InterestRev_Acct() != B_InterestRev_Acct)
+				{
+					acct.setB_Asset_Acct(B_InterestRev_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_InterestRev_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -431,7 +486,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
 		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
 				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
-				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID AND i.C_Bank_ID = p.C_Bank_ID) ")
 				.append(" WHERE i.C_BankAccount_ID IS NULL AND Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
@@ -804,13 +859,20 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		}
 
 		importBankAccount.setC_BankAccount_ID(newBankAccount.getC_BankAccount_ID());
-		importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
-		importBankAccount.setI_IsImported(true);
-		importBankAccount.setProcessed(true);
 
 		if(!Util.isEmpty(importBankAccount.getJP_AcctSchema_Name()) && importBankAccount.getC_AcctSchema_ID() > 0)
 			setBankAccountAcct(newBankAccount, importBankAccount);
 
+		if(Util.isEmpty(importBankAccount.getI_ErrorMsg()))
+		{
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		}else {
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord") + "  &  " +importBankAccount.getI_ErrorMsg());
+		}
+
+		importBankAccount.setI_IsImported(true);
+		importBankAccount.setProcessed(true);
+		importBankAccount.saveEx(get_TrxName());
 
 		return true;
 	}
@@ -884,7 +946,13 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		if(!Util.isEmpty(importBankAccount.getJP_AcctSchema_Name()) && importBankAccount.getC_AcctSchema_ID() > 0)
 			setBankAccountAcct(updateBankAccount, importBankAccount);
 
-		importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		if(Util.isEmpty(importBankAccount.getI_ErrorMsg()))
+		{
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		}else {
+			importBankAccount.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update") + "  &  " + importBankAccount.getI_ErrorMsg());
+		}
+
 		importBankAccount.setI_IsImported(true);
 		importBankAccount.setProcessed(true);
 		importBankAccount.saveEx(get_TrxName());
