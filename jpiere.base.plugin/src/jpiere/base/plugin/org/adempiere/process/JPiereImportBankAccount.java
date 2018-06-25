@@ -374,7 +374,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 
 		acct.saveEx(get_TrxName());
 
-	}
+	}//setBankAccountAcct
 
 
 	/**
@@ -397,7 +397,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
@@ -410,7 +410,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
@@ -444,12 +444,12 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
 
-		//Invalid JP_Org_Value
+		//Invalid JP_Bank_Name
 		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Bank_Name");
 		sql = new StringBuilder ("UPDATE I_BankAccountJP ")
 			.append("SET I_ErrorMsg='"+ msg + "'")
@@ -457,7 +457,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}

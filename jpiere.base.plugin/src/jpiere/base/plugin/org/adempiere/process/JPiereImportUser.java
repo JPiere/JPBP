@@ -256,6 +256,44 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
+		boolean isEMailLogin =  MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false, getAD_Client_ID());
+		if(isEMailLogin)
+		{
+			//Reverse lookup AD_User_ID From E-Mail
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "EMail") ;
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+				.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID) ")
+				.append(" WHERE i.EMail IS NOT NULL AND i.AD_User_ID IS NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+
+		}else {
+
+			//Reverse lookup AD_User_ID From Name && password
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Name" + " : " + Msg.getElement(getCtx(), "Password") );
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Name=p.Name AND i.Password=p.Password AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.Password IS NOT NULL AND i.Name IS NOT NULL AND i.AD_User_ID IS NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}
+
 		//Reverse lookup AD_User_ID From Value && Name
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " : " + Msg.getElement(getCtx(), "Name") );
@@ -264,21 +302,6 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL AND i.Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
-
-		//Reverse lookup AD_User_ID From E-Mail
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "EMail") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
-			.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-			.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID) ")
-			.append(" WHERE i.EMail IS NOT NULL AND i.AD_User_ID IS NULL")
-			.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
@@ -476,7 +499,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Org_Value") ;
 		sql = new StringBuilder ("UPDATE I_UserJP i ")
-				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_Org p")
 				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N') ")
 				.append(" WHERE i.JP_Org_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
@@ -903,9 +926,34 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			}
 		}
 
+		if(Util.isEmpty(importUser.getName()))
+		{
+			importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_Null") + Msg.getElement(getCtx(),"Name"));
+			importUser.setI_IsImported(false);
+			importUser.setProcessed(false);
+			importUser.saveEx(get_TrxName());
+			return false;
+		}
+
 		ModelValidationEngine.get().fireImportValidate(this, importUser, newUser, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(importUser, newUser);
+
+		//Replace <CRLF>->\r\n,  <CR> -> \r,  <LF> -> \n
+		if(!Util.isEmpty(newUser.getDescription()))
+		{
+			newUser.setDescription(newUser.getDescription().replaceAll("<CRLF>", "\r\n"));
+			newUser.setDescription(newUser.getDescription().replaceAll("<CR>", "\r"));
+			newUser.setDescription(newUser.getDescription().replaceAll("<LF>", "\n"));
+		}
+
+		if(!Util.isEmpty(importUser.getComments()))
+		{
+			newUser.setComments(newUser.getComments().replaceAll("<CRLF>", "\r\n"));
+			newUser.setComments(newUser.getComments().replaceAll("<CR>", "\r"));
+			newUser.setComments(newUser.getComments().replaceAll("<LF>", "\n"));
+		}
+
 		newUser.setIsActive(importUser.isI_IsActiveJP());
 
 		ModelValidationEngine.get().fireImportValidate(this, importUser, newUser, ImportValidator.TIMING_AFTER_IMPORT);
@@ -913,7 +961,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			newUser.saveEx(get_TrxName());
 		}catch (Exception e) {
-			importUser.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "AD_User_ID"));
+			importUser.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + " : "+ Msg.getElement(getCtx(), "AD_User_ID") + " : " + e.toString());
 			importUser.setI_IsImported(false);
 			importUser.setProcessed(false);
 			importUser.saveEx(get_TrxName());
@@ -921,6 +969,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		}
 
 		importUser.setAD_User_ID(newUser.getAD_User_ID());
+
 		importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
 		importUser.setI_IsImported(true);
 		importUser.setProcessed(true);
@@ -992,6 +1041,21 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 						String string_Value = (String)importValue;
 						if(!Util.isEmpty(string_Value))
 						{
+							//Replace <CRLF>->\r\n,  <CR> -> \r,  <LF> -> \n
+							if(j_Column.getColumnName().equals("Descripton"))
+							{
+								importValue = importValue.toString().replaceAll("<CRLF>", "\r\n");
+								importValue = importValue.toString().replaceAll("<CR>", "\r");
+								importValue = importValue.toString().replaceAll("<LF>", "\n");
+							}
+
+							if(j_Column.getColumnName().equals("Commnets"))
+							{
+								importValue = importValue.toString().replaceAll("<CRLF>", "\r\n");
+								importValue = importValue.toString().replaceAll("<CR>", "\r");
+								importValue = importValue.toString().replaceAll("<LF>", "\n");
+							}
+
 							updateUser.set_ValueNoCheck(i_Column.getColumnName(), importValue);
 						}
 
@@ -1006,8 +1070,25 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 					if(importValue != null)
 					{
-						try {
+						try
+						{
 							updateUser.set_ValueNoCheck(i_Column.getColumnName(), importValue);
+
+							//Replace <CRLF>->\r\n,  <CR> -> \r,  <LF> -> \n
+							if(j_Column.getColumnName().equals("Descripton"))
+							{
+								updateUser.setDescription(updateUser.getDescription().replaceAll("<CRLF>", "\r\n"));
+								updateUser.setDescription(updateUser.getDescription().replaceAll("<CR>", "\r"));
+								updateUser.setDescription(updateUser.getDescription().replaceAll("<LF>", "\n"));
+							}
+
+							if(j_Column.getColumnName().equals("Comments"))
+							{
+								updateUser.setComments(updateUser.getComments().replaceAll("<CRLF>", "\r\n"));
+								updateUser.setComments(updateUser.getComments().replaceAll("<CR>", "\r"));
+								updateUser.setComments(updateUser.getComments().replaceAll("<LF>", "\n"));
+							}
+
 						}catch (Exception e) {
 
 							importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + " Column = " + i_Column.getColumnName() + " & " + "Value = " +importValue.toString());
@@ -1033,7 +1114,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			updateUser.saveEx(get_TrxName());
 		}catch (Exception e) {
-			importUser.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "AD_User_ID"));
+			importUser.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError")  + " : " + Msg.getElement(getCtx(), "AD_User_ID") + " : " + e.toString());
 			importUser.setI_IsImported(false);
 			importUser.setProcessed(false);
 			importUser.saveEx(get_TrxName());
