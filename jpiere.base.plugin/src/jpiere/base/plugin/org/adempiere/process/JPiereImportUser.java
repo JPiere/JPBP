@@ -273,7 +273,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "EMail") ;
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID) ")
+				.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID AND p.Password IS NOT NULL) ")
 				.append(" WHERE i.EMail IS NOT NULL AND i.AD_User_ID IS NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 			try {
@@ -1028,7 +1028,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				continue;//i
 
 			if(i_Column.getColumnName().equals("IsActive")
-				|| i_Column.getColumnName().equals("EMail") //Can not Update EMail
+//				|| i_Column.getColumnName().equals("EMail") //Can not Update EMail
 				|| i_Column.getColumnName().equals("AD_Client_ID")
 				|| i_Column.getColumnName().equals("Value")
 				|| i_Column.getColumnName().equals("Name")

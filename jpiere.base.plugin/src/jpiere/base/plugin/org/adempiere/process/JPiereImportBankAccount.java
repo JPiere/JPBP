@@ -453,7 +453,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
 				.append("SET C_Bank_ID=(SELECT C_Bank_ID FROM C_Bank p")
 				.append(" WHERE i.JP_Bank_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.C_Bank_ID IS NULL AND JP_Bank_Name IS NOT NULL")
+				.append(" WHERE i.C_Bank_ID IS NULL AND i.JP_Bank_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -506,7 +506,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + sql );
 		}
 
 		//Reverese Look up C_BankAccount_ID From Value
@@ -515,7 +515,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
 				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
 				.append(" WHERE i.Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID AND i.C_Bank_ID = p.C_Bank_ID) ")
-				.append(" WHERE i.Value IS NOT NULL AND C_BankAccount_ID IS NULL ")
+				.append(" WHERE i.Value IS NOT NULL AND i.C_BankAccount_ID IS NULL ")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -685,7 +685,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 
 		//Description
 		if(!Util.isEmpty(importBankAccount.getDescription()))
-			newBankAccount.setValue(importBankAccount.getDescription());
+			newBankAccount.setDescription(importBankAccount.getDescription());
 
 		//IsDefault
 		newBankAccount.setIsDefault(importBankAccount.isDefault());
