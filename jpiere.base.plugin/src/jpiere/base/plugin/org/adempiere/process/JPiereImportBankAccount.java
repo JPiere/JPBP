@@ -47,6 +47,9 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 
 	private boolean p_deleteOldImported = false;
 
+	/**	Only validate, don't import		*/
+	private boolean	p_IsValidateOnly = false;
+
 	private IProcessUI processMonitor = null;
 
 	/**
@@ -99,8 +102,12 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		{
 			sql = new StringBuilder ("DELETE I_BankAccountJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			try {
+				no = DB.executeUpdate(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			}
 		}
 
 		//Reset Message
@@ -126,6 +133,10 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
+		if (p_IsValidateOnly)
+		{
+			return "Validated";
+		}
 
 		//
 		sql = new StringBuilder ("SELECT * FROM I_BankAccountJP WHERE I_IsImported='N'")
@@ -471,7 +482,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 	}//reverseLookupC_Bank_ID
 
 	/**
-	 * Reverese Look up C_BankAccount_ID From Value
+	 * Reverese Look up C_BankAccount_ID From Value & AccountNo
 	 *
 	 * @throws Exception
 	 */
@@ -481,17 +492,32 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		String msg = new String();
 		int no = 0;
 
+		//Reverese Look up C_BankAccount_ID From JP_BranchCode and AccountNo
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BankAccount_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_BranchCode")  + " : " + Msg.getElement(getCtx(), "AccountNo") ;
+		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
+				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
+				.append(" WHERE i.JP_BranchCode=p.JP_BranchCode AND i.AccountNo=p.AccountNo AND i.C_Bank_ID = p.C_Bank_ID) ")
+				.append(" WHERE i.AccountNo IS NOT NULL AND i.JP_BranchCode IS NOT NULL ")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
 		//Reverese Look up C_BankAccount_ID From Value
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BankAccount_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
 		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
 				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
-				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID AND i.C_Bank_ID = p.C_Bank_ID) ")
-				.append(" WHERE i.C_BankAccount_ID IS NULL AND Value IS NOT NULL")
+				.append(" WHERE i.Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID AND i.C_Bank_ID = p.C_Bank_ID) ")
+				.append(" WHERE i.Value IS NOT NULL AND C_BankAccount_ID IS NULL ")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
