@@ -1793,28 +1793,35 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			newBPartnerLocation.setC_Location_ID(importBPartner.getC_Location_ID());
 
 		}else {
-			int C_Location_ID = JPiereLocationUtil.createLocation(
-					getCtx()
-					,0
-					,importBPartner.getJP_Location_Label()
-					,importBPartner.getComments()
-					,importBPartner.getCountryCode()
-					,importBPartner.getPostal()
-					,importBPartner.getPostal_Add()
-					,importBPartner.getRegionName()
-					,importBPartner.getCity()
-					,importBPartner.getAddress1()
-					,importBPartner.getAddress2()
-					,importBPartner.getAddress3()
-					,importBPartner.getAddress4()
-					,importBPartner.getAddress5()
-					,get_TrxName() );
+
+			int C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), importBPartner.getJP_Location_Label(), get_TrxName());
+			if(C_Location_ID == 0)
+			{
+				C_Location_ID = JPiereLocationUtil.createLocation(
+						getCtx()
+						,0
+						,importBPartner.getJP_Location_Label()
+						,importBPartner.getComments()
+						,importBPartner.getCountryCode()
+						,importBPartner.getPostal()
+						,importBPartner.getPostal_Add()
+						,importBPartner.getRegionName()
+						,importBPartner.getCity()
+						,importBPartner.getAddress1()
+						,importBPartner.getAddress2()
+						,importBPartner.getAddress3()
+						,importBPartner.getAddress4()
+						,importBPartner.getAddress5()
+						,get_TrxName() );
+			}
 			newBPartnerLocation.setC_Location_ID(C_Location_ID);
+			importBPartner.setC_Location_ID(C_Location_ID);
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartnerLocation, ImportValidator.TIMING_AFTER_IMPORT);
 
 		newBPartnerLocation.saveEx(get_TrxName());
+		importBPartner.setC_BPartner_Location_ID(newBPartnerLocation.getC_BPartner_Location_ID());
 
 		return newBPartnerLocation.getC_BPartner_Location_ID();
 	}
@@ -1985,6 +1992,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			importBPartner.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") +" : " +Msg.getElement(getCtx(), "AD_User_ID"));
 			return 0;
 		}
+
+		importBPartner.setAD_User_ID(user.getAD_User_ID());
 
 		if(importBPartner.getR_InterestArea_ID() > 0)
 			createContactInterest(importBPartner,user.getAD_User_ID());

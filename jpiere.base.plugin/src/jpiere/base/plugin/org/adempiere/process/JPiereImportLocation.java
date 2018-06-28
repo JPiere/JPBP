@@ -43,6 +43,9 @@ public class JPiereImportLocation extends SvrProcess implements ImportProcess
 
 	private boolean p_deleteOldImported = false;
 
+	/**	Only validate, don't import		*/
+	private boolean	p_IsValidateOnly = false;
+
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -54,6 +57,8 @@ public class JPiereImportLocation extends SvrProcess implements ImportProcess
 			String name = para[i].getParameterName();
 			if (name.equals("DeleteOldImported"))
 				p_deleteOldImported = "Y".equals(para[i].getParameter());
+			else if (name.equals("IsValidateOnly"))
+				p_IsValidateOnly = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -93,7 +98,10 @@ public class JPiereImportLocation extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
-
+		if (p_IsValidateOnly)
+		{
+			return "Validated";
+		}
 		//
 		sql = new StringBuilder ("SELECT * FROM I_LocationJP WHERE I_IsImported='N'")
 					.append(clientCheck);

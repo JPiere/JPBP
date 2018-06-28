@@ -57,6 +57,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	/**	Delete old Imported				*/
 	private boolean			m_deleteOldImported = false;
 
+	/**	Only validate, don't import		*/
+	private boolean			p_IsValidateOnly = false;
 
 	private IProcessUI processMonitor = null;
 
@@ -73,6 +75,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 				m_AD_Client_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else if (name.equals("DeleteOldImported"))
 				m_deleteOldImported = "Y".equals(para[i].getParameter());
+			else if (name.equals("IsValidateOnly"))
+				p_IsValidateOnly = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -135,6 +139,10 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
+		if (p_IsValidateOnly)
+		{
+			return "Validated";
+		}
 
 		//Register & Update Product
 		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "M_Product_ID");

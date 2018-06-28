@@ -49,6 +49,9 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 	private boolean p_deleteOldImported = false;
 
+	/**	Only validate, don't import		*/
+	private boolean	p_IsValidateOnly = false;
+
 	private IProcessUI processMonitor = null;
 
 	/**
@@ -62,6 +65,8 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 			String name = para[i].getParameterName();
 			if (name.equals("DeleteOldImported"))
 				p_deleteOldImported = "Y".equals(para[i].getParameter());
+			else if (name.equals("IsValidateOnly"))
+				p_IsValidateOnly = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -117,7 +122,10 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
-
+		if (p_IsValidateOnly)
+		{
+			return "Validated";
+		}
 
 		sql = new StringBuilder ("SELECT * FROM I_OrgJP WHERE I_IsImported='N'")
 					.append(clientCheck);

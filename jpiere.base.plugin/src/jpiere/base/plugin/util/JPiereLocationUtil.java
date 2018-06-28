@@ -48,6 +48,10 @@ public class JPiereLocationUtil {
 	 */
 	public static int searchLocationByLabel (Properties ctx, String JP_Location_Label, String trxName )
 	{
+		if(JP_Location_Label.indexOf("'") != -1)
+		{
+			JP_Location_Label = JP_Location_Label.replaceAll("'", "''");//Escape
+		}
 
 		String WhereClause = " JP_Location_Label='" +JP_Location_Label + "'" + " AND AD_Client_ID=" +Env.getAD_Client_ID(Env.getCtx());
 

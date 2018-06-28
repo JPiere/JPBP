@@ -51,6 +51,9 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	/**	Delete old Imported				*/
 	private boolean			m_deleteOldImported = false;
 
+	/**	Only validate, don't import		*/
+	private boolean			p_IsValidateOnly = false;
+
 
 	private IProcessUI processMonitor = null;
 
@@ -67,6 +70,8 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				m_AD_Client_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else if (name.equals("DeleteOldImported"))
 				m_deleteOldImported = "Y".equals(para[i].getParameter());
+			else if (name.equals("IsValidateOnly"))
+				p_IsValidateOnly = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -130,6 +135,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
+		if (p_IsValidateOnly)
+		{
+			return "Validated";
+		}
 
 		//Register & Update User
 		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "AD_User_ID");
@@ -300,7 +309,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
 				.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL AND i.Name IS NOT NULL")
+				.append(" WHERE i.AD_User_ID IS NULL AND i.Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -924,6 +933,20 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				importUser.saveEx(get_TrxName());
 				return false;
 			}
+
+//			int[]  users = PO.getAllIDs(MUser.Table_Name, "EMail=" + email + " AND AD_Client_ID=" + m_AD_Client_ID, get_TrxName());
+//			if(users.length > 0)
+//			{
+//				int AD_User_ID = users[0];
+//				MUser user = new MUser(getCtx(), AD_User_ID, get_TrxName());
+//				importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_SameEMail") + " -> " +
+//										Msg.getElement(Env.getCtx(), "AD_User_ID") + " : "+ user.getName());
+//				importUser.setI_IsImported(false);
+//				importUser.setProcessed(false);
+//				importUser.saveEx(get_TrxName());
+//				return false;
+//
+//			}
 		}
 
 		if(Util.isEmpty(importUser.getName()))

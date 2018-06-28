@@ -63,6 +63,8 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			String name = para[i].getParameterName();
 			if (name.equals("DeleteOldImported"))
 				p_deleteOldImported = "Y".equals(para[i].getParameter());
+			else if (name.equals("IsValidateOnly"))
+				p_IsValidateOnly = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
