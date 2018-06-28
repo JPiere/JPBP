@@ -46,7 +46,7 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 	private boolean p_deleteOldImported = false;
 
 	/**	Only validate, don't import		*/
-	private boolean			p_IsValidateOnly = false;
+	private boolean	p_IsValidateOnly = false;
 
 	private IProcessUI processMonitor = null;
 
@@ -266,7 +266,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(NotInvoicedReceipts_Acct > 0)
 			{
 				imp.setNotInvoicedReceipts_Acct(NotInvoicedReceipts_Acct);
-				acct.setNotInvoicedReceipts_Acct(NotInvoicedReceipts_Acct);
+				if(acct.getNotInvoicedReceipts_Acct() != NotInvoicedReceipts_Acct)
+				{
+					acct.setNotInvoicedReceipts_Acct(NotInvoicedReceipts_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "NotInvoicedReceipts_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -277,7 +288,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(PayDiscount_Exp_Acct > 0)
 			{
 				imp.setPayDiscount_Exp_Acct(PayDiscount_Exp_Acct);
-				acct.setPayDiscount_Exp_Acct(PayDiscount_Exp_Acct);
+				if(acct.getPayDiscount_Exp_Acct() != PayDiscount_Exp_Acct)
+				{
+					acct.setPayDiscount_Exp_Acct(PayDiscount_Exp_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "PayDiscount_Exp_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -288,7 +310,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(PayDiscount_Rev_Acct > 0)
 			{
 				imp.setPayDiscount_Rev_Acct(PayDiscount_Rev_Acct);
-				acct.setPayDiscount_Rev_Acct(PayDiscount_Rev_Acct);
+				if(acct.getPayDiscount_Rev_Acct() != PayDiscount_Rev_Acct)
+				{
+					acct.setPayDiscount_Rev_Acct(PayDiscount_Rev_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "PayDiscount_Rev_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -299,7 +332,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(WriteOff_Acct > 0)
 			{
 				imp.setWriteOff_Acct(WriteOff_Acct);
-				acct.setWriteOff_Acct(WriteOff_Acct);
+				if(acct.getWriteOff_Acct() != WriteOff_Acct)
+				{
+					acct.setWriteOff_Acct(WriteOff_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "WriteOff_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -310,7 +354,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(C_Receivable_Acct > 0)
 			{
 				imp.setC_Receivable_Acct(C_Receivable_Acct);
-				acct.setC_Receivable_Acct(C_Receivable_Acct);
+				if(acct.getC_Receivable_Acct() != C_Receivable_Acct)
+				{
+					acct.setC_Receivable_Acct(C_Receivable_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "C_Receivable_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -321,7 +376,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(C_Prepayment_Acct > 0)
 			{
 				imp.setC_Prepayment_Acct(C_Prepayment_Acct);
-				acct.setC_Prepayment_Acct(C_Prepayment_Acct);
+				if(acct.getC_Prepayment_Acct() != C_Prepayment_Acct)
+				{
+					acct.setC_Prepayment_Acct(C_Prepayment_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "C_Prepayment_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -332,7 +398,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(V_Liability_Acct > 0)
 			{
 				imp.setV_Liability_Acct(V_Liability_Acct);
-				acct.setV_Liability_Acct(V_Liability_Acct);
+				if(acct.getV_Liability_Acct() != V_Liability_Acct)
+				{
+					acct.setV_Liability_Acct(V_Liability_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "V_Liability_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -343,7 +420,18 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 			if(V_Prepayment_Acct > 0)
 			{
 				imp.setV_Prepayment_Acct(V_Prepayment_Acct);
-				acct.setV_Prepayment_Acct(V_Prepayment_Acct);
+				if(acct.getV_Prepayment_Acct() != V_Prepayment_Acct)
+				{
+					acct.setV_Prepayment_Acct(V_Prepayment_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "V_Prepayment_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -869,7 +957,13 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 		if(!Util.isEmpty(impBPGroup.getJP_AcctSchema_Name()) && impBPGroup.getC_AcctSchema_ID() > 0)
 			setBPGroupAcct(newBPGroup, impBPGroup);
 
-		impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		if(Util.isEmpty(impBPGroup.getI_ErrorMsg()))
+		{
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		}else {
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord") + "  &  " +impBPGroup.getI_ErrorMsg());
+		}
+
 		impBPGroup.setI_IsImported(true);
 		impBPGroup.setProcessed(true);
 		impBPGroup.saveEx(get_TrxName());
@@ -941,7 +1035,13 @@ public class JPiereImportBPGroup extends SvrProcess implements ImportProcess
 		if(!Util.isEmpty(impBPGroup.getJP_AcctSchema_Name()) && impBPGroup.getC_AcctSchema_ID() > 0)
 			setBPGroupAcct(updateBPGroup, impBPGroup);
 
-		impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		if(Util.isEmpty(impBPGroup.getI_ErrorMsg()))
+		{
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		}else {
+			impBPGroup.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update") + "  &  " + impBPGroup.getI_ErrorMsg());
+		}
+
 		impBPGroup.setI_IsImported(true);
 		impBPGroup.setProcessed(true);
 		impBPGroup.saveEx(get_TrxName());

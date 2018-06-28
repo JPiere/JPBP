@@ -261,7 +261,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_Asset_Acct > 0)
 			{
 				imp.setP_Asset_Acct(P_Asset_Acct);
-				acct.setP_Asset_Acct(P_Asset_Acct);
+				if(acct.getP_Asset_Acct() != P_Asset_Acct)
+				{
+					acct.setP_Asset_Acct(P_Asset_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_Asset_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -272,7 +283,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_Expense_Acct > 0)
 			{
 				imp.setP_Expense_Acct(P_Expense_Acct);
-				acct.setP_Expense_Acct(P_Expense_Acct);
+				if(acct.getP_Expense_Acct() != P_Expense_Acct)
+				{
+					acct.setP_Expense_Acct(P_Expense_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_Expense_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -283,7 +305,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_CostAdjustment_Acct > 0)
 			{
 				imp.setP_CostAdjustment_Acct(P_CostAdjustment_Acct);
-				acct.setP_CostAdjustment_Acct(P_CostAdjustment_Acct);
+				if(acct.getP_CostAdjustment_Acct() != P_CostAdjustment_Acct)
+				{
+					acct.setP_CostAdjustment_Acct(P_CostAdjustment_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_CostAdjustment_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -294,7 +327,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_InventoryClearing_Acct > 0)
 			{
 				imp.setP_InventoryClearing_Acct(P_InventoryClearing_Acct);
-				acct.setP_InventoryClearing_Acct(P_InventoryClearing_Acct);
+				if(acct.getP_InventoryClearing_Acct() != P_InventoryClearing_Acct)
+				{
+					acct.setP_InventoryClearing_Acct(P_InventoryClearing_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_InventoryClearing_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -305,7 +349,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_COGS_Acct > 0)
 			{
 				imp.setP_COGS_Acct(P_COGS_Acct);
-				acct.setP_COGS_Acct(P_COGS_Acct);
+				if(acct.getP_COGS_Acct() != P_COGS_Acct)
+				{
+					acct.setP_COGS_Acct(P_COGS_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_COGS_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -316,7 +371,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_Revenue_Acct > 0)
 			{
 				imp.setP_Revenue_Acct(P_Revenue_Acct);
-				acct.setP_Revenue_Acct(P_Revenue_Acct);
+				if(acct.getP_Revenue_Acct() != P_Revenue_Acct)
+				{
+					acct.setP_Revenue_Acct(P_Revenue_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_Revenue_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -327,7 +393,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_PurchasePriceVariance_Acct > 0)
 			{
 				imp.setP_PurchasePriceVariance_Acct(P_PurchasePriceVariance_Acct);
-				acct.setP_PurchasePriceVariance_Acct(P_PurchasePriceVariance_Acct);
+				if(acct.getP_PurchasePriceVariance_Acct() != P_PurchasePriceVariance_Acct)
+				{
+					acct.setP_PurchasePriceVariance_Acct(P_PurchasePriceVariance_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_PurchasePriceVariance_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -338,7 +415,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_InvoicePriceVariance_Acct > 0)
 			{
 				imp.setP_InvoicePriceVariance_Acct(P_InvoicePriceVariance_Acct);
-				acct.setP_InvoicePriceVariance_Acct(P_InvoicePriceVariance_Acct);
+				if(acct.getP_InvoicePriceVariance_Acct() != P_InvoicePriceVariance_Acct)
+				{
+					acct.setP_InvoicePriceVariance_Acct(P_InvoicePriceVariance_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_InvoicePriceVariance_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -349,7 +437,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_TradeDiscountRec_Acct > 0)
 			{
 				imp.setP_TradeDiscountRec_Acct(P_TradeDiscountRec_Acct);
-				acct.setP_TradeDiscountRec_Acct(P_TradeDiscountRec_Acct);
+				if(acct.getP_TradeDiscountRec_Acct() != P_TradeDiscountRec_Acct)
+				{
+					acct.setP_TradeDiscountRec_Acct(P_TradeDiscountRec_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_TradeDiscountRec_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -360,7 +459,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_TradeDiscountGrant_Acct > 0)
 			{
 				imp.setP_TradeDiscountGrant_Acct(P_TradeDiscountGrant_Acct);
-				acct.setP_TradeDiscountGrant_Acct(P_TradeDiscountGrant_Acct);
+				if(acct.getP_TradeDiscountGrant_Acct() != P_TradeDiscountGrant_Acct)
+				{
+					acct.setP_TradeDiscountGrant_Acct(P_TradeDiscountGrant_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_TradeDiscountGrant_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -371,7 +481,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_RateVariance_Acct > 0)
 			{
 				imp.setP_RateVariance_Acct(P_RateVariance_Acct);
-				acct.setP_RateVariance_Acct(P_RateVariance_Acct);
+				if(acct.getP_RateVariance_Acct() != P_RateVariance_Acct)
+				{
+					acct.setP_RateVariance_Acct(P_RateVariance_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_RateVariance_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -382,7 +503,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_AverageCostVariance_Acct > 0)
 			{
 				imp.setP_AverageCostVariance_Acct(P_AverageCostVariance_Acct);
-				acct.setP_AverageCostVariance_Acct(P_AverageCostVariance_Acct);
+				if(acct.getP_AverageCostVariance_Acct() != P_AverageCostVariance_Acct)
+				{
+					acct.setP_AverageCostVariance_Acct(P_AverageCostVariance_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_AverageCostVariance_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -393,7 +525,18 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 			if(P_LandedCostClearing_Acct > 0)
 			{
 				imp.setP_LandedCostClearing_Acct(P_LandedCostClearing_Acct);
-				acct.setP_LandedCostClearing_Acct(P_LandedCostClearing_Acct);
+				if(acct.getP_LandedCostClearing_Acct() != P_LandedCostClearing_Acct)
+				{
+					acct.setP_LandedCostClearing_Acct(P_LandedCostClearing_Acct);
+					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "P_LandedCostClearing_Acct");
+
+					if(Util.isEmpty(imp.getI_ErrorMsg()))
+					{
+						imp.setI_ErrorMsg(msg);
+					}else {
+						imp.setI_ErrorMsg(imp.getI_ErrorMsg()+ " / " + msg);
+					}
+				}
 			}
 		}
 
@@ -734,7 +877,7 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 		newProductCategory.setName(impProductCategory.getName());
 
 		if(!Util.isEmpty(impProductCategory.getDescription()))
-			newProductCategory.setValue(impProductCategory.getDescription());
+			newProductCategory.setDescription(impProductCategory.getDescription());
 		newProductCategory.setIsDefault(impProductCategory.isDefault());
 		newProductCategory.setIsSelfService(impProductCategory.isSelfService());
 
@@ -770,7 +913,13 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 		if(!Util.isEmpty(impProductCategory.getJP_AcctSchema_Name()) && impProductCategory.getC_AcctSchema_ID() > 0)
 			setProductCategoryAcct(newProductCategory, impProductCategory);
 
-		impProductCategory.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		if(Util.isEmpty(impProductCategory.getI_ErrorMsg()))
+		{
+			impProductCategory.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		}else {
+			impProductCategory.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord") + "  &  " +impProductCategory.getI_ErrorMsg());
+		}
+
 		impProductCategory.setI_IsImported(true);
 		impProductCategory.setProcessed(true);
 		impProductCategory.saveEx(get_TrxName());
@@ -826,6 +975,13 @@ public class JPiereImportProductCategory extends SvrProcess implements ImportPro
 
 		if(!Util.isEmpty(imp.getJP_AcctSchema_Name()) && imp.getC_AcctSchema_ID() > 0)
 			setProductCategoryAcct(updateProductCategory, imp);
+
+		if(Util.isEmpty(imp.getI_ErrorMsg()))
+		{
+			imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		}else {
+			imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update") + "  &  " + imp.getI_ErrorMsg());
+		}
 
 		imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
 		imp.setI_IsImported(true);
