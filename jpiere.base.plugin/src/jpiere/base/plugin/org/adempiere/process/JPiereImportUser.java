@@ -145,7 +145,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		sql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' ")
-				.append(clientCheck).append(" ORDER BY Value ");
+				.append(clientCheck).append(" ORDER BY Value, Name ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -164,6 +164,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery();
 			String preValue = "";
+			String preName = "";
 			MUser user = null;
 
 			while (rs.next())
@@ -178,16 +179,16 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 				}else{
 
-					if(preValue.equals(imp.getValue()))
+					if(preValue.equals(imp.getValue()) && preName.equals(imp.getName()))
 					{
 						isNew = false;
 
 					}else {
 
 						preValue = imp.getValue();
+						preName = imp.getName();
 
 					}
-
 				}
 
 				if(isNew)

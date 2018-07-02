@@ -506,27 +506,27 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			log.warning(Msg.getMsg(getCtx(), "Warning") + msg +" : " +e.toString()  +" : " + sql );
 		}
 
 		//Invalid JP_SalesRep_EMail
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_SalesRep_EMail");
-		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
-			.append(" WHERE JP_SalesRep_EMail IS NOT NULL AND SalesRep_ID IS NULL ")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
-
-		if(no > 0)
-		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
-		}
+//		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_SalesRep_EMail");
+//		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
+//			.append("SET I_ErrorMsg='"+ msg + "'")
+//			.append(" WHERE JP_SalesRep_EMail IS NOT NULL AND SalesRep_ID IS NULL ")
+//			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+//		try {
+//			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+//			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+//		}catch(Exception e) {
+//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+//		}
+//
+//		if(no > 0)
+//		{
+//			commitEx();
+//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+//		}
 
 	}//reverseSalesRep_ID
 
@@ -1501,6 +1501,11 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartner, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(importBPartner, newBPartner);
+		if(!Util.isEmpty(importBPartner.getJP_SalesRep_EMail()) && importBPartner.getSalesRep_ID() == 0)
+		{
+			setSalesRep_ID(importBPartner, newBPartner);
+		}
+
 		newBPartner.setIsActive(importBPartner.isI_IsActiveJP());
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartner, ImportValidator.TIMING_AFTER_IMPORT);
@@ -1527,6 +1532,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
 				{
 					importBPartner.setI_ErrorMsg(msg);
+				}else{
+					importBPartner.setI_ErrorMsg(importBPartner.getI_ErrorMsg()+ " : "+ msg);
 				}
 
 				importBPartner.setI_IsImported(true);
@@ -1553,6 +1560,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
 				{
 					importBPartner.setI_ErrorMsg(msg);
+				}else{
+					importBPartner.setI_ErrorMsg(importBPartner.getI_ErrorMsg()+ " : "+ msg);
 				}
 
 			}else {
@@ -1624,6 +1633,14 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				if(i_Column.getColumnName().equals(j_Column.getColumnName()))
 				{
 					importValue = importBPartner.get_Value(j_Column.getColumnName());
+
+					if(j_Column.getColumnName().equals("SalesRep_ID"))//Reverse Look Up Sales Rep
+					{
+						if(importValue == null && !Util.isEmpty(importBPartner.getJP_SalesRep_EMail()))
+						{
+							setSalesRep_ID(importBPartner, updateBPartner);
+						}
+					}
 
 					if(importValue == null )
 					{
@@ -1704,6 +1721,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
 					{
 						importBPartner.setI_ErrorMsg(msg);
+					}else{
+						importBPartner.setI_ErrorMsg(importBPartner.getI_ErrorMsg()+ " : "+ msg);
 					}
 
 					importBPartner.setI_IsImported(false);
@@ -1739,6 +1758,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
 					{
 						importBPartner.setI_ErrorMsg(msg);
+					}else{
+						importBPartner.setI_ErrorMsg(importBPartner.getI_ErrorMsg()+ " : "+ msg);
 					}
 
 				}else {
@@ -2139,5 +2160,33 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		return null;
 	}
 
+	private void setSalesRep_ID(X_I_BPartnerJP importBPartner, MBPartner m_BPartner)
+	{
+		String JP_SalesRep_EMail = importBPartner.getJP_SalesRep_EMail();
+		int[] AD_User_IDs = PO.getAllIDs(MUser.Table_Name, "EMail=" + JP_SalesRep_EMail
+				+ " AND (AD_Client_ID=" + m_AD_Client_ID +" OR AD_Client_ID=0) ", get_TrxName() );
+		MUser m_SalesRep = null;
+		for(int i = 0; i < AD_User_IDs.length; i++)
+		{
+			m_SalesRep = new MUser(getCtx(), AD_User_IDs[i], get_TrxName());
+			if(m_SalesRep.getAD_Client_ID() == m_AD_Client_ID && m_SalesRep.getAD_Org_ID() == 0)
+			{
+				break;
+			}
+		}
+
+		if(m_SalesRep != null)
+		{
+			m_BPartner.setSalesRep_ID(m_SalesRep.getAD_User_ID());
+		}else {
+			String msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_SalesRep_EMail");
+			if(Util.isEmpty(importBPartner.getI_ErrorMsg()))
+			{
+				importBPartner.setI_ErrorMsg(msg);
+			}else{
+				importBPartner.setI_ErrorMsg(importBPartner.getI_ErrorMsg()+ " : "+ msg);
+			}
+		}
+	}//setSalesRep_ID
 
 }	//	ImportBPartner

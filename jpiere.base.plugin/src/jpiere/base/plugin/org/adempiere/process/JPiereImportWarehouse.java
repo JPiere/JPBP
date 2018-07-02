@@ -126,7 +126,7 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 
 		//
 		sql = new StringBuilder ("SELECT * FROM I_WarehouseJP WHERE I_IsImported='N'")
-					.append(clientCheck);
+					.append(clientCheck).append(" ORDER BY Value ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -144,6 +144,9 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery();
+			String preValue = "";
+			MWarehouse warehouse = null;
+
 			while (rs.next())
 			{
 				X_I_WarehouseJP imp = new X_I_WarehouseJP (getCtx (), rs, get_TrxName());
@@ -151,20 +154,32 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 				boolean isNew = true;
 				if(imp.getM_Warehouse_ID()!=0){
 					isNew =false;
+					warehouse = new MWarehouse(getCtx (), imp.getM_Warehouse_ID(), get_TrxName());
+				}else{
+
+					if(preValue.equals(imp.getValue()))
+					{
+						isNew = false;
+
+					}else {
+
+						preValue = imp.getValue();
+
+					}
 				}
 
 				if(isNew)//Create
 				{
-					MWarehouse newWarehouse = new MWarehouse(getCtx (), 0, get_TrxName());
-					if(createNewWarehouse(imp, newWarehouse))
+					warehouse = new MWarehouse(getCtx (), 0, get_TrxName());
+					if(createNewWarehouse(imp, warehouse))
 						successNewNum++;
 					else
 						failureNewNum++;
 
 				}else{//Update
 
-					MWarehouse updateWarehouse = new MWarehouse(getCtx (), imp.getM_Warehouse_ID(), get_TrxName());
-					if(updateWarehouse(imp, updateWarehouse))
+
+					if(updateWarehouse(imp, warehouse))
 						successUpdateNum++;
 					else
 						failureUpdateNum++;
