@@ -112,6 +112,8 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			}
 		}
 
+		commitEx();
+
 		//Reset Message
 		sql = new StringBuilder ("UPDATE I_BankAccountJP ")
 				.append("SET I_ErrorMsg='' ")
@@ -122,6 +124,8 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
+
+		commitEx();
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
@@ -514,14 +518,14 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
 		sql = new StringBuilder ("UPDATE I_BankAccountJP i ")
 				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
-				.append(" WHERE i.Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID AND i.C_Bank_ID = p.C_Bank_ID) ")
+				.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND i.AD_Client_ID=p.AD_Client_ID AND i.C_Bank_ID = p.C_Bank_ID) ")
 				.append(" WHERE i.Value IS NOT NULL AND i.C_BankAccount_ID IS NULL ")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + e.toString() + " : " + sql );
 		}
 
 	}//reverseLookupC_BankAccount_ID
@@ -550,7 +554,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + e.toString() + " : " + sql );
 		}
 
 		//Invalid ISO_Code
@@ -561,9 +565,9 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + e.toString() + " : " + sql );
 		}
 
 		if(no > 0)

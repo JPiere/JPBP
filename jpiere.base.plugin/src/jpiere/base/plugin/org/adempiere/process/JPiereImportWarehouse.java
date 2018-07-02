@@ -560,22 +560,28 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 			newWarehouse.setC_Location_ID(impWarehouse.getC_Location_ID());
 
 		}else {
-			int C_Location_ID = JPiereLocationUtil.createLocation(
-					getCtx()
-					,impWarehouse.getJP_LocationOrg_ID()
-					,impWarehouse.getJP_Location_Label()
-					,impWarehouse.getComments()
-					,impWarehouse.getCountryCode()
-					,impWarehouse.getPostal()
-					,impWarehouse.getPostal_Add()
-					,impWarehouse.getRegionName()
-					,impWarehouse.getCity()
-					,impWarehouse.getAddress1()
-					,impWarehouse.getAddress2()
-					,impWarehouse.getAddress3()
-					,impWarehouse.getAddress4()
-					,impWarehouse.getAddress5()
-					,get_TrxName() );
+			int C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), impWarehouse.getJP_Location_Label(), get_TrxName());
+			if(C_Location_ID > 0)
+			{
+				;//Noting to do;
+			}else {
+				C_Location_ID = JPiereLocationUtil.createLocation(
+						getCtx()
+						,impWarehouse.getJP_LocationOrg_ID()
+						,impWarehouse.getJP_Location_Label()
+						,impWarehouse.getComments()
+						,impWarehouse.getCountryCode()
+						,impWarehouse.getPostal()
+						,impWarehouse.getPostal_Add()
+						,impWarehouse.getRegionName()
+						,impWarehouse.getCity()
+						,impWarehouse.getAddress1()
+						,impWarehouse.getAddress2()
+						,impWarehouse.getAddress3()
+						,impWarehouse.getAddress4()
+						,impWarehouse.getAddress5()
+						,get_TrxName() );
+			}
 			newWarehouse.setC_Location_ID(C_Location_ID);
 			impWarehouse.setC_Location_ID(C_Location_ID);
 		}

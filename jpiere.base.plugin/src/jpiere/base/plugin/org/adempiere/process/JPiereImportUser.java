@@ -517,7 +517,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")+ e.toString() + " : " + msg + " : "+ sql );
 		}
 
 		//Invalid JP_Org_Value
@@ -530,7 +530,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + msg + " : "+ sql );
 		}
 
 		if(no > 0)

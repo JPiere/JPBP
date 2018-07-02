@@ -114,7 +114,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		if (m_deleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE I_BPartnerJP ")
-					.append("WHERE I_IsImported='Y'").append(clientCheck);
+					.append("WHERE I_IsImported='Y' AND Processed='Y' ").append(clientCheck);
 			try {
 				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 				if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
@@ -175,7 +175,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "C_BPartner_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		sql = new StringBuilder ("SELECT * FROM I_BPartnerJP WHERE I_IsImported='N' ")
+		sql = new StringBuilder ("SELECT * FROM I_BPartnerJP WHERE I_IsImported='N' OR Processed='N' ")
 				.append(clientCheck).append(" ORDER BY Value, ContactName, EMail ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -312,6 +312,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
 
+		commitEx();
+
 	}//reverseLookupC_BPartner_ID
 
 
@@ -362,6 +364,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			commitEx();
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
+
+		commitEx();
 
 	}//reverseLookupAD_Org_ID
 
@@ -414,6 +418,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}
 
 	/**
@@ -478,6 +483,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			commitEx();
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
+
+		commitEx();
 	}
 
 	/**
@@ -506,8 +513,10 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
 		}catch(Exception e) {
-			log.warning(Msg.getMsg(getCtx(), "Warning") + msg +" : " +e.toString()  +" : " + sql );
+//			log.warning(Msg.getMsg(getCtx(), "Warning") + msg +" : " +e.toString()  +" : " + sql );
 		}
+
+		commitEx();
 
 		//Invalid JP_SalesRep_EMail
 //		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_SalesRep_EMail");
@@ -557,7 +566,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")+ e.toString() +" : " + msg +" : " + sql );
 		}
 
 		//Invalid JP_InvoiceSchedule_Name
@@ -579,6 +588,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupC_InvoiceSchedule_ID
 
 
@@ -630,6 +640,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupC_PaymentTerm_ID
 
 	/**
@@ -681,6 +692,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
+
 	}//reverseLookupPO_PaymentTerm_ID
 
 	/**
@@ -731,6 +744,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupJP_BillSchema_ID
 
 	/**
@@ -781,6 +795,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupJP_BillSchemaPO_ID
 
 
@@ -832,6 +847,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupM_PriceList_ID
 
 
@@ -883,6 +899,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupPO_PriceList_ID
 
 
@@ -934,6 +951,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupM_DiscountSchema_ID
 
 
@@ -985,6 +1003,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
+
 	}//reverseLookupPO_DiscountSchema_ID
 
 
@@ -1014,7 +1034,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")+ e.toString() + " : " + msg +" : " + sql );
 		}
 
 		//Invalid JP_Dunning_Name
@@ -1036,6 +1056,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupC_Dunning_ID
 
 
@@ -1087,6 +1108,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
 		}
 
+		commitEx();
 	}//reverseLookupDefault1099Box_ID
 
 
@@ -1137,6 +1159,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			commitEx();
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
+
+		commitEx();
 
 	}//reverseLookupC_Greeting_ID
 
@@ -1190,6 +1214,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
+		commitEx();
 	}//reverseLookupJP_User_Greeting_ID
 
 
@@ -1222,24 +1247,26 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
 
-		//Invalid JP_Greeting_Name
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Location_Label");
-		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
-			.append(" WHERE JP_Location_Label IS NOT NULL AND C_Location_ID IS NULL ")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
+		//Invalid JP_Location_Label
+//		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Location_Label");
+//		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
+//			.append("SET I_ErrorMsg='"+ msg + "'")
+//			.append(" WHERE JP_Location_Label IS NOT NULL AND C_Location_ID IS NULL ")
+//			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+//		try {
+//			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+//			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
+//		}catch(Exception e) {
+//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+//		}
+//
+//		if(no > 0)
+//		{
+//			commitEx();
+//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+//		}
 
-		if(no > 0)
-		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
-		}
+		commitEx();
 
 	}//reverseLookupC_Location_ID
 
@@ -1290,6 +1317,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			commitEx();
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
+
+		commitEx();
 
 	}//reverseLookupC_SalesRegion_ID
 
@@ -1354,6 +1383,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 		}
 
+		commitEx();
+
 	}//reverseLookupAD_User_ID
 
 
@@ -1405,6 +1436,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
 
+		commitEx();
+
 	}//reverseLookupR_InterestArea_ID
 
 
@@ -1455,6 +1488,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			commitEx();
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
 		}
+
+		commitEx();
 
 	}//reverseLookupInvoice_PrintFormat_ID
 
@@ -1776,6 +1811,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			importBPartner.setI_IsImported(false);
 			importBPartner.setProcessed(false);
 			importBPartner.saveEx(get_TrxName());
+			commitEx();
 			return false;
 		}
 
@@ -2160,18 +2196,28 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		return null;
 	}
 
+	/**
+	 * Set SelesRep_ID
+	 *
+	 * @param importBPartner
+	 * @param m_BPartner
+	 */
 	private void setSalesRep_ID(X_I_BPartnerJP importBPartner, MBPartner m_BPartner)
 	{
 		String JP_SalesRep_EMail = importBPartner.getJP_SalesRep_EMail();
-		int[] AD_User_IDs = PO.getAllIDs(MUser.Table_Name, "EMail=" + JP_SalesRep_EMail
+		int[] AD_User_IDs = PO.getAllIDs(MUser.Table_Name, "EMail='" + JP_SalesRep_EMail +"'"
 				+ " AND (AD_Client_ID=" + m_AD_Client_ID +" OR AD_Client_ID=0) ", get_TrxName() );
 		MUser m_SalesRep = null;
-		for(int i = 0; i < AD_User_IDs.length; i++)
+
+		if(AD_User_IDs != null)
 		{
-			m_SalesRep = new MUser(getCtx(), AD_User_IDs[i], get_TrxName());
-			if(m_SalesRep.getAD_Client_ID() == m_AD_Client_ID && m_SalesRep.getAD_Org_ID() == 0)
+			for(int i = 0; i < AD_User_IDs.length; i++)
 			{
-				break;
+				m_SalesRep = new MUser(getCtx(), AD_User_IDs[i], get_TrxName());
+				if(m_SalesRep.getAD_Client_ID() == m_AD_Client_ID && m_SalesRep.getAD_Org_ID() == 0)
+				{
+					break;
+				}
 			}
 		}
 

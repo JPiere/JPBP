@@ -515,26 +515,32 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 		}else if(!Util.isEmpty(importOrg.getJP_Location_Label())){
 
-			C_Location_ID = JPiereLocationUtil.createLocation(
-					getCtx()
-					,"0"
-					,importOrg.getJP_Location_Label()
-					,importOrg.getComments()
-					,importOrg.getCountryCode()
-					,importOrg.getPostal()
-					,importOrg.getPostal_Add()
-					,importOrg.getRegionName()
-					,importOrg.getCity()
-					,importOrg.getAddress1()
-					,importOrg.getAddress2()
-					,importOrg.getAddress3()
-					,importOrg.getAddress4()
-					,importOrg.getAddress5()
-					,get_TrxName() );
+			C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), importOrg.getJP_Location_Label(), get_TrxName());
+			if(C_Location_ID > 0)
+			{
+				;//Noting to do;
+			}else {
+
+				C_Location_ID = JPiereLocationUtil.createLocation(
+						getCtx()
+						,"0"
+						,importOrg.getJP_Location_Label()
+						,importOrg.getComments()
+						,importOrg.getCountryCode()
+						,importOrg.getPostal()
+						,importOrg.getPostal_Add()
+						,importOrg.getRegionName()
+						,importOrg.getCity()
+						,importOrg.getAddress1()
+						,importOrg.getAddress2()
+						,importOrg.getAddress3()
+						,importOrg.getAddress4()
+						,importOrg.getAddress5()
+						,get_TrxName() );
+			}
 
 			orgInfo.setC_Location_ID(C_Location_ID);
 			importOrg.setC_Location_ID(C_Location_ID);
-
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, importOrg, orgInfo, ImportValidator.TIMING_AFTER_IMPORT);
