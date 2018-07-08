@@ -2180,14 +2180,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		{
 			if(importBPartner.getContactName().equals(users[i].getName()))
 			{
-				if(importBPartner.getEMail().equals(users[i].getEMail()))
+				if(!Util.isEmpty(users[i].getEMail()))
 				{
-					return users[i];
+					if(importBPartner.getEMail().equals(users[i].getEMail()))
+					{
+						return users[i];
+					}
 				}
 
-				if(importBPartner.getJP_User_Value().equals(users[i].getValue()))
+				if(!Util.isEmpty(users[i].getValue()))
 				{
-					return users[i];
+					if(importBPartner.getJP_User_Value().equals(users[i].getValue()))
+					{
+						return users[i];
+					}
 				}
 
 			}
