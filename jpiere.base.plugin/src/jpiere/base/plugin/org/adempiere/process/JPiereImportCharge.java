@@ -288,7 +288,7 @@ public class JPiereImportCharge extends SvrProcess  implements ImportProcess
 
 		//Invalid JP_Org_Value
 		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
-		sql = new StringBuilder ("UPDATE I_WarehouseJP ")
+		sql = new StringBuilder ("UPDATE I_ChargeJP ")
 			.append("SET I_ErrorMsg='"+ msg + "'")
 			.append(" WHERE AD_Org_ID = 0 AND JP_Org_Value IS NOT NULL AND JP_Org_Value <> '0' ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
@@ -419,11 +419,11 @@ public class JPiereImportCharge extends SvrProcess  implements ImportProcess
 		String msg = new String();
 		int no = 0;
 
-		 msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Charge_ID");
+		 msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		//Reverse lookup C_BPartner_ID From JP_BPartner_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Charge_ID")
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID")
 		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_BPartner_Value") ;
 		sql = new StringBuilder ("UPDATE I_ChargeJP i ")
 			.append("SET C_BPartner_ID=(SELECT C_BPartner_ID FROM C_BPartner p")
