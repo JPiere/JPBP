@@ -351,6 +351,21 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 		}
 
+		//JPIERE-0409:Set Counter Doc Line Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE )
+		{
+			MInvoiceLine invoiceLine = (MInvoiceLine)po;
+			if(invoiceLine.getRef_InvoiceLine_ID() > 0) //This is Counter doc Line
+			{
+				MInvoiceLine counterOrderLine = new MInvoiceLine(po.getCtx(), invoiceLine.getRef_InvoiceLine_ID(), po.get_TrxName());
+				invoiceLine.setPriceEntered(counterOrderLine.getPriceEntered());
+				invoiceLine.setC_UOM_ID(counterOrderLine.getC_UOM_ID());
+				invoiceLine.setPriceActual(counterOrderLine.getPriceActual());
+				invoiceLine.setLineNetAmt(counterOrderLine.getLineNetAmt());
+			}
+
+		}//JPIERE-0409:Set Counter Doc Line Info
+
 		return null;
 	}
 
