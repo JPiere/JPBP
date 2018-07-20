@@ -149,29 +149,23 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				MOrder counterOrder = new MOrder(po.getCtx(), order.getRef_Order_ID(), po.get_TrxName());
 				if(counterOrder.get_ValueAsInt("JP_Contract_ID") > 0)
 				{
-					if(order.get_ValueAsInt("JP_Contract_ID") <= 0)
-					{
-						MContract counterContract = MContract.get(po.getCtx(), counterOrder.get_ValueAsInt("JP_Contract_ID"));
-						if(counterContract != null && counterContract.getJP_Contract_ID() > 0 && counterContract.getJP_CounterContract_ID() > 0)
-							order.set_ValueNoCheck("JP_Contract_ID", counterContract.getJP_CounterContract_ID());
-					}
+
+					MContract counterContract = MContract.get(po.getCtx(), counterOrder.get_ValueAsInt("JP_Contract_ID"));
+					if(counterContract != null && counterContract.getJP_Contract_ID() > 0 && counterContract.getJP_CounterContract_ID() > 0)
+						order.set_ValueNoCheck("JP_Contract_ID", counterContract.getJP_CounterContract_ID());
+
 
 					if(counterOrder.get_ValueAsInt("JP_ContractContent_ID") > 0)
 					{
-						if(order.get_ValueAsInt("JP_ContractContent_ID") <= 0)
-						{
-							MContractContent counterContractContent = MContractContent.get(po.getCtx(), counterOrder.get_ValueAsInt("JP_ContractContent_ID"));
-							if(counterContractContent != null && counterContractContent.getJP_ContractContent_ID() > 0 && counterContractContent.getJP_CounterContractContent_ID() > 0)
-								order.set_ValueNoCheck("JP_ContractContent_ID", counterContractContent.getJP_CounterContractContent_ID());
-						}
+						MContractContent counterContractContent = MContractContent.get(po.getCtx(), counterOrder.get_ValueAsInt("JP_ContractContent_ID"));
+						if(counterContractContent != null && counterContractContent.getJP_ContractContent_ID() > 0 && counterContractContent.getJP_CounterContractContent_ID() > 0)
+							order.set_ValueNoCheck("JP_ContractContent_ID", counterContractContent.getJP_CounterContractContent_ID());
+
 					}
 
 					if(counterOrder.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
 					{
-						if(order.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
-						{
-							order.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterOrder.get_ValueAsInt("JP_ContractProcPeriod_ID") );
-						}
+						order.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterOrder.get_ValueAsInt("JP_ContractProcPeriod_ID") );
 					}
 
 				}//if(counterOrder.get_ValueAsInt("JP_Contract_ID") > 0)
@@ -441,21 +435,14 @@ public class JPiereContractOrderValidator implements ModelValidator {
 				MOrderLine counterOrderLine = new MOrderLine(po.getCtx(), orderLine.getRef_OrderLine_ID(), po.get_TrxName());
 				if(counterOrderLine.get_ValueAsInt("JP_ContractLine_ID") > 0)
 				{
-					if(orderLine.get_ValueAsInt("JP_ContractLine_ID") <= 0)
-					{
-						MContractLine counterContractLine = MContractLine.get(po.getCtx(), counterOrderLine.get_ValueAsInt("JP_ContractLine_ID"));
-						if(counterContractLine != null && counterContractLine.getJP_ContractLine_ID() > 0 && counterContractLine.getJP_CounterContractLine_ID() > 0)
-							orderLine.set_ValueNoCheck("JP_ContractLine_ID", counterContractLine.getJP_CounterContractLine_ID());
-					}
+					MContractLine counterContractLine = MContractLine.get(po.getCtx(), counterOrderLine.get_ValueAsInt("JP_ContractLine_ID"));
+					if(counterContractLine != null && counterContractLine.getJP_ContractLine_ID() > 0 && counterContractLine.getJP_CounterContractLine_ID() > 0)
+						orderLine.set_ValueNoCheck("JP_ContractLine_ID", counterContractLine.getJP_CounterContractLine_ID());
 				}
 
 				if(counterOrderLine.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
 				{
-					if(orderLine.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
-					{
-						orderLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterOrderLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
-					}
-
+					orderLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterOrderLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
 				}
 
 			}//if(orderLine.getRef_OrderLine_ID() > 0)

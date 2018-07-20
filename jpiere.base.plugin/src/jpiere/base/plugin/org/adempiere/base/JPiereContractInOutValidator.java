@@ -367,29 +367,20 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				MInOut counterIO = new MInOut(po.getCtx(), io.getRef_InOut_ID(), po.get_TrxName());
 				if(counterIO.get_ValueAsInt("JP_Contract_ID") > 0)
 				{
-					if(io.get_ValueAsInt("JP_Contract_ID") <= 0)
-					{
-						MContract counterContract = MContract.get(po.getCtx(), counterIO.get_ValueAsInt("JP_Contract_ID"));
-						if(counterContract != null && counterContract.getJP_Contract_ID() > 0 && counterContract.getJP_CounterContract_ID() > 0)
-							io.set_ValueNoCheck("JP_Contract_ID", counterContract.getJP_CounterContract_ID());
-					}
+					MContract counterContract = MContract.get(po.getCtx(), counterIO.get_ValueAsInt("JP_Contract_ID"));
+					if(counterContract != null && counterContract.getJP_Contract_ID() > 0 && counterContract.getJP_CounterContract_ID() > 0)
+						io.set_ValueNoCheck("JP_Contract_ID", counterContract.getJP_CounterContract_ID());
 
 					if(counterIO.get_ValueAsInt("JP_ContractContent_ID") > 0)
 					{
-						if(io.get_ValueAsInt("JP_ContractContent_ID") <= 0)
-						{
-							MContractContent counterContractContent = MContractContent.get(po.getCtx(), counterIO.get_ValueAsInt("JP_ContractContent_ID"));
-							if(counterContractContent != null && counterContractContent.getJP_ContractContent_ID() > 0 && counterContractContent.getJP_CounterContractContent_ID() > 0)
-								io.set_ValueNoCheck("JP_ContractContent_ID", counterContractContent.getJP_CounterContractContent_ID());
-						}
+						MContractContent counterContractContent = MContractContent.get(po.getCtx(), counterIO.get_ValueAsInt("JP_ContractContent_ID"));
+						if(counterContractContent != null && counterContractContent.getJP_ContractContent_ID() > 0 && counterContractContent.getJP_CounterContractContent_ID() > 0)
+							io.set_ValueNoCheck("JP_ContractContent_ID", counterContractContent.getJP_CounterContractContent_ID());
 					}
 
 					if(counterIO.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
 					{
-						if(io.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
-						{
-							io.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterIO.get_ValueAsInt("JP_ContractProcPeriod_ID") );
-						}
+						io.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterIO.get_ValueAsInt("JP_ContractProcPeriod_ID") );
 					}
 
 				}//if(counterIO.get_ValueAsInt("JP_Contract_ID") > 0)
@@ -453,21 +444,14 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				MInOutLine counterIOLine = new MInOutLine(po.getCtx(), ioLine.getRef_InOutLine_ID(), po.get_TrxName());
 				if(counterIOLine.get_ValueAsInt("JP_ContractLine_ID") > 0)
 				{
-					if(ioLine.get_ValueAsInt("JP_ContractLine_ID") <= 0)
-					{
-						MContractLine counterContractLine = MContractLine.get(po.getCtx(), counterIOLine.get_ValueAsInt("JP_ContractLine_ID"));
-						if(counterContractLine != null && counterContractLine.getJP_ContractLine_ID() > 0 && counterContractLine.getJP_CounterContractLine_ID() > 0)
-							ioLine.set_ValueNoCheck("JP_ContractLine_ID", counterContractLine.getJP_CounterContractLine_ID());
-					}
+					MContractLine counterContractLine = MContractLine.get(po.getCtx(), counterIOLine.get_ValueAsInt("JP_ContractLine_ID"));
+					if(counterContractLine != null && counterContractLine.getJP_ContractLine_ID() > 0 && counterContractLine.getJP_CounterContractLine_ID() > 0)
+						ioLine.set_ValueNoCheck("JP_ContractLine_ID", counterContractLine.getJP_CounterContractLine_ID());
 				}
 
 				if(counterIOLine.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
 				{
-					if(ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
-					{
-						ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterIOLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
-					}
-
+					ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterIOLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
 				}
 
 			}//if(ioLine.getRef_InOutLine_ID() > 0)
