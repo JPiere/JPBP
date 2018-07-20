@@ -261,11 +261,6 @@ public abstract class AbstractCreateContractFromTemplate extends SvrProcess {
 			contrctLine.setJP_ContractContent_ID(contractContent.getJP_ContractContent_ID());
 			contrctLine.setJP_ContractLineT_ID(m_ContractLineTemplates[i].getJP_ContractLineT_ID());
 
-			if(m_ContractLineTemplates[i].getJP_ContractLineT_ID()==1000043)//TODO
-			{
-				int test = 0;
-			}
-
 			if(contrctLine.getJP_BaseDocLinePolicy() != null)
 			{
 				if(contrctLine.getJP_BaseDocLinePolicy().equals("LP"))
