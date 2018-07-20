@@ -225,6 +225,46 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 	 */
 	private String invoiceValidate(PO po, int type)
 	{
+		//JPIERE-0408:Set Counter Doc Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW)
+		{
+			MInvoice invoice = (MInvoice)po;
+			if(invoice.getRef_Invoice_ID() > 0) //This is Counter doc
+			{
+				MInvoice counterInvoice = new MInvoice(po.getCtx(), invoice.getRef_Invoice_ID(), po.get_TrxName());
+				if(counterInvoice.get_ValueAsInt("JP_Contract_ID") > 0)
+				{
+					if(invoice.get_ValueAsInt("JP_Contract_ID") <= 0)
+					{
+						MContract counterContract = MContract.get(po.getCtx(), counterInvoice.get_ValueAsInt("JP_Contract_ID"));
+						if(counterContract != null && counterContract.getJP_Contract_ID() > 0 && counterContract.getJP_CounterContract_ID() > 0)
+							invoice.set_ValueNoCheck("JP_Contract_ID", counterContract.getJP_CounterContract_ID());
+					}
+
+					if(counterInvoice.get_ValueAsInt("JP_ContractContent_ID") > 0)
+					{
+						if(invoice.get_ValueAsInt("JP_ContractContent_ID") <= 0)
+						{
+							MContractContent counterContractContent = MContractContent.get(po.getCtx(), counterInvoice.get_ValueAsInt("JP_ContractContent_ID"));
+							if(counterContractContent != null && counterContractContent.getJP_ContractContent_ID() > 0 && counterContractContent.getJP_CounterContractContent_ID() > 0)
+								invoice.set_ValueNoCheck("JP_ContractContent_ID", counterContractContent.getJP_CounterContractContent_ID());
+						}
+					}
+
+					if(counterInvoice.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
+					{
+						if(invoice.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
+						{
+							invoice.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterInvoice.get_ValueAsInt("JP_ContractProcPeriod_ID") );
+						}
+					}
+
+				}//if(counterInvoice.get_ValueAsInt("JP_Contract_ID") > 0)
+
+			}//if(invoice.getRef_Invoice_ID() > 0)
+
+		}//JPIERE-0408:Set Counter Doc Info
+
 
 		//Check Derivative Doc
 		if(po.get_ValueAsInt("C_Order_ID") > 0 || po.get_ValueAsInt("M_RMA_ID") > 0 )
@@ -519,6 +559,37 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 	 */
 	private String invoiceLineValidate(PO po, int type)
 	{
+		//JPIERE-0408:Set Counter Doc Line Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW)
+		{
+			MInvoiceLine invoiceLine = (MInvoiceLine)po;
+			if(invoiceLine.getRef_InvoiceLine_ID() > 0) //This is Counter doc Line
+			{
+				MInvoiceLine counterInvoiceLine = new MInvoiceLine(po.getCtx(), invoiceLine.getRef_InvoiceLine_ID(), po.get_TrxName());
+				if(counterInvoiceLine.get_ValueAsInt("JP_ContractLine_ID") > 0)
+				{
+					if(invoiceLine.get_ValueAsInt("JP_ContractLine_ID") <= 0)
+					{
+						MContractLine counterContractLine = MContractLine.get(po.getCtx(), counterInvoiceLine.get_ValueAsInt("JP_ContractLine_ID"));
+						if(counterContractLine != null && counterContractLine.getJP_ContractLine_ID() > 0 && counterContractLine.getJP_CounterContractLine_ID() > 0)
+							invoiceLine.set_ValueNoCheck("JP_ContractLine_ID", counterContractLine.getJP_CounterContractLine_ID());
+					}
+				}
+
+				if(counterInvoiceLine.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
+				{
+					if(invoiceLine.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
+					{
+						invoiceLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterInvoiceLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
+					}
+
+				}
+
+			}//if(invoiceLine.getRef_InvoiceLine_ID() > 0)
+
+		}//JPIERE-0408:Set Counter Doc Line Info
+
+
 		//Check Derivative Contract
 		if(po.get_ValueAsInt("C_OrderLine_ID") > 0 || po.get_ValueAsInt("M_RMALine_ID") > 0)
 		{

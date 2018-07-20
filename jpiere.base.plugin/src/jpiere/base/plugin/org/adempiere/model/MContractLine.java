@@ -242,6 +242,143 @@ public class MContractLine extends X_JP_ContractLine {
 			}
 		}
 
+		//JPIERE-0408:Check Counter Contract Info
+		if(getJP_CounterContractLine_ID() > 0 && (newRecord || is_ValueChanged("JP_CounterContractLine_ID")))
+		{
+			MContractLine counterContractLine = new MContractLine(getCtx(),getJP_CounterContractLine_ID(),get_TrxName());
+
+			//Check Product & Qty
+			if(getM_Product_ID() != counterContractLine.getM_Product_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getC_Charge_ID() != counterContractLine.getC_Charge_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getQtyEntered() != null && !getQtyEntered().equals(counterContractLine.getQtyEntered()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyEntered");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyEntered");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getC_UOM_ID() != counterContractLine.getC_UOM_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_UOM_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_UOM_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			//Check Derivative InOut Info
+			if(getJP_DerivativeDocPolicy_InOut()!= null && !getJP_DerivativeDocPolicy_InOut().equals(counterContractLine.getJP_DerivativeDocPolicy_InOut()) )
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ContractCalender_InOut_ID() != counterContractLine.getJP_ContractCalender_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Lump_InOut_ID() != counterContractLine.getJP_ProcPeriod_Lump_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Start_InOut_ID() != counterContractLine.getJP_ProcPeriod_Start_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_End_InOut_ID() != counterContractLine.getJP_ProcPeriod_End_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getMovementQty() != null && !getMovementQty().equals(counterContractLine.getMovementQty()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "MovementQty");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "MovementQty");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			//Check Derivative Inv Info
+			if(getJP_DerivativeDocPolicy_Inv()!= null && !getJP_DerivativeDocPolicy_Inv().equals(counterContractLine.getJP_DerivativeDocPolicy_Inv()) )
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inv");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inv");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ContractCalender_Inv_ID() != counterContractLine.getJP_ContractCalender_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Lump_Inv_ID() != counterContractLine.getJP_ProcPeriod_Lump_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Start_Inv_ID() != counterContractLine.getJP_ProcPeriod_Start_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_End_Inv_ID() != counterContractLine.getJP_ProcPeriod_End_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getQtyInvoiced() != null && !getQtyInvoiced().equals(counterContractLine.getQtyInvoiced()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyInvoiced");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyInvoiced");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+		}
+
 		return true;
 
 	}//beforeSave

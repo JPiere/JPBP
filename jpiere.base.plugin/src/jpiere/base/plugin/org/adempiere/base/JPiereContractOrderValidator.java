@@ -140,6 +140,48 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	 */
 	private String orderValidate(PO po, int type)
 	{
+		//JPIERE-0408:Set Counter Doc Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW)
+		{
+			MOrder order = (MOrder)po;
+			if(order.getRef_Order_ID() > 0) //This is Counter doc
+			{
+				MOrder counterOrder = new MOrder(po.getCtx(), order.getRef_Order_ID(), po.get_TrxName());
+				if(counterOrder.get_ValueAsInt("JP_Contract_ID") > 0)
+				{
+					if(order.get_ValueAsInt("JP_Contract_ID") <= 0)
+					{
+						MContract counterContract = MContract.get(po.getCtx(), counterOrder.get_ValueAsInt("JP_Contract_ID"));
+						if(counterContract != null && counterContract.getJP_Contract_ID() > 0 && counterContract.getJP_CounterContract_ID() > 0)
+							order.set_ValueNoCheck("JP_Contract_ID", counterContract.getJP_CounterContract_ID());
+					}
+
+					if(counterOrder.get_ValueAsInt("JP_ContractContent_ID") > 0)
+					{
+						if(order.get_ValueAsInt("JP_ContractContent_ID") <= 0)
+						{
+							MContractContent counterContractContent = MContractContent.get(po.getCtx(), counterOrder.get_ValueAsInt("JP_ContractContent_ID"));
+							if(counterContractContent != null && counterContractContent.getJP_ContractContent_ID() > 0 && counterContractContent.getJP_CounterContractContent_ID() > 0)
+								order.set_ValueNoCheck("JP_ContractContent_ID", counterContractContent.getJP_CounterContractContent_ID());
+						}
+					}
+
+					if(counterOrder.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
+					{
+						if(order.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
+						{
+							order.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterOrder.get_ValueAsInt("JP_ContractProcPeriod_ID") );
+						}
+					}
+
+				}//if(counterOrder.get_ValueAsInt("JP_Contract_ID") > 0)
+
+			}//if(order.getRef_Order_ID() > 0)
+
+		}//JPIERE-0408:Set Counter Doc Info
+
+
+		//Check Contract Info
 		if( type == ModelValidator.TYPE_BEFORE_NEW
 				||( type == ModelValidator.TYPE_BEFORE_CHANGE && ( po.is_ValueChanged(MContract.COLUMNNAME_JP_Contract_ID)
 												||   po.is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractContent_ID)
@@ -390,6 +432,38 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	private String orderLineValidate(PO po, int type)
 	{
 
+		//JPIERE-0408:Set Counter Doc Line Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW)
+		{
+			MOrderLine orderLine = (MOrderLine)po;
+			if(orderLine.getRef_OrderLine_ID() > 0) //This is Counter doc Line
+			{
+				MOrderLine counterOrderLine = new MOrderLine(po.getCtx(), orderLine.getRef_OrderLine_ID(), po.get_TrxName());
+				if(counterOrderLine.get_ValueAsInt("JP_ContractLine_ID") > 0)
+				{
+					if(orderLine.get_ValueAsInt("JP_ContractLine_ID") <= 0)
+					{
+						MContractLine counterContractLine = MContractLine.get(po.getCtx(), counterOrderLine.get_ValueAsInt("JP_ContractLine_ID"));
+						if(counterContractLine != null && counterContractLine.getJP_ContractLine_ID() > 0 && counterContractLine.getJP_CounterContractLine_ID() > 0)
+							orderLine.set_ValueNoCheck("JP_ContractLine_ID", counterContractLine.getJP_CounterContractLine_ID());
+					}
+				}
+
+				if(counterOrderLine.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
+				{
+					if(orderLine.get_ValueAsInt("JP_ContractProcPeriod_ID") <= 0)
+					{
+						orderLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", counterOrderLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
+					}
+
+				}
+
+			}//if(orderLine.getRef_OrderLine_ID() > 0)
+
+		}//JPIERE-0408:Set Counter Doc Line Info
+
+
+		//Check Contract Info
 		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged(MOrderLine.COLUMNNAME_QtyInvoiced))
 		{
 			MOrderLine oLine = (MOrderLine)po;

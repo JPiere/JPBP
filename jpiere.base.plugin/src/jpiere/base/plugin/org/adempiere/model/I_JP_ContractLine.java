@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractLine
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 5.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractLine 
@@ -458,6 +458,17 @@ public interface I_JP_ContractLine
 
 	public I_JP_ContractProcess getJP_ContractProcess_Inv() throws RuntimeException;
 
+    /** Column name JP_CounterContractLine_ID */
+    public static final String COLUMNNAME_JP_CounterContractLine_ID = "JP_CounterContractLine_ID";
+
+	/** Set Counter Contract Content Line	  */
+	public void setJP_CounterContractLine_ID (int JP_CounterContractLine_ID);
+
+	/** Get Counter Contract Content Line	  */
+	public int getJP_CounterContractLine_ID();
+
+	public I_JP_ContractLine getJP_CounterContractLine() throws RuntimeException;
+
     /** Column name JP_DerivativeDocPolicy_InOut */
     public static final String COLUMNNAME_JP_DerivativeDocPolicy_InOut = "JP_DerivativeDocPolicy_InOut";
 
@@ -625,6 +636,21 @@ public interface I_JP_ContractLine
 
 	/** Get Process Now	  */
 	public String getJP_Processing2();
+
+    /** Column name JP_QtyOrderd_UOM_ID */
+    public static final String COLUMNNAME_JP_QtyOrderd_UOM_ID = "JP_QtyOrderd_UOM_ID";
+
+	/** Set Ordered Qty UOM.
+	  * Ordered Qty Unit of Measure
+	  */
+	public void setJP_QtyOrderd_UOM_ID (int JP_QtyOrderd_UOM_ID);
+
+	/** Get Ordered Qty UOM.
+	  * Ordered Qty Unit of Measure
+	  */
+	public int getJP_QtyOrderd_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getJP_QtyOrderd_UOM() throws RuntimeException;
 
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";

@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractLine
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 5.1 - $Id$ */
 public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170927L;
+	private static final long serialVersionUID = 20180719L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -802,6 +802,31 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	public I_JP_ContractLine getJP_CounterContractLine() throws RuntimeException
+    {
+		return (I_JP_ContractLine)MTable.get(getCtx(), I_JP_ContractLine.Table_Name)
+			.getPO(getJP_CounterContractLine_ID(), get_TrxName());	}
+
+	/** Set Counter Contract Content Line.
+		@param JP_CounterContractLine_ID Counter Contract Content Line	  */
+	public void setJP_CounterContractLine_ID (int JP_CounterContractLine_ID)
+	{
+		if (JP_CounterContractLine_ID < 1) 
+			set_Value (COLUMNNAME_JP_CounterContractLine_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_CounterContractLine_ID, Integer.valueOf(JP_CounterContractLine_ID));
+	}
+
+	/** Get Counter Contract Content Line.
+		@return Counter Contract Content Line	  */
+	public int getJP_CounterContractLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CounterContractLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** For the Duration of Contract process period = DD */
 	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod = "DD";
 	/** Lump on a certain point of Contract process period = LP */
@@ -1178,6 +1203,30 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	public String getJP_Processing2 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
+	public org.compiere.model.I_C_UOM getJP_QtyOrderd_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getJP_QtyOrderd_UOM_ID(), get_TrxName());	}
+
+	/** Set Ordered Qty UOM.
+		@param JP_QtyOrderd_UOM_ID 
+		Ordered Qty Unit of Measure
+	  */
+	public void setJP_QtyOrderd_UOM_ID (int JP_QtyOrderd_UOM_ID)
+	{
+		throw new IllegalArgumentException ("JP_QtyOrderd_UOM_ID is virtual column");	}
+
+	/** Get Ordered Qty UOM.
+		@return Ordered Qty Unit of Measure
+	  */
+	public int getJP_QtyOrderd_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_QtyOrderd_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Line No.
