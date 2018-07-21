@@ -645,7 +645,7 @@ public class MContractLine extends X_JP_ContractLine {
 				if(!checkCreateDerivativeInOutInfo(newRecord))
 					return false;
 
-				if(!checkCreateDerivativeInvoiceInfo(newRecord))//TODO
+				if(!checkCreateDerivativeInvoiceInfo(newRecord))
 					return false;
 
 				if(!checkDerivativeDocPeriodCorrespondence(newRecord))
