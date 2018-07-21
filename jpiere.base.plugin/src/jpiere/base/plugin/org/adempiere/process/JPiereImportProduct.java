@@ -64,6 +64,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	/**	Only validate, don't import		*/
 	private boolean			p_IsValidateOnly = false;
 
+	private String p_JP_ImportUserIdentifier = "VA";
+
 	private IProcessUI processMonitor = null;
 
 	/**
@@ -81,6 +83,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 				m_deleteOldImported = "Y".equals(para[i].getParameter());
 			else if (name.equals("IsValidateOnly"))
 				p_IsValidateOnly = para[i].getParameterAsBoolean();
+			else if (name.equals("JP_ImportUserIdentifier"))
+				p_JP_ImportUserIdentifier = para[i].getParameterAsString();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -896,19 +900,111 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		//Reverse Look up SalesRep_ID From JP_User_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") ;
-		sql = new StringBuilder ("UPDATE I_ProductJP i ")
-				.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
-				.append(" WHERE i.JP_User_Value IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
-		}catch(Exception e) {
-//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		if(p_JP_ImportUserIdentifier.equals("EM")) {//E-Mail
+
+			//Reverse Look up SalesRep_ID From JP_User_EMail
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_EMail") ;
+			sql = new StringBuilder ("UPDATE I_ProductJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else if(p_JP_ImportUserIdentifier.equals("NA")) { //Name
+
+			//Reverse Look up SalesRep_ID From JP_User_Name
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Name") ;
+			sql = new StringBuilder ("UPDATE I_ProductJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Name IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else if(p_JP_ImportUserIdentifier.equals("VA")) { //Value
+
+			//Reverse Look up SalesRep_ID From JP_User_Value
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") ;
+			sql = new StringBuilder ("UPDATE I_ProductJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else if(p_JP_ImportUserIdentifier.equals("VE")) { //Value + E-Mail
+
+			//Reverse Look up SalesRep_ID From JP_User_Value + JP_User_EMail
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") + " + " + Msg.getElement(getCtx(), "JP_User_EMail") ;
+			sql = new StringBuilder ("UPDATE I_ProductJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.JP_User_EMail=p.EMail  AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.JP_User_EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else if(p_JP_ImportUserIdentifier.equals("VN")) { //Value + Name
+
+			//Reverse Look up SalesRep_ID From JP_User_Value + JP_User_Name
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") + " + " + Msg.getElement(getCtx(), "JP_User_Name") ;
+			sql = new StringBuilder ("UPDATE I_ProductJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.JP_User_Name=p.Name  AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.JP_User_Name IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else if(p_JP_ImportUserIdentifier.equals("VZ")) { //Value + Name + EMail
+
+			//Reverse Look up SalesRep_ID From JP_User_Value + JP_User_Name + JP_User_EMail
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") + " + " + Msg.getElement(getCtx(), "JP_User_Name")
+			+ " + " + Msg.getElement(getCtx(), "JP_User_EMail") ;
+			sql = new StringBuilder ("UPDATE I_ProductJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.JP_User_Name=p.Name AND i.JP_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.JP_User_Name IS NOT NULL AND i.JP_User_EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else {
+			throw new Exception(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ImportUserIdentifier") );
 		}
 
 		//Invalid JP_User_Value
