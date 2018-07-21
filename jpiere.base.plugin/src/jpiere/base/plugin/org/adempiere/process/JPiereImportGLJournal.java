@@ -118,6 +118,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 		//Reverse Lookup Surrogate Key
 		reverseLookupGL_Journal_ID();
+		reverseLookupGL_JournalLine_ID();
 		reverseLookupAD_Org_ID();
 		reverseLookupAD_OrgTrx_ID();
 		reverseLookupC_AcctSchema_ID();
@@ -373,6 +374,36 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		commitEx();
 
 	}
+
+
+	private void reverseLookupGL_JournalLine_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "GL_JournalLine_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverese Look up  GL_Journal_ID From JP_DataMigration_Identifier
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "GL_JournalLine_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Line") ;
+		sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+				.append("SET GL_JournalLine_ID=(SELECT GL_JournalLine_ID FROM GL_JournalLine p")
+				.append(" WHERE i.Line=p.Line AND p.GL_Journal_ID=i.GL_Journal_ID ) ")
+				.append(" WHERE i.GL_JournalLine_ID IS NULL ")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + sql );
+		}
+
+		commitEx();
+
+	}
+
 
 	/**
 	 * Reverse Look up Organization From JP_Org_Value

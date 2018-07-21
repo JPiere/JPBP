@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 5.1 - $Id$ */
 public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170924L;
+	private static final long serialVersionUID = 20180719L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -1400,6 +1400,31 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public int getJP_Contract_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractContent getJP_CounterContractContent() throws RuntimeException
+    {
+		return (I_JP_ContractContent)MTable.get(getCtx(), I_JP_ContractContent.Table_Name)
+			.getPO(getJP_CounterContractContent_ID(), get_TrxName());	}
+
+	/** Set Counter Contract Content.
+		@param JP_CounterContractContent_ID Counter Contract Content	  */
+	public void setJP_CounterContractContent_ID (int JP_CounterContractContent_ID)
+	{
+		if (JP_CounterContractContent_ID < 1) 
+			set_Value (COLUMNNAME_JP_CounterContractContent_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_CounterContractContent_ID, Integer.valueOf(JP_CounterContractContent_ID));
+	}
+
+	/** Get Counter Contract Content.
+		@return Counter Contract Content	  */
+	public int getJP_CounterContractContent_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CounterContractContent_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

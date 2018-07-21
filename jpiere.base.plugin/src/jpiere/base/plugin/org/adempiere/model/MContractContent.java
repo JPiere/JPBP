@@ -947,6 +947,35 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 		}
 
+		//JPIERE-0408:Check Counter Contract Info
+		if(getJP_CounterContractContent_ID() > 0 && (newRecord || is_ValueChanged("JP_CounterContractContent_ID")))
+		{
+			MContractContent counterContractContent = new MContractContent(getCtx(),getJP_CounterContractContent_ID(),get_TrxName());
+
+			if(getJP_ContractProcDate_From() != null && !getJP_ContractProcDate_From().equals(counterContractContent.getJP_ContractProcDate_From()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractProcDate_From");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractProcDate_From");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ContractProcDate_To() != null && !getJP_ContractProcDate_To().equals(counterContractContent.getJP_ContractProcDate_To()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractProcDate_To");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractProcDate_To");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ContractCalender_ID() != counterContractContent.getJP_ContractCalender_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+		}
 
 		return true;
 	}
@@ -976,7 +1005,19 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					line.setDateOrdered(getDateOrdered());
 				if (is_ValueChanged(MOrder.COLUMNNAME_DatePromised))
 					line.setDatePromised(getDatePromised());
-				line.saveEx();
+				line.saveEx(get_TrxName());
+			}
+		}
+
+
+		//JPIERE-0408:Reset Counter Contract Info
+		if(!newRecord && is_ValueChanged("JP_CounterContractContent_ID"))
+		{
+			MContractLine[] lines = getLines();
+			for(int i = 0; i < lines.length; i++)
+			{
+				lines[i].setJP_CounterContractLine_ID(0);
+				lines[i].saveEx(get_TrxName());
 			}
 		}
 

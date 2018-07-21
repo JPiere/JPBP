@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 5.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractContent 
@@ -749,6 +749,17 @@ public interface I_JP_ContractContent
 	public int getJP_Contract_ID();
 
 	public I_JP_Contract getJP_Contract() throws RuntimeException;
+
+    /** Column name JP_CounterContractContent_ID */
+    public static final String COLUMNNAME_JP_CounterContractContent_ID = "JP_CounterContractContent_ID";
+
+	/** Set Counter Contract Content	  */
+	public void setJP_CounterContractContent_ID (int JP_CounterContractContent_ID);
+
+	/** Get Counter Contract Content	  */
+	public int getJP_CounterContractContent_ID();
+
+	public I_JP_ContractContent getJP_CounterContractContent() throws RuntimeException;
 
     /** Column name JP_CreateDerivativeDocPolicy */
     public static final String COLUMNNAME_JP_CreateDerivativeDocPolicy = "JP_CreateDerivativeDocPolicy";

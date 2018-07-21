@@ -421,6 +421,20 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 		}//JPiere-0377
 
 
+		//JPIERE-0409:Set Counter Doc Line Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE )
+		{
+			MOrderLine orderLine = (MOrderLine)po;
+			if(orderLine.getRef_OrderLine_ID() > 0) //This is Counter doc Line
+			{
+				MOrderLine counterOrderLine = new MOrderLine(po.getCtx(), orderLine.getRef_OrderLine_ID(), po.get_TrxName());
+				orderLine.setPriceEntered(counterOrderLine.getPriceEntered());
+				orderLine.setC_UOM_ID(counterOrderLine.getC_UOM_ID());
+				orderLine.setPriceActual(counterOrderLine.getPriceActual());
+			}//if(orderLine.getRef_OrderLine_ID() > 0)
+
+		}//JPIERE-0409:Set Counter Doc Line Info
+
 		return null;
 	}
 

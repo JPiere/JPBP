@@ -242,6 +242,144 @@ public class MContractLine extends X_JP_ContractLine {
 			}
 		}
 
+		//JPIERE-0408:Check Counter Contract Info
+		if(getJP_CounterContractLine_ID() > 0 && (newRecord || is_ValueChanged("JP_CounterContractLine_ID")))
+		{
+			MContractLine counterContractLine = new MContractLine(getCtx(),getJP_CounterContractLine_ID(),get_TrxName());
+
+			//Check Product & Qty
+			if(getM_Product_ID() != counterContractLine.getM_Product_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getC_Charge_ID() != counterContractLine.getC_Charge_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getQtyEntered() != null && !getQtyEntered().equals(counterContractLine.getQtyEntered()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyEntered");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyEntered");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getC_UOM_ID() != counterContractLine.getC_UOM_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_UOM_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "C_UOM_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			//Check Derivative InOut Info
+			if(getJP_DerivativeDocPolicy_InOut()!= null && !getJP_DerivativeDocPolicy_InOut().equals(counterContractLine.getJP_DerivativeDocPolicy_InOut()) )
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_InOut");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ContractCalender_InOut_ID() != counterContractLine.getJP_ContractCalender_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Lump_InOut_ID() != counterContractLine.getJP_ProcPeriod_Lump_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Start_InOut_ID() != counterContractLine.getJP_ProcPeriod_Start_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_End_InOut_ID() != counterContractLine.getJP_ProcPeriod_End_InOut_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_InOut_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_InOut_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getMovementQty() != null && !getMovementQty().equals(counterContractLine.getMovementQty()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "MovementQty");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "MovementQty");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			//Check Derivative Inv Info
+			if(getJP_DerivativeDocPolicy_Inv()!= null && !getJP_DerivativeDocPolicy_Inv().equals(counterContractLine.getJP_DerivativeDocPolicy_Inv()) )
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inv");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_DerivativeDocPolicy_Inv");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ContractCalender_Inv_ID() != counterContractLine.getJP_ContractCalender_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Lump_Inv_ID() != counterContractLine.getJP_ProcPeriod_Lump_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_Start_Inv_ID() != counterContractLine.getJP_ProcPeriod_Start_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getJP_ProcPeriod_End_Inv_ID() != counterContractLine.getJP_ProcPeriod_End_Inv_ID())
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_Inv_ID");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+
+			if(getQtyInvoiced() != null && !getQtyInvoiced().equals(counterContractLine.getQtyInvoiced()))
+			{
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyInvoiced");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID") +" - " + Msg.getElement(Env.getCtx(), "QtyInvoiced");
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+		}
+
+//
 		return true;
 
 	}//beforeSave
@@ -747,6 +885,7 @@ public class MContractLine extends X_JP_ContractLine {
 			return false;
 		}
 
+		int parentJP_ContractCalender_ID =  getParent().getJP_ContractCalender_ID();
 
 		if(getJP_DerivativeDocPolicy_InOut().equals("LP")|| getJP_DerivativeDocPolicy_InOut().equals("PS")
 				 || getJP_DerivativeDocPolicy_InOut().equals("PE") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
@@ -757,7 +896,7 @@ public class MContractLine extends X_JP_ContractLine {
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_InOut_ID")}));
 					return false;
-				}else if(newRecord && getJP_ProcPeriod_Lump_InOut_ID() == 0){
+				}else if(newRecord && (getJP_ProcPeriod_Lump_InOut_ID() == 0 || parentJP_ContractCalender_ID==0) ){
 					;//Noting to do for Copy Process from Template
 				}else{
 
@@ -787,7 +926,7 @@ public class MContractLine extends X_JP_ContractLine {
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_InOut_ID")}));
 					return false;
-				}else if(newRecord && getJP_ProcPeriod_Start_InOut_ID() == 0){
+				}else if(newRecord && (getJP_ProcPeriod_Start_InOut_ID() == 0 || parentJP_ContractCalender_ID == 0 )){
 					;//Noting to do for Copy Process from Template
 				}else{
 
@@ -817,7 +956,7 @@ public class MContractLine extends X_JP_ContractLine {
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_InOut_ID")}));
 					return false;
-				}else if(newRecord && getJP_ProcPeriod_End_InOut_ID() == 0){
+				}else if(newRecord && (getJP_ProcPeriod_End_InOut_ID() == 0 || parentJP_ContractCalender_ID == 0) ){
 					;//Noting to do for Copy Process from Template
 				}else{
 
@@ -861,23 +1000,29 @@ public class MContractLine extends X_JP_ContractLine {
 			setJP_ProcPeriod_Start_InOut_ID(0);
 			setJP_ProcPeriod_End_InOut_ID(0);
 
-			MContractCalender inOut_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
-			MContractProcPeriod inOut_Start_ProcPeriod = inOut_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-			if(inOut_Start_ProcPeriod == null)
+			if(newRecord && parentJP_ContractCalender_ID == 0)
 			{
-				log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
-						Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
-				return false;
-			}
+				;//Noting to do for Copy Process from Template
+			}else {
 
-			if(getParent().getJP_ContractProcDate_To() != null)
-			{
-				MContractProcPeriod inout_End_ProcPeriod = inOut_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_To());
-				if(inout_End_ProcPeriod == null)
+				MContractCalender inOut_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
+				MContractProcPeriod inOut_Start_ProcPeriod = inOut_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+				if(inOut_Start_ProcPeriod == null)
 				{
 					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
-							Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+							Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
 					return false;
+				}
+
+				if(getParent().getJP_ContractProcDate_To() != null)
+				{
+					MContractProcPeriod inout_End_ProcPeriod = inOut_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_To());
+					if(inout_End_ProcPeriod == null)
+					{
+						log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+								Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+						return false;
+					}
 				}
 			}
 		}
@@ -917,6 +1062,7 @@ public class MContractLine extends X_JP_ContractLine {
 			return false;
 		}
 
+		int parentJP_ContractCalender_ID =  getParent().getJP_ContractCalender_ID();
 
 		if(getJP_DerivativeDocPolicy_Inv().equals("LP")|| getJP_DerivativeDocPolicy_Inv().equals("PS")
 				 || getJP_DerivativeDocPolicy_Inv().equals("PE") || getJP_DerivativeDocPolicy_Inv().equals("PB"))
@@ -927,7 +1073,7 @@ public class MContractLine extends X_JP_ContractLine {
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Lump_Inv_ID")}));
 					return false;
-				}else if(newRecord && getJP_ProcPeriod_Lump_Inv_ID() == 0){
+				}else if(newRecord &&( getJP_ProcPeriod_Lump_Inv_ID() == 0 || parentJP_ContractCalender_ID==0 )){
 					;//Noting to do for Copy Process from Template
 				}else{
 
@@ -956,7 +1102,7 @@ public class MContractLine extends X_JP_ContractLine {
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ProcPeriod_Start_Inv_ID")}));
 					return false;
-				}else if(newRecord && getJP_ProcPeriod_Start_Inv_ID() == 0){
+				}else if(newRecord && (getJP_ProcPeriod_Start_Inv_ID() == 0 || parentJP_ContractCalender_ID==0) ){
 					;//Noting to do for Copy Process from Template
 				}else{
 
@@ -986,7 +1132,7 @@ public class MContractLine extends X_JP_ContractLine {
 				{
 					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",new Object[]{Msg.getElement(Env.getCtx(), "JP_ProcPeriod_End_Inv_ID")}));
 					return false;
-				}else if(newRecord && getJP_ProcPeriod_End_Inv_ID() == 0){
+				}else if(newRecord && ( getJP_ProcPeriod_End_Inv_ID() == 0 || parentJP_ContractCalender_ID==0 )){
 					;//Noting to do for Copy Process from Template
 				}else{
 
@@ -1030,26 +1176,31 @@ public class MContractLine extends X_JP_ContractLine {
 			setJP_ProcPeriod_Start_Inv_ID(0);
 			setJP_ProcPeriod_End_Inv_ID(0);
 
-			MContractCalender inv_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
-			MContractProcPeriod inv_Start_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
-			if(inv_Start_ProcPeriod == null)
+			if(newRecord && parentJP_ContractCalender_ID == 0)
 			{
-				log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
-						Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID") + " - " +Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
-				return false;
-			}
+				;//Noting to do for Copy Process from Template
+			}else {
 
-			if(getParent().getJP_ContractProcDate_To() != null)
-			{
-				MContractProcPeriod inv_End_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_To());
-				if(inv_End_ProcPeriod == null)
+				MContractCalender inv_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
+				MContractProcPeriod inv_Start_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
+				if(inv_Start_ProcPeriod == null)
 				{
 					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
-							Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+							Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID") + " - " +Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
 					return false;
 				}
-			}
 
+				if(getParent().getJP_ContractProcDate_To() != null)
+				{
+					MContractProcPeriod inv_End_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_To());
+					if(inv_End_ProcPeriod == null)
+					{
+						log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
+								Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+						return false;
+					}
+				}
+			}
 		}
 
 
@@ -1064,6 +1215,8 @@ public class MContractLine extends X_JP_ContractLine {
 
 	private boolean checkDerivativeDocPeriodCorrespondence(boolean newRecord)
 	{
+		int parentJP_ContractCalender_ID =  getParent().getJP_ContractCalender_ID();
+
 		/** Check Contract Process Period correspondence between Derivative shi/Recipt And Derivative invoice */
 		if( (getJP_DerivativeDocPolicy_InOut().equals("LP") && getJP_DerivativeDocPolicy_Inv().equals("LP"))
 				|| (getJP_DerivativeDocPolicy_InOut().equals("LP") && getJP_DerivativeDocPolicy_Inv().equals("PB"))
@@ -1071,11 +1224,11 @@ public class MContractLine extends X_JP_ContractLine {
 				)
 		{
 			//It is necessary to be single order Contract process Period
-			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
+			MContractCalender order_Calender = MContractCalender.get(getCtx(), parentJP_ContractCalender_ID);
 
 			if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 			{
-				if(newRecord && getJP_ProcPeriod_Lump_InOut_ID()==0)//for copy process
+				if(newRecord && (getJP_ProcPeriod_Lump_InOut_ID() == 0 || parentJP_ContractCalender_ID == 0) )//for copy process
 					return true;
 
 				MContractProcPeriod inout_ProcPeriod = MContractProcPeriod.get(getCtx(), getJP_ProcPeriod_Lump_InOut_ID());
@@ -1135,7 +1288,7 @@ public class MContractLine extends X_JP_ContractLine {
 
 			}else if(getJP_DerivativeDocPolicy_InOut().equals("PB")){
 
-				if(newRecord && getJP_ProcPeriod_Lump_Inv_ID()==0)//for copy process
+				if(newRecord && (getJP_ProcPeriod_Lump_Inv_ID() == 0 || parentJP_ContractCalender_ID == 0) )//for copy process
 					return true;
 
 				if(getJP_DerivativeDocPolicy_Inv().equals("LP"))//PB && LP
@@ -1175,8 +1328,8 @@ public class MContractLine extends X_JP_ContractLine {
 
 		}else if(getJP_DerivativeDocPolicy_InOut().equals("PB") && getJP_DerivativeDocPolicy_Inv().equals("PB")){
 
-			if(newRecord && getJP_ProcPeriod_Start_InOut_ID()==0 && getJP_ProcPeriod_Start_Inv_ID()==0//for copy process
-					&&  getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0)
+			if(newRecord &&( ( getJP_ProcPeriod_Start_InOut_ID()==0 && getJP_ProcPeriod_Start_Inv_ID()==0//for copy process
+					&&  getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0) || parentJP_ContractCalender_ID == 0) )
 				return true;
 
 			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
@@ -1207,7 +1360,7 @@ public class MContractLine extends X_JP_ContractLine {
 
 		}else if(getJP_DerivativeDocPolicy_InOut().equals("PS") && getJP_DerivativeDocPolicy_Inv().equals("PS")){
 
-			if(newRecord && getJP_ProcPeriod_Start_InOut_ID()==0 && getJP_ProcPeriod_Start_Inv_ID()==0)//for copy process
+			if(newRecord && ((getJP_ProcPeriod_Start_InOut_ID()==0 && getJP_ProcPeriod_Start_Inv_ID()==0) || parentJP_ContractCalender_ID == 0)) //for copy process
 				return true;
 
 			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
@@ -1225,7 +1378,7 @@ public class MContractLine extends X_JP_ContractLine {
 
 		}else if(getJP_DerivativeDocPolicy_InOut().equals("PE") && getJP_DerivativeDocPolicy_Inv().equals("PE")){
 
-			if(newRecord &&  getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0)//for copy process
+			if(newRecord && (( getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0 ) || parentJP_ContractCalender_ID == 0 ))//for copy process
 				return true;
 
 			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());

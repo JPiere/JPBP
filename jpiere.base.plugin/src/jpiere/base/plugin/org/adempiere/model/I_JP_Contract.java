@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Contract
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 5.1
  */
 @SuppressWarnings("all")
 public interface I_JP_Contract 
@@ -601,6 +601,17 @@ public interface I_JP_Contract
 
 	/** Get Contract Doc(UU)	  */
 	public String getJP_Contract_UU();
+
+    /** Column name JP_CounterContract_ID */
+    public static final String COLUMNNAME_JP_CounterContract_ID = "JP_CounterContract_ID";
+
+	/** Set Counter Contract Doc	  */
+	public void setJP_CounterContract_ID (int JP_CounterContract_ID);
+
+	/** Get Counter Contract Doc	  */
+	public int getJP_CounterContract_ID();
+
+	public I_JP_Contract getJP_CounterContract() throws RuntimeException;
 
     /** Column name JP_Estimation_ID */
     public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
