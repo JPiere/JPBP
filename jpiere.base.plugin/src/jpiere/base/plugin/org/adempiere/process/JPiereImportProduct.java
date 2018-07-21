@@ -905,6 +905,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			//Reverse Look up SalesRep_ID From JP_User_EMail
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_EMail") ;
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_ProductJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.JP_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
@@ -922,6 +923,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			//Reverse Look up SalesRep_ID From JP_User_Name
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Name") ;
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_ProductJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.JP_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
@@ -939,6 +941,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			//Reverse Look up SalesRep_ID From JP_User_Value
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") ;
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_ProductJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
@@ -956,6 +959,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			//Reverse Look up SalesRep_ID From JP_User_Value + JP_User_EMail
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") + " + " + Msg.getElement(getCtx(), "JP_User_EMail") ;
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_ProductJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.JP_User_EMail=p.EMail  AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
@@ -973,6 +977,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			//Reverse Look up SalesRep_ID From JP_User_Value + JP_User_Name
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") + " + " + Msg.getElement(getCtx(), "JP_User_Name") ;
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_ProductJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.JP_User_Name=p.Name  AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
@@ -991,6 +996,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_User_Value") + " + " + Msg.getElement(getCtx(), "JP_User_Name")
 			+ " + " + Msg.getElement(getCtx(), "JP_User_EMail") ;
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_ProductJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.JP_User_Name=p.Name AND i.JP_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")

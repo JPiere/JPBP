@@ -290,6 +290,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		{
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "EMail") ;
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
 				.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID) ")
@@ -306,6 +307,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Name");
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -322,6 +324,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value");
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -338,6 +341,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " + " + Msg.getElement(getCtx(), "EMail") );
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.Value=p.Value AND i.EMail=p.EMail AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -355,6 +359,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " + " + Msg.getElement(getCtx(), "Name") );
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
@@ -371,6 +376,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " + " + Msg.getElement(getCtx(), "Name") + " + " + Msg.getElement(getCtx(), "EMail") );
+			if (processMonitor != null)	processMonitor.statusUpdate(msg);
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
 					.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND i.EMail=p.EMail AND p.AD_Client_ID=i.AD_Client_ID) ")
