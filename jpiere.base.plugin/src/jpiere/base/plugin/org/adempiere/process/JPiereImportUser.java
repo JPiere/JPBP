@@ -54,8 +54,11 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	/**	Only validate, don't import		*/
 	private boolean			p_IsValidateOnly = false;
 
+	private String p_JP_ImportUserIdentifier = "VA";
 
 	private IProcessUI processMonitor = null;
+
+
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -72,6 +75,8 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				m_deleteOldImported = "Y".equals(para[i].getParameter());
 			else if (name.equals("IsValidateOnly"))
 				p_IsValidateOnly = para[i].getParameterAsBoolean();
+			else if (name.equals("JP_ImportUserIdentifier"))
+				p_JP_ImportUserIdentifier = para[i].getParameterAsString();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -144,8 +149,23 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "AD_User_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		sql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' ")
-				.append(clientCheck).append(" ORDER BY Value, Name ");
+		sql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' ");
+		if(p_JP_ImportUserIdentifier.equals("EM")) {//E-Mail
+			sql.append(clientCheck).append(" ORDER BY EMail ");
+		}else if(p_JP_ImportUserIdentifier.equals("NA")) { //Name
+			sql.append(clientCheck).append(" ORDER BY Name ");
+		}else if(p_JP_ImportUserIdentifier.equals("VA")) { //Value
+			sql.append(clientCheck).append(" ORDER BY Value ");
+		}else if(p_JP_ImportUserIdentifier.equals("VE")) { //Value + E-Mail
+			sql.append(clientCheck).append(" ORDER BY Value, EMail ");
+		}else if(p_JP_ImportUserIdentifier.equals("VN")) { //Value + Name
+			sql.append(clientCheck).append(" ORDER BY Value, Name ");
+		}else if(p_JP_ImportUserIdentifier.equals("VZ")) { //Value + Name + EMail
+			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
+		}else {
+			throw new Exception(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ImportUserIdentifier") );
+		}
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -266,15 +286,13 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		boolean isEMailLogin =  MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false, getAD_Client_ID());
-		if(isEMailLogin)
+		if(p_JP_ImportUserIdentifier.equals("EM"))//E-Mail
 		{
-			//Reverse lookup AD_User_ID From E-Mail
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "EMail") ;
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID AND p.Password IS NOT NULL) ")
+				.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID) ")
 				.append(" WHERE i.EMail IS NOT NULL AND i.AD_User_ID IS NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 			try {
@@ -284,16 +302,14 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 			}
 
+		}else if(p_JP_ImportUserIdentifier.equals("NA")) { //Name
 
-		}else {
-
-			//Reverse lookup AD_User_ID From Name && password
 			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
-			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Name" + " : " + Msg.getElement(getCtx(), "Password") );
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Name");
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.Name=p.Name AND i.Password=p.Password AND p.AD_Client_ID=i.AD_Client_ID) ")
-					.append(" WHERE i.Password IS NOT NULL AND i.Name IS NOT NULL AND i.AD_User_ID IS NULL")
+					.append(" WHERE i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.Name IS NOT NULL AND i.AD_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 			try {
 				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -302,21 +318,75 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
 			}
 
-		}
+		}else if(p_JP_ImportUserIdentifier.equals("VA")) { //Value
 
-		//Reverse lookup AD_User_ID From Value && Name
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " : " + Msg.getElement(getCtx(), "Name") );
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
-				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.AD_User_ID IS NULL AND i.Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value");
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else if(p_JP_ImportUserIdentifier.equals("VE")) { //Value + E-Mail
+
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " + " + Msg.getElement(getCtx(), "EMail") );
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND i.EMail=p.EMail AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.EMail IS NOT NULL AND i.Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+
+		}else if(p_JP_ImportUserIdentifier.equals("VN")) { //Value + Name
+
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " + " + Msg.getElement(getCtx(), "Name") );
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Name IS NOT NULL AND i.Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else if(p_JP_ImportUserIdentifier.equals("VZ")) { //Value + Name + EMail
+
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " + " + Msg.getElement(getCtx(), "Name") + " + " + Msg.getElement(getCtx(), "EMail") );
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND i.EMail=p.EMail AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Name IS NOT NULL AND i.Value IS NOT NULL AND i.EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			}
+
+		}else {
+
+			throw new Exception(Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ImportUserIdentifier") );
+
 		}
 
 		//Error : Name is null
