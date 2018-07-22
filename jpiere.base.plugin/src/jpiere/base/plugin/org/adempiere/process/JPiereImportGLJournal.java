@@ -13,6 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
@@ -21,6 +22,7 @@ import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MCalendar;
+import org.compiere.model.MElementValue;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MPeriod;
@@ -53,9 +55,24 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 	/**	Only validate, don't import		*/
 	private boolean p_IsValidateOnly = false;
 
+	private String p_DocAction = "DR";
+
+	private static final String JP_CollateGLJournalPolicy_Document = "DN";
+	private static final String JP_CollateGLJournalPolicy_DataMigrationIdentifier = "MI";
+	private static final String JP_CollateGLJournalPolicy_DoNotCollateWithExistingData = "NO";
+
+	private String p_JP_CollateGLJournalPolicy = JP_CollateGLJournalPolicy_Document;
+
+	private static final String JP_ReimportPolicy_DeleteExistingData = "DD";
+	private static final String JP_ReimportPolicy_NotImport = "NI";
+
+	private String p_JP_ReimportPolicy = JP_ReimportPolicy_NotImport;
+
+	private boolean p_IsReleaseDocControlledJP =false;
+
 	private IProcessUI processMonitor = null;
 
-	private String docAction = "DR";
+	private int[] releaseDocControll_ElementValue_IDs = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -71,7 +88,13 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			else if (name.equals("IsValidateOnly"))
 				p_IsValidateOnly = para[i].getParameterAsBoolean();
 			else if (name.equals("DocAction"))
-				docAction = para[i].getParameterAsString();
+				p_DocAction = para[i].getParameterAsString();
+			else if (name.equals("JP_CollateGLJournalPolicy"))
+				p_JP_CollateGLJournalPolicy = para[i].getParameterAsString();
+			else if (name.equals("JP_ReimportPolicy"))
+				p_JP_ReimportPolicy = para[i].getParameterAsString();
+			else if (name.equals("IsReleaseDocControlledJP"))
+				p_IsReleaseDocControlledJP = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -117,8 +140,11 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
 		//Reverse Lookup Surrogate Key
-		reverseLookupGL_Journal_ID();
-		reverseLookupGL_JournalLine_ID();
+		if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DoNotCollateWithExistingData))
+		{
+			reverseLookupGL_Journal_ID();
+			reverseLookupGL_JournalLine_ID();
+		}
 		reverseLookupAD_Org_ID();
 		reverseLookupAD_OrgTrx_ID();
 		reverseLookupC_AcctSchema_ID();
@@ -155,9 +181,38 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			return "Validated";
 		}
 
+		if(p_IsReleaseDocControlledJP)
+		{
+			releaseDocControll_ElementValue_IDs =  PO.getAllIDs(MElementValue.Table_Name, "IsSummary='N' AND IsDocControlled='Y' AND AD_Client_ID=" + getAD_Client_ID(), get_TrxName());
+
+			String updateSQL = "UPDATE C_ElementValue SET IsDocControlled='N' WHERE IsSummary='N' AND IsDocControlled='Y' AND AD_Client_ID=?";
+			int updateNum =  DB.executeUpdate(updateSQL, getAD_Client_ID(), get_TrxName());
+			commitEx();
+
+		}
+
+
 		//
 		sql = new StringBuilder ("SELECT * FROM I_GLJournalJP WHERE I_IsImported='N' ")
-					.append(clientCheck).append(" ORDER BY JP_DataMigration_Identifier, DocumentNo, Line ");
+					.append(clientCheck);
+		if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_Document))
+		{
+			sql.append(" ORDER BY DocumentNo, Line ");
+
+		}else if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DataMigrationIdentifier)){
+
+			sql.append(" ORDER BY JP_DataMigration_Identifier, DocumentNo, Line ");
+
+		}else if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DoNotCollateWithExistingData)){
+
+			sql.append(" ORDER BY JP_DataMigration_Identifier, DocumentNo, Line ");
+
+		}else {
+
+			sql.append(" ORDER BY JP_DataMigration_Identifier, DocumentNo, Line ");
+
+		}
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -186,72 +241,163 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			MJournal journal = null;
 			MJournalLine journalLine = null;
 
+			String deleteSQL_Fact_ACCT = "DELETE FACT_ACCT WHERE AD_Table_ID=224 AND Record_ID=?";//224 = GL_Journal
+			String deleteSQL_JournalLine = "DELETE GL_JournalLine WHERE GL_Journal_ID=?";
+			String deleteSQL_Journal = "DELETE GL_Journal WHERE GL_Journal_ID=?";
+
 			while (rs.next())
 			{
 				recordsNum++;
 
 				X_I_GLJournalJP imp = new X_I_GLJournalJP(getCtx (), rs, get_TrxName());
 
+				//Re-Import
 				if(imp.getGL_Journal_ID() != 0)
 				{
-					skipNum++;
-					String msg = Msg.getMsg(getCtx(), "AlreadyExists");
-					imp.setI_ErrorMsg(msg);
-					imp.setI_IsImported(false);
-					imp.setProcessed(false);
-					imp.saveEx(get_TrxName());
-					commitEx();
-					continue;
+					if(p_JP_ReimportPolicy.equals(JP_ReimportPolicy_NotImport))
+					{
+						skipNum++;
+						String msg = Msg.getMsg(getCtx(), "AlreadyExists");
+						imp.setI_ErrorMsg(msg);
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
+						commitEx();
+						continue;
+
+					}
+
 				}
 
+				//ProcessIt
 				boolean isCreateHeader= true;
-				if(!Util.isEmpty(preJP_DataMigration_Identifier) && preJP_DataMigration_Identifier.equals(imp.getJP_DataMigration_Identifier()))
+				if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DataMigrationIdentifier))
 				{
-					isCreateHeader = false;
-					if(journal.getGL_Journal_ID() == 0)
+					if(!Util.isEmpty(preJP_DataMigration_Identifier) && preJP_DataMigration_Identifier.equals(imp.getJP_DataMigration_Identifier()))
 					{
-						errorNum++;
-						String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
-						imp.setI_ErrorMsg(msg);
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
+						isCreateHeader = false;
+						if(journal.getGL_Journal_ID() == 0)
+						{
+							errorNum++;
+							String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
+							imp.setI_ErrorMsg(msg);
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							imp.saveEx(get_TrxName());
+							commitEx();
+							continue;
+						}
+
+					}else {
+
+						if(journal != null && journal.getGL_Journal_ID() != 0)
+						{
+							if(!Util.isEmpty(p_DocAction))
+								journal.processIt(p_DocAction);
+							journal.saveEx(get_TrxName());
+						}
+
+						preJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
+						preDocumentNo = imp.getDocumentNo();
 					}
 
-				}else if(Util.isEmpty(preJP_DataMigration_Identifier) && preDocumentNo.equals(imp.getDocumentNo())){
 
-					isCreateHeader = false;
-					if(journal.getGL_Journal_ID() == 0)
+				}else if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_Document)){
+
+					if(!Util.isEmpty(preDocumentNo) && preDocumentNo.equals(imp.getDocumentNo()))
 					{
-						errorNum++;
-						String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
-						imp.setI_ErrorMsg(msg);
-						imp.setI_IsImported(false);
-						imp.setProcessed(false);
-						imp.saveEx(get_TrxName());
-						commitEx();
-						continue;
+						isCreateHeader = false;
+						if(journal.getGL_Journal_ID() == 0)
+						{
+							errorNum++;
+							String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
+							imp.setI_ErrorMsg(msg);
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							imp.saveEx(get_TrxName());
+							commitEx();
+							continue;
+						}
+
+					}else {
+
+						if(journal != null && journal.getGL_Journal_ID() != 0)
+						{
+							if(!Util.isEmpty(p_DocAction))
+								journal.processIt(p_DocAction);
+							journal.saveEx(get_TrxName());
+						}
+
+						preJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
+						preDocumentNo = imp.getDocumentNo();
+
 					}
 
-				} else {
+				}else if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DoNotCollateWithExistingData)) {
 
-					if(journal != null && journal.getGL_Journal_ID() != 0)
+					if(!Util.isEmpty(preJP_DataMigration_Identifier) && preJP_DataMigration_Identifier.equals(imp.getJP_DataMigration_Identifier()))
 					{
-						if(!Util.isEmpty(docAction))
-							journal.processIt(docAction);
-						journal.saveEx(get_TrxName());
-					}
+						isCreateHeader = false;
+						if(journal.getGL_Journal_ID() == 0)
+						{
+							errorNum++;
+							String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
+							imp.setI_ErrorMsg(msg);
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							imp.saveEx(get_TrxName());
+							commitEx();
+							continue;
+						}
 
-					preJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
-					preDocumentNo = imp.getDocumentNo();
+					}else	if(!Util.isEmpty(preDocumentNo) && preDocumentNo.equals(imp.getDocumentNo())) {
+
+						isCreateHeader = false;
+						if(journal.getGL_Journal_ID() == 0)
+						{
+							errorNum++;
+							String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
+							imp.setI_ErrorMsg(msg);
+							imp.setI_IsImported(false);
+							imp.setProcessed(false);
+							imp.saveEx(get_TrxName());
+							commitEx();
+							continue;
+						}
+
+					}else {
+
+						if(journal != null && journal.getGL_Journal_ID() != 0)
+						{
+							if(!Util.isEmpty(p_DocAction))
+								journal.processIt(p_DocAction);
+							journal.saveEx(get_TrxName());
+						}
+
+						preJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
+						preDocumentNo = imp.getDocumentNo();
+
+					}
 
 				}
+
 
 				//Create Header
 				if(isCreateHeader)
 				{
+					if(p_JP_ReimportPolicy.equals(JP_ReimportPolicy_DeleteExistingData))
+					{
+						//Delete FACT_ACCT
+						int deleteFactNum = DB.executeUpdate(deleteSQL_Fact_ACCT, imp.getGL_Journal_ID(), get_TrxName());
+
+						//Delete GL Journal Line
+						int deleteJournalLineNum =DB.executeUpdate(deleteSQL_JournalLine, imp.getGL_Journal_ID(), get_TrxName());
+
+						//Delete GL Journal
+						int deleteJournalNum =DB.executeUpdate(deleteSQL_Journal, imp.getGL_Journal_ID(), get_TrxName());
+
+					}
+
 					journal = new MJournal(getCtx (), 0, get_TrxName());
 					if(createHeaderJournal(imp, journal))
 					{
@@ -266,6 +412,11 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 				//Create Line
 				journalLine = new MJournalLine(journal);
+				if(!isCreateHeader)
+				{
+					imp.setGL_Journal_ID(journal.getGL_Journal_ID());
+				}
+
 				if(addJournalLine(imp, journal,journalLine))
 				{
 					successCreateDocLine++;
@@ -295,13 +446,23 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			}//while (rs.next())
 
 		}catch (Exception e){
+
 			log.log(Level.SEVERE, sql.toString(), e);
 			throw e;
+
 		}finally{
+
+			if(p_IsReleaseDocControlledJP)
+			{
+				returnDocControlled();
+			}
+
 			DB.close(rs, pstmt);
 			rs = null;
 			pstmt = null;
 		}
+
+
 
 		return records + " : " + recordsNum + " = "
 				+ skipRecords + " : " + skipNum + " + "
@@ -312,6 +473,20 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 				+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
 				;
 	}	//	doIt
+
+	private void returnDocControlled()
+	{
+		if(releaseDocControll_ElementValue_IDs == null)
+			return ;
+
+		String updateSQL = "UPDATE C_ElementValue SET IsDocControlled='Y' WHERE C_ElementValue_ID=?";
+
+		for(int i = 0; i < releaseDocControll_ElementValue_IDs.length; i++)
+		{
+
+			DB.executeUpdate(updateSQL, releaseDocControll_ElementValue_IDs[i], get_TrxName());
+		}
+	}
 
 	@Override
 	public String getImportTableName() {
@@ -339,36 +514,39 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "GL_Journal_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		//Reverese Look up  GL_Journal_ID From JP_DataMigration_Identifier
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "GL_Journal_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_DataMigration_Identifier") ;
-		sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
-				.append("SET GL_Journal_ID=(SELECT GL_Journal_ID FROM GL_Journal p")
-				.append(" WHERE i.JP_DataMigration_Identifier=p.JP_DataMigration_Identifier AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.GL_Journal_ID IS NULL AND i.JP_DataMigration_Identifier IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + sql );
-		}
+		if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DataMigrationIdentifier))
+		{
+			//Reverese Look up  GL_Journal_ID From JP_DataMigration_Identifier
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "GL_Journal_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_DataMigration_Identifier") ;
+			sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+					.append("SET GL_Journal_ID=(SELECT GL_Journal_ID FROM GL_Journal p")
+					.append(" WHERE i.JP_DataMigration_Identifier=p.JP_DataMigration_Identifier AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.GL_Journal_ID IS NULL AND i.JP_DataMigration_Identifier IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + sql );
+			}
 
-		commitEx();
+		}else if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_Document)) {
 
-		//Reverese Look up  GL_Journal_ID From DocumentNo
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "GL_Journal_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "DocumentNo") ;
-		sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
-				.append("SET GL_Journal_ID=(SELECT GL_Journal_ID FROM GL_Journal p")
-				.append(" WHERE i.DocumentNo=p.DocumentNo AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.GL_Journal_ID IS NULL AND i.DocumentNo IS NOT NULL AND i.JP_DataMigration_Identifier IS NULL")
-				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + sql );
+			//Reverese Look up  GL_Journal_ID From DocumentNo
+			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "GL_Journal_ID")
+			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "DocumentNo") ;
+			sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+					.append("SET GL_Journal_ID=(SELECT GL_Journal_ID FROM GL_Journal p")
+					.append(" WHERE i.DocumentNo=p.DocumentNo AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.GL_Journal_ID IS NULL AND i.DocumentNo IS NOT NULL AND i.JP_DataMigration_Identifier IS NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + sql );
+			}
 		}
 
 		commitEx();
@@ -1797,7 +1975,8 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		PO.copyValues(impJournal, newJournal);
 		newJournal.setAD_Org_ID(impJournal.getAD_Org_ID());
 		newJournal.setC_Period_ID(period.getC_Period_ID());
-
+		newJournal.setGL_Journal_ID(0);
+		newJournal.setDocumentNo(impJournal.getDocumentNo());
 		newJournal.setDescription(impJournal.getJP_Description_Header());
 
 		ModelValidationEngine.get().fireImportValidate(this, impJournal, newJournal, ImportValidator.TIMING_AFTER_IMPORT);
@@ -1830,6 +2009,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, impJournal, journal, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(impJournal, journalLine);
+		journalLine.setGL_JournalLine_ID(0);
 		journalLine.setGL_Journal_ID(journal.getGL_Journal_ID());
 		if(impJournal.getGL_Journal_ID()==0)
 			impJournal.setGL_Journal_ID(journal.getGL_Journal_ID());
@@ -1839,6 +2019,28 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		int C_ValidCombination_ID = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), impJournal.getC_AcctSchema_ID()
 				, impJournal.getJP_ElementValue_Value(), get_TrxName());
 		journalLine.setC_ValidCombination_ID(C_ValidCombination_ID);
+
+		//Set Currency Conversion Rate
+		if(impJournal.getCurrencyRate().compareTo(Env.ZERO) == 0)
+		{
+			BigDecimal currencyRate = Env.ZERO;
+			if(journal.getC_AcctSchema().getC_Currency_ID() == journalLine.getC_Currency_ID())
+			{
+				currencyRate = Env.ONE;
+
+			}else if(impJournal.getAmtSourceDr().compareTo(Env.ZERO) != 0 && impJournal.getAmtAcctDr().compareTo(Env.ZERO) != 0 ) {
+
+				currencyRate = impJournal.getAmtSourceDr().divide(impJournal.getAmtAcctDr(), 12, BigDecimal.ROUND_HALF_UP);
+
+			}else if(impJournal.getAmtSourceCr().compareTo(Env.ZERO) != 0 && impJournal.getAmtAcctCr().compareTo(Env.ZERO) != 0 ) {
+
+				currencyRate = impJournal.getAmtSourceCr().divide(impJournal.getAmtAcctCr(), 12, BigDecimal.ROUND_HALF_UP);
+
+			}
+
+			impJournal.setCurrencyRate(currencyRate);
+			journalLine.setCurrencyRate(currencyRate);
+		}
 
 		ModelValidationEngine.get().fireImportValidate(this, impJournal, journal, ImportValidator.TIMING_AFTER_IMPORT);
 
