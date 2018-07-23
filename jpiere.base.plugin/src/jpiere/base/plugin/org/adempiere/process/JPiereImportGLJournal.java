@@ -57,14 +57,14 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 	private String p_DocAction = "DR";
 
-	private static final String JP_CollateGLJournalPolicy_Document = "DN";
-	private static final String JP_CollateGLJournalPolicy_DataMigrationIdentifier = "MI";
-	private static final String JP_CollateGLJournalPolicy_DoNotCollateWithExistingData = "NO";
+	public static final String JP_CollateGLJournalPolicy_Document = "DN";
+	public static final String JP_CollateGLJournalPolicy_DataMigrationIdentifier = "MI";
+	public static final String JP_CollateGLJournalPolicy_DoNotCollateWithExistingData = "NO";
 
 	private String p_JP_CollateGLJournalPolicy = JP_CollateGLJournalPolicy_Document;
 
-	private static final String JP_ReimportPolicy_DeleteExistingData = "DD";
-	private static final String JP_ReimportPolicy_NotImport = "NI";
+	public static final String JP_ReimportPolicy_DeleteExistingData = "DD";
+	public static final String JP_ReimportPolicy_NotImport = "NI";
 
 	private String p_JP_ReimportPolicy = JP_ReimportPolicy_NotImport;
 
@@ -140,6 +140,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
 		//Reverse Lookup Surrogate Key
+		reverseLookupC_AcctSchema_ID();
 		if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DoNotCollateWithExistingData))
 		{
 			reverseLookupGL_Journal_ID();
@@ -147,13 +148,12 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		}
 		reverseLookupAD_Org_ID();
 		reverseLookupAD_OrgTrx_ID();
-		reverseLookupC_AcctSchema_ID();
+
 		reverseLookupGL_Budget_ID();
 		reverseLookupC_DocType_ID();
 		reverseLookupGL_Category_ID();
 		reverseLookupC_Currency_ID();
 		reverseLookupC_ConversionType_ID();
-
 		reverseLookupAccount_ID();
 		reverseLookupC_SubAcct_ID();
 		reverseLookupC_UOM_ID();
@@ -521,7 +521,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_DataMigration_Identifier") ;
 			sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
 					.append("SET GL_Journal_ID=(SELECT GL_Journal_ID FROM GL_Journal p")
-					.append(" WHERE i.JP_DataMigration_Identifier=p.JP_DataMigration_Identifier AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.JP_DataMigration_Identifier=p.JP_DataMigration_Identifier AND p.C_AcctSchema_ID=i.C_AcctSchema_ID) ")
 					.append(" WHERE i.GL_Journal_ID IS NULL AND i.JP_DataMigration_Identifier IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 			try {
@@ -538,7 +538,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "DocumentNo") ;
 			sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
 					.append("SET GL_Journal_ID=(SELECT GL_Journal_ID FROM GL_Journal p")
-					.append(" WHERE i.DocumentNo=p.DocumentNo AND p.AD_Client_ID=i.AD_Client_ID) ")
+					.append(" WHERE i.DocumentNo=p.DocumentNo AND p.C_AcctSchema_ID=i.C_AcctSchema_ID) ")
 					.append(" WHERE i.GL_Journal_ID IS NULL AND i.DocumentNo IS NOT NULL AND i.JP_DataMigration_Identifier IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 			try {
