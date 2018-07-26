@@ -135,13 +135,6 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
 
-		/** Mandatory Check */
-		if(!checkNullName())
-		{
-			return message;
-		}
-
-
 		/** Reverse Lookup Surrogate Key */
 		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
 		if(processMonitor != null)	processMonitor.statusUpdate(message);
@@ -245,19 +238,19 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		sql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' ").append(getWhereClause());
 		if(Util.isEmpty(p_JP_ImportUserIdentifier)) {
 			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
-		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail)) {
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) {
 			sql.append(clientCheck).append(" ORDER BY EMail ");
-		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) {
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) {
 			sql.append(clientCheck).append(" ORDER BY Name ");
-		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) {
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) {
 			sql.append(clientCheck).append(" ORDER BY Value ");
-		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) {
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) {
 			sql.append(clientCheck).append(" ORDER BY Value, EMail ");
-		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) {
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) {
 			sql.append(clientCheck).append(" ORDER BY Value, Name ");
-		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) {
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) {
 			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
-		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate)) {
 			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
 		}else {
 			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
@@ -407,37 +400,6 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		return msgreturn.toString();
 	}
 
-	/**
-	 * Null Check - Name;
-	 *
-	 *
-	 * @return
-	 * @throws Exception
-	 */
-	private boolean checkNullName() throws Exception
-	{
-		//Check - Name is null
-		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_Null") + Msg.getElement(getCtx(), "Name");
-		int no = 0;
-		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ message + "'")
-			.append(" WHERE Name IS NULL AND AD_User_ID IS NULL ")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try
-		{
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-
-		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() + " : " + sql );
-		}
-
-		if(no > 0)
-		{
-			return false;
-		}
-
-		return true;
-	}
 
 	/**
 	 * Reverse Look up User From E-Mail and (Value && Name)
@@ -481,7 +443,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			}
 
 		}catch (Exception e) {
-			message = e.toString();
+			message = message + e.toString();
 			throw e;
 		}finally {
 			DB.close(checkUserDuplicationRS, checkUserDuplicationPSTMT);
@@ -497,7 +459,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		}
 
 
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = null;
 		int no = 0;
 
 		if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))//E-Mail
@@ -565,7 +527,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 		}catch(Exception e) {
 
-			message = e.toString();
+			message = message + e.toString();
 			return false;
 		}
 
@@ -775,11 +737,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupJP_Corporation_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
 		//Reverse lookup JP_Corporation_ID From JP_Corporation_Value
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder  sql = new StringBuilder ("UPDATE I_UserJP i ")
 			.append("SET JP_Corporation_ID=(SELECT JP_Corporation_ID FROM JP_Corporation p")
 			.append(" WHERE i.JP_Corporation_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
 			.append("WHERE i.JP_Corporation_ID IS NULL AND i.JP_Corporation_Value IS NOT NULL ")
@@ -787,7 +748,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_Corporation_Value
@@ -815,11 +776,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupC_BPartner_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
 		//Reverse lookup C_BPartner_ID From JP_BPartner_Value
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder  sql = new StringBuilder ("UPDATE I_UserJP i ")
 			.append("SET C_BPartner_ID=(SELECT C_BPartner_ID FROM C_BPartner p")
 			.append(" WHERE i.JP_BPartner_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
 			.append("WHERE i.C_BPartner_ID IS NULL AND i.JP_BPartner_Value IS NOT NULL ")
@@ -827,7 +787,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid BPartner_Value
@@ -854,11 +814,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupC_BPartner_Location_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
 		//Reverse lookup C_BPartner_Location_ID From JP_BPartner_Location_Name
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 			.append("SET C_BPartner_Location_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location p")
 			.append(" WHERE i.JP_BPartner_Location_Name=p.Name AND i.C_Bpartner_ID =p.C_BPartner_ID) ")
 			.append(" WHERE i.C_BPartner_Location_ID IS NULL AND i.JP_BPartner_Location_Name IS NOT NULL ")
@@ -866,7 +825,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_BPartner_Location_Name
@@ -893,12 +852,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 **/
 	private boolean reverseLookupAD_Org_ID() throws Exception
 	{
-
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
 		//Look up AD_Org ID From JP_Org_Value
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_Org p")
 				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N') ")
 				.append(" WHERE i.JP_Org_Value IS NOT NULL")
@@ -906,7 +863,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_Org_Value
@@ -936,12 +893,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 **/
 	private boolean reverseLookupAD_OrgTrx_ID() throws Exception
 	{
-
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
 		//Look up AD_OrgTrx ID From JP_OrgTrx_Name
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_OrgTrx_ID=(SELECT AD_Org_ID FROM AD_org p")
 				.append(" WHERE i.JP_OrgTrx_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N') ")
 				.append(" WHERE i.JP_OrgTrx_Value IS NOT NULL")
@@ -949,7 +904,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_OrgTrx_Value
@@ -981,11 +936,9 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupC_Job_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
-		//Look up C_TaxCategory_ID From JP_TaxCategory_Name
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET C_Job_ID=(SELECT C_Job_ID FROM C_Job p")
 				.append(" WHERE i.JP_Job_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_Job_Name IS NOT NULL")
@@ -993,7 +946,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_TaxCategory_Name
@@ -1028,7 +981,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(Util.isEmpty(p_JP_ImportUserIdentifier) || p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate))
 			return true;
 
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = null;
 		int no = 0;
 
 		if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))//E-Mail
@@ -1096,7 +1049,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 		}catch(Exception e) {
 
-			message = e.toString();
+			message = message + " : " +e.toString()+ " : "+sql.toString();
 			return false;
 		}
 
@@ -1112,11 +1065,9 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupR_DefaultMailText_ID()throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
-		//Look up M_FreightCategory_ID From JP_FreightCategory_Value
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET R_DefaultMailText_ID=(SELECT R_DefaultMailText_ID FROM M_FreightCategory p")
 				.append(" WHERE i.JP_MailText_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_MailText_Name IS NOT NULL")
@@ -1156,11 +1107,9 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupC_Location_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
-		//Reverse Loog up C_Location_ID From JP_Location_Label
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
 				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
@@ -1203,7 +1152,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		if(Util.isEmpty(p_JP_ImportUserIdentifier)||p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate))
 			return true;
 
-		StringBuilder sql = new StringBuilder();
+		StringBuilder sql = null;
 		int no = 0;
 
 		if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))//E-Mail
@@ -1286,11 +1235,10 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupC_Greeting_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
 		int no = 0;
 
 		//Reverse Look up C_Greeting_ID From JP_SalesRep_Email
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET C_Greeting_ID=(SELECT C_Greeting_ID FROM C_Greeting p")
 				.append(" WHERE i.JP_Greeting_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_Greeting_Name IS NOT NULL")
@@ -1357,20 +1305,6 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				importUser.saveEx(get_TrxName());
 				return false;
 			}
-
-//			int[]  users = PO.getAllIDs(MUser.Table_Name, "EMail=" + email + " AND AD_Client_ID=" + m_AD_Client_ID, get_TrxName());
-//			if(users.length > 0)
-//			{
-//				int AD_User_ID = users[0];
-//				MUser user = new MUser(getCtx(), AD_User_ID, get_TrxName());
-//				importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_SameEMail") + " -> " +
-//										Msg.getElement(Env.getCtx(), "AD_User_ID") + " : "+ user.getName());
-//				importUser.setI_IsImported(false);
-//				importUser.setProcessed(false);
-//				importUser.saveEx(get_TrxName());
-//				return false;
-//
-//			}
 		}
 
 		if(Util.isEmpty(importUser.getName()))
