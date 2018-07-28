@@ -1745,7 +1745,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		StringBuilder sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
 			.append("SET M_Locator_ID=(SELECT M_Locator_ID FROM M_Locator p")
 			.append(" WHERE i.JP_Locator_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
-			.append("WHERE i.M_Locator_ID IS NULL AND i.JP_Locator_Value IS NOT NULL ")
+			.append(" WHERE i.M_Locator_ID IS NULL AND i.JP_Locator_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -1757,7 +1757,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Locator_Value");
 		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
 			.append("SET I_ErrorMsg='"+ message + "'")
-			.append("WHERE M_Locator_ID IS NULL AND JP_Locator_Value IS NOT NULL")
+			.append(" WHERE M_Locator_ID IS NULL AND JP_Locator_Value IS NOT NULL")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
