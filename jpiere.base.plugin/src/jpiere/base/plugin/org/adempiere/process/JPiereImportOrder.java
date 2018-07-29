@@ -818,48 +818,48 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
 		{
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y' ) ")
 					.append(" WHERE i.JP_SalesRep_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y') ")
 					.append(" WHERE i.JP_SalesRep_Name IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y'  ) ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y' ) ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y'  ) ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_Name IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name  AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name  AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y'  ) ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_Name IS NOT NULL AND i.JP_SalesRep_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1416,7 +1416,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		if(p_JP_ImportInvoiceUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
 		{
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET Bill_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET Bill_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_Bill_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.Bill_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_Bill_User_EMail IS NOT NULL")
@@ -1425,7 +1425,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportInvoiceUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET Bill_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET Bill_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_Bill_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.Bill_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_Bill_User_Name IS NOT NULL")
@@ -1434,7 +1434,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportInvoiceUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET Bill_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET Bill_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_Bill_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.Bill_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_Bill_User_Value IS NOT NULL")
@@ -1443,7 +1443,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportInvoiceUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET Bill_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET Bill_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_Bill_User_Value=p.Value AND i.JP_Bill_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.Bill_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_Bill_User_Value IS NOT NULL AND i.JP_Bill_User_EMail IS NOT NULL")
@@ -1452,7 +1452,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportInvoiceUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET Bill_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET Bill_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_Bill_User_Value=p.Value AND i.JP_Bill_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.Bill_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_Bill_User_Value IS NOT NULL AND i.JP_Bill_User_Name IS NOT NULL")
@@ -1461,7 +1461,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportInvoiceUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET Bill_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET Bill_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_Bill_User_Value=p.Value AND i.JP_Bill_User_Name=p.Name  AND i.JP_Bill_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.Bill_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_Bill_User_Value IS NOT NULL AND i.JP_Bill_User_Name IS NOT NULL AND i.JP_Bill_User_EMail IS NOT NULL")
@@ -1733,7 +1733,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		if(p_JP_ImportDropShipUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
 		{
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET DropShip_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_DropShip_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_EMail IS NOT NULL")
@@ -1742,7 +1742,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportDropShipUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET DropShip_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_DropShip_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Name IS NOT NULL")
@@ -1751,7 +1751,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportDropShipUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET DropShip_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Value IS NOT NULL")
@@ -1760,7 +1760,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportDropShipUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET DropShip_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_DropShip_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Value IS NOT NULL AND i.JP_DropShip_User_EMail IS NOT NULL")
@@ -1769,7 +1769,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportDropShipUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET DropShip_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_Bill_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Value IS NOT NULL AND i.JP_DropShip_User_Name IS NOT NULL")
@@ -1778,7 +1778,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportDropShipUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET DropShip_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_Bill_User_Name=p.Name  AND i.JP_Bill_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Value IS NOT NULL AND i.JP_DropShip_User_Name IS NOT NULL AND i.JP_DropShip_User_EMail IS NOT NULL")
@@ -1887,7 +1887,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
 		{
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.EMail IS NOT NULL")
@@ -1896,7 +1896,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.ContactName=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.ContactName IS NOT NULL")
@@ -1905,7 +1905,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_User_Value IS NOT NULL")
@@ -1914,7 +1914,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.EMail IS NOT NULL")
@@ -1923,7 +1923,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactName=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.ContactName IS NOT NULL")
@@ -1932,7 +1932,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
 
 			sql = new StringBuilder ("UPDATE I_OrderJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactName=p.Name  AND i.EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )")
 					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.ContactName IS NOT NULL AND i.EMail IS NOT NULL")
