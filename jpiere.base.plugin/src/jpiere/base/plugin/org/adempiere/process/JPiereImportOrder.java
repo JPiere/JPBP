@@ -16,33 +16,35 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
+import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
-import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
-import org.compiere.model.MTable;
-import org.compiere.model.MTableIndex;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
+import org.compiere.model.PO;
+import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.X_I_BPartnerJP;
 import jpiere.base.plugin.org.adempiere.model.X_I_OrderJP;
 
 /**
- *	Import Order from I_OrderJP
+ *	JPIERE-0097:Import Order from I_OrderJP
  *  @author Oscar Gomez
  * 			<li>BF [ 2936629 ] Error when creating bpartner in the importation order
  * 			<li>https://sourceforge.net/tracker/?func=detail&aid=2936629&group_id=176962&atid=879332
@@ -58,9 +60,12 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 	/**	Organization to be imported to		*/
 	private int				m_AD_Org_ID = 0;
 	/**	Delete old Imported				*/
-	private boolean			m_deleteOldImported = false;
+	private boolean			p_deleteOldImported = false;
 	/**	Document Action					*/
-	private String			m_docAction = MOrder.DOCACTION_Prepare;
+	private String			p_docAction = MOrder.DOCACTION_Prepare;
+
+	/** Effective						*/
+	private Timestamp		p_DateValue = null;
 
 	private String message = null;
 
@@ -72,9 +77,9 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 	private String p_JP_ImportInvoiceUserIdentifier = JPiereImportUser.JP_ImportUserIdentifier_Name;
 
+	private IProcessUI processMonitor = null;
 
-	/** Effective						*/
-	private Timestamp		m_DateValue = null;
+
 
 	private boolean			isRecordCommitJP =false;
 
@@ -116,9 +121,9 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			else if (name.equals("AD_Org_ID"))
 				m_AD_Org_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else if (name.equals("DeleteOldImported"))
-				m_deleteOldImported = "Y".equals(para[i].getParameter());
+				p_deleteOldImported = "Y".equals(para[i].getParameter());
 			else if (name.equals("DocAction"))
-				m_docAction = (String)para[i].getParameter();
+				p_docAction = (String)para[i].getParameter();
 			else if (name.equals("IsRecordCommitJP"))
 				isRecordCommitJP = "Y".equals(para[i].getParameter());
 			else if (name.equals("IsDeleteIndexJP"))
@@ -140,8 +145,8 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
-		if (m_DateValue == null)
-			m_DateValue = new Timestamp (System.currentTimeMillis());
+		if (p_DateValue == null)
+			p_DateValue = new Timestamp (System.currentTimeMillis());
 	}	//	prepare
 
 
@@ -152,26 +157,16 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 	 */
 	protected String doIt() throws java.lang.Exception
 	{
-		//処理の計測
-		long start = System.currentTimeMillis();
-
-		//プロセス状況のモニタリング
-		IProcessUI processMonitor = null;
-		if(isMonitoringProcessJP)
-		{
-			processMonitor = Env.getProcessUI(getCtx());
-		}
+		processMonitor = Env.getProcessUI(getCtx());
 
 		StringBuilder sql = null;
 		int no = 0;
-		StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
-
 
 		/** Delete Old Imported */
-		if (m_deleteOldImported)
+		if (p_deleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE I_OrderJP ")
-				  .append("WHERE I_IsImported='Y'").append (clientCheck);
+				  .append("WHERE I_IsImported='Y' ").append (getWhereClause());
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
 		}
@@ -180,7 +175,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		/** Reset I_ErrorMsg */
 		sql = new StringBuilder ("UPDATE I_OrderJP ")
 				.append("SET I_ErrorMsg='' ")
-				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+				.append(" WHERE I_IsImported<>'Y' ").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
@@ -192,6 +187,13 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 		/** Reverse Lookup Surrogate Key */
 		//Header
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "DocumentNo");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Order_ID())
+			commitEx();
+		else
+			return message;
+
 		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
 		if(processMonitor != null)	processMonitor.statusUpdate(message);
 		if(reverseLookupAD_Org_ID())
@@ -214,10 +216,24 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			return message;
 
 
-		//TODO Business partner Info
+		//Business partner Info
 		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID");
 		if(processMonitor != null)	processMonitor.statusUpdate(message);
 		if(reverseLookupC_BPartner_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_BPartner_Location_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupAD_User_ID())
 			commitEx();
 		else
 			return message;
@@ -386,469 +402,218 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 
-		//前処理終了
-		long endPreProcessing = System.currentTimeMillis();
-		addLog("前処理時間: " + (endPreProcessing - start) + " ミリ秒");
-
-
-		/**
-		 * 制約の無効とIndexの削除//TODO
-		 */
-		//制約の無効
-		if(isInvalidConstraintJP)
-		{
-			if (processMonitor != null)	processMonitor.statusUpdate("制約の無効化");
-			long startInvalidConstraint = System.currentTimeMillis();
-
-			for(int i = 0; i < allDocumentTables.length; i++)
-			{
-				StringBuilder invalidConstraint = new StringBuilder (" update pg_trigger set tgenabled = 'D' "
-												+ "where oid in (select tr.oid from pg_trigger tr INNER JOIN pg_class cl on (tr.tgrelid = cl.oid) WHERE cl.relname="
-												+ "lower('" + allDocumentTables[i] + "') )");
-
-				DB.executeUpdate(invalidConstraint.toString(), get_TrxName());
-			}
+		/** Create BPartner */
+		message = Msg.getMsg(getCtx(), "CreateNew") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(createBPartner())
 			commitEx();
+		else
+			return message;
 
-			long endInvalidConstraint = System.currentTimeMillis();
-			addLog("制約無効の処理時間: " + (endInvalidConstraint - startInvalidConstraint) + " ミリ秒");
+		//Invalid C_BPartner_ID
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "C_BPartner_ID");
+		sql = new StringBuilder ("UPDATE I_OrderJP ")
+				.append(" SET I_ErrorMsg='"+ message + "'")
+				.append(" WHERE C_BPartner_ID IS NULL")
+				.append(" AND I_IsImported<>'Y'").append (getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql );
 		}
 
-		//indexの削除
-		if(isDeleteIndexJP)
+		if(no > 0)
 		{
-			if (processMonitor != null)	processMonitor.statusUpdate("Indexの削除");
-			long startDeleteIndex = System.currentTimeMillis();
-
-			for(int i = 0; i < allDocumentTables.length; i++)
-			{
-				MTable mTable = MTable.get(getCtx(), allDocumentTables[i]);
-				MTableIndex[] indexes = MTableIndex.get(mTable);
-				for(int j = 0; j < indexes.length; j++)
-				{
-					String indexDropSql = indexes[j].getDropDDL();
-					int rvalue = DB.executeUpdateEx(indexDropSql, get_TrxName());
-//					addLog(0, null, new BigDecimal(rvalue), indexDropSql.toString());
-				}
-			}
-			commitEx();
-
-			long endDeleteIndex = System.currentTimeMillis();
-			addLog("Indexの削除時間: " + (endDeleteIndex - startDeleteIndex) + " ミリ秒");
+			return message;
 		}
 
 
-		//	-- New BPartner ---------------------------------------------------
-
-		//	Go through Order Records w/o C_BPartner_ID
-		if (processMonitor != null)	processMonitor.statusUpdate("新規取引先の登録");
-		long startCreateBP = System.currentTimeMillis();
+		/** Create Orders */
+		message = Msg.getMsg(getCtx(), "CreateNew") + " : " + Msg.getElement(getCtx(), "C_Order_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
 
 		sql = new StringBuilder ("SELECT * FROM I_OrderJP ")
-			  .append("WHERE I_IsImported='N' AND C_BPartner_ID IS NULL").append (clientCheck);
+			  .append("WHERE I_IsImported='N'").append (getWhereClause())
+			.append(" ORDER BY DateOrdered, C_BPartner_ID, BillTo_ID, C_BPartner_Location_ID, DocumentNo, I_OrderJP_ID");
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				X_I_OrderJP imp = new X_I_OrderJP (getCtx (), rs, get_TrxName());
-				if (imp.getBPartnerValue () == null)
-				{
-					if (imp.getEMail () != null)
-						imp.setBPartnerValue (imp.getEMail ());
-					else if (imp.getName () != null)
-						imp.setBPartnerValue (imp.getName ());
-					else
-						continue;
-				}
-				if (imp.getName () == null)
-				{
-					if (imp.getContactName () != null)
-						imp.setName (imp.getContactName ());
-					else
-						imp.setName (imp.getBPartnerValue ());
-				}
-				//	BPartner
-				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue());
-				if (bp == null)
-				{
-					bp = new MBPartner (getCtx (), -1, get_TrxName());
-					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
-					bp.setValue (imp.getBPartnerValue ());
-					bp.setName (imp.getName ());
-					if (!bp.save ())
-						continue;
-				}
-				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
+		int recordsNum = 0;
+		int skipNum = 0;
+		int errorNum = 0;
+		int successNum = 0;
+		int successCreateDocHeader = 0;
+		int successCreateDocLine = 0;
+		int failureCreateDocHeader = 0;
+		int failureCreateDocLine = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String skipRecords = Msg.getMsg(getCtx(), "JP_NumberOfSkipRecords");
+		String errorRecords = Msg.getMsg(getCtx(), "JP_NumberOfUnexpectedErrorRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String createHeader = Msg.getMsg(getCtx(), "JP_CreateHeader");
+		String createLine = Msg.getMsg(getCtx(), "JP_CreateLine");
+		String detail = Msg.getMsg(getCtx(), "JP_DetailLog");
 
-				//	BP Location
-				MBPartnerLocation bpl = null;
-				MBPartnerLocation[] bpls = bp.getLocations(true);
-				for (int i = 0; bpl == null && i < bpls.length; i++)
-				{
-					if (imp.getC_BPartner_Location_ID() == bpls[i].getC_BPartner_Location_ID())
-						bpl = bpls[i];
-					//	Same Location ID
-					else if (imp.getC_Location_ID() == bpls[i].getC_Location_ID())
-						bpl = bpls[i];
-					//	Same Location Info
-					else if (imp.getC_Location_ID() == 0)
-					{
-						MLocation loc = bpls[i].getLocation(false);
-						if (loc.equals(imp.getC_Country_ID(), imp.getC_Region_ID(),
-								imp.getPostal(), "", imp.getCity(),
-								imp.getAddress1(), imp.getAddress2()))
-							bpl = bpls[i];
-					}
-				}
-				if (bpl == null)
-				{
-					//	New Location
-					MLocation loc = new MLocation (getCtx (), 0, get_TrxName());
-					loc.setAddress1 (imp.getAddress1 ());
-					loc.setAddress2 (imp.getAddress2 ());
-					loc.setCity (imp.getCity ());
-					loc.setPostal (imp.getPostal ());
-					if (imp.getC_Region_ID () != 0)
-						loc.setC_Region_ID (imp.getC_Region_ID ());
-					loc.setC_Country_ID (imp.getC_Country_ID ());
-					if (!loc.save ())
-						continue;
-					//
-					bpl = new MBPartnerLocation (bp);
-					bpl.setC_Location_ID (loc.getC_Location_ID ());
-					if (!bpl.save ())
-						continue;
-				}
-				imp.setC_Location_ID (bpl.getC_Location_ID ());
-				imp.setBillTo_ID (bpl.getC_BPartner_Location_ID ());
-				imp.setC_BPartner_Location_ID (bpl.getC_BPartner_Location_ID ());
-
-				//	User/Contact
-				if (imp.getContactName () != null
-					|| imp.getEMail () != null
-					|| imp.getPhone () != null)
-				{
-					MUser[] users = bp.getContacts(true);
-					MUser user = null;
-					for (int i = 0; user == null && i < users.length;  i++)
-					{
-						String name = users[i].getName();
-						if (name.equals(imp.getContactName())
-							|| name.equals(imp.getName()))
-						{
-							user = users[i];
-							imp.setAD_User_ID (user.getAD_User_ID ());
-						}
-					}
-					if (user == null)
-					{
-						user = new MUser (bp);
-						if (imp.getContactName () == null)
-							user.setName (imp.getName ());
-						else
-							user.setName (imp.getContactName ());
-						user.setEMail (imp.getEMail ());
-						user.setPhone (imp.getPhone ());
-						if (user.save ())
-							imp.setAD_User_ID (user.getAD_User_ID ());
-					}
-				}
-				imp.save ();
-			}	//	for all new BPartners
-			//
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, "BP - " + sql.toString(), e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-		sql = new StringBuilder ("UPDATE I_OrderJP ")
-			  .append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No BPartner, ' ")
-			  .append("WHERE C_BPartner_ID IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (clientCheck);
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (no != 0)
-			log.warning ("No BPartner=" + no);
-
-		commitEx();
-
-		/**
-		 * 新規取引先の登録処理終了//TODO
-		 */
-		long endCreateBP = System.currentTimeMillis();
-		addLog("新規取引先の登録時間: " + (endCreateBP - startCreateBP) + " ミリ秒");
-
-
-		//	-- New Orders -----------------------------------------------------
-
-		long startImport = System.currentTimeMillis();
-		if (processMonitor != null)	processMonitor.statusUpdate("受注伝票の登録");
-
-		int noInsert = 0;
-		int noInsertLine = 0;
-
-		//	Go through Order Records w/o
-		sql = new StringBuilder ("SELECT * FROM I_OrderJP ")
-			  .append("WHERE I_IsImported='N'").append (clientCheck)
-			.append(" ORDER BY DateOrdered, C_BPartner_ID, BillTo_ID, C_BPartner_Location_ID, I_OrderJP_ID");
 		try
 		{
 			pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery ();
 			//
-			int oldC_BPartner_ID = 0;
-			int oldBillTo_ID = 0;
-			int oldC_BPartner_Location_ID = 0;
-			String oldDocumentNo = "";
+			int lastC_BPartner_ID = 0;
+			int lastBillTo_ID = 0;
+			int lastC_BPartner_Location_ID = 0;
+			String lastDocumentNo = "";
 			//
 			MOrder order = null;
+			MOrderLine line = null;
 			int lineNo = 0;
+			boolean isCreateHeader= true;
+
 			while (rs.next ())
 			{
+				recordsNum++;
+
 				X_I_OrderJP imp = new X_I_OrderJP (getCtx (), rs, get_TrxName());
+
+				//Re-Import
+				if(imp.getC_Order_ID() > 0)
+				{
+					skipNum++;
+					String msg = Msg.getMsg(getCtx(), "AlreadyExists");
+					imp.setI_ErrorMsg(msg);
+					imp.setI_IsImported(false);
+					imp.setProcessed(false);
+					imp.saveEx(get_TrxName());
+					commitEx();
+					continue;
+				}
+
 				String cmpDocumentNo = imp.getDocumentNo();
 				if (cmpDocumentNo == null)
 					cmpDocumentNo = "";
+
 				//	New Order
-				if (oldC_BPartner_ID != imp.getC_BPartner_ID()
-					|| oldC_BPartner_Location_ID != imp.getC_BPartner_Location_ID()
-					|| oldBillTo_ID != imp.getBillTo_ID()
-					|| !oldDocumentNo.equals(cmpDocumentNo))
+				isCreateHeader= true;
+				if (lastC_BPartner_ID != imp.getC_BPartner_ID()
+					|| lastC_BPartner_Location_ID != imp.getC_BPartner_Location_ID()
+					|| lastBillTo_ID != imp.getBillTo_ID()
+					|| !lastDocumentNo.equals(cmpDocumentNo))
 				{
 					if (order != null)
 					{
-						if (m_docAction != null && m_docAction.length() > 0)
+						if(!order.processIt (p_docAction))
 						{
-//							order.setDocAction(m_docAction);
-							if(!order.processIt (m_docAction)) {
-								log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
-								throw new IllegalStateException("Order Process Failed: " + order + " - " + order.getProcessMsg());
-
-							}
-						}
-						order.saveEx();
-
-						if(isRecordCommitJP)
+							log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
+							imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + order.getProcessMsg());
+							imp.saveEx(get_TrxName());
 							commitEx();
-
-						if (processMonitor != null)	processMonitor.statusUpdate(order.getDocumentNo()+"の処理が完了しました。");
+						}
+						order.saveEx(get_TrxName());
+						commitEx();
 					}
-					oldC_BPartner_ID = imp.getC_BPartner_ID();
-					oldC_BPartner_Location_ID = imp.getC_BPartner_Location_ID();
-					oldBillTo_ID = imp.getBillTo_ID();
-					oldDocumentNo = imp.getDocumentNo();
-					if (oldDocumentNo == null)
-						oldDocumentNo = "";
-					//
-					order = new MOrder (getCtx(), 0, get_TrxName());
-					order.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
-					order.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
-					order.setIsSOTrx(imp.isSOTrx());
-					order.setDocAction(m_docAction);
-					if (imp.getDeliveryRule() != null ) {
-						order.setDeliveryRule(imp.getDeliveryRule());
-					}
-					if (imp.getDocumentNo() != null)
-						order.setDocumentNo(imp.getDocumentNo());
-					//	Ship Partner
-					order.setC_BPartner_ID(imp.getC_BPartner_ID());
-					order.setC_BPartner_Location_ID(imp.getC_BPartner_Location_ID());
-					if (imp.getAD_User_ID() != 0)
-						order.setAD_User_ID(imp.getAD_User_ID());
-					//	Bill Partner
-					order.setBill_BPartner_ID(imp.getC_BPartner_ID());
-					order.setBill_Location_ID(imp.getBillTo_ID());
-					//
-					if (imp.getDescription() != null)
-						order.setDescription(imp.getDescription());
-					order.setC_PaymentTerm_ID(imp.getC_PaymentTerm_ID());
-					order.setM_PriceList_ID(imp.getM_PriceList_ID());
-					order.setM_Warehouse_ID(imp.getM_Warehouse_ID());
-					if (imp.getM_Shipper_ID() != 0)
-						order.setM_Shipper_ID(imp.getM_Shipper_ID());
-					//	SalesRep from Import or the person running the import
-					if (imp.getSalesRep_ID() != 0)
-						order.setSalesRep_ID(imp.getSalesRep_ID());
-					if (order.getSalesRep_ID() == 0)
-						order.setSalesRep_ID(getAD_User_ID());
-					//
-					if (imp.getAD_OrgTrx_ID() != 0)
-						order.setAD_OrgTrx_ID(imp.getAD_OrgTrx_ID());
-					if (imp.getC_Activity_ID() != 0)
-						order.setC_Activity_ID(imp.getC_Activity_ID());
-					if (imp.getC_Campaign_ID() != 0)
-						order.setC_Campaign_ID(imp.getC_Campaign_ID());
-					if (imp.getC_Project_ID() != 0)
-						order.setC_Project_ID(imp.getC_Project_ID());
-					//
-					if (imp.getDateOrdered() != null)
-						order.setDateOrdered(imp.getDateOrdered());
-					if (imp.getDateAcct() != null)
-						order.setDateAcct(imp.getDateAcct());
 
-					// Set Order Source
-					if (imp.getC_OrderSource() != null)
-						order.setC_OrderSource_ID(imp.getC_OrderSource_ID());
-					//
-					order.saveEx();
-					noInsert++;
-					lineNo = 10;
-				}//if
-				imp.setC_Order_ID(order.getC_Order_ID());
-				//	New OrderLine
-				MOrderLine line = new MOrderLine (order);
-				line.setLine(lineNo);
-				lineNo += 10;
-				if (imp.getM_Product_ID() != 0)
-					line.setM_Product_ID(imp.getM_Product_ID(), true);
-				if (imp.getC_Charge_ID() != 0)
-					line.setC_Charge_ID(imp.getC_Charge_ID());
-				line.setQty(imp.getQtyOrdered());
-				line.setPrice();
-				if (imp.getPriceActual().compareTo(Env.ZERO) != 0)
-					line.setPrice(imp.getPriceActual());
-				if (imp.getC_Tax_ID() != 0)
-					line.setC_Tax_ID(imp.getC_Tax_ID());
-				else
-				{
-					line.setTax();
-					imp.setC_Tax_ID(line.getC_Tax_ID());
+					lastC_BPartner_ID = imp.getC_BPartner_ID();
+					lastC_BPartner_Location_ID = imp.getC_BPartner_Location_ID();
+					lastBillTo_ID = imp.getBillTo_ID();
+					lastDocumentNo = imp.getDocumentNo();
+					if (lastDocumentNo == null)
+						lastDocumentNo = "";
+
+				}else {
+
+					isCreateHeader = false;
 				}
-				if (imp.getFreightAmt() != null)
-					line.setFreightAmt(imp.getFreightAmt());
-				if (imp.getLineDescription() != null)
-					line.setDescription(imp.getLineDescription());
-				line.saveEx();
-				imp.setC_OrderLine_ID(line.getC_OrderLine_ID());
-				imp.setI_IsImported(true);
-				imp.setProcessed(true);
-				//
-				if (imp.save())
-					noInsertLine++;
+
+				if(isCreateHeader)
+				{
+					order = new MOrder (getCtx(), 0, get_TrxName());
+					lineNo = 0;
+
+					if(createOrderHeader(imp, order))
+					{
+						successCreateDocHeader++;
+					}else {
+						failureCreateDocHeader++;
+						errorNum++;//Error of Header include number of Error.
+						commitEx();
+						continue;
+					}
+				}
+
+
+				imp.setC_Order_ID(order.getC_Order_ID());
+
+				//Create OrderLine
+				line = new MOrderLine(order);
+				lineNo = lineNo + 10;
+
+				if(addOrderLine(imp, order,line, lineNo))
+				{
+					successCreateDocLine++;
+					successNum++;
+
+				}else {
+
+					failureCreateDocLine++;
+					errorNum++;//Error of Line include number of Error.
+					commitEx();
+					continue;
+
+				}
+
+				commitEx();
+
+
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						records + " : " + recordsNum + " = "
+						+ skipRecords + " : " + skipNum + " + "
+						+ errorRecords + " : " + errorNum + " + "
+						+ success + " : " + successNum
+						+ "   [" + detail +" --> "
+						+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+						+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+						);
+				}
 			}//While
+
+			//For last Journal
 			if (order != null)
 			{
-				if (m_docAction != null && m_docAction.length() > 0)
+				if(!order.processIt (p_docAction))
 				{
-					order.setDocAction(m_docAction);
-					if(!order.processIt (m_docAction)) {
-						log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
-						throw new IllegalStateException("Order Process Failed: " + order + " - " + order.getProcessMsg());
-
-					}
+					log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
 				}
-				order.saveEx();
+				order.saveEx(get_TrxName());
+				commitEx();
 
-				if(isRecordCommitJP)
-					commitEx();
-
-				if (processMonitor != null)	processMonitor.statusUpdate(order.getDocumentNo()+"の処理が完了しました。");
 			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "Order - " + sql.toString(), e);
-		}
-		finally
-		{
+
+		}catch (Exception e){
+
+			log.log(Level.SEVERE, sql.toString(), e);
+			throw e;
+
+		}finally{
 			DB.close(rs, pstmt);
 			rs = null;
 			pstmt = null;
 		}
 
-		//	Set Error to indicator to not imported
-		sql = new StringBuilder ("UPDATE I_OrderJP ")
-			.append("SET I_IsImported='N', Updated=SysDate ")
-			.append("WHERE I_IsImported<>'Y'").append(clientCheck);
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		addLog (0, null, new BigDecimal (no), "@Errors@");
 
-//		commitEx();
-		long endImport = System.currentTimeMillis();
-		addLog("インポート処理時間: " + (endImport - startImport) + " ミリ秒");
+		message = records + " : " + recordsNum + " = "
+				+ skipRecords + " : " + skipNum + " + "
+				+ errorRecords + " : " + errorNum + " + "
+				+ success + " : " + successNum
+				+ "   [" + detail +" --> "
+				+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+				+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]";
 
-
-		/**
-		 * indexの作成と制約の有効化の処理//TODO
-		 */
-
-		//indexの作成
-		if(isDeleteIndexJP)
-		{
-			if (processMonitor != null)	processMonitor.statusUpdate("Indexの再作成");
-			long startCreateIndex = System.currentTimeMillis();
-
-			createIndex();
-			commitEx();
-
-			long endCreateIndex = System.currentTimeMillis();
-			addLog("Indexの再作成時間: " + (endCreateIndex - startCreateIndex ) + " ミリ秒");
-		}
-
-		//制約の有効化
-		if(isInvalidConstraintJP)
-		{
-			if (processMonitor != null)	processMonitor.statusUpdate("制約の有効化");
-			long startValidConstraint = System.currentTimeMillis();
-
-			validConstraint();
-			commitEx();
-
-			long endValidConstraint = System.currentTimeMillis();
-			addLog("制約の有効化の処理時間: " + (endValidConstraint - startValidConstraint ) + " ミリ秒");
-		}
-
-		long finish = System.currentTimeMillis();
-
-		addLog("*****処理が無事終了しました*****");
-		addLog("合計時間処理時間: " + (finish - start) + " ミリ秒");
-
-		//
-		addLog (0, null, new BigDecimal (noInsert), "@C_Order_ID@: @Inserted@");
-		addLog (0, null, new BigDecimal (noInsertLine), "@C_OrderLine_ID@: @Inserted@");
-		StringBuilder msgreturn = new StringBuilder("#").append(noInsert).append("/").append(noInsertLine);
-		return msgreturn.toString();
+		return message;
 	}	//	doIt
 
-
-	private boolean createIndex()
-	{
-		for(int i = 0; i < allDocumentTables.length; i++)
-		{
-			MTable mTable = MTable.get(getCtx(), allDocumentTables[i]);
-			MTableIndex[] indexes = MTableIndex.get(mTable);
-			for(int j = 0; j < indexes.length; j++)
-			{
-				String indexDropSql = indexes[j].getDDL();
-				DB.executeUpdateEx(indexDropSql, get_TrxName());
-//				addLog(0, null, new BigDecimal(rvalue), indexDropSql.toString());
-			}
-		}
-
-		return true;
-	}
-
-	private boolean validConstraint()
-	{
-		for(int i = 0; i < allDocumentTables.length; i++)
-		{
-			StringBuilder invalidConstraint = new StringBuilder (" update pg_trigger set tgenabled = 'O' "
-											+ "where oid in (select tr.oid from pg_trigger tr INNER JOIN pg_class cl on (tr.tgrelid = cl.oid) WHERE cl.relname="
-											+ "lower('" + allDocumentTables[i] + "') )");
-
-			DB.executeUpdate(invalidConstraint.toString(), get_TrxName());
-		}
-		return true;
-	}
 
 	@Override
 	public String getWhereClause() {
@@ -861,6 +626,32 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 	public String getImportTableName() {
 		return X_I_OrderJP.Table_Name;
 	}
+
+
+	/**
+	 * Reverse Lookup C_Order_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupC_Order_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_OrderJP i ")
+				.append("SET C_Order_ID=(SELECT MAX(C_Order_ID) FROM C_Order p")
+				.append(" WHERE i.DocumentNo=p.DocumentNo AND p.AD_Client_ID=i.AD_Client_ID ) ")
+				.append(" WHERE i.DocumentNo IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
+		}
+
+		return true;
+
+	}//reverseLookupC_Order_ID
 
 	/**
 	 * Reverse Look up Organization From JP_Org_Value
@@ -1005,7 +796,6 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			  .append("SET I_ErrorMsg='"+ message + "'")
 			  .append(" WHERE C_DocType_ID IS NULL")
 			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
@@ -2041,145 +1831,160 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 	}
 
+	/**
+	 * Reverse Lookup C_BPartner_ID
+	 *
+	 *
+	 * @return
+	 * @throws Exception
+	 */
 	private boolean reverseLookupC_BPartner_ID()throws Exception
 	{
 		int no = 0;
 
-		StringBuilder sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET (C_BPartner_ID,AD_User_ID)=(SELECT C_BPartner_ID,AD_User_ID FROM AD_User u")
-			  .append(" WHERE o.EMail=u.EMail AND o.AD_Client_ID=u.AD_Client_ID AND u.C_BPartner_ID IS NOT NULL) ")
-			  .append("WHERE C_BPartner_ID IS NULL AND EMail IS NOT NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set BP from EMail=" + no);
+		//Reverse lookup C_BPartner_ID From JP_BPartner_Value
+		StringBuilder  sql = new StringBuilder ("UPDATE I_OrderJP i ")
+			.append("SET C_BPartner_ID=(SELECT C_BPartner_ID FROM C_BPartner p")
+			.append(" WHERE i.BPartnerValue=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append("WHERE i.C_BPartner_ID IS NULL AND i.BPartnerValue IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
+		}
 
-		//	BP from ContactName
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET (C_BPartner_ID,AD_User_ID)=(SELECT C_BPartner_ID,AD_User_ID FROM AD_User u")
-			  .append(" WHERE o.ContactName=u.Name AND o.AD_Client_ID=u.AD_Client_ID AND u.C_BPartner_ID IS NOT NULL) ")
-			  .append("WHERE C_BPartner_ID IS NULL AND ContactName IS NOT NULL")
-			  .append(" AND EXISTS (SELECT Name FROM AD_User u WHERE o.ContactName=u.Name AND o.AD_Client_ID=u.AD_Client_ID AND u.C_BPartner_ID IS NOT NULL GROUP BY Name HAVING COUNT(*)=1)")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set BP from ContactName=" + no);
+		return true;
 
-		//	BP from Value
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET C_BPartner_ID=(SELECT MAX(C_BPartner_ID) FROM C_BPartner bp")
-			  .append(" WHERE o.BPartnerValue=bp.Value AND o.AD_Client_ID=bp.AD_Client_ID) ")
-			  .append("WHERE C_BPartner_ID IS NULL AND BPartnerValue IS NOT NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set BP from Value=" + no);
+	}
 
-		//	Default BP
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET C_BPartner_ID=(SELECT C_BPartnerCashTrx_ID FROM AD_ClientInfo c")
-			  .append(" WHERE o.AD_Client_ID=c.AD_Client_ID) ")
-			  .append("WHERE C_BPartner_ID IS NULL AND BPartnerValue IS NULL AND Name IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set Default BP=" + no);
+	/**
+	 * Reverse Lookup C_BPartner_Location_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupC_BPartner_Location_ID() throws Exception
+	{
+		int no = 0;
 
-		//	Existing Location ? Exact Match
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET (BillTo_ID,C_BPartner_Location_ID)=(SELECT C_BPartner_Location_ID,C_BPartner_Location_ID")
-			  .append(" FROM C_BPartner_Location bpl INNER JOIN C_Location l ON (bpl.C_Location_ID=l.C_Location_ID)")
-			  .append(" WHERE o.C_BPartner_ID=bpl.C_BPartner_ID AND bpl.AD_Client_ID=o.AD_Client_ID")
-			  .append(" AND DUMP(o.Address1)=DUMP(l.Address1) AND DUMP(o.Address2)=DUMP(l.Address2)")
-			  .append(" AND DUMP(o.City)=DUMP(l.City) AND DUMP(o.Postal)=DUMP(l.Postal)")
-			  .append(" AND o.C_Region_ID=l.C_Region_ID AND o.C_Country_ID=l.C_Country_ID) ")
-			  .append("WHERE C_BPartner_ID IS NOT NULL AND C_BPartner_Location_ID IS NULL")
-			  .append(" AND I_IsImported='N'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
-		//	Set Bill Location from BPartner
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET BillTo_ID=(SELECT MAX(C_BPartner_Location_ID) FROM C_BPartner_Location l")
-			  .append(" WHERE l.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=l.AD_Client_ID")
-			  .append(" AND ((l.IsBillTo='Y' AND o.IsSOTrx='Y') OR (l.IsPayFrom='Y' AND o.IsSOTrx='N'))")
-			  .append(") ")
-			  .append("WHERE C_BPartner_ID IS NOT NULL AND BillTo_ID IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set BP BillTo from BP=" + no);
-		//	Set Location from BPartner
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET C_BPartner_Location_ID=(SELECT MAX(C_BPartner_Location_ID) FROM C_BPartner_Location l")
-			  .append(" WHERE l.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=l.AD_Client_ID")
-			  .append(" AND ((l.IsShipTo='Y' AND o.IsSOTrx='Y') OR o.IsSOTrx='N')")
-			  .append(") ")
-			  .append("WHERE C_BPartner_ID IS NOT NULL AND C_BPartner_Location_ID IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set BP Location from BP=" + no);
-		//
-		sql = new StringBuilder ("UPDATE I_OrderJP ")
-			  .append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No BP Location, ' ")
-			  .append("WHERE C_BPartner_ID IS NOT NULL AND (BillTo_ID IS NULL OR C_BPartner_Location_ID IS NULL)")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (no != 0)
-			log.warning ("No BP Location=" + no);
+		StringBuilder sql = new StringBuilder ("UPDATE I_OrderJP i ")
+				.append("SET C_BPartner_Location_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location p")
+				.append(" WHERE i.JP_BPartner_Location_Name=p.Name AND i.C_BPartner_ID=p.C_BPartner_ID) ")
+				.append("WHERE i.C_BPartner_Location_ID IS NULL AND i.JP_BPartner_Location_Name IS NOT NULL ")
+				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
 
-		//	Set Country
-		/**
-		sql = new StringBuffer ("UPDATE I_OrderJP o "
-			  + "SET CountryCode=(SELECT MAX(CountryCode) FROM C_Country c WHERE c.IsDefault='Y'"
-			  + " AND c.AD_Client_ID IN (0, o.AD_Client_ID)) "
-			  + "WHERE C_BPartner_ID IS NULL AND CountryCode IS NULL AND C_Country_ID IS NULL"
-			  + " AND I_IsImported<>'Y'").append (clientCheck);
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		log.fine("Set Country Default=" + no);
-		**/
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET C_Country_ID=(SELECT C_Country_ID FROM C_Country c")
-			  .append(" WHERE o.CountryCode=c.CountryCode AND c.AD_Client_ID IN (0, o.AD_Client_ID)) ")
-			  .append("WHERE C_BPartner_ID IS NULL AND C_Country_ID IS NULL AND CountryCode IS NOT NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set Country=" + no);
-		//
-		sql = new StringBuilder ("UPDATE I_OrderJP ")
-			  .append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Country, ' ")
-			  .append("WHERE C_BPartner_ID IS NULL AND C_Country_ID IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (no != 0)
-			log.warning ("Invalid Country=" + no);
 
-		//	Set Region
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("Set RegionName=(SELECT MAX(Name) FROM C_Region r")
-			  .append(" WHERE r.IsDefault='Y' AND r.C_Country_ID=o.C_Country_ID")
-			  .append(" AND r.AD_Client_ID IN (0, o.AD_Client_ID)) ")
-			  .append("WHERE C_BPartner_ID IS NULL AND C_Region_ID IS NULL AND RegionName IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set Region Default=" + no);
-		//
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("Set C_Region_ID=(SELECT C_Region_ID FROM C_Region r")
-			  .append(" WHERE r.Name=o.RegionName AND r.C_Country_ID=o.C_Country_ID")
-			  .append(" AND r.AD_Client_ID IN (0, o.AD_Client_ID)) ")
-			  .append("WHERE C_BPartner_ID IS NULL AND C_Region_ID IS NULL AND RegionName IS NOT NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set Region=" + no);
-		//
-		sql = new StringBuilder ("UPDATE I_OrderJP o ")
-			  .append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Region, ' ")
-			  .append("WHERE C_BPartner_ID IS NULL AND C_Region_ID IS NULL ")
-			  .append(" AND EXISTS (SELECT * FROM C_Country c")
-			  .append(" WHERE c.C_Country_ID=o.C_Country_ID AND c.HasRegion='Y')")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (no != 0)
-			log.warning ("Invalid Region=" + no);
-
+		sql = new StringBuilder ("UPDATE I_OrderJP i ")
+				.append("SET C_BPartner_Location_ID=(SELECT max(C_BPartner_Location_ID) FROM C_BPartner_Location p")
+				.append(" WHERE i.C_BPartner_ID=p.C_BPartner_ID AND i.Phone = p.phone) ")
+				.append(" WHERE i.C_BPartner_Location_ID IS NULL AND i.JP_BPartner_Location_Name IS NULL ")
+				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
 
 		return true;
 	}
+
+	/**
+	 * Reverse Lookup AD_User_ID
+	 *
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupAD_User_ID() throws Exception
+	{
+		if(Util.isEmpty(p_JP_ImportUserIdentifier) || p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate))
+			return true;
+
+		StringBuilder sql = null;
+
+		if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
+		{
+			sql = new StringBuilder ("UPDATE I_OrderJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
+					.append(" WHERE i.EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
+
+			sql = new StringBuilder ("UPDATE I_OrderJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.ContactName=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
+					.append(" WHERE i.ContactName IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
+
+			sql = new StringBuilder ("UPDATE I_OrderJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
+					.append(" WHERE i.JP_User_Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
+
+			sql = new StringBuilder ("UPDATE I_OrderJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
+					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
+
+			sql = new StringBuilder ("UPDATE I_OrderJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactName=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
+					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.ContactName IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
+
+			sql = new StringBuilder ("UPDATE I_OrderJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactName=p.Name  AND i.EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )")
+					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
+					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.ContactName IS NOT NULL AND i.EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate)){
+
+			return true;
+
+		}else {
+
+			return true;
+
+		}
+
+		try {
+			DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+
+			message = message + " : " +e.toString()+ " : "+sql.toString();
+			return false;
+
+		}
+
+		return true;
+
+	}
+
 
 	/**
 	 * Reverse Lookup M_Product_ID
@@ -2372,5 +2177,338 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 		return true;
 	}
+
+	private boolean createBPartner() throws Exception
+	{
+
+		ArrayList<X_I_OrderJP> orderlist = new ArrayList<X_I_OrderJP>();
+		String sql = "SELECT * FROM I_OrderJP WHERE I_IsImported<>'Y' AND C_BPartner_ID IS NULL AND BPartnerValue IS NOT NULL "
+							+ getWhereClause() + " ORDER BY BPartnerValue ";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			rs = pstmt.executeQuery();
+			String preValue = "";
+			X_I_OrderJP impOrder =null;
+
+			while (rs.next())
+			{
+				impOrder = new X_I_OrderJP (getCtx (), rs, get_TrxName());
+				if(preValue != null && preValue.equals(impOrder.getBPartnerValue()))
+				{
+					;//Noting to do
+				}else {
+					orderlist.add(impOrder);
+					preValue = impOrder.getBPartnerValue();
+				}
+
+
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		X_I_BPartnerJP i_BP = null;
+		for(X_I_OrderJP i_order : orderlist)
+		{
+			i_BP = new X_I_BPartnerJP (getCtx (), 0, get_TrxName());
+			PO.copyValues(i_order, i_BP);
+			i_BP.setJP_Org_Value(i_order.getJP_BP_Org_Value());
+			i_BP.setValue(i_order.getBPartnerValue());
+			i_BP.saveEx(get_TrxName());
+			commitEx();
+
+			ProcessInfo pi = new ProcessInfo("CreateBPartner", 0);
+			String className =  "jpiere.base.plugin.org.adempiere.process.JPiereImportBPartner";
+			pi.setClassName(className);
+			pi.setAD_Client_ID(getAD_Client_ID());
+			pi.setAD_User_ID(getAD_User_ID());
+			pi.setAD_PInstance_ID(getAD_PInstance_ID());
+			pi.setRecord_ID(0);
+
+			//Update ProcessInfoParameter
+			ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
+			list.add (new ProcessInfoParameter("DeleteOldImported", false, null, null, null ));
+			list.add (new ProcessInfoParameter("IsValidateOnly", false, null, null, null ));
+			list.add (new ProcessInfoParameter("JP_ImportUserIdentifier", p_JP_ImportUserIdentifier, null, null, null ));
+			list.add (new ProcessInfoParameter("I_BPartnerJP_ID", i_BP.getI_BPartnerJP_ID(), null, null, null ));
+
+			ProcessInfoParameter[] pars = new ProcessInfoParameter[list.size()];
+			list.toArray(pars);
+			pi.setParameter(pars);
+
+			if(!ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), true, processUI))
+			{
+				message = Msg.getMsg(getCtx(), "ProcessRunError");
+
+				return false;
+			}
+
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Create Order Header
+	 *
+	 * @param impOrder
+	 * @param order
+	 * @return
+	 */
+	private boolean createOrderHeader(X_I_OrderJP impOrder, MOrder order)
+	{
+		ModelValidationEngine.get().fireImportValidate(this, impOrder, order, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		PO.copyValues(impOrder, order);
+		order.setClientOrg (impOrder.getAD_Client_ID(), impOrder.getAD_Org_ID());
+		order.setC_DocTypeTarget_ID(impOrder.getC_DocType_ID());
+		order.setIsSOTrx(impOrder.isSOTrx());
+
+		//Date
+		if(impOrder.getDateOrdered() == null)
+		{
+			impOrder.setDateOrdered(p_DateValue);
+			order.setDateOrdered(p_DateValue);
+		}
+
+		if(impOrder.getDateAcct() == null)
+		{
+			impOrder.setDateAcct(p_DateValue);
+			order.setDateAcct(p_DateValue);
+		}
+
+		if(impOrder.getDatePromised() == null)
+		{
+			impOrder.setDatePromised(p_DateValue);
+			order.setDatePromised(p_DateValue);
+		}
+
+		//Busienss Partner
+		MBPartner bp = null;
+		if(impOrder.getC_BPartner_ID() > 0)
+		{
+			bp =MBPartner.get(getCtx(), impOrder.getC_BPartner_ID());
+		}else if(!Util.isEmpty(impOrder.getBPartnerValue())) {
+			bp =MBPartner.get(getCtx(), impOrder.getBPartnerValue());
+			impOrder.setC_BPartner_ID(bp.getC_BPartner_ID());
+		}else {
+			message = Msg.getMsg(getCtx(), "JP_Null") + Msg.getElement(getCtx(), "C_BPartner_ID");
+			impOrder.setI_ErrorMsg(message);
+			return false;
+		}
+
+		if(impOrder.getC_BPartner_Location_ID() > 0)
+		{
+			;
+		}else {
+
+			MBPartnerLocation[] locations = bp.getLocations(false);
+			if(locations != null && locations.length == 1 )
+			{
+				impOrder.setC_BPartner_Location_ID(locations[0].getC_BPartner_Location_ID());
+				order.setC_BPartner_Location_ID(locations[0].getC_BPartner_Location_ID());
+			}
+		}
+
+		if(impOrder.getAD_User_ID() > 0)
+		{
+			;
+		}else {
+
+			MUser[] users =MUser.getOfBPartner(getCtx(), impOrder.getC_BPartner_ID(),get_TrxName());
+			if(users != null && users.length == 1 )
+			{
+				impOrder.setAD_User_ID(users[0].getAD_User_ID());
+				order.setAD_User_ID(users[0].getAD_User_ID());
+			}
+
+		}
+
+		if(Util.isEmpty(impOrder.getDeliveryRule()))
+		{
+			if(Util.isEmpty(bp.getDeliveryRule()))
+			{
+				impOrder.setDeliveryRule(X_I_OrderJP.DELIVERYRULE_Availability);
+				order.setDeliveryRule(X_I_OrderJP.DELIVERYRULE_Availability);
+
+			}else {
+				impOrder.setDeliveryRule(bp.getDeliveryRule());
+				order.setDeliveryRule(bp.getDeliveryRule());
+			}
+		}
+
+		if(Util.isEmpty(impOrder.getPriorityRule()))
+		{
+			impOrder.setPriorityRule(X_I_OrderJP.PRIORITYRULE_Medium);
+			order.setPriorityRule(X_I_OrderJP.PRIORITYRULE_Medium);
+		}
+
+		if(Util.isEmpty(impOrder.getDeliveryViaRule()))
+		{
+			if(Util.isEmpty(bp.getDeliveryViaRule()))
+			{
+				;//set Default
+
+			}else {
+				impOrder.setDeliveryViaRule(bp.getDeliveryViaRule());
+				order.setDeliveryViaRule(bp.getDeliveryViaRule());
+			}
+		}
+
+		if(impOrder.getM_PriceList_ID() == 0)
+		{
+			if(bp.getM_PriceList_ID() == 0)
+			{
+				;//set Default
+
+			}else {
+				impOrder.setM_PriceList_ID(bp.getM_PriceList_ID());
+				order.setM_PriceList_ID(bp.getM_PriceList_ID());
+			}
+		}
+
+		if(Util.isEmpty(impOrder.getInvoiceRule()))
+		{
+			if(Util.isEmpty(bp.getInvoiceRule()))
+			{
+				impOrder.setInvoiceRule(X_I_OrderJP.INVOICERULE_Immediate);
+				order.setInvoiceRule(X_I_OrderJP.INVOICERULE_Immediate);
+
+			}else {
+				impOrder.setInvoiceRule(bp.getInvoiceRule());
+				order.setInvoiceRule(bp.getInvoiceRule());
+			}
+		}
+
+		if(Util.isEmpty(impOrder.getPaymentRule()))
+		{
+			if(Util.isEmpty(bp.getPaymentRule()))
+			{
+				//set Default
+				impOrder.setPaymentRule(X_I_OrderJP.PAYMENTRULE_OnCredit);
+				order.setPaymentRule(X_I_OrderJP.PAYMENTRULE_OnCredit);
+
+			}else {
+				impOrder.setPaymentRule(bp.getPaymentRule());
+				order.setPaymentRule(bp.getPaymentRule());
+			}
+		}
+
+		if(impOrder.getC_PaymentTerm_ID() == 0)
+		{
+			if(bp.getC_PaymentTerm_ID() == 0)
+			{
+				;//set Default
+
+			}else {
+				impOrder.setC_PaymentTerm_ID(bp.getC_PaymentTerm_ID());
+				order.setC_PaymentTerm_ID(bp.getC_PaymentTerm_ID());
+			}
+		}
+
+
+		//DocStatus
+		if(Util.isEmpty(impOrder.getDocStatus()))
+		{
+			order.setDocStatus(impOrder.getDocStatus());
+		}
+
+		if(Util.isEmpty(impOrder.getDocAction()))
+		{
+			if (p_docAction != null && p_docAction.length() > 0)
+			{
+				order.setDocAction(p_docAction);
+			}
+
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, impOrder, order, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			order.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impOrder.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_Order_ID") +" : " + e.toString());
+			impOrder.setI_IsImported(false);
+			impOrder.setProcessed(false);
+			impOrder.saveEx(get_TrxName());
+			return false;
+		}
+
+		impOrder.setC_Order_ID(order.getC_Order_ID());
+
+		return true;
+
+	}
+
+	/**
+	 *
+	 * add Order Line
+	 *
+	 * @param impOrder
+	 * @param order
+	 * @param line
+	 * @param lineNo
+	 * @return
+	 */
+	private boolean addOrderLine(X_I_OrderJP impOrder, MOrder order, MOrderLine line, int lineNo)
+	{
+		ModelValidationEngine.get().fireImportValidate(this, impOrder, line, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		PO.copyValues(impOrder, line);
+
+		line.setC_Order_ID(order.getC_Order_ID());
+
+		if(impOrder.getLine()==0)
+		{
+			line.setLine(lineNo);
+
+		}else {
+			line.setLine(impOrder.getLine());
+		}
+
+		if(line.getQtyEntered().compareTo(Env.ZERO) == 0 && line.getQtyOrdered().compareTo(Env.ZERO) != 0 )
+		{
+			line.setQtyEntered(line.getQtyOrdered());
+
+		}else if(line.getQtyEntered().compareTo(Env.ZERO) != 0 && line.getQtyOrdered().compareTo(Env.ZERO) == 0 ) {
+
+			line.setQtyOrdered(line.getQtyEntered());
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, impOrder, line, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			line.saveEx();
+		}catch (Exception e) {
+
+			rollback();//Roll Back from Header.
+
+			impOrder.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_OrderLine_ID") +" : " + e.toString());
+			impOrder.setI_IsImported(false);
+			impOrder.setProcessed(false);
+			impOrder.saveEx(get_TrxName());
+			return false;
+		}
+
+		impOrder.setC_OrderLine_ID(line.getC_OrderLine_ID());
+		impOrder.setI_IsImported(true);
+		impOrder.setProcessed(true);
+		impOrder.saveEx(get_TrxName());
+
+		return true;
+	}
+
 
 }	//	ImportOrder
