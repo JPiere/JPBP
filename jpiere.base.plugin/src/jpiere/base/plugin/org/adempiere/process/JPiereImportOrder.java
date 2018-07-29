@@ -75,6 +75,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 	private IProcessUI processMonitor = null;
 
+	private boolean p_IsHistoricalDataMigration = false;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -98,6 +99,8 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				p_JP_ImportDropShipUserIdentifier = para[i].getParameterAsString();
 			else if (name.equals("JP_ImportInvoiceUserIdentifier"))
 				p_JP_ImportInvoiceUserIdentifier = para[i].getParameterAsString();
+			else if (name.equals("IsHistoricalDataMigration"))
+				p_IsHistoricalDataMigration = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -441,19 +444,16 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				{
 					if (order != null)
 					{
-						if(!Util.isEmpty(order.getDocAction()))
+						if(p_IsHistoricalDataMigration)
 						{
+							order.setDocStatus(DocAction.STATUS_Closed);
+							order.setDocAction(DocAction.ACTION_None);
+							order.setProcessed(true);
+							order.setPosted(true);
+
+						}else {
+
 							if(!order.processIt (order.getDocAction()))
-							{
-								log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
-								imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + order.getProcessMsg());
-								imp.saveEx(get_TrxName());
-								commitEx();
-							}
-
-						}else if(!Util.isEmpty(p_docAction)) {
-
-							if(!order.processIt (p_docAction))
 							{
 								log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
 								imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + order.getProcessMsg());
@@ -548,16 +548,16 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			//For last Journal
 			if (order != null)
 			{
-				if(!Util.isEmpty(order.getDocAction()))
+				if(p_IsHistoricalDataMigration)
 				{
+					order.setDocStatus(DocAction.STATUS_Closed);
+					order.setDocAction(DocAction.ACTION_None);
+					order.setProcessed(true);
+					order.setPosted(true);
+
+				}else {
+
 					if(!order.processIt (order.getDocAction()))
-					{
-						log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
-					}
-
-				}else if(!Util.isEmpty(p_docAction)) {
-
-					if(!order.processIt (p_docAction))
 					{
 						log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
 					}
@@ -2458,6 +2458,8 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		//DocStatus
 		if(Util.isEmpty(impOrder.getDocStatus()))
 		{
+			order.setDocStatus(DocAction.STATUS_Drafted);
+		}else {
 			order.setDocStatus(impOrder.getDocStatus());
 		}
 
@@ -2469,7 +2471,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 			}else {
 
-				order.setDocAction(DocAction.ACTION_None);
+				order.setDocAction(DocAction.ACTION_Complete);
 			}
 
 		}
@@ -2525,6 +2527,18 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		}else if(line.getQtyEntered().compareTo(Env.ZERO) != 0 && line.getQtyOrdered().compareTo(Env.ZERO) == 0 ) {
 
 			line.setQtyOrdered(line.getQtyEntered());
+		}
+
+		if(p_IsHistoricalDataMigration)
+		{
+			line.setQtyDelivered(line.getQtyOrdered());
+			line.setQtyInvoiced(line.getQtyOrdered());
+			line.setQtyReserved(Env.ZERO);
+
+			if(line.get_ColumnIndex("JP_QtyRecognized") > 0)
+			{
+				line.set_ValueNoCheck("JP_QtyRecognized", line.getQtyOrdered());
+			}
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, impOrder, line, ImportValidator.TIMING_AFTER_IMPORT);
