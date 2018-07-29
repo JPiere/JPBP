@@ -227,7 +227,7 @@ public class CreateReversingEntry extends SvrProcess {
 			list.toArray(pars);
 			pi.setParameter(pars);
 
-			if(!ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), true, processUI))
+			if(!ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI))
 				return Msg.getMsg(getCtx(), "ProcessRunError");
 		}
 

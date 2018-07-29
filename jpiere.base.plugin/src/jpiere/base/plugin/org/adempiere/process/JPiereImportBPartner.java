@@ -652,14 +652,25 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		//Look up C_BP_Group_ID From GroupValue
 		sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-				.append("SET C_BP_Group_ID=(SELECT C_BP_Group_ID FROM C_BP_Group g")
+				.append(" SET C_BP_Group_ID=(SELECT C_BP_Group_ID FROM C_BP_Group g")
 				.append(" WHERE i.GroupValue=g.Value AND g.AD_Client_ID=i.AD_Client_ID) ")
-				.append("WHERE C_BP_Group_ID IS NULL")
+				.append(" WHERE C_BP_Group_ID IS NULL")
 				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + ": " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid GroupValue

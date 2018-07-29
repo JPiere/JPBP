@@ -13,7 +13,6 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -45,20 +44,16 @@ import jpiere.base.plugin.org.adempiere.model.X_I_OrderJP;
 
 /**
  *	JPIERE-0097:Import Order from I_OrderJP
- *  @author Oscar Gomez
- * 			<li>BF [ 2936629 ] Error when creating bpartner in the importation order
- * 			<li>https://sourceforge.net/tracker/?func=detail&aid=2936629&group_id=176962&atid=879332
- * 	@author 	Jorg Janke
- * 	@version 	$Id: ImportOrder.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
+ *
+ * 	@version 	2018-07-29
  *
  *  @author Hideaki Hagiwara
  */
 public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 {
 	/**	Client to be imported to		*/
-	private int				m_AD_Client_ID = 0;
-	/**	Organization to be imported to		*/
-	private int				m_AD_Org_ID = 0;
+	private int				p_AD_Client_ID = 0;
+
 	/**	Delete old Imported				*/
 	private boolean			p_deleteOldImported = false;
 	/**	Document Action					*/
@@ -80,60 +75,20 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 	private IProcessUI processMonitor = null;
 
 
-
-	private boolean			isRecordCommitJP =false;
-
-	private boolean 		isDeleteIndexJP = false;
-
-	private boolean			isInvalidConstraintJP = false;
-
-	private boolean			isMonitoringProcessJP = true;
-
-	private boolean			isUniqueCheckJP = false;
-
-	private String[] OrderTables = new String[] {
-			"C_Order",
-			"C_OrderLine"
-	};
-
-	private String[] allDocumentTables = new String[] {
-			"C_Order",
-			"C_OrderLine",
-			"M_InOut",
-			"M_InOutLine",
-			"C_Invoice",
-			"C_InvoiceLine",
-			"Fact_Acct"
-	};
-
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
 	protected void prepare()
 	{
-		m_AD_Client_ID = getAD_Client_ID();
+		p_AD_Client_ID = getAD_Client_ID();
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
 		{
 			String name = para[i].getParameterName();
-			if (name.equals("AD_Client_ID"))
-				m_AD_Client_ID = ((BigDecimal)para[i].getParameter()).intValue();
-			else if (name.equals("AD_Org_ID"))
-				m_AD_Org_ID = ((BigDecimal)para[i].getParameter()).intValue();
-			else if (name.equals("DeleteOldImported"))
+			if (name.equals("DeleteOldImported"))
 				p_deleteOldImported = "Y".equals(para[i].getParameter());
 			else if (name.equals("DocAction"))
 				p_docAction = (String)para[i].getParameter();
-			else if (name.equals("IsRecordCommitJP"))
-				isRecordCommitJP = "Y".equals(para[i].getParameter());
-			else if (name.equals("IsDeleteIndexJP"))
-				isDeleteIndexJP = "Y".equals(para[i].getParameter());
-			else if (name.equals("IsInvalidConstraintJP"))
-				isInvalidConstraintJP = "Y".equals(para[i].getParameter());
-			else if (name.equals("IsMonitoringProcessJP"))
-				isMonitoringProcessJP = "Y".equals(para[i].getParameter());
-			else if (name.equals("IsUniqueCheckJP"))
-				isUniqueCheckJP = "Y".equals(para[i].getParameter());
 			else if (name.equals("JP_ImportSalesRepIdentifier"))
 				p_JP_ImportSalesRepIdentifier = para[i].getParameterAsString();
 			else if (name.equals("JP_ImportUserIdentifier"))
@@ -410,23 +365,6 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		else
 			return message;
 
-		//Invalid C_BPartner_ID
-		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "C_BPartner_ID");
-		sql = new StringBuilder ("UPDATE I_OrderJP ")
-				.append(" SET I_ErrorMsg='"+ message + "'")
-				.append(" WHERE C_BPartner_ID IS NULL")
-				.append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql );
-		}
-
-		if(no > 0)
-		{
-			return message;
-		}
-
 
 		/** Create Orders */
 		message = Msg.getMsg(getCtx(), "CreateNew") + " : " + Msg.getElement(getCtx(), "C_Order_ID");
@@ -510,6 +448,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 							commitEx();
 						}
 						order.saveEx(get_TrxName());
+						order = null;
 						commitEx();
 					}
 
@@ -539,6 +478,18 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 						commitEx();
 						continue;
 					}
+				}
+
+				if(order == null)
+				{
+					errorNum++;
+					String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
+					imp.setI_ErrorMsg(msg);
+					imp.setI_IsImported(false);
+					imp.setProcessed(false);
+					imp.saveEx(get_TrxName());
+					commitEx();
+					continue;
 				}
 
 
@@ -617,7 +568,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 	@Override
 	public String getWhereClause() {
-		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
+		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(p_AD_Client_ID);
 		return msgreturn.toString();
 	}
 
@@ -2225,6 +2176,26 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			PO.copyValues(i_order, i_BP);
 			i_BP.setJP_Org_Value(i_order.getJP_BP_Org_Value());
 			i_BP.setValue(i_order.getBPartnerValue());
+			if(Util.isEmpty(i_order.getJP_BPartner_Location_Name()))
+				i_BP.setJP_BPartner_Location_Name(i_order.getName());
+			if(Util.isEmpty(i_order.getJP_Location_Label()))
+				i_BP.setJP_Location_Label(i_BP.getJP_BPartner_Location_Name());
+			if(Util.isEmpty(i_order.getContactName()))
+				i_BP.setContactName(i_order.getName());
+
+			if(i_order.isSOTrx())
+			{
+				i_BP.setIsCustomer(true);
+				i_BP.setIsVendor(false);
+				i_BP.setIsEmployee(false);
+				i_BP.setIsSalesRep(false);
+			}else {
+				i_BP.setIsCustomer(false);
+				i_BP.setIsVendor(true);
+				i_BP.setIsEmployee(false);
+				i_BP.setIsSalesRep(false);
+			}
+
 			i_BP.saveEx(get_TrxName());
 			commitEx();
 
@@ -2247,7 +2218,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			list.toArray(pars);
 			pi.setParameter(pars);
 
-			if(!ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), true, processUI))
+			if(!ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI))
 			{
 				message = Msg.getMsg(getCtx(), "ProcessRunError");
 
@@ -2300,9 +2271,13 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		if(impOrder.getC_BPartner_ID() > 0)
 		{
 			bp =MBPartner.get(getCtx(), impOrder.getC_BPartner_ID());
+
 		}else if(!Util.isEmpty(impOrder.getBPartnerValue())) {
-			bp =MBPartner.get(getCtx(), impOrder.getBPartnerValue());
+
+			bp =MBPartner.get(getCtx(), impOrder.getBPartnerValue(),get_TrxName());
 			impOrder.setC_BPartner_ID(bp.getC_BPartner_ID());
+			order.setC_BPartner_ID(bp.getC_BPartner_ID());
+
 		}else {
 			message = Msg.getMsg(getCtx(), "JP_Null") + Msg.getElement(getCtx(), "C_BPartner_ID");
 			impOrder.setI_ErrorMsg(message);
@@ -2359,11 +2334,25 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		{
 			if(Util.isEmpty(bp.getDeliveryViaRule()))
 			{
-				;//set Default
+				impOrder.setDeliveryViaRule(X_I_OrderJP.DELIVERYVIARULE_Pickup);
+				order.setDeliveryViaRule(X_I_OrderJP.DELIVERYVIARULE_Pickup);
 
 			}else {
 				impOrder.setDeliveryViaRule(bp.getDeliveryViaRule());
 				order.setDeliveryViaRule(bp.getDeliveryViaRule());
+			}
+		}
+
+		if(Util.isEmpty(impOrder.getFreightCostRule()))
+		{
+			if(Util.isEmpty(bp.getFreightCostRule()))
+			{
+				impOrder.setFreightCostRule(X_I_OrderJP.FREIGHTCOSTRULE_FixPrice);
+				order.setFreightCostRule(X_I_OrderJP.FREIGHTCOSTRULE_FixPrice);
+
+			}else {
+				impOrder.setFreightCostRule(bp.getFreightCostRule());
+				order.setFreightCostRule(bp.getFreightCostRule());
 			}
 		}
 
