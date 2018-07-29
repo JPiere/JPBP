@@ -30,6 +30,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -440,13 +441,27 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				{
 					if (order != null)
 					{
-						if(!order.processIt (p_docAction))
+						if(!Util.isEmpty(order.getDocAction()))
 						{
-							log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
-							imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + order.getProcessMsg());
-							imp.saveEx(get_TrxName());
-							commitEx();
+							if(!order.processIt (order.getDocAction()))
+							{
+								log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
+								imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + order.getProcessMsg());
+								imp.saveEx(get_TrxName());
+								commitEx();
+							}
+
+						}else if(!Util.isEmpty(p_docAction)) {
+
+							if(!order.processIt (p_docAction))
+							{
+								log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
+								imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + order.getProcessMsg());
+								imp.saveEx(get_TrxName());
+								commitEx();
+							}
 						}
+
 						order.saveEx(get_TrxName());
 						order = null;
 						commitEx();
@@ -533,13 +548,23 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			//For last Journal
 			if (order != null)
 			{
-				if(!order.processIt (p_docAction))
+				if(!Util.isEmpty(order.getDocAction()))
 				{
-					log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
+					if(!order.processIt (order.getDocAction()))
+					{
+						log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
+					}
+
+				}else if(!Util.isEmpty(p_docAction)) {
+
+					if(!order.processIt (p_docAction))
+					{
+						log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
+					}
 				}
+
 				order.saveEx(get_TrxName());
 				commitEx();
-
 			}
 
 		}catch (Exception e){
@@ -2227,6 +2252,28 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 		}
 
+		//Business partner Info
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_BPartner_ID())
+			commitEx();
+		else
+			return false;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_BPartner_Location_ID())
+			commitEx();
+		else
+			return false;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_UserID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupAD_User_ID())
+			commitEx();
+		else
+			return false;
+
 		return true;
 
 	}
@@ -2419,6 +2466,10 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			if (p_docAction != null && p_docAction.length() > 0)
 			{
 				order.setDocAction(p_docAction);
+
+			}else {
+
+				order.setDocAction(DocAction.ACTION_None);
 			}
 
 		}
