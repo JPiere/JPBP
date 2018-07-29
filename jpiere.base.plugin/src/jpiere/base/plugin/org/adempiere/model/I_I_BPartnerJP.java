@@ -1190,6 +1190,24 @@ public interface I_I_BPartnerJP
 	/** Get Sales Rep(E-Mail)	  */
 	public String getJP_SalesRep_EMail();
 
+    /** Column name JP_SalesRep_Name */
+    public static final String COLUMNNAME_JP_SalesRep_Name = "JP_SalesRep_Name";
+
+	/** Set Sales Rep(Name)	  */
+	public void setJP_SalesRep_Name (String JP_SalesRep_Name);
+
+	/** Get Sales Rep(Name)	  */
+	public String getJP_SalesRep_Name();
+
+    /** Column name JP_SalesRep_Value */
+    public static final String COLUMNNAME_JP_SalesRep_Value = "JP_SalesRep_Value";
+
+	/** Set Sales Rep(Search Key)	  */
+	public void setJP_SalesRep_Value (String JP_SalesRep_Value);
+
+	/** Get Sales Rep(Search Key)	  */
+	public String getJP_SalesRep_Value();
+
     /** Column name JP_User_Greeting_ID */
     public static final String COLUMNNAME_JP_User_Greeting_ID = "JP_User_Greeting_ID";
 

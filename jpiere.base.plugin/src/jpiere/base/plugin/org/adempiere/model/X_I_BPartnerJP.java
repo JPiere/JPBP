@@ -34,7 +34,7 @@ public class X_I_BPartnerJP extends PO implements I_I_BPartnerJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180619L;
+	private static final long serialVersionUID = 20180721L;
 
     /** Standard Constructor */
     public X_I_BPartnerJP (Properties ctx, int I_BPartnerJP_ID, String trxName)
@@ -1922,6 +1922,34 @@ public class X_I_BPartnerJP extends PO implements I_I_BPartnerJP, I_Persistent
 	public String getJP_SalesRep_EMail () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_SalesRep_EMail);
+	}
+
+	/** Set Sales Rep(Name).
+		@param JP_SalesRep_Name Sales Rep(Name)	  */
+	public void setJP_SalesRep_Name (String JP_SalesRep_Name)
+	{
+		set_Value (COLUMNNAME_JP_SalesRep_Name, JP_SalesRep_Name);
+	}
+
+	/** Get Sales Rep(Name).
+		@return Sales Rep(Name)	  */
+	public String getJP_SalesRep_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_SalesRep_Name);
+	}
+
+	/** Set Sales Rep(Search Key).
+		@param JP_SalesRep_Value Sales Rep(Search Key)	  */
+	public void setJP_SalesRep_Value (String JP_SalesRep_Value)
+	{
+		set_Value (COLUMNNAME_JP_SalesRep_Value, JP_SalesRep_Value);
+	}
+
+	/** Get Sales Rep(Search Key).
+		@return Sales Rep(Search Key)	  */
+	public String getJP_SalesRep_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_SalesRep_Value);
 	}
 
 	public org.compiere.model.I_C_Greeting getJP_User_Greeting() throws RuntimeException

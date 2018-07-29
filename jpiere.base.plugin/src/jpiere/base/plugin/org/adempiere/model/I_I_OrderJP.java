@@ -118,6 +118,19 @@ public interface I_I_OrderJP
 	  */
 	public String getAddress2();
 
+    /** Column name Address3 */
+    public static final String COLUMNNAME_Address3 = "Address3";
+
+	/** Set Address 3.
+	  * Address Line 3 for the location
+	  */
+	public void setAddress3 (String Address3);
+
+	/** Get Address 3.
+	  * Address Line 3 for the location
+	  */
+	public String getAddress3();
+
     /** Column name BPartnerValue */
     public static final String COLUMNNAME_BPartnerValue = "BPartnerValue";
 
@@ -145,6 +158,45 @@ public interface I_I_OrderJP
 	public int getBillTo_ID();
 
 	public org.compiere.model.I_C_BPartner_Location getBillTo() throws RuntimeException;
+
+    /** Column name Bill_BPValue */
+    public static final String COLUMNNAME_Bill_BPValue = "Bill_BPValue";
+
+	/** Set Invoice Partner Key	  */
+	public void setBill_BPValue (String Bill_BPValue);
+
+	/** Get Invoice Partner Key	  */
+	public String getBill_BPValue();
+
+    /** Column name Bill_BPartner_ID */
+    public static final String COLUMNNAME_Bill_BPartner_ID = "Bill_BPartner_ID";
+
+	/** Set Invoice Partner.
+	  * Business Partner to be invoiced
+	  */
+	public void setBill_BPartner_ID (int Bill_BPartner_ID);
+
+	/** Get Invoice Partner.
+	  * Business Partner to be invoiced
+	  */
+	public int getBill_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getBill_BPartner() throws RuntimeException;
+
+    /** Column name Bill_User_ID */
+    public static final String COLUMNNAME_Bill_User_ID = "Bill_User_ID";
+
+	/** Set Invoice Contact.
+	  * Business Partner Contact for invoicing
+	  */
+	public void setBill_User_ID (int Bill_User_ID);
+
+	/** Get Invoice Contact.
+	  * Business Partner Contact for invoicing
+	  */
+	public int getBill_User_ID();
+
+	public org.compiere.model.I_AD_User getBill_User() throws RuntimeException;
 
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
@@ -279,7 +331,7 @@ public interface I_I_OrderJP
 	  */
 	public int getC_Location_ID();
 
-	public org.compiere.model.I_M_Locator getC_Location() throws RuntimeException;
+	public org.compiere.model.I_C_Location getC_Location() throws RuntimeException;
 
     /** Column name C_OrderLine_ID */
     public static final String COLUMNNAME_C_OrderLine_ID = "C_OrderLine_ID";
@@ -500,6 +552,19 @@ public interface I_I_OrderJP
 	  */
 	public Timestamp getDateOrdered();
 
+    /** Column name DatePromised */
+    public static final String COLUMNNAME_DatePromised = "DatePromised";
+
+	/** Set Date Promised.
+	  * Date Order was promised
+	  */
+	public void setDatePromised (Timestamp DatePromised);
+
+	/** Get Date Promised.
+	  * Date Order was promised
+	  */
+	public Timestamp getDatePromised();
+
     /** Column name DeliveryRule */
     public static final String COLUMNNAME_DeliveryRule = "DeliveryRule";
 
@@ -513,6 +578,19 @@ public interface I_I_OrderJP
 	  */
 	public String getDeliveryRule();
 
+    /** Column name DeliveryViaRule */
+    public static final String COLUMNNAME_DeliveryViaRule = "DeliveryViaRule";
+
+	/** Set Delivery Via.
+	  * How the order will be delivered
+	  */
+	public void setDeliveryViaRule (String DeliveryViaRule);
+
+	/** Get Delivery Via.
+	  * How the order will be delivered
+	  */
+	public String getDeliveryViaRule();
+
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 
@@ -525,6 +603,32 @@ public interface I_I_OrderJP
 	  * Optional short description of the record
 	  */
 	public String getDescription();
+
+    /** Column name DocAction */
+    public static final String COLUMNNAME_DocAction = "DocAction";
+
+	/** Set Document Action.
+	  * The targeted status of the document
+	  */
+	public void setDocAction (String DocAction);
+
+	/** Get Document Action.
+	  * The targeted status of the document
+	  */
+	public String getDocAction();
+
+    /** Column name DocStatus */
+    public static final String COLUMNNAME_DocStatus = "DocStatus";
+
+	/** Set Document Status.
+	  * The current status of the document
+	  */
+	public void setDocStatus (String DocStatus);
+
+	/** Get Document Status.
+	  * The current status of the document
+	  */
+	public String getDocStatus();
 
     /** Column name DocTypeName */
     public static final String COLUMNNAME_DocTypeName = "DocTypeName";
@@ -552,6 +656,51 @@ public interface I_I_OrderJP
 	  */
 	public String getDocumentNo();
 
+    /** Column name DropShip_BPartner_ID */
+    public static final String COLUMNNAME_DropShip_BPartner_ID = "DropShip_BPartner_ID";
+
+	/** Set Drop Ship Business Partner.
+	  * Business Partner to ship to
+	  */
+	public void setDropShip_BPartner_ID (int DropShip_BPartner_ID);
+
+	/** Get Drop Ship Business Partner.
+	  * Business Partner to ship to
+	  */
+	public int getDropShip_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getDropShip_BPartner() throws RuntimeException;
+
+    /** Column name DropShip_Location_ID */
+    public static final String COLUMNNAME_DropShip_Location_ID = "DropShip_Location_ID";
+
+	/** Set Drop Shipment Location.
+	  * Business Partner Location for shipping to
+	  */
+	public void setDropShip_Location_ID (int DropShip_Location_ID);
+
+	/** Get Drop Shipment Location.
+	  * Business Partner Location for shipping to
+	  */
+	public int getDropShip_Location_ID();
+
+	public org.compiere.model.I_C_BPartner_Location getDropShip_Location() throws RuntimeException;
+
+    /** Column name DropShip_User_ID */
+    public static final String COLUMNNAME_DropShip_User_ID = "DropShip_User_ID";
+
+	/** Set Drop Shipment Contact.
+	  * Business Partner Contact for drop shipment
+	  */
+	public void setDropShip_User_ID (int DropShip_User_ID);
+
+	/** Get Drop Shipment Contact.
+	  * Business Partner Contact for drop shipment
+	  */
+	public int getDropShip_User_ID();
+
+	public org.compiere.model.I_AD_User getDropShip_User() throws RuntimeException;
+
     /** Column name EMail */
     public static final String COLUMNNAME_EMail = "EMail";
 
@@ -577,6 +726,32 @@ public interface I_I_OrderJP
 	  * Freight Amount 
 	  */
 	public BigDecimal getFreightAmt();
+
+    /** Column name FreightCostRule */
+    public static final String COLUMNNAME_FreightCostRule = "FreightCostRule";
+
+	/** Set Freight Cost Rule.
+	  * Method for charging Freight
+	  */
+	public void setFreightCostRule (String FreightCostRule);
+
+	/** Get Freight Cost Rule.
+	  * Method for charging Freight
+	  */
+	public String getFreightCostRule();
+
+    /** Column name GroupValue */
+    public static final String COLUMNNAME_GroupValue = "GroupValue";
+
+	/** Set Group Key.
+	  * Business Partner Group Key
+	  */
+	public void setGroupValue (String GroupValue);
+
+	/** Get Group Key.
+	  * Business Partner Group Key
+	  */
+	public String getGroupValue();
 
     /** Column name I_ErrorMsg */
     public static final String COLUMNNAME_I_ErrorMsg = "I_ErrorMsg";
@@ -622,6 +797,19 @@ public interface I_I_OrderJP
 	/** Get I_OrderJP_UU	  */
 	public String getI_OrderJP_UU();
 
+    /** Column name InvoiceRule */
+    public static final String COLUMNNAME_InvoiceRule = "InvoiceRule";
+
+	/** Set Invoice Rule.
+	  * Frequency and method of invoicing 
+	  */
+	public void setInvoiceRule (String InvoiceRule);
+
+	/** Get Invoice Rule.
+	  * Frequency and method of invoicing 
+	  */
+	public String getInvoiceRule();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -635,6 +823,32 @@ public interface I_I_OrderJP
 	  */
 	public boolean isActive();
 
+    /** Column name IsDiscountPrinted */
+    public static final String COLUMNNAME_IsDiscountPrinted = "IsDiscountPrinted";
+
+	/** Set Discount Printed.
+	  * Print Discount on Invoice and Order
+	  */
+	public void setIsDiscountPrinted (boolean IsDiscountPrinted);
+
+	/** Get Discount Printed.
+	  * Print Discount on Invoice and Order
+	  */
+	public boolean isDiscountPrinted();
+
+    /** Column name IsDropShip */
+    public static final String COLUMNNAME_IsDropShip = "IsDropShip";
+
+	/** Set Drop Shipment.
+	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public void setIsDropShip (boolean IsDropShip);
+
+	/** Get Drop Shipment.
+	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public boolean isDropShip();
+
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
 
@@ -647,6 +861,298 @@ public interface I_I_OrderJP
 	  * This is a Sales Transaction
 	  */
 	public boolean isSOTrx();
+
+    /** Column name IsSelectBillToJP */
+    public static final String COLUMNNAME_IsSelectBillToJP = "IsSelectBillToJP";
+
+	/** Set Select Bill to BP	  */
+	public void setIsSelectBillToJP (boolean IsSelectBillToJP);
+
+	/** Get Select Bill to BP	  */
+	public boolean isSelectBillToJP();
+
+    /** Column name JP_Activity_Value */
+    public static final String COLUMNNAME_JP_Activity_Value = "JP_Activity_Value";
+
+	/** Set Activity(Search Key)	  */
+	public void setJP_Activity_Value (String JP_Activity_Value);
+
+	/** Get Activity(Search Key)	  */
+	public String getJP_Activity_Value();
+
+    /** Column name JP_BP_Org_Value */
+    public static final String COLUMNNAME_JP_BP_Org_Value = "JP_BP_Org_Value";
+
+	/** Set BP Organization(Search Key)	  */
+	public void setJP_BP_Org_Value (String JP_BP_Org_Value);
+
+	/** Get BP Organization(Search Key)	  */
+	public String getJP_BP_Org_Value();
+
+    /** Column name JP_BPartner_Location_Name */
+    public static final String COLUMNNAME_JP_BPartner_Location_Name = "JP_BPartner_Location_Name";
+
+	/** Set Partner Location(Name)	  */
+	public void setJP_BPartner_Location_Name (String JP_BPartner_Location_Name);
+
+	/** Get Partner Location(Name)	  */
+	public String getJP_BPartner_Location_Name();
+
+    /** Column name JP_Bill_BP_Location_Name */
+    public static final String COLUMNNAME_JP_Bill_BP_Location_Name = "JP_Bill_BP_Location_Name";
+
+	/** Set Bill Partner Location(Name)	  */
+	public void setJP_Bill_BP_Location_Name (String JP_Bill_BP_Location_Name);
+
+	/** Get Bill Partner Location(Name)	  */
+	public String getJP_Bill_BP_Location_Name();
+
+    /** Column name JP_Bill_User_EMail */
+    public static final String COLUMNNAME_JP_Bill_User_EMail = "JP_Bill_User_EMail";
+
+	/** Set Invoice Contact(EMail).
+	  * Business Partner Contact for invoicing
+	  */
+	public void setJP_Bill_User_EMail (String JP_Bill_User_EMail);
+
+	/** Get Invoice Contact(EMail).
+	  * Business Partner Contact for invoicing
+	  */
+	public String getJP_Bill_User_EMail();
+
+    /** Column name JP_Bill_User_Name */
+    public static final String COLUMNNAME_JP_Bill_User_Name = "JP_Bill_User_Name";
+
+	/** Set Bill User Name	  */
+	public void setJP_Bill_User_Name (String JP_Bill_User_Name);
+
+	/** Get Bill User Name	  */
+	public String getJP_Bill_User_Name();
+
+    /** Column name JP_Bill_User_Value */
+    public static final String COLUMNNAME_JP_Bill_User_Value = "JP_Bill_User_Value";
+
+	/** Set Invoice Contact(Search Key).
+	  * Business Partner Contact for invoicing
+	  */
+	public void setJP_Bill_User_Value (String JP_Bill_User_Value);
+
+	/** Get Invoice Contact(Search Key).
+	  * Business Partner Contact for invoicing
+	  */
+	public String getJP_Bill_User_Value();
+
+    /** Column name JP_Campaign_Value */
+    public static final String COLUMNNAME_JP_Campaign_Value = "JP_Campaign_Value";
+
+	/** Set Campaign(Search Key)	  */
+	public void setJP_Campaign_Value (String JP_Campaign_Value);
+
+	/** Get Campaign(Search Key)	  */
+	public String getJP_Campaign_Value();
+
+    /** Column name JP_DropShip_BP_Location_Name */
+    public static final String COLUMNNAME_JP_DropShip_BP_Location_Name = "JP_DropShip_BP_Location_Name";
+
+	/** Set Drop Ship BP Location(Name)	  */
+	public void setJP_DropShip_BP_Location_Name (String JP_DropShip_BP_Location_Name);
+
+	/** Get Drop Ship BP Location(Name)	  */
+	public String getJP_DropShip_BP_Location_Name();
+
+    /** Column name JP_DropShip_BP_Value */
+    public static final String COLUMNNAME_JP_DropShip_BP_Value = "JP_DropShip_BP_Value";
+
+	/** Set Drop Ship BP(Search Key)	  */
+	public void setJP_DropShip_BP_Value (String JP_DropShip_BP_Value);
+
+	/** Get Drop Ship BP(Search Key)	  */
+	public String getJP_DropShip_BP_Value();
+
+    /** Column name JP_DropShip_User_EMail */
+    public static final String COLUMNNAME_JP_DropShip_User_EMail = "JP_DropShip_User_EMail";
+
+	/** Set Drop Shipment Contact(E-Mail)	  */
+	public void setJP_DropShip_User_EMail (String JP_DropShip_User_EMail);
+
+	/** Get Drop Shipment Contact(E-Mail)	  */
+	public String getJP_DropShip_User_EMail();
+
+    /** Column name JP_DropShip_User_Name */
+    public static final String COLUMNNAME_JP_DropShip_User_Name = "JP_DropShip_User_Name";
+
+	/** Set Drop Shipment Contact(Name)	  */
+	public void setJP_DropShip_User_Name (String JP_DropShip_User_Name);
+
+	/** Get Drop Shipment Contact(Name)	  */
+	public String getJP_DropShip_User_Name();
+
+    /** Column name JP_DropShip_User_Value */
+    public static final String COLUMNNAME_JP_DropShip_User_Value = "JP_DropShip_User_Value";
+
+	/** Set Drop Shipment Contact(Search Key)	  */
+	public void setJP_DropShip_User_Value (String JP_DropShip_User_Value);
+
+	/** Get Drop Shipment Contact(Search Key)	  */
+	public String getJP_DropShip_User_Value();
+
+    /** Column name JP_Location_Label */
+    public static final String COLUMNNAME_JP_Location_Label = "JP_Location_Label";
+
+	/** Set Location Label	  */
+	public void setJP_Location_Label (String JP_Location_Label);
+
+	/** Get Location Label	  */
+	public String getJP_Location_Label();
+
+    /** Column name JP_Locator_ID */
+    public static final String COLUMNNAME_JP_Locator_ID = "JP_Locator_ID";
+
+	/** Set Locator	  */
+	public void setJP_Locator_ID (int JP_Locator_ID);
+
+	/** Get Locator	  */
+	public int getJP_Locator_ID();
+
+	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
+
+    /** Column name JP_Locator_Value */
+    public static final String COLUMNNAME_JP_Locator_Value = "JP_Locator_Value";
+
+	/** Set Locator(Search Key).
+	  * Warehouse Locator
+	  */
+	public void setJP_Locator_Value (String JP_Locator_Value);
+
+	/** Get Locator(Search Key).
+	  * Warehouse Locator
+	  */
+	public String getJP_Locator_Value();
+
+    /** Column name JP_OrgTrx_Value */
+    public static final String COLUMNNAME_JP_OrgTrx_Value = "JP_OrgTrx_Value";
+
+	/** Set Trx Organization(Search Key)	  */
+	public void setJP_OrgTrx_Value (String JP_OrgTrx_Value);
+
+	/** Get Trx Organization(Search Key)	  */
+	public String getJP_OrgTrx_Value();
+
+    /** Column name JP_Org_Value */
+    public static final String COLUMNNAME_JP_Org_Value = "JP_Org_Value";
+
+	/** Set Organization(Search Key)	  */
+	public void setJP_Org_Value (String JP_Org_Value);
+
+	/** Get Organization(Search Key)	  */
+	public String getJP_Org_Value();
+
+    /** Column name JP_PriceList_Name */
+    public static final String COLUMNNAME_JP_PriceList_Name = "JP_PriceList_Name";
+
+	/** Set Price List(Name)	  */
+	public void setJP_PriceList_Name (String JP_PriceList_Name);
+
+	/** Get Price List(Name)	  */
+	public String getJP_PriceList_Name();
+
+    /** Column name JP_Project_Value */
+    public static final String COLUMNNAME_JP_Project_Value = "JP_Project_Value";
+
+	/** Set Project(Search Key)	  */
+	public void setJP_Project_Value (String JP_Project_Value);
+
+	/** Get Project(Search Key)	  */
+	public String getJP_Project_Value();
+
+    /** Column name JP_SalesRep_EMail */
+    public static final String COLUMNNAME_JP_SalesRep_EMail = "JP_SalesRep_EMail";
+
+	/** Set Sales Rep(E-Mail)	  */
+	public void setJP_SalesRep_EMail (String JP_SalesRep_EMail);
+
+	/** Get Sales Rep(E-Mail)	  */
+	public String getJP_SalesRep_EMail();
+
+    /** Column name JP_SalesRep_Name */
+    public static final String COLUMNNAME_JP_SalesRep_Name = "JP_SalesRep_Name";
+
+	/** Set Sales Rep(Name)	  */
+	public void setJP_SalesRep_Name (String JP_SalesRep_Name);
+
+	/** Get Sales Rep(Name)	  */
+	public String getJP_SalesRep_Name();
+
+    /** Column name JP_SalesRep_Value */
+    public static final String COLUMNNAME_JP_SalesRep_Value = "JP_SalesRep_Value";
+
+	/** Set Sales Rep(Search Key)	  */
+	public void setJP_SalesRep_Value (String JP_SalesRep_Value);
+
+	/** Get Sales Rep(Search Key)	  */
+	public String getJP_SalesRep_Value();
+
+    /** Column name JP_Shipper_Name */
+    public static final String COLUMNNAME_JP_Shipper_Name = "JP_Shipper_Name";
+
+	/** Set Shipper(Name).
+	  * Method or manner of product delivery
+	  */
+	public void setJP_Shipper_Name (String JP_Shipper_Name);
+
+	/** Get Shipper(Name).
+	  * Method or manner of product delivery
+	  */
+	public String getJP_Shipper_Name();
+
+    /** Column name JP_UserElement1_Value */
+    public static final String COLUMNNAME_JP_UserElement1_Value = "JP_UserElement1_Value";
+
+	/** Set User Element List 1(Search key)	  */
+	public void setJP_UserElement1_Value (String JP_UserElement1_Value);
+
+	/** Get User Element List 1(Search key)	  */
+	public String getJP_UserElement1_Value();
+
+    /** Column name JP_UserElement2_Value */
+    public static final String COLUMNNAME_JP_UserElement2_Value = "JP_UserElement2_Value";
+
+	/** Set User Element List 2(Search key)	  */
+	public void setJP_UserElement2_Value (String JP_UserElement2_Value);
+
+	/** Get User Element List 2(Search key)	  */
+	public String getJP_UserElement2_Value();
+
+    /** Column name JP_User_Value */
+    public static final String COLUMNNAME_JP_User_Value = "JP_User_Value";
+
+	/** Set User(Search Key)	  */
+	public void setJP_User_Value (String JP_User_Value);
+
+	/** Get User(Search Key)	  */
+	public String getJP_User_Value();
+
+    /** Column name JP_Warehouse_Value */
+    public static final String COLUMNNAME_JP_Warehouse_Value = "JP_Warehouse_Value";
+
+	/** Set Org Warehouse(Search Key)	  */
+	public void setJP_Warehouse_Value (String JP_Warehouse_Value);
+
+	/** Get Org Warehouse(Search Key)	  */
+	public String getJP_Warehouse_Value();
+
+    /** Column name Line */
+    public static final String COLUMNNAME_Line = "Line";
+
+	/** Set Line No.
+	  * Unique line for this document
+	  */
+	public void setLine (int Line);
+
+	/** Get Line No.
+	  * Unique line for this document
+	  */
+	public int getLine();
 
     /** Column name LineDescription */
     public static final String COLUMNNAME_LineDescription = "LineDescription";
@@ -734,6 +1240,45 @@ public interface I_I_OrderJP
 	  */
 	public String getName();
 
+    /** Column name Name2 */
+    public static final String COLUMNNAME_Name2 = "Name2";
+
+	/** Set Name 2.
+	  * Additional Name
+	  */
+	public void setName2 (String Name2);
+
+	/** Get Name 2.
+	  * Additional Name
+	  */
+	public String getName2();
+
+    /** Column name POReference */
+    public static final String COLUMNNAME_POReference = "POReference";
+
+	/** Set Order Reference.
+	  * Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public void setPOReference (String POReference);
+
+	/** Get Order Reference.
+	  * Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getPOReference();
+
+    /** Column name PaymentRule */
+    public static final String COLUMNNAME_PaymentRule = "PaymentRule";
+
+	/** Set Payment Rule.
+	  * How you pay the invoice
+	  */
+	public void setPaymentRule (String PaymentRule);
+
+	/** Get Payment Rule.
+	  * How you pay the invoice
+	  */
+	public String getPaymentRule();
+
     /** Column name PaymentTermValue */
     public static final String COLUMNNAME_PaymentTermValue = "PaymentTermValue";
 
@@ -773,6 +1318,19 @@ public interface I_I_OrderJP
 	  */
 	public String getPostal();
 
+    /** Column name Postal_Add */
+    public static final String COLUMNNAME_Postal_Add = "Postal_Add";
+
+	/** Set Additional Zip.
+	  * Additional ZIP or Postal code
+	  */
+	public void setPostal_Add (String Postal_Add);
+
+	/** Get Additional Zip.
+	  * Additional ZIP or Postal code
+	  */
+	public String getPostal_Add();
+
     /** Column name PriceActual */
     public static final String COLUMNNAME_PriceActual = "PriceActual";
 
@@ -785,6 +1343,32 @@ public interface I_I_OrderJP
 	  * Actual Price 
 	  */
 	public BigDecimal getPriceActual();
+
+    /** Column name PriceEntered */
+    public static final String COLUMNNAME_PriceEntered = "PriceEntered";
+
+	/** Set Price.
+	  * Price Entered - the price based on the selected/base UoM
+	  */
+	public void setPriceEntered (BigDecimal PriceEntered);
+
+	/** Get Price.
+	  * Price Entered - the price based on the selected/base UoM
+	  */
+	public BigDecimal getPriceEntered();
+
+    /** Column name PriorityRule */
+    public static final String COLUMNNAME_PriorityRule = "PriorityRule";
+
+	/** Set Priority.
+	  * Priority of a document
+	  */
+	public void setPriorityRule (String PriorityRule);
+
+	/** Get Priority.
+	  * Priority of a document
+	  */
+	public String getPriorityRule();
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
@@ -820,6 +1404,19 @@ public interface I_I_OrderJP
 	  * Key of the Product
 	  */
 	public String getProductValue();
+
+    /** Column name QtyEntered */
+    public static final String COLUMNNAME_QtyEntered = "QtyEntered";
+
+	/** Set Quantity.
+	  * The Quantity Entered is based on the selected UoM
+	  */
+	public void setQtyEntered (BigDecimal QtyEntered);
+
+	/** Get Quantity.
+	  * The Quantity Entered is based on the selected UoM
+	  */
+	public BigDecimal getQtyEntered();
 
     /** Column name QtyOrdered */
     public static final String COLUMNNAME_QtyOrdered = "QtyOrdered";
@@ -929,4 +1526,47 @@ public interface I_I_OrderJP
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set User Element List 1.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get User Element List 1.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
+    /** Column name User2_ID */
+    public static final String COLUMNNAME_User2_ID = "User2_ID";
+
+	/** Set User Element List 2.
+	  * User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID);
+
+	/** Get User Element List 2.
+	  * User defined list element #2
+	  */
+	public int getUser2_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
+    /** Column name X12DE355 */
+    public static final String COLUMNNAME_X12DE355 = "X12DE355";
+
+	/** Set UOM Code.
+	  * UOM EDI X12 Code
+	  */
+	public void setX12DE355 (String X12DE355);
+
+	/** Get UOM Code.
+	  * UOM EDI X12 Code
+	  */
+	public String getX12DE355();
 }
