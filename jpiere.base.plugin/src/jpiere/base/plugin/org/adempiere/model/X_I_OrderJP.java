@@ -33,7 +33,7 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180608L;
+	private static final long serialVersionUID = 20180728L;
 
     /** Standard Constructor */
     public X_I_OrderJP (Properties ctx, int I_OrderJP_ID, String trxName)
@@ -159,6 +159,23 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_Address2);
 	}
 
+	/** Set Address 3.
+		@param Address3 
+		Address Line 3 for the location
+	  */
+	public void setAddress3 (String Address3)
+	{
+		set_Value (COLUMNNAME_Address3, Address3);
+	}
+
+	/** Get Address 3.
+		@return Address Line 3 for the location
+	  */
+	public String getAddress3 () 
+	{
+		return (String)get_Value(COLUMNNAME_Address3);
+	}
+
 	/** Set Business Partner Key.
 		@param BPartnerValue 
 		Key of the Business Partner
@@ -199,6 +216,76 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	public int getBillTo_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_BillTo_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Invoice Partner Key.
+		@param Bill_BPValue Invoice Partner Key	  */
+	public void setBill_BPValue (String Bill_BPValue)
+	{
+		set_Value (COLUMNNAME_Bill_BPValue, Bill_BPValue);
+	}
+
+	/** Get Invoice Partner Key.
+		@return Invoice Partner Key	  */
+	public String getBill_BPValue () 
+	{
+		return (String)get_Value(COLUMNNAME_Bill_BPValue);
+	}
+
+	public org.compiere.model.I_C_BPartner getBill_BPartner() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
+			.getPO(getBill_BPartner_ID(), get_TrxName());	}
+
+	/** Set Invoice Partner.
+		@param Bill_BPartner_ID 
+		Business Partner to be invoiced
+	  */
+	public void setBill_BPartner_ID (int Bill_BPartner_ID)
+	{
+		if (Bill_BPartner_ID < 1) 
+			set_Value (COLUMNNAME_Bill_BPartner_ID, null);
+		else 
+			set_Value (COLUMNNAME_Bill_BPartner_ID, Integer.valueOf(Bill_BPartner_ID));
+	}
+
+	/** Get Invoice Partner.
+		@return Business Partner to be invoiced
+	  */
+	public int getBill_BPartner_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_User getBill_User() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
+			.getPO(getBill_User_ID(), get_TrxName());	}
+
+	/** Set Invoice Contact.
+		@param Bill_User_ID 
+		Business Partner Contact for invoicing
+	  */
+	public void setBill_User_ID (int Bill_User_ID)
+	{
+		if (Bill_User_ID < 1) 
+			set_Value (COLUMNNAME_Bill_User_ID, null);
+		else 
+			set_Value (COLUMNNAME_Bill_User_ID, Integer.valueOf(Bill_User_ID));
+	}
+
+	/** Get Invoice Contact.
+		@return Business Partner Contact for invoicing
+	  */
+	public int getBill_User_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_User_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -428,9 +515,9 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Locator getC_Location() throws RuntimeException
+	public org.compiere.model.I_C_Location getC_Location() throws RuntimeException
     {
-		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_Name)
+		return (org.compiere.model.I_C_Location)MTable.get(getCtx(), org.compiere.model.I_C_Location.Table_Name)
 			.getPO(getC_Location_ID(), get_TrxName());	}
 
 	/** Set Address.
@@ -793,6 +880,23 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
 	}
 
+	/** Set Date Promised.
+		@param DatePromised 
+		Date Order was promised
+	  */
+	public void setDatePromised (Timestamp DatePromised)
+	{
+		set_Value (COLUMNNAME_DatePromised, DatePromised);
+	}
+
+	/** Get Date Promised.
+		@return Date Order was promised
+	  */
+	public Timestamp getDatePromised () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DatePromised);
+	}
+
 	/** DeliveryRule AD_Reference_ID=151 */
 	public static final int DELIVERYRULE_AD_Reference_ID=151;
 	/** After Receipt = R */
@@ -825,6 +929,32 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_DeliveryRule);
 	}
 
+	/** DeliveryViaRule AD_Reference_ID=152 */
+	public static final int DELIVERYVIARULE_AD_Reference_ID=152;
+	/** Pickup = P */
+	public static final String DELIVERYVIARULE_Pickup = "P";
+	/** Delivery = D */
+	public static final String DELIVERYVIARULE_Delivery = "D";
+	/** Shipper = S */
+	public static final String DELIVERYVIARULE_Shipper = "S";
+	/** Set Delivery Via.
+		@param DeliveryViaRule 
+		How the order will be delivered
+	  */
+	public void setDeliveryViaRule (String DeliveryViaRule)
+	{
+
+		set_Value (COLUMNNAME_DeliveryViaRule, DeliveryViaRule);
+	}
+
+	/** Get Delivery Via.
+		@return How the order will be delivered
+	  */
+	public String getDeliveryViaRule () 
+	{
+		return (String)get_Value(COLUMNNAME_DeliveryViaRule);
+	}
+
 	/** Set Description.
 		@param Description 
 		Optional short description of the record
@@ -840,6 +970,98 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** DocAction AD_Reference_ID=135 */
+	public static final int DOCACTION_AD_Reference_ID=135;
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
+	/** Approve = AP */
+	public static final String DOCACTION_Approve = "AP";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
+	/** Close = CL */
+	public static final String DOCACTION_Close = "CL";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Invalidate = IN */
+	public static final String DOCACTION_Invalidate = "IN";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** <None> = -- */
+	public static final String DOCACTION_None = "--";
+	/** Prepare = PR */
+	public static final String DOCACTION_Prepare = "PR";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
+	/** Wait Complete = WC */
+	public static final String DOCACTION_WaitComplete = "WC";
+	/** Set Document Action.
+		@param DocAction 
+		The targeted status of the document
+	  */
+	public void setDocAction (String DocAction)
+	{
+
+		set_Value (COLUMNNAME_DocAction, DocAction);
+	}
+
+	/** Get Document Action.
+		@return The targeted status of the document
+	  */
+	public String getDocAction () 
+	{
+		return (String)get_Value(COLUMNNAME_DocAction);
+	}
+
+	/** DocStatus AD_Reference_ID=131 */
+	public static final int DOCSTATUS_AD_Reference_ID=131;
+	/** Drafted = DR */
+	public static final String DOCSTATUS_Drafted = "DR";
+	/** Completed = CO */
+	public static final String DOCSTATUS_Completed = "CO";
+	/** Approved = AP */
+	public static final String DOCSTATUS_Approved = "AP";
+	/** Not Approved = NA */
+	public static final String DOCSTATUS_NotApproved = "NA";
+	/** Voided = VO */
+	public static final String DOCSTATUS_Voided = "VO";
+	/** Invalid = IN */
+	public static final String DOCSTATUS_Invalid = "IN";
+	/** Reversed = RE */
+	public static final String DOCSTATUS_Reversed = "RE";
+	/** Closed = CL */
+	public static final String DOCSTATUS_Closed = "CL";
+	/** Unknown = ?? */
+	public static final String DOCSTATUS_Unknown = "??";
+	/** In Progress = IP */
+	public static final String DOCSTATUS_InProgress = "IP";
+	/** Waiting Payment = WP */
+	public static final String DOCSTATUS_WaitingPayment = "WP";
+	/** Waiting Confirmation = WC */
+	public static final String DOCSTATUS_WaitingConfirmation = "WC";
+	/** Set Document Status.
+		@param DocStatus 
+		The current status of the document
+	  */
+	public void setDocStatus (String DocStatus)
+	{
+
+		set_Value (COLUMNNAME_DocStatus, DocStatus);
+	}
+
+	/** Get Document Status.
+		@return The current status of the document
+	  */
+	public String getDocStatus () 
+	{
+		return (String)get_Value(COLUMNNAME_DocStatus);
 	}
 
 	/** Set Document Type Name.
@@ -874,6 +1096,90 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	public String getDocumentNo () 
 	{
 		return (String)get_Value(COLUMNNAME_DocumentNo);
+	}
+
+	public org.compiere.model.I_C_BPartner getDropShip_BPartner() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
+			.getPO(getDropShip_BPartner_ID(), get_TrxName());	}
+
+	/** Set Drop Ship Business Partner.
+		@param DropShip_BPartner_ID 
+		Business Partner to ship to
+	  */
+	public void setDropShip_BPartner_ID (int DropShip_BPartner_ID)
+	{
+		if (DropShip_BPartner_ID < 1) 
+			set_Value (COLUMNNAME_DropShip_BPartner_ID, null);
+		else 
+			set_Value (COLUMNNAME_DropShip_BPartner_ID, Integer.valueOf(DropShip_BPartner_ID));
+	}
+
+	/** Get Drop Ship Business Partner.
+		@return Business Partner to ship to
+	  */
+	public int getDropShip_BPartner_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DropShip_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BPartner_Location getDropShip_Location() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
+			.getPO(getDropShip_Location_ID(), get_TrxName());	}
+
+	/** Set Drop Shipment Location.
+		@param DropShip_Location_ID 
+		Business Partner Location for shipping to
+	  */
+	public void setDropShip_Location_ID (int DropShip_Location_ID)
+	{
+		if (DropShip_Location_ID < 1) 
+			set_Value (COLUMNNAME_DropShip_Location_ID, null);
+		else 
+			set_Value (COLUMNNAME_DropShip_Location_ID, Integer.valueOf(DropShip_Location_ID));
+	}
+
+	/** Get Drop Shipment Location.
+		@return Business Partner Location for shipping to
+	  */
+	public int getDropShip_Location_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DropShip_Location_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_User getDropShip_User() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
+			.getPO(getDropShip_User_ID(), get_TrxName());	}
+
+	/** Set Drop Shipment Contact.
+		@param DropShip_User_ID 
+		Business Partner Contact for drop shipment
+	  */
+	public void setDropShip_User_ID (int DropShip_User_ID)
+	{
+		if (DropShip_User_ID < 1) 
+			set_Value (COLUMNNAME_DropShip_User_ID, null);
+		else 
+			set_Value (COLUMNNAME_DropShip_User_ID, Integer.valueOf(DropShip_User_ID));
+	}
+
+	/** Get Drop Shipment Contact.
+		@return Business Partner Contact for drop shipment
+	  */
+	public int getDropShip_User_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DropShip_User_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set EMail Address.
@@ -911,6 +1217,51 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** FreightCostRule AD_Reference_ID=153 */
+	public static final int FREIGHTCOSTRULE_AD_Reference_ID=153;
+	/** Freight included = I */
+	public static final String FREIGHTCOSTRULE_FreightIncluded = "I";
+	/** Fix price = F */
+	public static final String FREIGHTCOSTRULE_FixPrice = "F";
+	/** Calculated = C */
+	public static final String FREIGHTCOSTRULE_Calculated = "C";
+	/** Line = L */
+	public static final String FREIGHTCOSTRULE_Line = "L";
+	/** Set Freight Cost Rule.
+		@param FreightCostRule 
+		Method for charging Freight
+	  */
+	public void setFreightCostRule (String FreightCostRule)
+	{
+
+		set_Value (COLUMNNAME_FreightCostRule, FreightCostRule);
+	}
+
+	/** Get Freight Cost Rule.
+		@return Method for charging Freight
+	  */
+	public String getFreightCostRule () 
+	{
+		return (String)get_Value(COLUMNNAME_FreightCostRule);
+	}
+
+	/** Set Group Key.
+		@param GroupValue 
+		Business Partner Group Key
+	  */
+	public void setGroupValue (String GroupValue)
+	{
+		set_Value (COLUMNNAME_GroupValue, GroupValue);
+	}
+
+	/** Get Group Key.
+		@return Business Partner Group Key
+	  */
+	public String getGroupValue () 
+	{
+		return (String)get_Value(COLUMNNAME_GroupValue);
 	}
 
 	/** Set Import Error Message.
@@ -988,6 +1339,82 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_I_OrderJP_UU);
 	}
 
+	/** InvoiceRule AD_Reference_ID=150 */
+	public static final int INVOICERULE_AD_Reference_ID=150;
+	/** After Order delivered = O */
+	public static final String INVOICERULE_AfterOrderDelivered = "O";
+	/** After Delivery = D */
+	public static final String INVOICERULE_AfterDelivery = "D";
+	/** Customer Schedule after Delivery = S */
+	public static final String INVOICERULE_CustomerScheduleAfterDelivery = "S";
+	/** Immediate = I */
+	public static final String INVOICERULE_Immediate = "I";
+	/** Set Invoice Rule.
+		@param InvoiceRule 
+		Frequency and method of invoicing 
+	  */
+	public void setInvoiceRule (String InvoiceRule)
+	{
+
+		set_Value (COLUMNNAME_InvoiceRule, InvoiceRule);
+	}
+
+	/** Get Invoice Rule.
+		@return Frequency and method of invoicing 
+	  */
+	public String getInvoiceRule () 
+	{
+		return (String)get_Value(COLUMNNAME_InvoiceRule);
+	}
+
+	/** Set Discount Printed.
+		@param IsDiscountPrinted 
+		Print Discount on Invoice and Order
+	  */
+	public void setIsDiscountPrinted (boolean IsDiscountPrinted)
+	{
+		set_Value (COLUMNNAME_IsDiscountPrinted, Boolean.valueOf(IsDiscountPrinted));
+	}
+
+	/** Get Discount Printed.
+		@return Print Discount on Invoice and Order
+	  */
+	public boolean isDiscountPrinted () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsDiscountPrinted);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Drop Shipment.
+		@param IsDropShip 
+		Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public void setIsDropShip (boolean IsDropShip)
+	{
+		set_ValueNoCheck (COLUMNNAME_IsDropShip, Boolean.valueOf(IsDropShip));
+	}
+
+	/** Get Drop Shipment.
+		@return Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public boolean isDropShip () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsDropShip);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Sales Transaction.
 		@param IsSOTrx 
 		This is a Sales Transaction
@@ -1010,6 +1437,462 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Select Bill to BP.
+		@param IsSelectBillToJP Select Bill to BP	  */
+	public void setIsSelectBillToJP (boolean IsSelectBillToJP)
+	{
+		set_Value (COLUMNNAME_IsSelectBillToJP, Boolean.valueOf(IsSelectBillToJP));
+	}
+
+	/** Get Select Bill to BP.
+		@return Select Bill to BP	  */
+	public boolean isSelectBillToJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSelectBillToJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Activity(Search Key).
+		@param JP_Activity_Value Activity(Search Key)	  */
+	public void setJP_Activity_Value (String JP_Activity_Value)
+	{
+		set_Value (COLUMNNAME_JP_Activity_Value, JP_Activity_Value);
+	}
+
+	/** Get Activity(Search Key).
+		@return Activity(Search Key)	  */
+	public String getJP_Activity_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Activity_Value);
+	}
+
+	/** Set BP Organization(Search Key).
+		@param JP_BP_Org_Value BP Organization(Search Key)	  */
+	public void setJP_BP_Org_Value (String JP_BP_Org_Value)
+	{
+		set_Value (COLUMNNAME_JP_BP_Org_Value, JP_BP_Org_Value);
+	}
+
+	/** Get BP Organization(Search Key).
+		@return BP Organization(Search Key)	  */
+	public String getJP_BP_Org_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BP_Org_Value);
+	}
+
+	/** Set Partner Location(Name).
+		@param JP_BPartner_Location_Name Partner Location(Name)	  */
+	public void setJP_BPartner_Location_Name (String JP_BPartner_Location_Name)
+	{
+		set_Value (COLUMNNAME_JP_BPartner_Location_Name, JP_BPartner_Location_Name);
+	}
+
+	/** Get Partner Location(Name).
+		@return Partner Location(Name)	  */
+	public String getJP_BPartner_Location_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BPartner_Location_Name);
+	}
+
+	/** Set Bill Partner Location(Name).
+		@param JP_Bill_BP_Location_Name Bill Partner Location(Name)	  */
+	public void setJP_Bill_BP_Location_Name (String JP_Bill_BP_Location_Name)
+	{
+		set_Value (COLUMNNAME_JP_Bill_BP_Location_Name, JP_Bill_BP_Location_Name);
+	}
+
+	/** Get Bill Partner Location(Name).
+		@return Bill Partner Location(Name)	  */
+	public String getJP_Bill_BP_Location_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Bill_BP_Location_Name);
+	}
+
+	/** Set Invoice Contact(EMail).
+		@param JP_Bill_User_EMail 
+		Business Partner Contact for invoicing
+	  */
+	public void setJP_Bill_User_EMail (String JP_Bill_User_EMail)
+	{
+		set_Value (COLUMNNAME_JP_Bill_User_EMail, JP_Bill_User_EMail);
+	}
+
+	/** Get Invoice Contact(EMail).
+		@return Business Partner Contact for invoicing
+	  */
+	public String getJP_Bill_User_EMail () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Bill_User_EMail);
+	}
+
+	/** Set Bill User Name.
+		@param JP_Bill_User_Name Bill User Name	  */
+	public void setJP_Bill_User_Name (String JP_Bill_User_Name)
+	{
+		set_Value (COLUMNNAME_JP_Bill_User_Name, JP_Bill_User_Name);
+	}
+
+	/** Get Bill User Name.
+		@return Bill User Name	  */
+	public String getJP_Bill_User_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Bill_User_Name);
+	}
+
+	/** Set Invoice Contact(Search Key).
+		@param JP_Bill_User_Value 
+		Business Partner Contact for invoicing
+	  */
+	public void setJP_Bill_User_Value (String JP_Bill_User_Value)
+	{
+		set_Value (COLUMNNAME_JP_Bill_User_Value, JP_Bill_User_Value);
+	}
+
+	/** Get Invoice Contact(Search Key).
+		@return Business Partner Contact for invoicing
+	  */
+	public String getJP_Bill_User_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Bill_User_Value);
+	}
+
+	/** Set Campaign(Search Key).
+		@param JP_Campaign_Value Campaign(Search Key)	  */
+	public void setJP_Campaign_Value (String JP_Campaign_Value)
+	{
+		set_Value (COLUMNNAME_JP_Campaign_Value, JP_Campaign_Value);
+	}
+
+	/** Get Campaign(Search Key).
+		@return Campaign(Search Key)	  */
+	public String getJP_Campaign_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Campaign_Value);
+	}
+
+	/** Set Drop Ship BP Location(Name).
+		@param JP_DropShip_BP_Location_Name Drop Ship BP Location(Name)	  */
+	public void setJP_DropShip_BP_Location_Name (String JP_DropShip_BP_Location_Name)
+	{
+		set_Value (COLUMNNAME_JP_DropShip_BP_Location_Name, JP_DropShip_BP_Location_Name);
+	}
+
+	/** Get Drop Ship BP Location(Name).
+		@return Drop Ship BP Location(Name)	  */
+	public String getJP_DropShip_BP_Location_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_DropShip_BP_Location_Name);
+	}
+
+	/** Set Drop Ship BP(Search Key).
+		@param JP_DropShip_BP_Value Drop Ship BP(Search Key)	  */
+	public void setJP_DropShip_BP_Value (String JP_DropShip_BP_Value)
+	{
+		set_Value (COLUMNNAME_JP_DropShip_BP_Value, JP_DropShip_BP_Value);
+	}
+
+	/** Get Drop Ship BP(Search Key).
+		@return Drop Ship BP(Search Key)	  */
+	public String getJP_DropShip_BP_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_DropShip_BP_Value);
+	}
+
+	/** Set Drop Shipment Contact(E-Mail).
+		@param JP_DropShip_User_EMail Drop Shipment Contact(E-Mail)	  */
+	public void setJP_DropShip_User_EMail (String JP_DropShip_User_EMail)
+	{
+		set_Value (COLUMNNAME_JP_DropShip_User_EMail, JP_DropShip_User_EMail);
+	}
+
+	/** Get Drop Shipment Contact(E-Mail).
+		@return Drop Shipment Contact(E-Mail)	  */
+	public String getJP_DropShip_User_EMail () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_DropShip_User_EMail);
+	}
+
+	/** Set Drop Shipment Contact(Name).
+		@param JP_DropShip_User_Name Drop Shipment Contact(Name)	  */
+	public void setJP_DropShip_User_Name (String JP_DropShip_User_Name)
+	{
+		set_Value (COLUMNNAME_JP_DropShip_User_Name, JP_DropShip_User_Name);
+	}
+
+	/** Get Drop Shipment Contact(Name).
+		@return Drop Shipment Contact(Name)	  */
+	public String getJP_DropShip_User_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_DropShip_User_Name);
+	}
+
+	/** Set Drop Shipment Contact(Search Key).
+		@param JP_DropShip_User_Value Drop Shipment Contact(Search Key)	  */
+	public void setJP_DropShip_User_Value (String JP_DropShip_User_Value)
+	{
+		set_Value (COLUMNNAME_JP_DropShip_User_Value, JP_DropShip_User_Value);
+	}
+
+	/** Get Drop Shipment Contact(Search Key).
+		@return Drop Shipment Contact(Search Key)	  */
+	public String getJP_DropShip_User_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_DropShip_User_Value);
+	}
+
+	/** Set Location Label.
+		@param JP_Location_Label Location Label	  */
+	public void setJP_Location_Label (String JP_Location_Label)
+	{
+		set_Value (COLUMNNAME_JP_Location_Label, JP_Location_Label);
+	}
+
+	/** Get Location Label.
+		@return Location Label	  */
+	public String getJP_Location_Label () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Location_Label);
+	}
+
+	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_Name)
+			.getPO(getJP_Locator_ID(), get_TrxName());	}
+
+	/** Set Locator.
+		@param JP_Locator_ID Locator	  */
+	public void setJP_Locator_ID (int JP_Locator_ID)
+	{
+		if (JP_Locator_ID < 1) 
+			set_Value (COLUMNNAME_JP_Locator_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Locator_ID, Integer.valueOf(JP_Locator_ID));
+	}
+
+	/** Get Locator.
+		@return Locator	  */
+	public int getJP_Locator_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Locator_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Locator(Search Key).
+		@param JP_Locator_Value 
+		Warehouse Locator
+	  */
+	public void setJP_Locator_Value (String JP_Locator_Value)
+	{
+		set_Value (COLUMNNAME_JP_Locator_Value, JP_Locator_Value);
+	}
+
+	/** Get Locator(Search Key).
+		@return Warehouse Locator
+	  */
+	public String getJP_Locator_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Locator_Value);
+	}
+
+	/** Set Trx Organization(Search Key).
+		@param JP_OrgTrx_Value Trx Organization(Search Key)	  */
+	public void setJP_OrgTrx_Value (String JP_OrgTrx_Value)
+	{
+		set_Value (COLUMNNAME_JP_OrgTrx_Value, JP_OrgTrx_Value);
+	}
+
+	/** Get Trx Organization(Search Key).
+		@return Trx Organization(Search Key)	  */
+	public String getJP_OrgTrx_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_OrgTrx_Value);
+	}
+
+	/** Set Organization(Search Key).
+		@param JP_Org_Value Organization(Search Key)	  */
+	public void setJP_Org_Value (String JP_Org_Value)
+	{
+		set_Value (COLUMNNAME_JP_Org_Value, JP_Org_Value);
+	}
+
+	/** Get Organization(Search Key).
+		@return Organization(Search Key)	  */
+	public String getJP_Org_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Org_Value);
+	}
+
+	/** Set Price List(Name).
+		@param JP_PriceList_Name Price List(Name)	  */
+	public void setJP_PriceList_Name (String JP_PriceList_Name)
+	{
+		set_Value (COLUMNNAME_JP_PriceList_Name, JP_PriceList_Name);
+	}
+
+	/** Get Price List(Name).
+		@return Price List(Name)	  */
+	public String getJP_PriceList_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_PriceList_Name);
+	}
+
+	/** Set Project(Search Key).
+		@param JP_Project_Value Project(Search Key)	  */
+	public void setJP_Project_Value (String JP_Project_Value)
+	{
+		set_Value (COLUMNNAME_JP_Project_Value, JP_Project_Value);
+	}
+
+	/** Get Project(Search Key).
+		@return Project(Search Key)	  */
+	public String getJP_Project_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Project_Value);
+	}
+
+	/** Set Sales Rep(E-Mail).
+		@param JP_SalesRep_EMail Sales Rep(E-Mail)	  */
+	public void setJP_SalesRep_EMail (String JP_SalesRep_EMail)
+	{
+		set_Value (COLUMNNAME_JP_SalesRep_EMail, JP_SalesRep_EMail);
+	}
+
+	/** Get Sales Rep(E-Mail).
+		@return Sales Rep(E-Mail)	  */
+	public String getJP_SalesRep_EMail () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_SalesRep_EMail);
+	}
+
+	/** Set Sales Rep(Name).
+		@param JP_SalesRep_Name Sales Rep(Name)	  */
+	public void setJP_SalesRep_Name (String JP_SalesRep_Name)
+	{
+		set_Value (COLUMNNAME_JP_SalesRep_Name, JP_SalesRep_Name);
+	}
+
+	/** Get Sales Rep(Name).
+		@return Sales Rep(Name)	  */
+	public String getJP_SalesRep_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_SalesRep_Name);
+	}
+
+	/** Set Sales Rep(Search Key).
+		@param JP_SalesRep_Value Sales Rep(Search Key)	  */
+	public void setJP_SalesRep_Value (String JP_SalesRep_Value)
+	{
+		set_Value (COLUMNNAME_JP_SalesRep_Value, JP_SalesRep_Value);
+	}
+
+	/** Get Sales Rep(Search Key).
+		@return Sales Rep(Search Key)	  */
+	public String getJP_SalesRep_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_SalesRep_Value);
+	}
+
+	/** Set Shipper(Name).
+		@param JP_Shipper_Name 
+		Method or manner of product delivery
+	  */
+	public void setJP_Shipper_Name (String JP_Shipper_Name)
+	{
+		set_Value (COLUMNNAME_JP_Shipper_Name, JP_Shipper_Name);
+	}
+
+	/** Get Shipper(Name).
+		@return Method or manner of product delivery
+	  */
+	public String getJP_Shipper_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Shipper_Name);
+	}
+
+	/** Set User Element List 1(Search key).
+		@param JP_UserElement1_Value User Element List 1(Search key)	  */
+	public void setJP_UserElement1_Value (String JP_UserElement1_Value)
+	{
+		set_Value (COLUMNNAME_JP_UserElement1_Value, JP_UserElement1_Value);
+	}
+
+	/** Get User Element List 1(Search key).
+		@return User Element List 1(Search key)	  */
+	public String getJP_UserElement1_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_UserElement1_Value);
+	}
+
+	/** Set User Element List 2(Search key).
+		@param JP_UserElement2_Value User Element List 2(Search key)	  */
+	public void setJP_UserElement2_Value (String JP_UserElement2_Value)
+	{
+		set_Value (COLUMNNAME_JP_UserElement2_Value, JP_UserElement2_Value);
+	}
+
+	/** Get User Element List 2(Search key).
+		@return User Element List 2(Search key)	  */
+	public String getJP_UserElement2_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_UserElement2_Value);
+	}
+
+	/** Set User(Search Key).
+		@param JP_User_Value User(Search Key)	  */
+	public void setJP_User_Value (String JP_User_Value)
+	{
+		set_Value (COLUMNNAME_JP_User_Value, JP_User_Value);
+	}
+
+	/** Get User(Search Key).
+		@return User(Search Key)	  */
+	public String getJP_User_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_User_Value);
+	}
+
+	/** Set Org Warehouse(Search Key).
+		@param JP_Warehouse_Value Org Warehouse(Search Key)	  */
+	public void setJP_Warehouse_Value (String JP_Warehouse_Value)
+	{
+		set_Value (COLUMNNAME_JP_Warehouse_Value, JP_Warehouse_Value);
+	}
+
+	/** Get Org Warehouse(Search Key).
+		@return Org Warehouse(Search Key)	  */
+	public String getJP_Warehouse_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Warehouse_Value);
+	}
+
+	/** Set Line No.
+		@param Line 
+		Unique line for this document
+	  */
+	public void setLine (int Line)
+	{
+		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
+	}
+
+	/** Get Line No.
+		@return Unique line for this document
+	  */
+	public int getLine () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Line);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Line Description.
@@ -1158,6 +2041,74 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
+	/** Set Name 2.
+		@param Name2 
+		Additional Name
+	  */
+	public void setName2 (String Name2)
+	{
+		set_Value (COLUMNNAME_Name2, Name2);
+	}
+
+	/** Get Name 2.
+		@return Additional Name
+	  */
+	public String getName2 () 
+	{
+		return (String)get_Value(COLUMNNAME_Name2);
+	}
+
+	/** Set Order Reference.
+		@param POReference 
+		Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public void setPOReference (String POReference)
+	{
+		set_Value (COLUMNNAME_POReference, POReference);
+	}
+
+	/** Get Order Reference.
+		@return Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getPOReference () 
+	{
+		return (String)get_Value(COLUMNNAME_POReference);
+	}
+
+	/** PaymentRule AD_Reference_ID=195 */
+	public static final int PAYMENTRULE_AD_Reference_ID=195;
+	/** Cash = B */
+	public static final String PAYMENTRULE_Cash = "B";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
+	/** Direct Deposit = T */
+	public static final String PAYMENTRULE_DirectDeposit = "T";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** Direct Debit = D */
+	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Mixed POS Payment = M */
+	public static final String PAYMENTRULE_MixedPOSPayment = "M";
+	/** Set Payment Rule.
+		@param PaymentRule 
+		How you pay the invoice
+	  */
+	public void setPaymentRule (String PaymentRule)
+	{
+
+		set_Value (COLUMNNAME_PaymentRule, PaymentRule);
+	}
+
+	/** Get Payment Rule.
+		@return How you pay the invoice
+	  */
+	public String getPaymentRule () 
+	{
+		return (String)get_Value(COLUMNNAME_PaymentRule);
+	}
+
 	/** Set Payment Term Key.
 		@param PaymentTermValue 
 		Key of the Payment Term
@@ -1209,6 +2160,23 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_Postal);
 	}
 
+	/** Set Additional Zip.
+		@param Postal_Add 
+		Additional ZIP or Postal code
+	  */
+	public void setPostal_Add (String Postal_Add)
+	{
+		set_Value (COLUMNNAME_Postal_Add, Postal_Add);
+	}
+
+	/** Get Additional Zip.
+		@return Additional ZIP or Postal code
+	  */
+	public String getPostal_Add () 
+	{
+		return (String)get_Value(COLUMNNAME_Postal_Add);
+	}
+
 	/** Set Unit Price.
 		@param PriceActual 
 		Actual Price 
@@ -1227,6 +2195,56 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Price.
+		@param PriceEntered 
+		Price Entered - the price based on the selected/base UoM
+	  */
+	public void setPriceEntered (BigDecimal PriceEntered)
+	{
+		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
+	}
+
+	/** Get Price.
+		@return Price Entered - the price based on the selected/base UoM
+	  */
+	public BigDecimal getPriceEntered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** PriorityRule AD_Reference_ID=154 */
+	public static final int PRIORITYRULE_AD_Reference_ID=154;
+	/** High = 3 */
+	public static final String PRIORITYRULE_High = "3";
+	/** Medium = 5 */
+	public static final String PRIORITYRULE_Medium = "5";
+	/** Low = 7 */
+	public static final String PRIORITYRULE_Low = "7";
+	/** Urgent = 1 */
+	public static final String PRIORITYRULE_Urgent = "1";
+	/** Minor = 9 */
+	public static final String PRIORITYRULE_Minor = "9";
+	/** Set Priority.
+		@param PriorityRule 
+		Priority of a document
+	  */
+	public void setPriorityRule (String PriorityRule)
+	{
+
+		set_Value (COLUMNNAME_PriorityRule, PriorityRule);
+	}
+
+	/** Get Priority.
+		@return Priority of a document
+	  */
+	public String getPriorityRule () 
+	{
+		return (String)get_Value(COLUMNNAME_PriorityRule);
 	}
 
 	/** Set Processed.
@@ -1289,6 +2307,26 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	public String getProductValue () 
 	{
 		return (String)get_Value(COLUMNNAME_ProductValue);
+	}
+
+	/** Set Quantity.
+		@param QtyEntered 
+		The Quantity Entered is based on the selected UoM
+	  */
+	public void setQtyEntered (BigDecimal QtyEntered)
+	{
+		set_Value (COLUMNNAME_QtyEntered, QtyEntered);
+	}
+
+	/** Get Quantity.
+		@return The Quantity Entered is based on the selected UoM
+	  */
+	public BigDecimal getQtyEntered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Ordered Qty.
@@ -1425,5 +2463,78 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	public String getUPC () 
 	{
 		return (String)get_Value(COLUMNNAME_UPC);
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser1_ID(), get_TrxName());	}
+
+	/** Set User Element List 1.
+		@param User1_ID 
+		User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID)
+	{
+		if (User1_ID < 1) 
+			set_Value (COLUMNNAME_User1_ID, null);
+		else 
+			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+	}
+
+	/** Get User Element List 1.
+		@return User defined list element #1
+	  */
+	public int getUser1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser2_ID(), get_TrxName());	}
+
+	/** Set User Element List 2.
+		@param User2_ID 
+		User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID)
+	{
+		if (User2_ID < 1) 
+			set_Value (COLUMNNAME_User2_ID, null);
+		else 
+			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
+	}
+
+	/** Get User Element List 2.
+		@return User defined list element #2
+	  */
+	public int getUser2_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set UOM Code.
+		@param X12DE355 
+		UOM EDI X12 Code
+	  */
+	public void setX12DE355 (String X12DE355)
+	{
+		set_Value (COLUMNNAME_X12DE355, X12DE355);
+	}
+
+	/** Get UOM Code.
+		@return UOM EDI X12 Code
+	  */
+	public String getX12DE355 () 
+	{
+		return (String)get_Value(COLUMNNAME_X12DE355);
 	}
 }

@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
@@ -54,8 +55,20 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	/**	Only validate, don't import		*/
 	private boolean			p_IsValidateOnly = false;
 
+	private String p_JP_ImportUserIdentifier = null;
+	public static final String JP_ImportUserIdentifier_EMail = "EM";
+	public static final String JP_ImportUserIdentifier_Name = "NA";
+	public static final String JP_ImportUserIdentifier_Value = "VA";
+	public static final String JP_ImportUserIdentifier_ValueEMail = "VE";
+	public static final String JP_ImportUserIdentifier_ValueName = "VN";
+	public static final String JP_ImportUserIdentifier_ValueNameEmail = "VZ";
+	public static final String JP_ImportUserIdentifier_NotCollate= "ZZ";
 
+
+	private String message = null;
 	private IProcessUI processMonitor = null;
+
+
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -72,6 +85,8 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				m_deleteOldImported = "Y".equals(para[i].getParameter());
 			else if (name.equals("IsValidateOnly"))
 				p_IsValidateOnly = para[i].getParameterAsBoolean();
+			else if (name.equals("JP_ImportUserIdentifier"))
+				p_JP_ImportUserIdentifier = para[i].getParameterAsString();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -92,7 +107,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		int no = 0;
 		String clientCheck = getWhereClause();
 
-		//Delete Old Imported
+		/** Delete Old Imported */
 		if (m_deleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE I_UserJP ")
@@ -105,7 +120,8 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			}
 		}
 
-		//Reset Message
+
+		/** Reset I_ErrorMsg */
 		sql = new StringBuilder ("UPDATE I_UserJP ")
 				.append("SET I_ErrorMsg='' ")
 				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
@@ -118,19 +134,93 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 
-		//Reverse Lookup Surrogate Key
-		reverseLookupAD_User_ID();
-		reverseLookupAD_Org_ID();
-		reverseLookupAD_OrgTrx_ID();
-		reverseLookupJP_Corporation_ID();
-		reverseLookupC_BPartner_ID();
-		reverseLookupC_BPartner_Location_ID();
-		reverseLookupC_Job_ID();
-		reverseLookupSupervisor_ID();
-		reverseLookupR_DefaultMailText_ID();
-		reverseLookupC_Location_ID();
-		reverseLookupSalesRep_ID();
-		reverseLookupC_Greeting_ID();
+
+		/** Reverse Lookup Surrogate Key */
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupAD_User_ID())
+			commitEx();
+		else
+			return message;
+
+
+		 message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupAD_Org_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_OrgTrx_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupAD_OrgTrx_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Corporation_ID") ;
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Corporation_ID())
+			commitEx();
+		else
+			return message;
+
+		 message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_BPartner_ID())
+			commitEx();
+		else
+			return message;
+
+		 message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_BPartner_Location_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Job_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Job_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "Supervisor_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupSupervisor_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "R_DefaultMailText_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupR_DefaultMailText_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Location_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupSalesRep_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Greeting_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Greeting_ID())
+			commitEx();
+		else
+			return message;
+
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
@@ -140,12 +230,32 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			return "Validated";
 		}
 
-		//Register & Update User
-		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "AD_User_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		sql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' ")
-				.append(clientCheck).append(" ORDER BY Value, Name ");
+		/** Register & Update User */
+		message = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "AD_User_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(message);
+
+		sql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' ").append(getWhereClause());
+		if(Util.isEmpty(p_JP_ImportUserIdentifier)) {
+			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) {
+			sql.append(clientCheck).append(" ORDER BY EMail ");
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) {
+			sql.append(clientCheck).append(" ORDER BY Name ");
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) {
+			sql.append(clientCheck).append(" ORDER BY Value ");
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) {
+			sql.append(clientCheck).append(" ORDER BY Value, EMail ");
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) {
+			sql.append(clientCheck).append(" ORDER BY Value, Name ");
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) {
+			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
+		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate)) {
+			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
+		}else {
+			sql.append(clientCheck).append(" ORDER BY Value, Name, EMail ");
+		}
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -165,6 +275,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			rs = pstmt.executeQuery();
 			String preValue = "";
 			String preName = "";
+			String preEMail = "";
 			MUser user = null;
 
 			while (rs.next())
@@ -179,17 +290,54 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 				}else{
 
-					if(preValue.equals(imp.getValue()) && preName.equals(imp.getName()))
-					{
-						isNew = false;
+					if(Util.isEmpty(p_JP_ImportUserIdentifier)) {
+
+						isNew = true;
+
+					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail)) {
+
+						if(preEMail.equals(imp.getEMail()))
+							isNew = false;
+
+					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) {
+
+						if(preName.equals(imp.getName()))
+							isNew = false;
+
+					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) {
+
+						if(preValue.equals(imp.getValue()))
+							isNew = false;
+
+					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) {
+
+						if(preValue.equals(imp.getValue()) && preEMail.equals(imp.getEMail()))
+							isNew = false;
+
+					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) {
+
+						if(preValue.equals(imp.getValue()) && preName.equals(imp.getName()))
+							isNew = false;
+
+					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) {
+
+						if(preValue.equals(imp.getValue()) && preName.equals(imp.getName()) && preEMail.equals(imp.getEMail()))
+							isNew = false;
+
+					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
+
+						isNew = true;
 
 					}else {
 
-						preValue = imp.getValue();
-						preName = imp.getName();
-
+						isNew = true;
 					}
+
 				}
+
+				preValue = imp.getValue();
+				preName = imp.getName();
+				preEMail = imp.getEMail();
 
 				if(isNew)
 				{
@@ -252,139 +400,371 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		return msgreturn.toString();
 	}
 
+
 	/**
 	 * Reverse Look up User From E-Mail and (Value && Name)
 	 * @throws Exception
 	 *
 	 */
-	private void reverseLookupAD_User_ID() throws Exception
+	private boolean reverseLookupAD_User_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
+		if(Util.isEmpty(p_JP_ImportUserIdentifier) || p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate))
+			return true;
+
+		//Check user Duplication!!
+		StringBuilder checkUserDuplicationSql = new StringBuilder ("SELECT * FROM I_UserJP WHERE I_IsImported='N' AND AD_Client_ID=? ");
+		PreparedStatement checkUserDuplicationPSTMT = null;
+		ResultSet checkUserDuplicationRS = null;
+		boolean isUserDuplication = false;
+		message = Msg.getMsg(getCtx(), "JP_Checking") + Msg.getElement(getCtx(), "JP_ImportUserIdentifier");
+		String JP_Checked = Msg.getMsg(getCtx(), "JP_Checked");
+		String Error = Msg.getMsg(getCtx(), "Error");
+		int i = 0;
+		int j = 0;
+		try
+		{
+			checkUserDuplicationPSTMT = DB.prepareStatement(checkUserDuplicationSql.toString(), get_TrxName());
+			checkUserDuplicationPSTMT.setInt(1, getAD_Client_ID());
+			checkUserDuplicationRS = checkUserDuplicationPSTMT.executeQuery();
+			while (checkUserDuplicationRS.next())
+			{
+				i++;
+				if(processMonitor != null)	processMonitor.statusUpdate(message +"("+ Error + j + " / " + JP_Checked + i + ")");
+
+				X_I_UserJP imp = new X_I_UserJP (getCtx (), checkUserDuplicationRS, get_TrxName());
+				if(isUserDuplication(getCtx(), imp.getValue(), imp.getName(), imp.getEMail(), p_JP_ImportUserIdentifier, get_TrxName()))
+				{
+					j++;
+					imp.setI_ErrorMsg(Error + JP_Checked + Msg.getElement(getCtx(), "JP_ImportUserIdentifier"));
+					isUserDuplication = true;
+					imp.saveEx(get_TrxName());
+					commitEx();
+				}
+			}
+
+		}catch (Exception e) {
+			message = message + e.toString();
+			throw e;
+		}finally {
+			DB.close(checkUserDuplicationRS, checkUserDuplicationPSTMT);
+			checkUserDuplicationRS = null;
+			checkUserDuplicationPSTMT = null;
+		}
+
+		if(isUserDuplication)
+		{
+			message = Msg.getMsg(getCtx(), "JP_Checked") + Msg.getElement(getCtx(), "JP_ImportUserIdentifier")
+																+"("+ Error + j + " / " + JP_Checked + i + ")";
+			return false;
+		}
+
+
+		StringBuilder sql = null;
 		int no = 0;
 
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
-		boolean isEMailLogin =  MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false, getAD_Client_ID());
-		if(isEMailLogin)
+		if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))//E-Mail
 		{
-			//Reverse lookup AD_User_ID From E-Mail
-			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
-			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "EMail") ;
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID AND p.Password IS NOT NULL) ")
+				.append(" WHERE i.EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
 				.append(" WHERE i.EMail IS NOT NULL AND i.AD_User_ID IS NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-			try {
-				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-			}catch(Exception e) {
-				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-			}
 
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) { //Name
 
-		}else {
-
-			//Reverse lookup AD_User_ID From Name && password
-			msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
-			+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Name" + " : " + Msg.getElement(getCtx(), "Password") );
 			sql = new StringBuilder ("UPDATE I_UserJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.Name=p.Name AND i.Password=p.Password AND p.AD_Client_ID=i.AD_Client_ID) ")
-					.append(" WHERE i.Password IS NOT NULL AND i.Name IS NOT NULL AND i.AD_User_ID IS NULL")
+					.append(" WHERE i.Name=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.Name IS NOT NULL AND i.AD_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
-			try {
-				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-				if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-			}catch(Exception e) {
-				throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-			}
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) { //Value
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND i.EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.AD_User_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) { //Value + Name
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.AD_User_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND i.EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.AD_User_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
+
+			return true;
+		}else {
+
+
+			return true;
 
 		}
 
-		//Reverse lookup AD_User_ID From Value && Name
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_User_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value" + " : " + Msg.getElement(getCtx(), "Name") );
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
-				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.Value=p.Value AND i.Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
-				.append(" WHERE i.AD_User_ID IS NULL AND i.Name IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
 		try {
+
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+
+			message = message + e.toString();
+			return false;
 		}
 
-		//Error : Name is null
-		msg = Msg.getMsg(getCtx(), "JP_Null") + Msg.getElement(getCtx(), "Name");
-		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
-			.append(" WHERE Name IS NULL AND AD_User_ID IS NULL ")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
-
-		if(no > 0)
-		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no );
-		}
-
+		return true;
 
 	}//reverseLookupAD_User_ID
+
+	/**
+	 *
+	 * Check User Duplication
+	 *
+	 * @param ctx
+	 * @param Value
+	 * @param Name
+	 * @param EMail
+	 * @param JP_ImportUserIdentifier
+	 * @param trxName
+	 * @return
+	 * @throws Exception
+	 */
+	static public boolean isUserDuplication(Properties ctx, String Value,String Name, String EMail, String JP_ImportUserIdentifier, String trxName) throws Exception
+	{
+		StringBuffer sql = new StringBuffer("SELECT count(*) From AD_User WHERE (AD_Client_ID = 0 or AD_Client_ID =?) AND ");
+
+		if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))
+		{
+			if(EMail == null)
+				sql.append("EMail IS NULL");
+			else
+				sql.append("EMail=?");
+
+		}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) {
+
+			if(Name == null)
+				sql.append("Name IS NULL");
+			else
+				sql.append("Name=?");
+
+		}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) {
+
+			if(Value == null)
+				sql.append("Value IS NULL");
+			else
+				sql.append("Value=?");
+
+		}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) {
+
+			if(Value == null && EMail == null)
+				sql.append("Value IS NULL AND EMail IS NULL");
+			else if (Value != null && EMail == null)
+				sql.append("Value=? AND EMail IS NULL");
+			else if (Value == null && EMail != null)
+				sql.append("Value IS NULL AND EMail=?");
+			else
+				sql.append("Value=? AND EMail=?");
+
+		}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) {
+
+			if(Value == null && Name == null)
+				sql.append("Value IS NULL AND Name IS NULL");
+			else if (Value != null && Name == null)
+				sql.append("Value=? AND Name IS NULL");
+			else if (Value == null && Name != null)
+				sql.append("Value IS NULL AND Name=?");
+			else
+				sql.append("Value=? AND Name=?");
+
+		}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) {
+
+			if(Value == null && Name == null && EMail == null)
+				sql.append("Value IS NULL AND Name IS NULL AND  EMail IS NULL");
+			else if (Value == null && Name == null  && EMail != null)
+				sql.append("Value IS NULL AND Name IS NULL AND EMail=?");
+			else if(Value == null && Name != null && EMail == null)
+				sql.append("Value IS NULL AND Name = ? AND  EMail IS NULL");
+			else if (Value == null && Name != null  && EMail != null)
+				sql.append("Value IS NULL AND Name=? AND EMail=?");
+			else if(Value != null && Name == null && EMail == null)
+				sql.append("Value=? AND Name IS NULL AND  EMail IS NULL");
+			else if (Value != null && Name == null  && EMail != null)
+				sql.append("Value=? AND Name IS NULL AND EMail=?");
+			else if(Value != null && Name != null && EMail == null)
+				sql.append("Value=? AND Name = ? AND  EMail IS NULL");
+			else if (Value != null && Name != null  && EMail != null)
+				sql.append("Value=? AND Name=? AND EMail=?");
+			else
+				sql.append("Value=? AND Name=? AND EMail=?");
+
+		}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
+			return false;
+		}else {
+			return false;
+		}
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), trxName);
+			pstmt.setInt(1, Env.getAD_Client_ID(ctx));
+			if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))
+			{
+				if(EMail==null)
+					;//Noting
+				else
+					pstmt.setString(2, EMail);
+
+			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) {
+
+				if(Name == null)
+					;//Noting
+				else
+					pstmt.setString(2, Name);
+
+			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) {
+
+				if(Value == null)
+					;//Noting
+				else
+					pstmt.setString(2, Value);
+
+			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) {
+
+				if(Value == null && EMail == null) {
+					;//Noting
+				}else if (Value != null && EMail == null) {
+					pstmt.setString(2, Value);
+				}else if (Value == null && EMail != null) {
+					pstmt.setString(2, EMail);
+				}else {
+					pstmt.setString(2, Value);
+					pstmt.setString(3, EMail);
+				}
+
+			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) {
+
+				if(Value == null && Name == null) {
+					;//Noting
+				}else if (Value != null && Name == null) {
+					pstmt.setString(2, Value);
+				}else if (Value == null && Name != null) {
+					pstmt.setString(2, Name);
+				}else {
+					pstmt.setString(2, Value);
+					pstmt.setString(3, Name);
+				}
+			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) {
+
+				if(Value == null && Name == null && EMail == null) {
+					;//Noting to do;
+				}else if (Value == null && Name == null  && EMail != null) {
+					pstmt.setString(2, EMail);
+				}else if(Value == null && Name != null && EMail == null) {
+					pstmt.setString(2, Name);
+				}else if (Value == null && Name != null  && EMail != null) {
+					pstmt.setString(2, Name);
+					pstmt.setString(3, EMail);
+				}else if(Value != null && Name == null && EMail == null) {
+					pstmt.setString(2, Value);
+				}else if (Value != null && Name == null  && EMail != null) {
+					pstmt.setString(2, Value);
+					pstmt.setString(3, EMail);
+				}else if(Value != null && Name != null && EMail == null) {
+					pstmt.setString(2, Value);
+					pstmt.setString(3, Name);
+
+				}else if (Value != null && Name != null  && EMail != null) {
+					pstmt.setString(2, Value);
+					pstmt.setString(3, Name);
+					pstmt.setString(4, EMail);
+				}else {
+					pstmt.setString(2, Value);
+					pstmt.setString(3, Name);
+					pstmt.setString(4, EMail);
+				}
+			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
+				return false;
+			}else {
+				return false;
+			}
+
+			rs = pstmt.executeQuery();
+			int no = 0;
+			if (rs.next())
+			{
+				no = rs.getInt(1);
+				if(no > 1)
+					return true;
+			}
+
+		}catch (Exception e) {
+			throw e;
+		}finally {
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		return false;
+	}
 
 	/**
 	 * Reverse look up JP_Corporation_ID From JP_Corporation_Value
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupJP_Corporation_ID() throws Exception
+	private boolean reverseLookupJP_Corporation_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
 		//Reverse lookup JP_Corporation_ID From JP_Corporation_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Corporation_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Corporation_Value") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder  sql = new StringBuilder ("UPDATE I_UserJP i ")
 			.append("SET JP_Corporation_ID=(SELECT JP_Corporation_ID FROM JP_Corporation p")
 			.append(" WHERE i.JP_Corporation_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
 			.append("WHERE i.JP_Corporation_ID IS NULL AND i.JP_Corporation_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg + "=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_Corporation_Value
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Corporation_Value");
+		message = Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Corporation_Value");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append("WHERE JP_Corporation_ID IS NULL AND JP_Corporation_Value IS NOT NULL")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
 
-//		if(no > 0)
-//		{
-//			commitEx();
-//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
-//		}
+		//Return all ture, because JP_Corporation_ID may not be registered when migration data.
+		return true;
 
 	}//reverseLookupC_BPartner_ID
 
@@ -394,49 +774,36 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupC_BPartner_ID() throws Exception
+	private boolean reverseLookupC_BPartner_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-
-		 msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
 		//Reverse lookup C_BPartner_ID From JP_BPartner_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_BPartner_Value") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder  sql = new StringBuilder ("UPDATE I_UserJP i ")
 			.append("SET C_BPartner_ID=(SELECT C_BPartner_ID FROM C_BPartner p")
 			.append(" WHERE i.JP_BPartner_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
 			.append("WHERE i.C_BPartner_ID IS NULL AND i.JP_BPartner_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine( msg + "=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid BPartner_Value
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_BPartner_Value");
+		message = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_BPartner_Value");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append("WHERE C_BPartner_ID IS NULL AND JP_BPartner_Value IS NOT NULL")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : "+ e.toString() + " : " + sql );
 		}
 
-//		if(no > 0)
-//		{
-//			commitEx();
-//			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no );
-//		}
+		//Return all ture, because C_BPartner_ID may not be registered when migration data.
+		return true;
 
 	}//reverseLookupC_BPartner_ID
 
@@ -445,99 +812,78 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupC_BPartner_Location_ID() throws Exception
+	private boolean reverseLookupC_BPartner_Location_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-		 msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
 		//Reverse lookup C_BPartner_Location_ID From JP_BPartner_Location_Name
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_BPartner_Location_Name") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 			.append("SET C_BPartner_Location_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location p")
 			.append(" WHERE i.JP_BPartner_Location_Name=p.Name AND i.C_Bpartner_ID =p.C_BPartner_ID) ")
 			.append(" WHERE i.C_BPartner_Location_ID IS NULL AND i.JP_BPartner_Location_Name IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine( msg + "=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_BPartner_Location_Name
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_BPartner_Location_Name");
+		message = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_BPartner_Location_Name");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append("WHERE C_BPartner_Location_ID IS NULL AND JP_BPartner_Location_Name IS NOT NULL AND C_BPartner_ID IS NOT NULL")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
 
-		if(no > 0)
-		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + no + " : " + no );
-		}
+		//Return all ture, because C_BPartner_Location_ID may not be registered when migration data.
+		return true;
 
-	}//reverseLookupC_BPartner_ID
+	}//reverseLookuppC_BPartner_Location_ID
 
 
 	/**
 	 * Reverse Look up Organization From JP_Org_Value
 	 *
 	 **/
-	private void reverseLookupAD_Org_ID() throws Exception
+	private boolean reverseLookupAD_Org_ID() throws Exception
 	{
-
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-		 msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
 		//Look up AD_Org ID From JP_Org_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Org_Value") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_Org p")
 				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N') ")
 				.append(" WHERE i.JP_Org_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error")+ e.toString() + " : " + msg + " : "+ sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_Org_Value
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE AD_Org_ID = 0 AND JP_Org_Value IS NOT NULL AND JP_Org_Value <> '0' ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + e.toString() + " : " + msg + " : "+ sql );
+			throw new Exception(message + " : " + e.toString() + " : " + sql );
 		}
 
 		if(no > 0)
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+			return false;
 		}
+
+		return true;
 
 	}//reverseLookupAD_Org_ID
 
@@ -545,49 +891,40 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 * Reverse Look up Trx Organization From JP_OrgTrx_Value
 	 *
 	 **/
-	private void reverseLookupAD_OrgTrx_ID() throws Exception
+	private boolean reverseLookupAD_OrgTrx_ID() throws Exception
 	{
-
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-		 msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_OrgTrx_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
 		//Look up AD_OrgTrx ID From JP_OrgTrx_Name
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_OrgTrx_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_OrgTrx_Value") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET AD_OrgTrx_ID=(SELECT AD_Org_ID FROM AD_org p")
 				.append(" WHERE i.JP_OrgTrx_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N') ")
 				.append(" WHERE i.JP_OrgTrx_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_OrgTrx_Value
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_OrgTrx_Value");
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_OrgTrx_Value");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE AD_Org_ID IS NULL AND JP_OrgTrx_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(message +" : " + e.toString() + " : " + sql );
 		}
 
 		if(no > 0)
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg  + " : " + no );
+			return false;
 		}
+
+		return true;
 
 	}//reverseLookupAD_OrgTrx_ID
 
@@ -597,49 +934,39 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupC_Job_ID() throws Exception
+	private boolean reverseLookupC_Job_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Job_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
-
-		//Look up C_TaxCategory_ID From JP_TaxCategory_Name
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Job_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Job_Name") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET C_Job_ID=(SELECT C_Job_ID FROM C_Job p")
 				.append(" WHERE i.JP_Job_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_Job_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_TaxCategory_Name
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Job_Name");
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Job_Name");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_Job_Name IS NOT NULL AND C_Job_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(message +" : " + e.toString() + " : " + sql );
 		}
 
 		if(no > 0)
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+			return false;
 		}
+
+		return true;
 
 	}//reverseLookupC_Job_ID
 
@@ -649,49 +976,84 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupSupervisor_ID() throws Exception
+	private boolean reverseLookupSupervisor_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
+		if(Util.isEmpty(p_JP_ImportUserIdentifier) || p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate))
+			return true;
+
+		StringBuilder sql = null;
 		int no = 0;
 
-
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "Supervisor_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
-		//Look up Supervisor_ID From  E-Mail
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "Supervisor_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Supervisor_EMail") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
-				.append("SET Supervisor_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.JP_Supervisor_EMail=p.EMail AND i.AD_Client_ID=p.AD_Client_ID ) ")
-				.append("WHERE JP_Supervisor_EMail IS NOT NULL")
-				.append(" AND I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
-
-		//Invalid JP_Supervisor_EMail
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Supervisor_EMail");
-		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
-			.append(" WHERE JP_Supervisor_EMail IS NOT NULL AND AD_User_ID IS NULL ")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
-
-		if(no > 0)
+		if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))//E-Mail
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET Supervisor_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_Supervisor_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("WHERE JP_Supervisor_EMail IS NOT NULL")
+					.append(" AND I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) { //Name
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET Supervisor_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_Supervisor_Name=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_Supervisor_Name IS NOT NULL AND i.Supervisor_ID IS NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) { //Value
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET Supervisor_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_Supervisor_Value=p.Value AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.Supervisor_ID IS NULL AND i.JP_Supervisor_Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET Supervisor_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_Supervisor_Value=p.Value AND i.JP_Supervisor_EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.Supervisor_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) { //Value + Name
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET Supervisor_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_Supervisor_Value=p.Value AND i.JP_Supervisor_Name=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.Supervisor_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET Supervisor_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_Supervisor_Value=p.Value AND i.JP_Supervisor_Name=p.Name AND i.JP_Supervisor_EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.Supervisor_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
+
+			return true;
+
+		}else {
+
+			return true;
+
 		}
+
+
+		try {
+
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+		}catch(Exception e) {
+
+			message = message + " : " +e.toString()+ " : "+sql.toString();
+			return false;
+		}
+
+		return true;
 
 	}//reverseLookupSupervisor_ID
 
@@ -701,48 +1063,39 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupR_DefaultMailText_ID()throws Exception
+	private boolean reverseLookupR_DefaultMailText_ID()throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "R_DefaultMailText_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
-		//Look up M_FreightCategory_ID From JP_FreightCategory_Value
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "R_DefaultMailText_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_MailText_Name") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET R_DefaultMailText_ID=(SELECT R_DefaultMailText_ID FROM M_FreightCategory p")
 				.append(" WHERE i.JP_MailText_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_MailText_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : "+ e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_MailText_Name
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_MailText_Name");
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_MailText_Name");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_MailText_Name IS NOT NULL AND R_DefaultMailText_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(message +" : " + e.toString() +" : " + sql );
 		}
 
 		if(no > 0)
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+			return false;
 		}
+
+		return true;
 
 	}//reverseLookupR_DefaultMailText_ID
 
@@ -752,48 +1105,39 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupC_Location_ID() throws Exception
+	private boolean reverseLookupC_Location_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
-		//Reverse Loog up C_Location_ID From JP_Location_Label
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Location_Label") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
 				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
 
 		//Invalid JP_Location_Label
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Location_Label");
+		message = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Location_Label");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_Location_Label IS NOT NULL AND C_Location_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " +  sql );
 		}
 
 		if(no > 0)
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+			return false;
 		}
+
+		return true;
 	}
 
 
@@ -803,48 +1147,83 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupSalesRep_ID() throws Exception
+	private boolean reverseLookupSalesRep_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
+		if(Util.isEmpty(p_JP_ImportUserIdentifier)||p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate))
+			return true;
+
+		StringBuilder sql = null;
 		int no = 0;
 
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
-		//Reverse Look up SalesRep_ID From JP_SalesRep_Email
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_SalesRep_Email") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
-				.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-				.append(" WHERE i.JP_SalesRep_Email=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
-				.append(" WHERE i.JP_SalesRep_Email IS NOT NULL")
-				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
-
-		//Invalid JP_User_Value
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_SalesRep_Email");
-		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
-			.append(" WHERE JP_SalesRep_Email IS NOT NULL AND SalesRep_ID IS NULL ")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
-		}
-
-		if(no > 0)
+		if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))//E-Mail
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_SalesRep_Email=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_SalesRep_Email IS NOT NULL  AND i.SalesRep_ID IS NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) { //Name
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_SalesRep_Name=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_SalesRep_Name IS NOT NULL AND i.SalesRep_ID IS NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) { //Value
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.SalesRep_ID IS NULL AND i.JP_SalesRep_Value IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.SalesRep_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) { //Value + Name
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.SalesRep_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
+
+			sql = new StringBuilder ("UPDATE I_UserJP i ")
+					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name AND i.JP_SalesRep_EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.SalesRep_ID IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
+				return true;
+
+		}else {
+
+			return true;
+
 		}
+
+
+		try {
+
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+		}catch(Exception e) {
+
+			message = e.toString();
+			return false;
+		}
+
+		return true;
 
 	}//reverseLookupSalesRep_ID
 
@@ -854,48 +1233,40 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	 *
 	 * @throws Exception
 	 */
-	private void reverseLookupC_Greeting_ID() throws Exception
+	private boolean reverseLookupC_Greeting_ID() throws Exception
 	{
-		StringBuilder sql = new StringBuilder();
-		String msg = new String();
 		int no = 0;
 
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Greeting_ID");
-		if (processMonitor != null)	processMonitor.statusUpdate(msg);
-
 		//Reverse Look up C_Greeting_ID From JP_SalesRep_Email
-		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Greeting_ID")
-		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Greeting_Name") ;
-		sql = new StringBuilder ("UPDATE I_UserJP i ")
+		StringBuilder sql = new StringBuilder ("UPDATE I_UserJP i ")
 				.append("SET C_Greeting_ID=(SELECT C_Greeting_ID FROM C_Greeting p")
 				.append(" WHERE i.JP_Greeting_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_Greeting_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no);
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_Greeting_Name
-		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Greeting_Name");
+		message= Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Greeting_Name");
 		sql = new StringBuilder ("UPDATE I_UserJP ")
-			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_Greeting_Name IS NOT NULL AND C_Greeting_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no );
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+			throw new Exception(message + " : " + e.toString() + " : " + sql );
 		}
 
 		if(no > 0)
 		{
-			commitEx();
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg + " : " + no  );
+			return false;
 		}
+
+		return true;
 
 	}//reverseLookupC_Greeting_ID
 
@@ -934,20 +1305,6 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 				importUser.saveEx(get_TrxName());
 				return false;
 			}
-
-//			int[]  users = PO.getAllIDs(MUser.Table_Name, "EMail=" + email + " AND AD_Client_ID=" + m_AD_Client_ID, get_TrxName());
-//			if(users.length > 0)
-//			{
-//				int AD_User_ID = users[0];
-//				MUser user = new MUser(getCtx(), AD_User_ID, get_TrxName());
-//				importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_SameEMail") + " -> " +
-//										Msg.getElement(Env.getCtx(), "AD_User_ID") + " : "+ user.getName());
-//				importUser.setI_IsImported(false);
-//				importUser.setProcessed(false);
-//				importUser.saveEx(get_TrxName());
-//				return false;
-//
-//			}
 		}
 
 		if(Util.isEmpty(importUser.getName()))
@@ -1115,7 +1472,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 						}catch (Exception e) {
 
-							importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + " Column = " + i_Column.getColumnName() + " & " + "Value = " +importValue.toString());
+							importUser.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + " Column = " + i_Column.getColumnName() + " & " + "Value = " +importValue.toString() +" -> " + e.toString());
 							importUser.setI_IsImported(false);
 							importUser.setProcessed(false);
 							importUser.saveEx(get_TrxName());

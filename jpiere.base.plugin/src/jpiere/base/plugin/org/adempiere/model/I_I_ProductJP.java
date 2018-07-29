@@ -736,6 +736,24 @@ public interface I_I_ProductJP
 	  */
 	public String getJP_TaxCategory_Name();
 
+    /** Column name JP_User_EMail */
+    public static final String COLUMNNAME_JP_User_EMail = "JP_User_EMail";
+
+	/** Set User(E-Mail)	  */
+	public void setJP_User_EMail (String JP_User_EMail);
+
+	/** Get User(E-Mail)	  */
+	public String getJP_User_EMail();
+
+    /** Column name JP_User_Name */
+    public static final String COLUMNNAME_JP_User_Name = "JP_User_Name";
+
+	/** Set User(Name)	  */
+	public void setJP_User_Name (String JP_User_Name);
+
+	/** Get User(Name)	  */
+	public String getJP_User_Name();
+
     /** Column name JP_User_Value */
     public static final String COLUMNNAME_JP_User_Value = "JP_User_Value";
 
@@ -904,12 +922,12 @@ public interface I_I_ProductJP
 	/** Set Minimum Order Qty.
 	  * Minimum order quantity in UOM
 	  */
-	public void setOrder_Min (int Order_Min);
+	public void setOrder_Min (BigDecimal Order_Min);
 
 	/** Get Minimum Order Qty.
 	  * Minimum order quantity in UOM
 	  */
-	public int getOrder_Min();
+	public BigDecimal getOrder_Min();
 
     /** Column name Order_Pack */
     public static final String COLUMNNAME_Order_Pack = "Order_Pack";
@@ -917,12 +935,12 @@ public interface I_I_ProductJP
 	/** Set Order Pack Qty.
 	  * Package order size in UOM (e.g. order set of 5 units)
 	  */
-	public void setOrder_Pack (int Order_Pack);
+	public void setOrder_Pack (BigDecimal Order_Pack);
 
 	/** Get Order Pack Qty.
 	  * Package order size in UOM (e.g. order set of 5 units)
 	  */
-	public int getOrder_Pack();
+	public BigDecimal getOrder_Pack();
 
     /** Column name PriceEffective */
     public static final String COLUMNNAME_PriceEffective = "PriceEffective";
@@ -1190,12 +1208,12 @@ public interface I_I_ProductJP
 	/** Set Units Per Pallet.
 	  * Units Per Pallet
 	  */
-	public void setUnitsPerPallet (int UnitsPerPallet);
+	public void setUnitsPerPallet (BigDecimal UnitsPerPallet);
 
 	/** Get Units Per Pallet.
 	  * Units Per Pallet
 	  */
-	public int getUnitsPerPallet();
+	public BigDecimal getUnitsPerPallet();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

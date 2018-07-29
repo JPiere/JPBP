@@ -34,7 +34,7 @@ public class X_I_ProductJP extends PO implements I_I_ProductJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180612L;
+	private static final long serialVersionUID = 20180721L;
 
     /** Standard Constructor */
     public X_I_ProductJP (Properties ctx, int I_ProductJP_ID, String trxName)
@@ -43,8 +43,6 @@ public class X_I_ProductJP extends PO implements I_I_ProductJP, I_Persistent
       /** if (I_ProductJP_ID == 0)
         {
 			setGuaranteeDays (0);
-// 0
-			setGuaranteeDaysMin (0);
 // 0
 			setI_IsActiveJP (true);
 // Y
@@ -72,8 +70,8 @@ public class X_I_ProductJP extends PO implements I_I_ProductJP, I_Persistent
 // N
 			setIsSummary (false);
 // N
-			setIsVerified (true);
-// Y
+			setIsVerified (false);
+// N
 			setIsWebStoreFeatured (false);
 // N
         } */
@@ -439,7 +437,7 @@ public class X_I_ProductJP extends PO implements I_I_ProductJP, I_Persistent
 	  */
 	public void setGuaranteeDaysMin (int GuaranteeDaysMin)
 	{
-		set_ValueNoCheck (COLUMNNAME_GuaranteeDaysMin, Integer.valueOf(GuaranteeDaysMin));
+		set_Value (COLUMNNAME_GuaranteeDaysMin, Integer.valueOf(GuaranteeDaysMin));
 	}
 
 	/** Get Min Guarantee Days.
@@ -1155,6 +1153,34 @@ public class X_I_ProductJP extends PO implements I_I_ProductJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_TaxCategory_Name);
 	}
 
+	/** Set User(E-Mail).
+		@param JP_User_EMail User(E-Mail)	  */
+	public void setJP_User_EMail (String JP_User_EMail)
+	{
+		set_Value (COLUMNNAME_JP_User_EMail, JP_User_EMail);
+	}
+
+	/** Get User(E-Mail).
+		@return User(E-Mail)	  */
+	public String getJP_User_EMail () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_User_EMail);
+	}
+
+	/** Set User(Name).
+		@param JP_User_Name User(Name)	  */
+	public void setJP_User_Name (String JP_User_Name)
+	{
+		set_Value (COLUMNNAME_JP_User_Name, JP_User_Name);
+	}
+
+	/** Get User(Name).
+		@return User(Name)	  */
+	public String getJP_User_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_User_Name);
+	}
+
 	/** Set User(Search Key).
 		@param JP_User_Value User(Search Key)	  */
 	public void setJP_User_Value (String JP_User_Value)
@@ -1434,40 +1460,40 @@ public class X_I_ProductJP extends PO implements I_I_ProductJP, I_Persistent
 		@param Order_Min 
 		Minimum order quantity in UOM
 	  */
-	public void setOrder_Min (int Order_Min)
+	public void setOrder_Min (BigDecimal Order_Min)
 	{
-		set_Value (COLUMNNAME_Order_Min, Integer.valueOf(Order_Min));
+		set_Value (COLUMNNAME_Order_Min, Order_Min);
 	}
 
 	/** Get Minimum Order Qty.
 		@return Minimum order quantity in UOM
 	  */
-	public int getOrder_Min () 
+	public BigDecimal getOrder_Min () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Order_Min);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Order_Min);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Order Pack Qty.
 		@param Order_Pack 
 		Package order size in UOM (e.g. order set of 5 units)
 	  */
-	public void setOrder_Pack (int Order_Pack)
+	public void setOrder_Pack (BigDecimal Order_Pack)
 	{
-		set_Value (COLUMNNAME_Order_Pack, Integer.valueOf(Order_Pack));
+		set_Value (COLUMNNAME_Order_Pack, Order_Pack);
 	}
 
 	/** Get Order Pack Qty.
 		@return Package order size in UOM (e.g. order set of 5 units)
 	  */
-	public int getOrder_Pack () 
+	public BigDecimal getOrder_Pack () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Order_Pack);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Order_Pack);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Price effective.
@@ -1908,20 +1934,20 @@ public class X_I_ProductJP extends PO implements I_I_ProductJP, I_Persistent
 		@param UnitsPerPallet 
 		Units Per Pallet
 	  */
-	public void setUnitsPerPallet (int UnitsPerPallet)
+	public void setUnitsPerPallet (BigDecimal UnitsPerPallet)
 	{
-		set_Value (COLUMNNAME_UnitsPerPallet, Integer.valueOf(UnitsPerPallet));
+		set_Value (COLUMNNAME_UnitsPerPallet, UnitsPerPallet);
 	}
 
 	/** Get Units Per Pallet.
 		@return Units Per Pallet
 	  */
-	public int getUnitsPerPallet () 
+	public BigDecimal getUnitsPerPallet () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_UnitsPerPallet);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_UnitsPerPallet);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Search Key.
