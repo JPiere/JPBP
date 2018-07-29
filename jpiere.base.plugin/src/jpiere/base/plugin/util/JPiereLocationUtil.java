@@ -48,6 +48,9 @@ public class JPiereLocationUtil {
 	 */
 	public static int searchLocationByLabel (Properties ctx, String JP_Location_Label, String trxName )
 	{
+		if(Util.isEmpty(JP_Location_Label))
+			return 0;
+
 		if(JP_Location_Label.indexOf("'") != -1)
 		{
 			JP_Location_Label = JP_Location_Label.replaceAll("'", "''");//Escape

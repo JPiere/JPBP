@@ -398,8 +398,8 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery();
-			String preJP_DataMigration_Identifier = "";
-			String preDocumentNo = "";
+			String lastJP_DataMigration_Identifier = "";
+			String lastDocumentNo = "";
 			MJournal journal = null;
 			MJournalLine journalLine = null;
 
@@ -435,7 +435,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 				boolean isCreateHeader= true;
 				if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DataMigrationIdentifier))
 				{
-					if(!Util.isEmpty(preJP_DataMigration_Identifier) && preJP_DataMigration_Identifier.equals(imp.getJP_DataMigration_Identifier()))
+					if(!Util.isEmpty(lastJP_DataMigration_Identifier) && lastJP_DataMigration_Identifier.equals(imp.getJP_DataMigration_Identifier()))
 					{
 						isCreateHeader = false;
 						if(journal.getGL_Journal_ID() == 0)
@@ -459,14 +459,14 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							journal.saveEx(get_TrxName());
 						}
 
-						preJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
-						preDocumentNo = imp.getDocumentNo();
+						lastJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
+						lastDocumentNo = imp.getDocumentNo();
 					}
 
 
 				}else if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_Document)){
 
-					if(!Util.isEmpty(preDocumentNo) && preDocumentNo.equals(imp.getDocumentNo()))
+					if(!Util.isEmpty(lastDocumentNo) && lastDocumentNo.equals(imp.getDocumentNo()))
 					{
 						isCreateHeader = false;
 						if(journal.getGL_Journal_ID() == 0)
@@ -490,14 +490,14 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							journal.saveEx(get_TrxName());
 						}
 
-						preJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
-						preDocumentNo = imp.getDocumentNo();
+						lastJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
+						lastDocumentNo = imp.getDocumentNo();
 
 					}
 
 				}else if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DoNotCollateWithExistingData)) {
 
-					if(!Util.isEmpty(preJP_DataMigration_Identifier) && preJP_DataMigration_Identifier.equals(imp.getJP_DataMigration_Identifier()))
+					if(!Util.isEmpty(lastJP_DataMigration_Identifier) && lastJP_DataMigration_Identifier.equals(imp.getJP_DataMigration_Identifier()))
 					{
 						isCreateHeader = false;
 						if(journal.getGL_Journal_ID() == 0)
@@ -512,7 +512,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							continue;
 						}
 
-					}else	if(!Util.isEmpty(preDocumentNo) && preDocumentNo.equals(imp.getDocumentNo())) {
+					}else	if(!Util.isEmpty(lastDocumentNo) && lastDocumentNo.equals(imp.getDocumentNo())) {
 
 						isCreateHeader = false;
 						if(journal.getGL_Journal_ID() == 0)
@@ -536,8 +536,8 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							journal.saveEx(get_TrxName());
 						}
 
-						preJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
-						preDocumentNo = imp.getDocumentNo();
+						lastJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
+						lastDocumentNo = imp.getDocumentNo();
 
 					}
 
@@ -606,6 +606,14 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 				}
 
 			}//while (rs.next())
+
+			//For last Journal
+			if(journal != null && journal.getGL_Journal_ID() != 0)
+			{
+				if(!Util.isEmpty(p_DocAction))
+					journal.processIt(p_DocAction);
+				journal.saveEx(get_TrxName());
+			}
 
 		}catch (Exception e){
 
@@ -1908,7 +1916,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 	private boolean addJournalLine(X_I_GLJournalJP impJournal, MJournal journal, MJournalLine journalLine)
 	{
 
-		ModelValidationEngine.get().fireImportValidate(this, impJournal, journal, ImportValidator.TIMING_BEFORE_IMPORT);
+		ModelValidationEngine.get().fireImportValidate(this, impJournal, journalLine, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(impJournal, journalLine);
 		journalLine.setGL_JournalLine_ID(0);
@@ -1944,7 +1952,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			journalLine.setCurrencyRate(currencyRate);
 		}
 
-		ModelValidationEngine.get().fireImportValidate(this, impJournal, journal, ImportValidator.TIMING_AFTER_IMPORT);
+		ModelValidationEngine.get().fireImportValidate(this, impJournal, journalLine, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {
 			journalLine.saveEx(get_TrxName());
@@ -1960,12 +1968,12 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		}
 
 		impJournal.setGL_JournalLine_ID(journalLine.getGL_JournalLine_ID());
-
 		impJournal.setI_IsImported(true);
 		impJournal.setProcessed(true);
 		impJournal.saveEx(get_TrxName());
 
 		return true;
-	}
 
-}	//	Import Warehouse
+	}//addJournalLine
+
+}	//	Import GL Journal

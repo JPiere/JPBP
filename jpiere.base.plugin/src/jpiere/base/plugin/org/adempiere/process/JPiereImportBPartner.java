@@ -60,16 +60,20 @@ import jpiere.base.plugin.util.JPiereLocationUtil;
 public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 {
 	/**	Client to be imported to		*/
-	private int				m_AD_Client_ID = 0;
+	private int				p_AD_Client_ID = 0;
 	/**	Delete old Imported				*/
-	private boolean			m_deleteOldImported = false;
+	private boolean			p_deleteOldImported = false;
 	/**	Only validate, don't import		*/
 	private boolean			p_IsValidateOnly = false;
 
 	/** Effective						*/
 	private Timestamp		m_DateValue = null;
 
-	private String p_JP_ImportUserIdentifier = "VA";
+	private String p_JP_ImportSalesRepIdentifier = JPiereImportUser.JP_ImportUserIdentifier_Value;
+
+	private String p_JP_ImportUserIdentifier = JPiereImportUser.JP_ImportUserIdentifier_Name;
+
+	private int p_I_BPartnerJP_ID = 0;
 
 	private IProcessUI processMonitor = null;
 
@@ -84,19 +88,23 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		for (int i = 0; i < para.length; i++)
 		{
 			String name = para[i].getParameterName();
-			if (name.equals("AD_Client_ID"))
-				m_AD_Client_ID = ((BigDecimal)para[i].getParameter()).intValue();
-			else if (name.equals("DeleteOldImported"))
-				m_deleteOldImported = "Y".equals(para[i].getParameter());
+			if (name.equals("DeleteOldImported"))
+				p_deleteOldImported = "Y".equals(para[i].getParameter());
 			else if (name.equals("IsValidateOnly"))
 				p_IsValidateOnly = para[i].getParameterAsBoolean();
+			else if (name.equals("JP_ImportSalesRepIdentifier"))
+				p_JP_ImportSalesRepIdentifier = para[i].getParameterAsString();
 			else if (name.equals("JP_ImportUserIdentifier"))
 				p_JP_ImportUserIdentifier = para[i].getParameterAsString();
+			else if (name.equals("I_BPartnerJP_ID"))
+				p_I_BPartnerJP_ID = para[i].getParameterAsInt();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
 		if (m_DateValue == null)
 			m_DateValue = new Timestamp (System.currentTimeMillis());
+
+		p_AD_Client_ID = getAD_Client_ID();
 	}	//	prepare
 
 
@@ -115,7 +123,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		String clientCheck = getWhereClause();
 
 		/**	Delete Old Imported */
-		if (m_deleteOldImported)
+		if (p_deleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE I_BPartnerJP ")
 					.append("WHERE I_IsImported='Y' AND Processed='Y' ").append(clientCheck);
@@ -337,7 +345,12 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
 		sql = new StringBuilder ("SELECT * FROM I_BPartnerJP WHERE I_IsImported='N' OR Processed='N' ")
-				.append(clientCheck).append(" ORDER BY Value, ContactName, EMail ");
+				.append(clientCheck);
+				if(p_I_BPartnerJP_ID > 0)
+					sql.append(" AND I_BPartnerJP_ID=? ");
+		sql.append(" ORDER BY Value, ContactName, EMail ");
+
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -354,6 +367,9 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+			if(p_I_BPartnerJP_ID > 0)
+				pstmt.setInt(1, p_I_BPartnerJP_ID);
+
 			rs = pstmt.executeQuery();
 			String preValue = "";
 			MBPartner bpartner = null;
@@ -433,7 +449,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	//@Override
 	public String getWhereClause()
 	{
-		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
+		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(p_AD_Client_ID);
 		return msgreturn.toString();
 	}
 
@@ -457,9 +473,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append(" WHERE i.Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
 			.append("WHERE i.C_BPartner_ID IS NULL AND i.Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
 
 		try {
-			DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -482,10 +508,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N') ")
 				.append(" WHERE i.JP_Org_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_Org_Value
@@ -494,10 +531,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='" + message + "'")
 			.append(" WHERE AD_Org_ID = 0 AND JP_Org_Value IS NOT NULL AND JP_Org_Value <> '0' ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -524,10 +571,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_CorporationValue=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_CorporationValue IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + ":" + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_CorporationValue
@@ -536,10 +594,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_CorporationValue IS NOT NULL AND JP_Corporation_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + ":" + e.toString() + " : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -565,10 +633,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" AND g.AD_Client_ID=i.AD_Client_ID) ");
 		sql.append("WHERE GroupValue IS NULL AND C_BP_Group_ID IS NULL")
 				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + ": " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Look up C_BP_Group_ID From GroupValue
@@ -589,10 +668,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE GroupValue IS NOT NULL AND C_BP_Group_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + ": " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -610,13 +699,13 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupSalesRep_ID() throws Exception
 	{
-		if(Util.isEmpty(p_JP_ImportUserIdentifier) || p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate))
+		if(Util.isEmpty(p_JP_ImportSalesRepIdentifier) || p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate))
 			return true;
 
 
 		StringBuilder sql = null;
 
-		if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
+		if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
 		{
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
@@ -624,7 +713,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					.append(" WHERE i.JP_SalesRep_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
-		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
+		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
@@ -632,7 +721,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					.append(" WHERE i.JP_SalesRep_Name IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
-		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
+		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
@@ -640,7 +729,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
-		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
+		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
@@ -648,7 +737,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
-		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
+		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
@@ -656,7 +745,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_Name IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
-		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
+		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
@@ -665,7 +754,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 
-		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate))
+		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate))
 		{
 			return true;
 
@@ -675,14 +764,24 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		}
 
-		try {
-			DB.executeUpdateEx(sql.toString(), get_TrxName());
-		}catch(Exception e) {
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
 
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
+		}catch(Exception e) {
 			message = message + " : " +e.toString()+ " : "+sql.toString();
 			return false;
-
 		}
+
 
 
 		return true;
@@ -704,8 +803,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_InvoiceSchedule_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_InvoiceSchedule_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -716,10 +826,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_InvoiceSchedule_Name IS NOT NULL AND C_InvoiceSchedule_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() + " : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -746,10 +866,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_PaymentTerm_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_PaymentTerm_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_PaymentTerm_Value
@@ -758,10 +889,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_PaymentTerm_Value IS NOT NULL AND C_PaymentTerm_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception( message +" : " +e.toString() + " : "+ sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -788,10 +929,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_PO_PaymentTerm_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_PO_PaymentTerm_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_PO_PaymentTerm_Value
@@ -800,10 +952,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_PO_PaymentTerm_Value IS NOT NULL AND PO_PaymentTerm_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -829,10 +991,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_BillSchema_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_BillSchema_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_BillSchema_Value
@@ -841,10 +1014,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_BillSchema_Value IS NOT NULL AND JP_BillSchema_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -870,10 +1053,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_BillSchemaPO_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_BillSchemaPO_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_BillSchemaPO_Value
@@ -882,10 +1076,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_BillSchemaPO_Value IS NOT NULL AND JP_BillSchemaPO_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() + " : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -912,10 +1116,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_PriceList_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_PriceList_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_PriceList_Name
@@ -924,10 +1139,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_PriceList_Name IS NOT NULL AND M_PriceList_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() + " : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -954,10 +1179,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_PO_PriceList_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_PO_PriceList_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_PO_PriceList_Name
@@ -966,10 +1202,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_PO_PriceList_Name IS NOT NULL AND PO_PriceList_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -996,8 +1242,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_DiscountSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_DiscountSchema_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -1008,10 +1265,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_DiscountSchema_Name IS NOT NULL AND M_DiscountSchema_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1038,8 +1305,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_PO_DiscountSchema_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_PO_DiscountSchema_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -1050,10 +1328,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_PO_DiscountSchema_Name IS NOT NULL AND PO_DiscountSchema_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1080,10 +1368,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_Dunning_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_Dunning_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +  " : " + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_Dunning_Name
@@ -1092,10 +1391,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_Dunning_Name IS NOT NULL AND C_Dunning_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message +  " : " + e.toString() + " : " + sql  );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1121,10 +1430,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_Default1099Box_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_Default1099Box_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid JP_Default1099Box_Value
@@ -1133,10 +1453,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_Default1099Box_Value IS NOT NULL AND Default1099Box_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1163,8 +1493,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_Greeting_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_Greeting_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -1175,10 +1516,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_Greeting_Name IS NOT NULL AND C_Greeting_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql) ;
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1206,10 +1557,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.BPContactGreeting=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.BPContactGreeting IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() +" : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid BPContactGreeting
@@ -1218,10 +1580,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE BPContactGreeting IS NOT NULL AND JP_User_Greeting_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message + " : " + e.toString() +" : " + sql );
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1248,8 +1620,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_Location_Label=p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_Location_Label IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -1273,8 +1656,19 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_SalesRegion_Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.JP_SalesRegion_Value IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -1285,10 +1679,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_SalesRegion_Value IS NOT NULL AND C_SalesRegion_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql);
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1302,7 +1706,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 
 	/**
-	 * Reverse Look up User From E-Mail and (Value && Name)
+	 * Reverse Look up User
 	 * @throws Exception
 	 *
 	 */
@@ -1321,7 +1725,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" WHERE i.EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
 					.append(" WHERE i.EMail IS NOT NULL AND i.AD_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1329,7 +1733,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.ContactNamel=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" WHERE i.ContactName=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
 					.append(" WHERE i.ContactName IS NOT NULL AND i.AD_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1337,7 +1741,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
 					.append(" WHERE i.AD_User_ID IS NULL AND i.JP_User_Value IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1345,7 +1749,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_User_Value=p.Value AND i.EMail = p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.EMail = p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND i.C_BPartner_ID = p.C_BPartner_ID  ) ")
 					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1353,7 +1757,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactNamel = p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactNamel = p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
 					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1361,7 +1765,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactNamel = p.Name AND i.EMail = p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactNamel = p.Name AND i.EMail = p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID  ) ")
 					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1375,10 +1779,22 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		}
 
+
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " +  e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		return true;
@@ -1400,10 +1816,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.InterestAreaName=p.Name AND p.AD_Client_ID=i.AD_Client_ID ) ")
 				.append(" WHERE i.InterestAreaName IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid InterestAreaName
@@ -1412,10 +1839,20 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE InterestAreaName IS NOT NULL AND R_InterestArea_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql);
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
 
 		if(no > 0)
@@ -1442,10 +1879,21 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				.append(" WHERE i.JP_Invoice_PrintFormat_Name=p.Name AND (p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID= 0) )")
 				.append(" WHERE i.JP_Invoice_PrintFormat_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
 		//Invalid InterestAreaName
@@ -1454,8 +1902,17 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			.append("SET I_ErrorMsg='"+ message + "'")
 			.append(" WHERE JP_Invoice_PrintFormat_Name IS NOT NULL AND Invoice_PrintFormat_ID IS NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
 		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
 		}catch(Exception e) {
 			throw new Exception( message + " : " + e.toString() + " : " + sql);
 		}
@@ -2188,7 +2645,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	{
 		String JP_SalesRep_EMail = importBPartner.getJP_SalesRep_EMail();
 		int[] AD_User_IDs = PO.getAllIDs(MUser.Table_Name, "EMail='" + JP_SalesRep_EMail +"'"
-				+ " AND (AD_Client_ID=" + m_AD_Client_ID +" OR AD_Client_ID=0) ", get_TrxName() );
+				+ " AND (AD_Client_ID=" + p_AD_Client_ID +" OR AD_Client_ID=0) ", get_TrxName() );
 		MUser m_SalesRep = null;
 
 		if(AD_User_IDs != null)
@@ -2196,7 +2653,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			for(int i = 0; i < AD_User_IDs.length; i++)
 			{
 				m_SalesRep = new MUser(getCtx(), AD_User_IDs[i], get_TrxName());
-				if(m_SalesRep.getAD_Client_ID() == m_AD_Client_ID && m_SalesRep.getAD_Org_ID() == 0)
+				if(m_SalesRep.getAD_Client_ID() == p_AD_Client_ID && m_SalesRep.getAD_Org_ID() == 0)
 				{
 					break;
 				}
