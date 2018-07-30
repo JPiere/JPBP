@@ -715,58 +715,110 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 
 		StringBuilder sql = null;
+		int no = 0;
 
 		if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) //E-Mail
 		{
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y') ")
 					.append(" WHERE i.JP_SalesRep_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) { //Name
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y') ")
 					.append(" WHERE i.JP_SalesRep_Name IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) { //Value
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )AND bp.IsSalesRep='Y') ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) { //Value + E-Mail
 
+			//In case of EMail is not null
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y') ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_EMail IS NOT NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+			if(p_I_BPartnerJP_ID > 0)
+				sql.append(" AND I_BPartnerJP_ID=? ");
+
+			try
+			{
+				if(p_I_BPartnerJP_ID > 0)
+				{
+					Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+					no = DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+				}else {
+					no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				}
+
+			}catch(Exception e) {
+				message = message + " : " +e.toString()+ " : "+sql.toString();
+				return false;
+			}
+
+			//In case of EMail is null
+			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND p.EMail IS NULL  AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y') ")
+					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_EMail IS NULL AND i.SalesRep_ID IS NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) { //Value + Name
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y') ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_Name IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) { //Value + Name + EMail
 
+			//In case of EMail is not null
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET SalesRep_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name  AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ) ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name  AND i.JP_SalesRep_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y') ")
 					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_Name IS NOT NULL AND i.JP_SalesRep_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
+			if(p_I_BPartnerJP_ID > 0)
+				sql.append(" AND I_BPartnerJP_ID=? ");
 
-		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate))
-		{
+			try
+			{
+				if(p_I_BPartnerJP_ID > 0)
+				{
+					Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+					no = DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+				}else {
+					no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				}
+
+			}catch(Exception e) {
+				message = message + " : " +e.toString()+ " : "+sql.toString();
+				return false;
+			}
+
+			//In case of EMail is null
+			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
+					.append("SET SalesRep_ID=(SELECT MAX(AD_User_ID) FROM AD_User p INNER JOIN C_BPartner bp ON (p.C_BPartner_ID = bp.C_BPartner_ID) ")
+					.append(" WHERE i.JP_SalesRep_Value=p.Value AND i.JP_SalesRep_Name=p.Name AND p.EMail IS NULL AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND bp.IsSalesRep='Y' ) ")
+					.append(" WHERE i.JP_SalesRep_Value IS NOT NULL AND i.JP_SalesRep_Name IS NOT NULL AND i.JP_SalesRep_EMail IS NULL AND i.SalesRep_ID IS NULL")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+		}else if(p_JP_ImportSalesRepIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate)){
+
 			return true;
 
 		}else {
@@ -783,9 +835,9 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			if(p_I_BPartnerJP_ID > 0)
 			{
 				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
-				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+				no = DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
 			}else {
-				DB.executeUpdateEx(sql.toString(), get_TrxName());
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			}
 
 		}catch(Exception e) {
@@ -1735,7 +1787,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_EMail)) {
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.EMail=p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
 					.append(" WHERE i.EMail IS NOT NULL AND i.AD_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
@@ -1743,7 +1795,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Name)) {
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.ContactName=p.Name AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
 					.append(" WHERE i.ContactName IS NOT NULL AND i.AD_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
@@ -1751,34 +1803,87 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_Value)) {
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
 					.append(" WHERE i.AD_User_ID IS NULL AND i.JP_User_Value IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueEMail)) {
 
+			//In case of EMail is not null
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.EMail = p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND i.C_BPartner_ID = p.C_BPartner_ID  ) ")
-					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL  AND i.EMai IS NOT NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+			if(p_I_BPartnerJP_ID > 0)
+				sql.append(" AND I_BPartnerJP_ID=? ");
+
+			try {
+
+				if(p_I_BPartnerJP_ID > 0)
+				{
+					Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+					DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+				}else {
+					DB.executeUpdateEx(sql.toString(), get_TrxName());
+				}
+
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+			}
+
+			//In case of EMail is null
+			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND p.EMail IS NULL AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) AND i.C_BPartner_ID = p.C_BPartner_ID  ) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL AND i.EMai IS NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueName)) {
 
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactNamel = p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
-					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL ")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactName = p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID ) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL AND i.ContactName IS NOT NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_ValueNameEmail)) {
 
+			//In case of EMail is not null
 			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
-					.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User p")
-					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactNamel = p.Name AND i.EMail = p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID  ) ")
-					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL ")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactName = p.Name AND i.EMail = p.EMail AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID  ) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL AND i.ContactName IS NOT NULL AND i.EMail IS NOT NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+			if(p_I_BPartnerJP_ID > 0)
+				sql.append(" AND I_BPartnerJP_ID=? ");
+
+			try {
+
+				if(p_I_BPartnerJP_ID > 0)
+				{
+					Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+					DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+				}else {
+					DB.executeUpdateEx(sql.toString(), get_TrxName());
+				}
+
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+			}
+
+			//In case of EMail is null
+			sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
+					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
+					.append(" WHERE i.JP_User_Value=p.Value AND i.ContactName = p.Name AND p.EMail IS NULL AND  ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )  AND i.C_BPartner_ID = p.C_BPartner_ID  ) ")
+					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL AND i.ContactName IS NOT NULL AND i.EMail IS NULL ")
+					.append(" AND i.I_IsImported='N'").append(getWhereClause());
+
+			if(p_I_BPartnerJP_ID > 0)
+				sql.append(" AND I_BPartnerJP_ID=? ");
 
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate)) {
 
