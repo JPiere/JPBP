@@ -57,6 +57,8 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 	/**	Delete old Imported				*/
 	private boolean			p_deleteOldImported = false;
+	/**	Only validate, don't import		*/
+	private boolean	p_IsValidateOnly = false;
 	/**	Document Action					*/
 	private String			p_docAction = MOrder.DOCACTION_Prepare;
 
@@ -89,6 +91,8 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			String name = para[i].getParameterName();
 			if (name.equals("DeleteOldImported"))
 				p_deleteOldImported = "Y".equals(para[i].getParameter());
+			else if (name.equals("IsValidateOnly"))
+				p_IsValidateOnly = para[i].getParameterAsBoolean();
 			else if (name.equals("DocAction"))
 				p_docAction = (String)para[i].getParameter();
 			else if (name.equals("JP_ImportSalesRepIdentifier"))
@@ -359,6 +363,13 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
+
+
+		commitEx();
+		if (p_IsValidateOnly)
+		{
+			return "Validated";
+		}
 
 
 		/** Create BPartner */
