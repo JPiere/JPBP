@@ -465,6 +465,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 						order.saveEx(get_TrxName());
 						order = null;
 						commitEx();
+
 					}
 
 					lastC_BPartner_ID = imp.getC_BPartner_ID();
@@ -488,8 +489,16 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 					{
 						successCreateDocHeader++;
 					}else {
+
+						rollback();
+						order = null;
+
 						failureCreateDocHeader++;
 						errorNum++;//Error of Header include number of Error.
+						imp.setI_ErrorMsg(message);
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
 						commitEx();
 						continue;
 					}
@@ -497,13 +506,14 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 				if(order == null)
 				{
+					rollback();
 					errorNum++;
 					String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
 					imp.setI_ErrorMsg(msg);
 					imp.setI_IsImported(false);
 					imp.setProcessed(false);
 					imp.saveEx(get_TrxName());
-					commitEx();
+					commitEx();;
 					continue;
 				}
 
@@ -521,15 +531,20 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 				}else {
 
+					rollback();
+					order = null;
+
 					failureCreateDocLine++;
 					errorNum++;//Error of Line include number of Error.
+
+					imp.setI_ErrorMsg(message);
+					imp.setI_IsImported(false);
+					imp.setProcessed(false);
+					imp.saveEx(get_TrxName());
 					commitEx();
 					continue;
 
 				}
-
-				commitEx();
-
 
 				if (processMonitor != null)
 				{
@@ -1402,7 +1417,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_OrderJP i ")
 				.append("SET BillTo_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location p")
-				.append(" WHERE i.JP_Bill_BP_Location_Name=p.Name AND i.C_BPartner_ID=p.C_BPartner_ID) ")
+				.append(" WHERE i.JP_Bill_BP_Location_Name=p.Name AND i.Bill_BPartner_ID=p.C_BPartner_ID) ")
 				.append("WHERE i.BillTo_ID IS NULL AND i.JP_Bill_BP_Location_Name IS NOT NULL ")
 				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
@@ -1751,9 +1766,9 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		int no = 0;
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_OrderJP i ")
-				.append("SET BillTo_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location p")
-				.append(" WHERE i.JP_DropShip_BP_Location_Name=p.Name AND i.C_BPartner_ID=p.C_BPartner_ID) ")
-				.append("WHERE i.DropShip_Location_ID IS NULL AND i.JP_DropShip_BP_Location_Name IS NOT NULL ")
+				.append("SET DropShip_Location_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location p")
+				.append(" WHERE i.JP_DropShip_BP_Location_Name=p.Name AND i.DropShip_BPartner_ID=p.C_BPartner_ID) ")
+				.append(" WHERE i.DropShip_Location_ID IS NULL AND i.JP_DropShip_BP_Location_Name IS NOT NULL ")
 				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -1765,7 +1780,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_DropShip_BP_Location_Name");
 		sql = new StringBuilder ("UPDATE I_OrderJP ")
 			.append("SET I_ErrorMsg='"+ message + "'")
-			.append("WHERE DropShip_Location_ID IS NULL AND JP_DropShip_BP_Location_Name IS NOT NULL")
+			.append(" WHERE DropShip_Location_ID IS NULL AND JP_DropShip_BP_Location_Name IS NOT NULL")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -2418,6 +2433,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, impOrder, order, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(impOrder, order);
+		order.setC_Order_ID(0);
 		order.setClientOrg (impOrder.getAD_Client_ID(), impOrder.getAD_Org_ID());
 		order.setC_DocTypeTarget_ID(impOrder.getC_DocType_ID());
 		order.setIsSOTrx(impOrder.isSOTrx());
@@ -2609,10 +2625,9 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		try {
 			order.saveEx(get_TrxName());
 		}catch (Exception e) {
-			impOrder.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_Order_ID") +" : " + e.toString());
-			impOrder.setI_IsImported(false);
-			impOrder.setProcessed(false);
-			impOrder.saveEx(get_TrxName());
+
+		    message = Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_Order_ID") +" : " + e.toString();
+
 			return false;
 		}
 
@@ -2672,15 +2687,11 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, impOrder, line, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {
-			line.saveEx();
+			line.saveEx(get_TrxName());
 		}catch (Exception e) {
 
-			rollback();//Roll Back from Header.
+			message = Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_OrderLine_ID") +" : " + e.toString();
 
-			impOrder.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_OrderLine_ID") +" : " + e.toString());
-			impOrder.setI_IsImported(false);
-			impOrder.setProcessed(false);
-			impOrder.saveEx(get_TrxName());
 			return false;
 		}
 
