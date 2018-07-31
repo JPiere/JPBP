@@ -454,15 +454,18 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 						}else {
 
-							if(!order.processIt (order.getDocAction()))
+							if(!imp.getDocAction().equals(DocAction.ACTION_None))
 							{
-								rollback();
-								message = "Order Process Failed: " + order.getProcessMsg();
-								order = null;
+								if(!order.processIt(order.getDocAction()))
+								{
+									rollback();
+									message = "Order Process Failed: " + order.getProcessMsg();
+									order = null;
 
-								imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + message);
-								imp.saveEx(get_TrxName());
-								commitEx();
+									imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + message);
+									imp.saveEx(get_TrxName());
+									commitEx();
+								}
 							}
 						}
 
@@ -2634,6 +2637,24 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			}else {
 
 				order.setDocAction(DocAction.ACTION_Complete);
+			}
+
+		}else if(impOrder.getDocAction().equals(DocAction.ACTION_None)) {
+
+			//set DocAction but noting to do;
+			if(impOrder.getDocStatus().equals(DocAction.STATUS_Closed) || impOrder.getDocStatus().equals(DocAction.STATUS_Voided)
+					|| impOrder.getDocStatus().equals(DocAction.STATUS_Reversed))
+			{
+				order.setDocAction(DocAction.ACTION_None);
+
+			}else if(impOrder.getDocStatus().equals(DocAction.STATUS_Completed)) {
+
+				order.setDocAction(DocAction.ACTION_Close);
+
+			}else {
+
+				order.setDocAction(DocAction.ACTION_Complete);
+
 			}
 
 		}
