@@ -409,6 +409,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			//
 			MOrder order = null;
 			MOrderLine line = null;
+			X_I_OrderJP imp = null;
 			int lineNo = 0;
 			boolean isCreateHeader= true;
 
@@ -416,7 +417,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			{
 				recordsNum++;
 
-				X_I_OrderJP imp = new X_I_OrderJP (getCtx (), rs, get_TrxName());
+				imp = new X_I_OrderJP (getCtx (), rs, get_TrxName());
 
 				//Re-Import
 				if(imp.getC_Order_ID() > 0)
@@ -455,16 +456,22 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 							if(!order.processIt (order.getDocAction()))
 							{
-								log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
-								imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + order.getProcessMsg());
+								rollback();
+								message = "Order Process Failed: " + order.getProcessMsg();
+								order = null;
+
+								imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + message);
 								imp.saveEx(get_TrxName());
 								commitEx();
 							}
 						}
 
-						order.saveEx(get_TrxName());
-						order = null;
-						commitEx();
+						if(order != null)
+						{
+							order.saveEx(get_TrxName());
+							order = null;
+							commitEx();
+						}
 
 					}
 
@@ -560,7 +567,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				}
 			}//While
 
-			//For last Journal
+			//last Journal
 			if (order != null)
 			{
 				if(p_IsHistoricalDataMigration)
@@ -574,13 +581,24 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 					if(!order.processIt (order.getDocAction()))
 					{
-						log.warning("Order Process Failed: " + order + " - " + order.getProcessMsg());
+						rollback();
+						message = "Order Process Failed: " + order.getProcessMsg();
+						order = null;
+
+						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + message);
+						imp.saveEx(get_TrxName());
+						commitEx();
 					}
 				}
 
-				order.saveEx(get_TrxName());
-				commitEx();
-			}
+				if(order != null)
+				{
+					order.saveEx(get_TrxName());
+					order = null;
+					commitEx();
+				}
+
+			}//if (order != null)
 
 		}catch (Exception e){
 
