@@ -2632,11 +2632,39 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		{
 			if (p_docAction != null && p_docAction.length() > 0)
 			{
-				order.setDocAction(p_docAction);
+				if(p_docAction.equals(DocAction.ACTION_None))
+				{
+
+					//set DocAction but noting to do;
+					if(impOrder.getDocStatus().equals(DocAction.STATUS_Closed) || impOrder.getDocStatus().equals(DocAction.STATUS_Voided)
+							|| impOrder.getDocStatus().equals(DocAction.STATUS_Reversed))
+					{
+						order.setDocAction(DocAction.ACTION_None);
+						impOrder.setDocAction(DocAction.ACTION_None);
+
+					}else if(impOrder.getDocStatus().equals(DocAction.STATUS_Completed)) {
+
+						order.setDocAction(DocAction.ACTION_Close);
+						impOrder.setDocAction(DocAction.ACTION_None);
+
+					}else {
+
+						order.setDocAction(DocAction.ACTION_Complete);
+						impOrder.setDocAction(DocAction.ACTION_None);
+
+					}
+
+				}else {
+
+					order.setDocAction(p_docAction);
+					impOrder.setDocAction(p_docAction);
+				}
 
 			}else {
 
 				order.setDocAction(DocAction.ACTION_Complete);
+				impOrder.setDocAction(DocAction.ACTION_None);
+
 			}
 
 		}else if(impOrder.getDocAction().equals(DocAction.ACTION_None)) {
