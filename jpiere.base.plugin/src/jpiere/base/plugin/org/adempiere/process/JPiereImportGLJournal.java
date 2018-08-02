@@ -357,15 +357,15 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		//
 		sql = new StringBuilder ("SELECT * FROM I_GLJournalJP WHERE I_IsImported='N' ")
 					.append(clientCheck);
-		if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_Document))
+		if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_Document))
 		{
 			sql.append(" ORDER BY DocumentNo, Line ");
 
-		}else if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DataMigrationIdentifier)){
+		}else if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DataMigrationIdentifier)){
 
 			sql.append(" ORDER BY JP_DataMigration_Identifier, DocumentNo, Line ");
 
-		}else if(!p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DoNotCollateWithExistingData)){
+		}else if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_DoNotCollateWithExistingData)){
 
 			sql.append(" ORDER BY JP_DataMigration_Identifier, DocumentNo, Line ");
 
@@ -457,6 +457,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							if(!Util.isEmpty(p_DocAction))
 								journal.processIt(p_DocAction);
 							journal.saveEx(get_TrxName());
+							commitEx();
 						}
 
 						lastJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
@@ -488,6 +489,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							if(!Util.isEmpty(p_DocAction))
 								journal.processIt(p_DocAction);
 							journal.saveEx(get_TrxName());
+							commitEx();
 						}
 
 						lastJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
@@ -534,6 +536,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							if(!Util.isEmpty(p_DocAction))
 								journal.processIt(p_DocAction);
 							journal.saveEx(get_TrxName());
+							commitEx();
 						}
 
 						lastJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
@@ -564,9 +567,18 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 					if(createHeaderJournal(imp, journal))
 					{
 						successCreateDocHeader++;
+
 					}else {
+
 						failureCreateDocHeader++;
 						errorNum++;//Error of Header include number of Error.
+
+						rollback();
+						imp.setGL_Journal_ID(0);
+						imp.setI_ErrorMsg(message);
+						imp.setI_IsImported(false);
+						imp.setProcessed(false);
+						imp.saveEx(get_TrxName());
 						commitEx();
 						continue;
 					}
@@ -583,9 +595,23 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 				{
 					successCreateDocLine++;
 					successNum++;
+
+					imp.setI_IsImported(true);
+					imp.setProcessed(true);
+					imp.saveEx(get_TrxName());
+
 				}else {
+
 					failureCreateDocLine++;
 					errorNum++;//Error of Line include number of Error.
+
+					rollback();
+					imp.setGL_Journal_ID(0);
+					imp.setGL_JournalLine_ID(0);
+					imp.setI_ErrorMsg(message);
+					imp.setI_IsImported(false);
+					imp.setProcessed(false);
+					imp.saveEx(get_TrxName());
 					commitEx();
 					continue;
 				}
@@ -962,22 +988,34 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
-		//Invalid JP_GL_Category_Name
-		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_GL_Category_Name");
-		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
-			.append("SET I_ErrorMsg='"+ message + "'")
-			.append("WHERE GL_Category_ID IS NULL AND JP_GL_Category_Name IS NOT NULL")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql);
-		}
 
-		if(no > 0)
-		{
-			return false;
-		}
+		sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+				.append("SET GL_Category_ID=(SELECT GL_Category_ID FROM C_DocType p")
+				.append(" WHERE i.C_DocType_ID=p.C_DocType_ID AND i.AD_Client_ID=p.AD_Client_ID) ")
+				.append(" WHERE i.GL_Category_ID IS NULL AND i.C_DocType_ID IS NOT NULL ")
+				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+			try {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}catch(Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+			}
+
+		//Invalid JP_GL_Category_Name
+//		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_GL_Category_Name");
+//		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
+//			.append("SET I_ErrorMsg='"+ message + "'")
+//			.append("WHERE GL_Category_ID IS NULL AND JP_GL_Category_Name IS NOT NULL")
+//			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+//		try {
+//			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+//		}catch(Exception e) {
+//			throw new Exception(message +" : " + e.toString() +" : " + sql);
+//		}
+//
+//		if(no > 0)
+//		{
+//			return false;
+//		}
 
 		return true;
 
@@ -1797,49 +1835,34 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		//Check AD_Org_ID
 		if(impJournal.getAD_Org_ID() <= 0)
 		{
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value"));
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
 			return false;
 		}
 
 		//Check C_AcctSchema_ID
 		if(impJournal.getC_AcctSchema_ID() <= 0)
 		{
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "C_AcctSchema_ID"));
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "C_AcctSchema_ID");
 			return false;
 		}
 
 		//Check C_DocType_ID
 		if(impJournal.getC_DocType_ID() <= 0)
 		{
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "C_DocType_ID"));
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "C_DocType_ID");
 			return false;
 		}
 
 		//Check PostingType
 		if(Util.isEmpty(impJournal.getPostingType()))
 		{
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "PostingType"));
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "PostingType");
 			return false;
 		}
 
 		if(impJournal.getDateAcct() == null)
 		{
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "DateAcct"));
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "DateAcct");
 			return false;
 		}
 
@@ -1854,10 +1877,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		//Check Mandatory - Currency
 		if(impJournal.getC_Currency_ID() <= 0)
 		{
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "C_Currency_ID"));
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "C_Currency_ID");
 			return false;
 		}
 
@@ -1871,10 +1891,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			}else {
 
 				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_Description_Header")};
-				impJournal.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
-				impJournal.setI_IsImported(false);
-				impJournal.setProcessed(false);
-				impJournal.saveEx(get_TrxName());
+				message = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
 				return false;
 
 			}
@@ -1894,10 +1911,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		try {
 			newJournal.saveEx(get_TrxName());
 		}catch (Exception e) {
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "GL_Journal_ID") +" : " + e.toString());
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "GL_Journal_ID") +" : " + e.toString();
 			return false;
 		}
 
@@ -1958,19 +1972,11 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			journalLine.saveEx(get_TrxName());
 		}catch (Exception e) {
 
-			rollback();//Roll Back from Header.
-
-			impJournal.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "GL_JournalLine_ID") +" : " + e.toString());
-			impJournal.setI_IsImported(false);
-			impJournal.setProcessed(false);
-			impJournal.saveEx(get_TrxName());
+			message = Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "GL_JournalLine_ID") +" : " + e.toString();
 			return false;
 		}
 
 		impJournal.setGL_JournalLine_ID(journalLine.getGL_JournalLine_ID());
-		impJournal.setI_IsImported(true);
-		impJournal.setProcessed(true);
-		impJournal.saveEx(get_TrxName());
 
 		return true;
 
