@@ -2741,6 +2741,9 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			line.setLine(impOrder.getLine());
 		}
 
+		if(!Util.isEmpty(impOrder.getLineDescription()))
+			line.setDescription(impOrder.getLineDescription());
+
 		if(line.getQtyEntered().compareTo(Env.ZERO) == 0 && line.getQtyOrdered().compareTo(Env.ZERO) != 0 )
 		{
 			line.setQtyEntered(line.getQtyOrdered());
