@@ -580,7 +580,7 @@ public class JPiereImportCharge extends SvrProcess  implements ImportProcess
 	private boolean createNewCharge(X_I_ChargeJP impCharge, MCharge newCharge)
 	{
 		//Check AD_Org_ID
-		if(impCharge.getAD_Org_ID() <= 0)
+		if(impCharge.getAD_Org_ID() < 0)
 		{
 			impCharge.setI_ErrorMsg(Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value"));
 			impCharge.setI_IsImported(false);
