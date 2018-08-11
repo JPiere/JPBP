@@ -357,6 +357,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		//
 		sql = new StringBuilder ("SELECT * FROM I_GLJournalJP WHERE I_IsImported='N' ")
 					.append(clientCheck);
+
 		if(p_JP_CollateGLJournalPolicy.equals(JP_CollateGLJournalPolicy_Document))
 		{
 			sql.append(" ORDER BY DocumentNo, Line ");
@@ -749,7 +750,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
 				.append("SET GL_JournalLine_ID=(SELECT GL_JournalLine_ID FROM GL_JournalLine p")
-				.append(" WHERE i.Line=p.Line AND p.GL_Journal_ID=i.GL_Journal_ID ) ")
+				.append(" WHERE p.GL_Journal_ID=i.GL_Journal_ID AND i.Line=p.Line ) ")
 				.append(" WHERE i.GL_JournalLine_ID IS NULL ")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
