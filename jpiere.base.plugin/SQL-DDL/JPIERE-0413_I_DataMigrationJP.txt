@@ -150,6 +150,23 @@ CREATE TABLE adempiere.I_DataMigrationJP
     JP_Invoice_DocumentNo character varying(30),
     JP_Payment_DocumentNo character varying(30),
 
+    --Other
+    DeliveryRule character(1) DEFAULT NULL::bpchar,
+    JP_Line_Campaign_Value character varying(40) DEFAULT NULL::character varying,
+    JP_Line_Campaign_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_Line_Activity_Value character varying(40) DEFAULT NULL::character varying,
+    JP_Line_Activity_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_Line_OrgTrx_Value character varying(40) DEFAULT NULL::character varying,
+    JP_Line_OrgTrx_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_Line_Project_Value character varying(40) DEFAULT NULL::character varying,
+    JP_Line_Project_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_Line_User1_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_Line_user2_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_Line_UserElement1_value character varying(40) DEFAULT NULL::character varying,
+    JP_Line_UserElement2_value character varying(40) DEFAULT NULL::character varying,
+    PriorityRule character(1) DEFAULT NULL::bpchar,
+    IsDropShip character(1) DEFAULT NULL::bpchar,
+
     CONSTRAINT I_DataMigrationJP_Pkey PRIMARY KEY (I_DataMigrationJP_ID)
 );
 

@@ -80,9 +80,9 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 				p_JP_ImportSalesRepIdentifier = para[i].getParameterAsString();
 			else if (name.equals("JP_ImportUserIdentifier"))
 				p_JP_ImportUserIdentifier = para[i].getParameterAsString();
-			else if (name.equals("JP_ImportDropShipUserIdentifier"))
+			else if (name.equals("JP_ImportDropSpUserIdentifier"))
 				p_JP_ImportDropShipUserIdentifier = para[i].getParameterAsString();
-			else if (name.equals("JP_ReimportPolicy_DeleteExistingData"))
+			else if (name.equals("JP_ReimportPolicy"))
 				p_JP_ReimportPolicy = para[i].getParameterAsString();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
@@ -325,6 +325,50 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_LocatorTo_ID");
 		if(processMonitor != null)	processMonitor.statusUpdate(message);
 		if(reverseLookupJP_LocatorTo_ID())
+			commitEx();
+		else
+			return message;
+
+
+		//Line Reference
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Line_Project_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Line_Project_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Line_Campaign_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Line_Campaign_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Line_Activity_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Line_Activity_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Line_OrgTrx_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Line_OrgTrx_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Line_User1_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Line_User1_ID())
+			commitEx();
+		else
+			return message;
+
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "User2_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Line_User2_ID())
 			commitEx();
 		else
 			return message;
@@ -635,7 +679,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 				.append("SET AD_Table_ID=(SELECT AD_Table_ID FROM AD_Table p")
 				.append(" WHERE i.TableName=p.TableName AND p.AD_Client_ID=0 ) ")
-				.append(" WHERE i.AD_Table_ID IS NOT NULL")
+				.append(" WHERE i.AD_Table_ID IS NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -974,33 +1018,11 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			throw new Exception(message +" : " + e.toString() +" : " + sql);
 		}
 
-		sql = new StringBuilder ("UPDATE I_DataMigrationJP o ")
-			  .append("SET M_Warehouse_ID=(SELECT MAX(M_Warehouse_ID) FROM M_Warehouse w")
-			  .append(" WHERE o.AD_Client_ID=w.AD_Client_ID AND o.AD_Org_ID=w.AD_Org_ID) ")
-			  .append("WHERE M_Warehouse_ID IS NULL AND I_IsImported<>'Y'").append (getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql);
-		}
-
-		sql = new StringBuilder ("UPDATE I_DataMigrationJP o ")
-			  .append("SET M_Warehouse_ID=(SELECT M_Warehouse_ID FROM M_Warehouse w")
-			  .append(" WHERE o.AD_Client_ID=w.AD_Client_ID) ")
-			  .append("WHERE M_Warehouse_ID IS NULL")
-			  .append(" AND EXISTS (SELECT AD_Client_ID FROM M_Warehouse w WHERE w.AD_Client_ID=o.AD_Client_ID GROUP BY AD_Client_ID HAVING COUNT(*)=1)")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		}catch(Exception e) {
-			throw new Exception(message +" : " + e.toString() +" : " + sql);
-		}
-
 		//Invalid M_Warehouse_ID
 		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "M_Warehouse_ID");
 		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
 				.append("SET I_ErrorMsg='"+ message + "'")
-				.append(" WHERE M_Warehouse_ID IS NULL")
+				.append(" WHERE M_Warehouse_ID IS NULL AND JP_Warehouse_Value IS NOT NULL ")
 				.append(" AND I_IsImported<>'Y'").append (getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -1251,7 +1273,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 			sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
-					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_Bill_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_DropShip_User_Name=p.Name AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Value IS NOT NULL AND i.JP_DropShip_User_Name IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
@@ -1261,7 +1283,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			//In case of EMail is not null
 			sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
-					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_Bill_User_Name=p.Name  AND i.JP_Bill_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_DropShip_User_Name=p.Name  AND i.JP_DropShip_User_EMail=p.EMail AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Value IS NOT NULL AND i.JP_DropShip_User_Name IS NOT NULL AND i.JP_DropShip_User_EMail IS NOT NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
@@ -1276,7 +1298,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			//In case of EMail is null
 			sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 					.append("SET DropShip_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
-					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_Bill_User_Name=p.Name  AND i.JP_Bill_User_EMail IS NULL AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
+					.append(" WHERE i.JP_DropShip_User_Value=p.Value AND i.JP_DropShip_User_Name=p.Name  AND i.JP_DropShip_User_EMail IS NULL AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 ) ")
 					.append(" AND i.DropShip_BPartner_ID = p.C_BPartner_ID )")
 					.append(" WHERE i.JP_DropShip_User_Value IS NOT NULL AND i.JP_DropShip_User_Name IS NOT NULL AND i.JP_DropShip_User_EMail IS NULL AND DropShip_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
@@ -1455,7 +1477,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean reverseLookupC_BankAccount_ID() throws Exception //TODO
+	private boolean reverseLookupC_BankAccount_ID() throws Exception
 	{
 		int no = 0;
 
@@ -1485,7 +1507,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 			.append("SET C_Project_ID=(SELECT C_Project_ID FROM C_Project p")
-			.append(" WHERE i.JP_Project_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE i.JP_Project_Value=p.Value AND (i.AD_Client_ID=p.AD_Client_ID or p.AD_Client_ID = 0) ) ")
 			.append("WHERE i.C_Project_ID IS NULL AND i.JP_Project_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
@@ -1516,6 +1538,48 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 	}
 
 	/**
+	 * Reverse Lookup JP_Line_Project_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_Line_Project_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
+			.append("SET JP_Line_Project_ID=(SELECT C_Project_ID FROM C_Project p")
+			.append(" WHERE i.JP_Line_Project_Value=p.Value AND  (i.AD_Client_ID=p.AD_Client_ID or p.AD_Client_ID = 0) ) ")
+			.append("WHERE i.JP_Line_Project_ID IS NULL AND i.JP_Line_Project_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Line_Project_Value
+		message = Msg.getMsg(getCtx(), "Error")  + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Line_Project_Value");
+		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE JP_Line_Project_ID IS NULL AND JP_Line_Project_Value IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception( message +" : " + e.toString() +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_Line_Project_ID
+
+	/**
 	 * Reverse Lookup C_Campaign_ID
 	 *
 	 * @return
@@ -1527,7 +1591,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 			.append("SET C_Campaign_ID=(SELECT C_Campaign_ID FROM C_Campaign p")
-			.append(" WHERE i.JP_Campaign_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE i.JP_Campaign_Value=p.Value AND  (i.AD_Client_ID=p.AD_Client_ID or p.AD_Client_ID = 0) ) ")
 			.append("WHERE i.C_Campaign_ID IS NULL AND i.JP_Campaign_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
@@ -1557,6 +1621,49 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 	}//reverseLookupC_Campaign_ID
 
+
+	/**
+	 * Reverse Lookup JP_Line_Campaign_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_Line_Campaign_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
+			.append("SET JP_Line_Campaign_ID=(SELECT C_Campaign_ID FROM C_Campaign p")
+			.append(" WHERE i.JP_Line_Campaign_Value=p.Value AND  (i.AD_Client_ID=p.AD_Client_ID or p.AD_Client_ID = 0) ) ")
+			.append("WHERE i.JP_Line_Campaign_ID IS NULL AND i.JP_Line_Campaign_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " +  e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Line_Campaign_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Line_Campaign_Value");
+		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE JP_Line_Campaign_ID IS NULL AND JP_Line_Campaign_Value IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " +  e.toString() +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_Line_Campaign_ID
+
 	/**
 	 * Reverse Lookup C_Activity_ID
 	 *
@@ -1569,7 +1676,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 			.append("SET C_Activity_ID=(SELECT C_Activity_ID FROM C_Activity p")
-			.append(" WHERE i.JP_Activity_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE i.JP_Activity_Value=p.Value AND  (i.AD_Client_ID=p.AD_Client_ID or p.AD_Client_ID = 0) ) ")
 			.append("WHERE i.C_Activity_ID IS NULL AND i.JP_Activity_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
@@ -1599,6 +1706,50 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 	}//reverseLookupC_Activity_ID
 
+
+	/**
+	 * Reverse Lookup JP_Line_Activity_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_Line_Activity_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
+			.append("SET JP_Line_Activity_ID=(SELECT C_Activity_ID FROM C_Activity p")
+			.append(" WHERE i.JP_Line_Activity_Value=p.Value AND  (i.AD_Client_ID=p.AD_Client_ID or p.AD_Client_ID = 0) ) ")
+			.append("WHERE i.JP_Line_Activity_ID IS NULL AND i.JP_Line_Activity_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Line_Activity_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Line_Activity_Value");
+		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE JP_Line_Activity_ID IS NULL AND JP_Line_Activity_Value IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_Line_Activity_ID
+
+
 	/**
 	 * Reverse Lookup AD_OrgTrx_ID
 	 *
@@ -1620,7 +1771,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : "+ e.toString() + " : "+ sql );
 		}
 
-		//Invalid JP_Org_Value
+		//Invalid JP_OrgTrx_Value
 		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_OrgTrx_Value");
 		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
 			.append("SET I_ErrorMsg='"+ message + "'")
@@ -1640,6 +1791,50 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		return true;
 
 	}//reverseLookupAD_OrgTrx_ID
+
+	/**
+	 * Reverse Lookup JP_Line_OrgTrx_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_Line_OrgTrx_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
+				.append("SET JP_Line_OrgTrx_ID=(SELECT AD_Org_ID FROM AD_Org p")
+				.append(" WHERE i.JP_Line_OrgTrx_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N' ) ")
+				.append(" WHERE i.JP_Line_OrgTrx_Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : "+ e.toString() + " : "+ sql );
+		}
+
+		//Invalid JP_Line_OrgTrx_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Line_OrgTrx_Value");
+		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_Line_OrgTrx_ID IS NULL AND JP_Line_OrgTrx_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message + " : "+ e.toString() + " : "+ sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_Line_OrgTrx_ID
+
+
 
 	/**
 	 * Reverse Lookup User1_ID
@@ -1683,6 +1878,50 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 	}//reverseLookupUser1_ID
 
+
+	/**
+	 * Reverse Lookup JP_Line_User1_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_Line_User1_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
+			.append("SET JP_Line_User1_ID=(SELECT C_ElementValue_ID FROM C_ElementValue p")
+			.append(" WHERE i.JP_Line_UserElement1_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append("WHERE i.JP_Line_User1_ID IS NULL AND i.JP_Line_UserElement1_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Line_UserElement1_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Line_UserElement1_Value");
+		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE JP_Line_User1_ID IS NULL AND JP_Line_UserElement1_Value IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_Line_User1_ID
+
+
 	/**
 	 * Reverse Lookup User2_ID
 	 *
@@ -1724,6 +1963,49 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		return true;
 
 	}//reverseLookupUser2_ID
+
+
+	/**
+	 * Reverse Lookup JP_Line_User2_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_Line_User2_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
+			.append("SET JP_Line_User2_ID=(SELECT C_ElementValue_ID FROM C_ElementValue p")
+			.append(" WHERE i.JP_Line_UserElement2_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append("WHERE i.JP_Line_User2_ID IS NULL AND i.JP_Line_UserElement2_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Line_UserElement2_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Line_UserElement2_Value");
+		sql = new StringBuilder ("UPDATE I_DataMigrationJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE JP_Line_User2_ID IS NULL AND JP_Line_UserElement2_Value IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_Line_User2_ID
 
 	/**
 	 * Reverse Lookup M_Product_ID
@@ -2037,6 +2319,48 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		dataMigrationLine.setJP_DataMigrationLine_ID(0);
 		dataMigrationLine.setJP_DataMigration_ID(dataMigration.getJP_DataMigration_ID());
 		dataMigrationLine.setAD_Org_ID(importDataMigration.getAD_Org_ID());
+
+		if(importDataMigration.getJP_Line_OrgTrx_ID() > 0)
+		{
+			dataMigrationLine.setAD_OrgTrx_ID(importDataMigration.getJP_Line_OrgTrx_ID());
+		}else {
+			dataMigrationLine.setAD_OrgTrx_ID(0);
+		}
+
+		if(importDataMigration.getJP_Line_Project_ID() > 0)
+		{
+			dataMigrationLine.setC_Project_ID(importDataMigration.getJP_Line_Project_ID());
+		}else {
+			dataMigrationLine.setC_Project_ID(0);
+		}
+
+		if(importDataMigration.getJP_Line_Activity_ID() > 0)
+		{
+			dataMigrationLine.setC_Activity_ID(importDataMigration.getJP_Line_Activity_ID());
+		}else {
+			dataMigrationLine.setC_Activity_ID(0);
+		}
+
+		if(importDataMigration.getJP_Line_Campaign_ID() > 0)
+		{
+			dataMigrationLine.setC_Campaign_ID(importDataMigration.getJP_Line_Campaign_ID());
+		}else {
+			dataMigrationLine.setC_Campaign_ID(0);
+		}
+
+		if(importDataMigration.getJP_Line_User1_ID() > 0)
+		{
+			dataMigrationLine.setUser1_ID(importDataMigration.getJP_Line_User1_ID());
+		}else {
+			dataMigrationLine.setUser1_ID(0);
+		}
+
+		if(importDataMigration.getJP_Line_User2_ID() > 0)
+		{
+			dataMigrationLine.setUser2_ID(importDataMigration.getJP_Line_User2_ID());
+		}else {
+			dataMigrationLine.setUser2_ID(0);
+		}
 
 		ModelValidationEngine.get().fireImportValidate(this, importDataMigration, dataMigrationLine, ImportValidator.TIMING_AFTER_IMPORT);
 

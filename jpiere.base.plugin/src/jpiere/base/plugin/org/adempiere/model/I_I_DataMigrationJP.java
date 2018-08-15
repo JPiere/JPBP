@@ -314,6 +314,19 @@ public interface I_I_DataMigrationJP
 	  */
 	public Timestamp getDateDoc();
 
+    /** Column name DeliveryRule */
+    public static final String COLUMNNAME_DeliveryRule = "DeliveryRule";
+
+	/** Set Delivery Rule.
+	  * Defines the timing of Delivery
+	  */
+	public void setDeliveryRule (String DeliveryRule);
+
+	/** Get Delivery Rule.
+	  * Defines the timing of Delivery
+	  */
+	public String getDeliveryRule();
+
     /** Column name DeliveryViaRule */
     public static final String COLUMNNAME_DeliveryViaRule = "DeliveryViaRule";
 
@@ -533,6 +546,19 @@ public interface I_I_DataMigrationJP
 	  */
 	public boolean isActive();
 
+    /** Column name IsDropShip */
+    public static final String COLUMNNAME_IsDropShip = "IsDropShip";
+
+	/** Set Drop Shipment.
+	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public void setIsDropShip (boolean IsDropShip);
+
+	/** Get Drop Shipment.
+	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public boolean isDropShip();
+
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
 
@@ -711,6 +737,132 @@ public interface I_I_DataMigrationJP
 
 	/** Get Invoice Document No	  */
 	public String getJP_Invoice_DocumentNo();
+
+    /** Column name JP_Line_Activity_ID */
+    public static final String COLUMNNAME_JP_Line_Activity_ID = "JP_Line_Activity_ID";
+
+	/** Set Activity of Line	  */
+	public void setJP_Line_Activity_ID (int JP_Line_Activity_ID);
+
+	/** Get Activity of Line	  */
+	public int getJP_Line_Activity_ID();
+
+	public org.compiere.model.I_C_Activity getJP_Line_Activity() throws RuntimeException;
+
+    /** Column name JP_Line_Activity_Value */
+    public static final String COLUMNNAME_JP_Line_Activity_Value = "JP_Line_Activity_Value";
+
+	/** Set Activity of Line(Search Key)	  */
+	public void setJP_Line_Activity_Value (String JP_Line_Activity_Value);
+
+	/** Get Activity of Line(Search Key)	  */
+	public String getJP_Line_Activity_Value();
+
+    /** Column name JP_Line_Campaign_ID */
+    public static final String COLUMNNAME_JP_Line_Campaign_ID = "JP_Line_Campaign_ID";
+
+	/** Set Campaign of Line	  */
+	public void setJP_Line_Campaign_ID (int JP_Line_Campaign_ID);
+
+	/** Get Campaign of Line	  */
+	public int getJP_Line_Campaign_ID();
+
+	public org.compiere.model.I_C_Campaign getJP_Line_Campaign() throws RuntimeException;
+
+    /** Column name JP_Line_Campaign_Value */
+    public static final String COLUMNNAME_JP_Line_Campaign_Value = "JP_Line_Campaign_Value";
+
+	/** Set Campaign of Line(Search Key)	  */
+	public void setJP_Line_Campaign_Value (String JP_Line_Campaign_Value);
+
+	/** Get Campaign of Line(Search Key)	  */
+	public String getJP_Line_Campaign_Value();
+
+    /** Column name JP_Line_OrgTrx_ID */
+    public static final String COLUMNNAME_JP_Line_OrgTrx_ID = "JP_Line_OrgTrx_ID";
+
+	/** Set Trx Org of Line	  */
+	public void setJP_Line_OrgTrx_ID (int JP_Line_OrgTrx_ID);
+
+	/** Get Trx Org of Line	  */
+	public int getJP_Line_OrgTrx_ID();
+
+    /** Column name JP_Line_OrgTrx_Value */
+    public static final String COLUMNNAME_JP_Line_OrgTrx_Value = "JP_Line_OrgTrx_Value";
+
+	/** Set Trx Org of Line(Search Key)	  */
+	public void setJP_Line_OrgTrx_Value (String JP_Line_OrgTrx_Value);
+
+	/** Get Trx Org of Line(Search Key)	  */
+	public String getJP_Line_OrgTrx_Value();
+
+    /** Column name JP_Line_Project_ID */
+    public static final String COLUMNNAME_JP_Line_Project_ID = "JP_Line_Project_ID";
+
+	/** Set Project of Line	  */
+	public void setJP_Line_Project_ID (int JP_Line_Project_ID);
+
+	/** Get Project of Line	  */
+	public int getJP_Line_Project_ID();
+
+	public org.compiere.model.I_C_Project getJP_Line_Project() throws RuntimeException;
+
+    /** Column name JP_Line_Project_Value */
+    public static final String COLUMNNAME_JP_Line_Project_Value = "JP_Line_Project_Value";
+
+	/** Set Project of Line(Search Key)	  */
+	public void setJP_Line_Project_Value (String JP_Line_Project_Value);
+
+	/** Get Project of Line(Search Key)	  */
+	public String getJP_Line_Project_Value();
+
+    /** Column name JP_Line_User1_ID */
+    public static final String COLUMNNAME_JP_Line_User1_ID = "JP_Line_User1_ID";
+
+	/** Set User Element List 1 of Line.
+	  * User defined list element #1
+	  */
+	public void setJP_Line_User1_ID (int JP_Line_User1_ID);
+
+	/** Get User Element List 1 of Line.
+	  * User defined list element #1
+	  */
+	public int getJP_Line_User1_ID();
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User1() throws RuntimeException;
+
+    /** Column name JP_Line_User2_ID */
+    public static final String COLUMNNAME_JP_Line_User2_ID = "JP_Line_User2_ID";
+
+	/** Set User Element List 2 of Line.
+	  * User defined list element #2
+	  */
+	public void setJP_Line_User2_ID (int JP_Line_User2_ID);
+
+	/** Get User Element List 2 of Line.
+	  * User defined list element #2
+	  */
+	public int getJP_Line_User2_ID();
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User2() throws RuntimeException;
+
+    /** Column name JP_Line_UserElement1_Value */
+    public static final String COLUMNNAME_JP_Line_UserElement1_Value = "JP_Line_UserElement1_Value";
+
+	/** Set User Element List 1 of Line(Search key)	  */
+	public void setJP_Line_UserElement1_Value (String JP_Line_UserElement1_Value);
+
+	/** Get User Element List 1 of Line(Search key)	  */
+	public String getJP_Line_UserElement1_Value();
+
+    /** Column name JP_Line_UserElement2_Value */
+    public static final String COLUMNNAME_JP_Line_UserElement2_Value = "JP_Line_UserElement2_Value";
+
+	/** Set User Element List 2 of Line(Search key)	  */
+	public void setJP_Line_UserElement2_Value (String JP_Line_UserElement2_Value);
+
+	/** Get User Element List 2 of Line(Search key)	  */
+	public String getJP_Line_UserElement2_Value();
 
     /** Column name JP_Link_Order_DocumentNo */
     public static final String COLUMNNAME_JP_Link_Order_DocumentNo = "JP_Link_Order_DocumentNo";
@@ -1159,6 +1311,19 @@ public interface I_I_DataMigrationJP
 	  * Price
 	  */
 	public BigDecimal getPrice();
+
+    /** Column name PriorityRule */
+    public static final String COLUMNNAME_PriorityRule = "PriorityRule";
+
+	/** Set Priority.
+	  * Priority of a document
+	  */
+	public void setPriorityRule (String PriorityRule);
+
+	/** Get Priority.
+	  * Priority of a document
+	  */
+	public String getPriorityRule();
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
