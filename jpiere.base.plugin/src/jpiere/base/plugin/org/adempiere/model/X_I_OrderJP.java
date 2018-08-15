@@ -33,7 +33,7 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180728L;
+	private static final long serialVersionUID = 20180815L;
 
     /** Standard Constructor */
     public X_I_OrderJP (Properties ctx, int I_OrderJP_ID, String trxName)
@@ -1646,6 +1646,241 @@ public class X_I_OrderJP extends PO implements I_I_OrderJP, I_Persistent
 	public String getJP_DropShip_User_Value () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_DropShip_User_Value);
+	}
+
+	public org.compiere.model.I_C_Activity getJP_Line_Activity() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
+			.getPO(getJP_Line_Activity_ID(), get_TrxName());	}
+
+	/** Set Activity of Line.
+		@param JP_Line_Activity_ID Activity of Line	  */
+	public void setJP_Line_Activity_ID (int JP_Line_Activity_ID)
+	{
+		if (JP_Line_Activity_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_Activity_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_Activity_ID, Integer.valueOf(JP_Line_Activity_ID));
+	}
+
+	/** Get Activity of Line.
+		@return Activity of Line	  */
+	public int getJP_Line_Activity_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_Activity_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Activity of Line(Search Key).
+		@param JP_Line_Activity_Value Activity of Line(Search Key)	  */
+	public void setJP_Line_Activity_Value (String JP_Line_Activity_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_Activity_Value, JP_Line_Activity_Value);
+	}
+
+	/** Get Activity of Line(Search Key).
+		@return Activity of Line(Search Key)	  */
+	public String getJP_Line_Activity_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_Activity_Value);
+	}
+
+	public org.compiere.model.I_C_Campaign getJP_Line_Campaign() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_Name)
+			.getPO(getJP_Line_Campaign_ID(), get_TrxName());	}
+
+	/** Set Campaign of Line.
+		@param JP_Line_Campaign_ID Campaign of Line	  */
+	public void setJP_Line_Campaign_ID (int JP_Line_Campaign_ID)
+	{
+		if (JP_Line_Campaign_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_Campaign_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_Campaign_ID, Integer.valueOf(JP_Line_Campaign_ID));
+	}
+
+	/** Get Campaign of Line.
+		@return Campaign of Line	  */
+	public int getJP_Line_Campaign_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_Campaign_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Campaign of Line(Search Key).
+		@param JP_Line_Campaign_Value Campaign of Line(Search Key)	  */
+	public void setJP_Line_Campaign_Value (String JP_Line_Campaign_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_Campaign_Value, JP_Line_Campaign_Value);
+	}
+
+	/** Get Campaign of Line(Search Key).
+		@return Campaign of Line(Search Key)	  */
+	public String getJP_Line_Campaign_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_Campaign_Value);
+	}
+
+	/** Set Trx Org of Line.
+		@param JP_Line_OrgTrx_ID Trx Org of Line	  */
+	public void setJP_Line_OrgTrx_ID (int JP_Line_OrgTrx_ID)
+	{
+		if (JP_Line_OrgTrx_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_OrgTrx_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_OrgTrx_ID, Integer.valueOf(JP_Line_OrgTrx_ID));
+	}
+
+	/** Get Trx Org of Line.
+		@return Trx Org of Line	  */
+	public int getJP_Line_OrgTrx_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_OrgTrx_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Trx Org of Line(Search Key).
+		@param JP_Line_OrgTrx_Value Trx Org of Line(Search Key)	  */
+	public void setJP_Line_OrgTrx_Value (String JP_Line_OrgTrx_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_OrgTrx_Value, JP_Line_OrgTrx_Value);
+	}
+
+	/** Get Trx Org of Line(Search Key).
+		@return Trx Org of Line(Search Key)	  */
+	public String getJP_Line_OrgTrx_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_OrgTrx_Value);
+	}
+
+	public org.compiere.model.I_C_Project getJP_Line_Project() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
+			.getPO(getJP_Line_Project_ID(), get_TrxName());	}
+
+	/** Set Project of Line.
+		@param JP_Line_Project_ID Project of Line	  */
+	public void setJP_Line_Project_ID (int JP_Line_Project_ID)
+	{
+		if (JP_Line_Project_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_Project_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_Project_ID, Integer.valueOf(JP_Line_Project_ID));
+	}
+
+	/** Get Project of Line.
+		@return Project of Line	  */
+	public int getJP_Line_Project_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_Project_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Project of Line(Search Key).
+		@param JP_Line_Project_Value Project of Line(Search Key)	  */
+	public void setJP_Line_Project_Value (String JP_Line_Project_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_Project_Value, JP_Line_Project_Value);
+	}
+
+	/** Get Project of Line(Search Key).
+		@return Project of Line(Search Key)	  */
+	public String getJP_Line_Project_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_Project_Value);
+	}
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getJP_Line_User1_ID(), get_TrxName());	}
+
+	/** Set User Element List 1 of Line.
+		@param JP_Line_User1_ID 
+		User defined list element #1
+	  */
+	public void setJP_Line_User1_ID (int JP_Line_User1_ID)
+	{
+		if (JP_Line_User1_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_User1_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_User1_ID, Integer.valueOf(JP_Line_User1_ID));
+	}
+
+	/** Get User Element List 1 of Line.
+		@return User defined list element #1
+	  */
+	public int getJP_Line_User1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User2() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getJP_Line_User2_ID(), get_TrxName());	}
+
+	/** Set User Element List 2 of Line.
+		@param JP_Line_User2_ID 
+		User defined list element #2
+	  */
+	public void setJP_Line_User2_ID (int JP_Line_User2_ID)
+	{
+		if (JP_Line_User2_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_User2_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_User2_ID, Integer.valueOf(JP_Line_User2_ID));
+	}
+
+	/** Get User Element List 2 of Line.
+		@return User defined list element #2
+	  */
+	public int getJP_Line_User2_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_User2_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set User Element List 1 of Line(Search key).
+		@param JP_Line_UserElement1_Value User Element List 1 of Line(Search key)	  */
+	public void setJP_Line_UserElement1_Value (String JP_Line_UserElement1_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_UserElement1_Value, JP_Line_UserElement1_Value);
+	}
+
+	/** Get User Element List 1 of Line(Search key).
+		@return User Element List 1 of Line(Search key)	  */
+	public String getJP_Line_UserElement1_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_UserElement1_Value);
+	}
+
+	/** Set User Element List 2 of Line(Search key).
+		@param JP_Line_UserElement2_Value User Element List 2 of Line(Search key)	  */
+	public void setJP_Line_UserElement2_Value (String JP_Line_UserElement2_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_UserElement2_Value, JP_Line_UserElement2_Value);
+	}
+
+	/** Get User Element List 2 of Line(Search key).
+		@return User Element List 2 of Line(Search key)	  */
+	public String getJP_Line_UserElement2_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_UserElement2_Value);
 	}
 
 	/** Set Location Label.

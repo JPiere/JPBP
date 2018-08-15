@@ -996,6 +996,132 @@ public interface I_I_OrderJP
 	/** Get Drop Shipment Contact(Search Key)	  */
 	public String getJP_DropShip_User_Value();
 
+    /** Column name JP_Line_Activity_ID */
+    public static final String COLUMNNAME_JP_Line_Activity_ID = "JP_Line_Activity_ID";
+
+	/** Set Activity of Line	  */
+	public void setJP_Line_Activity_ID (int JP_Line_Activity_ID);
+
+	/** Get Activity of Line	  */
+	public int getJP_Line_Activity_ID();
+
+	public org.compiere.model.I_C_Activity getJP_Line_Activity() throws RuntimeException;
+
+    /** Column name JP_Line_Activity_Value */
+    public static final String COLUMNNAME_JP_Line_Activity_Value = "JP_Line_Activity_Value";
+
+	/** Set Activity of Line(Search Key)	  */
+	public void setJP_Line_Activity_Value (String JP_Line_Activity_Value);
+
+	/** Get Activity of Line(Search Key)	  */
+	public String getJP_Line_Activity_Value();
+
+    /** Column name JP_Line_Campaign_ID */
+    public static final String COLUMNNAME_JP_Line_Campaign_ID = "JP_Line_Campaign_ID";
+
+	/** Set Campaign of Line	  */
+	public void setJP_Line_Campaign_ID (int JP_Line_Campaign_ID);
+
+	/** Get Campaign of Line	  */
+	public int getJP_Line_Campaign_ID();
+
+	public org.compiere.model.I_C_Campaign getJP_Line_Campaign() throws RuntimeException;
+
+    /** Column name JP_Line_Campaign_Value */
+    public static final String COLUMNNAME_JP_Line_Campaign_Value = "JP_Line_Campaign_Value";
+
+	/** Set Campaign of Line(Search Key)	  */
+	public void setJP_Line_Campaign_Value (String JP_Line_Campaign_Value);
+
+	/** Get Campaign of Line(Search Key)	  */
+	public String getJP_Line_Campaign_Value();
+
+    /** Column name JP_Line_OrgTrx_ID */
+    public static final String COLUMNNAME_JP_Line_OrgTrx_ID = "JP_Line_OrgTrx_ID";
+
+	/** Set Trx Org of Line	  */
+	public void setJP_Line_OrgTrx_ID (int JP_Line_OrgTrx_ID);
+
+	/** Get Trx Org of Line	  */
+	public int getJP_Line_OrgTrx_ID();
+
+    /** Column name JP_Line_OrgTrx_Value */
+    public static final String COLUMNNAME_JP_Line_OrgTrx_Value = "JP_Line_OrgTrx_Value";
+
+	/** Set Trx Org of Line(Search Key)	  */
+	public void setJP_Line_OrgTrx_Value (String JP_Line_OrgTrx_Value);
+
+	/** Get Trx Org of Line(Search Key)	  */
+	public String getJP_Line_OrgTrx_Value();
+
+    /** Column name JP_Line_Project_ID */
+    public static final String COLUMNNAME_JP_Line_Project_ID = "JP_Line_Project_ID";
+
+	/** Set Project of Line	  */
+	public void setJP_Line_Project_ID (int JP_Line_Project_ID);
+
+	/** Get Project of Line	  */
+	public int getJP_Line_Project_ID();
+
+	public org.compiere.model.I_C_Project getJP_Line_Project() throws RuntimeException;
+
+    /** Column name JP_Line_Project_Value */
+    public static final String COLUMNNAME_JP_Line_Project_Value = "JP_Line_Project_Value";
+
+	/** Set Project of Line(Search Key)	  */
+	public void setJP_Line_Project_Value (String JP_Line_Project_Value);
+
+	/** Get Project of Line(Search Key)	  */
+	public String getJP_Line_Project_Value();
+
+    /** Column name JP_Line_User1_ID */
+    public static final String COLUMNNAME_JP_Line_User1_ID = "JP_Line_User1_ID";
+
+	/** Set User Element List 1 of Line.
+	  * User defined list element #1
+	  */
+	public void setJP_Line_User1_ID (int JP_Line_User1_ID);
+
+	/** Get User Element List 1 of Line.
+	  * User defined list element #1
+	  */
+	public int getJP_Line_User1_ID();
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User1() throws RuntimeException;
+
+    /** Column name JP_Line_User2_ID */
+    public static final String COLUMNNAME_JP_Line_User2_ID = "JP_Line_User2_ID";
+
+	/** Set User Element List 2 of Line.
+	  * User defined list element #2
+	  */
+	public void setJP_Line_User2_ID (int JP_Line_User2_ID);
+
+	/** Get User Element List 2 of Line.
+	  * User defined list element #2
+	  */
+	public int getJP_Line_User2_ID();
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User2() throws RuntimeException;
+
+    /** Column name JP_Line_UserElement1_Value */
+    public static final String COLUMNNAME_JP_Line_UserElement1_Value = "JP_Line_UserElement1_Value";
+
+	/** Set User Element List 1 of Line(Search key)	  */
+	public void setJP_Line_UserElement1_Value (String JP_Line_UserElement1_Value);
+
+	/** Get User Element List 1 of Line(Search key)	  */
+	public String getJP_Line_UserElement1_Value();
+
+    /** Column name JP_Line_UserElement2_Value */
+    public static final String COLUMNNAME_JP_Line_UserElement2_Value = "JP_Line_UserElement2_Value";
+
+	/** Set User Element List 2 of Line(Search key)	  */
+	public void setJP_Line_UserElement2_Value (String JP_Line_UserElement2_Value);
+
+	/** Get User Element List 2 of Line(Search key)	  */
+	public String getJP_Line_UserElement2_Value();
+
     /** Column name JP_Location_Label */
     public static final String COLUMNNAME_JP_Location_Label = "JP_Location_Label";
 
