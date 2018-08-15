@@ -33,7 +33,7 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180804L;
+	private static final long serialVersionUID = 20180815L;
 
     /** Standard Constructor */
     public X_I_DataMigrationJP (Properties ctx, int I_DataMigrationJP_ID, String trxName)
@@ -42,7 +42,6 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
       /** if (I_DataMigrationJP_ID == 0)
         {
 			setI_DataMigrationJP_ID (0);
-			setJP_DataMigration_Identifier (null);
         } */
     }
 
@@ -137,9 +136,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setAD_User_ID (int AD_User_ID)
 	{
 		if (AD_User_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_AD_User_ID, null);
+			set_Value (COLUMNNAME_AD_User_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
+			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
 	}
 
 	/** Get User/Contact.
@@ -165,9 +164,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_Activity_ID (int C_Activity_ID)
 	{
 		if (C_Activity_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Activity_ID, null);
+			set_Value (COLUMNNAME_C_Activity_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
+			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
 	/** Get Activity.
@@ -193,9 +192,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
 		if (C_BPartner_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
 	/** Get Business Partner .
@@ -221,9 +220,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID)
 	{
 		if (C_BPartner_Location_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_Location_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_Location_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
+			set_Value (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
 	}
 
 	/** Get Partner Location.
@@ -277,9 +276,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_Campaign_ID (int C_Campaign_ID)
 	{
 		if (C_Campaign_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Campaign_ID, null);
+			set_Value (COLUMNNAME_C_Campaign_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
+			set_Value (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
 	}
 
 	/** Get Campaign.
@@ -305,9 +304,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_Charge_ID (int C_Charge_ID)
 	{
 		if (C_Charge_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
+			set_Value (COLUMNNAME_C_Charge_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
+			set_Value (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
 	}
 
 	/** Get Charge.
@@ -361,9 +360,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_PaymentTerm_ID (int C_PaymentTerm_ID)
 	{
 		if (C_PaymentTerm_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_PaymentTerm_ID, null);
+			set_Value (COLUMNNAME_C_PaymentTerm_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_PaymentTerm_ID, Integer.valueOf(C_PaymentTerm_ID));
+			set_Value (COLUMNNAME_C_PaymentTerm_ID, Integer.valueOf(C_PaymentTerm_ID));
 	}
 
 	/** Get Payment Term.
@@ -389,9 +388,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_Project_ID (int C_Project_ID)
 	{
 		if (C_Project_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
+			set_Value (COLUMNNAME_C_Project_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
 	}
 
 	/** Get Project.
@@ -445,9 +444,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setC_UOM_ID (int C_UOM_ID)
 	{
 		if (C_UOM_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
+			set_Value (COLUMNNAME_C_UOM_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
+			set_Value (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
 	}
 
 	/** Get UOM.
@@ -498,6 +497,38 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 		return (Timestamp)get_Value(COLUMNNAME_DateDoc);
 	}
 
+	/** DeliveryRule AD_Reference_ID=151 */
+	public static final int DELIVERYRULE_AD_Reference_ID=151;
+	/** After Receipt = R */
+	public static final String DELIVERYRULE_AfterReceipt = "R";
+	/** Availability = A */
+	public static final String DELIVERYRULE_Availability = "A";
+	/** Complete Line = L */
+	public static final String DELIVERYRULE_CompleteLine = "L";
+	/** Complete Order = O */
+	public static final String DELIVERYRULE_CompleteOrder = "O";
+	/** Force = F */
+	public static final String DELIVERYRULE_Force = "F";
+	/** Manual = M */
+	public static final String DELIVERYRULE_Manual = "M";
+	/** Set Delivery Rule.
+		@param DeliveryRule 
+		Defines the timing of Delivery
+	  */
+	public void setDeliveryRule (String DeliveryRule)
+	{
+
+		set_Value (COLUMNNAME_DeliveryRule, DeliveryRule);
+	}
+
+	/** Get Delivery Rule.
+		@return Defines the timing of Delivery
+	  */
+	public String getDeliveryRule () 
+	{
+		return (String)get_Value(COLUMNNAME_DeliveryRule);
+	}
+
 	/** DeliveryViaRule AD_Reference_ID=152 */
 	public static final int DELIVERYVIARULE_AD_Reference_ID=152;
 	/** Pickup = P */
@@ -513,7 +544,7 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setDeliveryViaRule (String DeliveryViaRule)
 	{
 
-		set_ValueNoCheck (COLUMNNAME_DeliveryViaRule, DeliveryViaRule);
+		set_Value (COLUMNNAME_DeliveryViaRule, DeliveryViaRule);
 	}
 
 	/** Get Delivery Via.
@@ -673,7 +704,7 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	  */
 	public void setDocumentNo (String DocumentNo)
 	{
-		set_ValueNoCheck (COLUMNNAME_DocumentNo, DocumentNo);
+		set_Value (COLUMNNAME_DocumentNo, DocumentNo);
 	}
 
 	/** Get Document No.
@@ -696,9 +727,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setDropShip_BPartner_ID (int DropShip_BPartner_ID)
 	{
 		if (DropShip_BPartner_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_DropShip_BPartner_ID, null);
+			set_Value (COLUMNNAME_DropShip_BPartner_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_DropShip_BPartner_ID, Integer.valueOf(DropShip_BPartner_ID));
+			set_Value (COLUMNNAME_DropShip_BPartner_ID, Integer.valueOf(DropShip_BPartner_ID));
 	}
 
 	/** Get Drop Ship Business Partner.
@@ -724,9 +755,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setDropShip_Location_ID (int DropShip_Location_ID)
 	{
 		if (DropShip_Location_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_DropShip_Location_ID, null);
+			set_Value (COLUMNNAME_DropShip_Location_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_DropShip_Location_ID, Integer.valueOf(DropShip_Location_ID));
+			set_Value (COLUMNNAME_DropShip_Location_ID, Integer.valueOf(DropShip_Location_ID));
 	}
 
 	/** Get Drop Shipment Location.
@@ -752,9 +783,9 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public void setDropShip_User_ID (int DropShip_User_ID)
 	{
 		if (DropShip_User_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_DropShip_User_ID, null);
+			set_Value (COLUMNNAME_DropShip_User_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_DropShip_User_ID, Integer.valueOf(DropShip_User_ID));
+			set_Value (COLUMNNAME_DropShip_User_ID, Integer.valueOf(DropShip_User_ID));
 	}
 
 	/** Get Drop Shipment Contact.
@@ -931,13 +962,37 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 		return bd;
 	}
 
+	/** Set Drop Shipment.
+		@param IsDropShip 
+		Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public void setIsDropShip (boolean IsDropShip)
+	{
+		set_Value (COLUMNNAME_IsDropShip, Boolean.valueOf(IsDropShip));
+	}
+
+	/** Get Drop Shipment.
+		@return Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public boolean isDropShip () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsDropShip);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Sales Transaction.
 		@param IsSOTrx 
 		This is a Sales Transaction
 	  */
 	public void setIsSOTrx (boolean IsSOTrx)
 	{
-		set_ValueNoCheck (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+		set_Value (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
 	}
 
 	/** Get Sales Transaction.
@@ -1254,6 +1309,241 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public String getJP_Invoice_DocumentNo () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Invoice_DocumentNo);
+	}
+
+	public org.compiere.model.I_C_Activity getJP_Line_Activity() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
+			.getPO(getJP_Line_Activity_ID(), get_TrxName());	}
+
+	/** Set Activity of Line.
+		@param JP_Line_Activity_ID Activity of Line	  */
+	public void setJP_Line_Activity_ID (int JP_Line_Activity_ID)
+	{
+		if (JP_Line_Activity_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_Activity_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_Activity_ID, Integer.valueOf(JP_Line_Activity_ID));
+	}
+
+	/** Get Activity of Line.
+		@return Activity of Line	  */
+	public int getJP_Line_Activity_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_Activity_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Activity of Line(Search Key).
+		@param JP_Line_Activity_Value Activity of Line(Search Key)	  */
+	public void setJP_Line_Activity_Value (String JP_Line_Activity_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_Activity_Value, JP_Line_Activity_Value);
+	}
+
+	/** Get Activity of Line(Search Key).
+		@return Activity of Line(Search Key)	  */
+	public String getJP_Line_Activity_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_Activity_Value);
+	}
+
+	public org.compiere.model.I_C_Campaign getJP_Line_Campaign() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_Name)
+			.getPO(getJP_Line_Campaign_ID(), get_TrxName());	}
+
+	/** Set Campaign of Line.
+		@param JP_Line_Campaign_ID Campaign of Line	  */
+	public void setJP_Line_Campaign_ID (int JP_Line_Campaign_ID)
+	{
+		if (JP_Line_Campaign_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_Campaign_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_Campaign_ID, Integer.valueOf(JP_Line_Campaign_ID));
+	}
+
+	/** Get Campaign of Line.
+		@return Campaign of Line	  */
+	public int getJP_Line_Campaign_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_Campaign_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Campaign of Line(Search Key).
+		@param JP_Line_Campaign_Value Campaign of Line(Search Key)	  */
+	public void setJP_Line_Campaign_Value (String JP_Line_Campaign_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_Campaign_Value, JP_Line_Campaign_Value);
+	}
+
+	/** Get Campaign of Line(Search Key).
+		@return Campaign of Line(Search Key)	  */
+	public String getJP_Line_Campaign_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_Campaign_Value);
+	}
+
+	/** Set Trx Org of Line.
+		@param JP_Line_OrgTrx_ID Trx Org of Line	  */
+	public void setJP_Line_OrgTrx_ID (int JP_Line_OrgTrx_ID)
+	{
+		if (JP_Line_OrgTrx_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_OrgTrx_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_OrgTrx_ID, Integer.valueOf(JP_Line_OrgTrx_ID));
+	}
+
+	/** Get Trx Org of Line.
+		@return Trx Org of Line	  */
+	public int getJP_Line_OrgTrx_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_OrgTrx_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Trx Org of Line(Search Key).
+		@param JP_Line_OrgTrx_Value Trx Org of Line(Search Key)	  */
+	public void setJP_Line_OrgTrx_Value (String JP_Line_OrgTrx_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_OrgTrx_Value, JP_Line_OrgTrx_Value);
+	}
+
+	/** Get Trx Org of Line(Search Key).
+		@return Trx Org of Line(Search Key)	  */
+	public String getJP_Line_OrgTrx_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_OrgTrx_Value);
+	}
+
+	public org.compiere.model.I_C_Project getJP_Line_Project() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
+			.getPO(getJP_Line_Project_ID(), get_TrxName());	}
+
+	/** Set Project of Line.
+		@param JP_Line_Project_ID Project of Line	  */
+	public void setJP_Line_Project_ID (int JP_Line_Project_ID)
+	{
+		if (JP_Line_Project_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_Project_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_Project_ID, Integer.valueOf(JP_Line_Project_ID));
+	}
+
+	/** Get Project of Line.
+		@return Project of Line	  */
+	public int getJP_Line_Project_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_Project_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Project of Line(Search Key).
+		@param JP_Line_Project_Value Project of Line(Search Key)	  */
+	public void setJP_Line_Project_Value (String JP_Line_Project_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_Project_Value, JP_Line_Project_Value);
+	}
+
+	/** Get Project of Line(Search Key).
+		@return Project of Line(Search Key)	  */
+	public String getJP_Line_Project_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_Project_Value);
+	}
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getJP_Line_User1_ID(), get_TrxName());	}
+
+	/** Set User Element List 1 of Line.
+		@param JP_Line_User1_ID 
+		User defined list element #1
+	  */
+	public void setJP_Line_User1_ID (int JP_Line_User1_ID)
+	{
+		if (JP_Line_User1_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_User1_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_User1_ID, Integer.valueOf(JP_Line_User1_ID));
+	}
+
+	/** Get User Element List 1 of Line.
+		@return User defined list element #1
+	  */
+	public int getJP_Line_User1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ElementValue getJP_Line_User2() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getJP_Line_User2_ID(), get_TrxName());	}
+
+	/** Set User Element List 2 of Line.
+		@param JP_Line_User2_ID 
+		User defined list element #2
+	  */
+	public void setJP_Line_User2_ID (int JP_Line_User2_ID)
+	{
+		if (JP_Line_User2_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_User2_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_User2_ID, Integer.valueOf(JP_Line_User2_ID));
+	}
+
+	/** Get User Element List 2 of Line.
+		@return User defined list element #2
+	  */
+	public int getJP_Line_User2_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_User2_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set User Element List 1 of Line(Search key).
+		@param JP_Line_UserElement1_Value User Element List 1 of Line(Search key)	  */
+	public void setJP_Line_UserElement1_Value (String JP_Line_UserElement1_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_UserElement1_Value, JP_Line_UserElement1_Value);
+	}
+
+	/** Get User Element List 1 of Line(Search key).
+		@return User Element List 1 of Line(Search key)	  */
+	public String getJP_Line_UserElement1_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_UserElement1_Value);
+	}
+
+	/** Set User Element List 2 of Line(Search key).
+		@param JP_Line_UserElement2_Value User Element List 2 of Line(Search key)	  */
+	public void setJP_Line_UserElement2_Value (String JP_Line_UserElement2_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_UserElement2_Value, JP_Line_UserElement2_Value);
+	}
+
+	/** Get User Element List 2 of Line(Search key).
+		@return User Element List 2 of Line(Search key)	  */
+	public String getJP_Line_UserElement2_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_UserElement2_Value);
 	}
 
 	/** Set Linked Order Document No.
@@ -1599,7 +1889,7 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 		@param JP_User_Name User(Name)	  */
 	public void setJP_User_Name (String JP_User_Name)
 	{
-		set_ValueNoCheck (COLUMNNAME_JP_User_Name, JP_User_Name);
+		set_Value (COLUMNNAME_JP_User_Name, JP_User_Name);
 	}
 
 	/** Get User(Name).
@@ -1988,6 +2278,36 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** PriorityRule AD_Reference_ID=154 */
+	public static final int PRIORITYRULE_AD_Reference_ID=154;
+	/** High = 3 */
+	public static final String PRIORITYRULE_High = "3";
+	/** Medium = 5 */
+	public static final String PRIORITYRULE_Medium = "5";
+	/** Low = 7 */
+	public static final String PRIORITYRULE_Low = "7";
+	/** Urgent = 1 */
+	public static final String PRIORITYRULE_Urgent = "1";
+	/** Minor = 9 */
+	public static final String PRIORITYRULE_Minor = "9";
+	/** Set Priority.
+		@param PriorityRule 
+		Priority of a document
+	  */
+	public void setPriorityRule (String PriorityRule)
+	{
+
+		set_Value (COLUMNNAME_PriorityRule, PriorityRule);
+	}
+
+	/** Get Priority.
+		@return Priority of a document
+	  */
+	public String getPriorityRule () 
+	{
+		return (String)get_Value(COLUMNNAME_PriorityRule);
 	}
 
 	/** Set Processed.
