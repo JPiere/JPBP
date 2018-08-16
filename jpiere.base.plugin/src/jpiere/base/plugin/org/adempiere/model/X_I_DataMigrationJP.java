@@ -867,6 +867,23 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 		return bd;
 	}
 
+	/** Set ISO Currency Code.
+		@param ISO_Code 
+		Three letter ISO 4217 Code of the Currency
+	  */
+	public void setISO_Code (String ISO_Code)
+	{
+		set_Value (COLUMNNAME_ISO_Code, ISO_Code);
+	}
+
+	/** Get ISO Currency Code.
+		@return Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code () 
+	{
+		return (String)get_Value(COLUMNNAME_ISO_Code);
+	}
+
 	/** Set I_DataMigrationJP.
 		@param I_DataMigrationJP_ID I_DataMigrationJP	  */
 	public void setI_DataMigrationJP_ID (int I_DataMigrationJP_ID)
@@ -1350,6 +1367,45 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 		return (String)get_Value(COLUMNNAME_JP_Line_Activity_Value);
 	}
 
+	public org.compiere.model.I_C_BPartner getJP_Line_BPartner() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
+			.getPO(getJP_Line_BPartner_ID(), get_TrxName());	}
+
+	/** Set Business Partner of Line.
+		@param JP_Line_BPartner_ID Business Partner of Line	  */
+	public void setJP_Line_BPartner_ID (int JP_Line_BPartner_ID)
+	{
+		if (JP_Line_BPartner_ID < 1) 
+			set_Value (COLUMNNAME_JP_Line_BPartner_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Line_BPartner_ID, Integer.valueOf(JP_Line_BPartner_ID));
+	}
+
+	/** Get Business Partner of Line.
+		@return Business Partner of Line	  */
+	public int getJP_Line_BPartner_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Line_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Business Partner of Line(Search Key).
+		@param JP_Line_BPartner_Value Business Partner of Line(Search Key)	  */
+	public void setJP_Line_BPartner_Value (String JP_Line_BPartner_Value)
+	{
+		set_Value (COLUMNNAME_JP_Line_BPartner_Value, JP_Line_BPartner_Value);
+	}
+
+	/** Get Business Partner of Line(Search Key).
+		@return Business Partner of Line(Search Key)	  */
+	public String getJP_Line_BPartner_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Line_BPartner_Value);
+	}
+
 	public org.compiere.model.I_C_Campaign getJP_Line_Campaign() throws RuntimeException
     {
 		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_Name)
@@ -1726,6 +1782,45 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public String getJP_Payment_DocumentNo () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Payment_DocumentNo);
+	}
+
+	public I_JP_PhysicalWarehouse getJP_PhysicalWarehouse() throws RuntimeException
+    {
+		return (I_JP_PhysicalWarehouse)MTable.get(getCtx(), I_JP_PhysicalWarehouse.Table_Name)
+			.getPO(getJP_PhysicalWarehouse_ID(), get_TrxName());	}
+
+	/** Set Physical Warehouse.
+		@param JP_PhysicalWarehouse_ID Physical Warehouse	  */
+	public void setJP_PhysicalWarehouse_ID (int JP_PhysicalWarehouse_ID)
+	{
+		if (JP_PhysicalWarehouse_ID < 1) 
+			set_Value (COLUMNNAME_JP_PhysicalWarehouse_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_PhysicalWarehouse_ID, Integer.valueOf(JP_PhysicalWarehouse_ID));
+	}
+
+	/** Get Physical Warehouse.
+		@return Physical Warehouse	  */
+	public int getJP_PhysicalWarehouse_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_PhysicalWarehouse_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Physical Warehouse(Search Key).
+		@param JP_PhysicalWarehouse_Value Physical Warehouse(Search Key)	  */
+	public void setJP_PhysicalWarehouse_Value (String JP_PhysicalWarehouse_Value)
+	{
+		set_Value (COLUMNNAME_JP_PhysicalWarehouse_Value, JP_PhysicalWarehouse_Value);
+	}
+
+	/** Get Physical Warehouse(Search Key).
+		@return Physical Warehouse(Search Key)	  */
+	public String getJP_PhysicalWarehouse_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_PhysicalWarehouse_Value);
 	}
 
 	/** Set Price List(Name).
@@ -2370,6 +2465,46 @@ public class X_I_DataMigrationJP extends PO implements I_I_DataMigrationJP, I_Pe
 	public BigDecimal getQty () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Qty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Quantity book.
+		@param QtyBook 
+		Book Quantity
+	  */
+	public void setQtyBook (BigDecimal QtyBook)
+	{
+		set_Value (COLUMNNAME_QtyBook, QtyBook);
+	}
+
+	/** Get Quantity book.
+		@return Book Quantity
+	  */
+	public BigDecimal getQtyBook () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyBook);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Quantity count.
+		@param QtyCount 
+		Counted Quantity
+	  */
+	public void setQtyCount (BigDecimal QtyCount)
+	{
+		set_Value (COLUMNNAME_QtyCount, QtyCount);
+	}
+
+	/** Get Quantity count.
+		@return Counted Quantity
+	  */
+	public BigDecimal getQtyCount () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyCount);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;

@@ -476,6 +476,19 @@ public interface I_I_DataMigrationJP
 	  */
 	public BigDecimal getGrandTotal();
 
+    /** Column name ISO_Code */
+    public static final String COLUMNNAME_ISO_Code = "ISO_Code";
+
+	/** Set ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public void setISO_Code (String ISO_Code);
+
+	/** Get ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code();
+
     /** Column name I_DataMigrationJP_ID */
     public static final String COLUMNNAME_I_DataMigrationJP_ID = "I_DataMigrationJP_ID";
 
@@ -758,6 +771,26 @@ public interface I_I_DataMigrationJP
 	/** Get Activity of Line(Search Key)	  */
 	public String getJP_Line_Activity_Value();
 
+    /** Column name JP_Line_BPartner_ID */
+    public static final String COLUMNNAME_JP_Line_BPartner_ID = "JP_Line_BPartner_ID";
+
+	/** Set Business Partner of Line	  */
+	public void setJP_Line_BPartner_ID (int JP_Line_BPartner_ID);
+
+	/** Get Business Partner of Line	  */
+	public int getJP_Line_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getJP_Line_BPartner() throws RuntimeException;
+
+    /** Column name JP_Line_BPartner_Value */
+    public static final String COLUMNNAME_JP_Line_BPartner_Value = "JP_Line_BPartner_Value";
+
+	/** Set Business Partner of Line(Search Key)	  */
+	public void setJP_Line_BPartner_Value (String JP_Line_BPartner_Value);
+
+	/** Get Business Partner of Line(Search Key)	  */
+	public String getJP_Line_BPartner_Value();
+
     /** Column name JP_Line_Campaign_ID */
     public static final String COLUMNNAME_JP_Line_Campaign_ID = "JP_Line_Campaign_ID";
 
@@ -974,6 +1007,26 @@ public interface I_I_DataMigrationJP
 
 	/** Get Payment Document No	  */
 	public String getJP_Payment_DocumentNo();
+
+    /** Column name JP_PhysicalWarehouse_ID */
+    public static final String COLUMNNAME_JP_PhysicalWarehouse_ID = "JP_PhysicalWarehouse_ID";
+
+	/** Set Physical Warehouse	  */
+	public void setJP_PhysicalWarehouse_ID (int JP_PhysicalWarehouse_ID);
+
+	/** Get Physical Warehouse	  */
+	public int getJP_PhysicalWarehouse_ID();
+
+	public I_JP_PhysicalWarehouse getJP_PhysicalWarehouse() throws RuntimeException;
+
+    /** Column name JP_PhysicalWarehouse_Value */
+    public static final String COLUMNNAME_JP_PhysicalWarehouse_Value = "JP_PhysicalWarehouse_Value";
+
+	/** Set Physical Warehouse(Search Key)	  */
+	public void setJP_PhysicalWarehouse_Value (String JP_PhysicalWarehouse_Value);
+
+	/** Get Physical Warehouse(Search Key)	  */
+	public String getJP_PhysicalWarehouse_Value();
 
     /** Column name JP_PriceList_Name */
     public static final String COLUMNNAME_JP_PriceList_Name = "JP_PriceList_Name";
@@ -1359,6 +1412,32 @@ public interface I_I_DataMigrationJP
 	  * Quantity
 	  */
 	public BigDecimal getQty();
+
+    /** Column name QtyBook */
+    public static final String COLUMNNAME_QtyBook = "QtyBook";
+
+	/** Set Quantity book.
+	  * Book Quantity
+	  */
+	public void setQtyBook (BigDecimal QtyBook);
+
+	/** Get Quantity book.
+	  * Book Quantity
+	  */
+	public BigDecimal getQtyBook();
+
+    /** Column name QtyCount */
+    public static final String COLUMNNAME_QtyCount = "QtyCount";
+
+	/** Set Quantity count.
+	  * Counted Quantity
+	  */
+	public void setQtyCount (BigDecimal QtyCount);
+
+	/** Get Quantity count.
+	  * Counted Quantity
+	  */
+	public BigDecimal getQtyCount();
 
     /** Column name SalesRep_ID */
     public static final String COLUMNNAME_SalesRep_ID = "SalesRep_ID";

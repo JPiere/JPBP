@@ -81,6 +81,11 @@ CREATE TABLE adempiere.JP_DataMigration
     Link_Order_ID numeric(10,0),
     JP_Ref_Order_DocumentNo character varying(30),
     Ref_Order_ID numeric(10,0),
+    
+    JP_PhysicalWarehouse_ID numeric(10,0) DEFAULT NULL::numeric,
+    DeliveryRule character(1) DEFAULT NULL::bpchar,
+    IsDropShip character(1) DEFAULT NULL::bpchar,
+    PriorityRule character(1) DEFAULT NULL::bpchar,
 
     CONSTRAINT JP_DataMigration_Pkey PRIMARY KEY (JP_DataMigration_ID)
 );

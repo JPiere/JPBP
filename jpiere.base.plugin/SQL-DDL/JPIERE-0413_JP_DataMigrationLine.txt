@@ -57,6 +57,9 @@ CREATE TABLE adempiere.JP_DataMigrationLine
     ChargeAmt  numeric,
     InterestAmt  numeric,
 
+    QtyCount numeric,
+    QtyBook numeric,
+    C_BPartner_ID numeric(10,0) DEFAULT NULL::numeric,
 
     CONSTRAINT JP_DataMigrationLine_Pkey PRIMARY KEY (JP_DataMigrationLine_ID)
 );

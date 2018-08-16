@@ -33,7 +33,7 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180804L;
+	private static final long serialVersionUID = 20180815L;
 
     /** Standard Constructor */
     public X_JP_DataMigration (Properties ctx, int JP_DataMigration_ID, String trxName)
@@ -377,9 +377,9 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_Payment getC_PaymentTerm() throws RuntimeException
+	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException
     {
-		return (org.compiere.model.I_C_Payment)MTable.get(getCtx(), org.compiere.model.I_C_Payment.Table_Name)
+		return (org.compiere.model.I_C_PaymentTerm)MTable.get(getCtx(), org.compiere.model.I_C_PaymentTerm.Table_Name)
 			.getPO(getC_PaymentTerm_ID(), get_TrxName());	}
 
 	/** Set Payment Term.
@@ -450,6 +450,38 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 		return (Timestamp)get_Value(COLUMNNAME_DateDoc);
 	}
 
+	/** DeliveryRule AD_Reference_ID=151 */
+	public static final int DELIVERYRULE_AD_Reference_ID=151;
+	/** After Receipt = R */
+	public static final String DELIVERYRULE_AfterReceipt = "R";
+	/** Availability = A */
+	public static final String DELIVERYRULE_Availability = "A";
+	/** Complete Line = L */
+	public static final String DELIVERYRULE_CompleteLine = "L";
+	/** Complete Order = O */
+	public static final String DELIVERYRULE_CompleteOrder = "O";
+	/** Force = F */
+	public static final String DELIVERYRULE_Force = "F";
+	/** Manual = M */
+	public static final String DELIVERYRULE_Manual = "M";
+	/** Set Delivery Rule.
+		@param DeliveryRule 
+		Defines the timing of Delivery
+	  */
+	public void setDeliveryRule (String DeliveryRule)
+	{
+
+		set_Value (COLUMNNAME_DeliveryRule, DeliveryRule);
+	}
+
+	/** Get Delivery Rule.
+		@return Defines the timing of Delivery
+	  */
+	public String getDeliveryRule () 
+	{
+		return (String)get_Value(COLUMNNAME_DeliveryRule);
+	}
+
 	/** DeliveryViaRule AD_Reference_ID=152 */
 	public static final int DELIVERYVIARULE_AD_Reference_ID=152;
 	/** Pickup = P */
@@ -465,7 +497,7 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 	public void setDeliveryViaRule (String DeliveryViaRule)
 	{
 
-		set_ValueNoCheck (COLUMNNAME_DeliveryViaRule, DeliveryViaRule);
+		set_Value (COLUMNNAME_DeliveryViaRule, DeliveryViaRule);
 	}
 
 	/** Get Delivery Via.
@@ -625,7 +657,7 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 	  */
 	public void setDocumentNo (String DocumentNo)
 	{
-		set_ValueNoCheck (COLUMNNAME_DocumentNo, DocumentNo);
+		set_Value (COLUMNNAME_DocumentNo, DocumentNo);
 	}
 
 	/** Get Document No.
@@ -816,6 +848,30 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 		return bd;
 	}
 
+	/** Set Drop Shipment.
+		@param IsDropShip 
+		Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public void setIsDropShip (boolean IsDropShip)
+	{
+		set_Value (COLUMNNAME_IsDropShip, Boolean.valueOf(IsDropShip));
+	}
+
+	/** Get Drop Shipment.
+		@return Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public boolean isDropShip () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsDropShip);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Sales Transaction.
 		@param IsSOTrx 
 		This is a Sales Transaction
@@ -969,6 +1025,31 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 	public String getJP_Order_DocumentNo () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Order_DocumentNo);
+	}
+
+	public I_JP_PhysicalWarehouse getJP_PhysicalWarehouse() throws RuntimeException
+    {
+		return (I_JP_PhysicalWarehouse)MTable.get(getCtx(), I_JP_PhysicalWarehouse.Table_Name)
+			.getPO(getJP_PhysicalWarehouse_ID(), get_TrxName());	}
+
+	/** Set Physical Warehouse.
+		@param JP_PhysicalWarehouse_ID Physical Warehouse	  */
+	public void setJP_PhysicalWarehouse_ID (int JP_PhysicalWarehouse_ID)
+	{
+		if (JP_PhysicalWarehouse_ID < 1) 
+			set_Value (COLUMNNAME_JP_PhysicalWarehouse_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_PhysicalWarehouse_ID, Integer.valueOf(JP_PhysicalWarehouse_ID));
+	}
+
+	/** Get Physical Warehouse.
+		@return Physical Warehouse	  */
+	public int getJP_PhysicalWarehouse_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_PhysicalWarehouse_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Ref Order Document No.
@@ -1259,6 +1340,36 @@ public class X_JP_DataMigration extends PO implements I_JP_DataMigration, I_Pers
 	public String getPaymentRule () 
 	{
 		return (String)get_Value(COLUMNNAME_PaymentRule);
+	}
+
+	/** PriorityRule AD_Reference_ID=154 */
+	public static final int PRIORITYRULE_AD_Reference_ID=154;
+	/** High = 3 */
+	public static final String PRIORITYRULE_High = "3";
+	/** Medium = 5 */
+	public static final String PRIORITYRULE_Medium = "5";
+	/** Low = 7 */
+	public static final String PRIORITYRULE_Low = "7";
+	/** Urgent = 1 */
+	public static final String PRIORITYRULE_Urgent = "1";
+	/** Minor = 9 */
+	public static final String PRIORITYRULE_Minor = "9";
+	/** Set Priority.
+		@param PriorityRule 
+		Priority of a document
+	  */
+	public void setPriorityRule (String PriorityRule)
+	{
+
+		set_Value (COLUMNNAME_PriorityRule, PriorityRule);
+	}
+
+	/** Get Priority.
+		@return Priority of a document
+	  */
+	public String getPriorityRule () 
+	{
+		return (String)get_Value(COLUMNNAME_PriorityRule);
 	}
 
 	public org.compiere.model.I_C_Order getRef_Order() throws RuntimeException

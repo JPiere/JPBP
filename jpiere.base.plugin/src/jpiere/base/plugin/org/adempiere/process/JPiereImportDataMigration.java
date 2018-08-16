@@ -373,6 +373,12 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		else
 			return message;
 
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Line_BPartner_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_Line_BPartner_ID())
+			commitEx();
+		else
+			return message;
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
@@ -840,6 +846,33 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			.append("SET C_BPartner_ID=(SELECT C_BPartner_ID FROM C_BPartner p")
 			.append(" WHERE i.JP_BPartner_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
 			.append("WHERE i.C_BPartner_ID IS NULL AND i.JP_BPartner_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
+		}
+
+		return true;
+
+	}
+
+	/**
+	 *
+	 * Reverse Lookup JP_Line_BPartner_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_Line_BPartner_ID()throws Exception
+	{
+		int no = 0;
+
+		//Reverse lookup JP_Line_BPartner_ID From JP_Line_BPartner_Value
+		StringBuilder  sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
+			.append("SET JP_Line_BPartner_ID=(SELECT C_BPartner_ID FROM C_BPartner p")
+			.append(" WHERE i.JP_Line_BPartner_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append("WHERE i.JP_Line_BPartner_ID IS NULL AND i.JP_Line_BPartner_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -2360,6 +2393,13 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			dataMigrationLine.setUser2_ID(importDataMigration.getJP_Line_User2_ID());
 		}else {
 			dataMigrationLine.setUser2_ID(0);
+		}
+
+		if(importDataMigration.getJP_Line_BPartner_ID() > 0)
+		{
+			dataMigrationLine.setC_BPartner_ID(importDataMigration.getJP_Line_BPartner_ID());
+		}else {
+			dataMigrationLine.setC_BPartner_ID(0);
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, importDataMigration, dataMigrationLine, ImportValidator.TIMING_AFTER_IMPORT);

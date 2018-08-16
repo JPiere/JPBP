@@ -166,6 +166,13 @@ CREATE TABLE adempiere.I_DataMigrationJP
     JP_Line_UserElement2_value character varying(40) DEFAULT NULL::character varying,
     PriorityRule character(1) DEFAULT NULL::bpchar,
     IsDropShip character(1) DEFAULT NULL::bpchar,
+    JP_PhysicalWarehouse_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_PhysicalWarehouse_Value character varying(40) DEFAULT NULL::character varying,
+    QtyCount numeric,
+    QtyBook numeric,
+    ISO_Code character varying(3) DEFAULT NULL::character varying,
+    JP_Line_BPartner_Value character varying(40) DEFAULT NULL::character varying,
+    JP_Line_BPartner_ID numeric(10,0) DEFAULT NULL::numeric,
 
     CONSTRAINT I_DataMigrationJP_Pkey PRIMARY KEY (I_DataMigrationJP_ID)
 );

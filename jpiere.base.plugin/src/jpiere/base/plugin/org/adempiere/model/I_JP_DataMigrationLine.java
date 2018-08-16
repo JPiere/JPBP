@@ -105,6 +105,21 @@ public interface I_JP_DataMigrationLine
 
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException;
 
+    /** Column name C_BPartner_ID */
+    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
+
+	/** Set Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID);
+
+	/** Get Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
+
     /** Column name C_Campaign_ID */
     public static final String COLUMNNAME_C_Campaign_ID = "C_Campaign_ID";
 
@@ -463,6 +478,32 @@ public interface I_JP_DataMigrationLine
 	  * Quantity
 	  */
 	public BigDecimal getQty();
+
+    /** Column name QtyBook */
+    public static final String COLUMNNAME_QtyBook = "QtyBook";
+
+	/** Set Quantity book.
+	  * Book Quantity
+	  */
+	public void setQtyBook (BigDecimal QtyBook);
+
+	/** Get Quantity book.
+	  * Book Quantity
+	  */
+	public BigDecimal getQtyBook();
+
+    /** Column name QtyCount */
+    public static final String COLUMNNAME_QtyCount = "QtyCount";
+
+	/** Set Quantity count.
+	  * Counted Quantity
+	  */
+	public void setQtyCount (BigDecimal QtyCount);
+
+	/** Get Quantity count.
+	  * Counted Quantity
+	  */
+	public BigDecimal getQtyCount();
 
     /** Column name StmtAmt */
     public static final String COLUMNNAME_StmtAmt = "StmtAmt";

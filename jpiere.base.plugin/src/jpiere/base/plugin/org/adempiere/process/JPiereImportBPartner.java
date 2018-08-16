@@ -2012,31 +2012,33 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
 
-		//Invalid InterestAreaName
-		message = Msg.getMsg(getCtx(), "Error")  + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Invoice_PrintFormat_Name");
-		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
-			.append("SET I_ErrorMsg='"+ message + "'")
-			.append(" WHERE JP_Invoice_PrintFormat_Name IS NOT NULL AND Invoice_PrintFormat_ID IS NULL ")
-			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-		if(p_I_BPartnerJP_ID > 0)
-			sql.append(" AND I_BPartnerJP_ID=? ");
+		//Invalid JP_Invoice_PrintFormat_Name
+//		message = Msg.getMsg(getCtx(), "Error")  + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Invoice_PrintFormat_Name");
+//		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
+//			.append("SET I_ErrorMsg='"+ message + "'")
+//			.append(" WHERE JP_Invoice_PrintFormat_Name IS NOT NULL AND Invoice_PrintFormat_ID IS NULL ")
+//			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+//		if(p_I_BPartnerJP_ID > 0)
+//			sql.append(" AND I_BPartnerJP_ID=? ");
+//
+//		try {
+//			if(p_I_BPartnerJP_ID > 0)
+//			{
+//				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+//				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+//			}else {
+//				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+//			}
+//		}catch(Exception e) {
+//			throw new Exception( message + " : " + e.toString() + " : " + sql);
+//		}
+//
+//		if(no > 0)
+//		{
+//			return false;
+//		}
 
-		try {
-			if(p_I_BPartnerJP_ID > 0)
-			{
-				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
-				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
-			}else {
-				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-			}
-		}catch(Exception e) {
-			throw new Exception( message + " : " + e.toString() + " : " + sql);
-		}
 
-		if(no > 0)
-		{
-			return false;
-		}
 
 		return true;
 

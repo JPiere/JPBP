@@ -32,7 +32,7 @@ public class X_JP_DataMigrationLine extends PO implements I_JP_DataMigrationLine
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180804L;
+	private static final long serialVersionUID = 20180815L;
 
     /** Standard Constructor */
     public X_JP_DataMigrationLine (Properties ctx, int JP_DataMigrationLine_ID, String trxName)
@@ -102,7 +102,7 @@ public class X_JP_DataMigrationLine extends PO implements I_JP_DataMigrationLine
 	  */
 	public void setAmount (BigDecimal Amount)
 	{
-		set_ValueNoCheck (COLUMNNAME_Amount, Amount);
+		set_Value (COLUMNNAME_Amount, Amount);
 	}
 
 	/** Get Amount.
@@ -139,6 +139,34 @@ public class X_JP_DataMigrationLine extends PO implements I_JP_DataMigrationLine
 	public int getC_Activity_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Activity_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
+			.getPO(getC_BPartner_ID(), get_TrxName());	}
+
+	/** Set Business Partner .
+		@param C_BPartner_ID 
+		Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID)
+	{
+		if (C_BPartner_ID < 1) 
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+	}
+
+	/** Get Business Partner .
+		@return Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -719,6 +747,46 @@ public class X_JP_DataMigrationLine extends PO implements I_JP_DataMigrationLine
 	public BigDecimal getQty () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Qty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Quantity book.
+		@param QtyBook 
+		Book Quantity
+	  */
+	public void setQtyBook (BigDecimal QtyBook)
+	{
+		set_Value (COLUMNNAME_QtyBook, QtyBook);
+	}
+
+	/** Get Quantity book.
+		@return Book Quantity
+	  */
+	public BigDecimal getQtyBook () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyBook);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Quantity count.
+		@param QtyCount 
+		Counted Quantity
+	  */
+	public void setQtyCount (BigDecimal QtyCount)
+	{
+		set_Value (COLUMNNAME_QtyCount, QtyCount);
+	}
+
+	/** Get Quantity count.
+		@return Counted Quantity
+	  */
+	public BigDecimal getQtyCount () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyCount);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;

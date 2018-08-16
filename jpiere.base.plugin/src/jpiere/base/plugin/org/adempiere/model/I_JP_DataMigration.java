@@ -240,7 +240,7 @@ public interface I_JP_DataMigration
 	  */
 	public int getC_PaymentTerm_ID();
 
-	public org.compiere.model.I_C_Payment getC_PaymentTerm() throws RuntimeException;
+	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException;
 
     /** Column name C_Project_ID */
     public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
@@ -285,6 +285,19 @@ public interface I_JP_DataMigration
 	  * Date of the Document
 	  */
 	public Timestamp getDateDoc();
+
+    /** Column name DeliveryRule */
+    public static final String COLUMNNAME_DeliveryRule = "DeliveryRule";
+
+	/** Set Delivery Rule.
+	  * Defines the timing of Delivery
+	  */
+	public void setDeliveryRule (String DeliveryRule);
+
+	/** Get Delivery Rule.
+	  * Defines the timing of Delivery
+	  */
+	public String getDeliveryRule();
 
     /** Column name DeliveryViaRule */
     public static final String COLUMNNAME_DeliveryViaRule = "DeliveryViaRule";
@@ -463,6 +476,19 @@ public interface I_JP_DataMigration
 	  */
 	public boolean isActive();
 
+    /** Column name IsDropShip */
+    public static final String COLUMNNAME_IsDropShip = "IsDropShip";
+
+	/** Set Drop Shipment.
+	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public void setIsDropShip (boolean IsDropShip);
+
+	/** Get Drop Shipment.
+	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  */
+	public boolean isDropShip();
+
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
 
@@ -538,6 +564,17 @@ public interface I_JP_DataMigration
 
 	/** Get JP_Order_DocumentNo	  */
 	public String getJP_Order_DocumentNo();
+
+    /** Column name JP_PhysicalWarehouse_ID */
+    public static final String COLUMNNAME_JP_PhysicalWarehouse_ID = "JP_PhysicalWarehouse_ID";
+
+	/** Set Physical Warehouse	  */
+	public void setJP_PhysicalWarehouse_ID (int JP_PhysicalWarehouse_ID);
+
+	/** Get Physical Warehouse	  */
+	public int getJP_PhysicalWarehouse_ID();
+
+	public I_JP_PhysicalWarehouse getJP_PhysicalWarehouse() throws RuntimeException;
 
     /** Column name JP_Ref_Order_DocumentNo */
     public static final String COLUMNNAME_JP_Ref_Order_DocumentNo = "JP_Ref_Order_DocumentNo";
@@ -702,6 +739,19 @@ public interface I_JP_DataMigration
 	  * How you pay the invoice
 	  */
 	public String getPaymentRule();
+
+    /** Column name PriorityRule */
+    public static final String COLUMNNAME_PriorityRule = "PriorityRule";
+
+	/** Set Priority.
+	  * Priority of a document
+	  */
+	public void setPriorityRule (String PriorityRule);
+
+	/** Get Priority.
+	  * Priority of a document
+	  */
+	public String getPriorityRule();
 
     /** Column name Ref_Order_ID */
     public static final String COLUMNNAME_Ref_Order_ID = "Ref_Order_ID";
