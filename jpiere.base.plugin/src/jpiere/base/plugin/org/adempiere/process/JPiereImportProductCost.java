@@ -15,6 +15,8 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
@@ -49,6 +51,8 @@ public class JPiereImportProductCost extends SvrProcess implements ImportProcess
 	private String message = null;
 
 	private IProcessUI processMonitor = null;
+
+	long startTime = System.currentTimeMillis();
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -173,6 +177,8 @@ public class JPiereImportProductCost extends SvrProcess implements ImportProcess
 			X_I_CostJP importCost = null;
 			while (rs.next())
 			{
+				recordsNum++;
+
 				importCost = new X_I_CostJP(getCtx(),rs,get_TrxName());
 				updateCost = MCost.get(getCtx(), importCost.getAD_Client_ID(), importCost.getAD_Org_ID(), importCost.getM_Product_ID()
 						, importCost.getM_CostType_ID(), importCost.getC_AcctSchema_ID(), importCost.getM_CostElement_ID(), 0, get_TrxName());
@@ -182,6 +188,8 @@ public class JPiereImportProductCost extends SvrProcess implements ImportProcess
 					importCost.setI_ErrorMsg(Msg.getMsg(getCtx(), "NotFound"));
 					importCost.save(get_TrxName());
 					failureUpdateNum++;
+					processMonitor.statusUpdate(records  + " : " + recordsNum + " / " + failure + " : " + failureUpdateNum);
+					commitEx();
 					continue;
 				}
 
@@ -230,12 +238,16 @@ public class JPiereImportProductCost extends SvrProcess implements ImportProcess
 					failureUpdateNum++;
 				}
 
+				importCost.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+				importCost.setI_IsImported(true);
+				importCost.setProcessed(true);
+				importCost.saveEx(get_TrxName());
+
 				commitEx();
 
-				recordsNum++;
 				if (processMonitor != null)
 				{
-					processMonitor.statusUpdate(failure + " : " + failureUpdateNum + "/ " + records  + " : " + recordsNum);
+					processMonitor.statusUpdate(records  + " : " + recordsNum + " / " + failure + " : " + failureUpdateNum);
 				}
 
 			}//while (rs.next())
@@ -251,7 +263,13 @@ public class JPiereImportProductCost extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
-		return failure + " : " + failureUpdateNum + "/ " + records  + " : " + recordsNum;
+		long endTime = System.currentTimeMillis();
+		long time = endTime - startTime;
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeFormatted = formatter.format(time);
+
+		return  Msg.getMsg(getCtx(), "ProcessOK") + "  "  + timeFormatted + " ( " + records  + " : " + recordsNum + " / " + failure + " : " + failureUpdateNum + " )" ;
 
 	}	//	doIt
 
@@ -503,7 +521,7 @@ public class JPiereImportProductCost extends SvrProcess implements ImportProcess
 		int no = 0;
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_CostJP i ")
-				.append("SET M_CostElement_ID=(SELECT M_CostElement_ID FROM M_CostType p")
+				.append("SET M_CostElement_ID=(SELECT M_CostElement_ID FROM M_CostElement p")
 				.append(" WHERE i.JP_CostElement_Name=p.Name AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.JP_CostElement_Name IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
