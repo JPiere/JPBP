@@ -27,6 +27,8 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.util.IProcessUI;
@@ -60,6 +62,8 @@ public class JPiereImportPriceList extends SvrProcess
 	private boolean			p_importPriceLimit = true;
 
 	private IProcessUI processMonitor = null;
+
+	long startTime = System.currentTimeMillis();
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -487,7 +491,14 @@ public class JPiereImportPriceList extends SvrProcess
 		addLog (0, null, new BigDecimal (noUpdatepp), "Product Price: @Updated@");
 		addLog (0, null, new BigDecimal (noInsertppvb), "@M_ProductPriceVendorBreak_ID@: @Inserted@");
 		addLog (0, null, new BigDecimal (noUpdateppvb), "@M_ProductPriceVendorBreak_ID@: @Updated@");
-		return "";
+
+		long endTime = System.currentTimeMillis();
+		long time = endTime - startTime;
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeFormatted = formatter.format(time);
+
+		return Msg.getMsg(getCtx(), "ProcessOK") + "  "  + timeFormatted;
 	}	//	doIt
 
 }	//	ImportProduct
