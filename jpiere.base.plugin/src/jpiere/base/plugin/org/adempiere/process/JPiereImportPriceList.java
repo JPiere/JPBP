@@ -63,7 +63,7 @@ public class JPiereImportPriceList extends SvrProcess
 
 	private IProcessUI processMonitor = null;
 
-	long startTime = System.currentTimeMillis();
+	private long startTime = System.currentTimeMillis();
 
 	/**
 	 *  Prepare - e.g., get Parameters.

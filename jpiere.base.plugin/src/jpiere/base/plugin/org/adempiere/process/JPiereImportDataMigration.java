@@ -15,6 +15,8 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
@@ -63,6 +65,8 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 	private String p_JP_ReimportPolicy = JPiereImportGLJournal.JP_ReimportPolicy_NotImport;
 
 	private IProcessUI processMonitor = null;
+
+	private long startTime = System.currentTimeMillis();
 
 	@Override
 	protected void prepare()
@@ -571,8 +575,13 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		}
 
 
+		long endTime = System.currentTimeMillis();
+		long time = endTime - startTime;
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeFormatted = formatter.format(time);
 
-		return records + " : " + recordsNum + " = "
+		return Msg.getMsg(getCtx(), "ProcessOK") + "  "  + timeFormatted + "  "+ records + " : " + recordsNum + " = "
 				+ skipRecords + " : " + skipNum + " + "
 				+ errorRecords + " : " + errorNum + " + "
 				+ success + " : " + successNum

@@ -16,6 +16,8 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
@@ -75,6 +77,8 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 	private int[] releaseDocControll_ElementValue_IDs = null;
 
 	private String message = null;
+
+	private long startTime = System.currentTimeMillis();
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -659,9 +663,13 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			pstmt = null;
 		}
 
+		long endTime = System.currentTimeMillis();
+		long time = endTime - startTime;
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeFormatted = formatter.format(time);
 
-
-		return records + " : " + recordsNum + " = "
+		return Msg.getMsg(getCtx(), "ProcessOK") + "  "  + timeFormatted + "  "+ records + " : " + recordsNum + " = "
 				+ skipRecords + " : " + skipNum + " + "
 				+ errorRecords + " : " + errorNum + " + "
 				+ success + " : " + successNum
@@ -1906,6 +1914,14 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		newJournal.setGL_Journal_ID(0);
 		newJournal.setDocumentNo(impJournal.getDocumentNo());
 		newJournal.setDescription(impJournal.getJP_Description_Header());
+		//Replace <CRLF>->\r\n,  <CR> -> \r,  <LF> -> \n
+		if(!Util.isEmpty(newJournal.getDescription()))
+		{
+			newJournal.setDescription(newJournal.getDescription().replaceAll("<CRLF>", "\r\n"));
+			newJournal.setDescription(newJournal.getDescription().replaceAll("<CR>", "\r"));
+			newJournal.setDescription(newJournal.getDescription().replaceAll("<LF>", "\n"));
+		}
+
 
 		ModelValidationEngine.get().fireImportValidate(this, impJournal, newJournal, ImportValidator.TIMING_AFTER_IMPORT);
 
@@ -1939,7 +1955,12 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		if(impJournal.getGL_Journal_ID()==0)
 			impJournal.setGL_Journal_ID(journal.getGL_Journal_ID());
 		if(!Util.isEmpty(impJournal.getJP_Description_Line()))
+		{
 			journalLine.setDescription(impJournal.getJP_Description_Line());
+			journalLine.setDescription(journalLine.getDescription().replaceAll("<CRLF>", "\r\n"));
+			journalLine.setDescription(journalLine.getDescription().replaceAll("<CR>", "\r"));
+			journalLine.setDescription(journalLine.getDescription().replaceAll("<LF>", "\n"));
+		}
 
 		int C_ValidCombination_ID = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), impJournal.getC_AcctSchema_ID()
 				, impJournal.getJP_ElementValue_Value(), get_TrxName());
