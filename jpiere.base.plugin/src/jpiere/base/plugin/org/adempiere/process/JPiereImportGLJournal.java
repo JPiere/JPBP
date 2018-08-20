@@ -1976,11 +1976,11 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 			}else if(impJournal.getAmtSourceDr().compareTo(Env.ZERO) != 0 && impJournal.getAmtAcctDr().compareTo(Env.ZERO) != 0 ) {
 
-				currencyRate = impJournal.getAmtSourceDr().divide(impJournal.getAmtAcctDr(), 12, BigDecimal.ROUND_HALF_UP);
+				currencyRate = impJournal.getAmtAcctDr().divide(impJournal.getAmtSourceDr(), 12, BigDecimal.ROUND_HALF_UP);
 
 			}else if(impJournal.getAmtSourceCr().compareTo(Env.ZERO) != 0 && impJournal.getAmtAcctCr().compareTo(Env.ZERO) != 0 ) {
 
-				currencyRate = impJournal.getAmtSourceCr().divide(impJournal.getAmtAcctCr(), 12, BigDecimal.ROUND_HALF_UP);
+				currencyRate = impJournal.getAmtAcctCr().divide(impJournal.getAmtSourceCr(), 12, BigDecimal.ROUND_HALF_UP);
 
 			}
 

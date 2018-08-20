@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
@@ -68,7 +70,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 	private String message = null;
 	private IProcessUI processMonitor = null;
 
-
+	private long startTime = System.currentTimeMillis();
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -311,8 +313,20 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) {
 
-						if(preValue.equals(imp.getValue()) && preEMail.equals(imp.getEMail()))
+
+						if(preEMail == null && !Util.isEmpty(imp.getEMail()))
+						{
+							isNew = true;
+						}else if(preEMail == null && Util.isEmpty(imp.getEMail())){
+
+							if(preValue.equals(imp.getValue()))
+								isNew = false;
+							else
+								isNew = true;
+
+						}else if(preValue.equals(imp.getValue()) && preEMail.equals(imp.getEMail())) {
 							isNew = false;
+						}
 
 					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) {
 
@@ -321,8 +335,19 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) {
 
-						if(preValue.equals(imp.getValue()) && preName.equals(imp.getName()) && preEMail.equals(imp.getEMail()))
+						if(preEMail == null && !Util.isEmpty(imp.getEMail()))
+						{
+							isNew = true;
+						}else if(preEMail == null && Util.isEmpty(imp.getEMail())){
+
+							if(preValue.equals(imp.getValue()) && preName.equals(imp.getName()))
+								isNew = false;
+							else
+								isNew = true;
+
+						}else if(preValue.equals(imp.getValue()) && preName.equals(imp.getName()) && preEMail.equals(imp.getEMail())) {
 							isNew = false;
+						}
 
 					}else if(p_JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_NotCollate)) {
 
@@ -380,8 +405,13 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
+		long endTime = System.currentTimeMillis();
+		long time = endTime - startTime;
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeFormatted = formatter.format(time);
 
-		return records + recordsNum + " = "	+
+		return Msg.getMsg(getCtx(), "ProcessOK") + "  "  + timeFormatted + "  "+ records + recordsNum + " = "	+
 					newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
 					+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
 

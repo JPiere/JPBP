@@ -17,8 +17,10 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
@@ -69,6 +71,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	private IProcessUI processMonitor = null;
 
 	private String message = null;
+
+	private long startTime = System.currentTimeMillis();
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -360,7 +364,13 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			pstmt = null;
 		}
 
-		return records + recordsNum + " = "	+
+		long endTime = System.currentTimeMillis();
+		long time = endTime - startTime;
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeFormatted = formatter.format(time);
+
+		return Msg.getMsg(getCtx(), "ProcessOK") + "  "  + timeFormatted + "  "+ records + recordsNum + " = "	+
 					newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
 					+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
 
