@@ -16,7 +16,6 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.util.logging.Level;
 
 import org.compiere.model.MInventory;
@@ -28,17 +27,16 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
- * JPIERE-0417 : Update Inventory Book Qty at Movement Date
+ * JPIERE-0418 : Update Inventory Book Qty at Now
  * @author Hideaki.Hagiwara
  *
  */
-public class InventoryUpdateQtyBookFromTransaction extends SvrProcess {
+public class InventoryUpdateQtyBookFromStorage extends SvrProcess {
 
 
 	int record_ID = 0;
 
 	MInventory m_Inventory = null;
-	Timestamp p_MovementDate = null;
 
 	@Override
 	protected void prepare()
@@ -53,7 +51,6 @@ public class InventoryUpdateQtyBookFromTransaction extends SvrProcess {
 			return Msg.getElement(getCtx(), "NoRecordID");//Record ID doesn't exist in the table
 
 		m_Inventory = new MInventory(getCtx(),record_ID, get_TrxName());
-		p_MovementDate = m_Inventory.getMovementDate();
 
 		if(m_Inventory.getDocStatus().equals(DocAction.STATUS_Completed)
 				|| m_Inventory.getDocStatus().equals(DocAction.STATUS_Closed)
@@ -99,8 +96,8 @@ public class InventoryUpdateQtyBookFromTransaction extends SvrProcess {
 	{
 		BigDecimal qtyBook = Env.ZERO;
 
-		String sql = "SELECT SUM(t.MovementQty) FROM M_Transaction t "
-								+ " WHERE t.M_Product_ID = ? AND t.M_Locator_ID = ? AND t.M_AttributeSetInstance_ID = ? AND t.MovementDate <= ? "
+		String sql = "SELECT SUM(t.QtyOnHand) FROM M_StorageOnHand t "
+								+ " WHERE t.M_Product_ID = ? AND t.M_Locator_ID = ? AND t.M_AttributeSetInstance_ID = ? "
 								+"  GROUP BY t.M_Product_ID, t.M_Locator_ID, t.M_AttributeSetInstance_ID";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -110,7 +107,6 @@ public class InventoryUpdateQtyBookFromTransaction extends SvrProcess {
 			pstmt.setInt(1, line.getM_Product_ID());
 			pstmt.setInt(2, line.getM_Locator_ID());
 			pstmt.setInt(3, line.getM_AttributeSetInstance_ID());
-			pstmt.setTimestamp(4, p_MovementDate);
 
 			rs = pstmt.executeQuery();
 			if (rs.next())
@@ -136,8 +132,8 @@ public class InventoryUpdateQtyBookFromTransaction extends SvrProcess {
 	{
 		BigDecimal qtyBook = Env.ZERO;
 
-		String sql = "SELECT SUM(t.MovementQty) FROM M_Transaction t "
-								+ " WHERE t.M_Product_ID = ? AND t.M_Locator_ID = ? AND t.MovementDate <= ? "
+		String sql = "SELECT SUM(t.QtyOnHand) FROM M_StorageOnHand t "
+								+ " WHERE t.M_Product_ID = ? AND t.M_Locator_ID = ? "
 								+"  GROUP BY t.M_Product_ID, t.M_Locator_ID ";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -146,7 +142,6 @@ public class InventoryUpdateQtyBookFromTransaction extends SvrProcess {
 			pstmt = DB.prepareStatement(sql, get_TrxName());
 			pstmt.setInt(1, line.getM_Product_ID());
 			pstmt.setInt(2, line.getM_Locator_ID());
-			pstmt.setTimestamp(3, p_MovementDate);
 
 			rs = pstmt.executeQuery();
 			if (rs.next())
