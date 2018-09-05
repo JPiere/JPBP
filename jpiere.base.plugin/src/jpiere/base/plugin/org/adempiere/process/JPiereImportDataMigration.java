@@ -40,7 +40,7 @@ import jpiere.base.plugin.org.adempiere.model.X_I_DataMigrationJP;
  * JPIERE-0413:Import Migration Data
  *
  *
- * @author hhagi
+ * @author h.hagiwara
  *
  */
 public class JPiereImportDataMigration extends SvrProcess implements ImportProcess {
@@ -448,6 +448,19 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
+
+						if (processMonitor != null)
+						{
+							processMonitor.statusUpdate(
+								records + " : " + recordsNum + " = "
+								+ skipRecords + " : " + skipNum + " + "
+								+ errorRecords + " : " + errorNum + " + "
+								+ success + " : " + successNum
+								+ "   [" + detail +" --> "
+								+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+								+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+								);
+						}
 						continue;
 					}
 				}
@@ -466,6 +479,19 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
+
+						if (processMonitor != null)
+						{
+							processMonitor.statusUpdate(
+								records + " : " + recordsNum + " = "
+								+ skipRecords + " : " + skipNum + " + "
+								+ errorRecords + " : " + errorNum + " + "
+								+ success + " : " + successNum
+								+ "   [" + detail +" --> "
+								+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+								+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+								);
+						}
 						continue;
 					}
 
@@ -507,6 +533,19 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
+
+						if (processMonitor != null)
+						{
+							processMonitor.statusUpdate(
+								records + " : " + recordsNum + " = "
+								+ skipRecords + " : " + skipNum + " + "
+								+ errorRecords + " : " + errorNum + " + "
+								+ success + " : " + successNum
+								+ "   [" + detail +" --> "
+								+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+								+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+								);
+						}
 						continue;
 					}
 				}
@@ -540,6 +579,19 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 					imp.setProcessed(false);
 					imp.saveEx(get_TrxName());
 					commitEx();
+
+					if (processMonitor != null)
+					{
+						processMonitor.statusUpdate(
+							records + " : " + recordsNum + " = "
+							+ skipRecords + " : " + skipNum + " + "
+							+ errorRecords + " : " + errorNum + " + "
+							+ success + " : " + successNum
+							+ "   [" + detail +" --> "
+							+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+							+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+							);
+					}
 					continue;
 				}
 
@@ -2323,11 +2375,13 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		PO.copyValues(importDataMigration, dataMigration);
 		dataMigration.setAD_Org_ID(importDataMigration.getAD_Org_ID());
 		dataMigration.setDocumentNo(importDataMigration.getDocumentNo());
+		dataMigration.setM_PriceList_ID(importDataMigration.getM_PriceList_ID());
+		dataMigration.setC_PaymentTerm_ID(importDataMigration.getC_PaymentTerm_ID());
 		if(importDataMigration.getDocBaseType().equals(MDocType.DOCBASETYPE_BankStatement))
 		{
 			;//TODO
 		}else if(importDataMigration.getDocBaseType().equals(MDocType.DOCBASETYPE_PaymentAllocation)){
-			;//TODO
+			dataMigration.setPayAmt(Env.ZERO);
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, importDataMigration, dataMigration, ImportValidator.TIMING_AFTER_IMPORT);
@@ -2409,6 +2463,13 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			dataMigrationLine.setC_BPartner_ID(importDataMigration.getJP_Line_BPartner_ID());
 		}else {
 			dataMigrationLine.setC_BPartner_ID(0);
+		}
+
+		if(importDataMigration.getDocBaseType().equals(MDocType.DOCBASETYPE_BankStatement))
+		{
+			;//TODO
+		}else if(importDataMigration.getDocBaseType().equals(MDocType.DOCBASETYPE_PaymentAllocation)){
+			dataMigrationLine.setAmount(importDataMigration.getPayAmt());
 		}
 
 		ModelValidationEngine.get().fireImportValidate(this, importDataMigration, dataMigrationLine, ImportValidator.TIMING_AFTER_IMPORT);

@@ -430,6 +430,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
+
+						if (processMonitor != null)
+						{
+							processMonitor.statusUpdate(
+								records + " : " + recordsNum + " = "
+								+ skipRecords + " : " + skipNum + " + "
+								+ errorRecords + " : " + errorNum + " + "
+								+ success + " : " + successNum
+								+ "   [" + detail +" --> "
+								+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+								+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+								);
+						}
 						continue;
 
 					}
@@ -452,6 +465,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -484,6 +510,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -516,6 +555,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -531,6 +583,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -585,6 +650,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
+
+						if (processMonitor != null)
+						{
+							processMonitor.statusUpdate(
+								records + " : " + recordsNum + " = "
+								+ skipRecords + " : " + skipNum + " + "
+								+ errorRecords + " : " + errorNum + " + "
+								+ success + " : " + successNum
+								+ "   [" + detail +" --> "
+								+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+								+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+								);
+						}
 						continue;
 					}
 				}
@@ -618,6 +696,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 					imp.setProcessed(false);
 					imp.saveEx(get_TrxName());
 					commitEx();
+
+					if (processMonitor != null)
+					{
+						processMonitor.statusUpdate(
+							records + " : " + recordsNum + " = "
+							+ skipRecords + " : " + skipNum + " + "
+							+ errorRecords + " : " + errorNum + " + "
+							+ success + " : " + successNum
+							+ "   [" + detail +" --> "
+							+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+							+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+							);
+					}
 					continue;
 				}
 
