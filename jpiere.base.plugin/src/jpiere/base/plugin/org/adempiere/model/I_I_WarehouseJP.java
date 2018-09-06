@@ -377,6 +377,15 @@ public interface I_I_WarehouseJP
 	/** Get Accounting Schema(Name)	  */
 	public String getJP_AcctSchema_Name();
 
+    /** Column name JP_City_Name */
+    public static final String COLUMNNAME_JP_City_Name = "JP_City_Name";
+
+	/** Set City(Name)	  */
+	public void setJP_City_Name (String JP_City_Name);
+
+	/** Get City(Name)	  */
+	public String getJP_City_Name();
+
     /** Column name JP_LocationOrg_ID */
     public static final String COLUMNNAME_JP_LocationOrg_ID = "JP_LocationOrg_ID";
 
@@ -412,6 +421,15 @@ public interface I_I_WarehouseJP
 
 	/** Get Organization(Search Key)	  */
 	public String getJP_Org_Value();
+
+    /** Column name JP_Region_Name */
+    public static final String COLUMNNAME_JP_Region_Name = "JP_Region_Name";
+
+	/** Set Region(Name)	  */
+	public void setJP_Region_Name (String JP_Region_Name);
+
+	/** Get Region(Name)	  */
+	public String getJP_Region_Name();
 
     /** Column name JP_W_Differences_Value */
     public static final String COLUMNNAME_JP_W_Differences_Value = "JP_W_Differences_Value";

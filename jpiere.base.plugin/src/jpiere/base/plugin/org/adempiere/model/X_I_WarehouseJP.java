@@ -30,7 +30,7 @@ public class X_I_WarehouseJP extends PO implements I_I_WarehouseJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180607L;
+	private static final long serialVersionUID = 20180907L;
 
     /** Standard Constructor */
     public X_I_WarehouseJP (Properties ctx, int I_WarehouseJP_ID, String trxName)
@@ -527,6 +527,20 @@ public class X_I_WarehouseJP extends PO implements I_I_WarehouseJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_AcctSchema_Name);
 	}
 
+	/** Set City(Name).
+		@param JP_City_Name City(Name)	  */
+	public void setJP_City_Name (String JP_City_Name)
+	{
+		set_Value (COLUMNNAME_JP_City_Name, JP_City_Name);
+	}
+
+	/** Get City(Name).
+		@return City(Name)	  */
+	public String getJP_City_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_City_Name);
+	}
+
 	/** Set Org of Location.
 		@param JP_LocationOrg_ID Org of Location	  */
 	public void setJP_LocationOrg_ID (int JP_LocationOrg_ID)
@@ -587,6 +601,20 @@ public class X_I_WarehouseJP extends PO implements I_I_WarehouseJP, I_Persistent
 	public String getJP_Org_Value () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Org_Value);
+	}
+
+	/** Set Region(Name).
+		@param JP_Region_Name Region(Name)	  */
+	public void setJP_Region_Name (String JP_Region_Name)
+	{
+		set_Value (COLUMNNAME_JP_Region_Name, JP_Region_Name);
+	}
+
+	/** Get Region(Name).
+		@return Region(Name)	  */
+	public String getJP_Region_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Region_Name);
 	}
 
 	/** Set Warehouse Differences(Search Key).
