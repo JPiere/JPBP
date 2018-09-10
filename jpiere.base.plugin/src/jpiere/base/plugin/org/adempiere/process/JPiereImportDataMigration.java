@@ -2284,7 +2284,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 			.append("SET JP_LocatorFrom_ID=(SELECT M_Locator_ID FROM M_Locator p")
 			.append(" WHERE i.JP_LocatorFrom_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
-			.append(" WHERE i.M_Locator_ID IS NULL AND i.JP_Locator_Value IS NOT NULL ")
+			.append(" WHERE i.JP_LocatorFrom_ID IS NULL AND i.JP_LocatorFrom_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -2326,7 +2326,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 		StringBuilder sql = new StringBuilder ("UPDATE I_DataMigrationJP i ")
 			.append("SET JP_LocatorTo_ID=(SELECT M_Locator_ID FROM M_Locator p")
 			.append(" WHERE i.JP_LocatorTo_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
-			.append(" WHERE i.JP_LocatorTo_ID IS NULL AND i.JP_Locator_Value IS NOT NULL ")
+			.append(" WHERE i.JP_LocatorTo_ID IS NULL AND i.JP_LocatorTo_Value IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
