@@ -2004,6 +2004,8 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 		PO.copyValues(impJournal, newJournal);
 		newJournal.setAD_Org_ID(impJournal.getAD_Org_ID());
+		newJournal.setDateDoc(impJournal.getDateTrx());
+		newJournal.setDateAcct(impJournal.getDateAcct());
 		newJournal.setC_Period_ID(period.getC_Period_ID());
 		newJournal.setGL_Journal_ID(0);
 		newJournal.setDocumentNo(impJournal.getDocumentNo());
