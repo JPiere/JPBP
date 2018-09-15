@@ -315,7 +315,7 @@ public class CreateReversingEntry extends SvrProcess {
 		impJournal.setLine(targetFact.getFact_Acct_ID());
 		impJournal.setJP_ConversionType_Value("S");
 		impJournal.setC_DocType_ID(p_C_DocType_ID);
-		impJournal.setJP_Description_Header(targetFact.getDescription());//TODO セットする情報を要検討
+		impJournal.setJP_Description_Header(targetFact.getDescription());
 		impJournal.setJP_Description_Line(targetFact.getDescription());
 		impJournal.setAmtSourceDr(impJournal.getAmtSourceDr().negate());
 		impJournal.setAmtSourceCr(impJournal.getAmtSourceCr().negate());
