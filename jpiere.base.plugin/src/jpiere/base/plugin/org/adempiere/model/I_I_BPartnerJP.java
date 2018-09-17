@@ -993,6 +993,15 @@ public interface I_I_BPartnerJP
 	/** Get Bill Schema(Search Key)	  */
 	public String getJP_BillSchema_Value();
 
+    /** Column name JP_City_Name */
+    public static final String COLUMNNAME_JP_City_Name = "JP_City_Name";
+
+	/** Set City(Name)	  */
+	public void setJP_City_Name (String JP_City_Name);
+
+	/** Get City(Name)	  */
+	public String getJP_City_Name();
+
     /** Column name JP_CorporationValue */
     public static final String COLUMNNAME_JP_CorporationValue = "JP_CorporationValue";
 
@@ -1158,6 +1167,15 @@ public interface I_I_BPartnerJP
 
 	/** Get Price List(Name)	  */
 	public String getJP_PriceList_Name();
+
+    /** Column name JP_Region_Name */
+    public static final String COLUMNNAME_JP_Region_Name = "JP_Region_Name";
+
+	/** Set Region(Name)	  */
+	public void setJP_Region_Name (String JP_Region_Name);
+
+	/** Get Region(Name)	  */
+	public String getJP_Region_Name();
 
     /** Column name JP_SOTaxRounding */
     public static final String COLUMNNAME_JP_SOTaxRounding = "JP_SOTaxRounding";

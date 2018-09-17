@@ -27,7 +27,6 @@ import org.compiere.model.MPaySelection;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.PaymentExport;
@@ -137,7 +136,7 @@ public class WPayPrintProcess extends SvrProcess{
 				String AccountNo = bankAccount.getAccountNo();
 				String payDateString = paySelection.getPayDate().toString().substring(0,10).replace("-", "");
 				LocalDateTime dateTime = LocalDateTime.now();
-				
+
 				int downloadNum = 0;
 				if( paySelection.get_ColumnIndex("JP_DownloadNum") > 0)
 				{
@@ -146,11 +145,14 @@ public class WPayPrintProcess extends SvrProcess{
 					paySelection.set_ValueNoCheck("JP_DownloadNum", downloadNum);
 					paySelection.saveEx(get_TrxName());
 				}
-				
+
 				Path inputPath = FileSystems.getDefault().getPath(tempFile.getAbsolutePath());
-				Path outputPath = FileSystems.getDefault().getPath(tempFile.getParent() + "\\ExpPayment_"
-									+ AccountNo + "_" + payDateString + (downloadNum == 0 ? "": "_" + downloadNum)  
-									+ "_" + dateTime.truncatedTo(ChronoUnit.SECONDS).toString().replace(":", "").replace("-", "") + ".txt");
+//				Path outputPath = FileSystems.getDefault().getPath(tempFile.getParent() + "\\ExpPayment_"
+//									+ AccountNo + "_" + payDateString + (downloadNum == 0 ? "": "_" + downloadNum)
+//									+ "_" + dateTime.truncatedTo(ChronoUnit.SECONDS).toString().replace(":", "").replace("-", "") + ".txt");
+				Path outputPath = FileSystems.getDefault().getPath("ExpPayment_"
+						+ AccountNo + "_" + payDateString + (downloadNum == 0 ? "": "_" + downloadNum)
+						+ "_" + dateTime.truncatedTo(ChronoUnit.SECONDS).toString().replace(":", "").replace("-", "") + ".txt");
 
 				Files.copy(inputPath, outputPath);
 				tempFile.delete();

@@ -15,11 +15,6 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
-
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MConversionType;
 import org.compiere.model.MJournal;
@@ -30,6 +25,11 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 
 /**
  * JPIERE-0163 Inventory Valuation Adjust Doc
@@ -63,30 +63,32 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 	{
 		MInvValProfileOrg[] orgs = m_InvValProfile.getOrgs();
 		int C_AcctSchema_ID = m_InvValProfile.getC_AcctSchema_ID();
-		
+
 		if(orgs==null || orgs.length < 1)
 		{
 			//Can Not Generate GL Journal ;
 			//Inventory valuation profile is not setting Organization
 			throw new AdempiereException(Msg.getMsg(getCtx(), "JP_CanNotGenerateGLJournal")+" - "+Msg.getMsg(getCtx(), "JP_InvValProfileNotOrganization"));
 		}
-		
+
+		//Befor Check
+		boolean isDifferenceAmt = false;
+
 		for(int i = 0; i < orgs.length; i++)
 		{
 			MInvValAdjustLine[] lines = m_InvValAdjust.getLines("AND AD_OrgTrx_ID="+orgs[i].getAD_Org_ID(), "");
-			
-			//Befor Check
-			boolean isDifferenceAmt = false;
+
+
 			for(int j = 0 ; j < lines.length; j++)
 			{
 				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO)!=0)
 					isDifferenceAmt = true;
 			}
-			
+
 			if(!isDifferenceAmt)
 				break;
-			
-			
+
+
 			MJournal journal = new MJournal(getCtx(), 0 , get_TrxName());
 			journal.setAD_Org_ID(orgs[i].getAD_Org_ID());
 			journal.setC_AcctSchema_ID(C_AcctSchema_ID);
@@ -100,14 +102,14 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 			journal.setC_Period_ID(MPeriod.getC_Period_ID(getCtx(),  m_InvValAdjust.getDateAcct(), orgs[i].getAD_Org_ID()));
 			journal.setDescription(Msg.getElement(getCtx(), MInvValAdjust.COLUMNNAME_JP_InvValAdjust_ID)+" : "+m_InvValAdjust.getDocumentNo());
 			journal.save(get_TrxName());
-			
+
 			int lineNo = 0;
 			for(int j = 0 ; j < lines.length; j++)
 			{
 
 				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO)==0)
 					continue;
-				
+
 				lineNo = lineNo + 10;
 				MJournalLine jl1 = new MJournalLine(getCtx(), 0, get_TrxName());
 				jl1.setGL_Journal_ID(journal.getGL_Journal_ID());
@@ -128,7 +130,7 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 					jl1.setAmtAcctCr(lines[j].getDifferenceAmt().negate());
 				}
 				jl1.saveEx(get_TrxName());
-				
+
 				lineNo = lineNo + 10;
 				MJournalLine jl2 = new MJournalLine(getCtx(), 0, get_TrxName());
 				jl2.setGL_Journal_ID(journal.getGL_Journal_ID());
@@ -149,7 +151,7 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 					jl2.setAmtAcctDr(lines[j].getDifferenceAmt().negate());
 				}
 				jl2.saveEx(get_TrxName());
-				
+
 				if(lines[j].getDifferenceAmt().compareTo(Env.ZERO) > 0)
 				{
 					lines[j].setJP_JournalLineDr_ID(jl1.getGL_JournalLine_ID());
@@ -158,18 +160,21 @@ public class DefaultInvValAdjustGLJournal extends SvrProcess {
 					lines[j].setJP_JournalLineDr_ID(jl2.getGL_JournalLine_ID());
 					lines[j].setJP_JournalLineCr_ID(jl1.getGL_JournalLine_ID());
 				}
-				
+
 				lines[j].saveEx(get_TrxName());
-				
+
 			}//for j
-			
+
 			journal.processIt(Util.isEmpty(m_InvValProfile.getDocAction())==true ? DocAction.ACTION_Complete : m_InvValProfile.getDocAction());
 			journal.saveEx(get_TrxName());
 			addBufferLog(0, null, null, journal.getDocumentNo(), MJournal.Table_ID, journal.getGL_Journal_ID());
-			
+
 		}//for i
-		
-		return null;
+
+		if(!isDifferenceAmt)
+			return Msg.getMsg(getCtx(), "JP_NoDiff");//There is no difference
+
+		return Msg.getMsg(getCtx(), "Success");
 	}
 
 }

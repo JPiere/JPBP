@@ -695,7 +695,7 @@ public class JPiereImportInvoice extends SvrProcess  implements ImportProcess
 		//Loolup - C_DocType_ID from JP_DocType_Name
 		sql = new StringBuilder ("UPDATE I_InvoiceJP o ")
 			  .append("SET C_DocType_ID=(SELECT C_DocType_ID FROM C_DocType d WHERE d.Name=o.JP_DocType_Name")
-			  .append(" AND d.DocBaseType IN ('API','ARI') AND o.AD_Client_ID=d.AD_Client_ID) ")
+			  .append(" AND d.DocBaseType IN ('API','ARI','APC','ARC') AND o.AD_Client_ID=d.AD_Client_ID) ")
 			  .append("WHERE C_DocType_ID IS NULL AND JP_DocType_Name IS NOT NULL AND I_IsImported<>'Y'").append (getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -1578,8 +1578,25 @@ public class JPiereImportInvoice extends SvrProcess  implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
-		return true;
 
+		//Invalid JP_BPartner_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_BPartner_Value");
+		sql = new StringBuilder ("UPDATE I_InvoiceJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE C_BPartner_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -1612,6 +1629,23 @@ public class JPiereImportInvoice extends SvrProcess  implements ImportProcess
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_BPartner_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_BPartner_Location_Name");
+		sql = new StringBuilder ("UPDATE I_InvoiceJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE C_BPartner_Location_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
 		}
 
 		return true;

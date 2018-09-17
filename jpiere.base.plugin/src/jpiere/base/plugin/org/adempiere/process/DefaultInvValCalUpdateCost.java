@@ -15,16 +15,17 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.util.logging.Level;
 
+import org.compiere.model.MCost;
+import org.compiere.model.MCostElement;
+import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
+
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 import jpiere.base.plugin.util.JPiereInvValUtil;
-
-import org.compiere.model.MCost;
-import org.compiere.model.MCostElement;
-import org.compiere.process.SvrProcess;
-import org.compiere.util.Env;
 
 /**
  * JPIERE-0161 Inventory Valuation Calculate Doc
@@ -138,7 +139,7 @@ public class DefaultInvValCalUpdateCost extends SvrProcess {
 
 		}//for i
 
-		return null;
+		return Msg.getMsg(getCtx(), "Success");
 	}
 
 }

@@ -15,17 +15,16 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
 import java.util.logging.Level;
-
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
-
-import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjustLine;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 
 
 /**
@@ -62,7 +61,7 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 											.append(" WHERE JP_InvValAdjust_ID=").append(m_InvValAdjust.getJP_InvValAdjust_ID());
 		DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
 
-			
+
 		MInvValProfileOrg[]  Orgs = m_InvValProfile.getOrgs();
 		StringBuilder sql = new StringBuilder("SELECT AD_Org_ID, M_Product_ID, Account_ID ")//1 - 3
 								.append(",QtyBook, AmtAcctDr, AmtAcctCr, AmtAcctBalance ")	//4 - 7
@@ -80,9 +79,9 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 			}
 			sql.append(")");
 		}
-		
+
 		sql.append(" ORDER BY M_Product_ID, AD_Org_ID");
-		
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		MInvValAdjustLine ivaLine = null;
@@ -124,8 +123,8 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 			rs = null;
 			pstmt = null;
 		}
-		
-		return "";
+
+		return Msg.getMsg(getCtx(), "Success");
 	}
 
 }

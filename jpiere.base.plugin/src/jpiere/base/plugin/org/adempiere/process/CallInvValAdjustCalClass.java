@@ -16,15 +16,16 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
-
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
+
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 
 /**
  * JPIERE-0163 Inventory Valuation Adjust Calculate Doc
@@ -56,7 +57,17 @@ public class CallInvValAdjustCalClass extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		pi.setClassName(m_InvValProfile.getJP_InvValAdjustCalClass());
+
+		String className = null;
+		if(Util.isEmpty(m_InvValProfile.getJP_InvValAdjustCalClass()))
+		{
+			className = "jpiere.base.plugin.org.adempiere.process.DefaultInvValAdjustCalculate";
+
+		}else{
+			className = m_InvValProfile.getJP_InvValAdjustCalClass();
+		}
+
+		pi.setClassName(className);
 		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
@@ -72,8 +83,8 @@ public class CallInvValAdjustCalClass extends SvrProcess {
 		}else{
 			throw new AdempiereException(pi.getSummary());
 		}
-		
-		return "";
+
+		return pi.getSummary();
 	}
 
 }

@@ -17,12 +17,15 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
+import org.compiere.model.MAccount;
 import org.compiere.model.MCalendar;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MJournal;
@@ -30,6 +33,7 @@ import org.compiere.model.MJournalLine;
 import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.PO;
+import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -39,7 +43,6 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_GLJournalJP;
 import jpiere.base.plugin.org.adempiere.model.X_I_WarehouseJP;
-import jpiere.base.plugin.util.JPiereValidCombinationUtil;
 
 /**
  * 	JPIERE-0407:Import GL Journal
@@ -430,6 +433,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
+
+						if (processMonitor != null)
+						{
+							processMonitor.statusUpdate(
+								records + " : " + recordsNum + " = "
+								+ skipRecords + " : " + skipNum + " + "
+								+ errorRecords + " : " + errorNum + " + "
+								+ success + " : " + successNum
+								+ "   [" + detail +" --> "
+								+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+								+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+								);
+						}
 						continue;
 
 					}
@@ -452,6 +468,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -484,6 +513,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -516,6 +558,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -531,6 +586,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 							imp.setProcessed(false);
 							imp.saveEx(get_TrxName());
 							commitEx();
+
+							if (processMonitor != null)
+							{
+								processMonitor.statusUpdate(
+									records + " : " + recordsNum + " = "
+									+ skipRecords + " : " + skipNum + " + "
+									+ errorRecords + " : " + errorNum + " + "
+									+ success + " : " + successNum
+									+ "   [" + detail +" --> "
+									+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+									+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+									);
+							}
 							continue;
 						}
 
@@ -585,6 +653,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
+
+						if (processMonitor != null)
+						{
+							processMonitor.statusUpdate(
+								records + " : " + recordsNum + " = "
+								+ skipRecords + " : " + skipNum + " + "
+								+ errorRecords + " : " + errorNum + " + "
+								+ success + " : " + successNum
+								+ "   [" + detail +" --> "
+								+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+								+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+								);
+						}
 						continue;
 					}
 				}
@@ -618,6 +699,19 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 					imp.setProcessed(false);
 					imp.saveEx(get_TrxName());
 					commitEx();
+
+					if (processMonitor != null)
+					{
+						processMonitor.statusUpdate(
+							records + " : " + recordsNum + " = "
+							+ skipRecords + " : " + skipNum + " + "
+							+ errorRecords + " : " + errorNum + " + "
+							+ success + " : " + successNum
+							+ "   [" + detail +" --> "
+							+ createHeader + "( "+  success + " : " + successCreateDocHeader + "  /  " +  failure + " : " + failureCreateDocHeader + " ) + "
+							+ createLine  + " ( "+  success + " : " + successCreateDocLine + "  /  " +  failure + " : " + failureCreateDocLine+ " ) ]"
+							);
+					}
 					continue;
 				}
 
@@ -1910,6 +2004,8 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 		PO.copyValues(impJournal, newJournal);
 		newJournal.setAD_Org_ID(impJournal.getAD_Org_ID());
+		newJournal.setDateDoc(impJournal.getDateTrx());
+		newJournal.setDateAcct(impJournal.getDateAcct());
 		newJournal.setC_Period_ID(period.getC_Period_ID());
 		newJournal.setGL_Journal_ID(0);
 		newJournal.setDocumentNo(impJournal.getDocumentNo());
@@ -1962,9 +2058,37 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			journalLine.setDescription(journalLine.getDescription().replaceAll("<LF>", "\n"));
 		}
 
-		int C_ValidCombination_ID = JPiereValidCombinationUtil.searchCreateValidCombination (getCtx(), impJournal.getC_AcctSchema_ID()
-				, impJournal.getJP_ElementValue_Value(), get_TrxName());
-		journalLine.setC_ValidCombination_ID(C_ValidCombination_ID);
+		MAccount validCombination = get (getCtx(),
+				impJournal.getAD_Client_ID(), impJournal.getAD_Org_ID(), impJournal.getC_AcctSchema_ID(),
+				impJournal.getAccount_ID(), impJournal.getC_SubAcct_ID(),
+				impJournal.getM_Product_ID(), impJournal.getC_BPartner_ID(), impJournal.getAD_OrgTrx_ID(),
+				impJournal.getC_LocFrom_ID(), impJournal.getC_LocTo_ID(), impJournal.getC_SalesRegion_ID(),
+				impJournal.getC_Project_ID(), impJournal.getC_Campaign_ID(), impJournal.getC_Activity_ID(),
+				impJournal.getUser1_ID(), impJournal.getUser2_ID(), impJournal.getUserElement1_ID(), impJournal.getUserElement2_ID(),
+				get_TrxName());
+		if(validCombination != null)
+			journalLine.setC_ValidCombination_ID(validCombination.getC_ValidCombination_ID());
+
+		//Set Accounting Reference Info
+		journalLine.setAD_OrgTrx_ID(impJournal.getAD_OrgTrx_ID());
+		journalLine.setC_SubAcct_ID(impJournal.getC_SubAcct_ID());
+		journalLine.setC_BPartner_ID(impJournal.getC_BPartner_ID());
+		journalLine.setM_Product_ID(impJournal.getM_Product_ID());
+		journalLine.setC_Project_ID(impJournal.getC_Project_ID());
+		if(journalLine.get_ColumnIndex("C_ProjectPhase_ID") >= 0)
+			journalLine.set_ValueNoCheck("C_ProjectPhase_ID",impJournal.getC_ProjectPhase_ID() );
+		if(journalLine.get_ColumnIndex("C_ProjectTask_ID") >= 0)
+			journalLine.set_ValueNoCheck("C_ProjectTask_ID",impJournal.getC_ProjectTask_ID() );
+		journalLine.setC_SalesRegion_ID(impJournal.getC_SalesRegion_ID());
+		journalLine.setC_Campaign_ID(impJournal.getC_Campaign_ID());
+		journalLine.setC_Activity_ID(impJournal.getC_Activity_ID());
+		journalLine.setC_LocFrom_ID(impJournal.getC_LocFrom_ID());
+		journalLine.setC_LocTo_ID(impJournal.getC_LocTo_ID());
+		journalLine.setUser1_ID(impJournal.getUser1_ID());
+		journalLine.setUser2_ID(impJournal.getUser2_ID());
+		journalLine.setA_Asset_ID(impJournal.getA_Asset_ID());
+		if(journalLine.get_ColumnIndex("M_Locator_ID") >= 0)
+			journalLine.set_ValueNoCheck("M_Locator_ID",impJournal.getM_Locator_ID() );
 
 		//Set Currency Conversion Rate
 		if(impJournal.getCurrencyRate().compareTo(Env.ZERO) == 0)
@@ -2004,4 +2128,168 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 	}//addJournalLine
 
+	public static MAccount get (Properties ctx,
+			int AD_Client_ID, int AD_Org_ID, int C_AcctSchema_ID,
+			int Account_ID, int C_SubAcct_ID,
+			int M_Product_ID, int C_BPartner_ID, int AD_OrgTrx_ID,
+			int C_LocFrom_ID, int C_LocTo_ID, int C_SalesRegion_ID,
+			int C_Project_ID, int C_Campaign_ID, int C_Activity_ID,
+			int User1_ID, int User2_ID, int UserElement1_ID, int UserElement2_ID,
+			String trxName)
+		{
+			StringBuilder info = new StringBuilder();
+			info.append("AD_Client_ID=").append(AD_Client_ID).append(",AD_Org_ID=").append(AD_Org_ID);
+			//	Schema
+			info.append(",C_AcctSchema_ID=").append(C_AcctSchema_ID);
+			//	Account
+			info.append(",Account_ID=").append(Account_ID).append(" ");
+
+			ArrayList<Object> params = new ArrayList<Object>();
+			//		Mandatory fields
+			StringBuilder whereClause =  new StringBuilder("AD_Client_ID=?")		//	#1
+								.append(" AND AD_Org_ID=?")
+								.append(" AND C_AcctSchema_ID=?")
+								.append(" AND Account_ID=?");			//	#4
+			params.add(AD_Client_ID);
+			params.add(AD_Org_ID);
+			params.add(C_AcctSchema_ID);
+			params.add(Account_ID);
+			//	Optional fields
+			if (C_SubAcct_ID == 0)
+				whereClause.append(" AND C_SubAcct_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_SubAcct_ID=?");
+				params.add(C_SubAcct_ID);
+			}
+			if (M_Product_ID == 0)
+				whereClause.append(" AND M_Product_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND M_Product_ID=?");
+				params.add(M_Product_ID);
+			}
+			if (C_BPartner_ID == 0)
+				whereClause.append(" AND C_BPartner_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_BPartner_ID=?");
+				params.add(C_BPartner_ID);
+			}
+			if (AD_OrgTrx_ID == 0)
+				whereClause.append(" AND AD_OrgTrx_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND AD_OrgTrx_ID=?");
+				params.add(AD_OrgTrx_ID);
+			}
+			if (C_LocFrom_ID == 0)
+				whereClause.append(" AND C_LocFrom_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_LocFrom_ID=?");
+				params.add(C_LocFrom_ID);
+			}
+			if (C_LocTo_ID == 0)
+				whereClause.append(" AND C_LocTo_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_LocTo_ID=?");
+				params.add(C_LocTo_ID);
+			}
+			if (C_SalesRegion_ID == 0)
+				whereClause.append(" AND C_SalesRegion_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_SalesRegion_ID=?");
+				params.add(C_SalesRegion_ID);
+			}
+			if (C_Project_ID == 0)
+				whereClause.append(" AND C_Project_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_Project_ID=?");
+				params.add(C_Project_ID);
+			}
+			if (C_Campaign_ID == 0)
+				whereClause.append(" AND C_Campaign_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_Campaign_ID=?");
+				params.add(C_Campaign_ID);
+			}
+			if (C_Activity_ID == 0)
+				whereClause.append(" AND C_Activity_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND C_Activity_ID=?");
+				params.add(C_Activity_ID);
+			}
+			if (User1_ID == 0)
+				whereClause.append(" AND User1_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND User1_ID=?");
+				params.add(User1_ID);
+			}
+			if (User2_ID == 0)
+				whereClause.append(" AND User2_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND User2_ID=?");
+				params.add(User2_ID);
+			}
+			if (UserElement1_ID == 0)
+				whereClause.append(" AND UserElement1_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND UserElement1_ID=?");
+				params.add(UserElement1_ID);
+			}
+			if (UserElement2_ID == 0)
+				whereClause.append(" AND UserElement2_ID IS NULL");
+			else
+			{
+				whereClause.append(" AND UserElement2_ID=?");
+				params.add(UserElement2_ID);
+			}
+			//	whereClause.append(" ORDER BY IsFullyQualified DESC");
+
+			MAccount existingAccount = new Query(ctx, MAccount.Table_Name, whereClause.toString(), trxName)
+											.setParameters(params)
+											.setOnlyActiveRecords(true)
+											.first();
+
+			//	Existing
+			if (existingAccount != null)
+				return existingAccount;
+
+			//	New
+			MAccount newAccount = new MAccount (ctx, 0, trxName);
+			newAccount.setAD_Org_ID(AD_Org_ID);
+			newAccount.setC_AcctSchema_ID(C_AcctSchema_ID);
+			newAccount.setAccount_ID(Account_ID);
+			//	--  Optional Accounting fields
+			newAccount.setC_SubAcct_ID(C_SubAcct_ID);
+			newAccount.setM_Product_ID(M_Product_ID);
+			newAccount.setC_BPartner_ID(C_BPartner_ID);
+			newAccount.setAD_OrgTrx_ID(AD_OrgTrx_ID);
+			newAccount.setC_LocFrom_ID(C_LocFrom_ID);
+			newAccount.setC_LocTo_ID(C_LocTo_ID);
+			newAccount.setC_SalesRegion_ID(C_SalesRegion_ID);
+			newAccount.setC_Project_ID(C_Project_ID);
+			newAccount.setC_Campaign_ID(C_Campaign_ID);
+			newAccount.setC_Activity_ID(C_Activity_ID);
+			newAccount.setUser1_ID(User1_ID);
+			newAccount.setUser2_ID(User2_ID);
+			newAccount.setUserElement1_ID(UserElement1_ID);
+			newAccount.setUserElement2_ID(UserElement2_ID);
+			//
+			if (!newAccount.save())
+			{
+				return null;
+			}
+
+			return newAccount;
+		}	//	get
 }	//	Import GL Journal
