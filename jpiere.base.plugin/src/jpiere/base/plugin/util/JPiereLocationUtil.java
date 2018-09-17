@@ -87,7 +87,28 @@ public class JPiereLocationUtil {
 			,String Address5
 			,String trxName )
 	{
+		return createLocation(ctx, JP_Org_Value, JP_Location_Label, Comments, CountryCode, Postal, Postal_Add
+				,RegionName, RegionName, City, City, Address1, Address2, Address3, Address4, Address5, trxName);
+	}
 
+	public static int createLocation (Properties ctx
+				,String JP_Org_Value
+				,String JP_Location_Label
+				,String Comments
+				,String CountryCode
+				,String Postal
+				,String Postal_Add
+				,String JP_Region_Name
+				,String RegionName
+				,String JP_City_Name
+				,String City
+				,String Address1
+				,String Address2
+				,String Address3
+				,String Address4
+				,String Address5
+				,String trxName )
+	{
 		int AD_Org_ID = 0;
 		if(JP_Org_Value.equals("0"))
 		{
@@ -106,7 +127,9 @@ public class JPiereLocationUtil {
 				,CountryCode
 				,Postal
 				,Postal_Add
+				,JP_Region_Name
 				,RegionName
+				,JP_City_Name
 				,City
 				,Address1
 				,Address2
@@ -117,7 +140,6 @@ public class JPiereLocationUtil {
 
 	}
 
-
 	public static int createLocation (Properties ctx
 			,int AD_Org_ID
 			,String JP_Location_Label
@@ -126,6 +148,28 @@ public class JPiereLocationUtil {
 			,String Postal
 			,String Postal_Add
 			,String RegionName
+			,String City
+			,String Address1
+			,String Address2
+			,String Address3
+			,String Address4
+			,String Address5
+			,String trxName )
+	{
+		return createLocation(ctx, AD_Org_ID, JP_Location_Label, Comments, CountryCode, Postal, Postal_Add
+				,RegionName, RegionName, City, City, Address1, Address2, Address3, Address4, Address5, trxName);
+	}
+
+	public static int createLocation (Properties ctx
+			,int AD_Org_ID
+			,String JP_Location_Label
+			,String Comments
+			,String CountryCode
+			,String Postal
+			,String Postal_Add
+			,String JP_Region_Name
+			,String RegionName
+			,String JP_City_Name
 			,String City
 			,String Address1
 			,String Address2
@@ -203,6 +247,18 @@ public class JPiereLocationUtil {
 		if(!Util.isEmpty(RegionName))
 		{
 			location.setRegionName(RegionName);
+			if(Util.isEmpty(JP_Region_Name))
+				JP_Region_Name = RegionName;
+
+		}
+
+		if(!Util.isEmpty(JP_Region_Name))
+		{
+			if(Util.isEmpty(RegionName))
+			{
+				location.setRegionName(JP_Region_Name);
+			}
+
 
 			ArrayList<MRegion> list = new ArrayList<MRegion>();
 			String sql = "SELECT * FROM C_Region WHERE C_Country_ID=? AND Name=? AND IsActive='Y' AND (AD_Client_ID = 0 or AD_Client_ID=?)";
@@ -212,7 +268,7 @@ public class JPiereLocationUtil {
 			{
 				pstmt = DB.prepareStatement(sql, trxName);
 				pstmt.setInt(1, location.getC_Country_ID());
-				pstmt.setString(2, RegionName);
+				pstmt.setString(2, JP_Region_Name);
 				pstmt.setInt(3, Env.getAD_Client_ID(ctx));
 				rs = pstmt.executeQuery();
 				while (rs.next())
@@ -238,7 +294,18 @@ public class JPiereLocationUtil {
 
 		if(!Util.isEmpty(City))
 		{
-			location.setCity(City);
+			location.setCity(City);;
+			if(Util.isEmpty(JP_City_Name))
+				JP_City_Name = City;
+
+		}
+
+		if(!Util.isEmpty(JP_City_Name))
+		{
+			if(Util.isEmpty(City))
+			{
+				location.setCity(JP_City_Name);
+			}
 
 			ArrayList<MCity> list = new ArrayList<MCity>();
 			String sql = "SELECT * FROM C_City WHERE C_Country_ID=? AND C_Region_ID =? AND Name=? AND IsActive='Y' AND (AD_Client_ID = 0 or AD_Client_ID=?)";
@@ -249,7 +316,7 @@ public class JPiereLocationUtil {
 				pstmt = DB.prepareStatement(sql, trxName);
 				pstmt.setInt(1, location.getC_Country_ID());
 				pstmt.setInt(2, location.getC_Region_ID());
-				pstmt.setString(3, City);
+				pstmt.setString(3, JP_City_Name);
 				pstmt.setInt(4, Env.getAD_Client_ID(ctx));
 				rs = pstmt.executeQuery();
 				while (rs.next())
@@ -323,6 +390,28 @@ public class JPiereLocationUtil {
 			,boolean IsActive
 			,String trxName )
 	{
+		return updateLocation(ctx,C_Location_ID,JP_Org_Value,Comments,CountryCode,Postal,Postal_Add,RegionName,RegionName,City,City,Address1,Address2,Address3,Address4,Address5,IsActive,trxName);
+	}
+
+	public static boolean updateLocation (Properties ctx
+			,int C_Location_ID
+			,String JP_Org_Value
+			,String Comments
+			,String CountryCode
+			,String Postal
+			,String Postal_Add
+			,String JP_Region_Name
+			,String RegionName
+			,String JP_City_Name
+			,String City
+			,String Address1
+			,String Address2
+			,String Address3
+			,String Address4
+			,String Address5
+			,boolean IsActive
+			,String trxName )
+	{
 
 		int AD_Org_ID = 0;
 		if(JP_Org_Value.equals("0"))
@@ -342,7 +431,9 @@ public class JPiereLocationUtil {
 				,CountryCode
 				,Postal
 				,Postal_Add
+				,JP_Region_Name
 				,RegionName
+				,JP_City_Name
 				,City
 				,Address1
 				,Address2
@@ -360,7 +451,9 @@ public class JPiereLocationUtil {
 			,String CountryCode
 			,String Postal
 			,String Postal_Add
+			,String JP_Region_Name
 			,String RegionName
+			,String JP_City_Name
 			,String City
 			,String Address1
 			,String Address2
@@ -431,9 +524,21 @@ public class JPiereLocationUtil {
 			location.setPostal_Add(Postal_Add);
 		}
 
+
 		if(!Util.isEmpty(RegionName))
 		{
 			location.setRegionName(RegionName);
+			if(Util.isEmpty(JP_Region_Name))
+				JP_Region_Name = RegionName;
+
+		}
+
+		if(!Util.isEmpty(JP_Region_Name))
+		{
+			if(Util.isEmpty(RegionName))
+			{
+				location.setRegionName(JP_Region_Name);
+			}
 
 			ArrayList<MRegion> list = new ArrayList<MRegion>();
 			String sql = "SELECT * FROM C_Region WHERE C_Country_ID=? AND Name=? AND IsActive='Y' AND (AD_Client_ID = 0 or AD_Client_ID=?)";
@@ -443,7 +548,7 @@ public class JPiereLocationUtil {
 			{
 				pstmt = DB.prepareStatement(sql, trxName);
 				pstmt.setInt(1, location.getC_Country_ID());
-				pstmt.setString(2, RegionName);
+				pstmt.setString(2, JP_Region_Name);
 				pstmt.setInt(3, Env.getAD_Client_ID(ctx));
 				rs = pstmt.executeQuery();
 				while (rs.next())
@@ -469,7 +574,18 @@ public class JPiereLocationUtil {
 
 		if(!Util.isEmpty(City))
 		{
-			location.setCity(City);
+			location.setCity(City);;
+			if(Util.isEmpty(JP_City_Name))
+				JP_City_Name = City;
+
+		}
+
+		if(!Util.isEmpty(JP_City_Name))
+		{
+			if(Util.isEmpty(City))
+			{
+				location.setCity(JP_City_Name);
+			}
 
 			ArrayList<MCity> list = new ArrayList<MCity>();
 			String sql = "SELECT * FROM C_City WHERE C_Country_ID=? AND C_Region_ID =? AND Name=? AND IsActive='Y' AND (AD_Client_ID = 0 or AD_Client_ID=?)";
@@ -480,7 +596,7 @@ public class JPiereLocationUtil {
 				pstmt = DB.prepareStatement(sql, trxName);
 				pstmt.setInt(1, location.getC_Country_ID());
 				pstmt.setInt(2, location.getC_Region_ID());
-				pstmt.setString(3, City);
+				pstmt.setString(3, JP_City_Name);
 				pstmt.setInt(4, Env.getAD_Client_ID(ctx));
 				rs = pstmt.executeQuery();
 				while (rs.next())

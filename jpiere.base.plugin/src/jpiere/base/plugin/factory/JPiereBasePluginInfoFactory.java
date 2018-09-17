@@ -19,6 +19,8 @@ import org.adempiere.webui.panel.InfoGeneralPanel;
 import org.adempiere.webui.panel.InfoPanel;
 import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
+import org.compiere.model.MSysConfig;
+import org.compiere.util.Env;
 
 /**
  * JPIERE-0230
@@ -32,9 +34,8 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
 			String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup) {
 
-		if (tableName.equals("M_Product") && AD_InfoWindow_ID > 0)
+		if (tableName.equals("M_Product") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
 		{
-
         	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup);
         	if (!info.loadedOK())
         	{
@@ -61,7 +62,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 		if (col.indexOf('.') != -1)
 			col = col.substring(col.indexOf('.')+1);
 
-		if (col.equals("M_Product_ID") && AD_InfoWindow_ID > 0)
+		if (col.equals("M_Product_ID") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
 		{
 			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, false, whereClause, AD_InfoWindow_ID, true);
 			return info;

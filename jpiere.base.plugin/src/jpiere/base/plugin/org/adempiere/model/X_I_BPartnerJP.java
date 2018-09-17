@@ -34,7 +34,7 @@ public class X_I_BPartnerJP extends PO implements I_I_BPartnerJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180721L;
+	private static final long serialVersionUID = 20180907L;
 
     /** Standard Constructor */
     public X_I_BPartnerJP (Properties ctx, int I_BPartnerJP_ID, String trxName)
@@ -1595,6 +1595,20 @@ public class X_I_BPartnerJP extends PO implements I_I_BPartnerJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_BillSchema_Value);
 	}
 
+	/** Set City(Name).
+		@param JP_City_Name City(Name)	  */
+	public void setJP_City_Name (String JP_City_Name)
+	{
+		set_Value (COLUMNNAME_JP_City_Name, JP_City_Name);
+	}
+
+	/** Get City(Name).
+		@return City(Name)	  */
+	public String getJP_City_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_City_Name);
+	}
+
 	/** Set Corporation(Search Key).
 		@param JP_CorporationValue 
 		Key of the Corporation
@@ -1860,6 +1874,20 @@ public class X_I_BPartnerJP extends PO implements I_I_BPartnerJP, I_Persistent
 	public String getJP_PriceList_Name () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_PriceList_Name);
+	}
+
+	/** Set Region(Name).
+		@param JP_Region_Name Region(Name)	  */
+	public void setJP_Region_Name (String JP_Region_Name)
+	{
+		set_Value (COLUMNNAME_JP_Region_Name, JP_Region_Name);
+	}
+
+	/** Get Region(Name).
+		@return Region(Name)	  */
+	public String getJP_Region_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Region_Name);
 	}
 
 	/** UP = 0 */
