@@ -61,6 +61,10 @@ public class DefaultInvValCalUpdateCost extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		if(m_InvValProfile.getJP_UpdateCost() == null)
+			return Msg.getMsg(getCtx(), "Invalid") + Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "JP_UpdateCost");
+
+
 		MCostElement[] costElements = JPiereInvValUtil.getMaterialStandardCostElements (getCtx());
 		int C_AcctSchema_ID = 0;
 		int M_CostType_ID = 0;
