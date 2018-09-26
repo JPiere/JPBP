@@ -532,15 +532,18 @@ public class JPiereImportInvoice extends SvrProcess  implements ImportProcess
 
 				}else {
 
-					if(!invoice.processIt (invoice.getDocAction()))
+					if(!Util.isEmpty(p_DocAction))
 					{
-						rollback();
-						message = "Invoice Process Failed: " + invoice.getProcessMsg();
-						invoice = null;
+						if(!invoice.processIt (p_DocAction))
+						{
+							rollback();
+							message = "Invoice Process Failed: " + invoice.getProcessMsg();
+							invoice = null;
 
-						imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + message);
-						imp.saveEx(get_TrxName());
-						commitEx();
+							imp.setI_ErrorMsg(Msg.getMsg(getCtx(), "Error") + message);
+							imp.saveEx(get_TrxName());
+							commitEx();
+						}
 					}
 				}
 
