@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractLineT
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 5.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractLineT 
@@ -151,6 +151,21 @@ public interface I_JP_ContractLineT
 	public int getC_Charge_ID();
 
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
+
+    /** Column name C_Currency_ID */
+    public static final String COLUMNNAME_C_Currency_ID = "C_Currency_ID";
+
+	/** Set Currency.
+	  * The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID);
+
+	/** Get Currency.
+	  * The Currency for this record
+	  */
+	public int getC_Currency_ID();
+
+	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
     /** Column name C_ProjectPhase_ID */
     public static final String COLUMNNAME_C_ProjectPhase_ID = "C_ProjectPhase_ID";
@@ -282,6 +297,19 @@ public interface I_JP_ContractLineT
 	  */
 	public BigDecimal getDiscount();
 
+    /** Column name DocBaseType */
+    public static final String COLUMNNAME_DocBaseType = "DocBaseType";
+
+	/** Set Document BaseType.
+	  * Logical type of document
+	  */
+	public void setDocBaseType (String DocBaseType);
+
+	/** Get Document BaseType.
+	  * Logical type of document
+	  */
+	public String getDocBaseType();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -316,6 +344,32 @@ public interface I_JP_ContractLineT
 	  * if true, the line is just description and no transaction
 	  */
 	public boolean isDescription();
+
+    /** Column name IsSOTrx */
+    public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
+
+	/** Set Sales Transaction.
+	  * This is a Sales Transaction
+	  */
+	public void setIsSOTrx (boolean IsSOTrx);
+
+	/** Get Sales Transaction.
+	  * This is a Sales Transaction
+	  */
+	public boolean isSOTrx();
+
+    /** Column name IsTaxIncluded */
+    public static final String COLUMNNAME_IsTaxIncluded = "IsTaxIncluded";
+
+	/** Set Price includes Tax.
+	  * Tax is included in the price 
+	  */
+	public void setIsTaxIncluded (boolean IsTaxIncluded);
+
+	/** Get Price includes Tax.
+	  * Tax is included in the price 
+	  */
+	public boolean isTaxIncluded();
 
     /** Column name JP_BaseDocLinePolicy */
     public static final String COLUMNNAME_JP_BaseDocLinePolicy = "JP_BaseDocLinePolicy";
@@ -398,6 +452,24 @@ public interface I_JP_ContractLineT
 	public int getJP_ContractProcRef_Inv_ID();
 
 	public I_JP_ContractProcessRef getJP_ContractProcRef_Inv() throws RuntimeException;
+
+    /** Column name JP_ContractType */
+    public static final String COLUMNNAME_JP_ContractType = "JP_ContractType";
+
+	/** Set Contract Type	  */
+	public void setJP_ContractType (String JP_ContractType);
+
+	/** Get Contract Type	  */
+	public String getJP_ContractType();
+
+    /** Column name JP_CreateDerivativeDocPolicy */
+    public static final String COLUMNNAME_JP_CreateDerivativeDocPolicy = "JP_CreateDerivativeDocPolicy";
+
+	/** Set Create Derivative Doc Policy	  */
+	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy);
+
+	/** Get Create Derivative Doc Policy	  */
+	public String getJP_CreateDerivativeDocPolicy();
 
     /** Column name JP_DerivativeDocPolicy_InOut */
     public static final String COLUMNNAME_JP_DerivativeDocPolicy_InOut = "JP_DerivativeDocPolicy_InOut";
@@ -531,6 +603,21 @@ public interface I_JP_ContractLineT
 	/** Get Offset of Start Contract Process Period(Invoice)	  */
 	public int getJP_ProcPeriodOffs_Start_Inv();
 
+    /** Column name JP_QtyOrderd_UOM_ID */
+    public static final String COLUMNNAME_JP_QtyOrderd_UOM_ID = "JP_QtyOrderd_UOM_ID";
+
+	/** Set Ordered Qty UOM.
+	  * Ordered Qty Unit of Measure
+	  */
+	public void setJP_QtyOrderd_UOM_ID (int JP_QtyOrderd_UOM_ID);
+
+	/** Get Ordered Qty UOM.
+	  * Ordered Qty Unit of Measure
+	  */
+	public int getJP_QtyOrderd_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getJP_QtyOrderd_UOM() throws RuntimeException;
+
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";
 
@@ -556,6 +643,21 @@ public interface I_JP_ContractLineT
 	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	  */
 	public BigDecimal getLineNetAmt();
+
+    /** Column name M_PriceList_ID */
+    public static final String COLUMNNAME_M_PriceList_ID = "M_PriceList_ID";
+
+	/** Set Price List.
+	  * Unique identifier of a Price List
+	  */
+	public void setM_PriceList_ID (int M_PriceList_ID);
+
+	/** Get Price List.
+	  * Unique identifier of a Price List
+	  */
+	public int getM_PriceList_ID();
+
+	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException;
 
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
@@ -584,6 +686,32 @@ public interface I_JP_ContractLineT
 	  * Quantity of a product moved.
 	  */
 	public BigDecimal getMovementQty();
+
+    /** Column name Name */
+    public static final String COLUMNNAME_Name = "Name";
+
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public void setName (String Name);
+
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public String getName();
+
+    /** Column name OrderType */
+    public static final String COLUMNNAME_OrderType = "OrderType";
+
+	/** Set Order Type.
+	  * Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)
+	  */
+	public void setOrderType (String OrderType);
+
+	/** Get Order Type.
+	  * Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)
+	  */
+	public String getOrderType();
 
     /** Column name PriceActual */
     public static final String COLUMNNAME_PriceActual = "PriceActual";

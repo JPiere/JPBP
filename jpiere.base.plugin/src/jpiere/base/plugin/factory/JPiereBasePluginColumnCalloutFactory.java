@@ -34,6 +34,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereCityCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractContentCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractLineCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractLineTCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereEstimationCallout;
@@ -51,6 +52,7 @@ import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractLineT;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
@@ -138,17 +140,25 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			}else if(tableName.equals(MContractContent.Table_Name)
 					||tableName.equals(MContractContentT.Table_Name) ){	//JPIERE-0363
 
-				if(columnName.equals("JP_BaseDocDocType_ID") || columnName.equals("JP_ContractCalender_ID") )
+				if(columnName.equals("JP_BaseDocDocType_ID") || columnName.equals("JP_ContractCalender_ID") || (tableName.equals(MContractContent.Table_Name) && columnName.equals("JP_ContractContentT_ID")))
 				{
 					list.add(new JPiereContractContentCallout());
 				}
 
 			}else if(tableName.equals(MContractLine.Table_Name)){//JPIERE-0363
 
-				if(columnName.equals("JP_ContractCalender_InOut_ID") || columnName.equals("JP_ContractCalender_Inv_ID") )
+				if(columnName.equals("JP_ContractCalender_InOut_ID") || columnName.equals("JP_ContractCalender_Inv_ID") || columnName.equals("JP_ContractLineT_ID")  )
 				{
 					list.add(new JPiereContractLineCallout());
 				}
+
+			}else if(tableName.equals(MContractLineT.Table_Name)){//JPIERE-0427
+
+				if(columnName.equals("M_PriceList_ID") || columnName.equals("DocBaseType"))
+				{
+					list.add(new JPiereContractLineTCallout());
+				}
+
 			}else if(tableName.equals(MRecognition.Table_Name)){//JPIERE-036４
 
 				if(columnName.equals("M_InOut_ID") )

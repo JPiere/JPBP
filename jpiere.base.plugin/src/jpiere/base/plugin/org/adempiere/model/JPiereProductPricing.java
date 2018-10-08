@@ -1065,8 +1065,14 @@ public class JPiereProductPricing extends MProductPricing
 
 			}else if (gt.getTableName().equals(MContractLineT.Table_Name)) {
 
-				m_C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), gt.getWindowNo(), gt.getParentTab().getTabNo() , "C_BPartner_ID");
-				m_isSOTrx = Env.getContext(Env.getCtx(), gt.getWindowNo(), gt.getParentTab().getTabNo() , "IsSOTrx").equals("Y");
+				if(gt.getParentTab()==null)
+				{
+					m_C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), gt.getWindowNo(), gt.getTabNo() , "C_BPartner_ID");
+					m_isSOTrx = Env.getContext(Env.getCtx(), gt.getWindowNo(), gt.getTabNo() , "IsSOTrx").equals("Y");
+				}else {
+					m_C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), gt.getWindowNo(), gt.getParentTab().getTabNo() , "C_BPartner_ID");
+					m_isSOTrx = Env.getContext(Env.getCtx(), gt.getWindowNo(), gt.getParentTab().getTabNo() , "IsSOTrx").equals("Y");
+				}
 				m_PriceDate = null;
 
 			}

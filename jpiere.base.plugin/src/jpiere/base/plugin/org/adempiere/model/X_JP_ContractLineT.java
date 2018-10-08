@@ -22,18 +22,17 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractLineT
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 5.1 - $Id$ */
 public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170927L;
+	private static final long serialVersionUID = 20181008L;
 
     /** Standard Constructor */
     public X_JP_ContractLineT (Properties ctx, int JP_ContractLineT_ID, String trxName)
@@ -41,14 +40,20 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
       super (ctx, JP_ContractLineT_ID, trxName);
       /** if (JP_ContractLineT_ID == 0)
         {
+			setC_Currency_ID (0);
 			setC_Tax_ID (0);
 			setC_UOM_ID (0);
 // @#C_UOM_ID@
+			setDocBaseType (null);
 			setIsCreateDocLineJP (true);
 // Y
 			setIsDescription (false);
-			setJP_ContractContentT_ID (0);
+			setIsSOTrx (false);
+// N
+			setIsTaxIncluded (false);
+// N
 			setJP_ContractLineT_ID (0);
+			setJP_ContractType (null);
 			setJP_ProcPeriodOffs_End (0);
 // 0
 			setJP_ProcPeriodOffs_End_InOut (0);
@@ -70,7 +75,12 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_ContractLineT WHERE JP_ContractContentT_ID=@JP_ContractContentT_ID@
 			setLineNetAmt (Env.ZERO);
+			setM_PriceList_ID (0);
 			setMovementQty (Env.ZERO);
+// 1
+			setName (null);
+			setOrderType (null);
+// --
 			setPriceActual (Env.ZERO);
 			setPriceEntered (Env.ZERO);
 			setPriceLimit (Env.ZERO);
@@ -275,6 +285,34 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
+			.getPO(getC_Currency_ID(), get_TrxName());	}
+
+	/** Set Currency.
+		@param C_Currency_ID 
+		The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID)
+	{
+		if (C_Currency_ID < 1) 
+			set_Value (COLUMNNAME_C_Currency_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
+	}
+
+	/** Get Currency.
+		@return The Currency for this record
+	  */
+	public int getC_Currency_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_ProjectPhase getC_ProjectPhase() throws RuntimeException
     {
 		return (org.compiere.model.I_C_ProjectPhase)MTable.get(getCtx(), org.compiere.model.I_C_ProjectPhase.Table_Name)
@@ -472,6 +510,112 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return bd;
 	}
 
+	/** DocBaseType AD_Reference_ID=183 */
+	public static final int DOCBASETYPE_AD_Reference_ID=183;
+	/** GL Journal = GLJ */
+	public static final String DOCBASETYPE_GLJournal = "GLJ";
+	/** GL Document = GLD */
+	public static final String DOCBASETYPE_GLDocument = "GLD";
+	/** AP Invoice = API */
+	public static final String DOCBASETYPE_APInvoice = "API";
+	/** AP Payment = APP */
+	public static final String DOCBASETYPE_APPayment = "APP";
+	/** AR Invoice = ARI */
+	public static final String DOCBASETYPE_ARInvoice = "ARI";
+	/** AR Receipt = ARR */
+	public static final String DOCBASETYPE_ARReceipt = "ARR";
+	/** Sales Order = SOO */
+	public static final String DOCBASETYPE_SalesOrder = "SOO";
+	/** AR Pro Forma Invoice = ARF */
+	public static final String DOCBASETYPE_ARProFormaInvoice = "ARF";
+	/** Material Delivery = MMS */
+	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Material Receipt = MMR */
+	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
+	/** Material Movement = MMM */
+	public static final String DOCBASETYPE_MaterialMovement = "MMM";
+	/** Purchase Order = POO */
+	public static final String DOCBASETYPE_PurchaseOrder = "POO";
+	/** Purchase Requisition = POR */
+	public static final String DOCBASETYPE_PurchaseRequisition = "POR";
+	/** Material Physical Inventory = MMI */
+	public static final String DOCBASETYPE_MaterialPhysicalInventory = "MMI";
+	/** AP Credit Memo = APC */
+	public static final String DOCBASETYPE_APCreditMemo = "APC";
+	/** AR Credit Memo = ARC */
+	public static final String DOCBASETYPE_ARCreditMemo = "ARC";
+	/** Bank Statement = CMB */
+	public static final String DOCBASETYPE_BankStatement = "CMB";
+	/** Cash Journal = CMC */
+	public static final String DOCBASETYPE_CashJournal = "CMC";
+	/** Payment Allocation = CMA */
+	public static final String DOCBASETYPE_PaymentAllocation = "CMA";
+	/** Material Production = MMP */
+	public static final String DOCBASETYPE_MaterialProduction = "MMP";
+	/** Match Invoice = MXI */
+	public static final String DOCBASETYPE_MatchInvoice = "MXI";
+	/** Match PO = MXP */
+	public static final String DOCBASETYPE_MatchPO = "MXP";
+	/** Project Issue = PJI */
+	public static final String DOCBASETYPE_ProjectIssue = "PJI";
+	/** Maintenance Order = MOF */
+	public static final String DOCBASETYPE_MaintenanceOrder = "MOF";
+	/** Manufacturing Order = MOP */
+	public static final String DOCBASETYPE_ManufacturingOrder = "MOP";
+	/** Quality Order = MQO */
+	public static final String DOCBASETYPE_QualityOrder = "MQO";
+	/** Payroll = HRP */
+	public static final String DOCBASETYPE_Payroll = "HRP";
+	/** Distribution Order = DOO */
+	public static final String DOCBASETYPE_DistributionOrder = "DOO";
+	/** Manufacturing Cost Collector = MCC */
+	public static final String DOCBASETYPE_ManufacturingCostCollector = "MCC";
+	/** Fixed Assets Addition = FAA */
+	public static final String DOCBASETYPE_FixedAssetsAddition = "FAA";
+	/** Fixed Assets Disposal = FAD */
+	public static final String DOCBASETYPE_FixedAssetsDisposal = "FAD";
+	/** Fixed Assets Depreciation = FDP */
+	public static final String DOCBASETYPE_FixedAssetsDepreciation = "FDP";
+	/** JPiere Bill = JPB */
+	public static final String DOCBASETYPE_JPiereBill = "JPB";
+	/** JPiere Inventory Valuation Calculate = JPI */
+	public static final String DOCBASETYPE_JPiereInventoryValuationCalculate = "JPI";
+	/** Inventory Valuation Adjust = JPA */
+	public static final String DOCBASETYPE_InventoryValuationAdjust = "JPA";
+	/** JPiere Estimation = JPE */
+	public static final String DOCBASETYPE_JPiereEstimation = "JPE";
+	/** JPiere Payment Request = JPP */
+	public static final String DOCBASETYPE_JPierePaymentRequest = "JPP";
+	/** JPiere Contract Doc = JPC */
+	public static final String DOCBASETYPE_JPiereContractDoc = "JPC";
+	/** JPiere Contract Content = JPT */
+	public static final String DOCBASETYPE_JPiereContractContent = "JPT";
+	/** JPiere Revenue Recognition = JPR */
+	public static final String DOCBASETYPE_JPiereRevenueRecognition = "JPR";
+	/** JPiere Expense Recognition = JPX */
+	public static final String DOCBASETYPE_JPiereExpenseRecognition = "JPX";
+	/** JPiere Revenue Recognition(Credit Memo) = JPS */
+	public static final String DOCBASETYPE_JPiereRevenueRecognitionCreditMemo = "JPS";
+	/** JPiere Expense Recognition(Credit Memo) = JPY */
+	public static final String DOCBASETYPE_JPiereExpenseRecognitionCreditMemo = "JPY";
+	/** Set Document BaseType.
+		@param DocBaseType 
+		Logical type of document
+	  */
+	public void setDocBaseType (String DocBaseType)
+	{
+
+		set_Value (COLUMNNAME_DocBaseType, DocBaseType);
+	}
+
+	/** Get Document BaseType.
+		@return Logical type of document
+	  */
+	public String getDocBaseType () 
+	{
+		return (String)get_Value(COLUMNNAME_DocBaseType);
+	}
+
 	/** Set Create Doc Line.
 		@param IsCreateDocLineJP Create Doc Line	  */
 	public void setIsCreateDocLineJP (boolean IsCreateDocLineJP)
@@ -508,6 +652,54 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public boolean isDescription () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsDescription);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Sales Transaction.
+		@param IsSOTrx 
+		This is a Sales Transaction
+	  */
+	public void setIsSOTrx (boolean IsSOTrx)
+	{
+		set_Value (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+	}
+
+	/** Get Sales Transaction.
+		@return This is a Sales Transaction
+	  */
+	public boolean isSOTrx () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSOTrx);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Price includes Tax.
+		@param IsTaxIncluded 
+		Tax is included in the price 
+	  */
+	public void setIsTaxIncluded (boolean IsTaxIncluded)
+	{
+		set_Value (COLUMNNAME_IsTaxIncluded, Boolean.valueOf(IsTaxIncluded));
+	}
+
+	/** Get Price includes Tax.
+		@return Tax is included in the price 
+	  */
+	public boolean isTaxIncluded () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsTaxIncluded);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
@@ -617,14 +809,6 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return ii.intValue();
 	}
 
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getJP_ContractContentT_ID()));
-    }
-
 	/** Set Contract Content Line Template.
 		@param JP_ContractLineT_ID Contract Content Line Template	  */
 	public void setJP_ContractLineT_ID (int JP_ContractLineT_ID)
@@ -707,6 +891,50 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Period Contract = PDC */
+	public static final String JP_CONTRACTTYPE_PeriodContract = "PDC";
+	/** Spot Contract = STC */
+	public static final String JP_CONTRACTTYPE_SpotContract = "STC";
+	/** General Contract = GLC */
+	public static final String JP_CONTRACTTYPE_GeneralContract = "GLC";
+	/** Set Contract Type.
+		@param JP_ContractType Contract Type	  */
+	public void setJP_ContractType (String JP_ContractType)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractType, JP_ContractType);
+	}
+
+	/** Get Contract Type.
+		@return Contract Type	  */
+	public String getJP_ContractType () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractType);
+	}
+
+	/** Manual = MA */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_Manual = "MA";
+	/** Create Ship/Receipt = IO */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt = "IO";
+	/** Create Invoice = IV */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice = "IV";
+	/** Create Ship/Receipt & Invoice = BT */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice = "BT";
+	/** Set Create Derivative Doc Policy.
+		@param JP_CreateDerivativeDocPolicy Create Derivative Doc Policy	  */
+	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_CreateDerivativeDocPolicy, JP_CreateDerivativeDocPolicy);
+	}
+
+	/** Get Create Derivative Doc Policy.
+		@return Create Derivative Doc Policy	  */
+	public String getJP_CreateDerivativeDocPolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_CreateDerivativeDocPolicy);
 	}
 
 	/** For the Duration of Contract process period = DD */
@@ -987,13 +1215,37 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_UOM getJP_QtyOrderd_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getJP_QtyOrderd_UOM_ID(), get_TrxName());	}
+
+	/** Set Ordered Qty UOM.
+		@param JP_QtyOrderd_UOM_ID 
+		Ordered Qty Unit of Measure
+	  */
+	public void setJP_QtyOrderd_UOM_ID (int JP_QtyOrderd_UOM_ID)
+	{
+		throw new IllegalArgumentException ("JP_QtyOrderd_UOM_ID is virtual column");	}
+
+	/** Get Ordered Qty UOM.
+		@return Ordered Qty Unit of Measure
+	  */
+	public int getJP_QtyOrderd_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_QtyOrderd_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Line No.
 		@param Line 
 		Unique line for this document
 	  */
 	public void setLine (int Line)
 	{
-		set_ValueNoCheck (COLUMNNAME_Line, Integer.valueOf(Line));
+		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
 	}
 
 	/** Get Line No.
@@ -1025,6 +1277,34 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
+			.getPO(getM_PriceList_ID(), get_TrxName());	}
+
+	/** Set Price List.
+		@param M_PriceList_ID 
+		Unique identifier of a Price List
+	  */
+	public void setM_PriceList_ID (int M_PriceList_ID)
+	{
+		if (M_PriceList_ID < 1) 
+			set_Value (COLUMNNAME_M_PriceList_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
+	}
+
+	/** Get Price List.
+		@return Unique identifier of a Price List
+	  */
+	public int getM_PriceList_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_PriceList_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
@@ -1073,6 +1353,59 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Name.
+		@param Name 
+		Alphanumeric identifier of the entity
+	  */
+	public void setName (String Name)
+	{
+		set_Value (COLUMNNAME_Name, Name);
+	}
+
+	/** Get Name.
+		@return Alphanumeric identifier of the entity
+	  */
+	public String getName () 
+	{
+		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Quotation = OB */
+	public static final String ORDERTYPE_Quotation = "OB";
+	/** Proposal = ON */
+	public static final String ORDERTYPE_Proposal = "ON";
+	/** Prepay Order = PR */
+	public static final String ORDERTYPE_PrepayOrder = "PR";
+	/** Return Material = RM */
+	public static final String ORDERTYPE_ReturnMaterial = "RM";
+	/** Standard Order = SO */
+	public static final String ORDERTYPE_StandardOrder = "SO";
+	/** On Credit Order = WI */
+	public static final String ORDERTYPE_OnCreditOrder = "WI";
+	/** Warehouse Order = WP */
+	public static final String ORDERTYPE_WarehouseOrder = "WP";
+	/** POS Order = WR */
+	public static final String ORDERTYPE_POSOrder = "WR";
+	/** Other = -- */
+	public static final String ORDERTYPE_Other = "--";
+	/** Set Order Type.
+		@param OrderType 
+		Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)
+	  */
+	public void setOrderType (String OrderType)
+	{
+
+		set_Value (COLUMNNAME_OrderType, OrderType);
+	}
+
+	/** Get Order Type.
+		@return Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)
+	  */
+	public String getOrderType () 
+	{
+		return (String)get_Value(COLUMNNAME_OrderType);
 	}
 
 	/** Set Unit Price.

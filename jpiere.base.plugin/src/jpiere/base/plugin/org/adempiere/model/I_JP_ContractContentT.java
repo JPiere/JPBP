@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractContentT
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 5.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractContentT 
@@ -612,6 +612,15 @@ public interface I_JP_ContractContentT
 	public int getJP_ContractT_ID();
 
 	public I_JP_ContractT getJP_ContractT() throws RuntimeException;
+
+    /** Column name JP_ContractType */
+    public static final String COLUMNNAME_JP_ContractType = "JP_ContractType";
+
+	/** Set Contract Type	  */
+	public void setJP_ContractType (String JP_ContractType);
+
+	/** Get Contract Type	  */
+	public String getJP_ContractType();
 
     /** Column name JP_Contract_Acct_ID */
     public static final String COLUMNNAME_JP_Contract_Acct_ID = "JP_Contract_Acct_ID";

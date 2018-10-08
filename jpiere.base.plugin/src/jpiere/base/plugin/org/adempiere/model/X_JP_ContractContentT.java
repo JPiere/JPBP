@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ContractContentT
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 5.1 - $Id$ */
 public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170928L;
+	private static final long serialVersionUID = 20181007L;
 
     /** Standard Constructor */
     public X_JP_ContractContentT (Properties ctx, int JP_ContractContentT_ID, String trxName)
@@ -68,7 +68,6 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 // N
 			setJP_BaseDocDocType_ID (0);
 			setJP_ContractContentT_ID (0);
-			setJP_ContractT_ID (0);
 			setJP_Contract_Acct_ID (0);
 			setM_PriceList_ID (0);
 			setName (null);
@@ -1105,6 +1104,27 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Period Contract = PDC */
+	public static final String JP_CONTRACTTYPE_PeriodContract = "PDC";
+	/** Spot Contract = STC */
+	public static final String JP_CONTRACTTYPE_SpotContract = "STC";
+	/** General Contract = GLC */
+	public static final String JP_CONTRACTTYPE_GeneralContract = "GLC";
+	/** Set Contract Type.
+		@param JP_ContractType Contract Type	  */
+	public void setJP_ContractType (String JP_ContractType)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractType, JP_ContractType);
+	}
+
+	/** Get Contract Type.
+		@return Contract Type	  */
+	public String getJP_ContractType () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractType);
 	}
 
 	public I_JP_Contract_Acct getJP_Contract_Acct() throws RuntimeException
