@@ -520,6 +520,15 @@ public interface I_JP_ContractLine
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_ProcPeriod_End_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_End_Date = "JP_ProcPeriod_End_Date";
+
+	/** Set End Contract Process Date	  */
+	public void setJP_ProcPeriod_End_Date (Timestamp JP_ProcPeriod_End_Date);
+
+	/** Get End Contract Process Date	  */
+	public Timestamp getJP_ProcPeriod_End_Date();
+
     /** Column name JP_ProcPeriod_End_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_End_ID = "JP_ProcPeriod_End_ID";
 
@@ -530,6 +539,15 @@ public interface I_JP_ContractLine
 	public int getJP_ProcPeriod_End_ID();
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_End_InOut_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_End_InOut_Date = "JP_ProcPeriod_End_InOut_Date";
+
+	/** Set End Contract Process Date(In/Out)	  */
+	public void setJP_ProcPeriod_End_InOut_Date (Timestamp JP_ProcPeriod_End_InOut_Date);
+
+	/** Get End Contract Process Date(In/Out)	  */
+	public Timestamp getJP_ProcPeriod_End_InOut_Date();
 
     /** Column name JP_ProcPeriod_End_InOut_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_End_InOut_ID = "JP_ProcPeriod_End_InOut_ID";
@@ -542,6 +560,15 @@ public interface I_JP_ContractLine
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_InOut() throws RuntimeException;
 
+    /** Column name JP_ProcPeriod_End_Inv_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_End_Inv_Date = "JP_ProcPeriod_End_Inv_Date";
+
+	/** Set End Contract Process Date(Invoice)	  */
+	public void setJP_ProcPeriod_End_Inv_Date (Timestamp JP_ProcPeriod_End_Inv_Date);
+
+	/** Get End Contract Process Date(Invoice)	  */
+	public Timestamp getJP_ProcPeriod_End_Inv_Date();
+
     /** Column name JP_ProcPeriod_End_Inv_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_End_Inv_ID = "JP_ProcPeriod_End_Inv_ID";
 
@@ -552,6 +579,15 @@ public interface I_JP_ContractLine
 	public int getJP_ProcPeriod_End_Inv_ID();
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_Inv() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Lump_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_Lump_Date = "JP_ProcPeriod_Lump_Date";
+
+	/** Set Date to handle in a lump	  */
+	public void setJP_ProcPeriod_Lump_Date (Timestamp JP_ProcPeriod_Lump_Date);
+
+	/** Get Date to handle in a lump	  */
+	public Timestamp getJP_ProcPeriod_Lump_Date();
 
     /** Column name JP_ProcPeriod_Lump_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Lump_ID = "JP_ProcPeriod_Lump_ID";
@@ -564,6 +600,15 @@ public interface I_JP_ContractLine
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump() throws RuntimeException;
 
+    /** Column name JP_ProcPeriod_Lump_InOut_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_Lump_InOut_Date = "JP_ProcPeriod_Lump_InOut_Date";
+
+	/** Set Date to handle in a lump(In/Out)	  */
+	public void setJP_ProcPeriod_Lump_InOut_Date (Timestamp JP_ProcPeriod_Lump_InOut_Date);
+
+	/** Get Date to handle in a lump(In/Out)	  */
+	public Timestamp getJP_ProcPeriod_Lump_InOut_Date();
+
     /** Column name JP_ProcPeriod_Lump_InOut_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Lump_InOut_ID = "JP_ProcPeriod_Lump_InOut_ID";
 
@@ -574,6 +619,15 @@ public interface I_JP_ContractLine
 	public int getJP_ProcPeriod_Lump_InOut_ID();
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_InOut() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Lump_Inv_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_Lump_Inv_Date = "JP_ProcPeriod_Lump_Inv_Date";
+
+	/** Set Date to handle in a lump(Invoice)	  */
+	public void setJP_ProcPeriod_Lump_Inv_Date (Timestamp JP_ProcPeriod_Lump_Inv_Date);
+
+	/** Get Date to handle in a lump(Invoice)	  */
+	public Timestamp getJP_ProcPeriod_Lump_Inv_Date();
 
     /** Column name JP_ProcPeriod_Lump_Inv_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Lump_Inv_ID = "JP_ProcPeriod_Lump_Inv_ID";
@@ -586,6 +640,15 @@ public interface I_JP_ContractLine
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_Inv() throws RuntimeException;
 
+    /** Column name JP_ProcPeriod_Start_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_Start_Date = "JP_ProcPeriod_Start_Date";
+
+	/** Set Start Contract Process Date	  */
+	public void setJP_ProcPeriod_Start_Date (Timestamp JP_ProcPeriod_Start_Date);
+
+	/** Get Start Contract Process Date	  */
+	public Timestamp getJP_ProcPeriod_Start_Date();
+
     /** Column name JP_ProcPeriod_Start_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Start_ID = "JP_ProcPeriod_Start_ID";
 
@@ -597,6 +660,15 @@ public interface I_JP_ContractLine
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start() throws RuntimeException;
 
+    /** Column name JP_ProcPeriod_Start_InOut_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_Start_InOut_Date = "JP_ProcPeriod_Start_InOut_Date";
+
+	/** Set Start Contract Process Date(In/Out)	  */
+	public void setJP_ProcPeriod_Start_InOut_Date (Timestamp JP_ProcPeriod_Start_InOut_Date);
+
+	/** Get Start Contract Process Date(In/Out)	  */
+	public Timestamp getJP_ProcPeriod_Start_InOut_Date();
+
     /** Column name JP_ProcPeriod_Start_InOut_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Start_InOut_ID = "JP_ProcPeriod_Start_InOut_ID";
 
@@ -607,6 +679,15 @@ public interface I_JP_ContractLine
 	public int getJP_ProcPeriod_Start_InOut_ID();
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start_InOut() throws RuntimeException;
+
+    /** Column name JP_ProcPeriod_Start_Inv_Date */
+    public static final String COLUMNNAME_JP_ProcPeriod_Start_Inv_Date = "JP_ProcPeriod_Start_Inv_Date";
+
+	/** Set Start Contract Process Date(Invoice)	  */
+	public void setJP_ProcPeriod_Start_Inv_Date (Timestamp JP_ProcPeriod_Start_Inv_Date);
+
+	/** Get Start Contract Process Date(Invoice)	  */
+	public Timestamp getJP_ProcPeriod_Start_Inv_Date();
 
     /** Column name JP_ProcPeriod_Start_Inv_ID */
     public static final String COLUMNNAME_JP_ProcPeriod_Start_Inv_ID = "JP_ProcPeriod_Start_Inv_ID";

@@ -147,7 +147,28 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 			}else if(tableName.equals(MContractLine.Table_Name)){//JPIERE-0363
 
-				if(columnName.equals("JP_ContractCalender_InOut_ID") || columnName.equals("JP_ContractCalender_Inv_ID") || columnName.equals("JP_ContractLineT_ID")  )
+				if(columnName.equals("JP_ContractCalender_InOut_ID")
+						|| columnName.equals("JP_ContractCalender_Inv_ID")
+						|| columnName.equals("JP_ContractLineT_ID")
+						|| columnName.equals("JP_ProcPeriod_Lump_ID")	//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Lump_Date")	//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Start_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Start_Date")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_End_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_End_Date")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Lump_InOut_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Lump_InOut_Date")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Start_InOut_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Start_InOut_Date")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_End_InOut_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_End_InOut_Date")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Lump_Inv_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Lump_Inv_Date")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Start_Inv_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_Start_Inv_Date")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_End_Inv_ID")//JPIERE-0428
+						|| columnName.equals("JP_ProcPeriod_End_Inv_Date")//JPIERE-0428
+						)
 				{
 					list.add(new JPiereContractLineCallout());
 				}

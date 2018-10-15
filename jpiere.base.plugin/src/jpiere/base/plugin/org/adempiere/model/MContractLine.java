@@ -106,19 +106,28 @@ public class MContractLine extends X_JP_ContractLine {
 					|| is_ValueChanged(MContractLine.COLUMNNAME_QtyInvoiced)
 					//Base Doc Line Info
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_BaseDocLinePolicy)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_ID)
 					//Derivative Doc Info
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_Inv)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_InOut_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_InOut_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_InOut_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_InOut_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_InOut_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_InOut_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Inv_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Inv_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Inv_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Inv_ID)
+					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_Inv_Date)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_Inv_ID)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID)
 					|| is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_Inv_ID)
@@ -145,10 +154,16 @@ public class MContractLine extends X_JP_ContractLine {
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_QtyInvoiced));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_BaseDocLinePolicy))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_BaseDocLinePolicy));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Start_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_End_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_End_ID));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_DerivativeDocPolicy_InOut))
@@ -159,16 +174,28 @@ public class MContractLine extends X_JP_ContractLine {
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_InOut_ID));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ContractCalender_Inv_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_InOut_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_InOut_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_InOut_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_InOut_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_InOut_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Start_InOut_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_InOut_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Start_InOut_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_InOut_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_End_InOut_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_InOut_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_End_InOut_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Inv_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Inv_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Inv_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Lump_Inv_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Inv_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Inv_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Inv_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_Start_Inv_ID));
+					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_Inv_Date))
+						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_End_Inv_Date));
 					else if(is_ValueChanged(MContractLine.COLUMNNAME_JP_ProcPeriod_End_Inv_ID))
 						msg = msg.append(" ").append(Msg.getElement(getCtx(), MContractLine.COLUMNNAME_JP_ProcPeriod_End_Inv_ID));
 					else if( is_ValueChanged(MContractLine.COLUMNNAME_JP_ContractProcess_InOut_ID))
@@ -704,8 +731,11 @@ public class MContractLine extends X_JP_ContractLine {
 	{
 		setJP_BaseDocLinePolicy(null);
 		setJP_ProcPeriod_Lump_ID(0);
+		setJP_ProcPeriod_Lump_Date(null);
 		setJP_ProcPeriod_Start_ID(0);
+		setJP_ProcPeriod_Start_Date(null);
 		setJP_ProcPeriod_End_ID(0);
+		setJP_ProcPeriod_End_Date(null);
 	}
 
 	private void setNullCreateDerivativeInOutInfo()
@@ -713,8 +743,11 @@ public class MContractLine extends X_JP_ContractLine {
 		setJP_DerivativeDocPolicy_InOut(null);
 		setJP_ContractCalender_InOut_ID(0);
 		setJP_ProcPeriod_Lump_InOut_ID(0);
+		setJP_ProcPeriod_Lump_InOut_Date(null);
 		setJP_ProcPeriod_Start_InOut_ID(0);
+		setJP_ProcPeriod_Start_InOut_Date(null);
 		setJP_ProcPeriod_End_InOut_ID(0);
+		setJP_ProcPeriod_End_InOut_Date(null);
 		setJP_ContractProcess_InOut_ID(0);
 	}
 
@@ -723,8 +756,11 @@ public class MContractLine extends X_JP_ContractLine {
 		setJP_DerivativeDocPolicy_Inv(null);
 		setJP_ContractCalender_Inv_ID(0);
 		setJP_ProcPeriod_Lump_Inv_ID(0);
+		setJP_ProcPeriod_Lump_Inv_Date(null);
 		setJP_ProcPeriod_Start_Inv_ID(0);
+		setJP_ProcPeriod_Start_Inv_Date(null);
 		setJP_ProcPeriod_End_Inv_ID(0);
+		setJP_ProcPeriod_End_Inv_Date(null);
 		setJP_ContractProcess_Inv_ID(0);
 	}
 
@@ -759,6 +795,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_Lump_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_Lump_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -769,7 +814,9 @@ public class MContractLine extends X_JP_ContractLine {
 
 				}
 				setJP_ProcPeriod_Start_ID(0);
+				setJP_ProcPeriod_Start_Date(null);
 				setJP_ProcPeriod_End_ID(0);
+				setJP_ProcPeriod_End_Date(null);
 			}//LP
 
 			if(getJP_BaseDocLinePolicy().equals("PS") || getJP_BaseDocLinePolicy().equals("PB"))
@@ -791,6 +838,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_Start_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_Start_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -800,8 +856,13 @@ public class MContractLine extends X_JP_ContractLine {
 
 				}
 				setJP_ProcPeriod_Lump_ID(0);
+				setJP_ProcPeriod_Lump_Date(null);
 				if(getJP_BaseDocLinePolicy().equals("PS"))
+				{
 					setJP_ProcPeriod_End_ID(0);
+					setJP_ProcPeriod_End_Date(null);
+				}
+
 			}//PS,PB
 
 			if(getJP_BaseDocLinePolicy().equals("PE") || getJP_BaseDocLinePolicy().equals("PB"))
@@ -822,6 +883,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_End_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_End_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getParent().getJP_ContractCalender_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -831,10 +901,12 @@ public class MContractLine extends X_JP_ContractLine {
 				}
 
 				setJP_ProcPeriod_Lump_ID(0);
+				setJP_ProcPeriod_Lump_Date(null);
 
 				if(getJP_BaseDocLinePolicy().equals("PE"))
 				{
 					setJP_ProcPeriod_Start_ID(0);
+					setJP_ProcPeriod_Start_Date(null);
 				}
 
 				if(getJP_BaseDocLinePolicy().equals("PB") && getJP_ProcPeriod_Start_ID() > 0 && getJP_ProcPeriod_End_ID() > 0 )
@@ -850,9 +922,13 @@ public class MContractLine extends X_JP_ContractLine {
 			}//PS,PB
 
 		}else{ //DD
+
 			setJP_ProcPeriod_Lump_ID(0);
+			setJP_ProcPeriod_Lump_Date(null);
 			setJP_ProcPeriod_Start_ID(0);
+			setJP_ProcPeriod_Start_Date(null);
 			setJP_ProcPeriod_End_ID(0);
+			setJP_ProcPeriod_End_Date(null);
 		}
 
 		return true;
@@ -908,6 +984,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_Lump_InOut_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_Lump_InOut_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_InOut_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -917,7 +1002,9 @@ public class MContractLine extends X_JP_ContractLine {
 
 				}
 				setJP_ProcPeriod_Start_InOut_ID(0);
+				setJP_ProcPeriod_Start_InOut_Date(null);
 				setJP_ProcPeriod_End_InOut_ID(0);
+				setJP_ProcPeriod_End_InOut_Date(null);
 			}//LP
 
 			if(getJP_DerivativeDocPolicy_InOut().equals("PS") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
@@ -938,6 +1025,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_Start_InOut_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_Start_InOut_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_InOut_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -946,8 +1042,13 @@ public class MContractLine extends X_JP_ContractLine {
 					}
 				}
 				setJP_ProcPeriod_Lump_InOut_ID(0);
+				setJP_ProcPeriod_Lump_InOut_Date(null);
 				if(getJP_DerivativeDocPolicy_InOut().equals("PS"))
+				{
 					setJP_ProcPeriod_End_InOut_ID(0);
+					setJP_ProcPeriod_End_InOut_Date(null);
+				}
+
 			}//PS,PB
 
 			if(getJP_DerivativeDocPolicy_InOut().equals("PE") || getJP_DerivativeDocPolicy_InOut().equals("PB"))
@@ -968,6 +1069,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_End_InOut_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_End_InOut_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_InOut_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -977,10 +1087,12 @@ public class MContractLine extends X_JP_ContractLine {
 				}
 
 				setJP_ProcPeriod_Lump_InOut_ID(0);
+				setJP_ProcPeriod_Lump_InOut_Date(null);
 
 				if(getJP_DerivativeDocPolicy_InOut().equals("PE"))
 				{
 					setJP_ProcPeriod_Start_InOut_ID(0);
+					setJP_ProcPeriod_Start_InOut_Date(null);
 				}
 
 				if(getJP_DerivativeDocPolicy_InOut().equals("PB") && getJP_ProcPeriod_Start_InOut_ID() > 0 && getJP_ProcPeriod_End_InOut_ID() > 0 )
@@ -996,9 +1108,13 @@ public class MContractLine extends X_JP_ContractLine {
 			}//PS,PB
 
 		}else{//DD
+
 			setJP_ProcPeriod_Lump_InOut_ID(0);
+			setJP_ProcPeriod_Lump_InOut_Date(null);
 			setJP_ProcPeriod_Start_InOut_ID(0);
+			setJP_ProcPeriod_Start_InOut_Date(null);
 			setJP_ProcPeriod_End_InOut_ID(0);
+			setJP_ProcPeriod_End_InOut_Date(null);
 
 			if(newRecord && parentJP_ContractCalender_ID == 0)
 			{
@@ -1085,6 +1201,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_Lump_Inv_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_Lump_Inv_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_Inv_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -1093,7 +1218,9 @@ public class MContractLine extends X_JP_ContractLine {
 					}
 				}
 				setJP_ProcPeriod_Start_Inv_ID(0);
+				setJP_ProcPeriod_Start_Inv_Date(null);
 				setJP_ProcPeriod_End_Inv_ID(0);
+				setJP_ProcPeriod_End_Inv_Date(null);
 			}//LP
 
 			if(getJP_DerivativeDocPolicy_Inv().equals("PS") || getJP_DerivativeDocPolicy_Inv().equals("PB"))
@@ -1114,6 +1241,15 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_Start_Inv_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_Start_Inv_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_Date"));
+							return false;
+						}
+					}
+
 					if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_Inv_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -1122,8 +1258,13 @@ public class MContractLine extends X_JP_ContractLine {
 					}
 				}
 				setJP_ProcPeriod_Lump_Inv_ID(0);
+				setJP_ProcPeriod_Lump_Inv_Date(null);
 				if(getJP_DerivativeDocPolicy_Inv().equals("PS"))
+				{
 					setJP_ProcPeriod_End_Inv_ID(0);
+					setJP_ProcPeriod_End_Inv_Date(null);
+				}
+
 			}//PS,PB
 
 			if(getJP_DerivativeDocPolicy_Inv().equals("PE") || getJP_DerivativeDocPolicy_Inv().equals("PB"))
@@ -1144,6 +1285,16 @@ public class MContractLine extends X_JP_ContractLine {
 						return false;
 					}
 
+					if(getJP_ProcPeriod_End_Inv_Date() != null)
+					{
+						if(!checkContainContractProcDate(getJP_ProcPeriod_End_Inv_Date()))
+						{
+							log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_OutsideContractProcessPeriod") + " : " + Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_Date"));
+							return false;
+						}
+					}
+
+
 					if(period.getJP_ContractCalender_ID() != getJP_ContractCalender_Inv_ID())
 					{
 						//Inconsistency between Contract Calender and Contract Process Period
@@ -1153,10 +1304,12 @@ public class MContractLine extends X_JP_ContractLine {
 				}
 
 				setJP_ProcPeriod_Lump_Inv_ID(0);
+				setJP_ProcPeriod_Lump_Inv_Date(null);
 
 				if(getJP_DerivativeDocPolicy_Inv().equals("PE"))
 				{
 					setJP_ProcPeriod_Start_Inv_ID(0);
+					setJP_ProcPeriod_Start_Inv_Date(null);
 				}
 
 				if(getJP_DerivativeDocPolicy_Inv().equals("PB") && getJP_ProcPeriod_Start_Inv_ID() > 0 && getJP_ProcPeriod_End_Inv_ID() > 0 )
@@ -1172,9 +1325,13 @@ public class MContractLine extends X_JP_ContractLine {
 			}//PS,PB
 
 		}else{//DD
+
 			setJP_ProcPeriod_Lump_Inv_ID(0);
+			setJP_ProcPeriod_Lump_Inv_Date(null);
 			setJP_ProcPeriod_Start_Inv_ID(0);
+			setJP_ProcPeriod_Start_Inv_Date(null);
 			setJP_ProcPeriod_End_Inv_ID(0);
+			setJP_ProcPeriod_End_Inv_Date(null);
 
 			if(newRecord && parentJP_ContractCalender_ID == 0)
 			{
@@ -1474,6 +1631,27 @@ public class MContractLine extends X_JP_ContractLine {
 		}else{
 			if(getParent().getJP_ContractProcDate_From().compareTo(period.getEndDate()) <= 0
 					&& (getParent().getJP_ContractProcDate_To().compareTo(period.getStartDate()) >= 0) )
+			{
+				return true;
+			}else{
+				return false;
+			}
+		}
+	}
+
+	private boolean checkContainContractProcDate(Timestamp date)
+	{
+		if(getParent().getJP_ContractProcDate_To() == null)
+		{
+			if(getParent().getJP_ContractProcDate_From().compareTo(date) <= 0)
+			{
+				return true;
+			}else{
+				return false;
+			}
+		}else{
+			if(getParent().getJP_ContractProcDate_From().compareTo(date) <= 0
+					&& (getParent().getJP_ContractProcDate_To().compareTo(date) >= 0) )
 			{
 				return true;
 			}else{

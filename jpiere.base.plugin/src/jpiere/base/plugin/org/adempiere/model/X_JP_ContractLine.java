@@ -34,7 +34,7 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180719L;
+	private static final long serialVersionUID = 20181015L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -952,6 +952,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set End Contract Process Date.
+		@param JP_ProcPeriod_End_Date End Contract Process Date	  */
+	public void setJP_ProcPeriod_End_Date (Timestamp JP_ProcPeriod_End_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_End_Date, JP_ProcPeriod_End_Date);
+	}
+
+	/** Get End Contract Process Date.
+		@return End Contract Process Date	  */
+	public Timestamp getJP_ProcPeriod_End_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_End_Date);
+	}
+
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -975,6 +989,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set End Contract Process Date(In/Out).
+		@param JP_ProcPeriod_End_InOut_Date End Contract Process Date(In/Out)	  */
+	public void setJP_ProcPeriod_End_InOut_Date (Timestamp JP_ProcPeriod_End_InOut_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_End_InOut_Date, JP_ProcPeriod_End_InOut_Date);
+	}
+
+	/** Get End Contract Process Date(In/Out).
+		@return End Contract Process Date(In/Out)	  */
+	public Timestamp getJP_ProcPeriod_End_InOut_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_End_InOut_Date);
 	}
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_InOut() throws RuntimeException
@@ -1002,6 +1030,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set End Contract Process Date(Invoice).
+		@param JP_ProcPeriod_End_Inv_Date End Contract Process Date(Invoice)	  */
+	public void setJP_ProcPeriod_End_Inv_Date (Timestamp JP_ProcPeriod_End_Inv_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_End_Inv_Date, JP_ProcPeriod_End_Inv_Date);
+	}
+
+	/** Get End Contract Process Date(Invoice).
+		@return End Contract Process Date(Invoice)	  */
+	public Timestamp getJP_ProcPeriod_End_Inv_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_End_Inv_Date);
+	}
+
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_End_Inv() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -1025,6 +1067,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Date to handle in a lump.
+		@param JP_ProcPeriod_Lump_Date Date to handle in a lump	  */
+	public void setJP_ProcPeriod_Lump_Date (Timestamp JP_ProcPeriod_Lump_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_Lump_Date, JP_ProcPeriod_Lump_Date);
+	}
+
+	/** Get Date to handle in a lump.
+		@return Date to handle in a lump	  */
+	public Timestamp getJP_ProcPeriod_Lump_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_Lump_Date);
 	}
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump() throws RuntimeException
@@ -1052,6 +1108,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set Date to handle in a lump(In/Out).
+		@param JP_ProcPeriod_Lump_InOut_Date Date to handle in a lump(In/Out)	  */
+	public void setJP_ProcPeriod_Lump_InOut_Date (Timestamp JP_ProcPeriod_Lump_InOut_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_Lump_InOut_Date, JP_ProcPeriod_Lump_InOut_Date);
+	}
+
+	/** Get Date to handle in a lump(In/Out).
+		@return Date to handle in a lump(In/Out)	  */
+	public Timestamp getJP_ProcPeriod_Lump_InOut_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_Lump_InOut_Date);
+	}
+
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_InOut() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -1075,6 +1145,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Date to handle in a lump(Invoice).
+		@param JP_ProcPeriod_Lump_Inv_Date Date to handle in a lump(Invoice)	  */
+	public void setJP_ProcPeriod_Lump_Inv_Date (Timestamp JP_ProcPeriod_Lump_Inv_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_Lump_Inv_Date, JP_ProcPeriod_Lump_Inv_Date);
+	}
+
+	/** Get Date to handle in a lump(Invoice).
+		@return Date to handle in a lump(Invoice)	  */
+	public Timestamp getJP_ProcPeriod_Lump_Inv_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_Lump_Inv_Date);
 	}
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Lump_Inv() throws RuntimeException
@@ -1102,6 +1186,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set Start Contract Process Date.
+		@param JP_ProcPeriod_Start_Date Start Contract Process Date	  */
+	public void setJP_ProcPeriod_Start_Date (Timestamp JP_ProcPeriod_Start_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_Start_Date, JP_ProcPeriod_Start_Date);
+	}
+
+	/** Get Start Contract Process Date.
+		@return Start Contract Process Date	  */
+	public Timestamp getJP_ProcPeriod_Start_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_Start_Date);
+	}
+
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -1127,6 +1225,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set Start Contract Process Date(In/Out).
+		@param JP_ProcPeriod_Start_InOut_Date Start Contract Process Date(In/Out)	  */
+	public void setJP_ProcPeriod_Start_InOut_Date (Timestamp JP_ProcPeriod_Start_InOut_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_Start_InOut_Date, JP_ProcPeriod_Start_InOut_Date);
+	}
+
+	/** Get Start Contract Process Date(In/Out).
+		@return Start Contract Process Date(In/Out)	  */
+	public Timestamp getJP_ProcPeriod_Start_InOut_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_Start_InOut_Date);
+	}
+
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start_InOut() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -1150,6 +1262,20 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Start Contract Process Date(Invoice).
+		@param JP_ProcPeriod_Start_Inv_Date Start Contract Process Date(Invoice)	  */
+	public void setJP_ProcPeriod_Start_Inv_Date (Timestamp JP_ProcPeriod_Start_Inv_Date)
+	{
+		set_Value (COLUMNNAME_JP_ProcPeriod_Start_Inv_Date, JP_ProcPeriod_Start_Inv_Date);
+	}
+
+	/** Get Start Contract Process Date(Invoice).
+		@return Start Contract Process Date(Invoice)	  */
+	public Timestamp getJP_ProcPeriod_Start_Inv_Date () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_ProcPeriod_Start_Inv_Date);
 	}
 
 	public I_JP_ContractProcPeriod getJP_ProcPeriod_Start_Inv() throws RuntimeException
