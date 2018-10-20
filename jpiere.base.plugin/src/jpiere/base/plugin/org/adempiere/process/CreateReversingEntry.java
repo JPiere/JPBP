@@ -321,6 +321,7 @@ public class CreateReversingEntry extends SvrProcess {
 		impJournal.setAmtSourceCr(impJournal.getAmtSourceCr().negate());
 		impJournal.setAmtAcctDr(impJournal.getAmtAcctDr().negate());
 		impJournal.setAmtAcctCr(impJournal.getAmtAcctCr().negate());
+		impJournal.setQty(impJournal.getQty().negate());
 
 		if(Util.isEmpty(impJournal.getDocumentNo()))
 			impJournal.setDocumentNo(getDocumentNo(targetFact,JP_DataMigration_Identifier));
