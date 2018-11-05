@@ -61,7 +61,7 @@ public class Doc_BankStatementJP extends Doc
 	}	//	Doc_Bank
 
 	/** Bank Account			*/
-	private int			m_C_BankAccount_ID = 0;
+	protected int			m_C_BankAccount_ID = 0;
 
 	/** Contained Optional Tax Lines    */
 	private DocTax[]        m_taxes = null;
@@ -102,7 +102,7 @@ public class Doc_BankStatementJP extends Doc
 	 *  AMTTYPE_Interest
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines(MBankStatement bs)
+	protected DocLine[] loadLines(MBankStatement bs)
 	{
 		ArrayList<DocLine_BankStatementJP> list = new ArrayList<DocLine_BankStatementJP>();
 		MBankStatementLine[] lines = bs.getLines(false);
@@ -367,7 +367,7 @@ public class Doc_BankStatementJP extends Doc
 	 * 	Get AD_Org_ID from Bank Account
 	 * 	@return AD_Org_ID or 0
 	 */
-	private int getBank_Org_ID ()
+	protected int getBank_Org_ID ()
 	{
 		if (m_C_BankAccount_ID == 0)
 			return 0;
