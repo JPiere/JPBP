@@ -74,7 +74,7 @@ import org.compiere.util.Msg;
 public class MRecognition extends X_JP_Recognition implements DocAction,DocOptions
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -9210893813732918522L;
 
@@ -97,7 +97,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	 * 	Create new Recognition by copying
 	 * 	@param from Recognition
 	 * 	@param dateDoc date of the document date
-	 *  @param acctDate original account date 
+	 *  @param acctDate original account date
 	 * 	@param C_DocTypeTarget_ID target doc type
 	 * 	@param isSOTrx sales order
 	 * 	@param counter create counter links
@@ -118,7 +118,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	 * 	Create new Recognition by copying
 	 * 	@param from invoice
 	 * 	@param dateDoc date of the document date
-	 *  @param acctDate original account date 
+	 *  @param acctDate original account date
 	 * 	@param C_DocTypeTarget_ID target doc type
 	 * 	@param isSOTrx sales order
 	 * 	@param counter create counter links
@@ -173,8 +173,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 
 		return to;
 	}
-	
-	/** 
+
+	/**
 	 *  @deprecated
 	 * 	Create new Recognition by copying
 	 * 	@param from invoice
@@ -224,7 +224,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	 */
 	public static MRecognition get (Properties ctx, int JP_Recognition_ID)
 	{
-		Integer key = new Integer (JP_Recognition_ID);
+		Integer key = Integer.valueOf(JP_Recognition_ID);
 		MRecognition retValue = (MRecognition) s_cache.get (key);
 		if (retValue != null)
 			return retValue;
@@ -283,7 +283,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		super(ctx, rs, trxName);
 	}	//	MRecognition
 
-	/** 
+	/**
 	 * 	Create Recognition from Order
 	 *	@param order order
 	 *	@param C_DocTypeTarget_ID target document type
@@ -315,7 +315,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		setC_BPartner_ID(order.getC_BPartner_ID());
 		setC_BPartner_Location_ID(order.getC_BPartner_Location_ID());
 		setAD_User_ID(order.getAD_User_ID());
-		
+
 		if(order.getBill_BPartner_ID() > 0)
 		{
 			setBill_BPartner_ID(order.getBill_BPartner_ID());
@@ -326,12 +326,12 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			setBill_Location_ID(order.getC_BPartner_Location_ID());
 			setBill_User_ID(order.getAD_User_ID());
 		}
-		
+
 		//Contract Info
 		setJP_Contract_ID(order.get_ValueAsInt("JP_Contract_ID"));
 		setJP_ContractContent_ID(order.get_ValueAsInt("JP_ContractContent_ID"));
 		setJP_ContractProcPeriod_ID(order.get_ValueAsInt("JP_ContractProcPeriod_ID"));
-		
+
 	}	//	MRecognition
 
 
@@ -363,7 +363,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 
 		setC_BPartner_ID(bp.getC_BPartner_ID());
 		//	Set Defaults
-		int ii = 0;	
+		int ii = 0;
 		//
 		if (isSOTrx())
 			ii = bp.getM_PriceList_ID();
@@ -622,18 +622,18 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			line.setJP_Recognition_ID(getJP_Recognition_ID());
 			line.setRecognition(this);
 			line.set_ValueNoCheck ("JP_RecognitionLine_ID", I_ZERO);	// new
-			
+
 			line.setC_OrderLine_ID(fromLine.getC_OrderLine_ID());
 			line.setM_RMALine_ID(fromLine.getM_RMALine_ID());
 			line.setM_InOutLine_ID(fromLine.getM_InOutLine_ID());
 			line.setJP_ContractLine_ID(fromLine.getJP_ContractLine_ID());
 			line.setJP_ContractProcPeriod_ID(fromLine.getJP_ContractProcPeriod_ID());
-			
+
 			line.setQtyEntered(fromLine.getQtyEntered());
 			line.setQtyInvoiced(fromLine.getQtyInvoiced());
 			line.setJP_QtyRecognized(fromLine.getJP_QtyRecognized());
 			line.setJP_TargetQtyRecognized(fromLine.getJP_TargetQtyRecognized());
-			
+
 			line.setM_AttributeSetInstance_ID(0);
 			line.setS_ResourceAssignment_ID(0);
 			//	New Tax
@@ -729,7 +729,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		StringBuilder set = new StringBuilder("SET Processed='")
 		.append((processed ? "Y" : "N"))
 		.append("' WHERE JP_Recognition_ID=").append(getJP_Recognition_ID());
-		
+
 		StringBuilder msgdb = new StringBuilder("UPDATE JP_RecognitionLine ").append(set);
 		int noLine = DB.executeUpdate(msgdb.toString(), get_TrxName());
 		msgdb = new StringBuilder("UPDATE JP_RecognitionTax ").append(set);
@@ -749,7 +749,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
-		
+
 		if(newRecord || is_ValueChanged("M_InOut_ID"))
 		{
 			MInOut io = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
@@ -761,26 +761,26 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_InOutDocCannotCreateRecog"));
 				return false;
 			}
-			
+
 			if(io.getC_Order_ID() == 0 && io.getM_RMA_ID() == 0)
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_CouldNotCreateRecog_NoInOutInfo"));
 				return false;
-			
+
 			}else if(io.getM_RMA_ID() > 0){
-				
+
 				MRMA rma = new MRMA(getCtx(), io.getM_RMA_ID(), get_TrxName());
-				setM_RMA_ID(rma.getM_RMA_ID());					
-			
+				setM_RMA_ID(rma.getM_RMA_ID());
+
 			}else if(io.getC_Order_ID() > 0){
-				
+
 				MOrder order = new MOrder(getCtx(), io.getC_Order_ID(), get_TrxName());
 				setC_Order_ID(order.getC_Order_ID());
 				setDateOrdered(order.getDateOrdered());
-				
-			
+
+
 			}
-			
+
 			//Should be Comment out Because Recognitiond document can not create from InOut when DocAciton Complete
 //			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)
 //					&& !getM_InOut().getDocStatus().equals(DocAction.STATUS_Closed))
@@ -790,8 +790,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 //				return false;
 //			}
 		}
-		
-		
+
+
 		if(newRecord || is_ValueChanged("C_DocTypeTarget_ID"))
 		{
 			if(getM_RMA_ID() > 0)
@@ -800,41 +800,41 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				{
 				  if(!(getC_DocTypeTarget().getDocBaseType().equals("JPS")))
 				  {
-						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx())});						
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx())});
 						log.saveError("Error", msg);
-						return false;  
+						return false;
 				  }
 				}else{
 				  if(!(getC_DocTypeTarget().getDocBaseType().equals("JPY")))
 				  {
-						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx())});						
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "M_RMA_ID", isSOTrx())});
 						log.saveError("Error", msg);
-						return false;  
-				  }				
-				}	
-				
+						return false;
+				  }
+				}
+
 			} else if(getC_Order_ID() > 0) {
-				
+
 				if(isSOTrx())
 				{
 					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPR")))
 					{
-						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});
 						log.saveError("Error", msg);
-						return false;  
+						return false;
 					}
 				}else{
 					if(!(getC_DocTypeTarget().getDocBaseType().equals("JPX")))
 					{
-						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});						
+						String msg = Msg.getMsg(getCtx(),"JP_Inconsistency",new Object[]{Msg.getElement(Env.getCtx(), "C_DocType_ID"),Msg.getElement(Env.getCtx(), "C_Order_ID", isSOTrx())});
 						log.saveError("Error", msg);
-						return false;  
-					}				
+						return false;
+					}
 				}
 			}
 		}
-		
-		
+
+
 		log.fine("");
 		//	No Partner Info - set Template
 		if (getC_BPartner_ID() == 0)
@@ -852,7 +852,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				if (isSOTrx() == pl.isSOPriceList())
 					setM_PriceList_ID(ii);
 			}
-			
+
 			if (getM_PriceList_ID() == 0)
 			{
 				String sql = "SELECT M_PriceList_ID FROM M_PriceList WHERE AD_Client_ID=? AND IsSOPriceList=? AND IsActive='Y' ORDER BY IsDefault DESC";
@@ -919,21 +919,21 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		if (getC_Order_ID() != 0)
 		{
 			//Load invoice lines for afterDelete()
-			getLines();	
+			getLines();
 		}
 		return true;
 	}	//	beforeDelete
-	
+
 	/**
 	 * After Delete
 	 * @param success success
 	 * @return deleted
 	 */
 	protected boolean afterDelete(boolean success) {
-		
+
 		if (!success)
 			return success;
-					
+
 		return true;
 	} //afterDelete
 
@@ -1047,14 +1047,14 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		MPrintFormat format = re.getPrintFormat();
 		// We have a Jasper Print Format
 		// ==============================
-		if(format.getJasperProcess_ID() > 0)	
+		if(format.getJasperProcess_ID() > 0)
 		{
 			ProcessInfo pi = new ProcessInfo ("", format.getJasperProcess_ID());
 			pi.setRecord_ID ( getJP_Recognition_ID() );
 			pi.setIsBatch(true);
-			
+
 			ServerProcessCtl.process(pi, null);
-			
+
 			return pi.getPDFReport();
 		}
 		// Standard Print Format (Non-Jasper)
@@ -1212,7 +1212,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		StringBuilder info = new StringBuilder();
-		
+
 		//	Update Order Lines or RMA Lines
 		MRecognitionLine[] lines = getLines(false);
 		boolean isDiffQty = false;
@@ -1221,7 +1221,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			MRecognitionLine line = lines[i];
 			if(isDiffQty == false && line.getJP_TargetQtyRecognized().compareTo(Env.ZERO) != 0 && line.getJP_QtyRecognized().compareTo(line.getJP_TargetQtyRecognized()) != 0)
 				isDiffQty = true;
-			
+
 			//Update JP_QtyRecognized Order Line
 			MOrderLine ol = null;
 			if (line.getC_OrderLine_ID() != 0 && line.getM_RMALine_ID() == 0)
@@ -1230,22 +1230,22 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				BigDecimal JP_QtyRecognized = (BigDecimal)ol.get_Value("JP_QtyRecognized");
 				if(JP_QtyRecognized == null)
 					JP_QtyRecognized = Env.ZERO;
-				
+
 				if (line.getJP_QtyRecognized() != null)
 				{
 					BigDecimal qtyDelivered = ol.getQtyDelivered();
 					BigDecimal qtyRecognized = JP_QtyRecognized.add(line.getJP_QtyRecognized());
 					if(qtyRecognized.compareTo(qtyDelivered) > 0)
 					{
-						m_processMsg = Msg.getElement(getCtx(), "JP_QtyRecognized") + " > " + Msg.getElement(getCtx(), "QtyDelivered") 
-									+ "  "+Msg.getElement(getCtx(), "JP_ToBeConfirmed") +" : " + Msg.getElement(getCtx(), MRecognitionLine.COLUMNNAME_JP_ContractLine_ID)+" : " + line.getLine(); 
+						m_processMsg = Msg.getElement(getCtx(), "JP_QtyRecognized") + " > " + Msg.getElement(getCtx(), "QtyDelivered")
+									+ "  "+Msg.getElement(getCtx(), "JP_ToBeConfirmed") +" : " + Msg.getElement(getCtx(), MRecognitionLine.COLUMNNAME_JP_ContractLine_ID)+" : " + line.getLine();
 						return DocAction.STATUS_Invalid;
-						
+
 					}else{
 						ol.set_ValueNoCheck("JP_QtyRecognized", qtyRecognized);
 					}
 				}
-				
+
 				if (!ol.save(get_TrxName()))
 				{
 					//Could not update Order Line
@@ -1261,19 +1261,19 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				BigDecimal JP_QtyRecognized = (BigDecimal)rmaLine.get_Value("JP_QtyRecognized");
 				if(JP_QtyRecognized == null)
 					JP_QtyRecognized = Env.ZERO;
-				
+
 				if (line.getJP_QtyRecognized() != null)
 				{
 					rmaLine.set_ValueNoCheck("JP_QtyRecognized", JP_QtyRecognized.add(line.getJP_QtyRecognized() ));
 				}
-				
+
 				if (!rmaLine.save(get_TrxName()))
 				{
 					m_processMsg = "Could not update RMA Line";
 					return DocAction.STATUS_Invalid;
 				}
 			}
-					
+
 		}//	for i
 
 		if(isDiffQty)
@@ -1284,15 +1284,15 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			{
 				splitRecognition(lines);
 			}
-			
+
 		}
-		
+
 		//Create Invoice From Recognition
 		int JP_Contract_Acct_ID = getJP_ContractContent().getJP_Contract_Acct_ID();
 		if(JP_Contract_Acct_ID > 0)
 		{
 			MContractAcct acctInfo = MContractAcct.get(getCtx(), JP_Contract_Acct_ID);
-			if(acctInfo.isPostingContractAcctJP() && acctInfo.isPostingRecognitionDocJP() 
+			if(acctInfo.isPostingContractAcctJP() && acctInfo.isPostingRecognitionDocJP()
 					&& acctInfo.getJP_RecogToInvoicePolicy() != null && acctInfo.getJP_RecogToInvoicePolicy().equals(MContractAcct.JP_RECOGTOINVOICEPOLICY_AfterRecognition))
 			{
 				if(!createInvoiceFromRecog())
@@ -1301,7 +1301,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				}
 			}
 		}
-		
+
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (valid != null)
@@ -1353,7 +1353,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
-		
+
 		if (DOCSTATUS_Closed.equals(getDocStatus())
 			|| DOCSTATUS_Reversed.equals(getDocStatus())
 			|| DOCSTATUS_Voided.equals(getDocStatus()))
@@ -1374,7 +1374,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
 			if (m_processMsg != null)
 				return false;
-			
+
 			//	Set lines to 0
 			MRecognitionLine[] lines = getLines(false);
 			for (int i = 0; i < lines.length; i++)
@@ -1397,15 +1397,15 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		else
 		{
 			boolean accrual = false;
-			try 
+			try
 			{
 				MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
 			}
-			catch (PeriodClosedException e) 
+			catch (PeriodClosedException e)
 			{
 				accrual = true;
 			}
-			
+
 			if (accrual)
 				return reverseAccrualIt();
 			else
@@ -1440,8 +1440,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			m_processMsg = Msg.getMsg(getCtx(), "JP_RecogDocStatusCloseError");
 			return false;
 		}
-		
-		
+
+
 		setProcessed(true);
 		setDocAction(DOCACTION_None);
 
@@ -1474,7 +1474,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			return false;
 
 		m_processMsg = reversal.getDocumentNo();
-		
+
 		return true;
 	}	//	reverseCorrectIt
 
@@ -1484,7 +1484,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			reversalDate = new Timestamp(System.currentTimeMillis());
 		}
 		Timestamp reversalDateRecognitioned = accrual ? reversalDate : getDateAcct();
-		
+
 		MPeriod.testPeriodOpen(getCtx(), reversalDate, getC_DocType_ID(), getAD_Org_ID());
 
 		//
@@ -1494,7 +1494,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		MRecognition reversal = null;
 		if (MSysConfig.getBooleanValue(MSysConfig.Invoice_ReverseUseNewNumber, true, getAD_Client_ID()))
 			reversal = copyFrom (this, reversalDateRecognitioned, reversalDate, getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true);
-		else 
+		else
 			reversal = copyFrom (this, reversalDateRecognitioned, reversalDate, getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true, getDocumentNo()+"^");
 		if (reversal == null)
 		{
@@ -1541,7 +1541,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			return null;
 		}
 		//
-		
+
 		reversal.closeIt();
 		reversal.setProcessing (false);
 		reversal.setDocStatus(DOCSTATUS_Reversed);
@@ -1556,7 +1556,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		setDocStatus(DOCSTATUS_Reversed);	//	may come from void
 		setDocAction(DOCACTION_None);
 
-		
+
 		//Sync Invoice
 		int JP_ContractContent_ID = getJP_ContractContent_ID();
 		if(JP_ContractContent_ID > 0 )
@@ -1566,7 +1566,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			if(JP_Contract_Acct_ID > 0)
 			{
 				MContractAcct acct = MContractAcct.get(Env.getCtx(), JP_Contract_Acct_ID);
-				if(acct.isPostingContractAcctJP() && acct.isPostingRecognitionDocJP() && 
+				if(acct.isPostingContractAcctJP() && acct.isPostingRecognitionDocJP() &&
 						acct.getJP_RecogToInvoicePolicy() != null && acct.getJP_RecogToInvoicePolicy().equals(MContractAcct.JP_RECOGTOINVOICEPOLICY_AfterRecognition))
 				{
 					int C_Invoice_ID = getC_Invoice_ID();
@@ -1576,38 +1576,38 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 						if(accrual)
 						{
 							invoice.processIt(DocAction.ACTION_Reverse_Accrual);
-						
+
 						}else if(!accrual){
-							
-							invoice.processIt(DocAction.ACTION_Reverse_Correct);	
+
+							invoice.processIt(DocAction.ACTION_Reverse_Correct);
 						}
-						
+
 					}else{
-						
+
 						if(!invoice.getDocStatus().equals(DocAction.ACTION_Complete))
 						{
 							invoice.processIt(DocAction.ACTION_Void);
-							
+
 						}else{
-							
+
 							if(MPeriod.isOpen(Env.getCtx(), invoice.getDateAcct(), invoice.getC_DocType().getDocBaseType(), invoice.getAD_Org_ID()))
 							{
 								invoice.processIt(DocAction.ACTION_Reverse_Correct);
 							}else{
 								invoice.processIt(DocAction.ACTION_Reverse_Accrual);
 							}
-							
+
 						}
-						
+
 					}
-					
+
 					invoice.saveEx(get_TrxName());
 				}
-				
+
 			}
 		}
-		
-		
+
+
 		return reversal;
 	}
 
@@ -1628,14 +1628,14 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		MRecognition reversal = reverse(true);
 		if (reversal == null)
 			return false;
-		
+
 		// After reverseAccrual
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
 		if (m_processMsg != null)
 			return false;
 
 		m_processMsg = reversal.getDocumentNo();
-		
+
 		return true;
 	}	//	reverseAccrualIt
 
@@ -1744,7 +1744,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	{
 		m_processMsg = processMsg;
 	}
-	
+
 	/**
 	 * Get tax providers
 	 * @return array of tax provider
@@ -1760,7 +1760,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
             if (provider == null)
             	providers.put(tax.getC_TaxProvider_ID(), new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName()));
 		}
-		
+
 		MTaxProvider[] retValue = new MTaxProvider[providers.size()];
 		providers.values().toArray(retValue);
 		return retValue;
@@ -1771,7 +1771,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	{
 		return getC_DocType_ID() > 0 ? getC_DocType_ID() : getC_DocTypeTarget_ID();
 	}
-	
+
 	static public MRecognition[] getRecognitionsByInOut(Properties ctx, int M_InOut_ID, boolean isReversal, int original_InOut_ID, String trxName)
 	{
 		ArrayList<MRecognition> list = new ArrayList<MRecognition>();
@@ -1800,8 +1800,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
-		
+
+
 		MRecognition[] recogs = new MRecognition[list.size()];
 		list.toArray(recogs);
 		return recogs;
@@ -1809,7 +1809,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 
 	@Override
 	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
-			int AD_Table_ID, String[] docAction, String[] options, int index) 
+			int AD_Table_ID, String[] docAction, String[] options, int index)
 	{
 		if(docStatus.equals(DocAction.STATUS_Completed))
 		{
@@ -1849,15 +1849,15 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		split.setTotalLines(Env.ZERO);
 		split.setGrandTotal(Env.ZERO);
 		split.saveEx();
-		
+
 		setJP_Recognition_SplitTo_ID(split.getJP_Recognition_ID());
-		
+
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRecognitionLine line = lines[i];
 			if(line.getJP_TargetQtyRecognized().compareTo(Env.ZERO) == 0)
 				continue;
-			
+
 			BigDecimal differenceQty = line.getJP_TargetQtyRecognized().subtract(line.getJP_QtyRecognized());
 			if (differenceQty.compareTo(Env.ZERO) == 0)
 				continue;
@@ -1870,16 +1870,16 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			splitLine.setM_RMALine_ID(line.getM_RMALine_ID());
 			splitLine.setM_InOutLine_ID(line.getM_InOutLine_ID());
 			splitLine.setLine(line.getLine());
-			
+
 			splitLine.setQty(differenceQty);
-			
+
 			splitLine.setJP_RecogLine_SplitFrom_ID(line.getJP_RecognitionLine_ID());
 			splitLine.saveEx();
 		}
-		
+
 	}	//	splitRecognition
 
-	
+
 	private boolean createInvoiceFromRecog()
 	{
 		MInOut io = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
@@ -1891,12 +1891,12 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			//Document Type for Shipment of Base Doc DocType is to create Invoice.
 			String msg = Msg.getMsg(getCtx(), "JP_DocTypeForShipmentOfBaseDocDocType") + "  " + Msg.getElement(getCtx(), "DocumentNo") + " : " +getDocumentNo();
 			m_processMsg = msg;
-			return false;	
+			return false;
 		}
-		
+
 		MInvoice invoice = new MInvoice(getCtx(),0, get_TrxName());
 		MOrder order = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
-		
+
 		PO.copyValues(this, invoice);
 		invoice.setC_Invoice_ID(0);
 		if(getBill_BPartner_ID() > 0)
@@ -1914,9 +1914,9 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		invoice.setDocAction(DOCACTION_Complete);
 		invoice.set_ValueNoCheck("JP_Recognition_ID", getJP_Recognition_ID());
 		invoice.saveEx(get_TrxName());
-		
+
 		setC_Invoice_ID(invoice.getC_Invoice_ID());
-		
+
 		MRecognitionLine[] rLines = getLines();
 		for(int i = 0; i < rLines.length; i++)
 		{
@@ -1928,16 +1928,16 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			iLine.set_ValueNoCheck("JP_RecognitionLine_ID", rLines[i].getJP_RecognitionLine_ID());
 			iLine.setM_InOutLine_ID(rLines[i].getM_InOutLine_ID());
 			iLine.saveEx(get_TrxName());
-			
+
 			rLines[i].setC_InvoiceLine_ID(iLine.getC_InvoiceLine_ID());
 			rLines[i].saveEx(get_TrxName());
 		}//for
-		
+
 		invoice.processIt(ACTION_Complete);
 		if(!invoice.getDocStatus().equals(STATUS_Completed))
 			invoice.saveEx(get_TrxName());
-		
+
 		return true;
 	}//createInvoiceFromRecog()
-	
+
 }	//	MRecognition

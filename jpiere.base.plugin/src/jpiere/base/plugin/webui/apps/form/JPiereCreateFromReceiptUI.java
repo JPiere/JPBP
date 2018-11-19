@@ -75,7 +75,7 @@ import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 /**
  * JPIERE-0343:Create Receipt from PO Orders
- * 
+ *
  * @author Low Heng Sin
  * @author Hideaki Hagiwara
  *
@@ -123,14 +123,14 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 	protected Listbox orderField = ListboxFactory.newDropdownListbox();
 
 	protected Checkbox sameWarehouseCb = new Checkbox();
-	
+
 	protected Checkbox shipFromScheduledShipLocatorCb = new Checkbox();
-	
+
 	protected Checkbox selectPhysicalWarehouseCb = new Checkbox();
-	
+
 	protected Label locatorLabel = new Label();
 	protected WSearchEditor locatorField = null;
-	
+
 	protected Label upcLabel = new Label();
 	protected WStringEditor upcField = new WStringEditor();
 
@@ -149,15 +149,15 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 
 		sameWarehouseCb.setSelected(true);
 		sameWarehouseCb.addActionListener(this);
-		
+
 		shipFromScheduledShipLocatorCb.setSelected(true);
 		shipFromScheduledShipLocatorCb.addActionListener(this);
-		
+
 		boolean checkSelectPhyWH = MSysConfig.getBooleanValue("JP_CREATE_FROM_RECEIPT_SELECT_PHYHW_CHECK", false, Env.getAD_Client_ID(Env.getCtx()),Env.getAD_Org_ID(Env.getCtx()) );
 		selectPhysicalWarehouseCb.setSelected(checkSelectPhyWH);
 		isSelectPhysicalWarehouse = checkSelectPhyWH;
 		selectPhysicalWarehouseCb.addActionListener(this);
-		
+
 		//  load Locator
 		int AD_Column_ID = MColumn.getColumn_ID("M_InOutLine", "M_Locator_ID");
 		MLookup lookupLocator = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, AD_Column_ID, DisplayType.Search);
@@ -205,7 +205,7 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
         sameWarehouseCb.setTooltiptext(Msg.getMsg(Env.getCtx(), "JP_FromSameWarehouseOnlyPO", true));
         shipFromScheduledShipLocatorCb.setText(Msg.getMsg(Env.getCtx(), "JP_ReceiptAtScheduledReceiptLocator", true));
         selectPhysicalWarehouseCb.setText(Msg.getMsg(Env.getCtx(), "JP_SelectByPhyWH", true));
-        
+
         upcLabel.setText(Msg.getElement(Env.getCtx(), "UPC", false));
 
 		Vlayout vlayout = new Vlayout();
@@ -220,7 +220,7 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 		Rows rows = (Rows) parameterStdLayout.newRows();
 		Row row = rows.newRow();
 		row.appendCellChild(bPartnerLabel.rightAlign(),2);			//2
-		if (bPartnerField != null) 
+		if (bPartnerField != null)
 		{
 			row.appendCellChild(bPartnerField.getComponent(), 10);	//12
 			bPartnerField.fillHorizontal();
@@ -233,23 +233,23 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 		row.appendCellChild(orderLabel.rightAlign(),2);	//8
 		row.appendCellChild(orderField,4);				//12
 		orderField.setHflex("1");
-		
+
 		row = rows.newRow();
-		row.appendCellChild(new Space(),2);			
+		row.appendCellChild(new Space(),2);
 		row.appendCellChild(shipFromScheduledShipLocatorCb,3);
        	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
 		row.appendCellChild(new Space());
 		row.appendCellChild(locatorLabel.rightAlign(),2);
 		row.appendCellChild(locatorField.getComponent(),4);
 		locatorField.fillHorizontal();
-		
+
 		row = rows.newRow();
-		row.appendCellChild(new Space(),2);	
+		row.appendCellChild(new Space(),2);
 		row.appendCellChild(selectPhysicalWarehouseCb,3);
 		isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected();
 		if(Doc_PhysicalWarehouse_ID==0)
 			selectPhysicalWarehouseCb.setVisible(false);
-			
+
 		row.appendCellChild(new Space());
 		row.appendCellChild(upcLabel.rightAlign(),2);
 		row.appendCellChild(upcField.getComponent(),4);
@@ -293,14 +293,14 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
            	isShipFromScheduledShipLocator = shipFromScheduledShipLocatorCb.isSelected();
         }
         else if (e.getTarget().equals(selectPhysicalWarehouseCb)){
-        	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected(); 
+        	isSelectPhysicalWarehouse = selectPhysicalWarehouseCb.isSelected();
     		ListItem selectedListItem = orderField.getSelectedItem();
     		int C_Order_ID = ((Integer)selectedListItem.getValue()).intValue();
     		if(C_Order_ID > 0)
     			loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
     		else if(C_Order_ID <= 0)
     			orderField.setSelectedIndex(0);
-    		
+
     		orderField.addActionListener(this);
         }
 		else if (e.getTarget().equals(upcField.getComponent()))
@@ -345,9 +345,9 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 	 *
 	 */
 	private int findProductRow(int M_Product_ID)
-	{	
+	{
 		//DefaultTableModel model = (DefaultTableModel)dialog.getMiniTable().getModel();
-		ListModelTable model = (ListModelTable) window.getWListbox().getModel();		
+		ListModelTable model = (ListModelTable) window.getWListbox().getModel();
 		KeyNamePair kp;
 		for (int i=0; i<model.getRowCount(); i++) {
 			kp = (KeyNamePair)model.getValueAt(i, 5);
@@ -398,7 +398,7 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, true, true, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
-		bPartnerField.setValue(new Integer(C_BPartner_ID));
+		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
 		initBPOrderDetails(C_BPartner_ID, forInvoice);
@@ -431,10 +431,10 @@ public class JPiereCreateFromReceiptUI extends JPiereCreateFromReceipt implement
 				loadOrder(C_Order_ID, false, locatorField.getValue()!=null?((Integer)locatorField.getValue()).intValue():0);
 			}
 		}
-		
+
 		if(C_Order_ID <= 0)
 			orderField.setSelectedIndex(0);
-		
+
 		orderField.addActionListener(this);
 
 	}   //  initBPartnerOIS

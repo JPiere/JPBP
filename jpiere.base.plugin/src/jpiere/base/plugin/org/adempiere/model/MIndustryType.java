@@ -18,24 +18,25 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
+
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
 
 /**
  * JPIERE-0290 Industory Types Master
- * 
+ *
  * @author h.hagiwara
  *
  */
 public class MIndustryType extends X_JP_IndustryType {
-	
-	
-	public MIndustryType(Properties ctx, int JP_IndustryType_ID, String trxName) 
+
+
+	public MIndustryType(Properties ctx, int JP_IndustryType_ID, String trxName)
 	{
 		super(ctx, JP_IndustryType_ID, trxName);
 	}
-	
+
 	public MIndustryType(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
@@ -43,7 +44,7 @@ public class MIndustryType extends X_JP_IndustryType {
 
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MIndustryType>	s_cache = new CCache<Integer,MIndustryType>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -52,7 +53,7 @@ public class MIndustryType extends X_JP_IndustryType {
 	 */
 	public static MIndustryType get (Properties ctx, int JP_IndustryTyp_ID)
 	{
-		Integer ii = new Integer (JP_IndustryTyp_ID);
+		Integer ii = Integer.valueOf(JP_IndustryTyp_ID);
 		MIndustryType retValue = (MIndustryType)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -61,10 +62,10 @@ public class MIndustryType extends X_JP_IndustryType {
 			s_cache.put (JP_IndustryTyp_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	private MCorporation[] m_Corporations = null;
-	
+
 	public MCorporation[] getCorporations (boolean requery)
 	{
 		if(m_Corporations != null && !requery)

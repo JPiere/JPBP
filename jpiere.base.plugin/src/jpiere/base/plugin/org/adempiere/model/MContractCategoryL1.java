@@ -24,26 +24,26 @@ import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
 public class MContractCategoryL1 extends X_JP_ContractCategoryL1 {
-	
+
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MContractCategoryL1>	s_cache = new CCache<Integer,MContractCategoryL1>(Table_Name, 20);
-	
-	public MContractCategoryL1(Properties ctx, int JP_ContractCategoryL1_ID, String trxName) 
+
+	public MContractCategoryL1(Properties ctx, int JP_ContractCategoryL1_ID, String trxName)
 	{
 		super(ctx, JP_ContractCategoryL1_ID, trxName);
 	}
-	
-	public MContractCategoryL1(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractCategoryL1(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	@Override
 	protected boolean beforeSave(boolean newRecord) {
 		return super.beforeSave(newRecord);
 	}
 
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -52,7 +52,7 @@ public class MContractCategoryL1 extends X_JP_ContractCategoryL1 {
 	 */
 	public static MContractCategoryL1 get (Properties ctx, int JP_ContractCategoryL1_ID)
 	{
-		Integer ii = new Integer (JP_ContractCategoryL1_ID);
+		Integer ii = Integer.valueOf(JP_ContractCategoryL1_ID);
 		MContractCategoryL1 retValue = (MContractCategoryL1)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -61,11 +61,11 @@ public class MContractCategoryL1 extends X_JP_ContractCategoryL1 {
 			s_cache.put (JP_ContractCategoryL1_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
-	
+
+
+
 	private MContractCategory[] m_ContractCategories = null;
-	
+
 	public MContractCategory[] getContractCategories (boolean requery)
 	{
 		if(m_ContractCategories != null && !requery)
@@ -98,5 +98,5 @@ public class MContractCategoryL1 extends X_JP_ContractCategoryL1 {
 		return m_ContractCategories;
 	}
 
-	
+
 }

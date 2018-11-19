@@ -30,21 +30,21 @@ import org.compiere.util.Msg;
 *
 */
 public class MContractProcPeriod extends X_JP_ContractProcPeriod {
-	
-	public MContractProcPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName) 
+
+	public MContractProcPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
 	{
 		super(ctx, JP_ContractProcPeriod_ID, trxName);
 	}
-	
-	public MContractProcPeriod(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractProcPeriod(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
-	
+
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractProcPeriod>	s_cache = new CCache<Integer,MContractProcPeriod>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -53,7 +53,7 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 	 */
 	public static MContractProcPeriod get (Properties ctx, int JP_ContractProcPeriod_ID)
 	{
-		Integer ii = new Integer (JP_ContractProcPeriod_ID);
+		Integer ii = Integer.valueOf(JP_ContractProcPeriod_ID);
 		MContractProcPeriod retValue = (MContractProcPeriod)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -62,16 +62,16 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 			s_cache.put (JP_ContractProcPeriod_ID, retValue);
 		return retValue;
 	}	//	get
-	
+
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) 
+	protected boolean beforeSave(boolean newRecord)
 	{
-		
+
 		if(newRecord || ( is_ValueChanged("StartDate") || is_ValueChanged("EndDate") ) )
 		{
 			boolean isUnique = true;
-			
+
 			//Check Overlapping form StartDate to EndDate
 			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod WHERE StartDate <= ? AND EndDate >=? AND JP_ContractCalender_ID=? ";
 			PreparedStatement pstmt = null;
@@ -104,17 +104,17 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 				DB.close(rs, pstmt);
 				rs = null; pstmt = null;
 			}
-			
+
 			if(!isUnique)
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_OverlapPeriod"));//Overlap Period
 				return false;
 			}
-			
+
 		}
-		
-		
-		
+
+
+
 		if(newRecord || is_ValueChanged("DateAcct") || ( is_ValueChanged("StartDate") || is_ValueChanged("EndDate") ) )
 		{
 			if(getStartDate().compareTo(getDateAcct()) > 0 || getEndDate().compareTo(getDateAcct()) < 0)
@@ -124,23 +124,23 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 				return false;
 			}
 		}
-		
-		
+
+
 		return true;
 	}
 
 	@Override
-	public String toString() 
+	public String toString()
 	{
 		return getName();
 	}
-	
+
 	public boolean isContainedBaseDocContractProcPeriod(int BaseDoc_ContractProcPeriod_ID)
-	{		
+	{
 		return isContainedBaseDocContractProcPeriod(MContractProcPeriod.get(getCtx(), BaseDoc_ContractProcPeriod_ID));
 	}
-	
-	
+
+
 	public boolean isContainedBaseDocContractProcPeriod(MContractProcPeriod BaseDoc_ContractProcPeriod)
 	{
 		if(getStartDate().compareTo(BaseDoc_ContractProcPeriod.getStartDate()) >= 0

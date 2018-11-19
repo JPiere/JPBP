@@ -79,7 +79,7 @@ public abstract class JPiereCreateFromStatement extends JPiereCreateFromBatch
 			while(rs.next())
 			{
 				Vector<Object> line = new Vector<Object>(6);
-				line.add(new Boolean(false));       //  0-Selection
+				line.add(Boolean.valueOf(false));       //  0-Selection
 				line.add(rs.getTimestamp(1));       //  1-DateTrx
 				KeyNamePair pp = new KeyNamePair(rs.getInt(2), rs.getString(3));
 				line.add(pp);                       //  2-C_Payment_ID

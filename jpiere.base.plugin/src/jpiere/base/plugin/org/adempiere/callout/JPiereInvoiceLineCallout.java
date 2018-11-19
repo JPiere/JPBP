@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.callout;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Properties;
 
 import org.adempiere.base.IColumnCallout;
@@ -50,33 +51,33 @@ public class JPiereInvoiceLineCallout implements IColumnCallout {
 			if (ol.get_ID() != 0)
 			{
 				if (ol.getC_Charge_ID() > 0 && ol.getM_Product_ID() <= 0) {
-					mTab.setValue("C_Charge_ID", new Integer(ol.getC_Charge_ID()));
+					mTab.setValue("C_Charge_ID", Integer.valueOf(ol.getC_Charge_ID()));
 					mTab.setValue("M_Product_ID", null);
 					mTab.setValue("M_AttributeSetInstance_ID", null);
 				}
 				else {
-					mTab.setValue("M_Product_ID", new Integer(ol.getM_Product_ID()));
-					mTab.setValue("M_AttributeSetInstance_ID", new Integer(ol.getM_AttributeSetInstance_ID()));
+					mTab.setValue("M_Product_ID", Integer.valueOf(ol.getM_Product_ID()));
+					mTab.setValue("M_AttributeSetInstance_ID", Integer.valueOf(ol.getM_AttributeSetInstance_ID()));
 					mTab.setValue("C_Charge_ID", null);
 				}
 				//
-				mTab.setValue("C_UOM_ID", new Integer(ol.getC_UOM_ID()));
+				mTab.setValue("C_UOM_ID", Integer.valueOf(ol.getC_UOM_ID()));
 				BigDecimal qtyInvoiced = ol.getQtyOrdered().subtract(ol.getQtyInvoiced());
 				mTab.setValue("QtyInvoiced", qtyInvoiced);
 				BigDecimal QtyEntered = qtyInvoiced;
 				if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
 					QtyEntered = QtyEntered.multiply(ol.getQtyEntered())
-						.divide(ol.getQtyOrdered(), 12, BigDecimal.ROUND_HALF_UP);
+						.divide(ol.getQtyOrdered(), 12, RoundingMode.HALF_UP);
 				mTab.setValue("QtyEntered", QtyEntered);
 				//
-				mTab.setValue("C_Activity_ID", new Integer(ol.getC_Activity_ID()));
-				mTab.setValue("C_Campaign_ID", new Integer(ol.getC_Campaign_ID()));
-				mTab.setValue("C_Project_ID", new Integer(ol.getC_Project_ID()));
-				mTab.setValue("C_ProjectPhase_ID", new Integer(ol.getC_ProjectPhase_ID()));
-				mTab.setValue("C_ProjectTask_ID", new Integer(ol.getC_ProjectTask_ID()));
-				mTab.setValue("AD_OrgTrx_ID", new Integer(ol.getAD_OrgTrx_ID()));
-				mTab.setValue("User1_ID", new Integer(ol.getUser1_ID()));
-				mTab.setValue("User2_ID", new Integer(ol.getUser2_ID()));
+				mTab.setValue("C_Activity_ID", Integer.valueOf(ol.getC_Activity_ID()));
+				mTab.setValue("C_Campaign_ID", Integer.valueOf(ol.getC_Campaign_ID()));
+				mTab.setValue("C_Project_ID", Integer.valueOf(ol.getC_Project_ID()));
+				mTab.setValue("C_ProjectPhase_ID", Integer.valueOf(ol.getC_ProjectPhase_ID()));
+				mTab.setValue("C_ProjectTask_ID", Integer.valueOf(ol.getC_ProjectTask_ID()));
+				mTab.setValue("AD_OrgTrx_ID", Integer.valueOf(ol.getAD_OrgTrx_ID()));
+				mTab.setValue("User1_ID", Integer.valueOf(ol.getUser1_ID()));
+				mTab.setValue("User2_ID", Integer.valueOf(ol.getUser2_ID()));
 			}
 		}	//	orderLine
 

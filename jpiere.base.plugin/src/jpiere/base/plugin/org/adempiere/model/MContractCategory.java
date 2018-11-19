@@ -31,21 +31,21 @@ import org.compiere.util.DB;
  *
  */
 public class MContractCategory extends X_JP_ContractCategory {
-	
-	public MContractCategory(Properties ctx, int JP_ContractCategory_ID, String trxName) 
+
+	public MContractCategory(Properties ctx, int JP_ContractCategory_ID, String trxName)
 	{
 		super(ctx, JP_ContractCategory_ID, trxName);
 	}
-	
-	public MContractCategory(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractCategory(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 
 	}
-	
+
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MContractCategory>	s_cache = new CCache<Integer,MContractCategory>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -54,7 +54,7 @@ public class MContractCategory extends X_JP_ContractCategory {
 	 */
 	public static MContractCategory get (Properties ctx, int JP_ContractCategory_ID)
 	{
-		Integer ii = new Integer (JP_ContractCategory_ID);
+		Integer ii = Integer.valueOf (JP_ContractCategory_ID);
 		MContractCategory retValue = (MContractCategory)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -63,10 +63,10 @@ public class MContractCategory extends X_JP_ContractCategory {
 			s_cache.put (JP_ContractCategory_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	private MContract[] m_Contracts = null;
-	
+
 	public MContract[] getContracts (boolean requery)
 	{
 		if(m_Contracts != null && !requery)
@@ -98,9 +98,9 @@ public class MContractCategory extends X_JP_ContractCategory {
 		list.toArray(m_Contracts);
 		return m_Contracts;
 	}
-	
+
 	private MContractT[] m_ContractTemplates = null;
-	
+
 	public MContractT[] getContractTemplates (boolean requery)
 	{
 		if(m_ContractTemplates != null && !requery)

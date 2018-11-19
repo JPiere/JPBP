@@ -31,20 +31,20 @@ import org.compiere.util.DB;
  *
  */
 public class MBusinessUnit extends X_JP_BusinessUnit {
-	
-	public MBusinessUnit(Properties ctx, int JP_BusinessUnit_ID, String trxName) 
+
+	public MBusinessUnit(Properties ctx, int JP_BusinessUnit_ID, String trxName)
 	{
 		super(ctx, JP_BusinessUnit_ID, trxName);
 	}
-	
-	public MBusinessUnit(Properties ctx, ResultSet rs, String trxName) 
+
+	public MBusinessUnit(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MBusinessUnit>	s_cache = new CCache<Integer,MBusinessUnit>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -53,7 +53,7 @@ public class MBusinessUnit extends X_JP_BusinessUnit {
 	 */
 	public static MBusinessUnit get (Properties ctx, int JP_BusinessUnit_ID)
 	{
-		Integer ii = new Integer (JP_BusinessUnit_ID);
+		Integer ii = Integer.valueOf(JP_BusinessUnit_ID);
 		MBusinessUnit retValue = (MBusinessUnit)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -62,10 +62,10 @@ public class MBusinessUnit extends X_JP_BusinessUnit {
 			s_cache.put (JP_BusinessUnit_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	private MOrg[] m_Orgs = null;
-	
+
 	public MOrg[] getOrgs (boolean requery)
 	{
 		if(m_Orgs != null && !requery)

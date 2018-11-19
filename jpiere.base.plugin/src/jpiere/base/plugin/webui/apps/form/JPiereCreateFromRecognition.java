@@ -14,6 +14,7 @@
 package jpiere.base.plugin.webui.apps.form;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,7 +49,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  * @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * 			<li>BF [ 1896947 ] Generate invoice from Order error
  * 			<li>BF [ 2007837 ] VCreateFrom.save() should run in trx
- * 
+ *
  * @author Hideaki Hagiwara
  */
 public abstract class JPiereCreateFromRecognition extends CreateFrom
@@ -155,7 +156,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 //				+ "l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line, l.C_OrderLine_ID ")
 //			.append(" HAVING l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)) <>0")
 //			.append(" ORDER BY l.Line");
-		
+
 		StringBuilder sql = new StringBuilder("SELECT ");	//	QtyEntered
 		sql.append("l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)),");
 		sql.append(" l.QtyEntered/l.MovementQty,"
@@ -180,7 +181,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 				+ "l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line, l.C_OrderLine_ID ");
 		sql.append(" HAVING l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)) <>0");
 		sql.append("ORDER BY l.Line");
-		
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -191,7 +192,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 			while (rs.next())
 			{
 				Vector<Object> line = new Vector<Object>(7);
-				line.add(new Boolean(false));           //  0-Selection
+				line.add(Boolean.valueOf(false));           //  0-Selection
 				BigDecimal qtyMovement = rs.getBigDecimal(1);
 				BigDecimal multiplier = rs.getBigDecimal(2);
 				BigDecimal qtyEntered = qtyMovement.multiply(multiplier);
@@ -298,7 +299,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 					product = MProduct.get(Env.getCtx(), M_Product_ID);
 					precision = product.getUOMPrecision();
 				}
-				QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_DOWN);
+				QtyEntered = QtyEntered.setScale(precision, RoundingMode.HALF_UP);
 				//
 				if (log.isLoggable(Level.FINE)) log.fine("Line QtyEntered=" + QtyEntered
 					+ ", Product_ID=" + M_Product_ID
@@ -386,7 +387,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 
 				}
 				//	get Ship info
-				
+
 				//	Shipment Info
 				if (inoutLine != null)
 				{

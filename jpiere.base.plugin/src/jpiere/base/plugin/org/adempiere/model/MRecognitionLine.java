@@ -15,6 +15,7 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -184,7 +185,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 */
 	public static MRecognitionLine get (Properties ctx, int JP_RecognitionLine_ID)
 	{
-		Integer ii = new Integer (JP_RecognitionLine_ID);
+		Integer ii = Integer.valueOf(JP_RecognitionLine_ID);
 		MRecognitionLine retValue = (MRecognitionLine)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -228,7 +229,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		m_C_BPartner_ID = recognition.getC_BPartner_ID();
 		m_C_BPartner_Location_ID = recognition.getC_BPartner_Location_ID();
 		m_IsSOTrx = recognition.isSOTrx();
-		m_precision = new Integer(recognition.getPrecision());
+		m_precision = Integer.valueOf(recognition.getPrecision());
 	}	//	setOrder
 
 	/**
@@ -379,7 +380,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
 	{
 		if (M_AttributeSetInstance_ID == 0)		//	 0 is valid ID
-			set_Value("M_AttributeSetInstance_ID", new Integer(0));
+			set_Value("M_AttributeSetInstance_ID", Integer.valueOf(0));
 		else
 			super.setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
 	}	//	setM_AttributeSetInstance_ID
@@ -424,7 +425,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			setPriceEntered(getPriceActual());
 		else
 			setPriceEntered(getPriceActual().multiply(getQtyInvoiced()
-				.divide(getQtyEntered(), 6, BigDecimal.ROUND_HALF_UP)));	//	precision
+				.divide(getQtyEntered(), 6, RoundingMode.HALF_UP)));	//	precision
 		//
 		if (getC_UOM_ID() == 0)
 			setC_UOM_ID(m_productPricing.getC_UOM_ID());
@@ -554,7 +555,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		}
 		int precision = getPrecision();
 		if (bd.scale() > precision)
-			bd = bd.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			bd = bd.setScale(precision, RoundingMode.HALF_UP);
 		super.setLineNetAmt (bd);
 	}	//	setLineNetAmt
 	/**
@@ -608,7 +609,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		if (QtyEntered != null && getC_UOM_ID() != 0)
 		{
 			int precision = MUOM.getPrecision(getCtx(), getC_UOM_ID());
-			QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			QtyEntered = QtyEntered.setScale(precision, RoundingMode.HALF_UP);
 		}
 		super.setQtyEntered (QtyEntered);
 	}	//	setQtyEntered
@@ -623,7 +624,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		if (QtyInvoiced != null && product != null)
 		{
 			int precision = product.getUOMPrecision();
-			QtyInvoiced = QtyInvoiced.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			QtyInvoiced = QtyInvoiced.setScale(precision, RoundingMode.HALF_UP);
 		}
 		super.setQtyInvoiced(QtyInvoiced);
 	}	//	setQtyInvoiced
@@ -848,7 +849,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			log.warning("getPrecision = " + i + " - set to 2");
 			i = 2;
 		}
-		m_precision = new Integer(i);
+		m_precision = Integer.valueOf(i);
 		return m_precision.intValue();
 	}	//	getPrecision
 

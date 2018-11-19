@@ -31,19 +31,19 @@ import org.compiere.util.DB;
 *
 */
 public class MContractAcct extends X_JP_Contract_Acct {
-	
+
 	public MContractAcct(Properties ctx, int JP_Contract_Acct_ID, String trxName)
 	{
 		super(ctx, JP_Contract_Acct_ID, trxName);
 	}
-	
-	public MContractAcct(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractAcct(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) 
+	protected boolean beforeSave(boolean newRecord)
 	{
 		//Check Base Doc Type
 		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_DocBaseType))
@@ -52,16 +52,16 @@ public class MContractAcct extends X_JP_Contract_Acct {
 					|| getDocBaseType().equals("ARI"))
 			{
 				setIsSOTrx(true);
-				
+
 			}else if(getDocBaseType().equals("POO")
 					|| getDocBaseType().equals("API"))
 			{
 				setIsSOTrx(false);
 			}
-			
+
 		}
-		
-		
+
+
 		//Check IsPostingContractAcctJP and IsPostingRecognitionDocJP
 		if(newRecord ||( is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingContractAcctJP)
 						|| is_ValueChanged(MContractAcct.COLUMNNAME_DocBaseType) ))
@@ -76,7 +76,7 @@ public class MContractAcct extends X_JP_Contract_Acct {
 				setJP_RecogToInvoicePolicy(null);
 			}
 		}
-		
+
 		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingRecognitionDocJP))
 		{
 			if(!isPostingRecognitionDocJP())
@@ -86,14 +86,14 @@ public class MContractAcct extends X_JP_Contract_Acct {
 				setJP_RecogToInvoicePolicy(null);
 			}
 		}
-		
+
 		return true;
 	}
-	
-	
+
+
 	/**	Cache				*/
 	private static CCache<Integer, MContractAcct>	s_cache = new CCache<Integer, MContractAcct>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -102,7 +102,7 @@ public class MContractAcct extends X_JP_Contract_Acct {
 	 */
 	public static MContractAcct get (Properties ctx, int JP_Contract_Acct_ID)
 	{
-		Integer ii = new Integer (JP_Contract_Acct_ID);
+		Integer ii = Integer.valueOf(JP_Contract_Acct_ID);
 		MContractAcct retValue = (MContractAcct)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -111,19 +111,19 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			s_cache.put (JP_Contract_Acct_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 
 	HashMap<Integer, MContractBPAcct> contractBPAcct = null;
-	
+
 	public MContractBPAcct getContractBPAcct(int C_AcctSchema_ID, boolean reload)
 	{
 		if (reload || contractBPAcct == null || contractBPAcct.size() == 0)
 			getAllContractBPAccts (reload);
-		
+
 		if(contractBPAcct == null || contractBPAcct.size() == 0)
 			return null;
-		
+
 		if(contractBPAcct.containsKey(C_AcctSchema_ID))
 		{
 			return contractBPAcct.get(C_AcctSchema_ID);
@@ -131,7 +131,7 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			return null;
 		}
 	}
-	
+
 	public HashMap<Integer, MContractBPAcct>  getAllContractBPAccts (boolean reload)
 	{
 		if (reload || contractBPAcct == null || contractBPAcct.size() == 0)
@@ -166,20 +166,20 @@ public class MContractAcct extends X_JP_Contract_Acct {
 
 		return contractBPAcct;
 	}	//	getContractBPAcct
-	
-	
+
+
 	//M_Product_Category_ID and C_AcctSchema_ID
 	HashMap<Integer, HashMap<Integer, MContractProductAcct>> contractProductAcct = null;
-	
-	
+
+
 	public MContractProductAcct getContractProductAcct(int M_Product_Category_ID,  int C_AcctSchema_ID, boolean reload)
 	{
 		if (reload || contractProductAcct == null || contractProductAcct.size() == 0)
 			getAllContractProductAccts (reload);
-		
+
 		if(contractProductAcct == null || contractProductAcct.size() == 0)
 			return null;
-		
+
 		if(contractProductAcct.containsKey(M_Product_Category_ID))
 		{
 			if(contractProductAcct.get(M_Product_Category_ID).containsKey(C_AcctSchema_ID))
@@ -188,13 +188,13 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			}else{
 				return null;
 			}
-				
+
 		}else{
 			return null;
 		}
 	}
-	
-	
+
+
 	public HashMap<Integer, HashMap<Integer, MContractProductAcct>> getAllContractProductAccts (boolean reload)
 	{
 		if (reload || contractProductAcct == null || contractProductAcct.size() == 0)
@@ -230,22 +230,22 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		}
 
 		return contractProductAcct;
-	}	
-	
-	
-	
+	}
+
+
+
 	//C_Tax_ID and C_AcctSchema_ID
 	HashMap<Integer, HashMap<Integer, MContractTaxAcct>> contractTaxAcct = null;
-	
-	
+
+
 	public MContractTaxAcct getContracTaxAcct(int C_Tax_ID,  int C_AcctSchema_ID, boolean reload)
 	{
 		if (reload || contractTaxAcct == null || contractTaxAcct.size() == 0)
 			getAllContractTaxAccts (reload);
-		
+
 		if(contractTaxAcct == null || contractTaxAcct.size() == 0)
 			return null;
-		
+
 		if(contractTaxAcct.containsKey(C_Tax_ID))
 		{
 			if(contractTaxAcct.get(C_Tax_ID).containsKey(C_AcctSchema_ID))
@@ -254,13 +254,13 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			}else{
 				return null;
 			}
-				
+
 		}else{
 			return null;
 		}
 	}
-	
-	
+
+
 	public HashMap<Integer, HashMap<Integer, MContractTaxAcct>> getAllContractTaxAccts (boolean reload)
 	{
 		if (reload || contractTaxAcct == null || contractTaxAcct.size() == 0)
@@ -296,21 +296,21 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		}
 
 		return contractTaxAcct;
-	}	
+	}
 
-	
+
 	//C_Charge_ID and C_AcctSchema_ID
 	HashMap<Integer, HashMap<Integer, MContractChargeAcct>> contractChargeAcct = null;
-	
-	
+
+
 	public MContractChargeAcct getContracChargeAcct(int C_Charge_ID,  int C_AcctSchema_ID, boolean reload)
 	{
 		if (reload || contractChargeAcct == null || contractChargeAcct.size() == 0)
 			getAllContractChargeAccts (reload);
-		
+
 		if(contractChargeAcct == null || contractChargeAcct.size() == 0)
 			return null;
-		
+
 		if(contractChargeAcct.containsKey(C_Charge_ID))
 		{
 			if(contractChargeAcct.get(C_Charge_ID).containsKey(C_AcctSchema_ID))
@@ -319,13 +319,13 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			}else{
 				return null;
 			}
-				
+
 		}else{
 			return null;
 		}
 	}
-	
-	
+
+
 	public HashMap<Integer, HashMap<Integer, MContractChargeAcct>> getAllContractChargeAccts (boolean reload)
 	{
 		if (reload || contractChargeAcct == null || contractChargeAcct.size() == 0)
@@ -361,6 +361,6 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		}
 
 		return contractChargeAcct;
-	}	
-	
+	}
+
 }

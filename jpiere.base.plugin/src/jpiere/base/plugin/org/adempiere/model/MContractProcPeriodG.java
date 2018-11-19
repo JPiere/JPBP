@@ -28,20 +28,20 @@ import org.compiere.util.CCache;
  *
  */
 public class MContractProcPeriodG extends X_JP_ContractProcPeriodG {
-	
-	public MContractProcPeriodG(Properties ctx, int JP_ContractProcPeriodG_ID, String trxName) 
+
+	public MContractProcPeriodG(Properties ctx, int JP_ContractProcPeriodG_ID, String trxName)
 	{
 		super(ctx, JP_ContractProcPeriodG_ID, trxName);
 	}
-	
-	public MContractProcPeriodG(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractProcPeriodG(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractProcPeriodG>	s_cache = new CCache<Integer,MContractProcPeriodG>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -50,7 +50,7 @@ public class MContractProcPeriodG extends X_JP_ContractProcPeriodG {
 	 */
 	public static MContractProcPeriodG get (Properties ctx, int JP_ContractProcPeriodG_ID)
 	{
-		Integer ii = new Integer (JP_ContractProcPeriodG_ID);
+		Integer ii = Integer.valueOf(JP_ContractProcPeriodG_ID);
 		MContractProcPeriodG retValue = (MContractProcPeriodG)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -59,5 +59,5 @@ public class MContractProcPeriodG extends X_JP_ContractProcPeriodG {
 			s_cache.put (JP_ContractProcPeriodG_ID, retValue);
 		return retValue;
 	}	//	get
-	
+
 }

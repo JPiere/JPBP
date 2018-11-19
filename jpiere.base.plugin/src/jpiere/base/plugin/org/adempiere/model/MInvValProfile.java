@@ -101,7 +101,7 @@ public class MInvValProfile extends X_JP_InvValProfile {
 		{
 			return null;
 		}
-		Integer key = new Integer (JP_InvValProfile_ID);
+		Integer key = Integer.valueOf(JP_InvValProfile_ID);
 		MInvValProfile retValue = (MInvValProfile) s_cache.get (key);
 		if (retValue != null)
 		{

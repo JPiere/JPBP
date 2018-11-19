@@ -113,7 +113,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		// set query to search this document
 		int m_docid = getJP_Contract_ID();
 		MQuery query = new MQuery(Table_Name);
-		query.addRestriction( COLUMNNAME_JP_Contract_ID, MQuery.EQUAL, new Integer(m_docid));
+		query.addRestriction( COLUMNNAME_JP_Contract_ID, MQuery.EQUAL, Integer.valueOf(m_docid));
 
 		// get Print Format
 		//int AD_PrintFormat_ID = 1000133;
@@ -1096,7 +1096,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	 */
 	public static MContractContent get (Properties ctx, int JP_ContractContent_ID)
 	{
-		Integer ii = new Integer (JP_ContractContent_ID);
+		Integer ii = Integer.valueOf(JP_ContractContent_ID);
 		MContractContent retValue = (MContractContent)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;

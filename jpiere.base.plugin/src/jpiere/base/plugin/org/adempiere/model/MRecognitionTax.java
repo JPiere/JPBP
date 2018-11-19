@@ -37,7 +37,7 @@ import org.compiere.util.Env;
 public class MRecognitionTax extends X_JP_RecognitionTax
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -5560880305482497098L;
 
@@ -50,14 +50,14 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 	 *	@param trxName transaction name
 	 *	@return existing or new tax
 	 */
-	public static MRecognitionTax get (MRecognitionLine line, int precision, 
+	public static MRecognitionTax get (MRecognitionLine line, int precision,
 		boolean oldTax, String trxName)
 	{
 		MRecognitionTax retValue = null;
 		if (line == null || line.getJP_Recognition_ID() == 0)
 			return null;
 		int C_Tax_ID = line.getC_Tax_ID();
-		boolean isOldTax = oldTax && line.is_ValueChanged(MRecognitionLine.COLUMNNAME_C_Tax_ID); 
+		boolean isOldTax = oldTax && line.is_ValueChanged(MRecognitionLine.COLUMNNAME_C_Tax_ID);
 		if (isOldTax)
 		{
 			Object old = line.get_ValueOld(MRecognitionLine.COLUMNNAME_C_Tax_ID);
@@ -71,7 +71,7 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 				s_log.warning("C_Tax_ID=0");
 			return null;
 		}
-		
+
 		retValue = new Query(line.getCtx(), Table_Name, "JP_Recognition_ID=? AND C_Tax_ID=?", trxName)
 						.setParameters(line.getJP_Recognition_ID(), C_Tax_ID)
 						.firstOnly();
@@ -88,7 +88,7 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 			if (isOldTax)
 				return null;
 		}
-		
+
 		//	Create New
 		retValue = new MRecognitionTax(line.getCtx(), 0, trxName);
 		retValue.set_TrxName(trxName);
@@ -100,11 +100,11 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 		if (s_log.isLoggable(Level.FINE)) s_log.fine("(new) " + retValue);
 		return retValue;
 	}	//	get
-	
+
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MRecognitionTax.class);
-	
-	
+
+
 	/**************************************************************************
 	 * 	Persistency Constructor
 	 *	@param ctx context
@@ -132,13 +132,13 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 	{
 		super(ctx, rs, trxName);
 	}	//	MInvoiceTax
-	
+
 	/** Tax							*/
 	private MTax 		m_tax = null;
 	/** Cached Precision			*/
 	private Integer		m_precision = null;
-	
-	
+
+
 	/**
 	 * 	Get Precision
 	 * 	@return Returns the precision or 2
@@ -156,7 +156,7 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 	 */
 	protected void setPrecision (int precision)
 	{
-		m_precision = new Integer(precision);
+		m_precision = Integer.valueOf(precision);
 	}	//	setPrecision
 
 	/**
@@ -169,8 +169,8 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 			m_tax = MTax.get(getCtx(), getC_Tax_ID());
 		return m_tax;
 	}	//	getTax
-	
-	
+
+
 	/**************************************************************************
 	 * 	Calculate/Set Tax Base Amt from Invoice Lines
 	 * 	@return true if tax calculated
@@ -227,7 +227,7 @@ public class MRecognitionTax extends X_JP_RecognitionTax
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
+
 		//	Calculate Tax
 		if (documentLevel || taxAmt.signum() == 0)
 			taxAmt = tax.calculateTax(taxBaseAmt, isTaxIncluded(), getPrecision());

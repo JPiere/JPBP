@@ -28,6 +28,7 @@
 package jpiere.base.plugin.webui.apps.form;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -213,7 +214,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 							break;
 
 						Vector<Object> line = new Vector<Object>();
-						line.add(new Boolean(false));           //  0-Selection
+						line.add(Boolean.valueOf(false));           //  0-Selection
 						KeyNamePair pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
 						line.add(pp);                           //  1-OrderLine
 						line.add(qtyEntered);  //  2-Qty
@@ -239,7 +240,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 
 
 				Vector<Object> line = new Vector<Object>();
-				line.add(new Boolean(false));           //  0-Selection
+				line.add(Boolean.valueOf(false));           //  0-Selection
 				KeyNamePair pp = new KeyNamePair(rs.getInt(10), rs.getString(11));
 				line.add(pp);                           //  1-OrderLine
 				BigDecimal qtyOrdered = rs.getBigDecimal(1);
@@ -441,7 +442,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 					MProduct product = MProduct.get(Env.getCtx(), M_Product_ID);
 					precision = product.getUOMPrecision();
 				}
-				QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_DOWN);
+				QtyEntered = QtyEntered.setScale(precision, RoundingMode.HALF_UP);
 				//
 				if (log.isLoggable(Level.FINE)) log.fine("Line QtyEntered=" + QtyEntered
 						+ ", Product=" + M_Product_ID+ ", OrderLine=" + C_OrderLine_ID);
@@ -464,7 +465,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 					{
 						iol.setMovementQty(QtyEntered
 								.multiply(ol.getQtyOrdered())
-								.divide(ol.getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP));
+								.divide(ol.getQtyEntered(), 12, RoundingMode.HALF_UP));
 						iol.setC_UOM_ID(ol.getC_UOM_ID());
 					}
 					iol.setM_AttributeSetInstance_ID(ol.getM_AttributeSetInstance_ID());

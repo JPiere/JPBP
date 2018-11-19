@@ -105,7 +105,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		// set query to search this document
 		int m_docid = getJP_Contract_ID();
 		MQuery query = new MQuery(Table_Name);
-		query.addRestriction( COLUMNNAME_JP_Contract_ID, MQuery.EQUAL, new Integer(m_docid));
+		query.addRestriction( COLUMNNAME_JP_Contract_ID, MQuery.EQUAL, Integer.valueOf(m_docid));
 
 		// get Print Format
 		//int AD_PrintFormat_ID = 1000133;
@@ -678,7 +678,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 					if(content.isAutomaticUpdateJP())
 					{
 
-						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 						if (no != 1)
 						{
 							log.warning("(1) #" + no);
@@ -690,7 +690,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 						Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
 						if(JP_ContractProcDate_To == null)
 						{
-							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 							if (no != 1)
 							{
 								log.warning("(1) #" + no);
@@ -699,7 +699,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 
 						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
 
-							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 							if (no != 1)
 							{
 								log.warning("(1) #" + no);
@@ -711,7 +711,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 							//Assumption need sync, In case of same date between JP_ContractPeriodDate_To and JP_ContractProcDate_To.
 							if(JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
 							{
-								int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,new Integer(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+								int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 								if (no != 1)
 								{
 									log.warning("(1) #" + no);
@@ -848,7 +848,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 	 */
 	public static MContract get (Properties ctx, int JP_Contract_ID)
 	{
-		Integer ii = new Integer (JP_Contract_ID);
+		Integer ii = Integer.valueOf(JP_Contract_ID);
 		MContract retValue = (MContract)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;

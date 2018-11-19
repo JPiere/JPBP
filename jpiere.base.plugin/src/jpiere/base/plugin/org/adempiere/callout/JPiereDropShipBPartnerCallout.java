@@ -83,14 +83,14 @@ public class JPiereDropShipBPartnerCallout implements IColumnCallout {
 				if (DropShip_Location_ID == 0)
 					mTab.setValue("DropShip_Location_ID", null);
 				else
-					mTab.setValue("DropShip_Location_ID", new Integer(DropShip_Location_ID));
+					mTab.setValue("DropShip_Location_ID", Integer.valueOf(DropShip_Location_ID));
 
 				//	Contact - overwritten by InfoBP selection
 				int DropShip_User_ID = rs.getInt(3);
 				if (DropShip_User_ID == 0)
 					mTab.setValue("DropShip_User_ID", null);
 				else
-					mTab.setValue("DropShip_User_ID", new Integer(DropShip_User_ID));
+					mTab.setValue("DropShip_User_ID", Integer.valueOf(DropShip_User_ID));
 			}
 		}
 		catch (SQLException e)

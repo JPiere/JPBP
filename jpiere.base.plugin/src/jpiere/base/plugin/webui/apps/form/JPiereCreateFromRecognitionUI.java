@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.webui.apps.form;
 
+import static org.compiere.model.SystemIDs.*;
+
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -37,9 +39,6 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridTab;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
-
-import static org.compiere.model.SystemIDs.*;
-
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -53,21 +52,21 @@ import org.zkoss.zul.Space;
 
 /**
  *  JPIERE-0364 : Create Recognition Transactions from Ship or Receipt or RMA
- * 
+ *
  * @author Hideaki Hagiwara
  *
  */
 public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition implements EventListener<Event>, ValueChangeListener
 {
 	private WCreateFromWindow window;
-	
-	public JPiereCreateFromRecognitionUI(GridTab tab) 
+
+	public JPiereCreateFromRecognitionUI(GridTab tab)
 	{
 		super(tab);
 		log.info(getGridTab().toString());
-		
+
 		window = new WCreateFromWindow(this, getGridTab().getWindowNo());
-		
+
 		p_WindowNo = getGridTab().getWindowNo();
 
 		try
@@ -84,20 +83,20 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		}
 		AEnv.showWindow(window);
 	}
-	
+
 	/** Window No               */
 	private int p_WindowNo;
 
 	/**	Logger			*/
 	private CLogger log = CLogger.getCLogger(getClass());
-		
+
 	protected Label bPartnerLabel = new Label();
 	protected WEditor bPartnerField;
-	
+
 	protected Label shipmentLabel = new Label();
 	protected Listbox shipmentField = ListboxFactory.newDropdownListbox();
-    
-	
+
+
 	/**
 	 *  Dynamic Init
 	 *  @throws Exception if Lookups cannot be initialized
@@ -106,28 +105,28 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 	public boolean dynInit() throws Exception
 	{
 		log.config("");
-		
+
 		super.dynInit();
-		
+
 		window.setTitle(getTitle());
-		
+
 		initBPartner(true);
 		bPartnerField.addValueChangeListener(this);
-		
+
 		return true;
 	}   //  dynInit
-	
+
 	protected void zkInit() throws Exception
 	{
 		bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
 		shipmentLabel.setText(Msg.getElement(Env.getCtx(), "M_InOut_ID", isSOTrx));
-        
+
 		Borderlayout parameterLayout = new Borderlayout();
 		ZKUpdateUtil.setHeight(parameterLayout, "110px");
 		ZKUpdateUtil.setWidth(parameterLayout, "100%");
     	Panel parameterPanel = window.getParameterPanel();
 		parameterPanel.appendChild(parameterLayout);
-		
+
 		Grid parameterStdLayout = GridFactory.newGridLayout();
     	Panel parameterStdPanel = new Panel();
 		parameterStdPanel.appendChild(parameterStdLayout);
@@ -135,7 +134,7 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		Center center = new Center();
 		parameterLayout.appendChild(center);
 		center.appendChild(parameterStdPanel);
-		
+
 		Rows rows = (Rows) parameterStdLayout.newRows();
 		Row row = rows.newRow();
 		row.appendChild(bPartnerLabel.rightAlign());
@@ -144,27 +143,27 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 			row.appendChild(bPartnerField.getComponent());
 			row.appendChild(new Space());
 		}
-		
+
 		row = rows.newRow();
 		row.appendChild(shipmentLabel.rightAlign());
 		ZKUpdateUtil.setHflex(shipmentField, "1");
-		row.appendChild(shipmentField);				
+		row.appendChild(shipmentField);
 		row.appendChild(new Space());
 	}
 
 	private boolean 	m_actionActive = false;
-	
+
 	/**
 	 *  Action Listener
 	 *  @param e event
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void onEvent(Event e) throws Exception
 	{
 		if (m_actionActive)
 			return;
 		m_actionActive = true;
-		
+
 		//  Shipment
 		if (e.getTarget().equals(shipmentField))
 		{
@@ -176,7 +175,7 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		}
 		m_actionActive = false;
 	}
-	
+
 	/**
 	 *  Change Listener
 	 *  @param e event
@@ -193,7 +192,7 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange
-	
+
 	/**************************************************************************
 	 *  Load BPartner Field
 	 *  @param forInvoice true if Invoices are to be created, false receipts
@@ -208,7 +207,7 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		bPartnerField.setReadWrite(false);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
-		bPartnerField.setValue(new Integer(C_BPartner_ID));
+		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
 		initBPShipmentDetails(C_BPartner_ID);
@@ -227,29 +226,29 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		//	None
 		KeyNamePair pp = new KeyNamePair(0,"");
 		shipmentField.addItem(pp);
-		
+
 		int M_InOut_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "M_InOut_ID");
 		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID, M_InOut_ID);
-		
+
 		for(KeyNamePair knp : list)
 			shipmentField.addItem(knp);
-		
+
 		shipmentField.setSelectedIndex(1);
 		shipmentField.addActionListener(this);
 		loadShipment (M_InOut_ID);
 	}
-	
+
 
 	/**
 	 *  Load Data - Ship
 	 *  @param M_InOUt_ID InOut
-	 *  
-	 */	
+	 *
+	 */
 	protected void loadShipment (int M_InOut_ID)
 	{
 		loadTableOIS(getShipmentData(M_InOut_ID));
 	}
-	
+
 	/**
 	 *  Load Order/Invoice/Shipment data into Table
 	 *  @param data data
@@ -257,7 +256,7 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 	protected void loadTableOIS (Vector<?> data)
 	{
 		window.getWListbox().clear();
-		
+
 		//  Remove previous listeners
 		window.getWListbox().getModel().removeTableModelListener(window);
 		//  Set Model
@@ -265,15 +264,15 @@ public class JPiereCreateFromRecognitionUI extends JPiereCreateFromRecognition i
 		model.addTableModelListener(window);
 		window.getWListbox().setData(model, getOISColumnNames());
 		//
-		
+
 		configureMiniTable(window.getWListbox());
 	}   //  loadOrder
-	
+
 	public void showWindow()
 	{
 		window.setVisible(true);
 	}
-	
+
 	public void closeWindow()
 	{
 		window.dispose();

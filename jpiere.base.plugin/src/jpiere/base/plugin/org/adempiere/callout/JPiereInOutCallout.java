@@ -52,12 +52,12 @@ public class JPiereInOutCallout implements IColumnCallout {
 			if (order.getDropShip_BPartner_ID() == 0)
 				mTab.setValue("DropShip_Location_ID", null);
 			else
-				mTab.setValue("DropShip_Location_ID", new Integer(order.getDropShip_Location_ID()));
+				mTab.setValue("DropShip_Location_ID", Integer.valueOf(order.getDropShip_Location_ID()));
 
 			if (order.getDropShip_User_ID() == 0)
 				mTab.setValue("DropShip_User_ID", null);
 			else
-				mTab.setValue("DropShip_User_ID", new Integer(order.getDropShip_User_ID()));
+				mTab.setValue("DropShip_User_ID", Integer.valueOf(order.getDropShip_User_ID()));
 		}
 
 		return "";

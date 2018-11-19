@@ -400,7 +400,7 @@ public class JPiereCreateFromShipmentUI extends JPiereCreateFromShipment impleme
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, true, true, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
-		bPartnerField.setValue(new Integer(C_BPartner_ID));
+		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
 		initBPOrderDetails(C_BPartner_ID, forInvoice);

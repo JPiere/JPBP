@@ -79,7 +79,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			MOrderLine line = lines[i];
 			totalLines = totalLines.add(line.getLineNetAmt());
-			Integer taxID = new Integer(line.getC_Tax_ID());
+			Integer taxID = Integer.valueOf(line.getC_Tax_ID());
 			if (!taxList.contains(taxID))
 			{
 				MTax tax = new MTax(order.getCtx(), taxID, order.get_TrxName());
@@ -173,7 +173,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			    + ", JP_ScheduledCostTotalLines = "
 			    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM C_OrderLine il WHERE i.C_Order_ID=il.C_Order_ID)"
 			+ "WHERE C_Order_ID = ?";
-		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
+		int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(1) #" + no);
 
@@ -183,7 +183,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM C_OrderTax it WHERE i.C_Order_ID=it.C_Order_ID AND it.IsTaxIncluded='N') "
 					+ "WHERE C_Order_ID = ?" ;
 		//JPiere-0369:finish
-		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
+		no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(line.getC_Order_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(2) #" + no);
 
@@ -563,7 +563,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			MRMALine line = lines[i];
 			totalLines = totalLines.add(line.getLineNetAmt());
-			Integer taxID = new Integer(line.getC_Tax_ID());
+			Integer taxID = Integer.valueOf(line.getC_Tax_ID());
 			if (!taxList.contains(taxID))
 			{
 				MTax tax = new MTax(rma.getCtx(), taxID, rma.get_TrxName());
@@ -767,7 +767,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 	public static RoundingMode getRoundingMode(int C_BPartner_ID, boolean isSOTrx, I_C_TaxProvider provider)
 	{
-		Integer key = new Integer (C_BPartner_ID);
+		Integer key = Integer.valueOf (C_BPartner_ID);
 		MBPartner bp = (MBPartner) s_cache.get (key);
 		if (bp == null){
 			bp = MBPartner.get(Env.getCtx(), C_BPartner_ID);
@@ -788,11 +788,11 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			if(isSOTrx){
 				Object SO_TaxRounding = bp.get_Value("JP_SOTaxRounding");
 				if(SO_TaxRounding != null)
-					roundingMode = RoundingMode.valueOf(new Integer(SO_TaxRounding.toString()).intValue());
+					roundingMode = RoundingMode.valueOf(Integer.valueOf(SO_TaxRounding.toString()).intValue());
 			}else{
 				Object PO_TaxRounding = bp.get_Value("JP_POTaxRounding");
 				if(PO_TaxRounding != null)
-					roundingMode = RoundingMode.valueOf(new Integer(PO_TaxRounding.toString()).intValue());
+					roundingMode = RoundingMode.valueOf(Integer.valueOf(PO_TaxRounding.toString()).intValue());
 			}
 		}
 
@@ -872,7 +872,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			MEstimationLine line = lines[i];
 			totalLines = totalLines.add(line.getLineNetAmt());
-			Integer taxID = new Integer(line.getC_Tax_ID());
+			Integer taxID = Integer.valueOf(line.getC_Tax_ID());
 			if (!taxList.contains(taxID))
 			{
 				MTax tax = new MTax(estimation.getCtx(), taxID, estimation.get_TrxName());
@@ -1072,7 +1072,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			    + ", JP_ScheduledCostTotalLines = "
 			    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID)"
 			+ "WHERE JP_Estimation_ID=?";
-		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
+		int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(1) #" + no);
 
@@ -1081,7 +1081,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				+ " SET GrandTotal=TotalLines+"
 					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_EstimationTax it WHERE i.JP_Estimation_ID=it.JP_Estimation_ID AND it.IsTaxIncluded='N' ) "
 					+ "WHERE JP_Estimation_ID=?";
-		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
+		no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(line.getJP_Estimation_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(2) #" + no);
 
@@ -1107,7 +1107,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			MRecognitionLine line = lines[i];
 			totalLines = totalLines.add(line.getLineNetAmt());
-			Integer taxID = new Integer(line.getC_Tax_ID());
+			Integer taxID = Integer.valueOf(line.getC_Tax_ID());
 			if (!taxList.contains(taxID))
 			{
 				MTax tax = new MTax(recognition.getCtx(), taxID, recognition.get_TrxName());
@@ -1305,7 +1305,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			+ " SET TotalLines="
 				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_RecognitionLine rl WHERE r.JP_Recognition_ID=rl.JP_Recognition_ID) "
 			+ "WHERE JP_Recognition_ID=?";
-		int no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Recognition_ID())}, false, line.get_TrxName(), 0);
+		int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(line.getJP_Recognition_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(1) #" + no);
 
@@ -1315,7 +1315,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				+ " SET GrandTotal=TotalLines+"
 					+ "(SELECT COALESCE(SUM(TaxAmt),0) FROM JP_RecognitionTax rt WHERE r.JP_Recognition_ID=rt.JP_Recognition_ID AND rt.IsTaxIncluded='N') "
 					+ "WHERE JP_Recognition_ID=?";
-		no = DB.executeUpdate(sql, new Object[]{new Integer(line.getJP_Recognition_ID())}, false, line.get_TrxName(), 0);
+		no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(line.getJP_Recognition_ID())}, false, line.get_TrxName(), 0);
 		if (no != 1)
 			log.warning("(2) #" + no);
 

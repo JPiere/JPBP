@@ -189,7 +189,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 							mTab.setValue("PaymentRule", s);
 						}
 						//	Payment Term
-						Integer ii =new Integer(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
+						Integer ii = Integer.valueOf(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
 						if (!rs.wasNull())
 							mTab.setValue("C_PaymentTerm_ID", ii);
 						//	InvoiceRule
@@ -254,12 +254,12 @@ public class JPiereEstimationCallout implements IColumnCallout {
 				rs = null; pstmt = null;
 				}
 		}
-		
+
 		//JPIERE-0227 Common Warehouse & JPIERE-0317 Physical Warehouse
 		if(mField.getColumnName().equals("JP_LocatorTo_ID"))
 		{
 			mTab.setValue("JP_Locator_ID", value);
-			
+
 			return "";
 		}
 
@@ -273,7 +273,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 				mTab.setValue("JP_LocatorTo_ID",toLocator.getM_Locator_ID()) ;
 				mTab.setValue("JP_Locator_ID", toLocator.getM_Locator_ID());
 			}
-			
+
 			return "";
 		}
 
@@ -284,7 +284,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 	{
 		int JP_PhysicalWarehouse_ID = fromLocator.get_ValueAsInt("JP_PhysicalWarehouse_ID");
 		int M_LocatorType_ID = fromLocator.get_ValueAsInt("M_LocatorType_ID");
-		
+
 		final String sql = "SELECT * FROM M_Locator WHERE M_Warehouse_ID=? AND JP_PhysicalWarehouse_ID = ? AND M_LocatorType_ID = ? ORDER BY IsDefault DESC, PriorityNo DESC";
 		MLocator toLocator = null;
 		PreparedStatement pstmt = null;
@@ -308,7 +308,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
+
 		return toLocator;
 	}
 }

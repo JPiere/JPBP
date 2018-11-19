@@ -28,18 +28,18 @@ import org.compiere.util.CCache;
 *
 */
 public class MContractProcess extends X_JP_ContractProcess {
-	
-	public MContractProcess(Properties ctx, int JP_ContractProcess_ID, String trxName) 
+
+	public MContractProcess(Properties ctx, int JP_ContractProcess_ID, String trxName)
 	{
 		super(ctx, JP_ContractProcess_ID, trxName);
 	}
-	
-	public MContractProcess(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractProcess(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
 
-	
+
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
@@ -53,7 +53,7 @@ public class MContractProcess extends X_JP_ContractProcess {
 				setIsCreateBaseDocJP(false);
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -62,7 +62,7 @@ public class MContractProcess extends X_JP_ContractProcess {
 
 	/**	Cache				*/
 	private static CCache<Integer,MContractProcess>	s_cache = new CCache<Integer,MContractProcess>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -71,7 +71,7 @@ public class MContractProcess extends X_JP_ContractProcess {
 	 */
 	public static MContractProcess get (Properties ctx, int JP_ContractProcess_ID)
 	{
-		Integer ii = new Integer (JP_ContractProcess_ID);
+		Integer ii = Integer.valueOf(JP_ContractProcess_ID);
 		MContractProcess retValue = (MContractProcess)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -80,6 +80,6 @@ public class MContractProcess extends X_JP_ContractProcess {
 			s_cache.put (JP_ContractProcess_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 }

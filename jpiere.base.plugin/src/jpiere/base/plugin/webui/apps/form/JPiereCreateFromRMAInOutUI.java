@@ -191,7 +191,7 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 			row.appendChild(bPartnerField.getComponent());
 			bPartnerField.fillHorizontal();
 		}
-    	
+
         // Add RMA document selection to panel
 		row = rows.newRow();
         row.appendChild(rmaLabel.rightAlign());
@@ -273,7 +273,7 @@ public class JPiereCreateFromRMAInOutUI extends JPiereCreateFromRMAInOut impleme
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, true, true, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
-		bPartnerField.setValue(new Integer(C_BPartner_ID));
+		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
 		initBPRMADetails(C_BPartner_ID, forInvoice);

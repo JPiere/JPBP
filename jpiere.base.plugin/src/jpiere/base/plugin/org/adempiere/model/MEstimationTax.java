@@ -20,20 +20,20 @@ import java.util.Properties;
 import org.compiere.util.DB;
 
 public class MEstimationTax extends X_JP_EstimationTax {
-	
+
 	/** Cached Precision			*/
 	private Integer		m_precision = null;
-	
+
 	public MEstimationTax(Properties ctx, int JP_EstimationTax_ID, String trxName)
 	{
 		super(ctx, JP_EstimationTax_ID, trxName);
 	}
-	
-	public MEstimationTax(Properties ctx, ResultSet rs, String trxName) 
+
+	public MEstimationTax(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**
 	 * 	Get Tax Line for Order Line
 	 *	@param line Order line
@@ -51,7 +51,7 @@ public class MEstimationTax extends X_JP_EstimationTax {
 			return null;
 		}
 		int C_Tax_ID = line.getC_Tax_ID();
-		boolean isOldTax = oldTax && line.is_ValueChanged(MEstimationTax.COLUMNNAME_C_Tax_ID); 
+		boolean isOldTax = oldTax && line.is_ValueChanged(MEstimationTax.COLUMNNAME_C_Tax_ID);
 		if (isOldTax)
 		{
 			Object old = line.get_ValueOld(MEstimationTax.COLUMNNAME_C_Tax_ID);
@@ -66,10 +66,10 @@ public class MEstimationTax extends X_JP_EstimationTax {
 		{
 			if (!line.isDescription())
 				;//s_log.fine("No Tax");
-			
+
 			return null;
 		}
-		
+
 		String sql = "SELECT * FROM JP_EstimationTax WHERE JP_Estimation_ID=? AND C_Tax_ID=?";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -105,7 +105,7 @@ public class MEstimationTax extends X_JP_EstimationTax {
 			if (isOldTax)
 				return null;
 		}
-		
+
 		//	Create New
 		retValue = new MEstimationTax(line.getCtx(), 0, trxName);
 		retValue.set_TrxName(trxName);
@@ -117,13 +117,13 @@ public class MEstimationTax extends X_JP_EstimationTax {
 //		if (s_log.isLoggable(Level.FINE)) s_log.fine("(new) " + retValue);
 		return retValue;
 	}	//	get
-	
+
 	/**
 	 * 	Set Precision
 	 *	@param precision The precision to set.
 	 */
 	protected void setPrecision (int precision)
 	{
-		m_precision = new Integer(precision);
+		m_precision = Integer.valueOf(precision);
 	}	//	setPrecision
 }

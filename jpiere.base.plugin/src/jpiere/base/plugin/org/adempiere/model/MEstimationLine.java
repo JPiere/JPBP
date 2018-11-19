@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -351,7 +352,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			setPriceEntered(getPriceActual());
 		else
 			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
-				.divide(getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP)));	//	recision
+				.divide(getQtyEntered(), 12, RoundingMode.HALF_UP)));	//	recision
 
 		//	Calculate Discount
 		setDiscount(m_productPrice.getDiscount());
@@ -386,7 +387,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		if (QtyEntered != null && getC_UOM_ID() != 0)
 		{
 			int precision = MUOM.getPrecision(getCtx(), getC_UOM_ID());
-			QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			QtyEntered = QtyEntered.setScale(precision, RoundingMode.HALF_UP);
 		}
 		super.setQtyEntered (QtyEntered);
 	}	//	setQtyEntered
@@ -413,7 +414,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 		if (QtyOrdered != null && product != null)
 		{
 			int precision = product.getUOMPrecision();
-			QtyOrdered = QtyOrdered.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			QtyOrdered = QtyOrdered.setScale(precision, RoundingMode.HALF_UP);
 		}
 		super.setQtyOrdered(QtyOrdered);
 	}	//	setQtyOrdered
@@ -466,7 +467,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 					+ " SET JP_ScheduledCostTotalLines = "
 					    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM JP_EstimationLine il WHERE i.JP_Estimation_ID=il.JP_Estimation_ID)"
 					+ "WHERE JP_Estimation_ID=?";
-				int no = DB.executeUpdate(sql, new Object[]{new Integer(getJP_Estimation_ID())}, false, get_TrxName(), 0);
+				int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(getJP_Estimation_ID())}, false, get_TrxName(), 0);
 				if (no != 1)
 				{
 					log.warning("(1) #" + no);
@@ -534,7 +535,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	public void setHeaderInfo (MEstimation estimation)
 	{
 		m_parent = estimation;
-		m_precision = new Integer(estimation.getPrecision());
+		m_precision = Integer.valueOf(estimation.getPrecision());
 		m_M_PriceList_ID = estimation.getM_PriceList_ID();
 		m_IsSOTrx = estimation.isSOTrx();
 	}	//	setHeaderInfo
@@ -560,7 +561,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			MCurrency cur = MCurrency.get(getCtx(), getC_Currency_ID());
 			if (cur.get_ID() != 0)
 			{
-				m_precision = new Integer (cur.getStdPrecision());
+				m_precision = Integer.valueOf(cur.getStdPrecision());
 				return m_precision.intValue();
 			}
 		}
@@ -569,7 +570,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			+ "FROM C_Currency c INNER JOIN JP_Estimation x ON (x.C_Currency_ID=c.C_Currency_ID) "
 			+ "WHERE x.JP_Estimation_ID=?";
 		int i = DB.getSQLValue(get_TrxName(), sql, getJP_Estimation_ID());
-		m_precision = new Integer(i);
+		m_precision = Integer.valueOf(i);
 		return m_precision.intValue();
 	}	//	getPrecision
 

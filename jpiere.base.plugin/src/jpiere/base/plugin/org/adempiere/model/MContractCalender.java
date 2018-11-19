@@ -30,21 +30,21 @@ import org.compiere.util.DB;
  *
  */
 public class MContractCalender extends X_JP_ContractCalender {
-	
-	public MContractCalender(Properties ctx, int JP_ContractCalender_ID, String trxName) 
+
+	public MContractCalender(Properties ctx, int JP_ContractCalender_ID, String trxName)
 	{
 		super(ctx, JP_ContractCalender_ID, trxName);
 	}
-	
-	public MContractCalender(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractCalender(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
-	
+
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractCalender>	s_cache = new CCache<Integer,MContractCalender>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -53,7 +53,7 @@ public class MContractCalender extends X_JP_ContractCalender {
 	 */
 	public static MContractCalender get (Properties ctx, int JP_ContractCalender_ID)
 	{
-		Integer ii = new Integer (JP_ContractCalender_ID);
+		Integer ii = Integer.valueOf(JP_ContractCalender_ID);
 		MContractCalender retValue = (MContractCalender)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -62,10 +62,10 @@ public class MContractCalender extends X_JP_ContractCalender {
 			s_cache.put (JP_ContractCalender_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param ctx
 	 * @param date_From
 	 * @param processPeriodNum
@@ -75,11 +75,11 @@ public class MContractCalender extends X_JP_ContractCalender {
 	{
 		if(date_From == null)
 			return null;
-		
+
 		int JP_ContractProcPeriod_ID = 0;
-		
+
 		if(processPeriodNum == 0)
-		{			
+		{
 			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod "
 												+ "WHERE StartDate <= ? AND EndDate >=? AND JP_ContractCalender_ID=? ";
 			PreparedStatement pstmt = null;
@@ -108,9 +108,9 @@ public class MContractCalender extends X_JP_ContractCalender {
 				DB.close(rs, pstmt);
 				rs = null; pstmt = null;
 			}
-			
+
 		}else if (processPeriodNum > 0){
-			
+
 			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod "
 												+ "WHERE EndDate >=? AND JP_ContractCalender_ID=? "
 												+ " ORDER BY EndDate ASC";
@@ -145,9 +145,9 @@ public class MContractCalender extends X_JP_ContractCalender {
 			}
 
 		}else{
-			
+
 			processPeriodNum = processPeriodNum *-1;
-			
+
 			final String sql = "SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod "
 											+ "WHERE StartDate <=? AND JP_ContractCalender_ID=? "
 											+ " ORDER BY StartDate DESC ";
@@ -180,9 +180,9 @@ public class MContractCalender extends X_JP_ContractCalender {
 				DB.close(rs, pstmt);
 				rs = null; pstmt = null;
 			}
-			
+
 		}
-		
+
 		if(JP_ContractProcPeriod_ID == 0)
 		{
 			return null;
@@ -190,12 +190,12 @@ public class MContractCalender extends X_JP_ContractCalender {
 			return new MContractProcPeriod(ctx, JP_ContractProcPeriod_ID, get_TrxName());
 		}
 	}
-	
+
 	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From, Timestamp date_To)
 	{
 		return getContractProcessPeriod(ctx, date_From,  date_To, 0);
 	}
-	
+
 	public MContractProcPeriod getContractProcessPeriod(Properties ctx, Timestamp date_From)
 	{
 		return getContractProcessPeriod(ctx, date_From, null, 0);

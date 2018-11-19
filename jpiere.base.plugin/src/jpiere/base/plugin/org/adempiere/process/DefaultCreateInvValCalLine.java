@@ -14,14 +14,10 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.logging.Level;
-
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
-import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
-import jpiere.base.plugin.util.JPiereInvValUtil;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAcctSchema;
@@ -34,6 +30,11 @@ import org.compiere.model.MProduct;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MInvValCal;
+import jpiere.base.plugin.org.adempiere.model.MInvValCalLine;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.util.JPiereInvValUtil;
 
 /**
  * JPIERE-0161 Inventory Valuation Calculate Doc
@@ -154,8 +155,8 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 
 				if(m_AcctSchema.getC_Currency_ID()==m_InvValCal.getC_Currency_ID())
 				{
-					ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
-					ivcLine.setFutureCostPrice(cost.getFutureCostPrice().setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+					ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,RoundingMode.HALF_UP));
+					ivcLine.setFutureCostPrice(cost.getFutureCostPrice().setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,RoundingMode.HALF_UP));
 				}else{
 					BigDecimal rate =MConversionRate.getRate(m_AcctSchema.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValCal.getDateValue(),
 							m_InvValProfile.getC_ConversionType_ID(), ivcLine.getAD_Client_ID(), ivcLine.getAD_Org_ID());
@@ -164,8 +165,8 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
 								m_AcctSchema.getC_Currency_ID(), m_InvValProfile.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
 					}else{
-						ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().multiply(rate).setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
-						ivcLine.setFutureCostPrice(cost.getFutureCostPrice().multiply(rate).setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,BigDecimal.ROUND_HALF_UP));
+						ivcLine.setCurrentCostPrice(cost.getCurrentCostPrice().multiply(rate).setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,RoundingMode.HALF_UP));
+						ivcLine.setFutureCostPrice(cost.getFutureCostPrice().multiply(rate).setScale(m_InvValCal.getC_Currency().getCostingPrecision() ,RoundingMode.HALF_UP));
 					}
 
 				}

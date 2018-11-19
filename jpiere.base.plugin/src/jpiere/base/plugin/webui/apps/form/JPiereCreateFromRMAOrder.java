@@ -50,46 +50,46 @@ import org.compiere.util.ValueNamePair;
 
 /**
  * JPIERE-0235: Craete From RMA Order
- * 
+ *
  *  Create Transactions for RMA
  * @author ashley
  * @author Teo Sarca, www.arhipac.ro
  * 			<li>BF [ 2007837 ] VCreateFrom.save() should run in trx
- * 
+ *
  * @author Hideaki Hagiwara
- * 
+ *
  */
 public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
 
 	protected MDocType 		m_DocType = null;
 	protected boolean		isSOTrx = true;
-	
+
 	public JPiereCreateFromRMAOrder(GridTab mTab)
 	{
 		super(mTab);
 		Integer C_DocType_ID = (Integer)mTab.getField("C_DocType_ID").getValue();
 		m_DocType = MDocType.get(Env.getCtx(), C_DocType_ID.intValue());
 		isSOTrx = m_DocType.isSOTrx();
-		
+
 		if (log.isLoggable(Level.INFO)) log.info(mTab.toString());
 	}
-	
+
 	@Override
-	public boolean dynInit() throws Exception 
+	public boolean dynInit() throws Exception
 	{
 		log.config("");
 		setTitle(Msg.getElement(Env.getCtx(), "M_RMA_ID",isSOTrx) + " .. " + Msg.translate(Env.getCtx(), "CreateFrom"));
 
 		return true;
 	}
-	
+
 	protected Vector<Vector<Object>> getRMAData()
 	{
 		int M_InOut_ID = Env.getContextAsInt(Env.getCtx(), getGridTab().getWindowNo(), "InOut_ID");
 		int M_RMA_ID = Env.getContextAsInt(Env.getCtx(), getGridTab().getWindowNo(), "M_RMA_ID");
-		
+
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		
+
 		/**
          * 1 M_InOutLine_ID
          * 2 Line
@@ -99,14 +99,14 @@ public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
          * 6 ASI
          */
         StringBuilder sqlStmt = new StringBuilder();
-        
+
         Language loginLang = Env.getLoginLanguage(Env.getCtx());
         String loginLangString =Env.getAD_Language(Env.getCtx());
         Boolean isBaseLang = loginLang.isBaseLanguage();
-        
-        sqlStmt.append("SELECT iol.M_InOutLine_ID, iol.Line, "); 
-        sqlStmt.append("COALESCE(p.Name, c.Name) AS ProductName, "); 
-        sqlStmt.append("iol.QtyEntered, "); 
+
+        sqlStmt.append("SELECT iol.M_InOutLine_ID, iol.Line, ");
+        sqlStmt.append("COALESCE(p.Name, c.Name) AS ProductName, ");
+        sqlStmt.append("iol.QtyEntered, ");
         if(isBaseLang)
         	sqlStmt.append("uom.Name, ");
         else
@@ -121,7 +121,7 @@ public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
         	sqlStmt.append("LEFT JOIN C_UOM_Trl uomt ON uom.C_UOM_ID = uomt.C_UOM_ID AND uomt.AD_Language = '"+loginLangString+"'");
         sqlStmt.append("WHERE M_InOut_ID=? ");
         sqlStmt.append("AND iol.M_InOutLine_ID NOT IN (SELECT rmal.M_InOutLine_ID FROM M_RMALine rmal WHERE rmal.M_RMA_ID=?) ORDER BY iol.Line");
-        
+
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try
@@ -133,24 +133,24 @@ public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
             while (rs.next())
             {
                 Vector<Object> line = new Vector<Object>(7);
-                BigDecimal qtyEntered = rs.getBigDecimal(4); 
+                BigDecimal qtyEntered = rs.getBigDecimal(4);
                 BigDecimal movementQty = rs.getBigDecimal(6);
-                
-                line.add(new Boolean(false));           //  0-Selection
+
+                line.add(Boolean.valueOf(false));           //  0-Selection
                 line.add(movementQty); //1-Return Qty
-                
+
                 KeyNamePair lineKNPair = new KeyNamePair(rs.getInt(1), rs.getString(2)); // 2-Line
                 line.add(lineKNPair);
                 line.add(rs.getString(3)); //3-Product
                 line.add(rs.getString(7)); //4-ASI
-                
 
-                
+
+
                 line.add(qtyEntered);  //5-QtyEntered
                 line.add(rs.getString(5)); //6-UOM
                 line.add(movementQty); //7-Movement Qty
 
-                
+
                 data.add(line);
             }
         }
@@ -164,52 +164,52 @@ public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
         	rs = null;
         	pstmt = null;
         }
-        
+
         return data;
 	}
 
 	@Override
-	public void info(IMiniTable miniTable, IStatusBar statusBar) 
+	public void info(IMiniTable miniTable, IStatusBar statusBar)
 	{
 
 	}
-	
+
 	protected void configureMiniTable (IMiniTable miniTable)
 	{
 		miniTable.setColumnClass(0, Boolean.class, false);      	//  0-Selection
 		miniTable.setColumnClass(1, BigDecimal.class, false);		//  1-Return Qty
 		miniTable.setColumnClass(2, String.class, true);        	//  2-Line
-		miniTable.setColumnClass(3, String.class, true);        	//  3-Product 
+		miniTable.setColumnClass(3, String.class, true);        	//  3-Product
 		miniTable.setColumnClass(4, String.class, true);        	//  4-ASI
 		miniTable.setColumnClass(5, BigDecimal.class, true);    	//  5-QtyEntered
 		miniTable.setColumnClass(6, String.class, true);  			//  6-UOM
 		miniTable.setColumnClass(7, BigDecimal.class, true); 		//  7-Movement Qty
 
-        
+
         //  Table UI
 		miniTable.autoSize();
 	}
 
 	@Override
-	public boolean save(IMiniTable miniTable, String trxName) 
+	public boolean save(IMiniTable miniTable, String trxName)
 	{
 		log.config("");
 		int M_RMA_ID = Env.getContextAsInt(Env.getCtx(), getGridTab().getWindowNo(), "M_RMA_ID");
-        
+
 //        Integer bpId = (Integer)bPartnerField.getValue();
         MRMA rma = new MRMA(Env.getCtx(), M_RMA_ID, trxName);
         //update BP
 //        rma.setC_BPartner_ID(bpId);
-        
+
         for (int i = 0; i < miniTable.getRowCount(); i++)
         {
             if (((Boolean)miniTable.getValueAt(i, 0)).booleanValue())
             {
                 BigDecimal d = (BigDecimal)miniTable.getValueAt(i, 1);              //  1-Return Qty
                 KeyNamePair pp = (KeyNamePair)miniTable.getValueAt(i, 2);   //  2-Line
-                
+
                 int inOutLineId = pp.getKey();
-                
+
                 MRMALine rmaLine = new MRMALine(rma.getCtx(), 0, rma.get_TrxName());
                 rmaLine.setM_RMA_ID(M_RMA_ID);
                 rmaLine.setM_InOutLine_ID(inOutLineId);
@@ -229,7 +229,7 @@ public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
         rma.saveEx();
         return true;
 	}
-	
+
 	protected Vector<String> getOISColumnNames()
 	{
 		//  Header Info
@@ -243,7 +243,7 @@ public abstract class JPiereCreateFromRMAOrder extends CreateFrom {
         columnNames.add(Msg.translate(Env.getCtx(), "C_UOM_ID"));
         columnNames.add(Msg.getElement(Env.getCtx(), "MovementQty"));
 
-        
+
 	    return columnNames;
 	}
 }

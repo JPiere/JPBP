@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: jpiere.base.plugin
 Bundle-SymbolicName: jpiere.base.plugin;singleton:=true
 Bundle-Version: 6.1.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  org.adempiere.plugin.utils;bundle-version="2.1.0",
  org.adempiere.ui.zk;bundle-version="2.1.0",
@@ -40,3 +39,4 @@ Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.util,
  jpiere.base.plugin.webui.apps.form
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: jpiere.base.plugin

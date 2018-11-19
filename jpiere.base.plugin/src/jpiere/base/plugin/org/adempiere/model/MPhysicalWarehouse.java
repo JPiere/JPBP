@@ -16,7 +16,6 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import org.compiere.model.I_M_Locator;
 import org.compiere.model.MLocator;
@@ -32,26 +31,26 @@ import org.compiere.util.CCache;
  *
  */
 public class MPhysicalWarehouse extends X_JP_PhysicalWarehouse {
-	
+
 	/**	Physical Warehouse Locators				*/
 	private MLocator[]	m_locators = null;
-	
+
 	/**	Cache					*/
-	private static CCache<Integer,MPhysicalWarehouse> s_cache = new CCache<Integer,MPhysicalWarehouse>(Table_Name, 50 );	
-	
-	
-	public MPhysicalWarehouse(Properties ctx, int JP_PhysicalWarehouse_ID, String trxName) 
+	private static CCache<Integer,MPhysicalWarehouse> s_cache = new CCache<Integer,MPhysicalWarehouse>(Table_Name, 50 );
+
+
+	public MPhysicalWarehouse(Properties ctx, int JP_PhysicalWarehouse_ID, String trxName)
 	{
 		super(ctx, JP_PhysicalWarehouse_ID, trxName);
 	}
-	
-	public MPhysicalWarehouse(Properties ctx, ResultSet rs, String trxName) 
+
+	public MPhysicalWarehouse(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
 
-	
+
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -62,8 +61,8 @@ public class MPhysicalWarehouse extends X_JP_PhysicalWarehouse {
 	{
 		return get(ctx, JP_PhysicalWarehouse_ID, null);
 	}
-	
-	
+
+
 	/**
 	 * Retrieves Physical warehouse from cache under transaction scope
 	 * @param ctx				context
@@ -73,7 +72,7 @@ public class MPhysicalWarehouse extends X_JP_PhysicalWarehouse {
 	 */
 	public static MPhysicalWarehouse get (Properties ctx, int JP_PhysicalWarehouse_ID, String trxName)
 	{
-		Integer key = new Integer(JP_PhysicalWarehouse_ID);
+		Integer key = Integer.valueOf(JP_PhysicalWarehouse_ID);
 		MPhysicalWarehouse retValue = (MPhysicalWarehouse)s_cache.get(key);
 		if (retValue != null)
 			return retValue;
@@ -82,7 +81,7 @@ public class MPhysicalWarehouse extends X_JP_PhysicalWarehouse {
 		s_cache.put (key, retValue);
 		return retValue;
 	}	//	get
-	
+
 	/**
 	 * 	Get Locators
 	 *	@param reload if true reload
@@ -102,8 +101,8 @@ public class MPhysicalWarehouse extends X_JP_PhysicalWarehouse {
 		m_locators = list.toArray(new MLocator[list.size()]);
 		return m_locators;
 	}	//	getLocators
-	
-	
+
+
 	/**
 	 * 	Get Default Locator
 	 *	@return (first) default locator
@@ -116,9 +115,9 @@ public class MPhysicalWarehouse extends X_JP_PhysicalWarehouse {
 			if (locators[i].isDefault() && locators[i].isActive() && locators[i].getM_Warehouse_ID() == orgWH.getM_Warehouse_ID())
 				return locators[i];
 		}
-	
+
 		return null;
 	}	//	getDefaultLocator
-	
-	
+
+
 }

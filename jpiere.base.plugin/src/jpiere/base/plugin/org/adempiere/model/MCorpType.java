@@ -30,20 +30,20 @@ import org.compiere.util.CCache;
 import org.compiere.util.DB;
 
 public class MCorpType extends X_JP_CorpType {
-	
-	public MCorpType(Properties ctx, int JP_CorpType_ID, String trxName) 
+
+	public MCorpType(Properties ctx, int JP_CorpType_ID, String trxName)
 	{
 		super(ctx, JP_CorpType_ID, trxName);
 	}
-	
-	public MCorpType(Properties ctx, ResultSet rs, String trxName) 
+
+	public MCorpType(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MCorpType>	s_cache = new CCache<Integer,MCorpType>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -52,7 +52,7 @@ public class MCorpType extends X_JP_CorpType {
 	 */
 	public static MCorpType get (Properties ctx, int JP_CorpType_ID)
 	{
-		Integer ii = new Integer (JP_CorpType_ID);
+		Integer ii = Integer.valueOf(JP_CorpType_ID);
 		MCorpType retValue = (MCorpType)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -61,9 +61,9 @@ public class MCorpType extends X_JP_CorpType {
 			s_cache.put (JP_CorpType_ID, retValue);
 		return retValue;
 	}	//	get
-	
+
 	private MCorporation[] m_Corporations = null;
-	
+
 	public MCorporation[] getCorporations (boolean requery)
 	{
 		if(m_Corporations != null && !requery)
@@ -95,5 +95,5 @@ public class MCorpType extends X_JP_CorpType {
 		list.toArray(m_Corporations);
 		return m_Corporations;
 	}
-	
+
 }

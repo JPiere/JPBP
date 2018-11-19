@@ -55,7 +55,7 @@ public class MContractCalenderRef extends X_JP_ContractCalenderRef {
 	 */
 	public static MContractCalenderRef get (Properties ctx, int JP_ContractCalenderRef_ID)
 	{
-		Integer ii = new Integer (JP_ContractCalenderRef_ID);
+		Integer ii = Integer.valueOf(JP_ContractCalenderRef_ID);
 		MContractCalenderRef retValue = (MContractCalenderRef)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;

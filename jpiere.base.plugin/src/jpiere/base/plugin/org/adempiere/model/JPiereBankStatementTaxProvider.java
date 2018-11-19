@@ -230,7 +230,7 @@ public class JPiereBankStatementTaxProvider {
 
 		if(C_BPartner_ID != 0)
 		{
-			Integer key = new Integer (C_BPartner_ID);
+			Integer key = Integer.valueOf(C_BPartner_ID);
 			MBPartner bp = (MBPartner) s_cache.get (key);
 			if (bp == null)
 				bp = MBPartner.get(Env.getCtx(), C_BPartner_ID);
@@ -240,11 +240,11 @@ public class JPiereBankStatementTaxProvider {
 			if(isSOTrx){
 				Object SO_TaxRounding = bp.get_Value("JP_SOTaxRounding");
 				if(SO_TaxRounding != null)
-					roundingMode = RoundingMode.valueOf(new Integer(SO_TaxRounding.toString()).intValue());
+					roundingMode = RoundingMode.valueOf(Integer.valueOf(SO_TaxRounding.toString()).intValue());
 			}else{
 				Object PO_TaxRounding = bp.get_Value("JP_POTaxRounding");
 				if(PO_TaxRounding != null)
-					roundingMode = RoundingMode.valueOf(new Integer(PO_TaxRounding.toString()).intValue());
+					roundingMode = RoundingMode.valueOf(Integer.valueOf(PO_TaxRounding.toString()).intValue());
 			}
 		}
 

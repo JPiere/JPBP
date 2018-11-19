@@ -99,7 +99,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	private boolean     m_calculating = false;
 
 	private static final String SELECT_DESELECT_ALL = "SelectAll";
-	
+
 	/***Binding Variables with component***/
 	//search criteria of AR Invoice
 	private int         Invoice_Org_ID = 0;			//C_Invoice.AD_Org_ID for Search AR Invoices
@@ -118,7 +118,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	private int         Payment_Currency_ID = 0;		//C_Payment.C_Currency_ID for Createing Income Payment
 	private BigDecimal  Payment_PayAmt = Env.ZERO;		//C_Payment.PayAmt for Createing Income Payment
 
-	
+
 	private ArrayList<Integer>	m_bpartnerCheck = new ArrayList<Integer>();
 
 	private DecimalFormat format = DisplayType.getNumberFormat(DisplayType.Amount,Env.getLanguage(Env.getCtx()));
@@ -195,7 +195,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 
 	/*【ステータスバー】*/
 	private Hlayout statusBar = new Hlayout();
-	
+
 
 	//Column Number
 	private int i_Select = 0;
@@ -246,19 +246,19 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		long dateLoginLong = dateLogin.getTime();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(dateLoginLong);
-		
+
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		calendar.add(Calendar.DATE, -1);
 		DateInvoiceTo_Editor.setValue(new Timestamp(calendar.getTimeInMillis()));
 		DateInvoiceTo_Editor.addValueChangeListener(this);
 		DateInvoiedTo = new Timestamp(calendar.getTimeInMillis());
-		
+
 		calendar.add(Calendar.DATE, 1);
 		calendar.add(Calendar.MONTH, -1);
 		DateInvoiceFrom_Editor.setValue(new Timestamp(calendar.getTimeInMillis()));
 		DateInvoiceFrom_Editor.addValueChangeListener(this);
 		DateInvoiedFrom = new Timestamp(calendar.getTimeInMillis());
-		
+
 		int AD_Column_ID = 0;
 
 		// Initialization of Org
@@ -274,7 +274,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Payment_Org_ID = Env.getAD_Org_ID(Env.getCtx());
 		Payment_Org_Editor.addValueChangeListener(this);
 
-		
+
 		//Initialization of BPartner
 		AD_Column_ID = MColumn.getColumn_ID("C_Invoice","C_BPartner_ID");
 		MLookup lookupBP = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), AD_Column_ID
@@ -285,7 +285,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Payment_BP_Editor = new WSearchEditor("Payment_BPartner_ID", true, false, true, lookupBP);
 		Payment_BP_Editor.addValueChangeListener(this);
 
-		
+
 		//Initialization of Corporation Master
 		AD_Column_ID = MColumn.getColumn_ID("C_BPartner","JP_Corporation_ID");
 		if(AD_Column_ID > 0)
@@ -297,7 +297,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			Corportion_Editor.addValueChangeListener(this);
 		}
 
-		
+
 		//Initialization of Doc Type
 		AD_Column_ID = MColumn.getColumn_ID("C_Payment","C_DocType_ID");//5302;
 		MLookup lookupDocType = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), AD_Column_ID,
@@ -306,7 +306,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Payment_DocType_Editor = new WTableDirEditor("Payment_DocType_ID", true, false, true, lookupDocType);
 		Payment_DocType_Editor.addValueChangeListener(this);
 
-		
+
 		//Initialization of Bank Account
 		AD_Column_ID = MColumn.getColumn_ID("C_Payment","C_BankAccount_ID");//3880;
 		MLookup lookupAcount = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), AD_Column_ID,
@@ -315,13 +315,13 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Payment_Account_Editor = new WTableDirEditor("Payment_BankAccount_ID", true, false, true, lookupAcount);
 		Payment_Account_Editor.addValueChangeListener(this);
 
-		
+
 		//
 		Payment_Date_Editor.setValue(Env.getContextAsDate(Env.getCtx(), "#Date"));
 		allocDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Payment_Date_Editor.addValueChangeListener(this);
 
-		
+
 		//Initialization of Currency
 		AD_Column_ID = MColumn.getColumn_ID("C_Invoice","C_Currency_ID");//1000033
 //		MLookup lookupCur = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID,  DisplayType.Search);
@@ -387,20 +387,20 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				ZKUpdateUtil.setHflex(DateInvoiceTo_Editor.getComponent(), "true");
 				row.appendCellChild(DateInvoiceTo_Editor.getComponent(),1);
 				row.setStyle("background-color: #ffffff");
-				
+
 				Invoice_Org_Label.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 				row.appendCellChild(Invoice_Org_Label.rightAlign());
 				ZKUpdateUtil.setHflex(Invoice_Org_Editor.getComponent(), "true");
 				row.appendCellChild(Invoice_Org_Editor.getComponent(),1);
 				row.appendCellChild(new Space(),1);
-				
+
 				Invoice_Currency_Label.setText(Msg.translate(Env.getCtx(), "C_Currency_ID"));
 				row.appendCellChild(Invoice_Currency_Label.rightAlign(),1);
-				ZKUpdateUtil.setHflex(Invoice_Currency_Editor.getComponent(), "true");	
+				ZKUpdateUtil.setHflex(Invoice_Currency_Editor.getComponent(), "true");
 				row.appendCellChild(Invoice_Currency_Editor.getComponent(),1);
 				row.appendCellChild(new Space(),1);
 				row.setStyle("background-color: #ffffff");
-				
+
 			row = rows.newRow();
 				Invoice_BP_Label.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
 				row.appendCellChild(Invoice_BP_Label.rightAlign());
@@ -411,7 +411,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				row.appendCellChild(Corportion_Label.rightAlign());
 				ZKUpdateUtil.setHflex(Corportion_Editor.getComponent(), "true");
 				row.appendCellChild(Corportion_Editor.getComponent(),2);
-				
+
 				row.setStyle("background-color: #ffffff");
 
 
@@ -536,13 +536,13 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		ZKUpdateUtil.setHflex(allocationLayout, "min");
 		rows = allocationLayout.newRows();
 		row = rows.newRow();
-		
+
 		WAppsAction selectAllAction = new WAppsAction (SELECT_DESELECT_ALL, null, null);
 		selectAllButton = selectAllAction.getButton();
 		selectAllButton.setAttribute(SELECT_DESELECT_ALL, Boolean.FALSE);
 		selectAllButton.addActionListener(this);
 		row.appendCellChild(selectAllButton);
-		
+
 		differenceLabel.setText(Msg.getMsg(Env.getCtx(), "Difference"));
 		row.appendCellChild(differenceLabel.rightAlign());
 		row.appendCellChild(allocCurrencyLabel.rightAlign());
@@ -551,19 +551,19 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		differenceField.setReadonly(true);
 		differenceField.setStyle("text-align: right");
 		row.appendCellChild(differenceField);
-		
+
 		allocateButton.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Process")));
 		allocateButton.addActionListener(this);
 		ZKUpdateUtil.setHflex(allocateButton, "true");
 		row.appendCellChild(allocateButton);
-		
+
 		refreshButton.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Refresh")));
 		refreshButton.addActionListener(this);
 		refreshButton.setAutodisable("self");
 		row.appendCellChild(refreshButton);
 
 
-		
+
 	}
 
 	public Vector<Vector<Object>> getInvoiceData(Object date, IMiniTable invoiceTable)
@@ -587,17 +587,17 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			sql.append(" AND i.C_BPartner_ID=?");
 		else
 			sql.append(" AND bp.JP_Corporation_ID=?");
-		
+
 		sql.append(" AND i.C_Currency_ID=?");                                   //  #3
 		if (Invoice_Org_ID != 0 )
 			sql.append(" AND i.AD_Org_ID=?");					//  #4
-		
+
 		if(DateInvoiedFrom != null)
 			sql.append(" AND i.DateInvoiced >= ?");
-		
+
 		if(DateInvoiedTo != null)
 			sql.append(" AND i.DateInvoiced <= ?");
-		
+
 		sql.append(" ORDER BY i.DateInvoiced, i.DocumentNo");
 		if (log.isLoggable(Level.FINE)) log.fine("InvSQL=" + sql.toString());
 
@@ -616,27 +616,27 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			else
 				pstmt.setInt(++i, JP_Corporation_ID);
 			pstmt.setInt(++i, Invoice_Currency_ID);
-			
+
 			if (Invoice_Org_ID != 0 )
 				pstmt.setInt(++i, Invoice_Org_ID);
-			
+
 			if(DateInvoiedFrom != null)
 				pstmt.setTimestamp(++i, DateInvoiedFrom);
-			
+
 			if(DateInvoiedTo != null)
 				pstmt.setTimestamp(++i, DateInvoiedTo);
-			
+
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
 				Vector<Object> line = new Vector<Object>();
-				line.add(new Boolean(false));       // 0-Selection
+				line.add(Boolean.valueOf(false));       // 0-Selection
 				line.add(rs.getTimestamp(1));       //  1-DateInvoiced
 				KeyNamePair pp = new KeyNamePair(rs.getInt(3), rs.getString(2));//C_Invoice_ID,DocumentNo
 				line.add(pp);                       //  2-DocumentNo
 				line.add(rs.getBigDecimal(6));      //  3-Grand Total
 				BigDecimal open = rs.getBigDecimal(7);
-				if (open == null)					
+				if (open == null)
 					open = Env.ZERO;
 				line.add(open);      				//  4-Open Amount
 				BigDecimal discount = rs.getBigDecimal(8);
@@ -646,10 +646,10 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				line.add(Env.ZERO);      			//  6-WriteOff
 				line.add(Env.ZERO);					//  7-Applied
 				line.add(open);				    	//  8-OverUnder
-								
+
 				line.add(rs.getString(10));			//9-Org
 				line.add(rs.getString(11));			//10-BPartner
-				
+
 				if (Env.ZERO.compareTo(open) != 0)
 					data.add(line);
 
@@ -755,9 +755,9 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	}
 
 
-	private void setAllocateButton() 
+	private void setAllocateButton()
 	{
-		
+
 		if (totalDiff.signum() == 0)
 		{
 			allocateButton.setEnabled(true);
@@ -766,7 +766,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		{
 			allocateButton.setEnabled(false);
 		}
-		
+
 	}
 
 	private void loadBPartner ()
@@ -786,7 +786,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		modelI.addTableModelListener(this);
 		invoiceTable.setData(modelI, columnNames);
 		setInvoiceColumnClass(invoiceTable);
-		
+
 		//  Calculate Totals
 		calculate(true);
 
@@ -797,7 +797,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	public void calculate(boolean isUpdatePayAmt)
 	{
 		invoiceInfo.setText(calculateInvoice(invoiceTable));
-		
+
 		if(isUpdatePayAmt)
 		{
 			Payment_PayAmt = totalInv;
@@ -939,7 +939,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 
 
 	@Override
-	public void valueChange(ValueChangeEvent e) 
+	public void valueChange(ValueChangeEvent e)
 	{
 		String name = e.getPropertyName();
 		Object value = e.getNewValue();
@@ -957,7 +957,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
 				label.setStyle("color: #ff0000");
 				statusBar.appendChild(label);
-				
+
 			}else{
 				statusBar.getChildren().clear();
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
@@ -1012,7 +1012,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
 				label.setStyle("color: #ff0000");
 				statusBar.appendChild(label);
-				
+
 			}else{
 				statusBar.getChildren().clear();
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
@@ -1037,7 +1037,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
 				label.setStyle("color: #ff0000");
 				statusBar.appendChild(label);
-				
+
 			}else{
 				statusBar.getChildren().clear();
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
@@ -1055,7 +1055,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			Payment_Account_Editor.setValue(null);
 			Payment_BankAccount_ID = 0;
 			mLookup.refresh();
-			
+
 			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
 			{
 				loadBPartner();
@@ -1064,7 +1064,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
 				label.setStyle("color: #ff0000");
 				statusBar.appendChild(label);
-				
+
 			}else{
 				statusBar.getChildren().clear();
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
@@ -1100,14 +1100,14 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
 				label.setStyle("color: #ff0000");
 				statusBar.appendChild(label);
-				
+
 			}else{
 				statusBar.getChildren().clear();
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
 				label.setStyle("color: #ff0000");
 				statusBar.appendChild(label);
 			}
-			
+
 		}else if(name.equals("DateInvoiceTo")){
 			DateInvoiedFrom = value != null ? ((Timestamp) value) : null;
 			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
@@ -1118,7 +1118,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
 				label.setStyle("color: #ff0000");
 				statusBar.appendChild(label);
-				
+
 			}else{
 				statusBar.getChildren().clear();
 				Label label = new Label(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
@@ -1166,27 +1166,27 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		if (e.getTarget().equals(allocateButton))
 		{
 			if(Payment_Org_ID == 0)
-				throw new AdempiereException(Msg.getElement(Env.getCtx(), "C_Payment_ID", true) +" " 
+				throw new AdempiereException(Msg.getElement(Env.getCtx(), "C_Payment_ID", true) +" "
 							+	Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "AD_Org_ID"));
-			
+
 			if(Payment_DocType_ID == 0)
 				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_DocType_ID"));
-			
+
 			if(allocDate == null)
 				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "DateTrx"));
-			
+
 			if(Payment_BankAccount_ID == 0)
 				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BankAccount_ID"));
-		
+
 			if(Payment_BP_ID == 0)
 				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
-			
+
 			if (Invoice_Currency_ID != Payment_Currency_ID)
 			{
 				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "JP_DifferentCurrency"));//Different Currency
 			}
-			
-			
+
+
 			allocateButton.setEnabled(false);
 
 			MAllocationHdr allocation = saveData();//Create Income Payment and Allocation.
@@ -1218,7 +1218,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		{
 			loadBPartner();
 		}
-		else if (e.getTarget().getId().equals(SELECT_DESELECT_ALL)) 
+		else if (e.getTarget().getId().equals(SELECT_DESELECT_ALL))
 		{
 			ListModelTable model = invoiceTable.getModel();
 			int rows = model.getSize();
@@ -1298,10 +1298,10 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		if (m_noInvoices == 0)
 			return null;
 
-		
+
 		int AD_Client_ID = Env.getContextAsInt(Env.getCtx(), m_WindowNo, "AD_Client_ID");
 		int AD_Org_ID = Payment_Org_ID;
-		int C_BPartner_ID = Payment_BP_ID;	
+		int C_BPartner_ID = Payment_BP_ID;
 		int C_Order_ID = 0;
 		int C_CashLine_ID = 0;
 		Timestamp DateTrx = (Timestamp)date;
@@ -1333,7 +1333,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		{
 			if (((Boolean)invoice.getValueAt(i, 0)).booleanValue())	 		//Selected Invoice Only
 			{
-				KeyNamePair pp = (KeyNamePair)invoice.getValueAt(i, i_DocumentNo); 
+				KeyNamePair pp = (KeyNamePair)invoice.getValueAt(i, i_DocumentNo);
 				int C_Invoice_ID = pp.getKey();
 				BigDecimal DiscountAmt = (BigDecimal)invoice.getValueAt(i, i_Discount);
 				BigDecimal WriteOffAmt = (BigDecimal)invoice.getValueAt(i, i_WriteOff);

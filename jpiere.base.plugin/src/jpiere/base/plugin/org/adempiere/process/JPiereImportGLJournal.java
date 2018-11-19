@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
@@ -2100,11 +2101,11 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 			}else if(impJournal.getAmtSourceDr().compareTo(Env.ZERO) != 0 && impJournal.getAmtAcctDr().compareTo(Env.ZERO) != 0 ) {
 
-				currencyRate = impJournal.getAmtAcctDr().divide(impJournal.getAmtSourceDr(), 12, BigDecimal.ROUND_HALF_UP);
+				currencyRate = impJournal.getAmtAcctDr().divide(impJournal.getAmtSourceDr(), 12, RoundingMode.HALF_UP);
 
 			}else if(impJournal.getAmtSourceCr().compareTo(Env.ZERO) != 0 && impJournal.getAmtAcctCr().compareTo(Env.ZERO) != 0 ) {
 
-				currencyRate = impJournal.getAmtAcctCr().divide(impJournal.getAmtSourceCr(), 12, BigDecimal.ROUND_HALF_UP);
+				currencyRate = impJournal.getAmtAcctCr().divide(impJournal.getAmtSourceCr(), 12, RoundingMode.HALF_UP);
 
 			}
 

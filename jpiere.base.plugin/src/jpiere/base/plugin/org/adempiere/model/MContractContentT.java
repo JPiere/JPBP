@@ -424,7 +424,7 @@ public class MContractContentT extends X_JP_ContractContentT {
 	 */
 	public static MContractContentT get (Properties ctx, int JP_ContractContentT_ID)
 	{
-		Integer ii = new Integer (JP_ContractContentT_ID);
+		Integer ii = Integer.valueOf(JP_ContractContentT_ID);
 		MContractContentT retValue = (MContractContentT)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;

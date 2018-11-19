@@ -117,7 +117,7 @@ public class JPiereBillBPartnerCallout implements IColumnCallout {
 				if (bill_Location_ID == 0)
 					mTab.setValue("C_BPartner_Location_ID", null);
 				else
-					mTab.setValue("C_BPartner_Location_ID", new Integer(bill_Location_ID));
+					mTab.setValue("C_BPartner_Location_ID", Integer.valueOf(bill_Location_ID));
 
 
 				//	Contact - overwritten by InfoBP selection
@@ -132,7 +132,7 @@ public class JPiereBillBPartnerCallout implements IColumnCallout {
 					mTab.setValue("AD_User_ID", null);
 				else
 				{
-					mTab.setValue("AD_User_ID", new Integer(contID));
+					mTab.setValue("AD_User_ID", Integer.valueOf(contID));
 				}
 
 
@@ -148,7 +148,7 @@ public class JPiereBillBPartnerCallout implements IColumnCallout {
 					mTab.setValue("PaymentRule", s);
 				}
 				//	Payment Term
-				Integer ii = new Integer(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
+				Integer ii = Integer.valueOf(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
 				if (!rs.wasNull())
 					mTab.setValue("C_PaymentTerm_ID", ii);
 

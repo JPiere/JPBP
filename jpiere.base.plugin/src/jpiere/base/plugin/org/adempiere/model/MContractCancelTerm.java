@@ -30,20 +30,20 @@ import org.compiere.util.Msg;
 *
 */
 public class MContractCancelTerm extends X_JP_ContractCancelTerm {
-	
-	public MContractCancelTerm(Properties ctx, int JP_ContractCancelTerm_ID, String trxName) 
+
+	public MContractCancelTerm(Properties ctx, int JP_ContractCancelTerm_ID, String trxName)
 	{
 		super(ctx, JP_ContractCancelTerm_ID, trxName);
 	}
-	
+
 	public MContractCancelTerm(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
-	
+
+
 	@Override
-	protected boolean beforeSave(boolean newRecord) 
+	protected boolean beforeSave(boolean newRecord)
 	{
 		if(newRecord || is_ValueChanged("JP_Day") || is_ValueChanged("IsDueFixed"))
 		{
@@ -62,7 +62,7 @@ public class MContractCancelTerm extends X_JP_ContractCancelTerm {
 
 	/**	Cache				*/
 	private static CCache<Integer,MContractCancelTerm>	s_cache = new CCache<Integer,MContractCancelTerm>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -71,7 +71,7 @@ public class MContractCancelTerm extends X_JP_ContractCancelTerm {
 	 */
 	public static MContractCancelTerm get (Properties ctx, int JP_ContractCancelTerm_ID)
 	{
-		Integer ii = new Integer (JP_ContractCancelTerm_ID);
+		Integer ii = Integer.valueOf(JP_ContractCancelTerm_ID);
 		MContractCancelTerm retValue = (MContractCancelTerm)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -80,12 +80,12 @@ public class MContractCancelTerm extends X_JP_ContractCancelTerm {
 			s_cache.put (JP_ContractCancelTerm_ID, retValue);
 		return retValue;
 	}	//	get
-	
+
 	public Timestamp calculateCancelDeadLine(Timestamp JP_ContractPeriodDate_To)
 	{
 		return calculateCancelDeadLine(JP_ContractPeriodDate_To.toLocalDateTime());
 	}
-	
+
 	public Timestamp calculateCancelDeadLine(LocalDateTime JP_ContractPeriodDate_To)
 	{
 		if(isDueFixed())

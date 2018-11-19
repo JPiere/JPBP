@@ -30,20 +30,20 @@ import org.compiere.util.DB;
  *
  */
 public class MBusinessArea extends X_JP_BusinessArea {
-	
-	public MBusinessArea(Properties ctx, int JP_BusinessArea_ID, String trxName) 
+
+	public MBusinessArea(Properties ctx, int JP_BusinessArea_ID, String trxName)
 	{
 		super(ctx, JP_BusinessArea_ID, trxName);
 	}
-	
-	public MBusinessArea(Properties ctx, ResultSet rs, String trxName) 
+
+	public MBusinessArea(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MBusinessArea>	s_cache = new CCache<Integer,MBusinessArea>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -52,7 +52,7 @@ public class MBusinessArea extends X_JP_BusinessArea {
 	 */
 	public static MBusinessArea get (Properties ctx, int JP_BusinessArea_ID)
 	{
-		Integer ii = new Integer (JP_BusinessArea_ID);
+		Integer ii = Integer.valueOf(JP_BusinessArea_ID);
 		MBusinessArea retValue = (MBusinessArea)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -61,10 +61,10 @@ public class MBusinessArea extends X_JP_BusinessArea {
 			s_cache.put (JP_BusinessArea_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	private MBusinessUnit[] m_BusinessUnits = null;
-	
+
 	public MBusinessUnit[] getBusinessUnits (boolean requery)
 	{
 		if(m_BusinessUnits != null && !requery)

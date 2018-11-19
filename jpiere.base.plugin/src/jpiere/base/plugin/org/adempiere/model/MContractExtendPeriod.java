@@ -30,20 +30,20 @@ import org.compiere.util.Msg;
 *
 */
 public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
-	
-	public MContractExtendPeriod(Properties ctx, int JP_ContractExtendPeriod_ID, String trxName) 
+
+	public MContractExtendPeriod(Properties ctx, int JP_ContractExtendPeriod_ID, String trxName)
 	{
 		super(ctx, JP_ContractExtendPeriod_ID, trxName);
 	}
-	
-	public MContractExtendPeriod(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractExtendPeriod(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
-	
+
+
 	@Override
-	protected boolean beforeSave(boolean newRecord) 
+	protected boolean beforeSave(boolean newRecord)
 	{
 		if(newRecord || is_ValueChanged("JP_Day") || is_ValueChanged("IsDueFixed"))
 		{
@@ -59,11 +59,11 @@ public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 
 		return true;
 	}
-	
-	
+
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractExtendPeriod>	s_cache = new CCache<Integer,MContractExtendPeriod>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -72,7 +72,7 @@ public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 	 */
 	public static MContractExtendPeriod get (Properties ctx, int JP_ContractExxtendPeriod_ID)
 	{
-		Integer ii = new Integer (JP_ContractExxtendPeriod_ID);
+		Integer ii = Integer.valueOf(JP_ContractExxtendPeriod_ID);
 		MContractExtendPeriod retValue = (MContractExtendPeriod)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -81,13 +81,13 @@ public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 			s_cache.put (JP_ContractExxtendPeriod_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	public Timestamp calculateNewPeriodEndDate(Timestamp old_PeriodEndDate)
 	{
 		return calculateNewPeriodEndDate(old_PeriodEndDate.toLocalDateTime());
 	}
-	
+
 	public Timestamp calculateNewPeriodEndDate(LocalDateTime old_PeriodEndDate)
 	{
 		if(isDueFixed())
@@ -101,10 +101,10 @@ public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 			}else{
 				return Timestamp.valueOf(old_PeriodEndDate.withDayOfMonth(getJP_Day()));
 			}
-			
+
 		}else{
 		   return Timestamp.valueOf(old_PeriodEndDate.plusYears(getJP_Year()).plusMonths(getJP_Month()).plusDays(getJP_Day()) );
 		}
 	}
-	
+
 }

@@ -90,7 +90,7 @@ public class MContractProcessRef extends X_JP_ContractProcessRef {
 	 */
 	public static MContractProcessRef get (Properties ctx, int JP_ContractProcessRef_ID)
 	{
-		Integer ii = new Integer (JP_ContractProcessRef_ID);
+		Integer ii = Integer.valueOf(JP_ContractProcessRef_ID);
 		MContractProcessRef retValue = (MContractProcessRef)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;

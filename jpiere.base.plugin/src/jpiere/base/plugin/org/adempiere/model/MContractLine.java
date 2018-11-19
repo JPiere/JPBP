@@ -14,7 +14,7 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
-import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -71,7 +71,7 @@ public class MContractLine extends X_JP_ContractLine {
 	 */
 	public static MContractLine get (Properties ctx, int JP_ContractLine_ID)
 	{
-		Integer ii = new Integer (JP_ContractLine_ID);
+		Integer ii = Integer.valueOf(JP_ContractLine_ID);
 		MContractLine retValue = (MContractLine)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -425,7 +425,7 @@ public class MContractLine extends X_JP_ContractLine {
 	public void setHeaderInfo ()
 	{
 		m_parent = getParent();
-		m_precision = new Integer(m_parent.getPrecision());
+		m_precision = Integer.valueOf(m_parent.getPrecision());
 		m_M_PriceList_ID = m_parent.getM_PriceList_ID();
 		m_IsSOTrx = m_parent.isSOTrx();
 		m_DateDoc = m_parent.getDateDoc();
@@ -457,7 +457,7 @@ public class MContractLine extends X_JP_ContractLine {
 			setPriceEntered(getPriceActual());
 		else
 			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
-				.divide(getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP)));	//	recision
+				.divide(getQtyEntered(), 12, RoundingMode.HALF_UP)));	//	recision
 
 		//	Calculate Discount
 		setDiscount(m_productPrice.getDiscount());
@@ -490,7 +490,7 @@ public class MContractLine extends X_JP_ContractLine {
 					+ " SET TotalLines = "
 					    + "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_ContractLine cl WHERE cc.JP_ContractContent_ID=cl.JP_ContractContent_ID)"
 					+ "WHERE JP_ContractContent_ID=?";
-				int no = DB.executeUpdate(sql, new Object[]{new Integer(getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+				int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 				if (no != 1)
 				{
 					log.warning("(1) #" + no);

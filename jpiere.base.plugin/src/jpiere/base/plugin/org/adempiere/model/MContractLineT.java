@@ -14,7 +14,7 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
-import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -270,13 +270,13 @@ public class MContractLineT extends X_JP_ContractLineT {
 		m_parent = getParent();
 		if(m_parent == null)
 		{
-			m_precision = new Integer(MCurrency.getStdPrecision(getCtx(), getC_Currency_ID()));
+			m_precision = Integer.valueOf(MCurrency.getStdPrecision(getCtx(), getC_Currency_ID()));
 			m_M_PriceList_ID = getM_PriceList_ID();
 			m_IsSOTrx = isSOTrx();
 
 		}else {
 
-			m_precision = new Integer(m_parent.getPrecision());
+			m_precision = Integer.valueOf(m_parent.getPrecision());
 			m_M_PriceList_ID = m_parent.getM_PriceList_ID();
 			m_IsSOTrx = m_parent.isSOTrx();
 
@@ -309,7 +309,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 			setPriceEntered(getPriceActual());
 		else
 			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
-				.divide(getQtyEntered(), 12, BigDecimal.ROUND_HALF_UP)));	//	recision
+				.divide(getQtyEntered(), 12, RoundingMode.HALF_UP)));	//	recision
 
 		//	Calculate Discount
 		setDiscount(m_productPrice.getDiscount());
@@ -343,7 +343,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 					+ " SET TotalLines = "
 					    + "(SELECT COALESCE(SUM(LineNetAmt),0) FROM JP_ContractLineT clt WHERE cct.JP_ContractContentT_ID=clt.JP_ContractContentT_ID)"
 					+ "WHERE JP_ContractContenTt_ID=?";
-				int no = DB.executeUpdate(sql, new Object[]{new Integer(getJP_ContractContentT_ID())}, false, get_TrxName(), 0);
+				int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(getJP_ContractContentT_ID())}, false, get_TrxName(), 0);
 				if (no != 1)
 				{
 					log.warning("(1) #" + no);
@@ -366,7 +366,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 	 */
 	public static MContractLineT get (Properties ctx, int JP_ContractLineT_ID)
 	{
-		Integer ii = new Integer (JP_ContractLineT_ID);
+		Integer ii = Integer.valueOf(JP_ContractLineT_ID);
 		MContractLineT retValue = (MContractLineT)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;

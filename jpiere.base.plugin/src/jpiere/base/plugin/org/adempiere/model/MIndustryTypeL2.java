@@ -25,25 +25,25 @@ import org.compiere.util.DB;
 
 /**
  * JPIERE-0290 Industory Types Master
- * 
+ *
  * @author h.hagiwara
  *
  */
 public class MIndustryTypeL2 extends X_JP_IndustryTypeL2 {
-	
+
 	public MIndustryTypeL2(Properties ctx, int JP_IndustryTypeL2_ID, String trxName)
 	{
 		super(ctx, JP_IndustryTypeL2_ID, trxName);
 	}
-	
-	public MIndustryTypeL2(Properties ctx, ResultSet rs, String trxName) 
+
+	public MIndustryTypeL2(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MIndustryTypeL2>	s_cache = new CCache<Integer,MIndustryTypeL2>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -52,7 +52,7 @@ public class MIndustryTypeL2 extends X_JP_IndustryTypeL2 {
 	 */
 	public static MIndustryTypeL2 get (Properties ctx, int JP_IndustryTypL2_ID)
 	{
-		Integer ii = new Integer (JP_IndustryTypL2_ID);
+		Integer ii = Integer.valueOf(JP_IndustryTypL2_ID);
 		MIndustryTypeL2 retValue = (MIndustryTypeL2)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -61,9 +61,9 @@ public class MIndustryTypeL2 extends X_JP_IndustryTypeL2 {
 			s_cache.put (JP_IndustryTypL2_ID, retValue);
 		return retValue;
 	}	//	get
-	
+
 	private MIndustryTypeL1[] m_IndustryTypesL1 = null;
-	
+
 	public MIndustryTypeL1[] getIndustryTypesL1 (boolean requery)
 	{
 		if(m_IndustryTypesL1 != null && !requery)

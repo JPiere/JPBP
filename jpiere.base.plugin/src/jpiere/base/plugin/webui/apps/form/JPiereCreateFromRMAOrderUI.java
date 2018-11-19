@@ -26,6 +26,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.webui.apps.form;
 
+import static org.compiere.model.SystemIDs.*;
+
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -46,9 +48,6 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridTab;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
-
-import static org.compiere.model.SystemIDs.*;
-
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -58,22 +57,22 @@ import org.zkoss.zul.Center;
 
 /**
  * JPIERE-0235: Craete From RMA Order
- * 
- * 
+ *
+ *
  * @author Hideaki Hagiwara
  *
  */
 public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder implements ValueChangeListener
 {
 	private WCreateFromWindow window;
-	
-	public JPiereCreateFromRMAOrderUI(GridTab tab) 
+
+	public JPiereCreateFromRMAOrderUI(GridTab tab)
 	{
 		super(tab);
 		log.info(getGridTab().toString());
-		
+
 		window = new WCreateFromWindow(this, getGridTab().getWindowNo());
-		
+
 		p_WindowNo = getGridTab().getWindowNo();
 
 		try
@@ -90,19 +89,19 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 		}
 		AEnv.showWindow(window);
 	}
-	
+
 	/** Window No               */
 	private int p_WindowNo;
 
 	/**	Logger			*/
 	private CLogger log = CLogger.getCLogger(getClass());
-		
+
 	protected Label inOutLabel = new Label();
 	protected WEditor inOutField;
 
 	protected Label bPartnerLabel = new Label();
 	protected WEditor bPartnerField;
-	
+
 	/**
 	 *  Dynamic Init
 	 *  @throws Exception if Lookups cannot be initialized
@@ -111,31 +110,31 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 	public boolean dynInit() throws Exception
 	{
 		log.config("");
-		
+
 		super.dynInit();
-		
+
 		window.setTitle(getTitle());
 		initInOut();
-		
+
 		initBPartner(true);
 		bPartnerField.addValueChangeListener(this);
-		
+
 		loadRMA();
-		
+
 		return true;
 	}   //  dynInit
-	
+
 	protected void zkInit() throws Exception
 	{
 		inOutLabel.setText(Msg.getElement(Env.getCtx(), "M_InOut_ID", isSOTrx));
 		bPartnerLabel.setText(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));
-        
+
 		Borderlayout parameterLayout = new Borderlayout();
 		ZKUpdateUtil.setHeight(parameterLayout, "110px");
 		ZKUpdateUtil.setWidth(parameterLayout, "100%");
     	Panel parameterPanel = window.getParameterPanel();
 		parameterPanel.appendChild(parameterLayout);
-		
+
 		Grid parameterStdLayout = GridFactory.newGridLayout();
     	Panel parameterStdPanel = new Panel();
 		parameterStdPanel.appendChild(parameterStdLayout);
@@ -143,19 +142,19 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 		Center center = new Center();
 		parameterLayout.appendChild(center);
 		center.appendChild(parameterStdPanel);
-		
+
 		Rows rows = (Rows) parameterStdLayout.newRows();
 		Row row = rows.newRow();
 		row.appendChild(inOutLabel.rightAlign());
 		if (inOutField != null)
 			row.appendChild(inOutField.getComponent());
-		
+
 		row = rows.newRow();
 		row.appendChild(bPartnerLabel.rightAlign());
 		if (bPartnerField != null)
 			row.appendChild(bPartnerField.getComponent());
 	}
-	
+
 	/**
 	 *  Change Listener
 	 *  @param e event
@@ -171,7 +170,7 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange
-	
+
 	/**************************************************************************
 	 *  Load BPartner Field
 	 *  @param forInvoice true if Invoices are to be created, false receipts
@@ -185,9 +184,9 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, true, false, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
-		bPartnerField.setValue(new Integer(C_BPartner_ID));
+		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 	}   //  initBPartner
-	
+
 	protected void initInOut () throws Exception
 	{
 		//  load InOut
@@ -196,14 +195,14 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 		inOutField = new WSearchEditor ("M_InOut_ID", true, true, false, lookup);
 		//
 		int M_InOut_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "InOut_ID");
-		inOutField.setValue(new Integer(M_InOut_ID));
+		inOutField.setValue(Integer.valueOf(M_InOut_ID));
 	}   //  initBPartner
-	
+
 	protected void loadRMA()
 	{
 		loadTableOIS(getRMAData());
 	}
-	
+
 	/**
 	 *  Load Order/Invoice/Shipment data into Table
 	 *  @param data data
@@ -211,7 +210,7 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 	protected void loadTableOIS (Vector<?> data)
 	{
 		window.getWListbox().clear();
-		
+
 		//  Remove previous listeners
 		window.getWListbox().getModel().removeTableModelListener(window);
 		//  Set Model
@@ -219,15 +218,15 @@ public class JPiereCreateFromRMAOrderUI extends JPiereCreateFromRMAOrder impleme
 		model.addTableModelListener(window);
 		window.getWListbox().setData(model, getOISColumnNames());
 		//
-		
+
 		configureMiniTable(window.getWListbox());
 	}   //  loadOrder
-	
+
 	public void showWindow()
 	{
 		window.setVisible(true);
 	}
-	
+
 	public void closeWindow()
 	{
 		window.dispose();

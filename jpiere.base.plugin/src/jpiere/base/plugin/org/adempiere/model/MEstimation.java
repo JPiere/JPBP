@@ -122,7 +122,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		// set query to search this document
 		int m_docid = getJP_Estimation_ID();
 		MQuery query = new MQuery(Table_Name);
-		query.addRestriction( COLUMNNAME_JP_Estimation_ID, MQuery.EQUAL, new Integer(m_docid));
+		query.addRestriction( COLUMNNAME_JP_Estimation_ID, MQuery.EQUAL, Integer.valueOf(m_docid));
 
 		// get Print Format
 		//int AD_PrintFormat_ID = 1000133;
@@ -232,8 +232,8 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			m_processMsg = msg;
 			return DocAction.STATUS_Invalid;
 		}
-		
-		
+
+
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -599,16 +599,16 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			}
 
 		}
-		
+
 		if( (newRecord  && getC_BPartner_ID() > 0 ) || (is_ValueChanged("C_BPartner_ID") && getC_BPartner_ID() > 0) )
 		{
 			MBPartner bp = MBPartner.get(getCtx(), getC_BPartner_ID());
-			
+
 			if(Util.isEmpty(getJP_BP_Name()))
 			{
 				setJP_BP_Name(bp.getName2());
 			}
-			
+
 			if(Util.isEmpty(getJP_BP_Address()))
 			{
 				int C_BPartner_Location_ID = getC_BPartner_Location_ID();
@@ -623,7 +623,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 						}
 					}
 				}
-					
+
 				if(C_BPartner_Location_ID >0)
 				{
 					MBPartnerLocation bpLocation = new MBPartnerLocation(getCtx(),C_BPartner_Location_ID,get_TrxName());
@@ -639,22 +639,22 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 								postal = "〒" + postal + "-" + postalAdd;
 							else
 								postal = postal + "-" + postalAdd;
-							
+
 						}else{
-							
+
 							if(country.getCountryCode().equals("JP"))
 								postal = "〒" + postal + "-0000";
 						}
-						
+
 						setJP_BP_Address(postal + " " + loc.getAddress1() + loc.getAddress2());
-						
+
 					}else{
 						setJP_BP_Address(loc.getAddress1() + loc.getAddress2());
 					}
-						
+
 				}
 			}//Address
-			
+
 			if(Util.isEmpty(getJP_BP_User_Name()))
 			{
 				MUser[] users = MUser.getOfBPartner(getCtx(), bp.getC_BPartner_ID(),get_TrxName());
@@ -666,7 +666,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 						break;
 					}
 				}
-					
+
 			}
 		}
 
@@ -674,7 +674,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 	}
 
 	@Override
-	protected boolean afterSave(boolean newRecord, boolean success) 
+	protected boolean afterSave(boolean newRecord, boolean success)
 	{
 		//Sync Lines
 		if (   is_ValueChanged("AD_Org_ID")
@@ -684,7 +684,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		    || is_ValueChanged(MEstimation.COLUMNNAME_DatePromised)
 		    || is_ValueChanged(MEstimation.COLUMNNAME_M_Warehouse_ID)
 		    || is_ValueChanged(MEstimation.COLUMNNAME_M_Shipper_ID)
-		    || is_ValueChanged(MEstimation.COLUMNNAME_C_Currency_ID)) 
+		    || is_ValueChanged(MEstimation.COLUMNNAME_C_Currency_ID))
 		{
 			MEstimationLine[] lines = getLines();
 			for (MEstimationLine line : lines) {
@@ -791,36 +791,36 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 
 		return index;
 	}
-	
+
 	boolean JP_ESTIMATION_ORDER_AMT_CHECK = false;
 	boolean JP_ESTIMATION_INVOICE_AMT_CHECK = false;
 	boolean JP_ESTIMATION_BILL_AMT_CHECK = false;
 	boolean JP_ESTIMATION_PAYMENT_AMT_CHECK = false;
 	boolean JP_ESTIMATION_RMA_AMT_CHECK = false;
-	
+
 	/**
-	 * 
+	 *
 	 * @return null of String(if Error)
 	 */
 	public String amountConsistencyCheck()
 	{
 		if(getRef_Order_ID() > 0)
 			JP_ESTIMATION_ORDER_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_ORDER_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
-		
+
 		if(getC_Invoice_ID() > 0)
 			JP_ESTIMATION_INVOICE_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_INVOICE_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
-		
+
 		if(getJP_Bill_ID() > 0)
 			JP_ESTIMATION_BILL_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_BILL_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
-		
+
 		if(getC_Payment_ID() > 0)
 			JP_ESTIMATION_PAYMENT_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_PAYMENT_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
-		
+
 		if(getM_RMA_ID() > 0)
 			JP_ESTIMATION_RMA_AMT_CHECK = MSysConfig.getBooleanValue("JP_ESTIMATION_RMA_AMT_CHECK", false, getAD_Client_ID(), getAD_Org_ID());
-		
-		
-		
+
+
+
 		if(JP_ESTIMATION_ORDER_AMT_CHECK)
 		{
 			MOrder order = new MOrder( getCtx(), getRef_Order_ID(), get_TrxName() );
@@ -829,16 +829,16 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + order.getDocumentInfo();
 			}
 		}
-		
+
 		if(JP_ESTIMATION_INVOICE_AMT_CHECK)
 		{
 			MInvoice invoice = new MInvoice( getCtx(), getC_Invoice_ID(), get_TrxName() );
 			if(invoice.getGrandTotal().compareTo(getGrandTotal()) != 0)
 			{
 				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + invoice.getDocumentInfo();
-			}			
+			}
 		}
-		
+
 		if(JP_ESTIMATION_BILL_AMT_CHECK)
 		{
 			MBill bill = new MBill( getCtx(), getJP_Bill_ID(), get_TrxName() );
@@ -847,7 +847,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + bill.getDocumentInfo();
 			}
 		}
-		
+
 		if(JP_ESTIMATION_PAYMENT_AMT_CHECK)
 		{
 			MPayment payment = new MPayment( getCtx(), getC_Payment_ID(), get_TrxName() );
@@ -856,7 +856,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + payment.getDocumentInfo();
 			}
 		}
-		
+
 		if(JP_ESTIMATION_RMA_AMT_CHECK)
 		{
 			MRMA rma = new MRMA( getCtx(), getM_RMA_ID(), get_TrxName() );
@@ -865,9 +865,9 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 				return Msg.getMsg(getCtx(), "JP_EstimationAmountConsistencyError") + " : " + rma.getDocumentInfo();
 			}
 		}
-		
+
 		return "";
-		
+
 	}
 
 }	//MEstimation

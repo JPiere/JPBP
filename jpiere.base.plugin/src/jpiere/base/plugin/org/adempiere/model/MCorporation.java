@@ -41,10 +41,10 @@ public class MCorporation extends X_JP_Corporation {
 	public MCorporation(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
-	
+
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MCorporation>	s_cache = new CCache<Integer,MCorporation>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -53,7 +53,7 @@ public class MCorporation extends X_JP_Corporation {
 	 */
 	public static MCorporation get (Properties ctx, int JP_Corporation_ID)
 	{
-		Integer ii = new Integer (JP_Corporation_ID);
+		Integer ii = Integer.valueOf(JP_Corporation_ID);
 		MCorporation retValue = (MCorporation)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -62,7 +62,7 @@ public class MCorporation extends X_JP_Corporation {
 			s_cache.put (JP_Corporation_ID, retValue);
 		return retValue;
 	}	//	get
-	
+
 
 	private MBPartner[] m_BPartners = null;
 

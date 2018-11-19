@@ -28,12 +28,14 @@
 package jpiere.base.plugin.webui.apps.form;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
+
 import org.compiere.apps.IStatusBar;
 import org.compiere.grid.CreateFrom;
 import org.compiere.minigrid.IMiniTable;
@@ -73,7 +75,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	private MRMA            m_rma = null;
 	protected MDocType 		m_DocType = null;
 	protected boolean		isSOTrx = true;
-	
+
 	protected int receiptLocator_ID=0;
 	protected int Doc_PhysicalWarehouse_ID = 0;
 
@@ -87,7 +89,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 		Integer C_DocType_ID = (Integer)mTab.getField("C_DocType_ID").getValue();
 		m_DocType = MDocType.get(Env.getCtx(), C_DocType_ID.intValue());
 		isSOTrx = m_DocType.isSOTrx();
-		
+
 		if (log.isLoggable(Level.INFO)) log.info(mTab.toString());
 	}   //  VCreateFromShipment
 
@@ -144,8 +146,8 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 		int M_RMALine_ID = 0;
 		BigDecimal QtyEntered = Env.ZERO;
 		int C_UOM_ID = 0;
-		
-		public IOLineRMALineSummary(int M_RMALine_ID, BigDecimal QtyEntered, int C_UOM_ID) 
+
+		public IOLineRMALineSummary(int M_RMALine_ID, BigDecimal QtyEntered, int C_UOM_ID)
 		{
 			this. M_RMALine_ID =  M_RMALine_ID;
 			this.QtyEntered = QtyEntered;
@@ -162,8 +164,8 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 		m_invoice = null;
 		p_order = null;
 		m_rma = new MRMA(Env.getCtx(), M_RMA_ID, null);
-		
-		
+
+
 		//Objective of this SQL is to exclude RMA Lines that are contained Shipment/Receipt Lines already.
 		StringBuilder preSQL = new StringBuilder("SELECT iol.M_RMALine_ID, SUM(iol.QtyEntered), iol.C_UOM_ID FROM M_InOutLine iol INNER JOIN M_InOut io ON(io.M_InOut_ID = iol.M_InOut_ID) "
 													+" WHERE iol.M_InOut_ID=? GROUP BY M_RMALine_ID, C_UOM_ID");
@@ -172,13 +174,13 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 		ArrayList<IOLineRMALineSummary> IOLineRMALineSummary_list = new ArrayList<IOLineRMALineSummary>();
 		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
 		try{
-			
+
 			prePSTMT = DB.prepareStatement(preSQL.toString(), null);
 			prePSTMT.setInt(1, M_InOut_ID);
 			preRS = prePSTMT.executeQuery();
 			while (preRS.next())
 				IOLineRMALineSummary_list.add(new IOLineRMALineSummary (preRS.getInt(1), preRS.getBigDecimal(2), preRS.getInt(3)));
-			
+
 		}catch (SQLException e){
 			log.log(Level.SEVERE, preSQL.toString(), e);
 //			throw new DBException(e, preSQL.toString());
@@ -186,8 +188,8 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 			DB.close(preRS, prePSTMT);
 			preRS = null; prePSTMT = null;
 		}
-		
-		
+
+
 
 	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 	    StringBuilder sqlStmt = new StringBuilder();
@@ -257,37 +259,37 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 				isContain = false;
 				for(IOLineRMALineSummary olSum : IOLineRMALineSummary_list)
 				{
-					if(olSum.M_RMALine_ID == rs.getInt(1))	
+					if(olSum.M_RMALine_ID == rs.getInt(1))
 					{
 						isContain = true;
 						BigDecimal qtyReturn = rs.getBigDecimal(3);
 						BigDecimal qtyEntered = qtyReturn.subtract(olSum.QtyEntered);
 						if(qtyEntered.compareTo(Env.ZERO)==0)
 							break;
-						
+
 			            Vector<Object> line = new Vector<Object>(7);
-			            line.add(new Boolean(false));   // 0-Selection
+			            line.add(Boolean.valueOf(false));   // 0-Selection
 			            KeyNamePair pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
-						line.add(pp);   //1-RMA	            
+						line.add(pp);   //1-RMA
 			            pp = new KeyNamePair(rs.getInt(4), rs.getString(5));
-						line.add(pp); // 2-Product            
+						line.add(pp); // 2-Product
 			            line.add(qtyEntered);  // 3-Qty
 			            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
-			            line.add(pp); // 4-UOM			
+			            line.add(pp); // 4-UOM
 						data.add(line);
-						
+
 						break;
-					}				
+					}
 				}
 				if(isContain)
 					continue;
-	        	
+
 	            Vector<Object> line = new Vector<Object>(7);
-	            line.add(new Boolean(false));   // 0-Selection
+	            line.add(Boolean.valueOf(false));   // 0-Selection
 	            KeyNamePair pp = new KeyNamePair(rs.getInt(1), rs.getString(2));
-				line.add(pp);   //1-RMA	            
+				line.add(pp);   //1-RMA
 	            pp = new KeyNamePair(rs.getInt(4), rs.getString(5));
-				line.add(pp); // 2-Product            
+				line.add(pp); // 2-Product
 	            line.add(rs.getBigDecimal(3));  // 3-Qty
 	            pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
 	            line.add(pp); // 4-UOM
@@ -426,7 +428,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 				// If we have RMA
 				if (pp != null)
 					M_RMALine_ID = pp.getKey();
-				
+
 				//	Precision of Qty UOM
 				int precision = 2;
 				if (M_Product_ID != 0)
@@ -434,7 +436,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 					MProduct product = MProduct.get(Env.getCtx(), M_Product_ID);
 					precision = product.getUOMPrecision();
 				}
-				QtyEntered = QtyEntered.setScale(precision, BigDecimal.ROUND_HALF_DOWN);
+				QtyEntered = QtyEntered.setScale(precision, RoundingMode.HALF_UP);
 				//
 				if (log.isLoggable(Level.FINE)) log.fine("Line QtyEntered=" + QtyEntered
 						+ ", Product=" + M_Product_ID);

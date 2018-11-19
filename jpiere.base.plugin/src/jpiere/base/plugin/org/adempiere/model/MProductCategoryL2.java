@@ -32,7 +32,7 @@ public class MProductCategoryL2 extends X_JP_ProductCategoryL2 {
 
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MProductCategoryL2>	s_cache = new CCache<Integer,MProductCategoryL2>(Table_Name, 20);
-	
+
 	/**
 	 * 	Get from Cache
 	 *	@param ctx context
@@ -41,7 +41,7 @@ public class MProductCategoryL2 extends X_JP_ProductCategoryL2 {
 	 */
 	public static MProductCategoryL2 get (Properties ctx, int JP_ProductCategoryL2_ID)
 	{
-		Integer ii = new Integer (JP_ProductCategoryL2_ID);
+		Integer ii = Integer.valueOf(JP_ProductCategoryL2_ID);
 		MProductCategoryL2 retValue = (MProductCategoryL2)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
@@ -50,11 +50,11 @@ public class MProductCategoryL2 extends X_JP_ProductCategoryL2 {
 			s_cache.put (JP_ProductCategoryL2_ID, retValue);
 		return retValue;
 	}	//	get
-	
-	
+
+
 	private MProductCategoryL1[] m_ProductCategoryL1s = null;
-	
-	
+
+
 	public MProductCategoryL1[] getProductCategoryL1s (boolean requery)
 	{
 		if(m_ProductCategoryL1s != null && !requery)
