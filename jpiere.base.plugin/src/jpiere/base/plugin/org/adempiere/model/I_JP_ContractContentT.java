@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractContentT
  *  @author iDempiere (generated) 
- *  @version Release 5.1
+ *  @version Release 6.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractContentT 
@@ -590,6 +590,15 @@ public interface I_JP_ContractContentT
 
 	/** Get Contract Process Period Num	  */
 	public int getJP_ContractProcPeriodNum();
+
+    /** Column name JP_ContractProcessMethod */
+    public static final String COLUMNNAME_JP_ContractProcessMethod = "JP_ContractProcessMethod";
+
+	/** Set Contract Process Method	  */
+	public void setJP_ContractProcessMethod (String JP_ContractProcessMethod);
+
+	/** Get Contract Process Method	  */
+	public String getJP_ContractProcessMethod();
 
     /** Column name JP_ContractProcessRef_ID */
     public static final String COLUMNNAME_JP_ContractProcessRef_ID = "JP_ContractProcessRef_ID";

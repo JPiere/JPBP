@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ContractContentT
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181007L;
+	private static final long serialVersionUID = 20181129L;
 
     /** Standard Constructor */
     public X_JP_ContractContentT (Properties ctx, int JP_ContractContentT_ID, String trxName)
@@ -68,6 +68,9 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 // N
 			setJP_BaseDocDocType_ID (0);
 			setJP_ContractContentT_ID (0);
+			setJP_ContractProcessMethod (null);
+// IC
+			setJP_ContractType (null);
 			setJP_Contract_Acct_ID (0);
 			setM_PriceList_ID (0);
 			setName (null);
@@ -1056,6 +1059,25 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return ii.intValue();
 	}
 
+	/** Direct Contract Process = DC */
+	public static final String JP_CONTRACTPROCESSMETHOD_DirectContractProcess = "DC";
+	/** Indirect Contract Process = IC */
+	public static final String JP_CONTRACTPROCESSMETHOD_IndirectContractProcess = "IC";
+	/** Set Contract Process Method.
+		@param JP_ContractProcessMethod Contract Process Method	  */
+	public void setJP_ContractProcessMethod (String JP_ContractProcessMethod)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractProcessMethod, JP_ContractProcessMethod);
+	}
+
+	/** Get Contract Process Method.
+		@return Contract Process Method	  */
+	public String getJP_ContractProcessMethod () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractProcessMethod);
+	}
+
 	public I_JP_ContractProcessRef getJP_ContractProcessRef() throws RuntimeException
     {
 		return (I_JP_ContractProcessRef)MTable.get(getCtx(), I_JP_ContractProcessRef.Table_Name)
@@ -1117,7 +1139,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setJP_ContractType (String JP_ContractType)
 	{
 
-		set_Value (COLUMNNAME_JP_ContractType, JP_ContractType);
+		set_ValueNoCheck (COLUMNNAME_JP_ContractType, JP_ContractType);
 	}
 
 	/** Get Contract Type.

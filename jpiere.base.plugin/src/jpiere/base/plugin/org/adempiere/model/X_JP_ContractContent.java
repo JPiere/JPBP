@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180719L;
+	private static final long serialVersionUID = 20181129L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -82,6 +82,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			setJP_ContractContent_ID (0);
 			setJP_ContractProcStatus (null);
 // UN
+			setJP_ContractProcessMethod (null);
+// IC
 			setJP_Contract_Acct_ID (0);
 			setJP_Contract_ID (0);
 			setM_PriceList_ID (0);
@@ -1328,6 +1330,25 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getJP_ContractProcStatus () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractProcStatus);
+	}
+
+	/** Direct Contract Process = DC */
+	public static final String JP_CONTRACTPROCESSMETHOD_DirectContractProcess = "DC";
+	/** Indirect Contract Process = IC */
+	public static final String JP_CONTRACTPROCESSMETHOD_IndirectContractProcess = "IC";
+	/** Set Contract Process Method.
+		@param JP_ContractProcessMethod Contract Process Method	  */
+	public void setJP_ContractProcessMethod (String JP_ContractProcessMethod)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractProcessMethod, JP_ContractProcessMethod);
+	}
+
+	/** Get Contract Process Method.
+		@return Contract Process Method	  */
+	public String getJP_ContractProcessMethod () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractProcessMethod);
 	}
 
 	public I_JP_ContractProcess getJP_ContractProcess() throws RuntimeException
