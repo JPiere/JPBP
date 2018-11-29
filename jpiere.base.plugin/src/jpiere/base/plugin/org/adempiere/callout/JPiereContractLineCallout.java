@@ -411,6 +411,9 @@ public class JPiereContractLineCallout implements IColumnCallout {
 					continue;
 				}
 
+				if(!fields[i].isAllowCopy())
+					continue;
+
 				columnIndex = lineTemplate.get_ColumnIndex(columnName);
 				if(columnIndex > -1)
 				{
