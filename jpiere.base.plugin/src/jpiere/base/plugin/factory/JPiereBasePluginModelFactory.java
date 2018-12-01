@@ -19,10 +19,6 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInOutConfirmJP;
-import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
-import jpiere.base.plugin.org.adempiere.model.MOrderJP;
-
 import org.adempiere.base.IModelFactory;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInvoice;
@@ -33,16 +29,12 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.MInOutConfirmJP;
+import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
+import jpiere.base.plugin.org.adempiere.model.MOrderJP;
+
 /**
  *  JPiere Base Plugin Model Factory
- *
- *  JPIERE-0024:JPBP:Corporation Master & Corporation Group Master
- *  JPIERE-0106:JPBP:Bill
- *  JPIERE-0142:
- *  JPIERE-0148,0149,0150	Product category Group
- *  JPIERE-0151,0152,0153   Sales Region Group & Delivery Days from Warehouse
- *  JPIERE-0160,0161,0163	Inventory Valuation Calculate
- *  JPIERE-0183				Estimation
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
@@ -51,15 +43,15 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 	private static CCache<String,Class<?>> s_classCache = new CCache<String,Class<?>>(null, "PO_Class", 20, false);
 	private final static CLogger s_log = CLogger.getCLogger(JPiereBasePluginModelFactory.class);
-	
+
 	@Override
-	public Class<?> getClass(String tableName) 
+	public Class<?> getClass(String tableName)
 	{
 		if(tableName.startsWith("JP"))
 		{
 			if (tableName.endsWith("_Trl"))
 				return null;
-			
+
 			//check cache
 			Class<?> cache = s_classCache.get(tableName);
 			if (cache != null)
@@ -70,7 +62,7 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				else
 					return cache;
 			}
-			
+
 			String className = tableName;
 			int index = className.indexOf('_');
 			if (index > 0)
@@ -88,7 +80,7 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			}
 			//	Remove underlines
 			className = Util.replace(className, "_", "");
-			
+
 			//	Search packages
 			StringBuffer name = new StringBuffer("jpiere.base.plugin.org.adempiere.model").append(".M").append(className);
 			Class<?> clazz = getPOclass(name.toString(), tableName);
@@ -97,8 +89,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				s_classCache.put(tableName, clazz);
 				return clazz;
 			}
-			
-			
+
+
 			//	Adempiere Extension
 			clazz = getPOclass("jpiere.base.plugin.org.adempiere.model.X_" + tableName, tableName);
 			if (clazz != null)
@@ -106,76 +98,6 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				s_classCache.put(tableName, clazz);
 				return clazz;
 			}
-			
-//			if(tableName.equals(MCorporation.Table_Name)){
-//				return MCorporation.class;
-//			}else if(tableName.equals(MCorporationGroup.Table_Name)){
-//				return MCorporationGroup.class;
-//			}else if(tableName.equals(MGroupCorporations.Table_Name)){
-//				return MGroupCorporations.class;
-//			}else if(tableName.equals(MBill.Table_Name)){
-//				return MBill.class;
-//			}else if(tableName.equals(MBillLine.Table_Name)){
-//				return MBillLine.class;
-//			}else if(tableName.equals(MReferenceTest.Table_Name)){
-//				return MReferenceTest.class;
-//			}else if(tableName.equals(MBillSchema.Table_Name)){
-//				return MBillSchema.class;
-//			}else if(tableName.equals(MProductCategoryL1.Table_Name)){
-//				return MProductCategoryL1.class;
-//			}else if(tableName.equals(MProductCategoryL2.Table_Name)){
-//				return MProductCategoryL2.class;
-//			}else if(tableName.equals(MProductCategoryG.Table_Name)){
-//				return MProductCategoryG.class;
-//			}else if(tableName.equals(MProductCategoryGLine.Table_Name)){
-//				return MProductCategoryGLine.class;
-//			}else if(tableName.equals(MProductGroup.Table_Name)){
-//				return MProductGroup.class;
-//			}else if(tableName.equals(MProductGroupLine.Table_Name)){
-//				return MProductGroupLine.class;
-//			}else if(tableName.equals(MSalesRegionL2.Table_Name)){	//JPIERE-0151
-//				return MSalesRegionL2.class;
-//			}else if(tableName.equals(MSalesRegionL1.Table_Name)){	//JPIERE-0151
-//				return MSalesRegionL1.class;
-//			}else if(tableName.equals(MSalesRegionG.Table_Name)){	//JPIERE-0152
-//				return MSalesRegionG.class;
-//			}else if(tableName.equals(MSalesRegionGLine.Table_Name)){//JPIERE-0152
-//				return MSalesRegionGLine.class;
-//			}else if(tableName.equals(MDeliveryDays.Table_Name)){	//JPIERE-0153
-//				return MDeliveryDays.class;
-//			}else if(tableName.equals(MInvValProfile.Table_Name)){	//JPIERE-0160
-//				return MInvValProfile.class;
-//			}else if(tableName.equals(MInvValProfileOrg.Table_Name)){	//JPIERE-0160
-//				return MInvValProfileOrg.class;
-//			}else if(tableName.equals(MInvValCal.Table_Name)){	//JPIERE-0161
-//				return MInvValCal.class;
-//			}else if(tableName.equals(MInvValCalLine.Table_Name)){	//JPIERE-0161
-//				return MInvValCalLine.class;
-//			}else if(tableName.equals(MInvValCalLog.Table_Name)){	//JPIERE-0161
-//				return MInvValCalLog.class;
-//			}else if(tableName.equals(MInvValAdjust.Table_Name)){	//JPIERE-0163
-//				return MInvValAdjust.class;
-//			}else if(tableName.equals(MInvValAdjustLine.Table_Name)){	//JPIERE-0163
-//				return MInvValAdjustLine.class;
-//			}else if(tableName.equals(MInventoryDiffQtyLog.Table_Name)){	//JPIERE-0163
-//				return MInventoryDiffQtyLog.class;
-//			}else if(tableName.equals(MEstimation.Table_Name)){	//JPIERE-0183
-//				return MEstimation.class;
-//			}else if(tableName.equals(MEstimationLine.Table_Name)){	//JPIERE-0183
-//				return MEstimationLine.class;
-//			}else if(tableName.equals(MEstimationTax.Table_Name)){	//JPIERE-0183
-//				return MEstimationTax.class;
-//			}else if(tableName.equals(MBankDataSchema.Table_Name)){//JPIERE-0301
-//				return MBankDataSchema.class;
-//			}else if(tableName.equals(MBankData.Table_Name)){//JPIERE-0302
-//				return MBankData.class;
-//			}else if(tableName.equals(MBankDataLine.Table_Name)){	//JPIERE-0302
-//				return MBankDataLine.class;
-//			}else if(tableName.equals(MPhysicalWarehouse.Table_Name)){	//JPIERE-0317
-//				return MPhysicalWarehouse.class;
-//			}else if(tableName.equals(MContractProcPeriod.Table_Name)){	//JPIERE-0363
-//				return MContractProcPeriod.class;
-//			}
 
 		}else{
 			if(tableName.equals(MOrder.Table_Name)){
@@ -200,7 +122,7 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			{
 				return null;
 			}
-			
+
 			boolean errorLogged = false;
 			try
 			{
@@ -243,7 +165,7 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 				s_log.log(Level.SEVERE, "(id) - Not found - Table=" + tableName
 					+ ", Record_ID=" + Record_ID);
 			return null;
-			
+
 //
 //			if(tableName.equals(MCorporation.Table_Name)){
 //				return  new MCorporation(Env.getCtx(), Record_ID, trxName);
@@ -355,8 +277,8 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 			if (!errorLogged)
 				s_log.log(Level.SEVERE, "(rs) - Not found - Table=" + tableName);
 			return null;
-			
-//			
+
+//
 //			if(tableName.equals(MCorporation.Table_Name)){
 //				return  new MCorporation(Env.getCtx(), rs, trxName);
 //			}else if(tableName.equals(MCorporationGroup.Table_Name)){
@@ -442,7 +364,7 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 		return null;
 	}
 
-	
+
 	/**
 	 * Get PO class
 	 * @param className fully qualified class name

@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.Duration;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -150,5 +151,10 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 		}else{
 			return false;
 		}
+	}
+
+	public long getContractProcPeriodDays()
+	{
+		return Duration.between(getStartDate().toLocalDateTime(), getEndDate().toLocalDateTime()).toDays()+1;
 	}
 }

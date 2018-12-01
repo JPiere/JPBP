@@ -36,6 +36,10 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereContractContentCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractLineCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractLineTCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereContractOrderCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractPSInOutLineCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractPSInvoiceLineCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractPSLineCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereContractProcScheduleCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereDropShipBPartnerCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereEstimationCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInOutCallout;
@@ -53,6 +57,10 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLineT;
+import jpiere.base.plugin.org.adempiere.model.MContractPSInOutLine;
+import jpiere.base.plugin.org.adempiere.model.MContractPSInvoiceLine;
+import jpiere.base.plugin.org.adempiere.model.MContractPSLine;
+import jpiere.base.plugin.org.adempiere.model.MContractProcSchedule;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
@@ -180,11 +188,38 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 					list.add(new JPiereContractLineTCallout());
 				}
 
-			}else if(tableName.equals(MRecognition.Table_Name)){//JPIERE-036４
+			}else if(tableName.equals(MRecognition.Table_Name)){//JPIERE-0364
 
 				if(columnName.equals("M_InOut_ID") )
 				{
 					list.add(new JPiereRecognitionCallout());
+				}
+
+			}else if(tableName.equals(MContractProcSchedule.Table_Name)){//JPIERE-0431
+
+				if(columnName.equals("JP_ContractContent_ID") )
+				{
+					list.add(new JPiereContractProcScheduleCallout());
+				}
+
+			}else if(tableName.equals(MContractPSLine.Table_Name)){//JPIERE-0431
+
+				if(columnName.equals("JP_ContractLine_ID") )
+				{
+					list.add(new JPiereContractPSLineCallout());
+				}
+
+			}else if(tableName.equals(MContractPSInOutLine.Table_Name)){//JPIERE-0431
+
+				if(columnName.equals("JP_ContractLine_ID") )
+				{
+					list.add(new JPiereContractPSInOutLineCallout());
+				}
+			}else if(tableName.equals(MContractPSInvoiceLine.Table_Name)){//JPIERE-0431
+
+				if(columnName.equals("JP_ContractLine_ID") )
+				{
+					list.add(new JPiereContractPSInvoiceLineCallout());
 				}
 			}
 

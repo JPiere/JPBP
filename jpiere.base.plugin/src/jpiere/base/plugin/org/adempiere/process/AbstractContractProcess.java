@@ -74,7 +74,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 	protected String p_DocBaseType = null;
 	protected boolean p_IsCreateBaseDocJP = false;
 	protected boolean p_IsRecordCommitJP = false;
-	protected String p_JP_ContractProcessTraceLevel = null;
+	protected String p_JP_ContractProcessTraceLevel = MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning;
 
 
 	protected int p_JP_ContractProcess_ID = 0; //use to create derivative Doc

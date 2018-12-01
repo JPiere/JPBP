@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
@@ -48,6 +49,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 
@@ -228,7 +230,44 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					m_processMsg = Msg.getElement(getCtx(), MContractLine.COLUMNNAME_Line)+" : "+ lines[i].getLine() +"  " + error.toString();
 					return DocAction.STATUS_Invalid;
 				}
+
 			}//for i
+
+		}
+
+		//Create Contract Process Schedule
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				&& getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+		{
+			if(!isScheduleCreatedJP())
+			{
+				String className = "";
+				if(Util.isEmpty(MContractProcess.get(getCtx(), getJP_ContractProcess_ID()).getClassname()))
+				{
+					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateSchedule";
+
+				}else{
+					className = getJP_ContractProcess().getClassname();
+				}
+
+				ProcessInfo pi = new ProcessInfo("CreateContractProcSchedule", 0);
+				pi.setClassName(className);
+				pi.setAD_Client_ID(getAD_Client_ID());
+				pi.setAD_User_ID(getAD_User_ID());
+				pi.setAD_PInstance_ID(0);//TODO
+				pi.setRecord_ID(getJP_ContractContent_ID());
+				boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+				if(success)
+				{
+					setIsScheduleCreatedJP(true);
+
+				}else {
+
+					return DocAction.STATUS_Invalid;
+				}
+			}
+
+
 
 		}
 

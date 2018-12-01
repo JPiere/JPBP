@@ -21,18 +21,18 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for JP_ContractContent
+/** Generated Interface for JP_ContractProcSchedule
  *  @author iDempiere (generated) 
  *  @version Release 6.1
  */
 @SuppressWarnings("all")
-public interface I_JP_ContractContent 
+public interface I_JP_ContractProcSchedule 
 {
 
-    /** TableName=JP_ContractContent */
-    public static final String Table_Name = "JP_ContractContent";
+    /** TableName=JP_ContractProcSchedule */
+    public static final String Table_Name = "JP_ContractProcSchedule";
 
-    /** AD_Table_ID=1000186 */
+    /** AD_Table_ID=1000227 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -227,20 +227,20 @@ public interface I_JP_ContractContent
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
-    /** Column name C_DocType_ID */
-    public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
+    /** Column name C_Invoice_ID */
+    public static final String COLUMNNAME_C_Invoice_ID = "C_Invoice_ID";
 
-	/** Set Document Type.
-	  * Document type or rules
+	/** Set Invoice.
+	  * Invoice Identifier
 	  */
-	public void setC_DocType_ID (int C_DocType_ID);
+	public void setC_Invoice_ID (int C_Invoice_ID);
 
-	/** Get Document Type.
-	  * Document type or rules
+	/** Get Invoice.
+	  * Invoice Identifier
 	  */
-	public int getC_DocType_ID();
+	public int getC_Invoice_ID();
 
-	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException;
 
     /** Column name C_Opportunity_ID */
     public static final String COLUMNNAME_C_Opportunity_ID = "C_Opportunity_ID";
@@ -252,6 +252,21 @@ public interface I_JP_ContractContent
 	public int getC_Opportunity_ID();
 
 	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException;
+
+    /** Column name C_Order_ID */
+    public static final String COLUMNNAME_C_Order_ID = "C_Order_ID";
+
+	/** Set Order.
+	  * Order
+	  */
+	public void setC_Order_ID (int C_Order_ID);
+
+	/** Get Order.
+	  * Order
+	  */
+	public int getC_Order_ID();
+
+	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException;
 
     /** Column name C_PaymentTerm_ID */
     public static final String COLUMNNAME_C_PaymentTerm_ID = "C_PaymentTerm_ID";
@@ -376,19 +391,6 @@ public interface I_JP_ContractContent
 	  * Defines the timing of Delivery
 	  */
 	public String getDeliveryRule();
-
-    /** Column name DeliveryTime_Promised */
-    public static final String COLUMNNAME_DeliveryTime_Promised = "DeliveryTime_Promised";
-
-	/** Set Promised Delivery Time.
-	  * Promised days between order and delivery
-	  */
-	public void setDeliveryTime_Promised (int DeliveryTime_Promised);
-
-	/** Get Promised Delivery Time.
-	  * Promised days between order and delivery
-	  */
-	public int getDeliveryTime_Promised();
 
     /** Column name DeliveryViaRule */
     public static final String COLUMNNAME_DeliveryViaRule = "DeliveryViaRule";
@@ -578,15 +580,6 @@ public interface I_JP_ContractContent
 	  */
 	public boolean isApproved();
 
-    /** Column name IsAutomaticUpdateJP */
-    public static final String COLUMNNAME_IsAutomaticUpdateJP = "IsAutomaticUpdateJP";
-
-	/** Set Automatic Update	  */
-	public void setIsAutomaticUpdateJP (boolean IsAutomaticUpdateJP);
-
-	/** Get Automatic Update	  */
-	public boolean isAutomaticUpdateJP();
-
     /** Column name IsDiscountPrinted */
     public static final String COLUMNNAME_IsDiscountPrinted = "IsDiscountPrinted";
 
@@ -613,6 +606,15 @@ public interface I_JP_ContractContent
 	  */
 	public boolean isDropShip();
 
+    /** Column name IsFactCreatedJP */
+    public static final String COLUMNNAME_IsFactCreatedJP = "IsFactCreatedJP";
+
+	/** Set Fact was created	  */
+	public void setIsFactCreatedJP (boolean IsFactCreatedJP);
+
+	/** Get Fact was created	  */
+	public boolean isFactCreatedJP();
+
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
 
@@ -625,15 +627,6 @@ public interface I_JP_ContractContent
 	  * This is a Sales Transaction
 	  */
 	public boolean isSOTrx();
-
-    /** Column name IsScheduleCreatedJP */
-    public static final String COLUMNNAME_IsScheduleCreatedJP = "IsScheduleCreatedJP";
-
-	/** Set Schedule was created	  */
-	public void setIsScheduleCreatedJP (boolean IsScheduleCreatedJP);
-
-	/** Get Schedule was created	  */
-	public boolean isScheduleCreatedJP();
 
     /** Column name IsTaxIncluded */
     public static final String COLUMNNAME_IsTaxIncluded = "IsTaxIncluded";
@@ -670,17 +663,6 @@ public interface I_JP_ContractContent
 
 	public I_JP_ContractCalender getJP_ContractCalender() throws RuntimeException;
 
-    /** Column name JP_ContractContentT_ID */
-    public static final String COLUMNNAME_JP_ContractContentT_ID = "JP_ContractContentT_ID";
-
-	/** Set Contract Content Template	  */
-	public void setJP_ContractContentT_ID (int JP_ContractContentT_ID);
-
-	/** Get Contract Content Template	  */
-	public int getJP_ContractContentT_ID();
-
-	public I_JP_ContractContentT getJP_ContractContentT() throws RuntimeException;
-
     /** Column name JP_ContractContent_ID */
     public static final String COLUMNNAME_JP_ContractContent_ID = "JP_ContractContent_ID";
 
@@ -690,50 +672,36 @@ public interface I_JP_ContractContent
 	/** Get Contract Content	  */
 	public int getJP_ContractContent_ID();
 
-    /** Column name JP_ContractContent_UU */
-    public static final String COLUMNNAME_JP_ContractContent_UU = "JP_ContractContent_UU";
+	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException;
 
-	/** Set Contract Content(UU)	  */
-	public void setJP_ContractContent_UU (String JP_ContractContent_UU);
+    /** Column name JP_ContractProcPeriod_ID */
+    public static final String COLUMNNAME_JP_ContractProcPeriod_ID = "JP_ContractProcPeriod_ID";
 
-	/** Get Contract Content(UU)	  */
-	public String getJP_ContractContent_UU();
+	/** Set Contract Process Period	  */
+	public void setJP_ContractProcPeriod_ID (int JP_ContractProcPeriod_ID);
 
-    /** Column name JP_ContractProcDate_From */
-    public static final String COLUMNNAME_JP_ContractProcDate_From = "JP_ContractProcDate_From";
+	/** Get Contract Process Period	  */
+	public int getJP_ContractProcPeriod_ID();
 
-	/** Set Contract Process Date(From)	  */
-	public void setJP_ContractProcDate_From (Timestamp JP_ContractProcDate_From);
+	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException;
 
-	/** Get Contract Process Date(From)	  */
-	public Timestamp getJP_ContractProcDate_From();
+    /** Column name JP_ContractProcSchedule_ID */
+    public static final String COLUMNNAME_JP_ContractProcSchedule_ID = "JP_ContractProcSchedule_ID";
 
-    /** Column name JP_ContractProcDate_To */
-    public static final String COLUMNNAME_JP_ContractProcDate_To = "JP_ContractProcDate_To";
+	/** Set Contract Process Schedule Doc	  */
+	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID);
 
-	/** Set Contract Process Date(To)	  */
-	public void setJP_ContractProcDate_To (Timestamp JP_ContractProcDate_To);
+	/** Get Contract Process Schedule Doc	  */
+	public int getJP_ContractProcSchedule_ID();
 
-	/** Get Contract Process Date(To)	  */
-	public Timestamp getJP_ContractProcDate_To();
+    /** Column name JP_ContractProcSchedule_UU */
+    public static final String COLUMNNAME_JP_ContractProcSchedule_UU = "JP_ContractProcSchedule_UU";
 
-    /** Column name JP_ContractProcStatus */
-    public static final String COLUMNNAME_JP_ContractProcStatus = "JP_ContractProcStatus";
+	/** Set JP_ContractProcSchedule_UU	  */
+	public void setJP_ContractProcSchedule_UU (String JP_ContractProcSchedule_UU);
 
-	/** Set Contract Process Status	  */
-	public void setJP_ContractProcStatus (String JP_ContractProcStatus);
-
-	/** Get Contract Process Status	  */
-	public String getJP_ContractProcStatus();
-
-    /** Column name JP_ContractProcessMethod */
-    public static final String COLUMNNAME_JP_ContractProcessMethod = "JP_ContractProcessMethod";
-
-	/** Set Contract Process Method	  */
-	public void setJP_ContractProcessMethod (String JP_ContractProcessMethod);
-
-	/** Get Contract Process Method	  */
-	public String getJP_ContractProcessMethod();
+	/** Get JP_ContractProcSchedule_UU	  */
+	public String getJP_ContractProcSchedule_UU();
 
     /** Column name JP_ContractProcess_ID */
     public static final String COLUMNNAME_JP_ContractProcess_ID = "JP_ContractProcess_ID";
@@ -746,17 +714,6 @@ public interface I_JP_ContractContent
 
 	public I_JP_ContractProcess getJP_ContractProcess() throws RuntimeException;
 
-    /** Column name JP_Contract_Acct_ID */
-    public static final String COLUMNNAME_JP_Contract_Acct_ID = "JP_Contract_Acct_ID";
-
-	/** Set Contract Acct Info	  */
-	public void setJP_Contract_Acct_ID (int JP_Contract_Acct_ID);
-
-	/** Get Contract Acct Info	  */
-	public int getJP_Contract_Acct_ID();
-
-	public I_JP_Contract_Acct getJP_Contract_Acct() throws RuntimeException;
-
     /** Column name JP_Contract_ID */
     public static final String COLUMNNAME_JP_Contract_ID = "JP_Contract_ID";
 
@@ -768,17 +725,6 @@ public interface I_JP_ContractContent
 
 	public I_JP_Contract getJP_Contract() throws RuntimeException;
 
-    /** Column name JP_CounterContractContent_ID */
-    public static final String COLUMNNAME_JP_CounterContractContent_ID = "JP_CounterContractContent_ID";
-
-	/** Set Counter Contract Content	  */
-	public void setJP_CounterContractContent_ID (int JP_CounterContractContent_ID);
-
-	/** Get Counter Contract Content	  */
-	public int getJP_CounterContractContent_ID();
-
-	public I_JP_ContractContent getJP_CounterContractContent() throws RuntimeException;
-
     /** Column name JP_CreateDerivativeDocPolicy */
     public static final String COLUMNNAME_JP_CreateDerivativeDocPolicy = "JP_CreateDerivativeDocPolicy";
 
@@ -787,17 +733,6 @@ public interface I_JP_ContractContent
 
 	/** Get Create Derivative Doc Policy	  */
 	public String getJP_CreateDerivativeDocPolicy();
-
-    /** Column name JP_Estimation_ID */
-    public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
-
-	/** Set Estimation & Handwritten	  */
-	public void setJP_Estimation_ID (int JP_Estimation_ID);
-
-	/** Get Estimation & Handwritten	  */
-	public int getJP_Estimation_ID();
-
-	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
 
     /** Column name JP_Locator_ID */
     public static final String COLUMNNAME_JP_Locator_ID = "JP_Locator_ID";
@@ -809,26 +744,6 @@ public interface I_JP_ContractContent
 	public int getJP_Locator_ID();
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
-
-    /** Column name JP_PreContractContent_ID */
-    public static final String COLUMNNAME_JP_PreContractContent_ID = "JP_PreContractContent_ID";
-
-	/** Set Precontract Content	  */
-	public void setJP_PreContractContent_ID (int JP_PreContractContent_ID);
-
-	/** Get Precontract Content	  */
-	public int getJP_PreContractContent_ID();
-
-	public I_JP_ContractContent getJP_PreContractContent() throws RuntimeException;
-
-    /** Column name JP_Processing1 */
-    public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
-
-	/** Set Process Now	  */
-	public void setJP_Processing1 (String JP_Processing1);
-
-	/** Get Process Now	  */
-	public String getJP_Processing1();
 
     /** Column name M_FreightCategory_ID */
     public static final String COLUMNNAME_M_FreightCategory_ID = "M_FreightCategory_ID";
@@ -889,19 +804,6 @@ public interface I_JP_ContractContent
 	public int getM_Warehouse_ID();
 
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
-
-    /** Column name Name */
-    public static final String COLUMNNAME_Name = "Name";
-
-	/** Set Name.
-	  * Alphanumeric identifier of the entity
-	  */
-	public void setName (String Name);
-
-	/** Get Name.
-	  * Alphanumeric identifier of the entity
-	  */
-	public String getName();
 
     /** Column name OrderType */
     public static final String COLUMNNAME_OrderType = "OrderType";
