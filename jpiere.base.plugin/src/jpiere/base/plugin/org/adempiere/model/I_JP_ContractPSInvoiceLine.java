@@ -107,6 +107,21 @@ public interface I_JP_ContractPSInvoiceLine
 
 	public org.compiere.model.I_C_Campaign getC_Campaign() throws RuntimeException;
 
+    /** Column name C_Charge_ID */
+    public static final String COLUMNNAME_C_Charge_ID = "C_Charge_ID";
+
+	/** Set Charge.
+	  * Additional document charges
+	  */
+	public void setC_Charge_ID (int C_Charge_ID);
+
+	/** Get Charge.
+	  * Additional document charges
+	  */
+	public int getC_Charge_ID();
+
+	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
+
     /** Column name C_InvoiceLine_ID */
     public static final String COLUMNNAME_C_InvoiceLine_ID = "C_InvoiceLine_ID";
 
@@ -323,6 +338,17 @@ public interface I_JP_ContractPSInvoiceLine
 
 	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException;
 
+    /** Column name JP_ContractProcSchedule_ID */
+    public static final String COLUMNNAME_JP_ContractProcSchedule_ID = "JP_ContractProcSchedule_ID";
+
+	/** Set Contract Process Schedule Doc	  */
+	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID);
+
+	/** Get Contract Process Schedule Doc	  */
+	public int getJP_ContractProcSchedule_ID();
+
+	public I_JP_ContractProcSchedule getJP_ContractProcSchedule() throws RuntimeException;
+
     /** Column name JP_ContractProcess_Inv_ID */
     public static final String COLUMNNAME_JP_ContractProcess_Inv_ID = "JP_ContractProcess_Inv_ID";
 
@@ -359,6 +385,36 @@ public interface I_JP_ContractPSInvoiceLine
 	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	  */
 	public BigDecimal getLineNetAmt();
+
+    /** Column name M_AttributeSetInstance_ID */
+    public static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
+
+	/** Set Attribute Info.
+	  * Product Attribute Set Instance
+	  */
+	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID);
+
+	/** Get Attribute Info.
+	  * Product Attribute Set Instance
+	  */
+	public int getM_AttributeSetInstance_ID();
+
+	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
+
+    /** Column name M_Product_ID */
+    public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
+
+	/** Set Product.
+	  * Product, Service, Item
+	  */
+	public void setM_Product_ID (int M_Product_ID);
+
+	/** Get Product.
+	  * Product, Service, Item
+	  */
+	public int getM_Product_ID();
+
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
     /** Column name PriceActual */
     public static final String COLUMNNAME_PriceActual = "PriceActual";
@@ -450,6 +506,19 @@ public interface I_JP_ContractPSInvoiceLine
 	  * Invoiced Quantity
 	  */
 	public BigDecimal getQtyInvoiced();
+
+    /** Column name S_ResourceAssignment_ID */
+    public static final String COLUMNNAME_S_ResourceAssignment_ID = "S_ResourceAssignment_ID";
+
+	/** Set Resource Assign.
+	  * Resource Assignment
+	  */
+	public void setS_ResourceAssignment_ID (int S_ResourceAssignment_ID);
+
+	/** Get Resource Assign.
+	  * Resource Assignment
+	  */
+	public int getS_ResourceAssignment_ID();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

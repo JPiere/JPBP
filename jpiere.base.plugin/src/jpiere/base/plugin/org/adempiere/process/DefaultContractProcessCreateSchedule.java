@@ -61,31 +61,69 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 			return "契約処理期間(To)が入力されていません。";//TODO;
 		}
 
+		int JP_ContractProcPeriod_ID = getJP_ContractProctPeriod_ID();
+		MContractProcPeriod firstContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From());
 		MContractProcPeriod endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
 		MContractProcPeriod contractProcPeriod = null;
 
-		int i = 1;
-		do
+		if(JP_ContractProcPeriod_ID == 0)
 		{
-			contractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From(), null, i);
-			if(i == 1)
+			int i = 1;
+			do
 			{
-				if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID())
-					createContractProcSchedule(contractProcPeriod, true,true,i);
-				else
-					createContractProcSchedule(contractProcPeriod, true,false,i);
+				contractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From(), null, i);
 
-			}else {
+				if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID())
+				{
+					createContractProcSchedule(contractProcPeriod, true,true);
 
-				if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID())
-					createContractProcSchedule(contractProcPeriod, false,true,i);
-				else
-					createContractProcSchedule(contractProcPeriod, false,false,i);
+				}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
+
+					createContractProcSchedule(contractProcPeriod, true,false);
+
+				}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
+
+					createContractProcSchedule(contractProcPeriod, false,true);
+
+				}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
+
+					createContractProcSchedule(contractProcPeriod, false,false);
+				}
+
+				i++;
+
+			}while(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID());
+
+		}else {
+
+			contractProcPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+
+			if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID())
+			{
+				createContractProcSchedule(contractProcPeriod, true,true);
+
+			}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
+
+				createContractProcSchedule(contractProcPeriod, true,false);
+
+			}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
+
+				createContractProcSchedule(contractProcPeriod, false,true);
+
+			}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
+					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
+
+				createContractProcSchedule(contractProcPeriod, false,false);
 			}
 
-			i++;
-
-		}while(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID());
+		}
 
 
 		return "";
@@ -102,7 +140,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 	 * @param loopCounter
 	 * @return
 	 */
-	private boolean createContractProcSchedule(MContractProcPeriod contractProcPeriod, boolean isFirstPeriod, boolean isLastPeriod, int loopCounter)
+	private boolean createContractProcSchedule(MContractProcPeriod contractProcPeriod, boolean isFirstPeriod, boolean isLastPeriod)
 	{
 
 		/** Pre check - Pre judgment create Document or not. */
@@ -157,7 +195,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		contractProcSchedule.setDatePromised(getOrderHeaderDatePromised(contractProcSchedule.getDateAcct()));
 
 		//
-		contractProcSchedule.setDocumentNo(contractProcSchedule.getDocumentNo() + "-" + loopCounter*10);
+		contractProcSchedule.setDocumentNo(contractProcSchedule.getDocumentNo() + "-" + contractProcPeriod.getName());
 
 		contractProcSchedule.saveEx(get_TrxName());
 		createContractPSLines(contractProcSchedule, contractProcPeriod, isFirstPeriod, isLastPeriod);
@@ -359,6 +397,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		contractPSInOutLine.setJP_ContractLine_ID(contractLine.getJP_ContractLine_ID());
 		contractPSInOutLine.setJP_ContractPSLine_ID(contractPSLine.getJP_ContractPSLine_ID());
 		contractPSInOutLine.setJP_ContractProcPeriod_ID(contractProcPeriod.getJP_ContractProcPeriod_ID());
+		contractPSInOutLine.setJP_ContractProcSchedule_ID(contractPSLine.getJP_ContractProcSchedule_ID());
 
 		//Set Qty
 		MUOM uom = null;
@@ -508,6 +547,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		contractPSInvoiceLine.setJP_ContractLine_ID(contractLine.getJP_ContractLine_ID());
 		contractPSInvoiceLine.setJP_ContractPSLine_ID(contractPSLine.getJP_ContractPSLine_ID());
 		contractPSInvoiceLine.setJP_ContractProcPeriod_ID(contractProcPeriod.getJP_ContractProcPeriod_ID());
+		contractPSInvoiceLine.setJP_ContractProcSchedule_ID(contractPSLine.getJP_ContractProcSchedule_ID());
 
 		MUOM uom = null;
 		if(contractLine.getM_Product_ID() > 0)

@@ -68,6 +68,8 @@ CREATE TABLE adempiere.JP_ContractPSLine
     C_OrderLine_ID numeric(10,0),
     C_InvoiceLine_ID numeric(10,0),
     IsFactCreatedJP character(1) NOT NULL DEFAULT 'N'::bpchar,
+    JP_ScheduledTotalRecognizeAmt numeric NOT NULL DEFAULT (0)::numeric,
+    JP_ScheduledTotalInvoiceAmt numeric NOT NULL DEFAULT (0)::numeric,
 
   CONSTRAINT JP_ContractPSLine_pkey PRIMARY KEY (JP_ContractPSLine_ID)
 )

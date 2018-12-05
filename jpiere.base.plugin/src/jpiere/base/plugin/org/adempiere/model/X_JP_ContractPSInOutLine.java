@@ -32,7 +32,7 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181129L;
+	private static final long serialVersionUID = 20181205L;
 
     /** Standard Constructor */
     public X_JP_ContractPSInOutLine (Properties ctx, int JP_ContractPSInOutLine_ID, String trxName)
@@ -47,11 +47,15 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 // N
 			setJP_ContractCalender_InOut_ID (0);
 			setJP_ContractLine_ID (0);
+// @JP_ContractLine_ID@
 			setJP_ContractPSInOutLine_ID (0);
 			setJP_ContractPSLine_ID (0);
 			setJP_ContractProcPeriod_ID (0);
+			setJP_ContractProcSchedule_ID (0);
+// @JP_ContractProcSchedule_ID@
 			setJP_ContractProcess_InOut_ID (0);
 			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_ContractPSInOutLine WHERE JP_ContractPSLine_ID=@JP_ContractPSLine_ID@
 			setLineNetAmt (Env.ZERO);
 			setMovementQty (Env.ZERO);
 			setPriceActual (Env.ZERO);
@@ -165,6 +169,34 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	public int getC_Campaign_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Campaign_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
+			.getPO(getC_Charge_ID(), get_TrxName());	}
+
+	/** Set Charge.
+		@param C_Charge_ID 
+		Additional document charges
+	  */
+	public void setC_Charge_ID (int C_Charge_ID)
+	{
+		if (C_Charge_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
+	}
+
+	/** Get Charge.
+		@return Additional document charges
+	  */
+	public int getC_Charge_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -491,9 +523,9 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	public void setJP_ContractProcPeriod_ID (int JP_ContractProcPeriod_ID)
 	{
 		if (JP_ContractProcPeriod_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriod_ID, null);
+			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriod_ID, Integer.valueOf(JP_ContractProcPeriod_ID));
+			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, Integer.valueOf(JP_ContractProcPeriod_ID));
 	}
 
 	/** Get Contract Process Period.
@@ -501,6 +533,31 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	public int getJP_ContractProcPeriod_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPeriod_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractProcSchedule getJP_ContractProcSchedule() throws RuntimeException
+    {
+		return (I_JP_ContractProcSchedule)MTable.get(getCtx(), I_JP_ContractProcSchedule.Table_Name)
+			.getPO(getJP_ContractProcSchedule_ID(), get_TrxName());	}
+
+	/** Set Contract Process Schedule Doc.
+		@param JP_ContractProcSchedule_ID Contract Process Schedule Doc	  */
+	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID)
+	{
+		if (JP_ContractProcSchedule_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, Integer.valueOf(JP_ContractProcSchedule_ID));
+	}
+
+	/** Get Contract Process Schedule Doc.
+		@return Contract Process Schedule Doc	  */
+	public int getJP_ContractProcSchedule_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcSchedule_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -537,7 +594,7 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	  */
 	public void setLine (int Line)
 	{
-		set_ValueNoCheck (COLUMNNAME_Line, Integer.valueOf(Line));
+		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
 	}
 
 	/** Get Line No.
@@ -569,6 +626,34 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException
+    {
+		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
+			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());	}
+
+	/** Set Attribute Info.
+		@param M_AttributeSetInstance_ID 
+		Product Attribute Set Instance
+	  */
+	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
+	{
+		if (M_AttributeSetInstance_ID < 0) 
+			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
+	}
+
+	/** Get Attribute Info.
+		@return Product Attribute Set Instance
+	  */
+	public int getM_AttributeSetInstance_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_InOutLine getM_InOutLine() throws RuntimeException
@@ -611,9 +696,9 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	public void setM_Locator_ID (int M_Locator_ID)
 	{
 		if (M_Locator_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_Locator_ID, null);
+			set_Value (COLUMNNAME_M_Locator_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_M_Locator_ID, Integer.valueOf(M_Locator_ID));
+			set_Value (COLUMNNAME_M_Locator_ID, Integer.valueOf(M_Locator_ID));
 	}
 
 	/** Get Locator.
@@ -622,6 +707,34 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	public int getM_Locator_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Locator_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_Name)
+			.getPO(getM_Product_ID(), get_TrxName());	}
+
+	/** Set Product.
+		@param M_Product_ID 
+		Product, Service, Item
+	  */
+	public void setM_Product_ID (int M_Product_ID)
+	{
+		if (M_Product_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_M_Product_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
+	}
+
+	/** Get Product.
+		@return Product, Service, Item
+	  */
+	public int getM_Product_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -673,7 +786,7 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	  */
 	public void setPriceEntered (BigDecimal PriceEntered)
 	{
-		set_ValueNoCheck (COLUMNNAME_PriceEntered, PriceEntered);
+		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
 	}
 
 	/** Get Price.
@@ -757,7 +870,7 @@ public class X_JP_ContractPSInOutLine extends PO implements I_JP_ContractPSInOut
 	  */
 	public void setQtyEntered (BigDecimal QtyEntered)
 	{
-		set_ValueNoCheck (COLUMNNAME_QtyEntered, QtyEntered);
+		set_Value (COLUMNNAME_QtyEntered, QtyEntered);
 	}
 
 	/** Get Quantity.

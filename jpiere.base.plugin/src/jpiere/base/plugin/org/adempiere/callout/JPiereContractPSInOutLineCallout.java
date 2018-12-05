@@ -13,6 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.callout;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 
 import org.adempiere.base.IColumnCallout;
@@ -84,9 +85,13 @@ public class JPiereContractPSInOutLineCallout implements IColumnCallout {
 
 						}else if(columnName.equals("C_UOM_ID")){
 
-							columnIndex = contentLine.get_ColumnIndex("JP_QtyOrderd_UOM_ID");
-							objectValue = contentLine.get_Value(columnIndex);
-							mTab.setValue("C_UOM_ID", objectValue);
+							int C_UOM_ID = 0;
+							if(contentLine.getM_Product_ID() > 0)
+								C_UOM_ID = contentLine.getM_Product().getC_UOM_ID();
+							else
+								C_UOM_ID = contentLine.getC_UOM_ID();
+
+							mTab.setValue("C_UOM_ID", C_UOM_ID);
 
 						}else if(objectValue != null){
 
@@ -95,6 +100,12 @@ public class JPiereContractPSInOutLineCallout implements IColumnCallout {
 					}
 
 				}//for
+
+				BigDecimal qty = (BigDecimal)mTab.getValue("QtyEntered");
+				BigDecimal amt = (BigDecimal)mTab.getValue("PriceEntered");
+
+				mTab.setValue("LineNetAmt", qty.multiply(amt));
+
 			}
 		}
 

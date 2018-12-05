@@ -1124,6 +1124,48 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	}	//	getLines
 
 
+	private MContractProcSchedule[] 	m_schedules = null;
+
+	public MContractProcSchedule[] getContractProcSchedules (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractProcSchedule.COLUMNNAME_JP_ContractContent_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MContractProcSchedule.COLUMNNAME_DocumentNo;
+
+		List<MContractProcSchedule> list = new Query(getCtx(), MContractProcSchedule.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		return list.toArray(new MContractProcSchedule[list.size()]);
+	}	//	getContractProcSchedules
+
+	public MContractProcSchedule[] getContractProcSchedules (boolean requery, String orderBy)
+	{
+		if (m_schedules != null && !requery) {
+			set_TrxName(m_schedules, get_TrxName());
+			return m_schedules;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += "DocumentNo";
+
+		m_schedules = getContractProcSchedules(null, orderClause);
+
+		return m_schedules;
+	}	//	getContractProcSchedules
+
+
+	public MContractProcSchedule[] getContractProcSchedules()
+	{
+		return getContractProcSchedules(false, null);
+	}	//	getContractProcSchedules
+
 	/**	Cache				*/
 	private static CCache<Integer,MContractContent>	s_cache = new CCache<Integer,MContractContent>(Table_Name, 20);
 

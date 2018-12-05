@@ -33,7 +33,7 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181129L;
+	private static final long serialVersionUID = 20181205L;
 
     /** Standard Constructor */
     public X_JP_ContractPSLine (Properties ctx, int JP_ContractPSLine_ID, String trxName)
@@ -48,9 +48,14 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 // N
 			setJP_ContractPSLine_ID (0);
 			setJP_ContractProcSchedule_ID (0);
+			setJP_ScheduledTotalInvoiceAmt (Env.ZERO);
+// 0
 			setJP_ScheduledTotalMovementQty (Env.ZERO);
 			setJP_ScheduledTotalQtyInvoiced (Env.ZERO);
+			setJP_ScheduledTotalRecognizeAmt (Env.ZERO);
+// 0
 			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_ContractPSLine WHERE JP_ContractProcSchedule_ID=@JP_ContractProcSchedule_ID@
 			setLineNetAmt (Env.ZERO);
 			setPriceActual (Env.ZERO);
 			setPriceEntered (Env.ZERO);
@@ -472,7 +477,7 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 	  */
 	public void setDatePromised (Timestamp DatePromised)
 	{
-		set_ValueNoCheck (COLUMNNAME_DatePromised, DatePromised);
+		set_Value (COLUMNNAME_DatePromised, DatePromised);
 	}
 
 	/** Get Date Promised.
@@ -739,9 +744,9 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 	public void setJP_Locator_ID (int JP_Locator_ID)
 	{
 		if (JP_Locator_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_Locator_ID, null);
+			set_Value (COLUMNNAME_JP_Locator_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_Locator_ID, Integer.valueOf(JP_Locator_ID));
+			set_Value (COLUMNNAME_JP_Locator_ID, Integer.valueOf(JP_Locator_ID));
 	}
 
 	/** Get Locator.
@@ -752,6 +757,23 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Scheduled Total Invoice Amt.
+		@param JP_ScheduledTotalInvoiceAmt Scheduled Total Invoice Amt	  */
+	public void setJP_ScheduledTotalInvoiceAmt (BigDecimal JP_ScheduledTotalInvoiceAmt)
+	{
+		set_Value (COLUMNNAME_JP_ScheduledTotalInvoiceAmt, JP_ScheduledTotalInvoiceAmt);
+	}
+
+	/** Get Scheduled Total Invoice Amt.
+		@return Scheduled Total Invoice Amt	  */
+	public BigDecimal getJP_ScheduledTotalInvoiceAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ScheduledTotalInvoiceAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Scheduled Total Movement Quantity.
@@ -788,13 +810,30 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 		return bd;
 	}
 
+	/** Set Scheduled Total Recognize Amt.
+		@param JP_ScheduledTotalRecognizeAmt Scheduled Total Recognize Amt	  */
+	public void setJP_ScheduledTotalRecognizeAmt (BigDecimal JP_ScheduledTotalRecognizeAmt)
+	{
+		set_Value (COLUMNNAME_JP_ScheduledTotalRecognizeAmt, JP_ScheduledTotalRecognizeAmt);
+	}
+
+	/** Get Scheduled Total Recognize Amt.
+		@return Scheduled Total Recognize Amt	  */
+	public BigDecimal getJP_ScheduledTotalRecognizeAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ScheduledTotalRecognizeAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Line No.
 		@param Line 
 		Unique line for this document
 	  */
 	public void setLine (int Line)
 	{
-		set_ValueNoCheck (COLUMNNAME_Line, Integer.valueOf(Line));
+		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
 	}
 
 	/** Get Line No.
@@ -938,7 +977,7 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 	  */
 	public void setPriceEntered (BigDecimal PriceEntered)
 	{
-		set_ValueNoCheck (COLUMNNAME_PriceEntered, PriceEntered);
+		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
 	}
 
 	/** Get Price.
@@ -1022,7 +1061,7 @@ public class X_JP_ContractPSLine extends PO implements I_JP_ContractPSLine, I_Pe
 	  */
 	public void setQtyEntered (BigDecimal QtyEntered)
 	{
-		set_ValueNoCheck (COLUMNNAME_QtyEntered, QtyEntered);
+		set_Value (COLUMNNAME_QtyEntered, QtyEntered);
 	}
 
 	/** Get Quantity.

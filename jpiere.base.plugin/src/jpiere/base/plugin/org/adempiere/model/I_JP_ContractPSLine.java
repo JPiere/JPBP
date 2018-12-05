@@ -442,6 +442,15 @@ public interface I_JP_ContractPSLine
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_ScheduledTotalInvoiceAmt */
+    public static final String COLUMNNAME_JP_ScheduledTotalInvoiceAmt = "JP_ScheduledTotalInvoiceAmt";
+
+	/** Set Scheduled Total Invoice Amt	  */
+	public void setJP_ScheduledTotalInvoiceAmt (BigDecimal JP_ScheduledTotalInvoiceAmt);
+
+	/** Get Scheduled Total Invoice Amt	  */
+	public BigDecimal getJP_ScheduledTotalInvoiceAmt();
+
     /** Column name JP_ScheduledTotalMovementQty */
     public static final String COLUMNNAME_JP_ScheduledTotalMovementQty = "JP_ScheduledTotalMovementQty";
 
@@ -459,6 +468,15 @@ public interface I_JP_ContractPSLine
 
 	/** Get Scheduled Total Invoice Qty	  */
 	public BigDecimal getJP_ScheduledTotalQtyInvoiced();
+
+    /** Column name JP_ScheduledTotalRecognizeAmt */
+    public static final String COLUMNNAME_JP_ScheduledTotalRecognizeAmt = "JP_ScheduledTotalRecognizeAmt";
+
+	/** Set Scheduled Total Recognize Amt	  */
+	public void setJP_ScheduledTotalRecognizeAmt (BigDecimal JP_ScheduledTotalRecognizeAmt);
+
+	/** Get Scheduled Total Recognize Amt	  */
+	public BigDecimal getJP_ScheduledTotalRecognizeAmt();
 
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";

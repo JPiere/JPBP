@@ -46,5 +46,11 @@ CREATE TABLE adempiere.JP_ContractPSInvoiceLine
     C_InvoiceLine_ID numeric(10,0),
     IsFactCreatedJP character(1) NOT NULL DEFAULT 'N'::bpchar,
 
+    S_ResourceAssignment_ID numeric(10,0) DEFAULT NULL::numeric,
+    M_Product_ID numeric(10,0) DEFAULT NULL::numeric,
+    M_AttributeSetInstance_ID numeric(10,0) DEFAULT NULL::numeric,
+    C_Charge_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_ContractProcSchedule_ID numeric(10,0) NOT NULL,
+
   CONSTRAINT JP_ContractPSInvoiceLine_pkey PRIMARY KEY (JP_ContractPSInvoiceLine_ID)
 )

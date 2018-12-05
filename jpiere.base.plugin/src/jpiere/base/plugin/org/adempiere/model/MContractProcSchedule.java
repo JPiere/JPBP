@@ -33,15 +33,18 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
+import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.Util;
 
 /**
  * JPIERE-0431:Contract Process Schedule
@@ -385,4 +388,91 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	}
 
 
-}	//	DocActionTemplate
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		//For callout of Product in Line And Doc Date Management
+		if(newRecord || is_ValueChanged("DateDoc"))
+		{
+			setDateInvoiced(getDateDoc());
+			setDateOrdered(getDateDoc());
+		}
+
+		if(newRecord)
+		{
+			MContractContent contractContent = MContractContent.get(getCtx(), getJP_ContractContent_ID());
+			setJP_Contract_ID(contractContent.getJP_Contract_ID());
+			setJP_ContractProcess_ID(contractContent.getJP_ContractProcess_ID());
+			setJP_ContractCalender_ID(contractContent.getJP_ContractCalender_ID());
+			setDocBaseType(contractContent.getDocBaseType());
+			setJP_BaseDocDocType_ID(contractContent.getJP_BaseDocDocType_ID());
+
+			setIsSOTrx(contractContent.isSOTrx());
+			setOrderType (contractContent.getOrderType());
+
+			setJP_CreateDerivativeDocPolicy(contractContent.getJP_CreateDerivativeDocPolicy());
+
+		}else {
+
+			if(is_ValueChanged("JP_Contract_ID")
+					|| is_ValueChanged("JP_ContractContent_ID")
+					|| is_ValueChanged("JP_ContractProcess_ID")
+					|| is_ValueChanged("JP_ContractCalender_ID")
+					|| is_ValueChanged("DocBaseType")
+					|| is_ValueChanged("JP_BaseDocDocType_ID")
+					|| is_ValueChanged("JP_CreateDerivativeDocPolicy")
+				)
+			{
+				log.saveError("Error", "変更する事ができません");
+				return false;
+			}
+
+		}
+
+
+		return true;
+	}
+
+
+	private MContractPSLine[] 	m_ContractPSLines = null;
+
+	public MContractPSLine[] getContractPSLines (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractPSLine.COLUMNNAME_JP_ContractProcSchedule_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MContractPSLine.COLUMNNAME_Line;
+
+		List<MContractPSLine> list = new Query(getCtx(), MContractPSLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		//
+		return list.toArray(new MContractPSLine[list.size()]);
+	}	//	getContractPSLines
+
+	public MContractPSLine[] getContractPSLines (boolean requery, String orderBy)
+	{
+		if (m_ContractPSLines != null && !requery) {
+			set_TrxName(m_ContractPSLines, get_TrxName());
+			return m_ContractPSLines;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += "Line";
+		m_ContractPSLines = getContractPSLines(null, orderClause);
+		return m_ContractPSLines;
+	}	//	getContractPSLines
+
+
+	public MContractPSLine[] getContractPSLines()
+	{
+		return getContractPSLines(false, null);
+	}	//	getContractPSLines
+
+}	//	MContractProcSchedule

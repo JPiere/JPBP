@@ -107,6 +107,21 @@ public interface I_JP_ContractPSInOutLine
 
 	public org.compiere.model.I_C_Campaign getC_Campaign() throws RuntimeException;
 
+    /** Column name C_Charge_ID */
+    public static final String COLUMNNAME_C_Charge_ID = "C_Charge_ID";
+
+	/** Set Charge.
+	  * Additional document charges
+	  */
+	public void setC_Charge_ID (int C_Charge_ID);
+
+	/** Get Charge.
+	  * Additional document charges
+	  */
+	public int getC_Charge_ID();
+
+	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
+
     /** Column name C_ProjectPhase_ID */
     public static final String COLUMNNAME_C_ProjectPhase_ID = "C_ProjectPhase_ID";
 
@@ -308,6 +323,17 @@ public interface I_JP_ContractPSInOutLine
 
 	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException;
 
+    /** Column name JP_ContractProcSchedule_ID */
+    public static final String COLUMNNAME_JP_ContractProcSchedule_ID = "JP_ContractProcSchedule_ID";
+
+	/** Set Contract Process Schedule Doc	  */
+	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID);
+
+	/** Get Contract Process Schedule Doc	  */
+	public int getJP_ContractProcSchedule_ID();
+
+	public I_JP_ContractProcSchedule getJP_ContractProcSchedule() throws RuntimeException;
+
     /** Column name JP_ContractProcess_InOut_ID */
     public static final String COLUMNNAME_JP_ContractProcess_InOut_ID = "JP_ContractProcess_InOut_ID";
 
@@ -345,6 +371,21 @@ public interface I_JP_ContractPSInOutLine
 	  */
 	public BigDecimal getLineNetAmt();
 
+    /** Column name M_AttributeSetInstance_ID */
+    public static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
+
+	/** Set Attribute Info.
+	  * Product Attribute Set Instance
+	  */
+	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID);
+
+	/** Get Attribute Info.
+	  * Product Attribute Set Instance
+	  */
+	public int getM_AttributeSetInstance_ID();
+
+	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
+
     /** Column name M_InOutLine_ID */
     public static final String COLUMNNAME_M_InOutLine_ID = "M_InOutLine_ID";
 
@@ -374,6 +415,21 @@ public interface I_JP_ContractPSInOutLine
 	public int getM_Locator_ID();
 
 	public org.compiere.model.I_M_Locator getM_Locator() throws RuntimeException;
+
+    /** Column name M_Product_ID */
+    public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
+
+	/** Set Product.
+	  * Product, Service, Item
+	  */
+	public void setM_Product_ID (int M_Product_ID);
+
+	/** Get Product.
+	  * Product, Service, Item
+	  */
+	public int getM_Product_ID();
+
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
     /** Column name MovementQty */
     public static final String COLUMNNAME_MovementQty = "MovementQty";
