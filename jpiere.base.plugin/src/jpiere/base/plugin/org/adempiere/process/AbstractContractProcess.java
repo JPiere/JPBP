@@ -42,7 +42,11 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLog;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
+import jpiere.base.plugin.org.adempiere.model.MContractPSInOutLine;
+import jpiere.base.plugin.org.adempiere.model.MContractPSInvoiceLine;
+import jpiere.base.plugin.org.adempiere.model.MContractPSLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
+import jpiere.base.plugin.org.adempiere.model.MContractProcSchedule;
 import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
 
@@ -378,7 +382,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 		}
 
 
-		if(p_DocBaseType.equals("SOO") || p_DocBaseType.equals("POO"))
+		if(p_DocBaseType != null && (p_DocBaseType.equals("SOO") || p_DocBaseType.equals("POO")) )
 		{
 			if(m_ContractContent != null && m_ContractContent.getJP_ContractCalender_ID() > 0)
 			{
@@ -639,7 +643,48 @@ public abstract class AbstractContractProcess extends SvrProcess
 			logDetail.setC_Invoice_ID(invoiceLine.getC_Invoice_ID());
 			logDetail.setC_InvoiceLine_ID(invoiceLine.getC_Invoice_ID());
 
+		}else if(po.get_TableName().equals(MContractProcSchedule.Table_Name)){
+
+			MContractProcSchedule contractProcSchdule = (MContractProcSchedule)po;
+			logDetail.setC_Order_ID(contractProcSchdule.getC_Order_ID());
+			logDetail.setC_Invoice_ID(contractProcSchdule.getC_Invoice_ID());
+			logDetail.setJP_ContractProcSchedule_ID(contractProcSchdule.getJP_ContractProcSchedule_ID());
+
+		}else if(po.get_TableName().equals(MContractPSLine.Table_Name)){
+
+			MContractPSLine contractPSLine = (MContractPSLine)po;
+			logDetail.setC_Order_ID(contractPSLine.getParent().getC_Order_ID());
+			logDetail.setC_Invoice_ID(contractPSLine.getParent().getC_Invoice_ID());
+			logDetail.setC_OrderLine_ID(contractPSLine.getC_OrderLine_ID());
+			logDetail.setC_InvoiceLine_ID(contractPSLine.getC_InvoiceLine_ID());
+			logDetail.setJP_ContractProcSchedule_ID(contractPSLine.getJP_ContractProcSchedule_ID());
+			logDetail.setJP_ContractPSLine_ID(contractPSLine.getJP_ContractPSLine_ID());
+
+		}else if(po.get_TableName().equals(MContractPSInOutLine.Table_Name)){
+
+			MContractPSInOutLine contractPSInOutLine = (MContractPSInOutLine)po;
+			logDetail.setC_Order_ID(contractPSInOutLine.getJP_ContractProcSchedule().getC_Order_ID());
+			logDetail.setC_OrderLine_ID(contractPSInOutLine.getJP_ContractPSLine().getC_OrderLine_ID());
+			logDetail.setM_InOutLine_ID(contractPSInOutLine.getM_InOutLine_ID());
+			MInOutLine ioLine = new MInOutLine(getCtx(), contractPSInOutLine.getM_InOutLine_ID(), get_TrxName());
+			logDetail.setM_InOut_ID(ioLine.getM_InOut_ID());
+			logDetail.setJP_ContractProcSchedule_ID(contractPSInOutLine.getJP_ContractProcSchedule_ID());
+			logDetail.setJP_ContractPSLine_ID(contractPSInOutLine.getJP_ContractPSLine_ID());
+
+		}else if(po.get_TableName().equals(MContractPSInvoiceLine.Table_Name)){
+
+			MContractPSInvoiceLine contractPSInvoiceLine = (MContractPSInvoiceLine)po;
+			logDetail.setC_Order_ID(contractPSInvoiceLine.getJP_ContractProcSchedule().getC_Order_ID());
+			logDetail.setC_OrderLine_ID(contractPSInvoiceLine.getJP_ContractPSLine().getC_OrderLine_ID());
+			logDetail.setC_InvoiceLine_ID(contractPSInvoiceLine.getC_InvoiceLine_ID());
+			MInvoiceLine iLine = new MInvoiceLine(getCtx(), contractPSInvoiceLine.getC_InvoiceLine_ID(), get_TrxName());
+			logDetail.setC_Invoice_ID(iLine.getC_Invoice_ID());
+			logDetail.setJP_ContractProcSchedule_ID(contractPSInvoiceLine.getJP_ContractProcSchedule_ID());
+			logDetail.setJP_ContractPSLine_ID(contractPSInvoiceLine.getJP_ContractPSLine_ID());
+
 		}
+
+
 
 		logDetail.saveEx(m_ContractLog.get_TrxName());
 

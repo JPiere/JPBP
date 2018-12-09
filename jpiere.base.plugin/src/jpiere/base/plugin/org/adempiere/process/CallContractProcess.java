@@ -307,9 +307,13 @@ public class CallContractProcess extends SvrProcess {
 							callCreateContractProcSchdule(contractContent, procPeriod);
 
 						}else if(p_IsCreateBaseDocJP) {
+
 							callCreateBaseDocIndirectly(contractContent, procPeriod);
+
 						}else {
+
 							callCreateDerivativeDocIndirectly(contractContent, procPeriod);
+
 						}
 					}else {
 						;//TODO エラー
@@ -538,7 +542,7 @@ public class CallContractProcess extends SvrProcess {
 					+ " WHERE cc.AD_Client_ID = ?"	//1
 					+ " AND c.JP_ContractType = 'PDC'"
 					+ " AND c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR','UC')"//Contract Status in 'Prepare' and 'Under Contract'
-					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'Unprocessed' and 'In Progress'
+					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'In Progress'
 					+ " AND cl.JP_ContractCalender_InOut_ID = ?" //2
 					+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
 					+ " AND cc.JP_CreateDerivativeDocPolicy IN ('BT','IO') ");
@@ -552,7 +556,7 @@ public class CallContractProcess extends SvrProcess {
 					+ " WHERE cc.AD_Client_ID = ?"	//1
 					+ " AND c.JP_ContractType = 'PDC'"
 					+ " AND c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR','UC')"//Contract Status in 'Prepare' and 'Under Contract'
-					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'Unprocessed' and 'In Progress'
+					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'In Progress'
 					+ " AND cl.JP_ContractCalender_Inv_ID = ?" //2
 					+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
 					+ " AND cc.JP_CreateDerivativeDocPolicy IN ('BT','IV') ");
@@ -593,9 +597,16 @@ public class CallContractProcess extends SvrProcess {
 				;//TODO
 
 			}else if(p_IsCreateBaseDocJP) {
-				;//TODO
+
+				getContractContentSQL.append(" AND cc.DocBaseType = ? ");
+
 			}else {
-				;//TODO
+
+				if(p_DocBaseType.equals("MMS") ||p_DocBaseType.equals("ARI") )
+					getContractContentSQL.append(" AND cc.DocBaseType ='SOO' ");
+				else if(p_DocBaseType.equals("MMR") ||p_DocBaseType.equals("API") )
+					getContractContentSQL.append(" AND cc.DocBaseType ='POO' ");
+
 			}
 
 			getContractContentSQL.append(" AND cc.JP_ContractProcessMethod ='IC' ");
@@ -628,8 +639,11 @@ public class CallContractProcess extends SvrProcess {
 				if(p_IsCreateBaseDocJP)
 				{
 					pstmt.setString (i++, p_DocBaseType);
+
 				}else {
+
 					;
+
 				}
 
 			}else if(p_JP_ContractProcessMethod.equals("IC")){
@@ -637,10 +651,15 @@ public class CallContractProcess extends SvrProcess {
 				if(p_DocBaseType.equals("CPS"))
 				{
 					;
+
 				}else if(p_IsCreateBaseDocJP) {
-					;
+
+					pstmt.setString (i++, p_DocBaseType);
+
 				}else {
+
 					;
+
 				}
 			}
 
@@ -835,10 +854,10 @@ public class CallContractProcess extends SvrProcess {
 		{
 			if(Util.isEmpty(MContractProcess.get(getCtx(), contractContent.getJP_ContractProcess_ID()).getJP_IndirectContractProcClass()))
 			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseOrder";
+				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseOrderIndirectly";//TODO
 
 			}else{
-				className = contractContent.getJP_ContractProcess().getJP_IndirectContractProcClass();//TODO
+				className = contractContent.getJP_ContractProcess().getJP_IndirectContractProcClass();
 			}
 		}
 
@@ -846,7 +865,7 @@ public class CallContractProcess extends SvrProcess {
 		{
 			if(Util.isEmpty(MContractProcess.get(getCtx(), contractContent.getJP_ContractProcess_ID()).getJP_IndirectContractProcClass()))
 			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseInvoice";//TODO
+				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseInvoiceIndirectly";//TODO
 
 			}else{
 				className = contractContent.getJP_ContractProcess().getJP_IndirectContractProcClass();
@@ -900,11 +919,11 @@ public class CallContractProcess extends SvrProcess {
 			{
 				if(p_DocBaseType.equals("MMS")|| p_DocBaseType.equals("MMR"))
 				{
-					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateDerivativeInOut";
+					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateDerivativeInOutIndirectly";//TODO
 
 				}else if(p_DocBaseType.equals("ARI")|| p_DocBaseType.equals("API")){
 
-					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateDerivativeInvoice";
+					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateDerivativeInvoiceIndirectly";//TODO
 				}
 
 			}else{

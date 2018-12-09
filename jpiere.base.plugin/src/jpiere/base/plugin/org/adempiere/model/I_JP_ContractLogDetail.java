@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractLogDetail
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 6.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractLogDetail 
@@ -274,6 +274,39 @@ public interface I_JP_ContractLogDetail
 
 	public I_JP_ContractLog getJP_ContractLog() throws RuntimeException;
 
+    /** Column name JP_ContractPSInOutLine_ID */
+    public static final String COLUMNNAME_JP_ContractPSInOutLine_ID = "JP_ContractPSInOutLine_ID";
+
+	/** Set JP_ContractPSInOutLine	  */
+	public void setJP_ContractPSInOutLine_ID (int JP_ContractPSInOutLine_ID);
+
+	/** Get JP_ContractPSInOutLine	  */
+	public int getJP_ContractPSInOutLine_ID();
+
+	public I_JP_ContractPSInOutLine getJP_ContractPSInOutLine() throws RuntimeException;
+
+    /** Column name JP_ContractPSInvoiceLine_ID */
+    public static final String COLUMNNAME_JP_ContractPSInvoiceLine_ID = "JP_ContractPSInvoiceLine_ID";
+
+	/** Set JP_ContractPSInvoiceLine	  */
+	public void setJP_ContractPSInvoiceLine_ID (int JP_ContractPSInvoiceLine_ID);
+
+	/** Get JP_ContractPSInvoiceLine	  */
+	public int getJP_ContractPSInvoiceLine_ID();
+
+	public I_JP_ContractPSInvoiceLine getJP_ContractPSInvoiceLine() throws RuntimeException;
+
+    /** Column name JP_ContractPSLine_ID */
+    public static final String COLUMNNAME_JP_ContractPSLine_ID = "JP_ContractPSLine_ID";
+
+	/** Set Contract Process Schedule Line	  */
+	public void setJP_ContractPSLine_ID (int JP_ContractPSLine_ID);
+
+	/** Get Contract Process Schedule Line	  */
+	public int getJP_ContractPSLine_ID();
+
+	public I_JP_ContractPSLine getJP_ContractPSLine() throws RuntimeException;
+
     /** Column name JP_ContractProcPeriod_ID */
     public static final String COLUMNNAME_JP_ContractProcPeriod_ID = "JP_ContractProcPeriod_ID";
 
@@ -284,6 +317,17 @@ public interface I_JP_ContractLogDetail
 	public int getJP_ContractProcPeriod_ID();
 
 	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException;
+
+    /** Column name JP_ContractProcSchedule_ID */
+    public static final String COLUMNNAME_JP_ContractProcSchedule_ID = "JP_ContractProcSchedule_ID";
+
+	/** Set Contract Process Schedule Doc	  */
+	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID);
+
+	/** Get Contract Process Schedule Doc	  */
+	public int getJP_ContractProcSchedule_ID();
+
+	public I_JP_ContractProcSchedule getJP_ContractProcSchedule() throws RuntimeException;
 
     /** Column name JP_ContractProcStatus_From */
     public static final String COLUMNNAME_JP_ContractProcStatus_From = "JP_ContractProcStatus_From";

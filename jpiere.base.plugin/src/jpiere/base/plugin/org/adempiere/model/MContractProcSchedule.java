@@ -44,6 +44,7 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 /**
@@ -173,20 +174,23 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 			m_processMsg = "@PeriodClosed@";
 			return DocAction.STATUS_Invalid;
 		}
-		MLine[] lines = getLines(false);
-		if (lines.length == 0)
+				**/
+
+		MContractPSLine[] contractPSLines = getContractPSLines();
+		if (contractPSLines.length == 0)
 		{
 			m_processMsg = "@NoLines@";
 			return DocAction.STATUS_Invalid;
 		}
-		**/
+
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
 		m_justPrepared = true;
-	//	if (!DOCACTION_Complete.equals(getDocAction()))
-	//		setDocAction(DOCACTION_Complete);
+		if (!DOCACTION_Complete.equals(getDocAction()))
+			setDocAction(DOCACTION_Complete);
+
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
 
@@ -234,7 +238,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 			return DocAction.STATUS_Invalid;
 
 		//	Implicit Approval
-	//	if (!isApproved())
+		if (!isApproved())
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
@@ -246,8 +250,8 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 			m_processMsg = valid;
 			return DocAction.STATUS_Invalid;
 		}
-	//	setProcessed(true);
-	//	setDocAction(DOCACTION_Close);
+		setProcessed(true);
+		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 
@@ -384,7 +388,26 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
 			int AD_Table_ID, String[] docAction, String[] options, int index)
 	{
-		return 0;
+//		if(isSOTrx.equals("Y") && (orderType.equals(MDocType.DOCSUBTYPESO_Proposal)
+//				|| orderType.equals(MDocType.DOCSUBTYPESO_Quotation)))
+//		{
+//			index = 0; //initialize the index
+//			options[index++] = DocumentEngine.ACTION_Prepare;
+//			options[index++] = DocumentEngine.ACTION_Void;
+//			return index;
+//		}
+//
+//		if (docStatus.equals(DocumentEngine.STATUS_Drafted) || docStatus.equals(DocumentEngine.STATUS_InProgress))
+//		{
+//			index = 0; //initialize the index
+//			options[index++] = DocumentEngine.ACTION_Void;
+//			options[index++] = DocumentEngine.ACTION_Prepare;
+//			options[index++] = DocumentEngine.ACTION_Complete;
+//
+//			return index;
+//		}
+
+		return index;
 	}
 
 
@@ -436,6 +459,14 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 
 	private MContractPSLine[] 	m_ContractPSLines = null;
 
+	/**
+	 *
+	 * Get Contract Process Lines
+	 *
+	 * @param whereClause
+	 * @param orderClause
+	 * @return
+	 */
 	public MContractPSLine[] getContractPSLines (String whereClause, String orderClause)
 	{
 		StringBuilder whereClauseFinal = new StringBuilder(MContractPSLine.COLUMNNAME_JP_ContractProcSchedule_ID+"=? ");
@@ -453,6 +484,14 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 		return list.toArray(new MContractPSLine[list.size()]);
 	}	//	getContractPSLines
 
+	/**
+	 *
+	 * Get Contract Process Lines
+	 *
+	 * @param requery
+	 * @param orderBy
+	 * @return
+	 */
 	public MContractPSLine[] getContractPSLines (boolean requery, String orderBy)
 	{
 		if (m_ContractPSLines != null && !requery) {
@@ -470,9 +509,157 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	}	//	getContractPSLines
 
 
+	/**
+	 *
+	 * Get Contract Process Lines
+	 *
+	 * @return
+	 */
 	public MContractPSLine[] getContractPSLines()
 	{
 		return getContractPSLines(false, null);
 	}	//	getContractPSLines
+
+
+	/**
+	 *
+	 * Get Contract Process Schedule Ship/Receipt Lines
+	 *
+	 * @param JP_ContractProcPeriod_ID
+	 * @param isFactCreatedJP
+	 * @return
+	 */
+	public MContractPSInOutLine[] getContractPSInOutLines(int JP_ContractProcPeriod_ID, boolean isFactCreatedJP)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractPSInOutLine.COLUMNNAME_JP_ContractProcSchedule_ID + "=? AND "
+														+ MContractPSInOutLine.COLUMNNAME_JP_ContractProcPeriod_ID + "=? AND IsFactCreatedJP=" + (isFactCreatedJP? "'Y'":"'N'"));
+
+		List<MContractPSInOutLine> list = new Query(getCtx(), MContractPSInOutLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID(),JP_ContractProcPeriod_ID)
+										.setOrderBy(MContractPSInOutLine.COLUMNNAME_Line)
+										.list();
+
+		return list.toArray(new MContractPSInOutLine[list.size()]);
+	}	//	getContractPSInOutLines
+
+	/**
+	 *
+	 * Get Contract Process Schedule Ship/Receipt Lines
+	 *
+	 * @param JP_ContractProcPeriod_ID
+	 * @return
+	 */
+	public MContractPSInOutLine[] getContractPSInOutLines(int JP_ContractProcPeriod_ID)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractPSInOutLine.COLUMNNAME_JP_ContractProcSchedule_ID + "=? AND"
+																			+ MContractPSInOutLine.COLUMNNAME_JP_ContractProcPeriod_ID + "=?");
+
+		List<MContractPSInOutLine> list = new Query(getCtx(), MContractPSInOutLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID(),JP_ContractProcPeriod_ID)
+										.setOrderBy(MContractPSInOutLine.COLUMNNAME_Line)
+										.list();
+
+		return list.toArray(new MContractPSInOutLine[list.size()]);
+	}	//	getContractPSInOutLines
+
+	/**
+	 *
+	 * Get Contract Process Schedule Ship/Receipt Lines
+	 *
+	 * @return
+	 */
+	public MContractPSInOutLine[] getContractPSInOutLines()
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractPSInOutLine.COLUMNNAME_JP_ContractProcSchedule_ID + "=?");
+
+		List<MContractPSInOutLine> list = new Query(getCtx(), MContractPSInOutLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(MContractPSInOutLine.COLUMNNAME_Line)
+										.list();
+
+		return list.toArray(new MContractPSInOutLine[list.size()]);
+	}	//	getContractPSInOutLines
+
+
+	/**
+	 *
+	 * Get Contract Process Schedule Invoice Lines
+	 *
+	 * @param JP_ContractProcPeriod_ID
+	 * @param isFactCreatedJP
+	 * @return
+	 */
+	public MContractPSInvoiceLine[] getContractPSInvoiceLines(int JP_ContractProcPeriod_ID, boolean isFactCreatedJP)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractPSInvoiceLine.COLUMNNAME_JP_ContractProcSchedule_ID + "=? AND "
+														+ MContractPSInvoiceLine.COLUMNNAME_JP_ContractProcPeriod_ID + "=? AND IsFactCreatedJP=" + (isFactCreatedJP? "'Y'":"'N'"));
+
+		List<MContractPSInvoiceLine> list = new Query(getCtx(), MContractPSInvoiceLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID(),JP_ContractProcPeriod_ID)
+										.setOrderBy(MContractPSInvoiceLine.COLUMNNAME_Line)
+										.list();
+
+		return list.toArray(new MContractPSInvoiceLine[list.size()]);
+	}	//	getContractPSInvoiceLines
+
+	/**
+	 *
+	 * Get Contract Process Schedule Invoice Lines
+	 *
+	 * @param JP_ContractProcPeriod_ID
+	 * @return
+	 */
+	public MContractPSInvoiceLine[] getContractPSInvoiceLines(int JP_ContractProcPeriod_ID)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractPSInvoiceLine.COLUMNNAME_JP_ContractProcSchedule_ID + "=? AND"
+																			+ MContractPSInvoiceLine.COLUMNNAME_JP_ContractProcPeriod_ID + "=?");
+
+		List<MContractPSInvoiceLine> list = new Query(getCtx(), MContractPSInvoiceLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID(),JP_ContractProcPeriod_ID)
+										.setOrderBy(MContractPSInvoiceLine.COLUMNNAME_Line)
+										.list();
+
+		return list.toArray(new MContractPSInvoiceLine[list.size()]);
+	}	//	getContractPSInvoiceLines
+
+	/**
+	 *
+	 * Get Contract Process Schedule Invoice Lines
+	 *
+	 * @return
+	 */
+	public MContractPSInvoiceLine[] getContractPSInvoiceLines()
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractPSInvoiceLine.COLUMNNAME_JP_ContractProcSchedule_ID + "=?");
+
+		List<MContractPSInvoiceLine> list = new Query(getCtx(), MContractPSInvoiceLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(MContractPSInvoiceLine.COLUMNNAME_Line)
+										.list();
+
+		return list.toArray(new MContractPSInvoiceLine[list.size()]);
+	}	//	getContractPSInvoiceLines
+
+	/**
+	 *
+	 * Get Contract Process Scheudles
+	 *
+	 * @param JP_ContractContent_ID
+	 * @param JP_ContractProcPeriod_ID
+	 * @param trxName
+	 * @return
+	 */
+	static public MContractProcSchedule[] getMContractProcSchedules(int JP_ContractContent_ID, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractProcSchedule.COLUMNNAME_JP_ContractContent_ID+"=? AND " + MContractProcSchedule.COLUMNNAME_JP_ContractProcPeriod_ID + "=?" );
+
+		List<MContractProcSchedule> list = new Query(Env.getCtx(), MContractProcSchedule.Table_Name, whereClauseFinal.toString(), trxName)
+										.setParameters(JP_ContractContent_ID,JP_ContractProcPeriod_ID)
+										.setOrderBy(MContractProcSchedule.COLUMNNAME_DocumentNo)
+										.list();
+
+		//
+		return list.toArray(new MContractProcSchedule[list.size()]);
+	}
 
 }	//	MContractProcSchedule
