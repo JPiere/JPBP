@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractProcSchedule
  *  @author iDempiere (generated) 
@@ -33,7 +34,7 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181129L;
+	private static final long serialVersionUID = 20181215L;
 
     /** Standard Constructor */
     public X_JP_ContractProcSchedule (Properties ctx, int JP_ContractProcSchedule_ID, String trxName)
@@ -44,11 +45,14 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 			setC_BPartner_ID (0);
 			setC_BPartner_Location_ID (0);
 			setC_Currency_ID (0);
+			setC_DocType_ID (0);
 			setC_PaymentTerm_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
 			setDateDoc (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
 			setDeliveryRule (null);
 			setDeliveryViaRule (null);
 			setDocAction (null);
@@ -291,9 +295,9 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
 		if (C_BPartner_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
 	/** Get Business Partner .
@@ -319,9 +323,9 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID)
 	{
 		if (C_BPartner_Location_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_Location_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_Location_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
+			set_Value (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
 	}
 
 	/** Get Partner Location.
@@ -414,6 +418,34 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public int getC_Currency_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
+			.getPO(getC_DocType_ID(), get_TrxName());	}
+
+	/** Set Document Type.
+		@param C_DocType_ID 
+		Document type or rules
+	  */
+	public void setC_DocType_ID (int C_DocType_ID)
+	{
+		if (C_DocType_ID < 0) 
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+	}
+
+	/** Get Document Type.
+		@return Document type or rules
+	  */
+	public int getC_DocType_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -562,7 +594,7 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	  */
 	public void setDateAcct (Timestamp DateAcct)
 	{
-		set_ValueNoCheck (COLUMNNAME_DateAcct, DateAcct);
+		set_Value (COLUMNNAME_DateAcct, DateAcct);
 	}
 
 	/** Get Account Date.
@@ -630,7 +662,7 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	  */
 	public void setDatePromised (Timestamp DatePromised)
 	{
-		set_ValueNoCheck (COLUMNNAME_DatePromised, DatePromised);
+		set_Value (COLUMNNAME_DatePromised, DatePromised);
 	}
 
 	/** Get Date Promised.
@@ -776,6 +808,8 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -854,6 +888,14 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	{
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), getDocumentNo());
+    }
 
 	public org.compiere.model.I_C_BPartner getDropShip_BPartner() throws RuntimeException
     {
@@ -1166,9 +1208,9 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setJP_BaseDocDocType_ID (int JP_BaseDocDocType_ID)
 	{
 		if (JP_BaseDocDocType_ID < 1) 
-			set_Value (COLUMNNAME_JP_BaseDocDocType_ID, null);
+			set_ValueNoCheck (COLUMNNAME_JP_BaseDocDocType_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_BaseDocDocType_ID, Integer.valueOf(JP_BaseDocDocType_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_BaseDocDocType_ID, Integer.valueOf(JP_BaseDocDocType_ID));
 	}
 
 	/** Get Base Doc DocType.
@@ -1353,7 +1395,7 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy)
 	{
 
-		set_Value (COLUMNNAME_JP_CreateDerivativeDocPolicy, JP_CreateDerivativeDocPolicy);
+		set_ValueNoCheck (COLUMNNAME_JP_CreateDerivativeDocPolicy, JP_CreateDerivativeDocPolicy);
 	}
 
 	/** Get Create Derivative Doc Policy.
@@ -1373,9 +1415,9 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setJP_Locator_ID (int JP_Locator_ID)
 	{
 		if (JP_Locator_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_Locator_ID, null);
+			set_Value (COLUMNNAME_JP_Locator_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_Locator_ID, Integer.valueOf(JP_Locator_ID));
+			set_Value (COLUMNNAME_JP_Locator_ID, Integer.valueOf(JP_Locator_ID));
 	}
 
 	/** Get Locator.
@@ -1400,9 +1442,9 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setM_FreightCategory_ID (int M_FreightCategory_ID)
 	{
 		if (M_FreightCategory_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_FreightCategory_ID, null);
+			set_Value (COLUMNNAME_M_FreightCategory_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_M_FreightCategory_ID, Integer.valueOf(M_FreightCategory_ID));
+			set_Value (COLUMNNAME_M_FreightCategory_ID, Integer.valueOf(M_FreightCategory_ID));
 	}
 
 	/** Get Freight Category.
@@ -1484,9 +1526,9 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setM_Warehouse_ID (int M_Warehouse_ID)
 	{
 		if (M_Warehouse_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, null);
+			set_Value (COLUMNNAME_M_Warehouse_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
 	}
 
 	/** Get Org Warehouse.
@@ -1542,7 +1584,7 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	  */
 	public void setPOReference (String POReference)
 	{
-		set_ValueNoCheck (COLUMNNAME_POReference, POReference);
+		set_Value (COLUMNNAME_POReference, POReference);
 	}
 
 	/** Get Order Reference.
@@ -1630,7 +1672,7 @@ public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSc
 	public void setPriorityRule (String PriorityRule)
 	{
 
-		set_ValueNoCheck (COLUMNNAME_PriorityRule, PriorityRule);
+		set_Value (COLUMNNAME_PriorityRule, PriorityRule);
 	}
 
 	/** Get Priority.

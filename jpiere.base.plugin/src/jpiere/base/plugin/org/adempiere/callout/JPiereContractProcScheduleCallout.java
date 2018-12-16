@@ -25,6 +25,7 @@ import org.compiere.util.Env;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
+import jpiere.base.plugin.org.adempiere.model.MContractProcSchedule;
 
 /**
  *
@@ -82,7 +83,16 @@ public class JPiereContractProcScheduleCallout implements IColumnCallout {
 						objectValue = contentTemplate.get_Value(columnIndex);
 						if(objectValue != null)
 						{
+							if(columnName.equals(MContractProcSchedule.COLUMNNAME_C_DocType_ID))
+							{
+								MDocType contractPSDocType = MDocType.get(ctx, ((Integer)objectValue).intValue());
+								Object obj_ContractPSDocType_ID = contractPSDocType.get_Value("JP_ContractPSDocType_ID");
+								if(obj_ContractPSDocType_ID != null)
+									mTab.setValue(columnName, obj_ContractPSDocType_ID);
+
+							}else {
 								mTab.setValue(columnName, objectValue);
+							}
 						}
 					}
 

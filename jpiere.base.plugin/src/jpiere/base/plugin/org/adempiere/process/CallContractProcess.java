@@ -302,7 +302,7 @@ public class CallContractProcess extends SvrProcess {
 
 					}else if(p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)) { //TODO
 
-						if(p_DocBaseType.equals("CPS"))
+						if(p_DocBaseType.equals("JCS"))
 						{
 							callCreateContractProcSchdule(contractContent, procPeriod);
 
@@ -521,7 +521,7 @@ public class CallContractProcess extends SvrProcess {
 		StringBuilder getContractContentSQL = new StringBuilder("");
 
 		//Get Contract Content that create Base Doc(Order and Invoice).
-		if(p_IsCreateBaseDocJP || p_DocBaseType.equals("CPS") )
+		if(p_IsCreateBaseDocJP || p_DocBaseType.equals("JCS") )
 		{
 			getContractContentSQL.append("SELECT cc.* FROM JP_ContractContent cc "
 				+ " INNER JOIN JP_Contract c ON (cc.JP_Contract_ID = C.JP_Contract_ID)"
@@ -592,7 +592,7 @@ public class CallContractProcess extends SvrProcess {
 
 		}else if(p_JP_ContractProcessMethod.equals("IC")){
 
-			if(p_DocBaseType.equals("CPS"))
+			if(p_DocBaseType.equals("JCS"))
 			{
 				;//TODO
 
@@ -648,7 +648,7 @@ public class CallContractProcess extends SvrProcess {
 
 			}else if(p_JP_ContractProcessMethod.equals("IC")){
 
-				if(p_DocBaseType.equals("CPS"))
+				if(p_DocBaseType.equals("JCS"))
 				{
 					;
 

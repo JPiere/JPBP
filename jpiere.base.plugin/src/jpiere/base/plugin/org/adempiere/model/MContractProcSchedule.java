@@ -38,6 +38,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
+import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.Query;
@@ -45,6 +46,7 @@ import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
@@ -165,16 +167,15 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
-		/**
-		MDocType dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
+
+		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 
 		//	Std Period open?
-		if (!MPeriod.isOpen(getCtx(), getDateAcct(), dt.getDocBaseType()))
+		if (!MPeriod.isOpen(getCtx(), getDateAcct(), dt.getDocBaseType(), getAD_Org_ID()))
 		{
 			m_processMsg = "@PeriodClosed@";
 			return DocAction.STATUS_Invalid;
 		}
-				**/
 
 		MContractPSLine[] contractPSLines = getContractPSLines();
 		if (contractPSLines.length == 0)
@@ -414,6 +415,38 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+
+		//Check - General Contract and Spot Contract can not have Contract Process Schedule
+		if(newRecord)
+		{
+			if(getGrandparent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract))
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_GeneralContractContent_NotContractPS"));//General Contract can not have Contract Process Schedule.
+				return false;
+			}
+
+			if(getGrandparent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_SpotContractContent_NotContractPS"));//Spot Contract can not have Contract Process Schedule.
+				return false;
+			}
+
+			if(getGrandparent().getDocStatus().equals(DocAction.STATUS_Closed) || getParent().getDocStatus().equals(DocAction.STATUS_Voided)
+					|| getParent().getDocStatus().equals(DocAction.STATUS_Reversed))
+			{
+				//You can not create Contract Process Schedule for Document status of Contract Document.
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_NotCreateContractPSForDocStatus"));
+				return false;
+			}
+
+			if(!getParent().getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+			{
+				//Contract Content is not Indirect Contract Process Method.
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_ContractContentNoIndirectContractProcMethod"));
+				return false;
+			}
+		}
+
 		//For callout of Product in Line And Doc Date Management
 		if(newRecord || is_ValueChanged("DateDoc"))
 		{
@@ -429,24 +462,40 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 			setJP_ContractCalender_ID(contractContent.getJP_ContractCalender_ID());
 			setDocBaseType(contractContent.getDocBaseType());
 			setJP_BaseDocDocType_ID(contractContent.getJP_BaseDocDocType_ID());
-
+			setJP_CreateDerivativeDocPolicy(contractContent.getJP_CreateDerivativeDocPolicy());
 			setIsSOTrx(contractContent.isSOTrx());
 			setOrderType (contractContent.getOrderType());
 
-			setJP_CreateDerivativeDocPolicy(contractContent.getJP_CreateDerivativeDocPolicy());
+			setIsApproved(false);
+			setProcessed(false);
 
 		}else {
 
-			if(is_ValueChanged("JP_Contract_ID")
-					|| is_ValueChanged("JP_ContractContent_ID")
-					|| is_ValueChanged("JP_ContractProcess_ID")
-					|| is_ValueChanged("JP_ContractCalender_ID")
-					|| is_ValueChanged("DocBaseType")
-					|| is_ValueChanged("JP_BaseDocDocType_ID")
-					|| is_ValueChanged("JP_CreateDerivativeDocPolicy")
-				)
+			Object[] objs = null;
+
+			if(is_ValueChanged("JP_Contract_ID"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_Contract_ID")};
+			else if(is_ValueChanged("JP_ContractContent_ID"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractContent_ID")};
+			else if(is_ValueChanged("JP_ContractProcess_ID"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcess_ID")};
+			else if(is_ValueChanged("JP_ContractCalender_ID"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID")};
+			else if(is_ValueChanged("DocBaseType"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "DocBaseType")};
+			else if(is_ValueChanged("JP_BaseDocDocType_ID"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BaseDocDocType_ID")};
+			else if(is_ValueChanged("JP_CreateDerivativeDocPolicy"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy")};
+			else if(is_ValueChanged("IsSOTrx"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "IsSOTrx")};
+			else if(is_ValueChanged("OrderType"))
+				objs = new Object[]{Msg.getElement(Env.getCtx(), "OrderType")};
+
+			if(objs != null)
 			{
-				log.saveError("Error", "変更する事ができません");
+				String msg = Msg.getMsg(Env.getCtx(),"JP_CannotChangeField",objs);
+				log.saveError("Error",msg);
 				return false;
 			}
 
@@ -660,6 +709,32 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 
 		//
 		return list.toArray(new MContractProcSchedule[list.size()]);
+	}
+
+	//Cache parent
+	private MContractContent parent = null;
+
+	public MContractContent getParent()
+	{
+		if(parent == null)
+		{
+			parent = new MContractContent(getCtx(), getJP_ContractContent_ID(), null);
+		}
+
+		return parent;
+	}
+
+	//Cache Grand parent
+	private MContract grandparent = null;
+
+	public MContract getGrandparent()
+	{
+		if(grandparent == null)
+		{
+			grandparent = new MContract(getCtx(), getJP_Contract_ID(), null);
+		}
+
+		return grandparent;
 	}
 
 }	//	MContractProcSchedule

@@ -974,6 +974,48 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}//if(JP_Contract_Acct_ID > 0)
 		}//Check Contract Acct
 
+		//Check Contract Process Method
+		if(newRecord || (is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcessMethod)
+							|| is_ValueChanged(MContractContent.COLUMNNAME_C_DocType_ID)) )
+		{
+			String JP_ContractProcessMethod = getJP_ContractProcessMethod();
+			if(JP_ContractProcessMethod == null)
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcessMethod")};
+				log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+				return false ;
+			}
+
+			//Check Indirect Contract Process
+			if(JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+			{
+				//Check JP_ContractProcDate_To
+				if(getJP_ContractProcDate_To() == null)
+				{
+					String msg1 = Msg.getMsg(getCtx(), "JP_InCaseOfIndirectContractProcess");//In case of Indirect Contract Process,
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcDate_To")};
+					log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+					String msg2 = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error", msg1 + msg2);
+					return false ;
+				}
+
+				//Check Doc Type
+				MDocType contractPSDocType = MDocType.get(getCtx(), getC_DocType_ID());
+				Object  obj_ContractPSDocType_ID = contractPSDocType.get_Value("JP_ContractPSDocType_ID");
+				if(obj_ContractPSDocType_ID == null)
+				{
+					String msg0 = Msg.getElement(getCtx(), "C_DocType_ID");
+					String msg1 = Msg.getMsg(getCtx(), "JP_InCaseOfIndirectContractProcess");//In case of Indirect Contract Process,
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractPSDocType_ID")};
+					String msg2 = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg0 + ":" + msg1 + msg2);
+					return false ;
+				}
+			}
+
+		}//Check Contract Process Method
+
 		//Check Price List and IsSotrx
 		if(newRecord || is_ValueChanged("M_PriceList_ID") || is_ValueChanged("IsSOTrx"))
 		{
@@ -1017,7 +1059,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 
 		return true;
-	}
+
+	}//beforeSave
 
 
 	@Override
@@ -1061,7 +1104,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 
 		return true;
-	}
+
+	}//afterSave
 
 	//Cache parent
 	private MContract parent = null;

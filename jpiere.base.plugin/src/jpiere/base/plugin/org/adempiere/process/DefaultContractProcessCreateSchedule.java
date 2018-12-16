@@ -17,11 +17,16 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.logging.Level;
 
+import org.compiere.model.MDocType;
 import org.compiere.model.MUOM;
 import org.compiere.model.PO;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -194,7 +199,27 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		}
 		contractProcSchedule.setDatePromised(getOrderHeaderDatePromised(contractProcSchedule.getDateAcct()));
 
-		//
+		//Doc Type
+		MDocType contractContentDocType = MDocType.get(getCtx(), m_ContractContent.getC_DocType_ID());
+		Object obj_ContractPSDocType_ID = contractContentDocType.get_Value("JP_ContractPSDocType_ID");
+		if(obj_ContractPSDocType_ID == null)
+		{
+
+			int JP_ContractPSDocType_ID = getDefaultContractPSDocType_ID();
+			if(JP_ContractPSDocType_ID == 0)
+			{
+				//TODO エラー　伝票タイプが見つかりません。
+			}else {
+				contractProcSchedule.setC_DocType_ID(JP_ContractPSDocType_ID);
+			}
+
+		}else {
+
+			contractProcSchedule.setC_DocType_ID(((Integer)obj_ContractPSDocType_ID).intValue());
+
+		}
+
+		//other
 		contractProcSchedule.setDocumentNo(contractProcSchedule.getDocumentNo() + "-" + contractProcPeriod.getName());
 
 		contractProcSchedule.saveEx(get_TrxName());
@@ -1059,4 +1084,35 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		return true;
 
 	}//isCreateContractPSInvoiceLine
+
+
+	public int getDefaultContractPSDocType_ID ()
+	{
+		int JP_ContractPSDocType_ID = 0;
+		String sql = "SELECT C_DocType_ID FROM C_DocType WHERE AD_Client_ID=? AND DocBaseType='JCS' AND IsDefault='Y' ORDER BY C_DocType_ID DESC";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, getAD_Client_ID());
+			rs = pstmt.executeQuery ();
+			if (rs.next ())
+			{
+				JP_ContractPSDocType_ID = rs.getInt(1);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, "getDefaultContractPSDocType", e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		return JP_ContractPSDocType_ID;
+	}	//	getDefaultContractPSDocType_ID
 }

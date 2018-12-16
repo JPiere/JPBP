@@ -96,6 +96,7 @@ CREATE TABLE adempiere.JP_ContractProcSchedule
   AD_OrgTrx_ID numeric(10,0),
   User1_ID numeric(10,0),
   User2_ID numeric(10,0),
+  C_DocType_ID numeric(10,0) NOT NULL,
 
 
   CONSTRAINT JP_ContractProcSchedule_pkey PRIMARY KEY (JP_ContractProcSchedule_ID)
