@@ -385,12 +385,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		super.setProcessed (processed);
 		if (get_ID() == 0)
 			return;
+
 		StringBuilder set = new StringBuilder("SET Processed='")
 		.append((processed ? "Y" : "N"))
-		.append("' WHERE JP_ContractContent_ID=").append(getJP_ContractContent_ID());
+		.append("' WHERE JP_ContractContent_ID=?");
 
+		//Update JP_ContractLine
 		StringBuilder msgdb = new StringBuilder("UPDATE JP_ContractLine ").append(set);
-		int noLine = DB.executeUpdate(msgdb.toString(), get_TrxName());
+		int noLine = DB.executeUpdate(msgdb.toString(), getJP_ContractContent_ID(), get_TrxName());
 		m_lines = null;
 
 		if (log.isLoggable(Level.FINE)) log.fine(processed + " - Lines=" + noLine);
@@ -409,7 +411,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (m_processMsg != null)
 			return false;
 
-		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Contract_ID(), get_TrxName());
+		MFactAcct.deleteEx(MContractContent.Table_ID, getJP_Contract_ID(), get_TrxName());
 		setPosted(true);
 
 		// After Void
@@ -471,7 +473,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (m_processMsg != null)
 			return false;
 
-		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Contract_ID(), get_TrxName());
+		MFactAcct.deleteEx(MContractContent.Table_ID, getJP_Contract_ID(), get_TrxName());
 		setPosted(false);
 
 		// After reActivate

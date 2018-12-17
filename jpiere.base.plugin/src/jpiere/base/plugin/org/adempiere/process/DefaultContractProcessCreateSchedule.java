@@ -27,6 +27,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MDocType;
 import org.compiere.model.MUOM;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -163,6 +164,8 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 	private boolean createContractProcSchedule(MContractProcPeriod contractProcPeriod, boolean isFirstPeriod, boolean isLastPeriod)
 	{
 
+		boolean isOK = false;
+
 		/** Pre check - Pre judgment create Document or not. */
 		MContractLine[] 	m_lines = m_ContractContent.getLines();
 		boolean isCreateDocLine = false;
@@ -189,6 +192,8 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		contractProcSchedule.setJP_ContractProcPeriod_ID(contractProcPeriod.getJP_ContractProcPeriod_ID());
 		contractProcSchedule.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		contractProcSchedule.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+		contractProcSchedule.setDocAction(getDocAction());
+		contractProcSchedule.setDocStatus(DocAction.STATUS_Drafted);
 
 		//Date
 		if(isFirstPeriod)
@@ -248,10 +253,34 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 			;
 		}
 
-		createContractPSLines(contractProcSchedule, contractProcPeriod, isFirstPeriod, isLastPeriod);
-
 		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, contractProcSchedule, null);
-		return true;
+
+		isOK = createContractPSLines(contractProcSchedule, contractProcPeriod, isFirstPeriod, isLastPeriod);
+
+		if(isOK)
+		{
+			if(contractProcSchedule.getDocAction() != null)
+			{
+				if(contractProcSchedule.processIt(contractProcSchedule.getDocAction()))
+				{
+					try {
+						contractProcSchedule.saveEx(get_TrxName());
+					} catch (AdempiereException e) {
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+						throw e;
+					}finally {
+						;
+					}
+
+				}else {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, contractProcSchedule, null);
+				}
+			}
+		}
+
+
+
+		return isOK;
 
 	}//createContractProcSchedule
 

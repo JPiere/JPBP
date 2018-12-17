@@ -79,6 +79,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 	protected boolean p_IsCreateBaseDocJP = false;
 	protected boolean p_IsRecordCommitJP = false;
 	protected String p_JP_ContractProcessTraceLevel = MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning;
+	protected String p_JP_IndirectContractProcType = JP_IndirectContractProcType_AllValidContractProcessSchedule ;
 
 
 	protected int p_JP_ContractProcess_ID = 0; //use to create derivative Doc
@@ -93,6 +94,10 @@ public abstract class AbstractContractProcess extends SvrProcess
 	public static final String JP_ContractProcessUnit_ContractProcessPeriodGroup  = "GPP";
 	public static final String JP_ContractProcessUnit_ContractProcessValueofContractProcessPeriodGroup  = "GPV";
 	public static final String JP_ContractProcessUnit_PerContractContent  = "PCC";
+
+	public static final String JP_IndirectContractProcType_AllValidContractProcessSchedule = "AVC";
+	public static final String JP_IndirectContractProcType_ValidContractProcessScheduleInValidContractDoc = "VCI";
+
 
 	@Override
 	protected void prepare()
@@ -194,6 +199,10 @@ public abstract class AbstractContractProcess extends SvrProcess
 			}else if (name.equals("JP_ContractProcess_ID")){
 
 				p_JP_ContractProcess_ID = para[i].getParameterAsInt();
+
+			}else if (name.equals("JP_IndirectContractProcType")) {
+
+				p_JP_IndirectContractProcType = para[i].getParameterAsString();
 
 			}else{
 //				log.log(Level.SEVERE, "Unknown Parameter: " + name);

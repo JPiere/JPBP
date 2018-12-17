@@ -22,7 +22,7 @@ import org.compiere.acct.Fact;
 import org.compiere.model.MAcctSchema;
 import org.compiere.util.Env;
 
-import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractProcSchedule;
 
 /**
  * Post Contract Documents.
@@ -40,7 +40,7 @@ public class Doc_JPContractProcSchedule extends Doc
 
 	public Doc_JPContractProcSchedule (MAcctSchema as, ResultSet rs, String trxName)
 	{
-		super (as, MContract.class, rs, "CPS", trxName);
+		super (as, MContractProcSchedule.class, rs, "JCS", trxName);
 	}
 
 	protected String loadDocumentDetails ()

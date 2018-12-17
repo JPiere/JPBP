@@ -67,6 +67,7 @@ public class CallContractProcess extends SvrProcess {
 	private boolean p_IsCreateBaseDocJP = false;
 	private boolean p_IsRecordCommitJP = false;
 	private String p_JP_ContractProcessTraceLevel = "WAR";
+	private String p_JP_IndirectContractProcType = AbstractContractProcess.JP_IndirectContractProcType_AllValidContractProcessSchedule;
 
 	private int p_JP_Contract_ID = 0;
 	private int p_JP_ContractContent_ID = 0;
@@ -130,6 +131,8 @@ public class CallContractProcess extends SvrProcess {
 				p_JP_ContractContent_ID = para[i].getParameterAsInt();
 			}else if (name.equals("JP_ContractProcessMethod")){
 				p_JP_ContractProcessMethod = para[i].getParameterAsString();
+			} else if (name.equals("JP_IndirectContractProcType")) {
+				p_JP_IndirectContractProcType = para[i].getParameterAsString();
 			}else{
 //				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if
@@ -554,6 +557,161 @@ public class CallContractProcess extends SvrProcess {
 
 	private ArrayList<MContractContent> getContractContentList(MContractProcPeriod procPeriod) throws Exception
 	{
+
+		if(p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
+		{
+			return getContractContentListForDirectContractProcess(procPeriod)	;
+
+		}else if (p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)) {
+
+			if(p_JP_IndirectContractProcType.equals(AbstractContractProcess.JP_IndirectContractProcType_ValidContractProcessScheduleInValidContractDoc))
+			{
+				return getContractContentList_ValidContractProcessScheduleInValidContractDoc(procPeriod)	;
+
+			}else if(p_JP_IndirectContractProcType.equals(AbstractContractProcess.JP_IndirectContractProcType_AllValidContractProcessSchedule))
+			{
+				return getContractContentList_AllValidContractProcessSchedule(procPeriod);//TODO
+
+			}
+
+		}
+
+		return null;
+	}
+
+
+	private ArrayList<MContractContent> getContractContentListForDirectContractProcess(MContractProcPeriod procPeriod) throws Exception
+	{
+
+		StringBuilder getContractContentSQL = new StringBuilder("");
+
+		//Get Contract Content that create Base Doc(Order and Invoice).
+		if(p_IsCreateBaseDocJP)
+		{
+			getContractContentSQL.append("SELECT cc.* FROM JP_ContractContent cc "
+				+ " INNER JOIN JP_Contract c ON (cc.JP_Contract_ID = C.JP_Contract_ID)"
+				+ " WHERE cc.AD_Client_ID = ?"	//1
+				+ " AND c.JP_ContractType = 'PDC'"
+				+ " AND c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR','UC')"//Contract Status in 'Prepare' and 'Under Contract'
+				+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus IN ('UN','IP')" //Contract Process Status in 'Unprocessed' and 'In Progress'
+				+ " AND cc.JP_ContractCalender_ID = ?" //2
+				+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
+				+ " ");
+
+		//Get Contract Content that create Derivative InOut Doc from Order
+		}else if( p_DocBaseType.equals("MMS") || p_DocBaseType.equals("MMR") ){
+
+			getContractContentSQL.append("SELECT DISTINCT cc.* FROM JP_ContractContent cc "
+					+ " INNER JOIN JP_Contract c ON (cc.JP_Contract_ID = C.JP_Contract_ID)"
+					+ " INNER JOIN JP_ContractLine cl ON (cc.JP_ContractContent_ID = Cl.JP_ContractContent_ID)"
+					+ " WHERE cc.AD_Client_ID = ?"	//1
+					+ " AND c.JP_ContractType = 'PDC'"
+					+ " AND c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR','UC')"//Contract Status in 'Prepare' and 'Under Contract'
+					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'In Progress'
+					+ " AND cl.JP_ContractCalender_InOut_ID = ?" //2
+					+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
+					+ " AND cc.JP_CreateDerivativeDocPolicy IN ('BT','IO') ");
+
+		//Get Contract Content that create Derivative Invoice Doc from Order
+		}else if( p_DocBaseType.equals("ARI") || p_DocBaseType.equals("API") ){
+
+			getContractContentSQL.append("SELECT DISTINCT cc.* FROM JP_ContractContent cc "
+					+ " INNER JOIN JP_Contract c ON (cc.JP_Contract_ID = C.JP_Contract_ID)"
+					+ " INNER JOIN JP_ContractLine cl ON (cc.JP_ContractContent_ID = Cl.JP_ContractContent_ID)"
+					+ " WHERE cc.AD_Client_ID = ?"	//1
+					+ " AND c.JP_ContractType = 'PDC'"
+					+ " AND c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR','UC')"//Contract Status in 'Prepare' and 'Under Contract'
+					+ " AND cc.DocStatus = 'CO' AND cc.JP_ContractProcStatus = 'IP' " //Contract Process Status in 'In Progress'
+					+ " AND cl.JP_ContractCalender_Inv_ID = ?" //2
+					+ " AND cc.JP_ContractProcDate_From <=? AND (cc.JP_ContractProcDate_To is null or cc.JP_ContractProcDate_To >=?)"//3,4
+					+ " AND cc.JP_CreateDerivativeDocPolicy IN ('BT','IV') ");
+		}
+
+		if(p_AD_Org_ID > 0)
+			getContractContentSQL.append(" AND cc.AD_Org_ID = ? ");
+		if(p_JP_ContractCategory_ID > 0)
+			getContractContentSQL.append(" AND c.JP_ContractCategory_ID = ? ");
+		if(p_C_DocType_ID > 0)
+			getContractContentSQL.append(" AND cc.C_DocType_ID = ? ");
+		if(p_JP_Contract_ID > 0)
+			getContractContentSQL.append(" AND c.JP_Contract_ID = ? ");
+		if(p_JP_ContractContent_ID > 0)
+			getContractContentSQL.append(" AND cc.JP_ContractContent_ID = ? ");
+
+
+		if(p_IsCreateBaseDocJP)
+		{
+			getContractContentSQL.append(" AND cc.DocBaseType = ? ");
+
+		}else{
+
+			if(p_DocBaseType.equals("MMS") ||p_DocBaseType.equals("ARI") )
+				getContractContentSQL.append(" AND cc.DocBaseType ='SOO' ");
+			else if(p_DocBaseType.equals("MMR") ||p_DocBaseType.equals("API") )
+				getContractContentSQL.append(" AND cc.DocBaseType ='POO' ");
+		}
+
+		getContractContentSQL.append(" AND cc.JP_ContractProcessMethod ='DC' ");
+
+
+
+		ArrayList<MContractContent> contractContentList = new ArrayList<MContractContent>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (getContractContentSQL.toString(), null);
+			int i = 1;
+			pstmt.setInt (i++, getAD_Client_ID());	//1
+			pstmt.setInt(i++, procPeriod.getJP_ContractCalender_ID());	//2
+			pstmt.setTimestamp(i++, procPeriod.getEndDate());	//3
+			pstmt.setTimestamp(i++, procPeriod.getStartDate());	//4
+			if(p_AD_Org_ID > 0)
+				pstmt.setInt (i++, p_AD_Org_ID);
+			if(p_JP_ContractCategory_ID > 0)
+				pstmt.setInt (i++, p_JP_ContractCategory_ID);
+			if(p_C_DocType_ID > 0)
+				pstmt.setInt (i++, p_C_DocType_ID);
+			if(p_JP_Contract_ID > 0)
+				pstmt.setInt (i++, p_JP_Contract_ID);
+			if(p_JP_ContractContent_ID > 0)
+				pstmt.setInt (i++, p_JP_ContractContent_ID);
+
+
+			if(p_IsCreateBaseDocJP)
+			{
+				pstmt.setString (i++, p_DocBaseType);
+
+			}else {
+
+				;
+
+			}
+
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				contractContentList.add(new MContractContent(getCtx(), rs, get_TrxName()));
+			}
+		}
+		catch (Exception e)
+		{
+			throw new Exception(e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		return contractContentList;
+	}
+
+
+	private ArrayList<MContractContent> getContractContentList_ValidContractProcessScheduleInValidContractDoc(MContractProcPeriod procPeriod) throws Exception
+	{
+
 		StringBuilder getContractContentSQL = new StringBuilder("");
 
 		//Get Contract Content that create Base Doc(Order and Invoice).
@@ -610,43 +768,25 @@ public class CallContractProcess extends SvrProcess {
 			getContractContentSQL.append(" AND cc.JP_ContractContent_ID = ? ");
 
 
-		if(p_JP_ContractProcessMethod.equals("DC"))
+		if(p_DocBaseType.equals("JCS"))
 		{
-			if(p_IsCreateBaseDocJP)
-			{
-				getContractContentSQL.append(" AND cc.DocBaseType = ? ");
+			;//TODO
 
-			}else{
+		}else if(p_IsCreateBaseDocJP) {
 
-				if(p_DocBaseType.equals("MMS") ||p_DocBaseType.equals("ARI") )
-					getContractContentSQL.append(" AND cc.DocBaseType ='SOO' ");
-				else if(p_DocBaseType.equals("MMR") ||p_DocBaseType.equals("API") )
-					getContractContentSQL.append(" AND cc.DocBaseType ='POO' ");
-			}
+			getContractContentSQL.append(" AND cc.DocBaseType = ? ");
 
-			getContractContentSQL.append(" AND cc.JP_ContractProcessMethod ='DC' ");
+		}else {
 
-		}else if(p_JP_ContractProcessMethod.equals("IC")){
+			if(p_DocBaseType.equals("MMS") ||p_DocBaseType.equals("ARI") )
+				getContractContentSQL.append(" AND cc.DocBaseType ='SOO' ");
+			else if(p_DocBaseType.equals("MMR") ||p_DocBaseType.equals("API") )
+				getContractContentSQL.append(" AND cc.DocBaseType ='POO' ");
 
-			if(p_DocBaseType.equals("JCS"))
-			{
-				;//TODO
-
-			}else if(p_IsCreateBaseDocJP) {
-
-				getContractContentSQL.append(" AND cc.DocBaseType = ? ");
-
-			}else {
-
-				if(p_DocBaseType.equals("MMS") ||p_DocBaseType.equals("ARI") )
-					getContractContentSQL.append(" AND cc.DocBaseType ='SOO' ");
-				else if(p_DocBaseType.equals("MMR") ||p_DocBaseType.equals("API") )
-					getContractContentSQL.append(" AND cc.DocBaseType ='POO' ");
-
-			}
-
-			getContractContentSQL.append(" AND cc.JP_ContractProcessMethod ='IC' ");
 		}
+
+		getContractContentSQL.append(" AND cc.JP_ContractProcessMethod ='IC' ");
+
 
 		ArrayList<MContractContent> contractContentList = new ArrayList<MContractContent>();
 		PreparedStatement pstmt = null;
@@ -670,34 +810,21 @@ public class CallContractProcess extends SvrProcess {
 			if(p_JP_ContractContent_ID > 0)
 				pstmt.setInt (i++, p_JP_ContractContent_ID);
 
-			if(p_JP_ContractProcessMethod.equals("DC"))
+
+			if(p_DocBaseType.equals("JCS"))
 			{
-				if(p_IsCreateBaseDocJP)
-				{
-					pstmt.setString (i++, p_DocBaseType);
+				;
 
-				}else {
+			}else if(p_IsCreateBaseDocJP) {
 
-					;
+				pstmt.setString (i++, p_DocBaseType);
 
-				}
+			}else {
 
-			}else if(p_JP_ContractProcessMethod.equals("IC")){
+				;
 
-				if(p_DocBaseType.equals("JCS"))
-				{
-					;
-
-				}else if(p_IsCreateBaseDocJP) {
-
-					pstmt.setString (i++, p_DocBaseType);
-
-				}else {
-
-					;
-
-				}
 			}
+
 
 
 			rs = pstmt.executeQuery ();
@@ -718,6 +845,12 @@ public class CallContractProcess extends SvrProcess {
 		}
 
 		return contractContentList;
+	}
+
+
+	private ArrayList<MContractContent> getContractContentList_AllValidContractProcessSchedule(MContractProcPeriod procPeriod) throws Exception
+	{
+		return null;
 	}
 
 

@@ -38,6 +38,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
+import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -45,8 +46,10 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.TimeUtil;
 import org.compiere.util.Util;
 
 /**
@@ -142,7 +145,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
-	//	setProcessing(false);
+		setProcessing(false);
 		return true;
 	}	//	unlockIt
 
@@ -153,7 +156,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("invalidateIt - " + toString());
-	//	setDocAction(DOCACTION_Prepare);
+		setDocAction(DOCACTION_Prepare);
 		return true;
 	}	//	invalidateIt
 
@@ -202,7 +205,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("approveIt - " + toString());
-	//	setIsApproved(true);
+		setIsApproved(true);
 		return true;
 	}	//	approveIt
 
@@ -213,7 +216,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("rejectIt - " + toString());
-	//	setIsApproved(false);
+		setIsApproved(false);
 		return true;
 	}	//	rejectIt
 
@@ -232,7 +235,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 				return status;
 		}
 
-		// setDefiniteDocumentNo();
+		 setDefiniteDocumentNo();
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)
@@ -251,15 +254,45 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 			m_processMsg = valid;
 			return DocAction.STATUS_Invalid;
 		}
+
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
+
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
+
+
+	public void setProcessed (boolean processed)
+	{
+		super.setProcessed (processed);
+		if (get_ID() == 0)
+			return;
+
+
+		StringBuilder set = new StringBuilder("SET Processed='")
+		.append((processed ? "Y" : "N"))
+		.append("' WHERE JP_ContractProcSchedule_ID=?");
+
+		//Update JP_ContractPSLine
+		StringBuilder msgdb = new StringBuilder("UPDATE JP_ContractPSLine ").append(set);
+		DB.executeUpdate(msgdb.toString(), getJP_ContractProcSchedule_ID(), get_TrxName());
+		m_ContractPSLines = null;
+
+		//Update JP_ContractPSInOutLine
+		msgdb = new StringBuilder("UPDATE JP_ContractPSInOutLine ").append(set);
+		DB.executeUpdate(msgdb.toString(), getJP_ContractProcSchedule_ID(), get_TrxName());
+
+
+		//Update JP_ContractPSInvoiceLine
+		msgdb = new StringBuilder("UPDATE JP_ContractPSInvoiceLine ").append(set);
+		DB.executeUpdate(msgdb.toString(), getJP_ContractProcSchedule_ID(), get_TrxName());
+
+	}	//	setProcesse
+
 
 	/**
 	 * 	Set the definite document number after completed
 	 */
-	/*
 	private void setDefiniteDocumentNo() {
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		if (dt.isOverwriteDateOnComplete()) {
@@ -281,7 +314,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 			}
 		}
 	}
-	*/
+
 
 	/**
 	 * 	Void Document.
@@ -290,8 +323,30 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	 */
 	public boolean voidIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("voidIt - " + toString());
-		return closeIt();
+		if(isFactCreatedJP())
+		{
+			m_processMsg = "実績が作成されてるのでボイドできません";//TODO
+			return false;
+		}
+
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		// Before Void
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
+		if (m_processMsg != null)
+			return false;
+
+		MFactAcct.deleteEx(MContractProcSchedule.Table_ID, getJP_ContractProcSchedule_ID(), get_TrxName());
+		setPosted(true);
+
+		// After Void
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
+		if (m_processMsg != null)
+			return false;
+
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+
+		return true;
 	}	//	voidIt
 
 	/**
@@ -304,7 +359,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
 
 		//	Close Not delivered Qty
-	//	setDocAction(DOCACTION_None);
+		setDocAction(DOCACTION_None);
 		return true;
 	}	//	closeIt
 
@@ -334,11 +389,24 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	 */
 	public boolean reActivateIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("reActivateIt - " + toString());
-	//	setProcessed(false);
-		if (reverseCorrectIt())
-			return true;
-		return false;
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		// Before reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
+		if (m_processMsg != null)
+			return false;
+
+		MFactAcct.deleteEx(MContractProcSchedule.Table_ID, getJP_ContractProcSchedule_ID(), get_TrxName());
+		setPosted(false);
+
+		// After reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
+		if (m_processMsg != null)
+			return false;
+
+		setDocAction(DOCACTION_Complete);
+		setProcessed(false);
+
+		return true;
 	}	//	reActivateIt
 
 
@@ -348,16 +416,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	 */
 	public String getSummary()
 	{
-		StringBuilder sb = new StringBuilder();
-	//	sb.append(getDocumentNo());
-		//	: Total Lines = 123.00 (#1)
-	//	sb.append(": ")
-	//		.append(Msg.translate(getCtx(),"TotalLines")).append("=").append(getTotalLines())
-	//		.append(" (#").append(getLines(false).length).append(")");
-		//	 - Description
-	//	if (getDescription() != null && getDescription().length() > 0)
-	//		sb.append(" - ").append(getDescription());
-		return sb.toString();
+		return getDocumentNo();
 	}	//	getSummary
 
 
@@ -389,24 +448,24 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	public int customizeValidActions(String docStatus, Object processing, String orderType, String isSOTrx,
 			int AD_Table_ID, String[] docAction, String[] options, int index)
 	{
-//		if(isSOTrx.equals("Y") && (orderType.equals(MDocType.DOCSUBTYPESO_Proposal)
-//				|| orderType.equals(MDocType.DOCSUBTYPESO_Quotation)))
-//		{
-//			index = 0; //initialize the index
-//			options[index++] = DocumentEngine.ACTION_Prepare;
-//			options[index++] = DocumentEngine.ACTION_Void;
-//			return index;
-//		}
-//
-//		if (docStatus.equals(DocumentEngine.STATUS_Drafted) || docStatus.equals(DocumentEngine.STATUS_InProgress))
-//		{
-//			index = 0; //initialize the index
-//			options[index++] = DocumentEngine.ACTION_Void;
-//			options[index++] = DocumentEngine.ACTION_Prepare;
-//			options[index++] = DocumentEngine.ACTION_Complete;
-//
-//			return index;
-//		}
+
+		if(docStatus.equals(DocAction.STATUS_Completed))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Close;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_ReActivate;
+			return index;
+		}
+
+		if(docStatus.equals(DocAction.STATUS_Drafted))
+		{
+			index = 0; //initialize the index
+			options[index++] = DocumentEngine.ACTION_Prepare;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_Complete;
+			return index;
+		}
 
 		return index;
 	}
