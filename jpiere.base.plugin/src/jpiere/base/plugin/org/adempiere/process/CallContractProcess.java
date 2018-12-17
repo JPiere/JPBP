@@ -239,36 +239,73 @@ public class CallContractProcess extends SvrProcess {
 			if(Record_ID > 0)
 			{
 				MContractContent contractContent = new MContractContent(getCtx(),Record_ID, get_TrxName());
-				if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
+
+				if(p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
 				{
-					callCreateBaseDocDirectly(contractContent, null);
 
-				}if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)){
-
-					MContractProcPeriod period = null;
-					if(p_JP_ContractProcPeriod_ID == 0)
+					if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_SpotContract))
 					{
-						MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
-						period = calender.getContractProcessPeriod(getCtx(), p_DateAcct);
-						p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+						callCreateBaseDocDirectly(contractContent, null);
 
-					}else{
+					}if(contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)){
 
-						period = MContractProcPeriod.get(getCtx(), p_JP_ContractProcPeriod_ID);
+						MContractProcPeriod period = null;
+						if(p_JP_ContractProcPeriod_ID == 0)
+						{
+							MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+							period = calender.getContractProcessPeriod(getCtx(), p_DateAcct);
+							p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+
+						}else{
+
+							period = MContractProcPeriod.get(getCtx(), p_JP_ContractProcPeriod_ID);
+						}
+
+						//Create Base Doc contract process
+						if(p_IsCreateBaseDocJP)
+						{
+							callCreateBaseDocDirectly(contractContent, period);
+
+						//Create Derivative Doc Contract process
+						}else{
+
+							callCreateDerivativeDocDirectly(contractContent, period);
+
+						}
 					}
 
-					//Create Base Doc contract process
-					if(p_IsCreateBaseDocJP)
+				}else if(p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)) { //TODO
+
+
+
+					if(p_DocBaseType.equals("JCS"))
 					{
-						callCreateBaseDocDirectly(contractContent, period);
+						callCreateContractProcSchdule(contractContent, null);
 
-					//Create Derivative Doc Contract process
-					}else{
+					}else {
 
-						callCreateDerivativeDocDirectly(contractContent, period);
+						//Get Contract Process Period
+						ArrayList<MContractProcPeriod> contractProcPeriodList = getContractProcPeriodList();
+						for(MContractProcPeriod procPeriod : contractProcPeriodList)
+						{
+							if(p_IsCreateBaseDocJP) {
+
+								callCreateBaseDocIndirectly(contractContent, procPeriod);
+
+							}else {
+
+								callCreateDerivativeDocIndirectly(contractContent, procPeriod);
+
+							}
+						}
 
 					}
+
+
+				}else {
+					;//TODO エラー
 				}
+
 
 			}else{
 				log.log(Level.SEVERE, "Record_ID <= 0 ");
@@ -285,7 +322,6 @@ public class CallContractProcess extends SvrProcess {
 				//Get Contract Content from Contract Process Period
 				ArrayList<MContractContent> contractContentList = getContractContentList(procPeriod);
 				processContractContentNum = processContractContentNum + contractContentList.size();
-
 
 				for(MContractContent contractContent : contractContentList)
 				{

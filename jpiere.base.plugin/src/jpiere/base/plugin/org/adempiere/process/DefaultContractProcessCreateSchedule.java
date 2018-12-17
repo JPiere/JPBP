@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MDocType;
 import org.compiere.model.MUOM;
 import org.compiere.model.PO;
@@ -63,13 +64,17 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		MContractCalender contractCalender = MContractCalender.get(getCtx(), m_ContractContent.getJP_ContractCalender_ID());
 		if(m_ContractContent.getJP_ContractProcDate_To()==null)
 		{
-			return "契約処理期間(To)が入力されていません。";//TODO;
+			String descriptionMsg = Msg.getMsg(getCtx(), "NotFound") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To");
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, descriptionMsg);
+			return "";
 		}
 
 		int JP_ContractProcPeriod_ID = getJP_ContractProctPeriod_ID();
 		MContractProcPeriod firstContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From());
 		MContractProcPeriod endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
 		MContractProcPeriod contractProcPeriod = null;
+
+		boolean isOK = false;
 
 		if(JP_ContractProcPeriod_ID == 0)
 		{
@@ -81,22 +86,22 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 				if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID())
 				{
-					createContractProcSchedule(contractProcPeriod, true,true);
+					isOK = createContractProcSchedule(contractProcPeriod, true,true);
 
 				}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
 
-					createContractProcSchedule(contractProcPeriod, true,false);
+					isOK = createContractProcSchedule(contractProcPeriod, true,false);
 
 				}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
 
-					createContractProcSchedule(contractProcPeriod, false,true);
+					isOK = createContractProcSchedule(contractProcPeriod, false,true);
 
 				}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
 
-					createContractProcSchedule(contractProcPeriod, false,false);
+					isOK = createContractProcSchedule(contractProcPeriod, false,false);
 				}
 
 				i++;
@@ -110,26 +115,36 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 			if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID())
 			{
-				createContractProcSchedule(contractProcPeriod, true,true);
+				isOK = createContractProcSchedule(contractProcPeriod, true,true);
 
 			}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
 
-				createContractProcSchedule(contractProcPeriod, true,false);
+				isOK = createContractProcSchedule(contractProcPeriod, true,false);
 
 			}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
 
-				createContractProcSchedule(contractProcPeriod, false,true);
+				isOK = createContractProcSchedule(contractProcPeriod, false,true);
 
 			}else if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 					&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID()) {
 
-				createContractProcSchedule(contractProcPeriod, false,false);
+				isOK = createContractProcSchedule(contractProcPeriod, false,false);
 			}
 
 		}
 
+		if(isOK)
+		{
+			m_ContractContent.setIsScheduleCreatedJP(true);
+			try {
+				m_ContractContent.saveEx(get_TrxName());
+			}catch (Exception e) {
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+				throw e;
+			}
+		}
 
 		return "";
 
@@ -164,7 +179,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		if(!isCreateDocLine)
 		{
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, null, null);
-			return true;
+			return false;
 		}
 
 
@@ -208,7 +223,9 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 			int JP_ContractPSDocType_ID = getDefaultContractPSDocType_ID();
 			if(JP_ContractPSDocType_ID == 0)
 			{
-				//TODO エラー　伝票タイプが見つかりません。
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, Msg.getMsg(getCtx(), "NotFound") + " : " + Msg.getElement(getCtx(), "C_DocType_ID"));
+				return false;
+
 			}else {
 				contractProcSchedule.setC_DocType_ID(JP_ContractPSDocType_ID);
 			}
@@ -222,9 +239,18 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		//other
 		contractProcSchedule.setDocumentNo(contractProcSchedule.getDocumentNo() + "-" + contractProcPeriod.getName());
 
-		contractProcSchedule.saveEx(get_TrxName());
+		try {
+			contractProcSchedule.saveEx(get_TrxName());
+		} catch (AdempiereException e) {
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+			throw e;
+		}finally {
+			;
+		}
+
 		createContractPSLines(contractProcSchedule, contractProcPeriod, isFirstPeriod, isLastPeriod);
 
+		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, contractProcSchedule, null);
 		return true;
 
 	}//createContractProcSchedule
@@ -325,7 +351,15 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 			contractPSLine.setPriceActual(contractLines[i].getPriceActual());
 			contractPSLine.setLineNetAmt(contractPSLine.getQtyOrdered().multiply(contractPSLine.getPriceActual()));
 
-			contractPSLine.saveEx(get_TrxName());
+			try {
+				contractPSLine.saveEx(get_TrxName());
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocumentLine, contractLines[i], contractProcSchedule, null);
+			} catch (AdempiereException e) {
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, contractLines[i], contractProcSchedule, e.getMessage());
+				throw e;
+			}finally {
+				;
+			}
 
 			if(m_ContractContent.getJP_CreateDerivativeDocPolicy() == null || m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
 				continue;
@@ -490,7 +524,15 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		contractPSInOutLine.setPriceActual(contractPSLine.getPriceActual());
 		contractPSInOutLine.setLineNetAmt(contractPSInOutLine.getMovementQty().multiply(contractPSInOutLine.getPriceActual()));
 
-		contractPSInOutLine.saveEx(get_TrxName());
+		try {
+			contractPSInOutLine.saveEx(get_TrxName());
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocumentLine, contractLine, contractPSInOutLine, null);
+		} catch (AdempiereException e) {
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, contractLine, contractPSLine, e.getMessage());
+			throw e;
+		}finally {
+			;
+		}
 
 		return true;
 	}
@@ -640,7 +682,15 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		contractPSInvoiceLine.setPriceActual(contractPSLine.getPriceActual());
 		contractPSInvoiceLine.setLineNetAmt(contractPSInvoiceLine.getQtyInvoiced().multiply(contractPSInvoiceLine.getPriceActual()));
 
-		contractPSInvoiceLine.saveEx(get_TrxName());
+		try {
+			contractPSInvoiceLine.saveEx(get_TrxName());
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocumentLine, contractLine, contractPSInvoiceLine, null);
+		} catch (AdempiereException e) {
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, contractLine, contractPSLine, e.getMessage());
+			throw e;
+		}finally {
+			;
+		}
 
 		return true;
 

@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
@@ -49,7 +48,6 @@ import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 
@@ -235,41 +233,54 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		}
 
-		//Create Contract Process Schedule
-		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
-				&& getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
-		{
-			if(!isScheduleCreatedJP())
-			{
-				String className = "";
-				if(Util.isEmpty(MContractProcess.get(getCtx(), getJP_ContractProcess_ID()).getClassname()))
-				{
-					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateSchedule";
-
-				}else{
-					className = getJP_ContractProcess().getClassname();
-				}
-
-				ProcessInfo pi = new ProcessInfo("CreateContractProcSchedule", 0);
-				pi.setClassName(className);
-				pi.setAD_Client_ID(getAD_Client_ID());
-				pi.setAD_User_ID(getAD_User_ID());
-				pi.setAD_PInstance_ID(0);//TODO
-				pi.setRecord_ID(getJP_ContractContent_ID());
-				boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
-				if(success)
-				{
-					setIsScheduleCreatedJP(true);
-
-				}else {
-
-					return DocAction.STATUS_Invalid;
-				}
-			}
-
-
-
-		}
+		//TODO:Create Contract Process Schedule
+//		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+//				&& getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+//		{
+//			if(!isScheduleCreatedJP())
+//			{
+//				String className = "";
+//				if(Util.isEmpty(MContractProcess.get(getCtx(), getJP_ContractProcess_ID()).getClassname()))
+//				{
+//					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateSchedule";
+//
+//				}else{
+//					className = getJP_ContractProcess().getClassname();
+//				}
+//
+//				ProcessInfo pi = new ProcessInfo("CreateContractProcSchedule", 0);
+//				pi.setClassName(className);
+//				pi.setAD_Client_ID(getAD_Client_ID());
+//				pi.setAD_User_ID(getAD_User_ID());
+//				pi.setAD_PInstance_ID(0);//TODO
+//				pi.setRecord_ID(getJP_ContractContent_ID());
+//
+//				MContractLog m_ContractLog = new MContractLog(getCtx(), 0, get_TrxName());
+//				m_ContractLog.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information);
+//				m_ContractLog.setAD_PInstance_ID(pi.getAD_PInstance_ID());
+//				m_ContractLog.setJP_ContractProcessUnit(MContractLog.JP_CONTRACTPROCESSUNIT_PerContractContent);
+//				m_ContractLog.saveEx(get_TrxName());
+//
+//				ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
+//				list.add (new ProcessInfoParameter("JP_ContractProcess_ID", getJP_ContractProcess_ID(), null, null, null ));
+//				list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
+//				list.add (new ProcessInfoParameter("JP_ContractProcessTraceLevel", MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information, null, null, null ));
+//				ProcessInfoParameter[] pars = new ProcessInfoParameter[list.size()];
+//				list.toArray(pars);
+//				pi.setParameter(pars);
+//
+//				boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
+//				if(success)
+//				{
+//					setIsScheduleCreatedJP(true);
+//
+//				}else {
+//
+//					return DocAction.STATUS_Invalid;
+//				}
+//			}
+//
+//		}
 
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
@@ -568,6 +579,17 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			setDateOrdered(getDateDoc());
 		}
 
+		if(newRecord || is_ValueChanged("JP_ContractProcDate_From") || is_ValueChanged("JP_ContractProcDate_To"))
+		{
+			if(getJP_ContractProcDate_From() != null && getJP_ContractProcDate_To() != null)
+			{
+				if(getJP_ContractProcDate_From().compareTo(getJP_ContractProcDate_To()) > 0)
+				{
+					log.saveError("Error", Msg.getElement(getCtx(), "JP_ContractProcDate_From") +" > "+ Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
+					return false;
+				}
+			}
+		}
 
 		//Check overlap of Contract process date in Same contract content tempalete
 		MContract contract = getParent();
@@ -983,6 +1005,20 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			{
 				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcessMethod")};
 				log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+				return false ;
+			}
+
+			if(!getJP_ContractProcStatus().endsWith(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed) && (newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcessMethod)) )
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcessMethod")};
+				log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_CannotChangeField",objs) + " : "+ Msg.getElement(getCtx(), "JP_ContractProcStatus"));
+				return false ;
+			}
+
+			if(isScheduleCreatedJP() && (newRecord || is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcessMethod)) )
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcessMethod")};
+				log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_CannotChangeField",objs) + " : "+ Msg.getElement(getCtx(), "IsScheduleCreatedJP"));
 				return false ;
 			}
 

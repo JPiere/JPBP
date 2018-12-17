@@ -830,6 +830,15 @@ public interface I_JP_ContractContent
 	/** Get Process Now	  */
 	public String getJP_Processing1();
 
+    /** Column name JP_Processing2 */
+    public static final String COLUMNNAME_JP_Processing2 = "JP_Processing2";
+
+	/** Set Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2);
+
+	/** Get Process Now	  */
+	public String getJP_Processing2();
+
     /** Column name M_FreightCategory_ID */
     public static final String COLUMNNAME_M_FreightCategory_ID = "M_FreightCategory_ID";
 

@@ -34,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181130L;
+	private static final long serialVersionUID = 20181217L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -784,6 +784,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -1152,7 +1154,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		@param IsScheduleCreatedJP Schedule was created	  */
 	public void setIsScheduleCreatedJP (boolean IsScheduleCreatedJP)
 	{
-		set_ValueNoCheck (COLUMNNAME_IsScheduleCreatedJP, Boolean.valueOf(IsScheduleCreatedJP));
+		set_Value (COLUMNNAME_IsScheduleCreatedJP, Boolean.valueOf(IsScheduleCreatedJP));
 	}
 
 	/** Get Schedule was created.
@@ -1584,6 +1586,20 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getJP_Processing1 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
 	}
 
 	public org.compiere.model.I_M_FreightCategory getM_FreightCategory() throws RuntimeException

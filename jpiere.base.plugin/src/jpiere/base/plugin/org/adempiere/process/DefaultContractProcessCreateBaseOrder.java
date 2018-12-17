@@ -231,7 +231,7 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, order, null);
 		return "";
 
-	}
+	}//doIt()
 
 
 	private boolean isCreateDocLine(MContractLine contractLine, int JP_ContractProcPeriod_ID, boolean isCreateLog)
