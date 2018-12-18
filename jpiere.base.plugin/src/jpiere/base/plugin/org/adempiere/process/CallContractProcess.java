@@ -19,14 +19,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.IProcessUI;
 import org.adempiere.util.ProcessUtil;
-import org.compiere.model.MClient;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MSession;
 import org.compiere.model.Query;
@@ -85,9 +83,6 @@ public class CallContractProcess extends SvrProcess {
 	private int failureNum = 0;
 	private int processContractContentNum = 0;
 	private int processContractLineNum = 0;
-
-
-	volatile static HashMap<Integer, Boolean> processingNow = null;
 
 	@Override
 	protected void prepare()
@@ -148,24 +143,12 @@ public class CallContractProcess extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		if(processingNow == null)
-		{
-			processingNow = new HashMap<Integer, Boolean>();
-			MClient[] clients = MClient.getAll(getCtx());
-			for(int i = 0; i < clients.length; i++)
-			{
-				processingNow.put(clients[i].getAD_Client_ID(), false);
-			}
-		}
-
 
 		String msg = "";
 		try
 		{
-			if(processingNow.get(getAD_Client_ID()))
+			if(isProcessRunning())
 				throw new Exception(Msg.getMsg(getCtx(), "JP_ContractProcessRunningNow"));//Contract process is running now by other user.
-			else
-				processingNow.put(getAD_Client_ID(), true);
 
 			//Create Contract Management Log
 			if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
@@ -209,7 +192,6 @@ public class CallContractProcess extends SvrProcess {
 
 		} finally {
 
-			processingNow.put(getAD_Client_ID(), false);
 			if(contractLogTrx != null)
 			{
 				contractLogTrx.close();
@@ -412,6 +394,13 @@ public class CallContractProcess extends SvrProcess {
 	}//doContractProcess
 
 
+	/**
+	 *
+	 * Get Contract Process Period List
+	 *
+	 * @return
+	 * @throws Exception
+	 */
 	private ArrayList<MContractProcPeriod> getContractProcPeriodList() throws Exception
 	{
 		ArrayList<MContractProcPeriod> contractProcPeriodList = new ArrayList<MContractProcPeriod>();
@@ -559,6 +548,14 @@ public class CallContractProcess extends SvrProcess {
 	}//
 
 
+	/**
+	 *
+	 * Get Contract Content List handler.
+	 *
+	 * @param procPeriod
+	 * @return
+	 * @throws Exception
+	 */
 	private ArrayList<MContractContent> getContractContentList(MContractProcPeriod procPeriod) throws Exception
 	{
 
@@ -584,6 +581,14 @@ public class CallContractProcess extends SvrProcess {
 	}
 
 
+	/**
+	 *
+	 * Get MContractContent List that is used by Direct Contract Process.
+	 *
+	 * @param procPeriod
+	 * @return
+	 * @throws Exception
+	 */
 	private ArrayList<MContractContent> getContractContentList_DirectContractProcess(MContractProcPeriod procPeriod) throws Exception
 	{
 
@@ -713,6 +718,14 @@ public class CallContractProcess extends SvrProcess {
 	}
 
 
+	/**
+	 *
+	 * Get MContractContent List that Valid Contract Process Schedule In valid Contract Document.
+	 *
+	 * @param procPeriod
+	 * @return
+	 * @throws Exception
+	 */
 	private ArrayList<MContractContent> getContractContentList_ValidContractProcessScheduleInValidContractDoc(MContractProcPeriod procPeriod) throws Exception
 	{
 
@@ -851,6 +864,14 @@ public class CallContractProcess extends SvrProcess {
 	}
 
 
+	/**
+	 *
+	 * Get MContractContent List That All Valid Contract Process Schedule.
+	 *
+	 * @param procPeriod
+	 * @return
+	 * @throws Exception
+	 */
 	private ArrayList<MContractContent> getContractContentList_AllValidContractProcessSchedule(MContractProcPeriod procPeriod) throws Exception
 	{
 		StringBuilder getContractContentSQL = new StringBuilder("");
@@ -1276,6 +1297,15 @@ public class CallContractProcess extends SvrProcess {
 
 	}
 
+	/**
+	 *
+	 * Set ProcessInfoParameter
+	 *
+	 * @param pi
+	 * @param list
+	 * @param procPeriod
+	 * @throws Exception
+	 */
 	private void setProcessInfoParameter(ProcessInfo pi, ArrayList<ProcessInfoParameter> list ,MContractProcPeriod procPeriod) throws Exception
 	{
 		ProcessInfoParameter[] para = getParameter();
@@ -1313,6 +1343,14 @@ public class CallContractProcess extends SvrProcess {
 
 	private IProcessUI processUI = null;
 
+	/**
+	 *
+	 * Start Process
+	 *
+	 * @param pi
+	 * @return
+	 * @throws Exception
+	 */
 	private boolean startProcess(ProcessInfo pi) throws Exception
 	{
 		if(processUI == null)
@@ -1320,11 +1358,7 @@ public class CallContractProcess extends SvrProcess {
 			processUI = Env.getProcessUI(getCtx());
 
 		}
-//		else
-//		{
-//			Env.getCtx().put(PROCESS_UI_CTX_KEY, processUI);
-//		}
-//
+
 		boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI);
 		if(success)
 		{
@@ -1389,9 +1423,17 @@ public class CallContractProcess extends SvrProcess {
 		return success;
 	}
 
-	//IDEMPIERE-3799 Ref:ProcessInfo
-	//TODO:同じプロセスの同時実行の禁止
-	public boolean isProcessRunning() {
+
+	/**
+	 *
+	 * Process Running
+	 *
+	 * Ref: IDEMPIERE-3799 - ProcessInfo.java
+	 *
+	 * @return
+	 */
+	private boolean isProcessRunning()
+	{
 
 		Timestamp lastRebootDate = getLastServerRebootDate();
 		if (lastRebootDate == null)
@@ -1410,7 +1452,14 @@ public class CallContractProcess extends SvrProcess {
 
 	}
 
-	private Timestamp getLastServerRebootDate() {
+	/**
+	 *
+	 * Get Last Server Reboot Date
+	 *
+	 * @return
+	 */
+	private Timestamp getLastServerRebootDate()
+	{
 		MSession currentSession = MSession.get(Env.getCtx(), false);
 		if (currentSession == null)
 			return null;

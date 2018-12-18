@@ -78,6 +78,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 	protected String p_DocBaseType = null;
 	protected boolean p_IsCreateBaseDocJP = false;
 	protected boolean p_IsRecordCommitJP = false;
+	protected String p_JP_ContractProcessMethod = null;
 	protected String p_JP_ContractProcessTraceLevel = MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning;
 	protected String p_JP_IndirectContractProcType = JP_IndirectContractProcType_AllValidContractProcessSchedule ;
 
@@ -199,6 +200,10 @@ public abstract class AbstractContractProcess extends SvrProcess
 			}else if (name.equals("JP_ContractProcess_ID")){
 
 				p_JP_ContractProcess_ID = para[i].getParameterAsInt();
+
+			}else if (name.equals("JP_ContractProcessMethod")){
+
+				p_JP_ContractProcessMethod = para[i].getParameterAsString();
 
 			}else if (name.equals("JP_IndirectContractProcType")) {
 
@@ -693,10 +698,14 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 		}
 
-
-
 		logDetail.saveEx(m_ContractLog.get_TrxName());
 
 	}//createContractLogDetail
+
+
+	protected String getSkipReason()
+	{
+		return null;
+	}
 
 }
