@@ -19,5 +19,8 @@ CREATE TABLE adempiere.JP_ContractProcess
 
   DocAction character varying(2)  DEFAULT 'CO'::character varying,
 
+  JP_CreateContractPSClass character varying(255) COLLATE pg_catalog."default",
+  JP_IndirectcontractProcClass character varying(255) COLLATE pg_catalog."default",
+
   CONSTRAINT JP_ContractProcess_pkey PRIMARY KEY (JP_ContractProcess_ID)
 )

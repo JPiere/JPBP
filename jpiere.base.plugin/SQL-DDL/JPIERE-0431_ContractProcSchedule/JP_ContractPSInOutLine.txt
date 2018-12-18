@@ -1,0 +1,58 @@
+CREATE TABLE adempiere.JP_ContractPSInOutLine
+(
+    JP_ContractPSInOutLine_ID numeric(10,0) NOT NULL,
+    JP_ContractPSInOutLine_UU character varying(36) DEFAULT NULL::character varying,
+    AD_Client_ID numeric(10,0) NOT NULL,
+    AD_Org_ID numeric(10,0) NOT NULL,
+    IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+    Created timestamp without time zone NOT NULL DEFAULT now(),
+    Createdby numeric(10,0) NOT NULL,
+    Updated timestamp without time zone NOT NULL DEFAULT now(),
+    Updatedby numeric(10,0) NOT NULL,
+    
+    --Contract Info
+    JP_ContractPSLine_ID  numeric(10,0) NOT NULL,
+    JP_ContractLine_ID numeric(10,0) NOT NULL,
+    JP_ContractCalender_InOut_ID numeric(10,0) NOT NULL,
+    JP_ContractProcPeriod_ID numeric(10,0) NOT NULL,
+    JP_ContractProcess_InOut_ID numeric(10,0) NOT NULL,
+    
+    --In Out Info
+    Line numeric(10,0) NOT NULL,
+    M_Locator_ID numeric(10,0) ,
+    Description character varying(255),
+
+    QtyEntered numeric NOT NULL,
+    C_UOM_ID numeric(10,0) NOT NULL,
+    MovementQty numeric NOT NULL DEFAULT 0,
+    
+    PriceEntered numeric NOT NULL,
+    PriceActual numeric NOT NULL DEFAULT 0,
+    PriceList numeric NOT NULL DEFAULT 0,
+    PriceLimit numeric NOT NULL DEFAULT 0,
+    
+    C_Tax_ID numeric(10,0) NOT NULL,
+    
+    IsDescription character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
+    C_Project_ID numeric(10,0),
+    C_ProjectPhase_ID numeric(10,0),
+    C_ProjectTask_ID numeric(10,0),
+    C_Campaign_ID numeric(10,0),
+    C_Activity_ID numeric(10,0),
+    User1_ID numeric(10,0),
+    User2_ID numeric(10,0),
+    AD_OrgTrx_ID numeric(10,0),
+
+    Processed character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
+    
+    --Status
+    LineNetAmt numeric NOT NULL DEFAULT 0,
+    M_InOutLine_ID numeric(10,0),
+    IsFactCreatedJP character(1) NOT NULL DEFAULT 'N'::bpchar,
+    M_Product_ID numeric(10,0) DEFAULT NULL::numeric,
+    M_AttributeSetInstance_ID numeric(10,0) DEFAULT NULL::numeric,
+    C_Charge_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_ContractProcSchedule_ID numeric(10,0) NOT NULL,
+
+  CONSTRAINT JP_ContractPSInOutLine_pkey PRIMARY KEY (JP_ContractPSInOutLine_ID)
+)

@@ -23,77 +23,83 @@ import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
-/** Generated Model for JP_ContractContentT
+/** Generated Model for JP_ContractProcSchedule
  *  @author iDempiere (generated) 
  *  @version Release 6.1 - $Id$ */
-public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, I_Persistent 
+public class X_JP_ContractProcSchedule extends PO implements I_JP_ContractProcSchedule, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181129L;
+	private static final long serialVersionUID = 20181215L;
 
     /** Standard Constructor */
-    public X_JP_ContractContentT (Properties ctx, int JP_ContractContentT_ID, String trxName)
+    public X_JP_ContractProcSchedule (Properties ctx, int JP_ContractProcSchedule_ID, String trxName)
     {
-      super (ctx, JP_ContractContentT_ID, trxName);
-      /** if (JP_ContractContentT_ID == 0)
+      super (ctx, JP_ContractProcSchedule_ID, trxName);
+      /** if (JP_ContractProcSchedule_ID == 0)
         {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
 			setC_Currency_ID (0);
-// @C_Currency_ID@
 			setC_DocType_ID (0);
 			setC_PaymentTerm_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateDoc (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
 			setDeliveryRule (null);
-// F
 			setDeliveryViaRule (null);
-// P
+			setDocAction (null);
+// CO
 			setDocBaseType (null);
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
 			setFreightCostRule (null);
 // I
 			setInvoiceRule (null);
 // I
-			setIsAutomaticUpdateJP (false);
-// N
+			setIsApproved (false);
 			setIsDiscountPrinted (false);
-// N
 			setIsDropShip (false);
 // N
-			setIsOrverlapContractProcDateJP (true);
-// Y
-			setIsSOTrx (true);
-// Y
-			setIsTaxIncluded (false);
+			setIsFactCreatedJP (false);
 // N
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setIsTaxIncluded (false);
 			setJP_BaseDocDocType_ID (0);
-			setJP_ContractContentT_ID (0);
-			setJP_ContractProcessMethod (null);
-// IC
-			setJP_ContractType (null);
-			setJP_Contract_Acct_ID (0);
+			setJP_ContractCalender_ID (0);
+			setJP_ContractContent_ID (0);
+			setJP_ContractProcPeriod_ID (0);
+			setJP_ContractProcSchedule_ID (0);
+			setJP_ContractProcess_ID (0);
+			setJP_Contract_ID (0);
 			setM_PriceList_ID (0);
-			setName (null);
-			setOrderType (null);
-// --
 			setPaymentRule (null);
-// B
+			setPosted (false);
+// N
 			setPriorityRule (null);
-// 5
+			setProcessed (false);
 			setSendEMail (false);
 			setTotalLines (Env.ZERO);
-			setValue (null);
         } */
     }
 
     /** Load Constructor */
-    public X_JP_ContractContentT (Properties ctx, ResultSet rs, String trxName)
+    public X_JP_ContractProcSchedule (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 1 - Org 
       */
     protected int get_AccessLevel()
     {
@@ -109,7 +115,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractContentT[")
+      StringBuffer sb = new StringBuffer ("X_JP_ContractProcSchedule[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -261,9 +267,9 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setC_Activity_ID (int C_Activity_ID)
 	{
 		if (C_Activity_ID < 1) 
-			set_Value (COLUMNNAME_C_Activity_ID, null);
+			set_ValueNoCheck (COLUMNNAME_C_Activity_ID, null);
 		else 
-			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
+			set_ValueNoCheck (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
 	/** Get Activity.
@@ -345,9 +351,9 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setC_Campaign_ID (int C_Campaign_ID)
 	{
 		if (C_Campaign_ID < 1) 
-			set_Value (COLUMNNAME_C_Campaign_ID, null);
+			set_ValueNoCheck (COLUMNNAME_C_Campaign_ID, null);
 		else 
-			set_Value (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
+			set_ValueNoCheck (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
 	}
 
 	/** Get Campaign.
@@ -401,9 +407,9 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setC_Currency_ID (int C_Currency_ID)
 	{
 		if (C_Currency_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Currency_ID, null);
+			set_Value (COLUMNNAME_C_Currency_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
+			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
 	}
 
 	/** Get Currency.
@@ -429,9 +435,9 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setC_DocType_ID (int C_DocType_ID)
 	{
 		if (C_DocType_ID < 0) 
-			set_Value (COLUMNNAME_C_DocType_ID, null);
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
 		else 
-			set_Value (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
 	}
 
 	/** Get Document Type.
@@ -440,6 +446,87 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public int getC_DocType_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_Name)
+			.getPO(getC_Invoice_ID(), get_TrxName());	}
+
+	/** Set Invoice.
+		@param C_Invoice_ID 
+		Invoice Identifier
+	  */
+	public void setC_Invoice_ID (int C_Invoice_ID)
+	{
+		if (C_Invoice_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+	}
+
+	/** Get Invoice.
+		@return Invoice Identifier
+	  */
+	public int getC_Invoice_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Opportunity)MTable.get(getCtx(), org.compiere.model.I_C_Opportunity.Table_Name)
+			.getPO(getC_Opportunity_ID(), get_TrxName());	}
+
+	/** Set Sales Opportunity.
+		@param C_Opportunity_ID Sales Opportunity	  */
+	public void setC_Opportunity_ID (int C_Opportunity_ID)
+	{
+		if (C_Opportunity_ID < 1) 
+			set_Value (COLUMNNAME_C_Opportunity_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Opportunity_ID, Integer.valueOf(C_Opportunity_ID));
+	}
+
+	/** Get Sales Opportunity.
+		@return Sales Opportunity	  */
+	public int getC_Opportunity_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Opportunity_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_Name)
+			.getPO(getC_Order_ID(), get_TrxName());	}
+
+	/** Set Order.
+		@param C_Order_ID 
+		Order
+	  */
+	public void setC_Order_ID (int C_Order_ID)
+	{
+		if (C_Order_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_Order_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
+	}
+
+	/** Get Order.
+		@return Order
+	  */
+	public int getC_Order_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -485,9 +572,9 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setC_Project_ID (int C_Project_ID)
 	{
 		if (C_Project_ID < 1) 
-			set_Value (COLUMNNAME_C_Project_ID, null);
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
 		else 
-			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
 	}
 
 	/** Get Project.
@@ -501,13 +588,47 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return ii.intValue();
 	}
 
+	/** Set Account Date.
+		@param DateAcct 
+		Accounting Date
+	  */
+	public void setDateAcct (Timestamp DateAcct)
+	{
+		set_Value (COLUMNNAME_DateAcct, DateAcct);
+	}
+
+	/** Get Account Date.
+		@return Accounting Date
+	  */
+	public Timestamp getDateAcct () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
+	}
+
+	/** Set Document Date.
+		@param DateDoc 
+		Date of the Document
+	  */
+	public void setDateDoc (Timestamp DateDoc)
+	{
+		set_Value (COLUMNNAME_DateDoc, DateDoc);
+	}
+
+	/** Get Document Date.
+		@return Date of the Document
+	  */
+	public Timestamp getDateDoc () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateDoc);
+	}
+
 	/** Set Date Invoiced.
 		@param DateInvoiced 
 		Date printed on Invoice
 	  */
 	public void setDateInvoiced (Timestamp DateInvoiced)
 	{
-		set_Value (COLUMNNAME_DateInvoiced, DateInvoiced);
+		set_ValueNoCheck (COLUMNNAME_DateInvoiced, DateInvoiced);
 	}
 
 	/** Get Date Invoiced.
@@ -516,6 +637,40 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public Timestamp getDateInvoiced () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateInvoiced);
+	}
+
+	/** Set Date Ordered.
+		@param DateOrdered 
+		Date of Order
+	  */
+	public void setDateOrdered (Timestamp DateOrdered)
+	{
+		set_ValueNoCheck (COLUMNNAME_DateOrdered, DateOrdered);
+	}
+
+	/** Get Date Ordered.
+		@return Date of Order
+	  */
+	public Timestamp getDateOrdered () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
+	}
+
+	/** Set Date Promised.
+		@param DatePromised 
+		Date Order was promised
+	  */
+	public void setDatePromised (Timestamp DatePromised)
+	{
+		set_Value (COLUMNNAME_DatePromised, DatePromised);
+	}
+
+	/** Get Date Promised.
+		@return Date Order was promised
+	  */
+	public Timestamp getDatePromised () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DatePromised);
 	}
 
 	/** DeliveryRule AD_Reference_ID=151 */
@@ -548,26 +703,6 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public String getDeliveryRule () 
 	{
 		return (String)get_Value(COLUMNNAME_DeliveryRule);
-	}
-
-	/** Set Promised Delivery Time.
-		@param DeliveryTime_Promised 
-		Promised days between order and delivery
-	  */
-	public void setDeliveryTime_Promised (int DeliveryTime_Promised)
-	{
-		set_Value (COLUMNNAME_DeliveryTime_Promised, Integer.valueOf(DeliveryTime_Promised));
-	}
-
-	/** Get Promised Delivery Time.
-		@return Promised days between order and delivery
-	  */
-	public int getDeliveryTime_Promised () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_DeliveryTime_Promised);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** DeliveryViaRule AD_Reference_ID=152 */
@@ -613,6 +748,54 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** DocAction AD_Reference_ID=135 */
+	public static final int DOCACTION_AD_Reference_ID=135;
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
+	/** Approve = AP */
+	public static final String DOCACTION_Approve = "AP";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
+	/** Close = CL */
+	public static final String DOCACTION_Close = "CL";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Invalidate = IN */
+	public static final String DOCACTION_Invalidate = "IN";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** <None> = -- */
+	public static final String DOCACTION_None = "--";
+	/** Prepare = PR */
+	public static final String DOCACTION_Prepare = "PR";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
+	/** Wait Complete = WC */
+	public static final String DOCACTION_WaitComplete = "WC";
+	/** Set Document Action.
+		@param DocAction 
+		The targeted status of the document
+	  */
+	public void setDocAction (String DocAction)
+	{
+
+		set_Value (COLUMNNAME_DocAction, DocAction);
+	}
+
+	/** Get Document Action.
+		@return The targeted status of the document
+	  */
+	public String getDocAction () 
+	{
+		return (String)get_Value(COLUMNNAME_DocAction);
+	}
+
 	/** AP Invoice = API */
 	public static final String DOCBASETYPE_APInvoice = "API";
 	/** AR Invoice = ARI */
@@ -625,6 +808,8 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -632,7 +817,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setDocBaseType (String DocBaseType)
 	{
 
-		set_Value (COLUMNNAME_DocBaseType, DocBaseType);
+		set_ValueNoCheck (COLUMNNAME_DocBaseType, DocBaseType);
 	}
 
 	/** Get Document BaseType.
@@ -642,6 +827,75 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	{
 		return (String)get_Value(COLUMNNAME_DocBaseType);
 	}
+
+	/** DocStatus AD_Reference_ID=131 */
+	public static final int DOCSTATUS_AD_Reference_ID=131;
+	/** Drafted = DR */
+	public static final String DOCSTATUS_Drafted = "DR";
+	/** Completed = CO */
+	public static final String DOCSTATUS_Completed = "CO";
+	/** Approved = AP */
+	public static final String DOCSTATUS_Approved = "AP";
+	/** Not Approved = NA */
+	public static final String DOCSTATUS_NotApproved = "NA";
+	/** Voided = VO */
+	public static final String DOCSTATUS_Voided = "VO";
+	/** Invalid = IN */
+	public static final String DOCSTATUS_Invalid = "IN";
+	/** Reversed = RE */
+	public static final String DOCSTATUS_Reversed = "RE";
+	/** Closed = CL */
+	public static final String DOCSTATUS_Closed = "CL";
+	/** Unknown = ?? */
+	public static final String DOCSTATUS_Unknown = "??";
+	/** In Progress = IP */
+	public static final String DOCSTATUS_InProgress = "IP";
+	/** Waiting Payment = WP */
+	public static final String DOCSTATUS_WaitingPayment = "WP";
+	/** Waiting Confirmation = WC */
+	public static final String DOCSTATUS_WaitingConfirmation = "WC";
+	/** Set Document Status.
+		@param DocStatus 
+		The current status of the document
+	  */
+	public void setDocStatus (String DocStatus)
+	{
+
+		set_Value (COLUMNNAME_DocStatus, DocStatus);
+	}
+
+	/** Get Document Status.
+		@return The current status of the document
+	  */
+	public String getDocStatus () 
+	{
+		return (String)get_Value(COLUMNNAME_DocStatus);
+	}
+
+	/** Set Document No.
+		@param DocumentNo 
+		Document sequence number of the document
+	  */
+	public void setDocumentNo (String DocumentNo)
+	{
+		set_ValueNoCheck (COLUMNNAME_DocumentNo, DocumentNo);
+	}
+
+	/** Get Document No.
+		@return Document sequence number of the document
+	  */
+	public String getDocumentNo () 
+	{
+		return (String)get_Value(COLUMNNAME_DocumentNo);
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), getDocumentNo());
+    }
 
 	public org.compiere.model.I_C_BPartner getDropShip_BPartner() throws RuntimeException
     {
@@ -803,18 +1057,21 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return (String)get_Value(COLUMNNAME_InvoiceRule);
 	}
 
-	/** Set Automatic Update.
-		@param IsAutomaticUpdateJP Automatic Update	  */
-	public void setIsAutomaticUpdateJP (boolean IsAutomaticUpdateJP)
+	/** Set Approved.
+		@param IsApproved 
+		Indicates if this document requires approval
+	  */
+	public void setIsApproved (boolean IsApproved)
 	{
-		set_Value (COLUMNNAME_IsAutomaticUpdateJP, Boolean.valueOf(IsAutomaticUpdateJP));
+		set_ValueNoCheck (COLUMNNAME_IsApproved, Boolean.valueOf(IsApproved));
 	}
 
-	/** Get Automatic Update.
-		@return Automatic Update	  */
-	public boolean isAutomaticUpdateJP () 
+	/** Get Approved.
+		@return Indicates if this document requires approval
+	  */
+	public boolean isApproved () 
 	{
-		Object oo = get_Value(COLUMNNAME_IsAutomaticUpdateJP);
+		Object oo = get_Value(COLUMNNAME_IsApproved);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
@@ -830,7 +1087,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	  */
 	public void setIsDiscountPrinted (boolean IsDiscountPrinted)
 	{
-		set_Value (COLUMNNAME_IsDiscountPrinted, Boolean.valueOf(IsDiscountPrinted));
+		set_ValueNoCheck (COLUMNNAME_IsDiscountPrinted, Boolean.valueOf(IsDiscountPrinted));
 	}
 
 	/** Get Discount Printed.
@@ -854,7 +1111,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	  */
 	public void setIsDropShip (boolean IsDropShip)
 	{
-		set_Value (COLUMNNAME_IsDropShip, Boolean.valueOf(IsDropShip));
+		set_ValueNoCheck (COLUMNNAME_IsDropShip, Boolean.valueOf(IsDropShip));
 	}
 
 	/** Get Drop Shipment.
@@ -872,18 +1129,18 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return false;
 	}
 
-	/** Set Permit overlap of Contract Process Date.
-		@param IsOrverlapContractProcDateJP Permit overlap of Contract Process Date	  */
-	public void setIsOrverlapContractProcDateJP (boolean IsOrverlapContractProcDateJP)
+	/** Set Fact was created.
+		@param IsFactCreatedJP Fact was created	  */
+	public void setIsFactCreatedJP (boolean IsFactCreatedJP)
 	{
-		set_Value (COLUMNNAME_IsOrverlapContractProcDateJP, Boolean.valueOf(IsOrverlapContractProcDateJP));
+		set_Value (COLUMNNAME_IsFactCreatedJP, Boolean.valueOf(IsFactCreatedJP));
 	}
 
-	/** Get Permit overlap of Contract Process Date.
-		@return Permit overlap of Contract Process Date	  */
-	public boolean isOrverlapContractProcDateJP () 
+	/** Get Fact was created.
+		@return Fact was created	  */
+	public boolean isFactCreatedJP () 
 	{
-		Object oo = get_Value(COLUMNNAME_IsOrverlapContractProcDateJP);
+		Object oo = get_Value(COLUMNNAME_IsFactCreatedJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
@@ -923,7 +1180,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	  */
 	public void setIsTaxIncluded (boolean IsTaxIncluded)
 	{
-		set_Value (COLUMNNAME_IsTaxIncluded, Boolean.valueOf(IsTaxIncluded));
+		set_ValueNoCheck (COLUMNNAME_IsTaxIncluded, Boolean.valueOf(IsTaxIncluded));
 	}
 
 	/** Get Price includes Tax.
@@ -951,9 +1208,9 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setJP_BaseDocDocType_ID (int JP_BaseDocDocType_ID)
 	{
 		if (JP_BaseDocDocType_ID < 1) 
-			set_Value (COLUMNNAME_JP_BaseDocDocType_ID, null);
+			set_ValueNoCheck (COLUMNNAME_JP_BaseDocDocType_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_BaseDocDocType_ID, Integer.valueOf(JP_BaseDocDocType_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_BaseDocDocType_ID, Integer.valueOf(JP_BaseDocDocType_ID));
 	}
 
 	/** Get Base Doc DocType.
@@ -966,209 +1223,160 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return ii.intValue();
 	}
 
-	public I_JP_ContractCalenderRef getJP_ContractCalenderRef() throws RuntimeException
+	public I_JP_ContractCalender getJP_ContractCalender() throws RuntimeException
     {
-		return (I_JP_ContractCalenderRef)MTable.get(getCtx(), I_JP_ContractCalenderRef.Table_Name)
-			.getPO(getJP_ContractCalenderRef_ID(), get_TrxName());	}
+		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
+			.getPO(getJP_ContractCalender_ID(), get_TrxName());	}
 
-	/** Set Contract Calender Reference.
-		@param JP_ContractCalenderRef_ID Contract Calender Reference	  */
-	public void setJP_ContractCalenderRef_ID (int JP_ContractCalenderRef_ID)
+	/** Set Contract Calender.
+		@param JP_ContractCalender_ID Contract Calender	  */
+	public void setJP_ContractCalender_ID (int JP_ContractCalender_ID)
 	{
-		if (JP_ContractCalenderRef_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractCalenderRef_ID, null);
+		if (JP_ContractCalender_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCalender_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_ContractCalenderRef_ID, Integer.valueOf(JP_ContractCalenderRef_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractCalender_ID, Integer.valueOf(JP_ContractCalender_ID));
 	}
 
-	/** Get Contract Calender Reference.
-		@return Contract Calender Reference	  */
-	public int getJP_ContractCalenderRef_ID () 
+	/** Get Contract Calender.
+		@return Contract Calender	  */
+	public int getJP_ContractCalender_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalenderRef_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Contract Content Template.
-		@param JP_ContractContentT_ID Contract Content Template	  */
-	public void setJP_ContractContentT_ID (int JP_ContractContentT_ID)
-	{
-		if (JP_ContractContentT_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractContentT_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractContentT_ID, Integer.valueOf(JP_ContractContentT_ID));
-	}
-
-	/** Get Contract Content Template.
-		@return Contract Content Template	  */
-	public int getJP_ContractContentT_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractContentT_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Contract Content Template(UU).
-		@param JP_ContractContentT_UU Contract Content Template(UU)	  */
-	public void setJP_ContractContentT_UU (String JP_ContractContentT_UU)
-	{
-		set_ValueNoCheck (COLUMNNAME_JP_ContractContentT_UU, JP_ContractContentT_UU);
-	}
-
-	/** Get Contract Content Template(UU).
-		@return Contract Content Template(UU)	  */
-	public String getJP_ContractContentT_UU () 
-	{
-		return (String)get_Value(COLUMNNAME_JP_ContractContentT_UU);
-	}
-
-	/** Set Contract Process Period Offset.
-		@param JP_ContractProcPOffset Contract Process Period Offset	  */
-	public void setJP_ContractProcPOffset (int JP_ContractProcPOffset)
-	{
-		set_Value (COLUMNNAME_JP_ContractProcPOffset, Integer.valueOf(JP_ContractProcPOffset));
-	}
-
-	/** Get Contract Process Period Offset.
-		@return Contract Process Period Offset	  */
-	public int getJP_ContractProcPOffset () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPOffset);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Contract Process Period Num.
-		@param JP_ContractProcPeriodNum Contract Process Period Num	  */
-	public void setJP_ContractProcPeriodNum (int JP_ContractProcPeriodNum)
-	{
-		set_Value (COLUMNNAME_JP_ContractProcPeriodNum, Integer.valueOf(JP_ContractProcPeriodNum));
-	}
-
-	/** Get Contract Process Period Num.
-		@return Contract Process Period Num	  */
-	public int getJP_ContractProcPeriodNum () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPeriodNum);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Direct Contract Process = DC */
-	public static final String JP_CONTRACTPROCESSMETHOD_DirectContractProcess = "DC";
-	/** Indirect Contract Process = IC */
-	public static final String JP_CONTRACTPROCESSMETHOD_IndirectContractProcess = "IC";
-	/** Set Contract Process Method.
-		@param JP_ContractProcessMethod Contract Process Method	  */
-	public void setJP_ContractProcessMethod (String JP_ContractProcessMethod)
-	{
-
-		set_Value (COLUMNNAME_JP_ContractProcessMethod, JP_ContractProcessMethod);
-	}
-
-	/** Get Contract Process Method.
-		@return Contract Process Method	  */
-	public String getJP_ContractProcessMethod () 
-	{
-		return (String)get_Value(COLUMNNAME_JP_ContractProcessMethod);
-	}
-
-	public I_JP_ContractProcessRef getJP_ContractProcessRef() throws RuntimeException
+	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException
     {
-		return (I_JP_ContractProcessRef)MTable.get(getCtx(), I_JP_ContractProcessRef.Table_Name)
-			.getPO(getJP_ContractProcessRef_ID(), get_TrxName());	}
+		return (I_JP_ContractContent)MTable.get(getCtx(), I_JP_ContractContent.Table_Name)
+			.getPO(getJP_ContractContent_ID(), get_TrxName());	}
 
-	/** Set Contract Process Reference.
-		@param JP_ContractProcessRef_ID Contract Process Reference	  */
-	public void setJP_ContractProcessRef_ID (int JP_ContractProcessRef_ID)
+	/** Set Contract Content.
+		@param JP_ContractContent_ID Contract Content	  */
+	public void setJP_ContractContent_ID (int JP_ContractContent_ID)
 	{
-		if (JP_ContractProcessRef_ID < 1) 
-			set_Value (COLUMNNAME_JP_ContractProcessRef_ID, null);
+		if (JP_ContractContent_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractContent_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_ContractProcessRef_ID, Integer.valueOf(JP_ContractProcessRef_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
 	}
 
-	/** Get Contract Process Reference.
-		@return Contract Process Reference	  */
-	public int getJP_ContractProcessRef_ID () 
+	/** Get Contract Content.
+		@return Contract Content	  */
+	public int getJP_ContractContent_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcessRef_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractContent_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	public I_JP_ContractT getJP_ContractT() throws RuntimeException
+	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException
     {
-		return (I_JP_ContractT)MTable.get(getCtx(), I_JP_ContractT.Table_Name)
-			.getPO(getJP_ContractT_ID(), get_TrxName());	}
+		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
+			.getPO(getJP_ContractProcPeriod_ID(), get_TrxName());	}
 
-	/** Set Contract Doc Template.
-		@param JP_ContractT_ID Contract Doc Template	  */
-	public void setJP_ContractT_ID (int JP_ContractT_ID)
+	/** Set Contract Process Period.
+		@param JP_ContractProcPeriod_ID Contract Process Period	  */
+	public void setJP_ContractProcPeriod_ID (int JP_ContractProcPeriod_ID)
 	{
-		if (JP_ContractT_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, null);
+		if (JP_ContractProcPeriod_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriod_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, Integer.valueOf(JP_ContractT_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcPeriod_ID, Integer.valueOf(JP_ContractProcPeriod_ID));
 	}
 
-	/** Get Contract Doc Template.
-		@return Contract Doc Template	  */
-	public int getJP_ContractT_ID () 
+	/** Get Contract Process Period.
+		@return Contract Process Period	  */
+	public int getJP_ContractProcPeriod_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractT_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPeriod_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Period Contract = PDC */
-	public static final String JP_CONTRACTTYPE_PeriodContract = "PDC";
-	/** Spot Contract = STC */
-	public static final String JP_CONTRACTTYPE_SpotContract = "STC";
-	/** General Contract = GLC */
-	public static final String JP_CONTRACTTYPE_GeneralContract = "GLC";
-	/** Set Contract Type.
-		@param JP_ContractType Contract Type	  */
-	public void setJP_ContractType (String JP_ContractType)
+	/** Set Contract Process Schedule Doc.
+		@param JP_ContractProcSchedule_ID Contract Process Schedule Doc	  */
+	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID)
 	{
-
-		set_ValueNoCheck (COLUMNNAME_JP_ContractType, JP_ContractType);
-	}
-
-	/** Get Contract Type.
-		@return Contract Type	  */
-	public String getJP_ContractType () 
-	{
-		return (String)get_Value(COLUMNNAME_JP_ContractType);
-	}
-
-	public I_JP_Contract_Acct getJP_Contract_Acct() throws RuntimeException
-    {
-		return (I_JP_Contract_Acct)MTable.get(getCtx(), I_JP_Contract_Acct.Table_Name)
-			.getPO(getJP_Contract_Acct_ID(), get_TrxName());	}
-
-	/** Set Contract Acct Info.
-		@param JP_Contract_Acct_ID Contract Acct Info	  */
-	public void setJP_Contract_Acct_ID (int JP_Contract_Acct_ID)
-	{
-		if (JP_Contract_Acct_ID < 1) 
-			set_Value (COLUMNNAME_JP_Contract_Acct_ID, null);
+		if (JP_ContractProcSchedule_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_Contract_Acct_ID, Integer.valueOf(JP_Contract_Acct_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, Integer.valueOf(JP_ContractProcSchedule_ID));
 	}
 
-	/** Get Contract Acct Info.
-		@return Contract Acct Info	  */
-	public int getJP_Contract_Acct_ID () 
+	/** Get Contract Process Schedule Doc.
+		@return Contract Process Schedule Doc	  */
+	public int getJP_ContractProcSchedule_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_Acct_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcSchedule_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set JP_ContractProcSchedule_UU.
+		@param JP_ContractProcSchedule_UU JP_ContractProcSchedule_UU	  */
+	public void setJP_ContractProcSchedule_UU (String JP_ContractProcSchedule_UU)
+	{
+		set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_UU, JP_ContractProcSchedule_UU);
+	}
+
+	/** Get JP_ContractProcSchedule_UU.
+		@return JP_ContractProcSchedule_UU	  */
+	public String getJP_ContractProcSchedule_UU () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractProcSchedule_UU);
+	}
+
+	public I_JP_ContractProcess getJP_ContractProcess() throws RuntimeException
+    {
+		return (I_JP_ContractProcess)MTable.get(getCtx(), I_JP_ContractProcess.Table_Name)
+			.getPO(getJP_ContractProcess_ID(), get_TrxName());	}
+
+	/** Set Contract Process.
+		@param JP_ContractProcess_ID Contract Process	  */
+	public void setJP_ContractProcess_ID (int JP_ContractProcess_ID)
+	{
+		if (JP_ContractProcess_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcess_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcess_ID, Integer.valueOf(JP_ContractProcess_ID));
+	}
+
+	/** Get Contract Process.
+		@return Contract Process	  */
+	public int getJP_ContractProcess_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcess_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_Contract getJP_Contract() throws RuntimeException
+    {
+		return (I_JP_Contract)MTable.get(getCtx(), I_JP_Contract.Table_Name)
+			.getPO(getJP_Contract_ID(), get_TrxName());	}
+
+	/** Set Contract Document.
+		@param JP_Contract_ID Contract Document	  */
+	public void setJP_Contract_ID (int JP_Contract_ID)
+	{
+		if (JP_Contract_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
+	}
+
+	/** Get Contract Document.
+		@return Contract Document	  */
+	public int getJP_Contract_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -1187,7 +1395,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy)
 	{
 
-		set_Value (COLUMNNAME_JP_CreateDerivativeDocPolicy, JP_CreateDerivativeDocPolicy);
+		set_ValueNoCheck (COLUMNNAME_JP_CreateDerivativeDocPolicy, JP_CreateDerivativeDocPolicy);
 	}
 
 	/** Get Create Derivative Doc Policy.
@@ -1334,23 +1542,6 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return ii.intValue();
 	}
 
-	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
-	public void setName (String Name)
-	{
-		set_Value (COLUMNNAME_Name, Name);
-	}
-
-	/** Get Name.
-		@return Alphanumeric identifier of the entity
-	  */
-	public String getName () 
-	{
-		return (String)get_Value(COLUMNNAME_Name);
-	}
-
 	/** Quotation = OB */
 	public static final String ORDERTYPE_Quotation = "OB";
 	/** Proposal = ON */
@@ -1376,7 +1567,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public void setOrderType (String OrderType)
 	{
 
-		set_Value (COLUMNNAME_OrderType, OrderType);
+		set_ValueNoCheck (COLUMNNAME_OrderType, OrderType);
 	}
 
 	/** Get Order Type.
@@ -1385,6 +1576,23 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public String getOrderType () 
 	{
 		return (String)get_Value(COLUMNNAME_OrderType);
+	}
+
+	/** Set Order Reference.
+		@param POReference 
+		Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public void setPOReference (String POReference)
+	{
+		set_Value (COLUMNNAME_POReference, POReference);
+	}
+
+	/** Get Order Reference.
+		@return Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getPOReference () 
+	{
+		return (String)get_Value(COLUMNNAME_POReference);
 	}
 
 	/** PaymentRule AD_Reference_ID=195 */
@@ -1421,6 +1629,30 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		return (String)get_Value(COLUMNNAME_PaymentRule);
 	}
 
+	/** Set Posted.
+		@param Posted 
+		Posting status
+	  */
+	public void setPosted (boolean Posted)
+	{
+		set_Value (COLUMNNAME_Posted, Boolean.valueOf(Posted));
+	}
+
+	/** Get Posted.
+		@return Posting status
+	  */
+	public boolean isPosted () 
+	{
+		Object oo = get_Value(COLUMNNAME_Posted);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** PriorityRule AD_Reference_ID=154 */
 	public static final int PRIORITYRULE_AD_Reference_ID=154;
 	/** High = 3 */
@@ -1449,6 +1681,71 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public String getPriorityRule () 
 	{
 		return (String)get_Value(COLUMNNAME_PriorityRule);
+	}
+
+	/** Set Processed.
+		@param Processed 
+		The document has been processed
+	  */
+	public void setProcessed (boolean Processed)
+	{
+		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
+	}
+
+	/** Get Processed.
+		@return The document has been processed
+	  */
+	public boolean isProcessed () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processed);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Processed On.
+		@param ProcessedOn 
+		The date+time (expressed in decimal format) when the document has been processed
+	  */
+	public void setProcessedOn (BigDecimal ProcessedOn)
+	{
+		set_Value (COLUMNNAME_ProcessedOn, ProcessedOn);
+	}
+
+	/** Get Processed On.
+		@return The date+time (expressed in decimal format) when the document has been processed
+	  */
+	public BigDecimal getProcessedOn () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ProcessedOn);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Process Now.
+		@param Processing Process Now	  */
+	public void setProcessing (boolean Processing)
+	{
+		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public boolean isProcessing () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processing);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException
@@ -1485,7 +1782,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	  */
 	public void setSendEMail (boolean SendEMail)
 	{
-		set_Value (COLUMNNAME_SendEMail, Boolean.valueOf(SendEMail));
+		set_ValueNoCheck (COLUMNNAME_SendEMail, Boolean.valueOf(SendEMail));
 	}
 
 	/** Get Send EMail.
@@ -1509,7 +1806,7 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	  */
 	public void setTotalLines (BigDecimal TotalLines)
 	{
-		set_Value (COLUMNNAME_TotalLines, TotalLines);
+		set_ValueNoCheck (COLUMNNAME_TotalLines, TotalLines);
 	}
 
 	/** Get Total Lines.
@@ -1577,22 +1874,5 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
-	public void setValue (String Value)
-	{
-		set_Value (COLUMNNAME_Value, Value);
-	}
-
-	/** Get Search Key.
-		@return Search key for the record in the format required - must be unique
-	  */
-	public String getValue () 
-	{
-		return (String)get_Value(COLUMNNAME_Value);
 	}
 }

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractProcess
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 6.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractProcess 
@@ -171,6 +171,32 @@ public interface I_JP_ContractProcess
 
 	/** Get Contract Process(UU)	  */
 	public String getJP_ContractProcess_UU();
+
+    /** Column name JP_CreateContractPSClass */
+    public static final String COLUMNNAME_JP_CreateContractPSClass = "JP_CreateContractPSClass";
+
+	/** Set Class(Create Contract Process Schedule).
+	  * Java Classname
+	  */
+	public void setJP_CreateContractPSClass (String JP_CreateContractPSClass);
+
+	/** Get Class(Create Contract Process Schedule).
+	  * Java Classname
+	  */
+	public String getJP_CreateContractPSClass();
+
+    /** Column name JP_IndirectContractProcClass */
+    public static final String COLUMNNAME_JP_IndirectContractProcClass = "JP_IndirectContractProcClass";
+
+	/** Set Class(Indirect Contract Process).
+	  * Java Classname
+	  */
+	public void setJP_IndirectContractProcClass (String JP_IndirectContractProcClass);
+
+	/** Get Class(Indirect Contract Process).
+	  * Java Classname
+	  */
+	public String getJP_IndirectContractProcClass();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

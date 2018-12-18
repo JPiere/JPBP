@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractProcessRef
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractProcessRef extends PO implements I_JP_ContractProcessRef, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20181205L;
 
     /** Standard Constructor */
     public X_JP_ContractProcessRef (Properties ctx, int JP_ContractProcessRef_ID, String trxName)
@@ -105,6 +105,8 @@ public class X_JP_ContractProcessRef extends PO implements I_JP_ContractProcessR
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Contract Proc Schedule = CPS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "CPS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document

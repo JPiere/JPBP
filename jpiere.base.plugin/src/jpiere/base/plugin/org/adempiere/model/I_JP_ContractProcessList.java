@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractProcessList
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 6.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractProcessList 

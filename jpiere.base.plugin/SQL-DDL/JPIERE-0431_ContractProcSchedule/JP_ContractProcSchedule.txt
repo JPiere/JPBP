@@ -1,0 +1,103 @@
+CREATE TABLE adempiere.JP_ContractProcSchedule
+(
+  --Window Mandatory
+  JP_ContractProcSchedule_ID numeric(10,0) NOT NULL,
+  JP_ContractProcSchedule_UU character varying(36) DEFAULT NULL::character varying,
+  AD_Client_ID numeric(10,0) NOT NULL,
+  AD_Org_ID numeric(10,0) NOT NULL,
+  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  Created timestamp without time zone NOT NULL DEFAULT now(),
+  CreatedBy numeric(10,0) NOT NULL,
+  Updated timestamp without time zone NOT NULL DEFAULT now(),
+  UpdatedBy numeric(10,0) NOT NULL,
+
+  --Doc Mandatory
+  DocumentNo character varying(30) NOT NULL,
+  DocStatus character(2) NOT NULL,
+  DocAction character(2) NOT NULL,
+  Processing character(1),
+  Processed character(1) NOT NULL DEFAULT 'N'::bpchar,
+  Posted character(1) NOT NULL DEFAULT 'N'::bpchar,
+  IsApproved character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  ProcessedOn numeric,
+
+  --Contract Content column
+  JP_Contract_ID numeric(10,0) NOT NULL,
+  JP_ContractContent_ID numeric(10,0) NOT NULL,
+  JP_ContractCalender_ID numeric(10,0) NOT NULL,
+  JP_ContractProcess_ID numeric(10,0) NOT NULL,
+  JP_ContractProcPeriod_ID numeric(10,0) NOT NULL,
+  JP_BaseDocDocType_ID numeric(10,0) NOT NULL,
+  SalesRep_ID numeric(10,0),
+  DocBaseType character(3) NOT NULL,
+  JP_CreateDerivativeDocPolicy character(2),
+   
+  DateDoc  timestamp without time zone NOT NULL DEFAULT now(),
+  DateAcct timestamp without time zone NOT NULL DEFAULT now(),
+  DatePromised timestamp without time zone NOT NULL DEFAULT now(),
+  DateOrdered timestamp without time zone,
+  DateInvoiced timestamp without time zone,
+  
+
+  --Status
+  TotalLines numeric NOT NULL DEFAULT 0,
+  C_Order_ID numeric(10,0),
+  C_Invoice_ID numeric(10,0),
+  IsFactCreatedJP character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+
+  --Order Column
+  IsSOTrx character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  IsTaxIncluded character(1) NOT NULL DEFAULT 'N'::bpchar,
+  SendeMail character(1) NOT NULL DEFAULT 'N'::bpchar,
+  OrderType character varying(2) ,
+  
+  Description character varying(255),
+  POReference character varying(20),
+  
+  C_Opportunity_ID numeric(10,0) ,
+  C_BPartner_ID numeric(10,0) NOT NULL,
+  C_BPartner_Location_ID numeric(10,0) NOT NULL,
+  AD_User_ID numeric(10,0),
+  
+  M_Warehouse_ID numeric(10,0),
+
+  JP_Locator_ID numeric(10,0) ,
+  IsDropShip character(1) NOT NULL DEFAULT 'N'::bpchar,
+
+  Dropship_BPartner_ID numeric(10,0),
+  Dropship_Location_ID numeric(10,0),
+  Dropship_User_ID numeric(10,0),
+  DeliveryRule character(1) NOT NULL,
+  PriorityRule character(1) NOT NULL,
+  DeliveryViaRule character(1) NOT NULL,
+  M_Shipper_ID numeric(10,0),
+  M_FreightCategory_ID numeric(10,0),
+  FreightCostRule character(1) NOT NULL,
+  FreightAmt numeric DEFAULT 0,
+
+
+  Bill_BPartner_ID numeric(10,0),
+  Bill_Location_ID numeric(10,0),
+  Bill_User_ID numeric(10,0),
+  InvoiceRule character(1) NOT NULL,
+  IsDiscountPrinted character(1) NOT NULL DEFAULT 'N'::bpchar,
+  M_PriceList_ID numeric(10,0) NOT NULL,
+  C_Currency_ID numeric(10,0) NOT NULL,
+  C_ConversionType_ID numeric(10,0),
+
+  PaymentRule character(1) NOT NULL,
+  C_PaymentTerm_ID numeric(10,0) NOT NULL,
+
+
+  C_Campaign_ID numeric(10,0),
+  C_Project_ID numeric(10,0),
+  C_Activity_ID numeric(10,0),
+  AD_OrgTrx_ID numeric(10,0),
+  User1_ID numeric(10,0),
+  User2_ID numeric(10,0),
+  C_DocType_ID numeric(10,0) NOT NULL,
+
+
+  CONSTRAINT JP_ContractProcSchedule_pkey PRIMARY KEY (JP_ContractProcSchedule_ID)
+)
