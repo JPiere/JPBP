@@ -24,14 +24,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractProcessList
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractProcessList extends PO implements I_JP_ContractProcessList, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20181205L;
 
     /** Standard Constructor */
     public X_JP_ContractProcessList (Properties ctx, int JP_ContractProcessList_ID, String trxName)

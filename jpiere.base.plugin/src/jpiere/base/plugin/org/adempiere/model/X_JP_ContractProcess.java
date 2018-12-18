@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractProcess
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20181205L;
 
     /** Standard Constructor */
     public X_JP_ContractProcess (Properties ctx, int JP_ContractProcess_ID, String trxName)
@@ -169,6 +169,8 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Contract Proc Schedule = CPS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "CPS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -240,6 +242,40 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 	public String getJP_ContractProcess_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractProcess_UU);
+	}
+
+	/** Set Class(Create Contract Process Schedule).
+		@param JP_CreateContractPSClass 
+		Java Classname
+	  */
+	public void setJP_CreateContractPSClass (String JP_CreateContractPSClass)
+	{
+		set_Value (COLUMNNAME_JP_CreateContractPSClass, JP_CreateContractPSClass);
+	}
+
+	/** Get Class(Create Contract Process Schedule).
+		@return Java Classname
+	  */
+	public String getJP_CreateContractPSClass () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_CreateContractPSClass);
+	}
+
+	/** Set Class(Indirect Contract Process).
+		@param JP_IndirectContractProcClass 
+		Java Classname
+	  */
+	public void setJP_IndirectContractProcClass (String JP_IndirectContractProcClass)
+	{
+		set_Value (COLUMNNAME_JP_IndirectContractProcClass, JP_IndirectContractProcClass);
+	}
+
+	/** Get Class(Indirect Contract Process).
+		@return Java Classname
+	  */
+	public String getJP_IndirectContractProcClass () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_IndirectContractProcClass);
 	}
 
 	/** Set Name.

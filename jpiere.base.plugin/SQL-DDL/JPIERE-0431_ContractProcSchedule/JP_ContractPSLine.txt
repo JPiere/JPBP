@@ -1,0 +1,75 @@
+CREATE TABLE adempiere.JP_ContractPSLine
+(
+     --Window Mandatory
+    JP_ContractPSLine_ID numeric(10,0) NOT NULL,
+    JP_ContractPSLine_UU character varying(36) DEFAULT NULL::character varying,
+    AD_Client_ID numeric(10,0) NOT NULL,
+    AD_Org_ID numeric(10,0) NOT NULL,
+    IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+    Created timestamp without time zone NOT NULL DEFAULT now(),
+    Createdby numeric(10,0) NOT NULL,
+    Updated timestamp without time zone NOT NULL DEFAULT now(),
+    Updatedby numeric(10,0) NOT NULL,
+    
+    --Contract Info
+    JP_ContractProcSchedule_ID  numeric(10,0) NOT NULL,
+    JP_ContractLine_ID numeric(10,0),
+    
+    --Base Doc Line Info
+    Line numeric(10,0) NOT NULL,
+    C_BPartner_ID numeric(10,0),
+    C_BPartner_Location_ID numeric(10,0),
+    DateOrdered timestamp without time zone,
+    DatePromised timestamp without time zone,
+    M_Warehouse_ID numeric(10,0),
+
+    M_Product_ID numeric(10,0),
+    M_AttributeSetInstance_ID numeric(10,0),
+    S_ResourceAssignment_ID numeric(10,0),
+    JP_Locator_ID numeric(10,0),
+    C_Charge_ID numeric(10,0),
+
+    Description character varying(255),
+
+    QtyEntered numeric NOT NULL,
+    C_UOM_ID numeric(10,0) NOT NULL,
+    QtyOrdered numeric NOT NULL DEFAULT 0,
+
+    JP_ScheduledTotalMovementQty numeric NOT NULL DEFAULT 0,
+    JP_ScheduledTotalQtyInvoiced numeric NOT NULL DEFAULT 0,
+    
+    PriceEntered numeric NOT NULL,
+    PriceActual numeric NOT NULL DEFAULT 0,
+    PriceList numeric NOT NULL DEFAULT 0,
+    PriceLimit numeric NOT NULL DEFAULT 0,
+    
+    C_Tax_ID numeric(10,0) NOT NULL,
+    
+    JP_LocatorFrom_ID numeric(10,0),
+    JP_LocatorTo_ID numeric(10,0),
+    JP_ASI_From_ID numeric(10,0),
+    JP_ASI_To_ID numeric(10,0),
+    
+    IsDescription character(1) NOT NULL DEFAULT 'N'::bpchar,
+    C_Project_ID numeric(10,0),
+    C_ProjectPhase_ID numeric(10,0),
+    C_ProjectTask_ID numeric(10,0),
+    C_Campaign_ID numeric(10,0),
+    C_Activity_ID numeric(10,0),
+    User1_ID numeric(10,0),
+    User2_ID numeric(10,0),
+    AD_OrgTrx_ID numeric(10,0),
+    
+    Processed character(1) NOT NULL DEFAULT 'N'::bpchar,
+    
+
+    --Status
+    LinenetAmt numeric NOT NULL DEFAULT 0,
+    C_OrderLine_ID numeric(10,0),
+    C_InvoiceLine_ID numeric(10,0),
+    IsFactCreatedJP character(1) NOT NULL DEFAULT 'N'::bpchar,
+    JP_ScheduledTotalRecognizeAmt numeric NOT NULL DEFAULT (0)::numeric,
+    JP_ScheduledTotalInvoiceAmt numeric NOT NULL DEFAULT (0)::numeric,
+
+  CONSTRAINT JP_ContractPSLine_pkey PRIMARY KEY (JP_ContractPSLine_ID)
+)

@@ -168,6 +168,9 @@ public class JPiereContractContentCallout implements IColumnCallout {
 						continue;
 					}
 
+					if(!fields[i].isAllowCopy())
+						continue;
+
 					columnIndex = contentTemplate.get_ColumnIndex(columnName);
 					if(columnIndex > -1)
 					{

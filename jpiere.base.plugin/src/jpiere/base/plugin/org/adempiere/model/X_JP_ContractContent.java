@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180719L;
+	private static final long serialVersionUID = 20181217L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -76,12 +76,16 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 // N
 			setIsSOTrx (true);
 // Y
+			setIsScheduleCreatedJP (false);
+// N
 			setIsTaxIncluded (false);
 			setJP_BaseDocDocType_ID (0);
 			setJP_ContractContentT_ID (0);
 			setJP_ContractContent_ID (0);
 			setJP_ContractProcStatus (null);
 // UN
+			setJP_ContractProcessMethod (null);
+// IC
 			setJP_Contract_Acct_ID (0);
 			setJP_Contract_ID (0);
 			setM_PriceList_ID (0);
@@ -780,6 +784,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -1144,6 +1150,27 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return false;
 	}
 
+	/** Set Schedule was created.
+		@param IsScheduleCreatedJP Schedule was created	  */
+	public void setIsScheduleCreatedJP (boolean IsScheduleCreatedJP)
+	{
+		set_Value (COLUMNNAME_IsScheduleCreatedJP, Boolean.valueOf(IsScheduleCreatedJP));
+	}
+
+	/** Get Schedule was created.
+		@return Schedule was created	  */
+	public boolean isScheduleCreatedJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsScheduleCreatedJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Price includes Tax.
 		@param IsTaxIncluded 
 		Tax is included in the price 
@@ -1328,6 +1355,25 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getJP_ContractProcStatus () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractProcStatus);
+	}
+
+	/** Direct Contract Process = DC */
+	public static final String JP_CONTRACTPROCESSMETHOD_DirectContractProcess = "DC";
+	/** Indirect Contract Process = IC */
+	public static final String JP_CONTRACTPROCESSMETHOD_IndirectContractProcess = "IC";
+	/** Set Contract Process Method.
+		@param JP_ContractProcessMethod Contract Process Method	  */
+	public void setJP_ContractProcessMethod (String JP_ContractProcessMethod)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractProcessMethod, JP_ContractProcessMethod);
+	}
+
+	/** Get Contract Process Method.
+		@return Contract Process Method	  */
+	public String getJP_ContractProcessMethod () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractProcessMethod);
 	}
 
 	public I_JP_ContractProcess getJP_ContractProcess() throws RuntimeException
@@ -1540,6 +1586,20 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getJP_Processing1 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
 	}
 
 	public org.compiere.model.I_M_FreightCategory getM_FreightCategory() throws RuntimeException

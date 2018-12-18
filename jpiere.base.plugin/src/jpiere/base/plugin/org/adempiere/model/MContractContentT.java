@@ -330,6 +330,38 @@ public class MContractContentT extends X_JP_ContractContentT {
 			}
 		}
 
+
+		//Check Contract Process Method
+		if(newRecord || (is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessMethod)
+							|| is_ValueChanged(MContractContentT.COLUMNNAME_C_DocType_ID)) )
+		{
+			String JP_ContractProcessMethod = getJP_ContractProcessMethod();
+			if(JP_ContractProcessMethod == null)
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractProcessMethod")};
+				log.saveError("Error",Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+				return false ;
+			}
+
+			//Check Doc Type
+			if(JP_ContractProcessMethod.equals(MContractContentT.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+			{
+				MDocType contractPSDocType = MDocType.get(getCtx(), getC_DocType_ID());
+				Object  obj_ContractPSDocType_ID = contractPSDocType.get_Value("JP_ContractPSDocType_ID");
+
+				if(obj_ContractPSDocType_ID == null)
+				{
+					String msg0 = Msg.getElement(getCtx(), "C_DocType_ID");
+					String msg1 = Msg.getMsg(getCtx(), "JP_InCaseOfIndirectContractProcess");//In case of Indirect Contract Process,
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractPSDocType_ID")};
+					String msg2 = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg0 + ":" + msg1 + msg2);
+					return false ;
+				}
+			}
+		}//Check Contract Process Method
+
+
 		//Check Price List and IsTaxIncluded
 		if(newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_M_PriceList_ID))
 		{

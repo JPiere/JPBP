@@ -18,14 +18,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MBill;
-import jpiere.base.plugin.org.adempiere.model.MContract;
-import jpiere.base.plugin.org.adempiere.model.MContractContent;
-import jpiere.base.plugin.org.adempiere.model.MEstimation;
-import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
-import jpiere.base.plugin.org.adempiere.model.MInvValCal;
-import jpiere.base.plugin.org.adempiere.model.MRecognition;
-
 import org.adempiere.base.IDocFactory;
 import org.compiere.acct.Doc;
 import org.compiere.model.MAcctSchema;
@@ -38,6 +30,15 @@ import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+
+import jpiere.base.plugin.org.adempiere.model.MBill;
+import jpiere.base.plugin.org.adempiere.model.MContract;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractProcSchedule;
+import jpiere.base.plugin.org.adempiere.model.MEstimation;
+import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
+import jpiere.base.plugin.org.adempiere.model.MInvValCal;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
 
 
 /**
@@ -65,6 +66,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 				|| AD_Table_ID==MBill.Table_ID //1000032
 				|| AD_Table_ID==MContract.Table_ID //1000180
 				|| AD_Table_ID==MContractContent.Table_ID //1000186
+				|| AD_Table_ID==MContractProcSchedule.Table_ID//1000227
 				|| AD_Table_ID==MInvValCal.Table_ID //1000067
 				|| AD_Table_ID==MInvValAdjust.Table_ID//1000071
 			)
@@ -98,10 +100,10 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 				rs = null;
 				pstmt = null;
 			}
-			
+
 
 		}
-		
+
 		return doc;
 	}
 
@@ -118,7 +120,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 		}else if(AD_Table_ID == MMatchInv.Table_ID){//472
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_MatchInvJP";
 		}else if(AD_Table_ID == MAllocationHdr.Table_ID){//735
-			className = "jpiere.base.plugin.org.compiere.acct.Doc_AllocationHdrJP";			
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_AllocationHdrJP";
 		}else if(AD_Table_ID == MBankStatement.Table_ID){//392
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_BankStatementJP";
 		}else if(AD_Table_ID == MRecognition.Table_ID){
@@ -135,7 +137,8 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPContract";
 		}else if(AD_Table_ID == MContractContent.Table_ID){
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPContractContent";
-
+		}else if(AD_Table_ID == MContractProcSchedule.Table_ID){
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPContractProcSchedule";
 		}else {
 			return null;
 		}

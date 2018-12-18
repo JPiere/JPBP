@@ -24,14 +24,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractLogDetail
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171014L;
+	private static final long serialVersionUID = 20181209L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -459,6 +459,81 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 		return ii.intValue();
 	}
 
+	public I_JP_ContractPSInOutLine getJP_ContractPSInOutLine() throws RuntimeException
+    {
+		return (I_JP_ContractPSInOutLine)MTable.get(getCtx(), I_JP_ContractPSInOutLine.Table_Name)
+			.getPO(getJP_ContractPSInOutLine_ID(), get_TrxName());	}
+
+	/** Set JP_ContractPSInOutLine.
+		@param JP_ContractPSInOutLine_ID JP_ContractPSInOutLine	  */
+	public void setJP_ContractPSInOutLine_ID (int JP_ContractPSInOutLine_ID)
+	{
+		if (JP_ContractPSInOutLine_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractPSInOutLine_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractPSInOutLine_ID, Integer.valueOf(JP_ContractPSInOutLine_ID));
+	}
+
+	/** Get JP_ContractPSInOutLine.
+		@return JP_ContractPSInOutLine	  */
+	public int getJP_ContractPSInOutLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractPSInOutLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractPSInvoiceLine getJP_ContractPSInvoiceLine() throws RuntimeException
+    {
+		return (I_JP_ContractPSInvoiceLine)MTable.get(getCtx(), I_JP_ContractPSInvoiceLine.Table_Name)
+			.getPO(getJP_ContractPSInvoiceLine_ID(), get_TrxName());	}
+
+	/** Set JP_ContractPSInvoiceLine.
+		@param JP_ContractPSInvoiceLine_ID JP_ContractPSInvoiceLine	  */
+	public void setJP_ContractPSInvoiceLine_ID (int JP_ContractPSInvoiceLine_ID)
+	{
+		if (JP_ContractPSInvoiceLine_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractPSInvoiceLine_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractPSInvoiceLine_ID, Integer.valueOf(JP_ContractPSInvoiceLine_ID));
+	}
+
+	/** Get JP_ContractPSInvoiceLine.
+		@return JP_ContractPSInvoiceLine	  */
+	public int getJP_ContractPSInvoiceLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractPSInvoiceLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractPSLine getJP_ContractPSLine() throws RuntimeException
+    {
+		return (I_JP_ContractPSLine)MTable.get(getCtx(), I_JP_ContractPSLine.Table_Name)
+			.getPO(getJP_ContractPSLine_ID(), get_TrxName());	}
+
+	/** Set Contract Process Schedule Line.
+		@param JP_ContractPSLine_ID Contract Process Schedule Line	  */
+	public void setJP_ContractPSLine_ID (int JP_ContractPSLine_ID)
+	{
+		if (JP_ContractPSLine_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractPSLine_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractPSLine_ID, Integer.valueOf(JP_ContractPSLine_ID));
+	}
+
+	/** Get Contract Process Schedule Line.
+		@return Contract Process Schedule Line	  */
+	public int getJP_ContractPSLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractPSLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException
     {
 		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
@@ -479,6 +554,31 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public int getJP_ContractProcPeriod_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPeriod_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_ContractProcSchedule getJP_ContractProcSchedule() throws RuntimeException
+    {
+		return (I_JP_ContractProcSchedule)MTable.get(getCtx(), I_JP_ContractProcSchedule.Table_Name)
+			.getPO(getJP_ContractProcSchedule_ID(), get_TrxName());	}
+
+	/** Set Contract Process Schedule Doc.
+		@param JP_ContractProcSchedule_ID Contract Process Schedule Doc	  */
+	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID)
+	{
+		if (JP_ContractProcSchedule_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, Integer.valueOf(JP_ContractProcSchedule_ID));
+	}
+
+	/** Get Contract Process Schedule Doc.
+		@return Contract Process Schedule Doc	  */
+	public int getJP_ContractProcSchedule_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcSchedule_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
