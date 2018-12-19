@@ -25,10 +25,8 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
-import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
-import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 
 
@@ -234,208 +232,44 @@ public class DefaultContractProcessCreateBaseOrder extends AbstractContractProce
 	}//doIt()
 
 
+	/**
+	 *
+	 * Check Create Doc Line or Not.
+	 *
+	 * @param contractLine
+	 * @param JP_ContractProcPeriod_ID
+	 * @param isCreateLog
+	 * @return
+	 */
 	private boolean isCreateDocLine(MContractLine contractLine, int JP_ContractProcPeriod_ID, boolean isCreateLog)
 	{
-		if(!contractLine.isCreateDocLineJP())
+
+		String logMsg = AbstractContractProcess.getSkipReason_CreateBaseOrderLine(getCtx(), m_ContractContent, contractLine, JP_ContractProcPeriod_ID, true, get_TrxName());
+
+		if(logMsg == null)
 		{
-			if(isCreateLog)
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse, contractLine, null, null);
-
-			return false;
-		}
-
-		if(!m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			return true;
 
-		//Check Overlap
-		MOrderLine[] oLines = contractLine.getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
-		if(oLines != null && oLines.length > 0)
-		{
-			if(isCreateLog)
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod, contractLine, oLines[0], null);
-
-			return false;
 		}
 
-
-		//Check Base Doc Line
-		if(contractLine.getJP_BaseDocLinePolicy() != null &&
-				( m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual)
-				||  !m_ContractContent.getOrderType().equals(MContractContent.ORDERTYPE_StandardOrder)) )
+		if(isCreateLog)
 		{
-			//Lump
-			if(contractLine.getJP_BaseDocLinePolicy().equals(MContractLine.JP_BASEDOCLINEPOLICY_LumpOnACertainPointOfContractProcessPeriod))
+			if (logMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod))
 			{
-				MContractProcPeriod lump_ContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Lump_ID());
-				if(!lump_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
+				MOrderLine[] oLines = contractLine.getOrderLineByContractPeriod(getCtx(), JP_ContractProcPeriod_ID, get_TrxName());
+				if(oLines != null && oLines.length > 0)
 				{
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, null);
-
-					return false;
+					createContractLogDetail(logMsg, contractLine, oLines[0], null);
 				}
-			}
 
-			//Start Period
-			if(contractLine.getJP_BaseDocLinePolicy().equals(MContractLine.JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriod)
-					||contractLine.getJP_BaseDocLinePolicy().equals(MContractLine.JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriodToEnd) )
-			{
-				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_ID());
-				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-				if(contractLine_Period.getStartDate().compareTo(process_Period.getStartDate()) <= 0 )
-				{
-					;//This is OK. contractLine_Period.StartDate <= process_Period.StartDate
-				}else{
+			}else {
 
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, Msg.getElement(getCtx(), "JP_ProcPeriod_Start_ID"));
+				createContractLogDetail(logMsg, contractLine, null, null);
 
-					return false;
-
-				}
-			}
-
-			//End Period
-			if(contractLine.getJP_BaseDocLinePolicy().equals(MContractLine.JP_BASEDOCLINEPOLICY_ToEndContractProcessPeriod)
-					||contractLine.getJP_BaseDocLinePolicy().equals(MContractLine.JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriodToEnd) )
-			{
-				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_ID());
-				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-				if(contractLine_Period.getEndDate().compareTo(process_Period.getEndDate()) >= 0)
-				{
-					;//This is OK.  contractLine_Period.EndDate >= process_Period.EndDate
-				}else{
-
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_ID");
-					return false;
-				}
-			}
-
-			return true;
-
-		}//Check Base Doc Line
-
-
-		//ignore Base doc line info because carete Derivative Doc
-		//Check Derivative Ship/Recipt Doc Line
-		if(m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt) ||
-				m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice) )
-		{
-
-			//Lump
-			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod))
-			{
-				MContractProcPeriod lump_ContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Lump_InOut_ID());
-				if(!lump_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
-				{
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod, contractLine, null, null);
-
-					return false;
-				}
-			}
-
-			//Start Period
-			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod)
-					||contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd) )
-			{
-				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_InOut_ID());
-				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-				if(contractLine_Period.getStartDate().compareTo(process_Period.getStartDate()) <= 0
-						|| contractLine_Period.getStartDate().compareTo(process_Period.getEndDate()) <= 0)
-				{
-					;//This is OK. process_Period.StartDate  >=  contractLine_Period.StartDate <= process_Period.EndDate
-				}else{
-
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID"));
-
-					return false;
-
-				}
-			}
-
-			//End Period
-			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod)
-					||contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd) )
-			{
-				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_InOut_ID());
-				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-				if(contractLine_Period.getEndDate().compareTo(process_Period.getEndDate()) >= 0
-						|| contractLine_Period.getEndDate().compareTo(process_Period.getStartDate()) >= 0)
-				{
-					;//This is OK.  process_Period.StartDate  <=  contractLine_Period.EndDate >= process_Period.EndDate
-				}else{
-
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_InOut_ID");
-
-					return false;
-
-				}
 			}
 		}
 
-		//Check Derivative Invoice Doc Line
-		if(m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice) ||
-				m_ContractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice) )
-		{
-			//Lump
-			if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod))
-			{
-				MContractProcPeriod lump_ContractProcPeriod = MContractProcPeriod.get(getCtx(),contractLine.getJP_ProcPeriod_Lump_Inv_ID());
-				if(!lump_ContractProcPeriod.isContainedBaseDocContractProcPeriod(JP_ContractProcPeriod_ID))
-				{
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod, contractLine, null, null);
+		return false;
 
-					return false;
-				}
-			}
-
-			//Start Period
-			if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod)
-					||contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd) )
-			{
-				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_Inv_ID());
-				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-				if(contractLine_Period.getStartDate().compareTo(process_Period.getStartDate()) <= 0
-						|| contractLine_Period.getStartDate().compareTo(process_Period.getEndDate()) <= 0 )
-				{
-					;//This is OK. process_Period.StartDate  >=  contractLine_Period.StartDate <= process_Period.EndDate
-				}else{
-
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID"));
-
-					return false;
-
-				}
-			}
-
-			//End Period
-			if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod)
-					|| contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd) )
-			{
-				MContractProcPeriod contractLine_Period = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_Inv_ID());
-				MContractProcPeriod process_Period = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
-				if(contractLine_Period.getEndDate().compareTo(process_Period.getEndDate()) >= 0
-						|| contractLine_Period.getEndDate().compareTo(process_Period.getStartDate()) >= 0 )
-				{
-					;//This is OK.  process_Period.StartDate  <=  contractLine_Period.EndDate >= process_Period.EndDate
-
-				}else{
-
-					if(isCreateLog)
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod, contractLine, null, "JP_ProcPeriod_End_Inv_ID");
-
-					return false;
-
-				}
-			}
-		}
-
-		return true;
-	}
+	}//isCreateDocLine
 }

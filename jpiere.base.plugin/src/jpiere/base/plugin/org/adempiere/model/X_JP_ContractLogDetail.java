@@ -31,7 +31,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181209L;
+	private static final long serialVersionUID = 20181219L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -419,6 +419,12 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_Skipped = "B9";
 	/** Warning = W9 */
 	public static final String JP_CONTRACTLOGMSG_Warning = "W9";
+	/** Skipped for Not Period Contract = BA */
+	public static final String JP_CONTRACTLOGMSG_SkippedForNotPeriodContract = "BA";
+	/** Skipped for Different Contract Process = BB */
+	public static final String JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess = "BB";
+	/** Skipped for Different Contract Calender = BC */
+	public static final String JP_CONTRACTLOGMSG_SkippedForDifferentContractCalender = "BC";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)
