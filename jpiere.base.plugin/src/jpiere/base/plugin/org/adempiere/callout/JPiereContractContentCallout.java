@@ -22,10 +22,14 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrgInfo;
+import org.compiere.model.MPriceList;
+import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+import jpiere.base.plugin.org.adempiere.model.I_JP_ContractContent;
+import jpiere.base.plugin.org.adempiere.model.I_JP_ContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractCalenderList;
@@ -240,6 +244,40 @@ public class JPiereContractContentCallout implements IColumnCallout {
 					}
 				}//for
 			}
+		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateDoc") ){
+
+			Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
+			if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)
+				return "";
+
+			MPriceList pl = MPriceList.get(ctx, M_PriceList_ID, null);
+			if (pl != null && pl.getM_PriceList_ID() == M_PriceList_ID)
+			{
+
+				//	Tax Included
+				mTab.setValue("IsTaxIncluded", pl.isTaxIncluded());
+				//	Currency
+				mTab.setValue("C_Currency_ID", pl.getC_Currency_ID());
+
+				//	Price Limit Enforce
+				Env.setContext(ctx, WindowNo, "EnforcePriceLimit", pl.isEnforcePriceLimit());
+
+				//PriceList Version
+				Timestamp date = null;
+				if (mTab.getAD_Table_ID() == I_JP_ContractContent.Table_ID)
+					date =(Timestamp)mTab.getValue("DateDoc");
+				else if (mTab.getAD_Table_ID() == I_JP_ContractContentT.Table_ID)
+					date = Env.getContextAsDate(ctx, "@#Date@");
+
+				MPriceListVersion plv = pl.getPriceListVersion(date);
+				if (plv != null && plv.getM_PriceList_Version_ID() > 0) {
+					Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", plv.getM_PriceList_Version_ID());
+				} else {
+					Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", (String) null);
+				}
+
+			}//if
+
 		}
 
 		return "";

@@ -13,12 +13,15 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.callout;
 
+import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MInOut;
+import org.compiere.model.MPriceList;
+import org.compiere.model.MPriceListVersion;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -47,14 +50,46 @@ public class JPiereRecognitionCallout implements IColumnCallout {
 						+ Msg.getMsg(Env.getCtx(), "JP_ToBeConfirmed") + "  " + Msg.getElement(Env.getCtx(), "JP_ContractType");
 				return msg;
 			}
-			
+
 			mTab.setValue("JP_Contract_ID", io.get_Value("JP_Contract_ID"));
 			mTab.setValue("JP_ContractContent_ID", io.get_Value("JP_ContractContent_ID"));
 			mTab.setValue("JP_ContractProcPeriod_ID", io.get_Value("JP_ContractProcPeriod_ID"));
+
+
+		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateDoc") ){
+
+			Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
+			if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)
+				return "";
+
+			MPriceList pl = MPriceList.get(ctx, M_PriceList_ID, null);
+			if (pl != null && pl.getM_PriceList_ID() == M_PriceList_ID)
+			{
+
+				//	Tax Included
+				mTab.setValue("IsTaxIncluded", pl.isTaxIncluded());
+				//	Currency
+				mTab.setValue("C_Currency_ID", pl.getC_Currency_ID());
+
+				//	Price Limit Enforce
+				Env.setContext(ctx, WindowNo, "EnforcePriceLimit", pl.isEnforcePriceLimit());
+
+				//PriceList Version
+				Timestamp date =(Timestamp)mTab.getValue("DateOrdered");
+
+				MPriceListVersion plv = pl.getPriceListVersion(date);
+				if (plv != null && plv.getM_PriceList_Version_ID() > 0) {
+					Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", plv.getM_PriceList_Version_ID());
+				} else {
+					Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", (String) null);
+				}
+
+			}//if
+
 		}
 
 		return "";
+
 	}
-	
 
 }

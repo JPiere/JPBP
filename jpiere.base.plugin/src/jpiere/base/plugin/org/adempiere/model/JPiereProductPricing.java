@@ -54,6 +54,8 @@ import org.compiere.util.Env;
 import org.compiere.util.Trace;
 
 /**
+ *  IDEMPIERE-2825 Prices and Conditions & JPIERE-0363 Contract Management
+ *
  *  Product Price Calculations
  *
  *  @author Jorg Janke
@@ -883,6 +885,7 @@ public class JPiereProductPricing extends MProductPricing
 	public void setM_PriceList_Version_ID (int M_PriceList_Version_ID)
 	{
 		super.setM_PriceList_Version_ID(M_PriceList_Version_ID);
+		m_M_PriceList_Version_ID = M_PriceList_Version_ID;
 		m_calculated = false;
 	}	//	setM_PriceList_Version_ID
 
