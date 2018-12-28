@@ -1196,7 +1196,7 @@ public class CallContractProcess extends SvrProcess {
 	 * @param procPeriod
 	 * @throws Exception
 	 */
-	private void callCreateBaseDocIndirectly(MContractContent contractContent, MContractProcPeriod procPeriod) throws Exception //TODO ロジック修正
+	private void callCreateBaseDocIndirectly(MContractContent contractContent, MContractProcPeriod procPeriod) throws Exception
 	{
 		ProcessInfo pi = new ProcessInfo("CreateBaseDoc", 0);
 		String className = null;
@@ -1204,7 +1204,7 @@ public class CallContractProcess extends SvrProcess {
 		{
 			if(Util.isEmpty(MContractProcess.get(getCtx(), contractContent.getJP_ContractProcess_ID()).getJP_IndirectContractProcClass()))
 			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseOrderIndirectly";//TODO
+				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseOrderIndirectly";
 
 			}else{
 				className = contractContent.getJP_ContractProcess().getJP_IndirectContractProcClass();
@@ -1215,7 +1215,7 @@ public class CallContractProcess extends SvrProcess {
 		{
 			if(Util.isEmpty(MContractProcess.get(getCtx(), contractContent.getJP_ContractProcess_ID()).getJP_IndirectContractProcClass()))
 			{
-				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseInvoiceIndirectly";//TODO
+				className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateBaseInvoiceIndirectly";
 
 			}else{
 				className = contractContent.getJP_ContractProcess().getJP_IndirectContractProcClass();

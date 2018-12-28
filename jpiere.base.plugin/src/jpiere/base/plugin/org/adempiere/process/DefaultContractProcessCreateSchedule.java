@@ -141,12 +141,16 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 
 		if(isOK)
 		{
-			m_ContractContent.setIsScheduleCreatedJP(true);
-			try {
-				m_ContractContent.saveEx(get_TrxName());
-			}catch (Exception e) {
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
-				throw e;
+			if(!m_ContractContent.isScheduleCreatedJP())
+			{
+				m_ContractContent.setIsScheduleCreatedJP(true);
+				try {
+					m_ContractContent.saveEx(get_TrxName());
+				}catch (Exception e) {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
+					throw e;
+				}
+
 			}
 
 		}
@@ -274,9 +278,9 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 
 		if(isOK)
 		{
-			if(p_DocAction != null)
+			if(getDocAction() != null)
 			{
-				if(contractProcSchedule.processIt(p_DocAction))
+				if(contractProcSchedule.processIt(getDocAction()))
 				{
 					try {
 						contractProcSchedule.saveEx(get_TrxName());

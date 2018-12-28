@@ -16,10 +16,10 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.compiere.model.MOrderLine;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
-import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -28,7 +28,6 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractPSLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcSchedule;
-import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 
 
 /**
@@ -37,7 +36,7 @@ import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 * @author Hideaki Hagiwara
 *
 */
-public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractContractProcess
+public class DefaultContractProcessCreateBaseInvoiceIndirectly extends AbstractContractProcess
 {
 
 	@Override
@@ -87,26 +86,25 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 			}
 
 			/** Create Order header */
-			MOrderJP order = new MOrderJP(getCtx(), 0, get_TrxName());
-			PO.copyValues(contractProcSchdules[i], order);
-			order.setProcessed(false);
-			order.setDocStatus(DocAction.STATUS_Drafted);
-			order.setAD_Org_ID(contractProcSchdules[i].getAD_Org_ID());
-			order.setAD_OrgTrx_ID(contractProcSchdules[i].getAD_OrgTrx_ID());
-			order.setDateOrdered(getDateOrdered());
-			order.setDateAcct(getDateAcct());
-			order.setDatePromised(contractProcSchdules[i].getDatePromised()); //DateAcct is basis.
-			order.setDocumentNo(""); //Reset Document No
-			order.setC_DocTypeTarget_ID(contractProcSchdules[i].getJP_BaseDocDocType_ID());
-			order.setC_DocType_ID(contractProcSchdules[i].getJP_BaseDocDocType_ID());
-			order.set_ValueOfColumn("JP_Contract_ID", contractProcSchdules[i].getJP_Contract_ID());
-			order.set_ValueOfColumn("JP_ContractContent_ID", contractProcSchdules[i].getJP_ContractContent_ID());
+			MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
+			PO.copyValues(contractProcSchdules[i], invoice);
+			invoice.setProcessed(false);
+			invoice.setDocStatus(DocAction.STATUS_Drafted);
+			invoice.setAD_Org_ID(contractProcSchdules[i].getAD_Org_ID());
+			invoice.setAD_OrgTrx_ID(contractProcSchdules[i].getAD_OrgTrx_ID());
+			invoice.setDateOrdered(getDateOrdered());
+			invoice.setDateAcct(getDateAcct());
+			invoice.setDocumentNo(""); //Reset Document No
+			invoice.setC_DocTypeTarget_ID(contractProcSchdules[i].getJP_BaseDocDocType_ID());
+			invoice.setC_DocType_ID(contractProcSchdules[i].getJP_BaseDocDocType_ID());
+			invoice.set_ValueOfColumn("JP_Contract_ID", contractProcSchdules[i].getJP_Contract_ID());
+			invoice.set_ValueOfColumn("JP_ContractContent_ID", contractProcSchdules[i].getJP_ContractContent_ID());
 			if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				order.set_ValueOfColumn("JP_ContractProcPeriod_ID", contractProcSchdules[i].getJP_ContractProcPeriod_ID());
+				invoice.set_ValueOfColumn("JP_ContractProcPeriod_ID", contractProcSchdules[i].getJP_ContractProcPeriod_ID());
 
 			try
 			{
-				order.saveEx(get_TrxName());
+				invoice.saveEx(get_TrxName());
 			} catch (AdempiereException e) {
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
 				throw e;
@@ -117,7 +115,7 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 			try
 			{
 				contractProcSchdules[i].setIsFactCreatedJP(true);
-				contractProcSchdules[i].setC_Order_ID(order.getC_Order_ID());
+				contractProcSchdules[i].setC_Invoice_ID(invoice.getC_Invoice_ID());
 				contractProcSchdules[i].saveEx(get_TrxName());
 			} catch (AdempiereException e) {
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, contractProcSchdules[i], e.getMessage());
@@ -128,50 +126,35 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 
 			for(int j = 0; j < contractPSLines.length; j++)
 			{
-				MOrderLine oLine = new MOrderLine(getCtx(), 0, get_TrxName());
-				PO.copyValues(contractPSLines[j], oLine);
-				oLine.setC_Order_ID(order.getC_Order_ID());
-				oLine.setAD_Org_ID(order.getAD_Org_ID());
-				oLine.setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
-				oLine.setProcessed(false);
-
-
-				//
-				if(contractPSLines[j].getC_BPartner_ID() == 0)
-					oLine.setC_BPartner_ID(order.getC_BPartner_ID());
-				if(contractPSLines[j].getC_BPartner_Location_ID() == 0)
-					oLine.setC_BPartner_Location_ID(order.getC_BPartner_Location_ID());
-				oLine.setM_Warehouse_ID(order.getM_Warehouse_ID());
-				oLine.setC_Currency_ID(order.getC_Currency_ID());
+				MInvoiceLine iLine = new MInvoiceLine(getCtx(), 0, get_TrxName());
+				PO.copyValues(contractPSLines[j], iLine);
+				iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
+				iLine.setAD_Org_ID(invoice.getAD_Org_ID());
+				iLine.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
+				iLine.setProcessed(false);
 
 
 				//Qty
 				if(contractPSLines[j].getM_Product_ID() > 0)
 				{
-					oLine.setC_UOM_ID(contractPSLines[j].getM_Product().getC_UOM_ID());
-					oLine.setQtyEntered(contractPSLines[j].getQtyOrdered());
+					iLine.setC_UOM_ID(contractPSLines[j].getM_Product().getC_UOM_ID());
+					iLine.setQtyEntered(contractPSLines[j].getQtyOrdered());
 				}else{
-					oLine.setQtyEntered(contractPSLines[j].getQtyEntered());
+					iLine.setQtyEntered(contractPSLines[j].getQtyEntered());
 
 				}
-				oLine.setQtyOrdered(contractPSLines[j].getQtyOrdered());
-				oLine.setQtyReserved(Env.ZERO);
-				oLine.setQtyDelivered(Env.ZERO);
-				oLine.setQtyInvoiced(Env.ZERO);
+				iLine.setQtyInvoiced(contractPSLines[j].getQtyOrdered());
 
 				//Contract Info
-				oLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSLines[j].getJP_ContractLine_ID());
+				iLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSLines[j].getJP_ContractLine_ID());
 				if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-					oLine.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+					iLine.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 
-				//Date
-				oLine.setDateOrdered(order.getDateOrdered());
-				oLine.setDatePromised(contractPSLines[j].getDatePromised());
 
 				try {
-					oLine.saveEx(get_TrxName());//DocStatus is Draft
+					iLine.saveEx(get_TrxName());//DocStatus is Draft
 				} catch (AdempiereException e) {
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
 					throw e;
 				}finally {
 					;
@@ -180,7 +163,7 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 				try
 				{
 					contractPSLines[j].setIsFactCreatedJP(true);
-					contractPSLines[j].setC_OrderLine_ID(oLine.getC_OrderLine_ID());
+					contractPSLines[j].setC_InvoiceLine_ID(iLine.getC_InvoiceLine_ID());
 					contractPSLines[j].saveEx(get_TrxName());
 				} catch (AdempiereException e) {
 					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, contractPSLines[j], e.getMessage());
@@ -210,19 +193,19 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 			updateContractProcStatus();
 			if(!Util.isEmpty(docAction))
 			{
-				if(!order.processIt(docAction))
+				if(!invoice.processIt(docAction))
 				{
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, order, order.getProcessMsg());
-					throw new AdempiereException(order.getProcessMsg());
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, invoice, invoice.getProcessMsg());
+					throw new AdempiereException(invoice.getProcessMsg());
 				}
 
 				if(!docAction.equals(DocAction.ACTION_Complete))
 				{
-					order.setDocAction(DocAction.ACTION_Complete);
+					invoice.setDocAction(DocAction.ACTION_Complete);
 					try {
-						order.saveEx(get_TrxName());
+						invoice.saveEx(get_TrxName());
 					} catch (AdempiereException e) {
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
 						throw e;
 					}finally {
 						;
@@ -230,11 +213,11 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 				}
 			}else{
 
-				order.setDocAction(DocAction.ACTION_Complete);
+				invoice.setDocAction(DocAction.ACTION_Complete);
 				try {
-					order.saveEx(get_TrxName());//DocStatus is Draft
+					invoice.saveEx(get_TrxName());//DocStatus is Draft
 				} catch (AdempiereException e) {
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
 					throw e;
 				}finally {
 					;
@@ -242,7 +225,7 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 
 			}
 
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, order, null);
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument, null, invoice, null);
 
 		}//for i
 
