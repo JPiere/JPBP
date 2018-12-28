@@ -148,6 +148,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
 				throw e;
 			}
+
 		}
 
 		return "";
@@ -168,6 +169,17 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 	{
 
 		boolean isOK = false;
+
+
+		//Check Overlap Header
+		MContractProcSchedule[] contractProcSchedules = m_ContractContent.getContractProcScheduleByContractPeriod(Env.getCtx(), contractProcPeriod.getJP_ContractProcPeriod_ID(), get_TrxName());
+		if(contractProcSchedules != null && contractProcSchedules.length > 0)
+		{
+			p_JP_ContractProcPeriod_ID = contractProcPeriod.getJP_ContractProcPeriod_ID();
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod, null,  contractProcSchedules[0], null);
+			return false;
+		}//Check Overlap
+
 
 		/** Pre check - Pre judgment create Document or not. */
 		MContractLine[] 	m_lines = m_ContractContent.getLines();
@@ -262,9 +274,9 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 
 		if(isOK)
 		{
-			if(contractProcSchedule.getDocAction() != null)
+			if(p_DocAction != null)
 			{
-				if(contractProcSchedule.processIt(contractProcSchedule.getDocAction()))
+				if(contractProcSchedule.processIt(p_DocAction))
 				{
 					try {
 						contractProcSchedule.saveEx(get_TrxName());

@@ -622,16 +622,38 @@ public abstract class AbstractContractProcess extends SvrProcess
 			if(processUI != null)
 				processUI.statusUpdate(Msg.getMsg(getCtx(), "JP_CreateDocNum") + " : " + (m_ContractLog.createDocNum));
 
-		}else if(TraceLevel.equals(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed) ) {
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped)//B9
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod)//B1
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped)//B2
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDocLineIsFalse)//B3
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheDerivativeDocPeriod)//B4
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForOutsideOfTheBaseDocLinePeriod)//B5
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForCreateDerivativeDocManually)//B6
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusOfOrderIsNotCompleted)//B7
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyOfContractLineIsZero)//B8
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNotPeriodContract)//BA
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess)//BB
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractCalender)//BC
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToDeliver)//C2
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToRecognized)//C3
+
+				) {
 
 			if(ContractLine == null)
 			{
-				m_ContractLog.confirmNum++;
 				m_ContractLog.skipContractContentNum++;
 			}else{
-				m_ContractLog.confirmNum++;
 				m_ContractLog.skipContractLineNum++;
 			}
+
+
+		}
+
+
+		if(TraceLevel.equals(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed) ) {
+
+			m_ContractLog.confirmNum++;
+			m_ContractLog.skipContractContentNum++;
 
 		}else if(TraceLevel.equals(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning)){
 

@@ -148,7 +148,10 @@ public class CallContractProcess extends SvrProcess {
 		try
 		{
 			if(isProcessRunning())
+			{
+				msg = "@Error@" +" : " + Msg.getMsg(getCtx(), "JP_ContractProcessRunningNow");
 				throw new Exception(Msg.getMsg(getCtx(), "JP_ContractProcessRunningNow"));//Contract process is running now by other user.
+			}
 
 			//Create Contract Management Log
 			if(!p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_NoLog))
@@ -197,6 +200,7 @@ public class CallContractProcess extends SvrProcess {
 				contractLogTrx.close();
 				contractLogTrx = null;
 			}
+
 		}
 
 		return  msg;
@@ -1446,9 +1450,17 @@ public class CallContractProcess extends SvrProcess {
 				.list();
 
 		if (processInstanceList == null || processInstanceList.isEmpty())
+		{
 			return false;
-		else
-			return true;
+		}else {
+
+			if(processInstanceList.size() > 1)//Size == 1 is itself because Pinstance was saved already.
+			{
+				return true;
+			}
+		}
+
+		return false;
 
 	}
 

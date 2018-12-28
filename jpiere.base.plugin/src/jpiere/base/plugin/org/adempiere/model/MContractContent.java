@@ -1272,6 +1272,46 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 	/**
 	 *
+	 * Get Contract Process Schedules by Contract Period
+	 *
+	 * @param ctx
+	 * @param JP_ContractProcPeriod_ID
+	 * @param trxName
+	 * @return
+	 */
+	public MContractProcSchedule[] getContractProcScheduleByContractPeriod(Properties ctx, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		ArrayList<MContractProcSchedule> list = new ArrayList<MContractProcSchedule>();
+		final String sql = "SELECT * FROM JP_ContractProcSchedule WHERE JP_ContractContent_ID=? AND JP_ContractProcPeriod_ID=? AND DocStatus NOT IN ('VO','RE')";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, get_ID());
+			pstmt.setInt(2, JP_ContractProcPeriod_ID);
+			rs = pstmt.executeQuery();
+			while(rs.next())
+				list.add(new MContractProcSchedule(getCtx(), rs, trxName));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+
+		MContractProcSchedule[] contractProcSchedules = new MContractProcSchedule[list.size()];
+		list.toArray(contractProcSchedules);
+		return contractProcSchedules;
+	}
+
+	/**
+	 *
 	 * @param ctx
 	 * @param JP_ContractProcPeriod_ID
 	 * @return
