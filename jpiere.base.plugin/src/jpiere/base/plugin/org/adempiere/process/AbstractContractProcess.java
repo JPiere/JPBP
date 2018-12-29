@@ -447,7 +447,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 	protected void createContractLogDetail(String ContractLogMsg, MContractLine ContractLine, PO po, String descriptionMsg)
 	{
-		//A
+		/** A **/
 		if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocument))//A1
 		{
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
@@ -456,7 +456,8 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
 
-		//B
+
+		/** B **/
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod)) {//B1;
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
@@ -505,7 +506,31 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
 
-		//C
+		}else if(ContractLogMsg.equals(	MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated)) { //BD
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
+
+		}else if(ContractLogMsg.equals(	MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsCreated)) { //BE";
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
+
+		}else if(ContractLogMsg.equals(	MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusIsNotCompleted)) { //BF";
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
+
+		}else if(ContractLogMsg.equals(	MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractShipReceiptSchedule)) { //BH";
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
+
+		}else if(ContractLogMsg.equals(	MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractProcessScheduleLines)) { //BG";
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
+
+		}else if(ContractLogMsg.equals(	MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractInvoiceSchedule)) { //BI";
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
+
+		/** C **/
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_CouldNotCreateInvoiceForInvoicedPartly )) {//C1;
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
@@ -518,7 +543,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 
-		//S
+		/** S **/
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_ContractStatusUpdated)) {//S1;
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
@@ -531,7 +556,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 
-		//W
+		/** W **/
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator)) {//W1;
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning);
@@ -634,6 +659,12 @@ public abstract class AbstractContractProcess extends SvrProcess
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNotPeriodContract)//BA
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess)//BB
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractCalender)//BC
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated)//BD
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsCreated)//BE
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusIsNotCompleted)//BF
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractShipReceiptSchedule)//BH
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractProcessScheduleLines)//BG
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractInvoiceSchedule)//BI
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToDeliver)//C2
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToRecognized)//C3
 
@@ -653,7 +684,6 @@ public abstract class AbstractContractProcess extends SvrProcess
 		if(TraceLevel.equals(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed) ) {
 
 			m_ContractLog.confirmNum++;
-			m_ContractLog.skipContractContentNum++;
 
 		}else if(TraceLevel.equals(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Warning)){
 
@@ -1059,9 +1089,53 @@ public abstract class AbstractContractProcess extends SvrProcess
 		return null;
 	}
 
+	static public String getSkipReason_CreateBaseDocIndirectly(Properties ctx, MContractProcSchedule contractProcSchedule, int JP_ContractProcPeriod_ID, boolean isCheckOverlap, String trxName)
+	{
+
+		if(contractProcSchedule.isFactCreatedJP())
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsCreated;//BE
+		}
+
+		if(!contractProcSchedule.getDocStatus().equals(DocAction.STATUS_Completed))
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusIsNotCompleted;//BF
+		}
+
+		MContractPSLine[] contractPSLines = contractProcSchedule.getContractPSLines();
+		if(contractPSLines.length <= 0)
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractProcessScheduleLines;//BG
+
+		}
+
+		//Check Overlap
+		if(isCheckOverlap)
+		{
+			MContractContent cc = MContractContent.get(ctx, contractProcSchedule.getJP_ContractContent_ID());
+			if(cc.getDocBaseType().equals(MContractContent.DOCBASETYPE_SalesOrder) || cc.getDocBaseType().equals(MContractContent.DOCBASETYPE_PurchaseOrder))
+			{
+				MOrder[] oLines = cc.getOrderByContractPeriod(ctx, JP_ContractProcPeriod_ID, trxName);
+				if(oLines != null && oLines.length > 0)
+				{
+					return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod;
+				}
+
+			}else if(cc.getDocBaseType().equals(MContractContent.DOCBASETYPE_ARInvoice) || cc.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice)) {
+
+				MInvoice[] iLines = cc.getInvoiceByContractPeriod(ctx, JP_ContractProcPeriod_ID, trxName);
+				if(iLines != null && iLines.length > 0)
+				{
+					return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedContractProcessForOverlapContractProcessPeriod;
+				}
+			}
+		}
+
+		return null;
+	}
 
 	static public String getSkipReason_CreateDerivativeInOutLine(Properties ctx, MContractContent contractContent, MContractLine contractLine, MOrderLine orderLine
-																									, int JP_ContractProcPeriod_ID,int JP_ContractProcess_ID, boolean isCheckOverlap, String trxName)
+														, int JP_ContractProcPeriod_ID,int JP_ContractProcess_ID, boolean isCheckOverlap, boolean isCheckContractProcess, String trxName)
 	{
 		if(contractContent == null)
 			return MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError;
@@ -1071,9 +1145,12 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 
 		//Check Contract Process
-		if(contractLine.getJP_ContractProcess_InOut_ID() != JP_ContractProcess_ID)
+		if(isCheckContractProcess)
 		{
-			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess;
+			if(contractLine.getJP_ContractProcess_InOut_ID() != JP_ContractProcess_ID)
+			{
+				return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess;
+			}
 		}
 
 		//Check Contract Calender
@@ -1166,8 +1243,35 @@ public abstract class AbstractContractProcess extends SvrProcess
 		return null;
 	}
 
+	static public String getSkipReason_CreateDerivativeInOutIndirectly(Properties ctx, MContractProcSchedule contractProcSchedule, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		if(!contractProcSchedule.isFactCreatedJP())
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated;//BD
+		}
+
+		if(contractProcSchedule.getC_Order_ID() == 0)
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated;//BD
+		}
+
+		if(!contractProcSchedule.getDocStatus().equals(DocAction.STATUS_Completed))
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusIsNotCompleted;//BF
+		}
+
+
+		MContractPSInOutLine[] contractPSInOutLines = contractProcSchedule.getContractPSInOutLines(JP_ContractProcPeriod_ID, false);
+		if(contractPSInOutLines.length <= 0)
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractShipReceiptSchedule;//BH
+		}
+
+		return null;
+	}
+
 	static public String getSkipReason_CreateDerivativeInvoiceLine(Properties ctx, MContractContent contractContent, MContractLine contractLine, MOrderLine orderLine
-																						, int JP_ContractProcPeriod_ID,int JP_ContractProcess_ID, boolean isCheckOverlap, String trxName)
+															, int JP_ContractProcPeriod_ID,int JP_ContractProcess_ID, boolean isCheckOverlap, boolean isCheckContractProcess, String trxName)
 	{
 		if(contractContent == null)
 			return MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError;
@@ -1176,10 +1280,14 @@ public abstract class AbstractContractProcess extends SvrProcess
 			return MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError;
 
 		//Check Contract Process
-		if(contractLine.getJP_ContractProcess_Inv_ID() != JP_ContractProcess_ID)
+		if(isCheckContractProcess)
 		{
-			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess;
+			if(contractLine.getJP_ContractProcess_Inv_ID() != JP_ContractProcess_ID)
+			{
+				return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess;
+			}
 		}
+
 
 		//Check Contract Calender
 		MContractProcPeriod processPeriod = MContractProcPeriod.get(ctx, JP_ContractProcPeriod_ID);
@@ -1262,6 +1370,33 @@ public abstract class AbstractContractProcess extends SvrProcess
 			{
 				return MContractLogDetail.JP_CONTRACTLOGMSG_OverOrderedQuantity;
 			}
+		}
+
+		return null;
+	}
+
+	static public String getSkipReason_CreateDerivativeInvoiceIndirectly(Properties ctx, MContractProcSchedule contractProcSchedule, int JP_ContractProcPeriod_ID, String trxName)
+	{
+		if(!contractProcSchedule.isFactCreatedJP())
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated;//BD
+		}
+
+		if(contractProcSchedule.getC_Order_ID() == 0)
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated;//BD
+		}
+
+		if(!contractProcSchedule.getDocStatus().equals(DocAction.STATUS_Completed))
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusIsNotCompleted;//BF
+		}
+
+
+		MContractPSInvoiceLine[] contractPSInvoiceLines = contractProcSchedule.getContractPSInvoiceLines(JP_ContractProcPeriod_ID, false);
+		if(contractPSInvoiceLines.length <= 0)
+		{
+			return MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractInvoiceSchedule;//BI
 		}
 
 		return null;

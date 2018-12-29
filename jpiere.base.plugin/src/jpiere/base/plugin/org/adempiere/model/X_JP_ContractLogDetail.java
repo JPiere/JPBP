@@ -31,7 +31,7 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181219L;
+	private static final long serialVersionUID = 20181229L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -425,6 +425,18 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_SkippedForDifferentContractProcess = "BB";
 	/** Skipped for Different Contract Calender = BC */
 	public static final String JP_CONTRACTLOGMSG_SkippedForDifferentContractCalender = "BC";
+	/** Skipped for Base Doc is not created = BD */
+	public static final String JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated = "BD";
+	/** Skipped for Document Status is not Completed = BF */
+	public static final String JP_CONTRACTLOGMSG_SkippedForDocumentStatusIsNotCompleted = "BF";
+	/** Skipped for No Contract Ship/Receipt Schedule = BH */
+	public static final String JP_CONTRACTLOGMSG_SkippedForNoContractShipReceiptSchedule = "BH";
+	/** Skipped for Base Doc is created = BE */
+	public static final String JP_CONTRACTLOGMSG_SkippedForBaseDocIsCreated = "BE";
+	/** Skipped for No Contract Process Schedule Lines = BG */
+	public static final String JP_CONTRACTLOGMSG_SkippedForNoContractProcessScheduleLines = "BG";
+	/** Skipped for No Contract Invoice Schedule = BI */
+	public static final String JP_CONTRACTLOGMSG_SkippedForNoContractInvoiceSchedule = "BI";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)

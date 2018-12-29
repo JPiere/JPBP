@@ -265,7 +265,7 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 
 		MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
 
-		String logMsg = getSkipReason_CreateDerivativeInOutLine(getCtx(), m_ContractContent, contractLine, orderLine , JP_ContractProcPeriod_ID, getJP_ContractProcess_ID(), true, get_TrxName());
+		String logMsg = getSkipReason_CreateDerivativeInOutLine(getCtx(), m_ContractContent, contractLine, orderLine , JP_ContractProcPeriod_ID, getJP_ContractProcess_ID(), true, true, get_TrxName());
 
 
 		if(logMsg == null)

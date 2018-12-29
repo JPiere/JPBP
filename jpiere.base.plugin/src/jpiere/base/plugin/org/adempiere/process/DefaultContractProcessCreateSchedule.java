@@ -834,7 +834,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
 
 
-		String logMsg = getSkipReason_CreateDerivativeInOutLine(getCtx(), m_ContractContent, contractLine, null , JP_ContractProcPeriod_ID, getJP_ContractProcess_ID(), false, get_TrxName());
+		String logMsg = getSkipReason_CreateDerivativeInOutLine(getCtx(), m_ContractContent, contractLine, null , JP_ContractProcPeriod_ID, getJP_ContractProcess_ID(), false, false, get_TrxName());
 
 		if(logMsg == null)
 		{
@@ -876,7 +876,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		MContractLine contractLine = MContractLine.get(getCtx(), JP_ContractLine_ID);
 
 
-		String logMsg = getSkipReason_CreateDerivativeInvoiceLine(getCtx(), m_ContractContent, contractLine, null , JP_ContractProcPeriod_ID, getJP_ContractProcess_ID(), false, get_TrxName());
+		String logMsg = getSkipReason_CreateDerivativeInvoiceLine(getCtx(), m_ContractContent, contractLine, null , JP_ContractProcPeriod_ID, getJP_ContractProcess_ID(), false, false, get_TrxName());
 
 		if(logMsg == null)
 		{

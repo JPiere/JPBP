@@ -82,43 +82,24 @@ public class DefaultContractProcessCreateDerivativeInOutIndirectly extends Abstr
 		}
 
 
-		MContractProcSchedule[] contractProcSchdules= MContractProcSchedule.getMContractProcSchedules(m_ContractContent.getJP_ContractContent_ID(), JP_ContractProcPeriod_ID, get_TrxName());
-		for(int i = 0;  i < contractProcSchdules.length; i++)
+		MContractProcSchedule[] contractProcSchedules= MContractProcSchedule.getMContractProcSchedules(m_ContractContent.getJP_ContractContent_ID(), JP_ContractProcPeriod_ID, get_TrxName());
+		for(int i = 0;  i < contractProcSchedules.length; i++)
 		{
 
-			if(!contractProcSchdules[i].isFactCreatedJP())
+			String msg = getSkipReason_CreateDerivativeInOutIndirectly(getCtx(), contractProcSchedules[i], JP_ContractProcPeriod_ID, get_TrxName());
+			if(msg != null)
 			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], "基点となる伝票が作成されていません。");//TODO
-				continue;
-			}
-
-			if(contractProcSchdules[i].getC_Order_ID() == 0)
-			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], "基点となる伝票が作成されていません。");//TODO
-				continue;
-			}
-
-			if(!contractProcSchdules[i].getDocStatus().equals(DocAction.STATUS_Completed))
-			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], "伝票は完成されていません。");//TODO
+				createContractLogDetail(msg, null, contractProcSchedules[i], null);
 				continue;
 			}
 
 
-			MContractPSInOutLine[] contractPSInOutLines = contractProcSchdules[i].getContractPSInOutLines(JP_ContractProcPeriod_ID, false);
-			if(contractPSInOutLines.length <= 0)
-			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], "作成対象となる契約入出荷予定明細がありません");//TODO
-				continue;
-			}
-
-
-			MOrder order = new MOrder(getCtx(), contractProcSchdules[i].getC_Order_ID(), get_TrxName());
+			MOrder order = new MOrder(getCtx(), contractProcSchedules[i].getC_Order_ID(), get_TrxName());
 
 			//Check Order
 			if(!order.getDocStatus().equals(DocAction.ACTION_Complete))
 			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], "基点となる伝票は完成されていません。");//TODO
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusOfOrderIsNotCompleted, null, order, null);
 				continue;
 			}
 
@@ -144,13 +125,14 @@ public class DefaultContractProcessCreateDerivativeInOutIndirectly extends Abstr
 			try{
 				inout.saveEx(get_TrxName());
 			} catch (AdempiereException e) {
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, contractProcSchdules[i], e.getMessage());
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, contractProcSchedules[i], e.getMessage());
 				throw e;
 			}finally {
 				;
 			}
 
 
+			MContractPSInOutLine[] contractPSInOutLines = contractProcSchedules[i].getContractPSInOutLines(JP_ContractProcPeriod_ID, false);
 			for(int j = 0; j < contractPSInOutLines.length; j++)
 			{
 

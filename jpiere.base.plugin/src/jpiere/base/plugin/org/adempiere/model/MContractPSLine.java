@@ -18,8 +18,11 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MColumn;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
@@ -44,8 +47,52 @@ public class MContractPSLine extends X_JP_ContractPSLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		if(!newRecord && isFactCreatedJP() && !is_ValueChanged("IsFactCreatedJP"))
+		{
+			int columnCount = get_ColumnCount();
+			String columnName = null;
+			MColumn column = null;
+			boolean isOk = true;
+			for(int i = 0; i < columnCount; i++)
+			{
+				if(is_ValueChanged(i))
+				{
+					columnName = get_ColumnName(i);
+					if(columnName.equals("IsFactCreatedJP")) {
+						continue;
+					}else if(columnName.equals("QtyEntered") || columnName.equals("QtyOrdered")) {
+
+						if(getParent().getDocBaseType().equals(MContractProcSchedule.DOCBASETYPE_ARInvoice) ||getParent().getDocBaseType().equals(MContractProcSchedule.DOCBASETYPE_APInvoice))
+						{
+							break;
+						}else {
+
+							break;//TODO:数量更新のロジック実装?
+						}
+					}
+
+					column = MColumn.get(getCtx(), Table_Name, columnName);
+					if(column.isAlwaysUpdateable())
+					{
+						continue;
+					}else {
+						isOk = false;
+						break;
+					}
+				}
+
+			}//for
+
+			if(!isOk)
+			{
+				log.saveError("Error",  Msg.getMsg(Env.getCtx(),"JP_CannotChangeField",new Object[]{Msg.getElement(Env.getCtx(), columnName)})+ " : " + Msg.getElement(getCtx(), "IsFactCreatedJP"));
+				return false;
+			}
+		}
+
 		return true;
 	}
+
 
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)

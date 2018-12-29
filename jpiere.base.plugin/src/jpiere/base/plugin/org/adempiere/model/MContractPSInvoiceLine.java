@@ -17,7 +17,9 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.model.MColumn;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
@@ -41,13 +43,50 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		if(!newRecord && isFactCreatedJP() && !is_ValueChanged("IsFactCreatedJP") )
+		{
+			int columnCount = get_ColumnCount();
+			String columnName = null;
+			MColumn column = null;
+			boolean isOk = true;
+			for(int i = 0; i < columnCount; i++)
+			{
+				if(is_ValueChanged(i))
+				{
+					columnName = get_ColumnName(i);
+					if(columnName.equals("IsFactCreatedJP"))
+						continue;
+
+					column = MColumn.get(getCtx(), Table_Name, columnName);
+					if(column.isAlwaysUpdateable())
+					{
+						continue;
+					}else {
+						isOk = false;
+						break;
+					}
+				}
+
+			}//for
+
+			if(!isOk)
+			{
+				log.saveError("Error",  Msg.getMsg(Env.getCtx(),"JP_CannotChangeField",new Object[]{Msg.getElement(Env.getCtx(), columnName)})+ " : " + Msg.getElement(getCtx(), "IsFactCreatedJP"));
+				return false;
+			}
+		}
+
 		//Check JP_ContractProcPeriod_ID
 		if(newRecord || is_ValueChanged("JP_ContractProcPeriod_ID"))
 		{
 
 			if(getJP_ContractLine().getJP_ContractCalender_Inv_ID() != getJP_ContractCalender_Inv_ID())
 			{
-				log.saveError("Error", "契約内容明細とカレンダーが異なります。");//TODO:エラー
+				//Different between {0} and {1}
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractPSInvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
 				return false;
 			}
 
@@ -66,7 +105,11 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 		{
 			if(getJP_ContractLine().getM_Product_ID() != getM_Product_ID())
 			{
-				log.saveError("Error", "契約内容明細と品目が異なります。");//TODO:エラー
+				//Different between {0} and {1}
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractPSInvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
+
+				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
 				return false;
 			}
 		}
@@ -77,8 +120,14 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 		{
 			if(getJP_ContractLine().getC_Charge_ID() != getC_Charge_ID())
 			{
-				log.saveError("Error", "契約内容明細と摘要科目が異なります。");//TODO:エラー
-				return false;
+				if(getJP_ContractLine().getC_Charge_ID() != getC_Charge_ID())
+				{
+					String msg0 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")+" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
+					String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractPSInvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
+
+					log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
+					return false;
+				}
 			}
 		}
 

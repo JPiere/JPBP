@@ -284,40 +284,40 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	}	//	setOrderLine
 
 	/**
-	 * 	Set values from Shipment Line.
+	 * 	Set values from InOut Line.
 	 * 	Does not set quantity!
-	 *	@param sLine ship line
+	 *	@param ioLine Inout line
 	 */
-	public void setRecogLine (MInOutLine sLine)
+	public void setRecogLine (MInOutLine ioLine)
 	{
-		setM_InOutLine_ID(sLine.getM_InOutLine_ID());
-		setC_OrderLine_ID(sLine.getC_OrderLine_ID());
+		setM_InOutLine_ID(ioLine.getM_InOutLine_ID());
+		setC_OrderLine_ID(ioLine.getC_OrderLine_ID());
 		// Set RMALine ID if shipment/receipt is based on RMA Doc
-        setM_RMALine_ID(sLine.getM_RMALine_ID());
+        setM_RMALine_ID(ioLine.getM_RMALine_ID());
 
 		//
-		setLine(sLine.getLine());
-		setIsDescription(sLine.isDescription());
-		setDescription(sLine.getDescription());
+		setLine(ioLine.getLine());
+		setIsDescription(ioLine.isDescription());
+		setDescription(ioLine.getDescription());
 		//
-		setM_Product_ID(sLine.getM_Product_ID());
-		if (sLine.sameOrderLineUOM() || getProduct() == null)
-			setC_UOM_ID(sLine.getC_UOM_ID());
+		setM_Product_ID(ioLine.getM_Product_ID());
+		if (ioLine.sameOrderLineUOM() || getProduct() == null)
+			setC_UOM_ID(ioLine.getC_UOM_ID());
 		else
 			// use product UOM if the shipment hasn't the same uom than the order
 			setC_UOM_ID(getProduct().getC_UOM_ID());
-		setM_AttributeSetInstance_ID(sLine.getM_AttributeSetInstance_ID());
+		setM_AttributeSetInstance_ID(ioLine.getM_AttributeSetInstance_ID());
 	//	setS_ResourceAssignment_ID(sLine.getS_ResourceAssignment_ID());
 		if(getM_Product_ID() == 0)
-		    setC_Charge_ID(sLine.getC_Charge_ID());
+		    setC_Charge_ID(ioLine.getC_Charge_ID());
 		//
-		int C_OrderLine_ID = sLine.getC_OrderLine_ID();
+		int C_OrderLine_ID = ioLine.getC_OrderLine_ID();
 		if (C_OrderLine_ID != 0)
 		{
 			MOrderLine oLine = new MOrderLine (getCtx(), C_OrderLine_ID, get_TrxName());
 			setS_ResourceAssignment_ID(oLine.getS_ResourceAssignment_ID());
 			//
-			if (sLine.sameOrderLineUOM())
+			if (ioLine.sameOrderLineUOM())
 				setPriceEntered(oLine.getPriceEntered());
 			else
 				setPriceEntered(oLine.getPriceActual());
@@ -330,10 +330,10 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			setC_Project_ID(oLine.getC_Project_ID());
 		}
 		// Check if shipment line is based on RMA
-        else if (sLine.getM_RMALine_ID() != 0)
+        else if (ioLine.getM_RMALine_ID() != 0)
         {
         	// Set Pricing details from the RMA Line on which it is based
-            MRMALine rmaLine = new MRMALine(getCtx(), sLine.getM_RMALine_ID(), get_TrxName());
+            MRMALine rmaLine = new MRMALine(getCtx(), ioLine.getM_RMALine_ID(), get_TrxName());
 
             setPrice();
             setPrice(rmaLine.getAmt());
@@ -346,17 +346,17 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			setTax();
 		}
 		//
-		setC_Project_ID(sLine.getC_Project_ID());
-		setC_ProjectPhase_ID(sLine.getC_ProjectPhase_ID());
-		setC_ProjectTask_ID(sLine.getC_ProjectTask_ID());
-		setC_Activity_ID(sLine.getC_Activity_ID());
-		setC_Campaign_ID(sLine.getC_Campaign_ID());
-		setAD_OrgTrx_ID(sLine.getAD_OrgTrx_ID());
-		setUser1_ID(sLine.getUser1_ID());
-		setUser2_ID(sLine.getUser2_ID());
-		setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID") );
-		setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
-	}	//	setShipLine
+		setC_Project_ID(ioLine.getC_Project_ID());
+		setC_ProjectPhase_ID(ioLine.getC_ProjectPhase_ID());
+		setC_ProjectTask_ID(ioLine.getC_ProjectTask_ID());
+		setC_Activity_ID(ioLine.getC_Activity_ID());
+		setC_Campaign_ID(ioLine.getC_Campaign_ID());
+		setAD_OrgTrx_ID(ioLine.getAD_OrgTrx_ID());
+		setUser1_ID(ioLine.getUser1_ID());
+		setUser2_ID(ioLine.getUser2_ID());
+		setJP_ContractLine_ID(ioLine.get_ValueAsInt("JP_ContractLine_ID") );
+		setJP_ContractProcPeriod_ID(ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID") );
+	}	//	setRecogLine
 
 	/**
 	 * 	Add to Description

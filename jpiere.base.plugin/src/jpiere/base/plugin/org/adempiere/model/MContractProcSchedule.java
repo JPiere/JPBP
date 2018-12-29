@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MColumn;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
@@ -325,7 +326,7 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	{
 		if(isFactCreatedJP())
 		{
-			m_processMsg = "実績が作成されてるのでボイドできません";//TODO
+			m_processMsg = Msg.getMsg(getCtx(), "JP_CannotVoid" + " : " + Msg.getElement(getCtx(), "IsFactCreatedJP"));
 			return false;
 		}
 
@@ -474,6 +475,46 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		if(!newRecord && isFactCreatedJP() && !is_ValueChanged("IsFactCreatedJP") )
+		{
+			int columnCount = get_ColumnCount();
+			String columnName = null;
+			MColumn column = null;
+			boolean isOk = true;
+			for(int i = 0; i < columnCount; i++)
+			{
+				if(is_ValueChanged(i))
+				{
+					columnName = get_ColumnName(i);
+					if(columnName.equals("IsFactCreatedJP"))
+						continue;
+					else if(columnName.equals("DocStatus"))
+						continue;
+					else if(columnName.equals("DocAction"))
+						continue;
+					else if(columnName.equals("Processed"))
+						continue;
+					else if(columnName.equals("Posted"))
+						continue;
+
+					column = MColumn.get(getCtx(), Table_Name, columnName);
+					if(column.isAlwaysUpdateable())
+					{
+						continue;
+					}else {
+						isOk = false;
+						break;
+					}
+				}
+
+			}//for
+
+			if(!isOk)
+			{
+				log.saveError("Error",  Msg.getMsg(Env.getCtx(),"JP_CannotChangeField",new Object[]{Msg.getElement(Env.getCtx(), columnName)})+ " : " + Msg.getElement(getCtx(), "IsFactCreatedJP"));
+				return false;
+			}
+		}
 
 		//Check - General Contract and Spot Contract can not have Contract Process Schedule
 		if(newRecord)

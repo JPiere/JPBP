@@ -43,6 +43,7 @@ import org.compiere.util.Util;
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractPSInOutLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
@@ -236,31 +237,48 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 					return Msg.getMsg(Env.getCtx(),"JP_CouldNotCreate") + " " + Msg.getElement(Env.getCtx(),"JP_Recognition_ID") +" : "+ io.getDocumentInfo();
 				}
 
-				MInOutLine[] sLines = io.getLines(false);
-				for (int i = 0; i < sLines.length; i++)
+				MInOutLine[] ioLines = io.getLines(false);
+				for (int i = 0; i < ioLines.length; i++)
 				{
-					MInOutLine sLine = sLines[i];
+					MInOutLine ioLine = ioLines[i];
 					//
 					MRecognitionLine rcogLine = new MRecognitionLine(recognition);
-					rcogLine.setRecogLine(sLine);
+					rcogLine.setRecogLine(ioLine);
 					if(isRMA)
 					{
-						int M_RMALine_ID = sLine.getM_RMALine_ID();
+						int M_RMALine_ID = ioLine.getM_RMALine_ID();
 						MRMALine rmaLine = new MRMALine(Env.getCtx(),M_RMALine_ID, trxName);
 						int JP_OrderLine_ID = rmaLine.get_ValueAsInt("JP_OrderLine_ID");
 						rcogLine.setC_OrderLine_ID(JP_OrderLine_ID);
 					}
-					rcogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", sLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
+					rcogLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", ioLine.get_Value("JP_ProductExplodeBOM_ID"));//JPIERE-0295
 					//	Qty = Delivered
-					if (sLine.sameOrderLineUOM())
-						rcogLine.setQtyEntered(sLine.getQtyEntered());
+					if (ioLine.sameOrderLineUOM())
+						rcogLine.setQtyEntered(ioLine.getQtyEntered());
 					else
-						rcogLine.setQtyEntered(sLine.getMovementQty());
-					rcogLine.setQtyInvoiced(sLine.getMovementQty());
-					rcogLine.setJP_QtyRecognized(sLine.getMovementQty());
-					rcogLine.setJP_TargetQtyRecognized(sLine.getMovementQty());
-					rcogLine.setJP_ContractLine_ID(sLine.get_ValueAsInt("JP_ContractLine_ID"));
-					rcogLine.setJP_ContractProcPeriod_ID(sLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+						rcogLine.setQtyEntered(ioLine.getMovementQty());
+					rcogLine.setQtyInvoiced(ioLine.getMovementQty());
+					rcogLine.setJP_QtyRecognized(ioLine.getMovementQty());
+					rcogLine.setJP_TargetQtyRecognized(ioLine.getMovementQty());
+					rcogLine.setJP_ContractLine_ID(ioLine.get_ValueAsInt("JP_ContractLine_ID"));
+					rcogLine.setJP_ContractProcPeriod_ID(ioLine.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+
+					MContractPSInOutLine[] cpsIOLines =  MContractPSInOutLine.getContractPSInOutLinebyInOutLine(po.getCtx(), ioLine.getM_InOutLine_ID(), po.get_TrxName());
+					if(cpsIOLines.length > 0)
+					{
+						if(ioLine.getC_UOM_ID() == cpsIOLines[0].getC_UOM_ID())
+						{
+							rcogLine.setPriceEntered(cpsIOLines[0].getPriceEntered());
+							rcogLine.setPriceActual(cpsIOLines[0].getPriceActual());
+
+						}else {
+
+							rcogLine.setPriceEntered(cpsIOLines[0].getPriceActual());
+							rcogLine.setPriceActual(cpsIOLines[0].getPriceActual());
+
+						}
+					}
+
 					if (!rcogLine.save(trxName))
 					{
 						return Msg.getMsg(Env.getCtx(),"JP_CouldNotCreate") + " " + Msg.getElement(Env.getCtx(),"JP_RecognitionLine_ID") +" : "+ recognition.getDocumentInfo();

@@ -63,46 +63,34 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 			return "";
 		}
 
-		MContractProcSchedule[] contractProcSchdules= MContractProcSchedule.getMContractProcSchedules(m_ContractContent.getJP_ContractContent_ID(), JP_ContractProcPeriod_ID, get_TrxName());
-		for(int i = 0;  i < contractProcSchdules.length; i++)
+		MContractProcSchedule[] contractProcSchedules= MContractProcSchedule.getMContractProcSchedules(m_ContractContent.getJP_ContractContent_ID(), JP_ContractProcPeriod_ID, get_TrxName());
+		for(int i = 0;  i < contractProcSchedules.length; i++)
 		{
 
-			if(contractProcSchdules[i].isFactCreatedJP())
+			String msg = getSkipReason_CreateBaseDocIndirectly(getCtx(), contractProcSchedules[i], JP_ContractProcPeriod_ID, false, get_TrxName());
+			if(msg != null)
 			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], Msg.getElement(getCtx(), "IsFactCreatedJP") + " = Y ");
-				continue;
-			}
-
-			if(!contractProcSchdules[i].getDocStatus().equals(DocAction.STATUS_Completed))
-			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], Msg.getElement(getCtx(), "DocStatus") + " = " + contractProcSchdules[i].getDocStatus());
-				continue;
-			}
-
-			MContractPSLine[] contractPSLines = contractProcSchdules[i].getContractPSLines();
-			if(contractPSLines.length <= 0)
-			{
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, null, contractProcSchdules[i], Msg.getMsg(getCtx(),"NoLines"));
+				createContractLogDetail(msg, null, contractProcSchedules[i], null);
 				continue;
 			}
 
 			/** Create Order header */
 			MOrderJP order = new MOrderJP(getCtx(), 0, get_TrxName());
-			PO.copyValues(contractProcSchdules[i], order);
+			PO.copyValues(contractProcSchedules[i], order);
 			order.setProcessed(false);
 			order.setDocStatus(DocAction.STATUS_Drafted);
-			order.setAD_Org_ID(contractProcSchdules[i].getAD_Org_ID());
-			order.setAD_OrgTrx_ID(contractProcSchdules[i].getAD_OrgTrx_ID());
+			order.setAD_Org_ID(contractProcSchedules[i].getAD_Org_ID());
+			order.setAD_OrgTrx_ID(contractProcSchedules[i].getAD_OrgTrx_ID());
 			order.setDateOrdered(getDateOrdered());
 			order.setDateAcct(getDateAcct());
-			order.setDatePromised(contractProcSchdules[i].getDatePromised()); //DateAcct is basis.
+			order.setDatePromised(contractProcSchedules[i].getDatePromised()); //DateAcct is basis.
 			order.setDocumentNo(""); //Reset Document No
-			order.setC_DocTypeTarget_ID(contractProcSchdules[i].getJP_BaseDocDocType_ID());
-			order.setC_DocType_ID(contractProcSchdules[i].getJP_BaseDocDocType_ID());
-			order.set_ValueOfColumn("JP_Contract_ID", contractProcSchdules[i].getJP_Contract_ID());
-			order.set_ValueOfColumn("JP_ContractContent_ID", contractProcSchdules[i].getJP_ContractContent_ID());
+			order.setC_DocTypeTarget_ID(contractProcSchedules[i].getJP_BaseDocDocType_ID());
+			order.setC_DocType_ID(contractProcSchedules[i].getJP_BaseDocDocType_ID());
+			order.set_ValueOfColumn("JP_Contract_ID", contractProcSchedules[i].getJP_Contract_ID());
+			order.set_ValueOfColumn("JP_ContractContent_ID", contractProcSchedules[i].getJP_ContractContent_ID());
 			if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				order.set_ValueOfColumn("JP_ContractProcPeriod_ID", contractProcSchdules[i].getJP_ContractProcPeriod_ID());
+				order.set_ValueOfColumn("JP_ContractProcPeriod_ID", contractProcSchedules[i].getJP_ContractProcPeriod_ID());
 
 			try
 			{
@@ -116,16 +104,17 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 
 			try
 			{
-				contractProcSchdules[i].setIsFactCreatedJP(true);
-				contractProcSchdules[i].setC_Order_ID(order.getC_Order_ID());
-				contractProcSchdules[i].saveEx(get_TrxName());
+				contractProcSchedules[i].setIsFactCreatedJP(true);
+				contractProcSchedules[i].setC_Order_ID(order.getC_Order_ID());
+				contractProcSchedules[i].saveEx(get_TrxName());
 			} catch (AdempiereException e) {
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, contractProcSchdules[i], e.getMessage());
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, contractProcSchedules[i], e.getMessage());
 				throw e;
 			}finally {
 				;
 			}
 
+			MContractPSLine[] contractPSLines = contractProcSchedules[i].getContractPSLines();
 			for(int j = 0; j < contractPSLines.length; j++)
 			{
 				MOrderLine oLine = new MOrderLine(getCtx(), 0, get_TrxName());
