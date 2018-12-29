@@ -64,10 +64,11 @@ public class MContractPSLine extends X_JP_ContractPSLine {
 
 						if(getParent().getDocBaseType().equals(MContractProcSchedule.DOCBASETYPE_ARInvoice) ||getParent().getDocBaseType().equals(MContractProcSchedule.DOCBASETYPE_APInvoice))
 						{
+							isOk = false;
 							break;
 						}else {
 
-							break;//TODO:数量更新のロジック実装?
+							continue;//TODO:Need to implement Update order Line Qty
 						}
 					}
 
