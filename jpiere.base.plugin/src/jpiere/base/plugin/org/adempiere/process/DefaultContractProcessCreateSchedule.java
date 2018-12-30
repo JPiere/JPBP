@@ -86,6 +86,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 			do
 			{
 				contractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From(), null, i);
+				p_JP_ContractProcPeriod_ID = contractProcPeriod.getJP_ContractProcPeriod_ID();
 
 				if(contractProcPeriod.getJP_ContractProcPeriod_ID( ) == firstContractProcPeriod.getJP_ContractProcPeriod_ID()
 						&& contractProcPeriod.getJP_ContractProcPeriod_ID( ) == endContractProcPeriod.getJP_ContractProcPeriod_ID())
@@ -442,14 +443,40 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 	private boolean createContractPSInOutLines(MContractLine contractLine, MContractPSLine contractPSLine, MContractProcPeriod baseDocContractProcPeriod)
 	{
 		MContractCalender contractCalender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_InOut_ID());
-		if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod))
+		if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod)	//DD
+				|| contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd)//PB
+				|| contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod) //PS
+				|| contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod ) )//PE
 		{
 			MContractProcPeriod contractProcPeriod = null;
-			MContractProcPeriod endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
+			MContractProcPeriod startContractProcPeriod = null;
+			MContractProcPeriod endContractProcPeriod = null;
+
+			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod))//DD
+			{
+				startContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From());
+				endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
+
+			}else if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd)) {//PB
+
+				startContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_InOut_ID());
+				endContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_InOut_ID());
+
+			}else if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod)) {//PS
+
+				startContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_InOut_ID());
+				endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
+
+			}else if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod)){//PE
+
+				startContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From());
+				endContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_InOut_ID());
+			}
+
 			int i = 1;
 			do
 			{
-				contractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From(), null, i);
+				contractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), startContractProcPeriod.getDateDoc(), null, i);
 				if(contractProcPeriod.isContainedBaseDocContractProcPeriod(baseDocContractProcPeriod))
 				{
 					if(i == 1)
@@ -470,7 +497,13 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 
 			}while(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID());
 
+		}else if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod)) {//LP
+
+			MContractProcPeriod contractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Lump_InOut_ID());
+			createContractPSInOutLine(contractLine, contractPSLine, baseDocContractProcPeriod, contractProcPeriod, true, true, 1);
+
 		}
+
 
 		return true;
 
@@ -492,9 +525,9 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 													, MContractProcPeriod contractProcPeriod, boolean isFirstPeriod, boolean isLastPeriod, int loopCounter)
 	{
 
-		if(!isCreateContractPSInOutLine(contractPSLine, baseDocContractProcPeriod.getJP_ContractProcPeriod_ID(), false))
+		if(!isCreateContractPSInOutLine(contractPSLine, contractProcPeriod.getJP_ContractProcPeriod_ID(), false))
 		{
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, contractPSLine, null);
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, contractPSLine, Msg.getElement(getCtx(), "JP_ContractPSInOutLine_ID"));
 			return true;
 		}
 
@@ -598,15 +631,41 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 	{
 		MContractCalender contractCalender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_Inv_ID());
 
-		if(contractLine.getJP_DerivativeDocPolicy_InOut().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod))
+		if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod)	//DD
+			|| contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd)//PB
+			|| contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod) //PS
+			|| contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod ) )//PE
 		{
 			MContractProcPeriod contractProcPeriod = null;
-			MContractProcPeriod endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
+			MContractProcPeriod startContractProcPeriod = null;
+			MContractProcPeriod endContractProcPeriod = null;
+
+			if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod))//DD
+			{
+				startContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From());
+				endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
+
+			}else if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd)) {//PB
+
+				startContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_Inv_ID());
+				endContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_Inv_ID());
+
+			}else if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod)) {//PS
+
+				startContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Start_Inv_ID());
+				endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
+
+			}else if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod)){//PE
+
+				startContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From());
+				endContractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_End_Inv_ID());
+			}
+
 
 			int i = 1;
 			do
 			{
-				contractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_From(), null, i);
+				contractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), startContractProcPeriod.getDateDoc(), null, i);
 				if(contractProcPeriod.isContainedBaseDocContractProcPeriod(baseDocContractProcPeriod))
 				{
 					if(i == 1)
@@ -626,6 +685,11 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 				i++;
 
 			}while(contractProcPeriod.getJP_ContractProcPeriod_ID( ) != endContractProcPeriod.getJP_ContractProcPeriod_ID());
+
+		}else if(contractLine.getJP_DerivativeDocPolicy_Inv().equals(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod)) {//LP
+
+			MContractProcPeriod contractProcPeriod = MContractProcPeriod.get(getCtx(), contractLine.getJP_ProcPeriod_Lump_Inv_ID());
+			createContractPSInvoiceLine(contractLine, contractPSLine, baseDocContractProcPeriod, contractProcPeriod, true, true, 1);
 
 		}
 
@@ -650,9 +714,9 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 	private boolean createContractPSInvoiceLine( MContractLine contractLine, MContractPSLine contractPSLine, MContractProcPeriod baseDocContractProcPeriod
 															, MContractProcPeriod contractProcPeriod, boolean isFirstPeriod, boolean isLastPeriod, int loopCounter)
 	{
-		if(!isCreateContractPSInvoiceLine(contractPSLine, baseDocContractProcPeriod.getJP_ContractProcPeriod_ID(), false))
+		if(!isCreateContractPSInvoiceLine(contractPSLine, contractProcPeriod.getJP_ContractProcPeriod_ID(), false))
 		{
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, contractPSLine, null);
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_AllContractContentLineWasSkipped, null, contractPSLine,  Msg.getElement(getCtx(), "JP_ContractPSInvoiceLine_ID"));
 			return true;
 		}
 
@@ -765,6 +829,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 				return true;
 
 			}
+
 
 			if(isCreateLog)
 			{

@@ -149,7 +149,8 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 				oLine.setQtyInvoiced(Env.ZERO);
 
 				//Contract Info
-				oLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSLines[j].getJP_ContractLine_ID());
+				if(contractPSLines[j].getJP_ContractLine_ID() != 0)
+					oLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSLines[j].getJP_ContractLine_ID());
 				if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 					oLine.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 
