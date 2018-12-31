@@ -233,55 +233,6 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		}
 
-		//TODO:Create Contract Process Schedule
-//		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
-//				&& getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
-//		{
-//			if(!isScheduleCreatedJP())
-//			{
-//				String className = "";
-//				if(Util.isEmpty(MContractProcess.get(getCtx(), getJP_ContractProcess_ID()).getClassname()))
-//				{
-//					className = "jpiere.base.plugin.org.adempiere.process.DefaultContractProcessCreateSchedule";
-//
-//				}else{
-//					className = getJP_ContractProcess().getClassname();
-//				}
-//
-//				ProcessInfo pi = new ProcessInfo("CreateContractProcSchedule", 0);
-//				pi.setClassName(className);
-//				pi.setAD_Client_ID(getAD_Client_ID());
-//				pi.setAD_User_ID(getAD_User_ID());
-//				pi.setAD_PInstance_ID(0);//TODO
-//				pi.setRecord_ID(getJP_ContractContent_ID());
-//
-//				MContractLog m_ContractLog = new MContractLog(getCtx(), 0, get_TrxName());
-//				m_ContractLog.setJP_ContractProcessTraceLevel(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information);
-//				m_ContractLog.setAD_PInstance_ID(pi.getAD_PInstance_ID());
-//				m_ContractLog.setJP_ContractProcessUnit(MContractLog.JP_CONTRACTPROCESSUNIT_PerContractContent);
-//				m_ContractLog.saveEx(get_TrxName());
-//
-//				ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
-//				list.add (new ProcessInfoParameter("JP_ContractProcess_ID", getJP_ContractProcess_ID(), null, null, null ));
-//				list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
-//				list.add (new ProcessInfoParameter("JP_ContractProcessTraceLevel", MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information, null, null, null ));
-//				ProcessInfoParameter[] pars = new ProcessInfoParameter[list.size()];
-//				list.toArray(pars);
-//				pi.setParameter(pars);
-//
-//				boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, Env.getProcessUI(getCtx()));
-//				if(success)
-//				{
-//					setIsScheduleCreatedJP(true);
-//
-//				}else {
-//
-//					return DocAction.STATUS_Invalid;
-//				}
-//			}
-//
-//		}
-
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)

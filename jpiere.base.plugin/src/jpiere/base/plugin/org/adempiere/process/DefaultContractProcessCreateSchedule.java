@@ -66,7 +66,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		super.doIt();
 
 		MContractCalender contractCalender = MContractCalender.get(getCtx(), m_ContractContent.getJP_ContractCalender_ID());
-		if(m_ContractContent.getJP_ContractProcDate_To()==null)
+		if(m_ContractContent.getJP_ContractProcDate_To() == null)
 		{
 			String descriptionMsg = Msg.getMsg(getCtx(), "NotFound") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To");
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null,  null, descriptionMsg);
@@ -78,7 +78,25 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		MContractProcPeriod endContractProcPeriod = contractCalender.getContractProcessPeriod(getCtx(), m_ContractContent.getJP_ContractProcDate_To());
 		MContractProcPeriod contractProcPeriod = null;
 
-		boolean isOK = false;
+		boolean isOK = true;
+
+		//Check Lines
+		MContractLine[] lines = m_ContractContent.getLines();
+		for(int i = 0; i < lines.length; i++)
+		{
+			if(!lines[i].checkPeriodContractInfo(false))
+			{
+				Object error= Env.getCtx().get( "org.compiere.util.CLogger.lastError");
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, lines[i],  null,
+						Msg.getElement(getCtx(), MContractLine.COLUMNNAME_Line)+" : "+ lines[i].getLine() +"  " + error.toString());
+				isOK = false;
+			}
+
+		}//for i
+
+		if(!isOK)
+			return "";
+
 
 		if(JP_ContractProcPeriod_ID == 0)
 		{

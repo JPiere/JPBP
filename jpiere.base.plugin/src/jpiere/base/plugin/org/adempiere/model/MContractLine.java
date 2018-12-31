@@ -67,7 +67,7 @@ public class MContractLine extends X_JP_ContractLine {
 	 * 	Get from Cache
 	 *	@param ctx context
 	 *	@param JP_ContractLine_ID id
-	 *	@return Contract Calender
+	 *	@return Contract Content Line
 	 */
 	public static MContractLine get (Properties ctx, int JP_ContractLine_ID)
 	{

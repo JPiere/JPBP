@@ -232,6 +232,7 @@ public class CallContractProcess extends SvrProcess {
 			if(Record_ID > 0)
 			{
 				MContractContent contractContent = new MContractContent(getCtx(),Record_ID, get_TrxName());
+				processContractLineNum = processContractLineNum + contractContent.getLines().length;
 
 				if(p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
 				{
@@ -318,6 +319,8 @@ public class CallContractProcess extends SvrProcess {
 
 				for(MContractContent contractContent : contractContentList)
 				{
+					processContractLineNum = processContractLineNum + contractContent.getLines().length;
+
 					if(p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
 					{
 						if(p_IsCreateBaseDocJP)
@@ -361,16 +364,16 @@ public class CallContractProcess extends SvrProcess {
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_CreateDocNum")).append(":").append(m_ContractLog.createDocNum).append(" / ");//Number of documents to create
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" / ");//Number of To Be Confirmed
 		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append("  ");//Number of errors
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append(" / ");//Number of errors
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractContent")).append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //Number of skips(Contract Content)
+		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractLine")).append(":").append(m_ContractLog.skipContractLineNum).append("  ");  //Number of skips(Contract Content Line)
 
 		StringBuilder systemProcessLog = new StringBuilder("");
-
 		systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
 		systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  / ");
 		systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
-//		systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractLine_ID")).append(":").append(processContractLineNum).append(" / ");
-		systemProcessLog.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractContent")).append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //Number of skips(Contract Content)
-		systemProcessLog.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractLine")).append(":").append(m_ContractLog.skipContractLineNum).append(" / ");  //Number of skips(Contract Content Line)
+		systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractLine_ID")).append(":").append(processContractLineNum).append(" ");
+
 
 
 		if(contractLogTrx !=null)

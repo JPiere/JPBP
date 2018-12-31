@@ -149,6 +149,8 @@ public class DefaultContractProcessCreateDerivativeInOutIndirectly extends Abstr
 				ioLine.setM_InOut_ID(inout.getM_InOut_ID());
 				ioLine.setAD_Org_ID(inout.getAD_Org_ID());
 				ioLine.setAD_OrgTrx_ID(inout.getAD_OrgTrx_ID());
+				ioLine.setLine(contractPSInOutLines[j].getLine());
+
 				int M_Locator_ID = contractPSInOutLines[j].getM_Locator_ID();
 				if(M_Locator_ID > 0)
 				{
@@ -179,8 +181,12 @@ public class DefaultContractProcessCreateDerivativeInOutIndirectly extends Abstr
 
 				ioLine.setQtyEntered(contractPSInOutLines[j].getMovementQty());
 				ioLine.setMovementQty(contractPSInOutLines[j].getMovementQty());
-				ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
-				ioLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSInOutLines[j].getJP_ContractLine_ID());
+
+				if(contractPSInOutLines[j].getJP_ContractLine_ID() != 0)
+				{
+					ioLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+					ioLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSInOutLines[j].getJP_ContractLine_ID());
+				}
 
 				try{
 					ioLine.saveEx(get_TrxName());

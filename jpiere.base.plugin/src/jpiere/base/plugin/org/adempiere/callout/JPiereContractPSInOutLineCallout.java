@@ -21,6 +21,7 @@ import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractPSLine;
 
 /**
  *
@@ -37,13 +38,13 @@ public class JPiereContractPSInOutLineCallout implements IColumnCallout {
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 
-		if(mField.getColumnName().equals("JP_ContractLine_ID"))
+		if(mField.getColumnName().equals("JP_ContractPSLine_ID"))
 		{
 
 			if( value != null)
 			{
-				int JP_ContractLine_ID =  Integer.parseInt(value.toString());
-				MContractLine contentLine= MContractLine.get(ctx, JP_ContractLine_ID);
+				int JP_ContractPSLine_ID =  Integer.parseInt(value.toString());
+				MContractPSLine contentPSLine= MContractPSLine.get(ctx, JP_ContractPSLine_ID);
 				GridField[] fields = mTab.getFields();
 				String columnName = null;
 				int columnIndex = -1;
@@ -73,23 +74,24 @@ public class JPiereContractPSInOutLineCallout implements IColumnCallout {
 					if(!fields[i].isAllowCopy())
 						continue;
 
-					columnIndex = contentLine.get_ColumnIndex(columnName);
+					columnIndex = contentPSLine.get_ColumnIndex(columnName);
 					if(columnIndex > -1)
 					{
-						objectValue = contentLine.get_Value(columnIndex);
+						objectValue = contentPSLine.get_Value(columnIndex);
 						if(columnName.equals("QtyEntered"))
 						{
-							columnIndex = contentLine.get_ColumnIndex("MovementQty");
-							objectValue = contentLine.get_Value(columnIndex);
+							columnIndex = contentPSLine.get_ColumnIndex("QtyOrdered");
+							objectValue = contentPSLine.get_Value(columnIndex);
 							mTab.setValue("QtyEntered", objectValue);
+							mTab.setValue("MovementQty", objectValue);
 
 						}else if(columnName.equals("C_UOM_ID")){
 
 							int C_UOM_ID = 0;
-							if(contentLine.getM_Product_ID() > 0)
-								C_UOM_ID = contentLine.getM_Product().getC_UOM_ID();
+							if(contentPSLine.getM_Product_ID() > 0)
+								C_UOM_ID = contentPSLine.getM_Product().getC_UOM_ID();
 							else
-								C_UOM_ID = contentLine.getC_UOM_ID();
+								C_UOM_ID = contentPSLine.getC_UOM_ID();
 
 							mTab.setValue("C_UOM_ID", C_UOM_ID);
 
@@ -100,6 +102,14 @@ public class JPiereContractPSInOutLineCallout implements IColumnCallout {
 					}
 
 				}//for
+
+				Object obj_ContractLine_ID = mTab.getValue("JP_ContractLine_ID");
+				if(obj_ContractLine_ID != null)
+				{
+					MContractLine contractLine = MContractLine.get(ctx, ((Integer)obj_ContractLine_ID).intValue());
+					mTab.setValue("JP_ContractCalender_InOut_ID", contractLine.getJP_ContractCalender_InOut_ID());
+					mTab.setValue("JP_ContractProcess_InOut_ID", contractLine.getJP_ContractProcess_InOut_ID());
+				}
 
 				BigDecimal qty = (BigDecimal)mTab.getValue("QtyEntered");
 				BigDecimal amt = (BigDecimal)mTab.getValue("PriceEntered");

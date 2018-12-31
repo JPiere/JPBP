@@ -135,7 +135,8 @@ public class DefaultContractProcessCreateBaseInvoiceIndirectly extends AbstractC
 				iLine.setQtyInvoiced(contractPSLines[j].getQtyOrdered());
 
 				//Contract Info
-				iLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSLines[j].getJP_ContractLine_ID());
+				if(contractPSLines[j].getJP_ContractLine_ID() != 0)
+					iLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSLines[j].getJP_ContractLine_ID());
 				if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 					iLine.set_ValueOfColumn("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 

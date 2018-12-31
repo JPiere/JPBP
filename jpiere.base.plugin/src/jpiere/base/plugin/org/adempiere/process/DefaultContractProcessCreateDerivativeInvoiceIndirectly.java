@@ -143,6 +143,7 @@ public class DefaultContractProcessCreateDerivativeInvoiceIndirectly extends Abs
 				iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
 				iLine.setAD_Org_ID(invoice.getAD_Org_ID());
 				iLine.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
+				iLine.setLine(contractPSInvoiceLines[j].getLine());
 
 				if(iLine.getM_Product_ID() > 0)
 					iLine.setC_UOM_ID(MProduct.get(getCtx(), iLine.getM_Product_ID()).getC_UOM_ID());
@@ -151,8 +152,13 @@ public class DefaultContractProcessCreateDerivativeInvoiceIndirectly extends Abs
 
 				iLine.setQtyEntered(contractPSInvoiceLines[j].getQtyInvoiced());
 				iLine.setQtyInvoiced(contractPSInvoiceLines[j].getQtyInvoiced());
-				iLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
-				iLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSInvoiceLines[j].getJP_ContractLine_ID());
+				if(contractPSInvoiceLines[j].getJP_ContractLine_ID() != 0)
+				{
+					iLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+					iLine.set_ValueNoCheck("JP_ContractLine_ID", contractPSInvoiceLines[j].getJP_ContractLine_ID());
+				}
+
+
 
 				try{
 					iLine.saveEx(get_TrxName());

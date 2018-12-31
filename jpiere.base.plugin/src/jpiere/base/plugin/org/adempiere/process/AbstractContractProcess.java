@@ -662,8 +662,8 @@ public abstract class AbstractContractProcess extends SvrProcess
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsNotCreated)//BD
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForBaseDocIsCreated)//BE
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForDocumentStatusIsNotCompleted)//BF
-				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractShipReceiptSchedule)//BH
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractProcessScheduleLines)//BG
+				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractShipReceiptSchedule)//BH
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForNoContractInvoiceSchedule)//BI
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToDeliver)//C2
 				|| ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_SkippedForQtyToRecognized)//C3

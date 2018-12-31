@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.compiere.model.MColumn;
 import org.compiere.model.Query;
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -93,6 +94,27 @@ public class MContractPSLine extends X_JP_ContractPSLine {
 
 		return true;
 	}
+
+	/**	Cache				*/
+	private static CCache<Integer,MContractPSLine>	s_cache = new CCache<Integer,MContractPSLine>(Table_Name, 20);
+
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractPSLine_ID id
+	 *	@return Contract Process Schedule Line
+	 */
+	public static MContractPSLine get (Properties ctx, int JP_ContractPSLine_ID)
+	{
+		Integer ii = Integer.valueOf(JP_ContractPSLine_ID);
+		MContractPSLine retValue = (MContractPSLine)s_cache.get(ii);
+		if (retValue != null)
+			return retValue;
+		retValue = new MContractPSLine (ctx, JP_ContractPSLine_ID, null);
+		if (retValue.get_ID () != 0)
+			s_cache.put (JP_ContractPSLine_ID, retValue);
+		return retValue;
+	}	//	get
 
 
 	@Override

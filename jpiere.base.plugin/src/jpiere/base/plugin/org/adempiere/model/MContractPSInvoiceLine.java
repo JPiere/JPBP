@@ -77,17 +77,20 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 		}
 
 		//Check JP_ContractProcPeriod_ID
-		if(newRecord || is_ValueChanged("JP_ContractProcPeriod_ID"))
+		if(newRecord || is_ValueChanged("JP_ContractCalender_Inv_ID") || is_ValueChanged("JP_ContractProcPeriod_ID"))
 		{
 
-			if(getJP_ContractLine().getJP_ContractCalender_Inv_ID() != getJP_ContractCalender_Inv_ID())
+			if(getJP_ContractLine_ID() != 0)
 			{
-				//Different between {0} and {1}
-				String msg0 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
-				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractPSInvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+				if(getJP_ContractLine().getJP_ContractCalender_Inv_ID() != getJP_ContractCalender_Inv_ID())
+				{
+					//Different between {0} and {1}
+					String msg0 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
+					String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractPSInvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID");
 
-				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
-				return false;
+					log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
+					return false;
+				}
 			}
 
 			MContractProcPeriod cpp = MContractProcPeriod.get(getCtx(), getJP_ContractProcPeriod_ID());
@@ -95,15 +98,24 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_OutsidePperiod") + " : "
 						+ Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));//outside the specified period
+				return false;
 			}
 
 		}
 
+		//Set JP_ContractLine_ID
+		if(newRecord || is_ValueChanged("JP_ContractPSLine_ID"))
+		{
+			if(getJP_ContractPSLine().getJP_ContractLine_ID() !=0)
+			{
+				setJP_ContractLine_ID(getJP_ContractPSLine().getJP_ContractLine_ID());
+			}
+		}
 
 		//Check M_Product_ID
 		if(newRecord || is_ValueChanged("M_Product_ID"))
 		{
-			if(getJP_ContractLine().getM_Product_ID() != getM_Product_ID())
+			if(getJP_ContractPSLine().getM_Product_ID() != getM_Product_ID())
 			{
 				//Different between {0} and {1}
 				String msg0 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")+" - " + Msg.getElement(Env.getCtx(), "M_Product_ID");
@@ -118,9 +130,9 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 		//Check C_Charge_ID
 		if(newRecord || is_ValueChanged("C_Charge_ID"))
 		{
-			if(getJP_ContractLine().getC_Charge_ID() != getC_Charge_ID())
+			if(getJP_ContractPSLine().getC_Charge_ID() != getC_Charge_ID())
 			{
-				if(getJP_ContractLine().getC_Charge_ID() != getC_Charge_ID())
+				if(getJP_ContractPSLine().getC_Charge_ID() != getC_Charge_ID())
 				{
 					String msg0 = Msg.getElement(Env.getCtx(), "JP_ContractLine_ID")+" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
 					String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractPSInvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "C_Charge_ID");
@@ -135,10 +147,10 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 		if(newRecord || is_ValueChanged("C_UOM_ID"))
 		{
 			int C_UOM_ID = 0;
-			if(getJP_ContractLine().getM_Product_ID() > 0)
-				C_UOM_ID = getJP_ContractLine().getM_Product().getC_UOM_ID();
+			if(getJP_ContractPSLine().getM_Product_ID() > 0)
+				C_UOM_ID = getJP_ContractPSLine().getM_Product().getC_UOM_ID();
 			else
-				C_UOM_ID = getJP_ContractLine().getC_UOM_ID();
+				C_UOM_ID = getJP_ContractPSLine().getC_UOM_ID();
 
 			setC_UOM_ID(C_UOM_ID);
 		}
