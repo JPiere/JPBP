@@ -48,6 +48,7 @@ public class MContractPSLine extends X_JP_ContractPSLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Check Update
 		if(!newRecord && isFactCreatedJP() && !is_ValueChanged("IsFactCreatedJP"))
 		{
 			int columnCount = get_ColumnCount();
@@ -69,7 +70,7 @@ public class MContractPSLine extends X_JP_ContractPSLine {
 							break;
 						}else {
 
-							continue;//TODO:Need to implement Update order Line Qty
+							continue;//Update order Line Qty
 						}
 					}
 

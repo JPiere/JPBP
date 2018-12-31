@@ -21,6 +21,7 @@ import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDocType;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
@@ -49,6 +50,13 @@ public class JPiereContractProcScheduleCallout implements IColumnCallout {
 			{
 				int JP_ContractContent_ID =  Integer.parseInt(value.toString());
 				MContractContent contractContent= MContractContent.get(ctx, JP_ContractContent_ID);
+				if(!contractContent.getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+				{
+					mTab.setValue("JP_ContractContent_ID", null);
+					return Msg.getMsg(ctx, "JP_ContractContentNoIndirectContractProcMethod");//Contract Content is not Indirect Contract Process Method.
+				}
+
+
 				GridField[] fields = mTab.getFields();
 				String columnName = null;
 				int columnIndex = -1;
