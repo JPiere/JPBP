@@ -66,6 +66,7 @@ public class JPiereContractPSInOutLineCallout implements IColumnCallout {
 							|| columnName.equals("Line")
 							|| columnName.equals("LineNetAmt")
 							|| columnName.equals("Processed")
+							|| columnName.equals("IsFactCreatedJP")
 						)
 					{
 						continue;
@@ -117,6 +118,23 @@ public class JPiereContractPSInOutLineCallout implements IColumnCallout {
 				mTab.setValue("LineNetAmt", qty.multiply(amt));
 
 			}
+
+		}else if(mField.getColumnName().equals("QtyEntered")){
+
+			BigDecimal qty = (BigDecimal)mTab.getValue("QtyEntered");
+			BigDecimal amt = (BigDecimal)mTab.getValue("PriceEntered");
+
+			mTab.setValue("MovementQty", qty);
+			mTab.setValue("LineNetAmt", qty.multiply(amt));
+
+		}else if(mField.getColumnName().equals("PriceEntered")){
+
+			BigDecimal qty = (BigDecimal)mTab.getValue("QtyEntered");
+			BigDecimal amt = (BigDecimal)mTab.getValue("PriceEntered");
+
+			mTab.setValue("PriceActual", amt);
+			mTab.setValue("LineNetAmt", qty.multiply(amt));
+
 		}
 
 		return "";

@@ -43,6 +43,7 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Check update conditions
 		if(!newRecord && isFactCreatedJP() && !is_ValueChanged("IsFactCreatedJP") )
 		{
 			int columnCount = get_ColumnCount();
@@ -154,6 +155,9 @@ public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 
 			setC_UOM_ID(C_UOM_ID);
 		}
+
+		setQtyInvoiced(getQtyEntered());
+		setLineNetAmt(getQtyEntered().multiply(getPriceActual()));
 
 		return true;
 	}

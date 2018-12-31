@@ -214,13 +214,17 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 			}else if(tableName.equals(MContractPSInOutLine.Table_Name)){//JPIERE-0431
 
-				if(columnName.equals("JP_ContractPSLine_ID") )
+				if(columnName.equals("JP_ContractPSLine_ID")
+						|| columnName.equals("QtyEntered")
+						|| columnName.equals("PriceEntered"))
 				{
 					list.add(new JPiereContractPSInOutLineCallout());
 				}
 			}else if(tableName.equals(MContractPSInvoiceLine.Table_Name)){//JPIERE-0431
 
-				if(columnName.equals("JP_ContractPSLine_ID") )
+				if(columnName.equals("JP_ContractPSLine_ID")
+						|| columnName.equals("QtyEntered")
+						|| columnName.equals("PriceEntered") )
 				{
 					list.add(new JPiereContractPSInvoiceLineCallout());
 				}

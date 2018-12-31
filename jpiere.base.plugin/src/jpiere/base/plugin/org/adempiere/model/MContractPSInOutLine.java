@@ -46,6 +46,7 @@ public class MContractPSInOutLine extends X_JP_ContractPSInOutLine {
 	protected boolean beforeSave(boolean newRecord)
 	{
 
+		//Check update conditions
 		if(!newRecord && isFactCreatedJP() && !is_ValueChanged("IsFactCreatedJP") )
 		{
 			int columnCount = get_ColumnCount();
@@ -155,6 +156,9 @@ public class MContractPSInOutLine extends X_JP_ContractPSInOutLine {
 
 			setC_UOM_ID(C_UOM_ID);
 		}
+
+		setMovementQty(getQtyEntered());
+		setLineNetAmt(getQtyEntered().multiply(getPriceActual()));
 
 		return true;
 
