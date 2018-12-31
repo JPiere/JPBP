@@ -494,6 +494,8 @@ public class MContractProcSchedule extends X_JP_ContractProcSchedule implements 
 						continue;
 					else if(columnName.equals("Processed"))
 						continue;
+					else if(columnName.equals("ProcessedOn"))
+						continue;
 					else if(columnName.equals("Posted"))
 						continue;
 

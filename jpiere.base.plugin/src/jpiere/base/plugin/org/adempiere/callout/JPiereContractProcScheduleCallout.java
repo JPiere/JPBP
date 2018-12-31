@@ -48,7 +48,7 @@ public class JPiereContractProcScheduleCallout implements IColumnCallout {
 			if( value != null)
 			{
 				int JP_ContractContent_ID =  Integer.parseInt(value.toString());
-				MContractContent contentTemplate= MContractContent.get(ctx, JP_ContractContent_ID);
+				MContractContent contractContent= MContractContent.get(ctx, JP_ContractContent_ID);
 				GridField[] fields = mTab.getFields();
 				String columnName = null;
 				int columnIndex = -1;
@@ -69,6 +69,7 @@ public class JPiereContractProcScheduleCallout implements IColumnCallout {
 							|| columnName.equals("UpdatedBy")
 							|| columnName.equals("TotalLines")
 							|| columnName.equals("Processed")
+							|| columnName.equals("ProcessedOn")
 						)
 					{
 						continue;
@@ -77,10 +78,10 @@ public class JPiereContractProcScheduleCallout implements IColumnCallout {
 					if(!fields[i].isAllowCopy())
 						continue;
 
-					columnIndex = contentTemplate.get_ColumnIndex(columnName);
+					columnIndex = contractContent.get_ColumnIndex(columnName);
 					if(columnIndex > -1)
 					{
-						objectValue = contentTemplate.get_Value(columnIndex);
+						objectValue = contractContent.get_Value(columnIndex);
 						if(objectValue != null)
 						{
 							if(columnName.equals(MContractProcSchedule.COLUMNNAME_C_DocType_ID))
@@ -98,9 +99,23 @@ public class JPiereContractProcScheduleCallout implements IColumnCallout {
 
 				}//for
 
+				//set Date
 				calloutOfJP_ProcPeriod_DateAcct(ctx, WindowNo, mTab, mField, mTab.getValue("DateAcct"), null);
 
+				//Set IsSOTrx
+				Object obj_BaseDocDocType_ID = mTab.getValue("JP_BaseDocDocType_ID");
+				if(obj_BaseDocDocType_ID != null)
+				{
+					MDocType docType = MDocType.get(ctx, ((Integer)obj_BaseDocDocType_ID).intValue());
+					mTab.setValue("IsSOTrx", docType.isSOTrx());
+				}else {
+
+					mTab.setValue ("OrderType",  "--");
+
+				}
+
 			}
+
 		}else if(mField.getColumnName().equals("JP_BaseDocDocType_ID")){
 
 			if( value == null)
