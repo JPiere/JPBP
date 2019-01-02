@@ -179,13 +179,21 @@ public abstract class AbstractCreateContractFromTemplate extends SvrProcess {
 
 			}else{
 
-				if(contractContent.getParent().getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+				if(contentTemplate.getJP_ContractProcPeriodNum() == 0)
 				{
-					contractContent.setJP_ContractProcDate_To(period.getEndDate());
-
-				}else{
-
 					contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
+
+				}else {
+
+					if(contractContent.getParent().getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+					{
+						contractContent.setJP_ContractProcDate_To(period.getEndDate());
+
+					}else{
+
+						contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
+
+					}
 				}
 
 			}

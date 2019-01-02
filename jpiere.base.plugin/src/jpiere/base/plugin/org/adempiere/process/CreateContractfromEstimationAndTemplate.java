@@ -134,8 +134,8 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 		m_Contract.setJP_ContractT_ID(contractTemplate.getJP_ContractT_ID());
 		m_Contract.setC_DocType_ID(contractTemplate.getC_DocType_ID());
 		m_Contract.setDateDoc(estimation.getDateOrdered());
-		m_Contract.setDateAcct(estimation.getDateOrdered());
-		m_Contract.setJP_ContractPeriodDate_From(estimation.getDateOrdered());
+		m_Contract.setDateAcct(estimation.getDateAcct());
+		m_Contract.setJP_ContractPeriodDate_From(estimation.getDateAcct());
 
 		//Set DocumentNo
 		if(contractTemplate.getC_DocType().isDocNoControlled())

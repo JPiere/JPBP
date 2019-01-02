@@ -123,7 +123,12 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 				setDerivativeInvoiceLineProcPeriod(to_ContractLine, MContractLineT.get(getCtx(), to_ContractLine.getJP_ContractLineT_ID()));
 			}
 
-			to_ContractLine.saveEx(get_TrxName());
+			try
+			{
+				to_ContractLine.saveEx(get_TrxName());
+			}catch (Exception e) {
+				throw e;
+			}
 
 		}//For i
 
