@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Contract
  *  @author iDempiere (generated) 
- *  @version Release 5.1
+ *  @version Release 6.1
  */
 @SuppressWarnings("all")
 public interface I_JP_Contract 
@@ -623,6 +623,15 @@ public interface I_JP_Contract
 	public int getJP_Estimation_ID();
 
 	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
+
+    /** Column name JP_Processing1 */
+    public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
+
+	/** Set Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1);
+
+	/** Get Process Now	  */
+	public String getJP_Processing1();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

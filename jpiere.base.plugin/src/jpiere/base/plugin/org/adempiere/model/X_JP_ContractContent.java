@@ -34,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181217L;
+	private static final long serialVersionUID = 20190101L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -1600,6 +1600,20 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getJP_Processing2 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing3 Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3)
+	{
+		set_Value (COLUMNNAME_JP_Processing3, JP_Processing3);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing3 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing3);
 	}
 
 	public org.compiere.model.I_M_FreightCategory getM_FreightCategory() throws RuntimeException

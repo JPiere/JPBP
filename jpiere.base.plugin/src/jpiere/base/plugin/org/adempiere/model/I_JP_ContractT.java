@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractT
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 6.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractT 
@@ -155,6 +155,19 @@ public interface I_JP_ContractT
 
 	/** Get Automatic Update	  */
 	public boolean isAutomaticUpdateJP();
+
+    /** Column name JP_Classname1 */
+    public static final String COLUMNNAME_JP_Classname1 = "JP_Classname1";
+
+	/** Set Classname.
+	  * Java Classname
+	  */
+	public void setJP_Classname1 (String JP_Classname1);
+
+	/** Get Classname.
+	  * Java Classname
+	  */
+	public String getJP_Classname1();
 
     /** Column name JP_ContractCancelTerm_ID */
     public static final String COLUMNNAME_JP_ContractCancelTerm_ID = "JP_ContractCancelTerm_ID";

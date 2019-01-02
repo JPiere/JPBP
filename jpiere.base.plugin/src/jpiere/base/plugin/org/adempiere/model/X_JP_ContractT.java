@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractT
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 6.1 - $Id$ */
 public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20190101L;
 
     /** Standard Constructor */
     public X_JP_ContractT (Properties ctx, int JP_ContractT_ID, String trxName)
@@ -182,6 +182,23 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Classname.
+		@param JP_Classname1 
+		Java Classname
+	  */
+	public void setJP_Classname1 (String JP_Classname1)
+	{
+		set_Value (COLUMNNAME_JP_Classname1, JP_Classname1);
+	}
+
+	/** Get Classname.
+		@return Java Classname
+	  */
+	public String getJP_Classname1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Classname1);
 	}
 
 	public I_JP_ContractCancelTerm getJP_ContractCancelTerm() throws RuntimeException
