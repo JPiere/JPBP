@@ -73,5 +73,8 @@ CREATE TABLE adempiere.JP_Contract
    JP_ContractStatus_IN_Date timestamp without time zone,
   JP_ContractDocLocator character varying(255) DEFAULT NULL::character varying,
 
+  JP_CounterContract_ID numeric(10,0) DEFAULT NULL::numeric,
+    JP_Processing1 character(1) COLLATE pg_catalog."default" DEFAULT NULL::bpchar,
+
   CONSTRAINT JP_Contract_pkey PRIMARY KEY (JP_Contract_ID)
 )

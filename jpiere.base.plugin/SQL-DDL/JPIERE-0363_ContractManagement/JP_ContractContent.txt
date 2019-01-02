@@ -125,12 +125,14 @@ CREATE TABLE adempiere.JP_ContractContent
   JP_Estimation_ID numeric(10) DEFAULT NULL::numeric,
   DateOrdered timestamp without time zone,
   DatePromised timestamp without time zone,
-  jp_processing1 character(1) DEFAULT NULL::bpchar,
-dateinvoiced timestamp without time zone,
-    jp_countercontractcontent_id numeric(10,0) DEFAULT NULL::numeric,
-    jp_contractprocessmethod character varying(2) COLLATE pg_catalog."default" NOT NULL DEFAULT 'IC'::character varying,
-    isschedulecreatedjp character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
-    jp_processing2 character(1) COLLATE pg_catalog."default" DEFAULT NULL::bpchar,
+  JP_Processing1 character(1) DEFAULT NULL::bpchar,
+  DateInvoiced timestamp without time zone,
+  JP_CountercontractContent_ID numeric(10,0) DEFAULT NULL::numeric,
+  JP_ContractProcessMethod character varying(2) COLLATE pg_catalog."default" NOT NULL DEFAULT 'IC'::character varying,
+  IsScheduleCreatedJP character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
+  JP_processing2 character(1) COLLATE pg_catalog."default" DEFAULT NULL::bpchar,
+  JP_processing3 character(1) COLLATE pg_catalog."default" DEFAULT NULL::bpchar,
+
 
   CONSTRAINT JP_ContractContent_pkey PRIMARY KEY (JP_ContractContent_ID)
 )
