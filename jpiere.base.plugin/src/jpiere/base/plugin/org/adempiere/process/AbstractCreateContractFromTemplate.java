@@ -19,8 +19,11 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
 
+import org.compiere.model.MOrgInfo;
+import org.compiere.model.MWarehouse;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -410,5 +413,40 @@ public abstract class AbstractCreateContractFromTemplate extends SvrProcess {
 		}
 
 	}//setDerivativeInvoiceLineProcPeriod
+
+	protected void setWarehouseOfContractContent(MContractContentT from, MContractContent to) throws Exception
+	{
+		if(from.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice)
+				|| from.getDocBaseType().equals(MContractContent.DOCBASETYPE_ARInvoice) )
+			return ;
+
+		if(from.getM_Warehouse() != null && from.getM_Warehouse().getAD_Org_ID() == to.getAD_Org_ID())
+		{
+			to.setM_Warehouse_ID(from.getM_Warehouse_ID());
+
+		}else{
+
+			if(MOrgInfo.get(null, to.getAD_Org_ID(),get_TrxName()).getM_Warehouse_ID() != 0)
+			{
+				to.setM_Warehouse_ID(MOrgInfo.get(null, to.getAD_Org_ID(),get_TrxName()).getM_Warehouse_ID());
+
+			}else{
+
+				MWarehouse[] warehouses =  MWarehouse.getForOrg(getCtx(), from.getAD_Org_ID());
+				if(warehouses.length > 0)
+				{
+					to.setM_Warehouse_ID(warehouses[0].getM_Warehouse_ID());
+
+				}else {
+
+					throw new Exception(Msg.getMsg(Env.getCtx(),"NotFound") + Msg.getElement(getCtx(), "M_Warehouse_ID") + " : "
+										+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + " - "+  to.getDocumentNo());
+
+				}
+
+			}
+
+		}
+	}
 
 }

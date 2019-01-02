@@ -15,7 +15,6 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
-import org.compiere.model.MOrgInfo;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.util.Env;
@@ -106,8 +105,8 @@ public class DefaultCreateContractFromTemplate extends AbstractCreateContractFro
 			contractContent.setDocStatus(DocAction.STATUS_Drafted);
 			contractContent.setDocAction(DocAction.ACTION_Complete);
 			contractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed);
-			if(contractContent.getM_Warehouse_ID() == 0)
-				contractContent.setM_Warehouse_ID(MOrgInfo.get(null, contractContent.getAD_Org_ID(),get_TrxName()).getM_Warehouse_ID());
+
+			setWarehouseOfContractContent(m_ContractContentTemplates[i], contractContent);
 
 			contractContent.setC_Currency_ID(contractContent.getM_PriceList().getC_Currency_ID());
 			contractContent.saveEx(get_TrxName());

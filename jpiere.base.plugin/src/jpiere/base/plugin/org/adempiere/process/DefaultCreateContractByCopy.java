@@ -81,9 +81,9 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 			to_ContractContent.setIsScheduleCreatedJP(false);
 			to_ContractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed);
 
-			setDocumentNo(from_ContractContents[i], to_ContractContent);
-			setBPartner(from_ContractContents[i], to_ContractContent);
-			setWarehouse(from_ContractContents[i], to_ContractContent);
+			setDocumentNoOfContractContent(from_ContractContents[i], to_ContractContent);
+			setBPartnerOfContractContent(from_ContractContents[i], to_ContractContent);
+			setWarehouseOfContractContent(from_ContractContents[i], to_ContractContent);
 
 			to_ContractContent.setC_Currency_ID(to_ContractContent.getM_PriceList().getC_Currency_ID());
 			to_ContractContent.saveEx(get_TrxName());

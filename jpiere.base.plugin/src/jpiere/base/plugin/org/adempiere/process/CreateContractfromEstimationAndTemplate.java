@@ -4,7 +4,6 @@ import java.util.logging.Level;
 
 import org.adempiere.util.Callback;
 import org.adempiere.util.IProcessUI;
-import org.compiere.model.MOrgInfo;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
@@ -192,11 +191,17 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 			contractContent.setDocStatus(DocAction.STATUS_Drafted);
 			contractContent.setDocAction(DocAction.ACTION_Complete);
 			contractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed);
-			if(contractContent.getM_Warehouse_ID() == 0)
-				contractContent.setM_Warehouse_ID(MOrgInfo.get(null, contractContent.getAD_Org_ID(),get_TrxName()).getM_Warehouse_ID());
-
 			contractContent.setC_Currency_ID(contractContent.getM_PriceList().getC_Currency_ID());
+
 			try {
+				setWarehouseOfContractContent(contractContentTemplates[i], contractContent);
+			} catch (Exception e) {
+				return e.toString();
+			}
+
+
+			try {
+
 				contractContent.saveEx(get_TrxName());
 			} catch (Exception e) {
 				return e.toString();

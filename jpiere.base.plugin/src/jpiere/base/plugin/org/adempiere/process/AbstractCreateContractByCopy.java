@@ -45,8 +45,6 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 	protected MContract from_Contract = null;
 	protected MContractContent from_ContractContent = null;
 
-	protected int overwrite_C_BPartner_ID = 0;
-
 	protected String p_JP_ContractTabLevel = null;
 	protected  static final String JP_ContractTabLevel_Document  = "CD";
 	protected  static final String JP_ContractTabLevel_Content  = "CC";
@@ -61,7 +59,6 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-
 			ProcessInfoParameter[] para = getParameter();
 			for (int i = 0; i < para.length; i++)
 			{
@@ -82,11 +79,6 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 				}else if (name.equals("JP_CopyFrom_ContractContent_ID")){
 
 					from_JP_ContractContent_ID = para[i].getParameterAsInt();
-
-				}else if (name.equals("C_BPartner_ID")){
-
-					overwrite_C_BPartner_ID = para[i].getParameterAsInt();
-
 
 				}else{
 
@@ -160,7 +152,7 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 		return Msg.getMsg(getCtx(), "Success");
 	}
 
-	protected void setDocumentNo(MContractContent from, MContractContent to)
+	protected void setDocumentNoOfContractContent(MContractContent from, MContractContent to)
 	{
 		MDocType docType = MDocType.get(getCtx(), from.getC_DocType_ID());
 		to.setC_DocType_ID(docType.getC_DocType_ID());
@@ -170,11 +162,12 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 		}
 	}
 
-	protected void setBPartner(MContractContent from, MContractContent to)
+	protected void setBPartnerOfContractContent(MContractContent from, MContractContent to)
 	{
-		if(overwrite_C_BPartner_ID != 0 && overwrite_C_BPartner_ID == from.getC_BPartner_ID())
+
+		if(to.getParent().getC_BPartner_ID() == from.getC_BPartner_ID())
 		{
-			to.setC_BPartner_ID(overwrite_C_BPartner_ID);
+			to.setC_BPartner_ID(from.getC_BPartner_ID());
 			to.setC_BPartner_Location_ID(from.getC_BPartner_Location_ID());
 			to.setAD_User_ID(from.getAD_User_ID());
 
@@ -187,91 +180,69 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 			to.setBill_Location_ID(from.getBill_Location_ID());
 			to.setBill_User_ID(from.getBill_User_ID());
 
-		}else if(overwrite_C_BPartner_ID != 0 && overwrite_C_BPartner_ID == from.getJP_ContractContentT().getC_BPartner_ID() ) {
-
-			to.setC_BPartner_ID(overwrite_C_BPartner_ID);
-			if(from.getJP_ContractContentT().getC_BPartner_Location_ID() != 0) {
-				to.setC_BPartner_Location_ID(from.getJP_ContractContentT().getC_BPartner_Location_ID());
-			}else {
-
-				MBPartnerLocation[]  bpLocations = MBPartnerLocation.getForBPartner(getCtx(), overwrite_C_BPartner_ID, get_TrxName());
-				if(bpLocations.length > 1)
-				{
-					to.setC_BPartner_Location_ID(bpLocations[0].getC_BPartner_Location_ID());
-				}
-			}
-
-			to.setAD_User_ID(from.getJP_ContractContentT().getAD_User_ID());
-
-			to.setDropShip_BPartner_ID(from.getJP_ContractContentT().getDropShip_BPartner_ID());
-			to.setDropShip_Location_ID(from.getJP_ContractContentT().getDropShip_Location_ID());
-			to.setDropShip_User_ID(from.getJP_ContractContentT().getDropShip_User_ID());
-			to.setIsDropShip(from.getJP_ContractContentT().isDropShip());
-
-			to.setBill_BPartner_ID(from.getJP_ContractContentT().getBill_BPartner_ID());
-			to.setBill_Location_ID(from.getJP_ContractContentT().getBill_Location_ID());
-			to.setBill_User_ID(from.getJP_ContractContentT().getBill_User_ID());
-
-
-		}else if (overwrite_C_BPartner_ID == 0 || (overwrite_C_BPartner_ID != 0 && overwrite_C_BPartner_ID == to_Contract.getC_BPartner_ID()) ){
-
-			to.setC_BPartner_ID(overwrite_C_BPartner_ID);
-			if(to_Contract.getC_BPartner_Location_ID() != 0)
-			{
-				to.setC_BPartner_Location_ID(to_Contract.getC_BPartner_Location_ID());
-			}else {
-
-				MBPartnerLocation[]  bpLocations = MBPartnerLocation.getForBPartner(getCtx(), overwrite_C_BPartner_ID, get_TrxName());
-				if(bpLocations.length > 1)
-				{
-					to.setC_BPartner_Location_ID(bpLocations[0].getC_BPartner_Location_ID());
-				}
-			}
-
-			if(to_Contract.getAD_User_ID() != 0)
-			{
-				to.setAD_User_ID(to_Contract.getAD_User_ID());
-			}else {
-
-				to.setAD_User_ID(0);
-			}
-
-			to.setDropShip_BPartner_ID(0);
-			to.setDropShip_Location_ID(0);
-			to.setDropShip_User_ID(0);
-			to.setIsDropShip(false);
-
-			to.setBill_BPartner_ID(0);
-			to.setBill_Location_ID(0);
-			to.setBill_User_ID(0);
-
 		}else {
 
-			to.setC_BPartner_ID(overwrite_C_BPartner_ID);
-			MBPartnerLocation[]  bpLocations = MBPartnerLocation.getForBPartner(getCtx(), overwrite_C_BPartner_ID, get_TrxName());
-			if(bpLocations.length > 1)
+			if(from.getC_BPartner_ID() == from.getJP_ContractContentT().getC_BPartner_ID())
 			{
-				to.setC_BPartner_Location_ID(bpLocations[0].getC_BPartner_Location_ID());
+
+				to.setC_BPartner_ID(from.getC_BPartner_ID());
+				to.setC_BPartner_Location_ID(from.getC_BPartner_Location_ID());
+				to.setAD_User_ID(from.getAD_User_ID());
+
+				to.setDropShip_BPartner_ID(from.getDropShip_BPartner_ID());
+				to.setDropShip_Location_ID(from.getDropShip_Location_ID());
+				to.setDropShip_User_ID(from.getDropShip_User_ID());
+				to.setIsDropShip(from.isDropShip());
+
+				to.setBill_BPartner_ID(from.getBill_BPartner_ID());
+				to.setBill_Location_ID(from.getBill_Location_ID());
+				to.setBill_User_ID(from.getBill_User_ID());
+
+			}else {
+
+				to.setC_BPartner_ID(to.getParent().getC_BPartner_ID());
+				if(to.getParent().getC_BPartner_Location_ID() != 0)
+				{
+					to.setC_BPartner_Location_ID(to.getParent().getC_BPartner_Location_ID());
+				}else {
+
+					MBPartnerLocation[]  bpLocations = MBPartnerLocation.getForBPartner(getCtx(), to.getParent().getC_BPartner_ID(), get_TrxName());
+					if(bpLocations.length > 1)
+					{
+						to.setC_BPartner_Location_ID(bpLocations[0].getC_BPartner_Location_ID());
+					}
+				}
+
+				if(to.getParent().getAD_User_ID() != 0)
+				{
+					to.setAD_User_ID(to.getParent().getAD_User_ID());
+				}else {
+
+					to.setAD_User_ID(0);
+				}
+
+				to.setDropShip_BPartner_ID(0);
+				to.setDropShip_Location_ID(0);
+				to.setDropShip_User_ID(0);
+				to.setIsDropShip(false);
+
+				to.setBill_BPartner_ID(0);
+				to.setBill_Location_ID(0);
+				to.setBill_User_ID(0);
 			}
 
-			to.setAD_User_ID(to.getAD_User_ID());
-
-			to.setDropShip_BPartner_ID(0);
-			to.setDropShip_Location_ID(0);
-			to.setDropShip_User_ID(0);
-			to.setIsDropShip(false);
-
-			to.setBill_BPartner_ID(0);
-			to.setBill_Location_ID(0);
-			to.setBill_User_ID(0);
-
-		}//Set Business Partner
+		}
 
 	}
 
-	protected void setWarehouse(MContractContent from, MContractContent to) throws Exception
+	protected void setWarehouseOfContractContent(MContractContent from, MContractContent to) throws Exception
 	{
-		if(from.getM_Warehouse().getAD_Org_ID() == to.getAD_Org_ID())
+		if(from.getDocBaseType().equals(MContractContent.DOCBASETYPE_APInvoice)
+				|| from.getDocBaseType().equals(MContractContent.DOCBASETYPE_ARInvoice) )
+			return ;
+
+
+		if(from.getM_Warehouse() != null && from.getM_Warehouse().getAD_Org_ID() == to.getAD_Org_ID())
 		{
 			to.setM_Warehouse_ID(from.getM_Warehouse_ID());
 
@@ -286,7 +257,7 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 				MWarehouse[] warehouses =  MWarehouse.getForOrg(getCtx(), from.getAD_Org_ID());
 				if(warehouses.length > 0)
 				{
-					to_ContractContent.setM_Warehouse_ID(warehouses[0].getM_Warehouse_ID());
+					to.setM_Warehouse_ID(warehouses[0].getM_Warehouse_ID());
 
 				}else {
 
