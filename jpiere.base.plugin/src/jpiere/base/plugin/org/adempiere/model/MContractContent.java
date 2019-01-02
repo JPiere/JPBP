@@ -608,7 +608,6 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				}//for
 			}
 
-
 		}//Check overlap of Contract process date in Same contract content tempalete
 
 
@@ -1103,7 +1102,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	{
 		if(parent == null)
 		{
-			parent = new MContract(getCtx(), getJP_Contract_ID(), null);
+			parent = new MContract(getCtx(), getJP_Contract_ID(), get_TrxName());
 		}
 
 		return parent;

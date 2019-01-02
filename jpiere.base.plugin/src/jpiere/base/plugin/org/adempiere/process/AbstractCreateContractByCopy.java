@@ -190,7 +190,17 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 		}else if(overwrite_C_BPartner_ID != 0 && overwrite_C_BPartner_ID == from.getJP_ContractContentT().getC_BPartner_ID() ) {
 
 			to.setC_BPartner_ID(overwrite_C_BPartner_ID);
-			to.setC_BPartner_Location_ID(from.getJP_ContractContentT().getC_BPartner_Location_ID());
+			if(from.getJP_ContractContentT().getC_BPartner_Location_ID() != 0) {
+				to.setC_BPartner_Location_ID(from.getJP_ContractContentT().getC_BPartner_Location_ID());
+			}else {
+
+				MBPartnerLocation[]  bpLocations = MBPartnerLocation.getForBPartner(getCtx(), overwrite_C_BPartner_ID, get_TrxName());
+				if(bpLocations.length > 1)
+				{
+					to.setC_BPartner_Location_ID(bpLocations[0].getC_BPartner_Location_ID());
+				}
+			}
+
 			to.setAD_User_ID(from.getJP_ContractContentT().getAD_User_ID());
 
 			to.setDropShip_BPartner_ID(from.getJP_ContractContentT().getDropShip_BPartner_ID());

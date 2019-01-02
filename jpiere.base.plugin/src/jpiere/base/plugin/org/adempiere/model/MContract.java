@@ -858,4 +858,18 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		return retValue;
 	}	//	get
 
+	public static MContract[] getContractByEstimation(Properties ctx, int JP_Estimation_ID, String trxName)//TODO
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContract.COLUMNNAME_JP_Estimation_ID+"=? ");
+		StringBuilder orderClause = new StringBuilder(MContract.COLUMNNAME_JP_Estimation_ID);
+		//
+		List<MContract> list = new Query(ctx, MContract.Table_Name, whereClauseFinal.toString(), trxName)
+										.setParameters(JP_Estimation_ID)
+										.setOrderBy(orderClause.toString())
+										.list();
+
+		return list.toArray(new MContract[list.size()]);
+
+	}
+
 }	//	MContract

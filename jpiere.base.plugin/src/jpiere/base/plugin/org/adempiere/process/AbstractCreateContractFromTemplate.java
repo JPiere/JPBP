@@ -35,7 +35,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractLineT;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractT;
 
-/** JPIERE-0363
+/**
+*  JPIERE-0363
 *
 * @author Hideaki Hagiwara
 *
@@ -111,13 +112,98 @@ public abstract class AbstractCreateContractFromTemplate extends SvrProcess {
 		return Msg.getMsg(getCtx(), "Success");
 	}
 
-
 	protected Timestamp calculateDate(Timestamp baseDate, int addNum)
 	{
 		LocalDateTime datePromisedLocal = baseDate.toLocalDateTime();
 		datePromisedLocal = datePromisedLocal.plusDays(addNum);
 
 		return Timestamp.valueOf(datePromisedLocal);
+	}
+
+	protected void setContractContentProcDate(MContractContent contractContent, MContractContentT contentTemplate)
+	{
+		//Set Contract Calender
+		int JP_ContractCalenderRef_ID = contentTemplate.getJP_ContractCalenderRef_ID();
+		if(JP_ContractCalenderRef_ID > 0)
+		{
+			MContractCalenderRef  contractCalenderRef = MContractCalenderRef.get(getCtx(), JP_ContractCalenderRef_ID);
+			MContractCalenderList[] contractCalenderLists = contractCalenderRef.getContractCalenderList(getCtx(), true, get_TrxName());
+			if(contractCalenderLists.length==1)
+				contractContent.setJP_ContractCalender_ID(contractCalenderLists[0].getJP_ContractCalender_ID());
+		}
+
+		//Set JP_ContractProcDate_From
+		if(contentTemplate.getJP_ContractProcPOffset() == 0)
+		{
+			contractContent.setJP_ContractProcDate_From(contractContent.getParent().getJP_ContractPeriodDate_From());
+
+		}else{
+
+			if(contractContent.getJP_ContractCalender_ID() > 0)
+			{
+				MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getParent().getJP_ContractPeriodDate_From(), null, contentTemplate.getJP_ContractProcPOffset());
+				contractContent.setJP_ContractProcDate_From(period.getStartDate());
+
+			} else if(contractContent.getJP_ContractProcDate_From() == null) {
+
+				contractContent.setJP_ContractProcDate_From(contractContent.getParent().getJP_ContractPeriodDate_From());
+
+			}
+
+		}
+
+		//Set JP_ContractProcDate_To
+		if(contractContent.getJP_ContractCalender_ID() > 0)
+		{
+			MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+			MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From(), null, contentTemplate.getJP_ContractProcPeriodNum());
+			if(contractContent.getParent().getJP_ContractPeriodDate_To() == null)
+			{
+				if(contentTemplate.getJP_ContractProcPeriodNum() == 0)
+				{
+					if(contentTemplate.getJP_ContractProcessMethod().equals(MContractContentT.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+					{
+						contractContent.setJP_ContractProcDate_To(period.getEndDate());
+					}else {
+						contractContent.setJP_ContractProcDate_To(null);
+					}
+
+				}else {
+
+					contractContent.setJP_ContractProcDate_To(period.getEndDate());
+				}
+
+			}else{
+
+				if(contractContent.getParent().getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+				{
+					contractContent.setJP_ContractProcDate_To(period.getEndDate());
+
+				}else{
+
+					contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
+				}
+
+			}
+
+		}else {
+
+			if(contractContent.getParent().getJP_ContractPeriodDate_To() != null)
+			{
+				contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
+
+			}else {
+
+				if(contentTemplate.getJP_ContractProcessMethod().equals(MContractContentT.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+				{
+					contractContent.setJP_ContractProcDate_To(contractContent.getJP_ContractProcDate_From());
+				}else {
+					contractContent.setJP_ContractProcDate_To(null);
+				}
+			}
+		}
+
 	}
 
 	protected void setBaseDocLineProcPeriod(MContractLine contractLine, MContractLineT lineTemplate)

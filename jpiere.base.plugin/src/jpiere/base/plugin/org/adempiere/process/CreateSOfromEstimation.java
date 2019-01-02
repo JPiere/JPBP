@@ -107,7 +107,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 		{
 			isOpenDialog = true;
 			//Already Sales Order created, Do you want to create Sales Order again?
-			processUI.ask(Msg.getMsg(getCtx(), "JP_CreateSOfromEstimationAgain"), new Callback<Boolean>() {
+			processUI.ask("JP_CreateSOfromEstimationAgain", new Callback<Boolean>() {
 
 				@Override
 				public void onCallback(Boolean result)

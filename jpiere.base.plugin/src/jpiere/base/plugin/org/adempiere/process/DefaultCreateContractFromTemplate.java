@@ -15,9 +15,6 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
@@ -25,14 +22,10 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
-import jpiere.base.plugin.org.adempiere.model.MContractCalender;
-import jpiere.base.plugin.org.adempiere.model.MContractCalenderList;
-import jpiere.base.plugin.org.adempiere.model.MContractCalenderRef;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLineT;
-import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcessList;
 import jpiere.base.plugin.org.adempiere.model.MContractProcessRef;
 
@@ -91,15 +84,7 @@ public class DefaultCreateContractFromTemplate extends AbstractCreateContractFro
 			contractContent.setDateAcct(m_Contract.getDateAcct());
 			contractContent.setDatePromised(calculateDate(m_Contract.getDateAcct(), m_ContractContentTemplates[i].getDeliveryTime_Promised()));
 			contractContent.setDateInvoiced(m_Contract.getDateAcct());
-
-			int JP_ContractCalenderRef_ID = m_ContractContentTemplates[i].getJP_ContractCalenderRef_ID();
-			if(JP_ContractCalenderRef_ID > 0)
-			{
-				MContractCalenderRef  contractCalenderRef = MContractCalenderRef.get(getCtx(), JP_ContractCalenderRef_ID);
-				MContractCalenderList[] contractCalenderLists = contractCalenderRef.getContractCalenderList(getCtx(), true, get_TrxName());
-				if(contractCalenderLists.length==1)
-					contractContent.setJP_ContractCalender_ID(contractCalenderLists[0].getJP_ContractCalender_ID());
-			}
+			setContractContentProcDate(contractContent, m_ContractContentTemplates[i]);
 
 			int JP_ContractProcessRef_ID = m_ContractContentTemplates[i].getJP_ContractProcessRef_ID();
 			if(JP_ContractProcessRef_ID > 0)
@@ -110,46 +95,6 @@ public class DefaultCreateContractFromTemplate extends AbstractCreateContractFro
 					contractContent.setJP_ContractProcess_ID(contractProcessLists[0].getJP_ContractProcess_ID());
 			}
 
-			if(m_ContractContentTemplates[i].getJP_ContractProcPOffset()==0)
-			{
-				contractContent.setJP_ContractProcDate_From(m_Contract.getJP_ContractPeriodDate_From());
-
-			}else{
-				if(contractContent.getJP_ContractCalender_ID() > 0)
-				{
-					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
-					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), m_Contract.getJP_ContractPeriodDate_From(), null, m_ContractContentTemplates[i].getJP_ContractProcPOffset());
-					contractContent.setJP_ContractProcDate_From(period.getStartDate());
-				}
-			}
-
-			if(m_ContractContentTemplates[i].getJP_ContractProcPeriodNum()==0)
-			{
-				contractContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
-			}else{
-
-				if(contractContent.getJP_ContractCalender_ID() > 0)
-				{
-					MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
-					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From(), null, m_ContractContentTemplates[i].getJP_ContractProcPeriodNum());
-					if(m_Contract.getJP_ContractPeriodDate_To() == null)
-					{
-						contractContent.setJP_ContractProcDate_To(period.getEndDate());
-
-					}else{
-
-						if(m_Contract.getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
-						{
-							contractContent.setJP_ContractProcDate_To(period.getEndDate());
-
-						}else{
-
-							contractContent.setJP_ContractProcDate_To(m_Contract.getJP_ContractPeriodDate_To());
-						}
-
-					}
-				}
-			}
 
 			if(m_ContractContentTemplates[i].getC_BPartner_ID()==0)
 			{
@@ -191,11 +136,7 @@ public class DefaultCreateContractFromTemplate extends AbstractCreateContractFro
 			contrctLine.setAD_Org_ID(contractContent.getAD_Org_ID());
 			contrctLine.setAD_OrgTrx_ID(contractContent.getAD_OrgTrx_ID());
 			contrctLine.setDateOrdered(contractContent.getDateOrdered());
-			LocalDateTime datePromisedLocal = contractContent.getDateAcct().toLocalDateTime();
-			datePromisedLocal = datePromisedLocal.plusDays(m_ContractLineTemplates[i].getDeliveryTime_Promised());
-			contrctLine.setDatePromised(Timestamp.valueOf(datePromisedLocal)) ;
-
-			contrctLine.setDatePromised(contractContent.getDatePromised());
+			contrctLine.setDatePromised(calculateDate(contractContent.getDateAcct(), m_ContractLineTemplates[i].getDeliveryTime_Promised())) ;
 			contrctLine.setJP_ContractContent_ID(contractContent.getJP_ContractContent_ID());
 			contrctLine.setJP_ContractLineT_ID(m_ContractLineTemplates[i].getJP_ContractLineT_ID());
 
