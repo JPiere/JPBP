@@ -73,15 +73,24 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 	@Override
 	protected String doIt() throws Exception
 	{
-//		super.doIt();
+		//PreCheck
+		if(estimation.getC_BPartner_ID() == 0)
+		{
+			errorMsg = errorMsg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_ID") + System.lineSeparator();
+		}
+
+		if(estimation.getC_BPartner_Location_ID() == 0)
+		{
+			errorMsg = errorMsg + Msg.getMsg(getCtx(), "FillMandatory") + " : " + Msg.getElement(getCtx(), "C_BPartner_Location_ID")+ System.lineSeparator();
+		}
 
 		if(!Util.isEmpty(errorMsg))
 		{
 			throw new Exception(errorMsg);
 		}
 
-		MContract[] contracts = MContract.getContractByEstimation(getCtx(), p_JP_Estimation_ID, get_TrxName());
 
+		MContract[] contracts = MContract.getContractByEstimation(getCtx(), p_JP_Estimation_ID, get_TrxName());
 
 		if(processUI != null && contracts.length > 0)
 		{
