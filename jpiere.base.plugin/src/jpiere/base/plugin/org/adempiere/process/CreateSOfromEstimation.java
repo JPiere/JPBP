@@ -45,6 +45,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 	private int			p_JP_DocTypeSO_ID = 0;
 	private String			p_DocAction = null;
 	private MEstimation 	estimation = null;
+	private MOrderJP		order = null;
 	private IProcessUI 		processUI = null;
 	private boolean 		isCreateSO = false;
 	private boolean 		isOpenDialog = false;
@@ -146,9 +147,9 @@ public class CreateSOfromEstimation extends SvrProcess {
 		}
 
 		if(isCreateSO)
-			addBufferLog(0, null, null, returnMsg, MOrder.Table_ID, estimation.getLink_Order_ID());
+			addBufferLog(0, null, null, order.getDocumentNo(), MOrder.Table_ID, estimation.getLink_Order_ID());
 
-		return returnMsg;
+		return "";//Msg.getMsg(getCtx(), "Success");
 
 	}
 
@@ -156,7 +157,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 	{
 		MEstimationLine[] eLines = estimation.getLines();
 
-		MOrderJP order = new MOrderJP(getCtx(), 0, get_TrxName()) ;
+		order = new MOrderJP(getCtx(), 0, get_TrxName()) ;
 		PO.copyValues(estimation, order);
 		order.setAD_Org_ID(estimation.getAD_Org_ID());
 		order.setDocumentNo(null);
@@ -165,6 +166,8 @@ public class CreateSOfromEstimation extends SvrProcess {
 		order.setDocAction(DocAction.ACTION_Complete);
 		order.setRef_Order_ID(0);
 		order.setLink_Order_ID(0);
+		order.set_ValueNoCheck("JP_Contract_ID", null);
+		order.set_ValueNoCheck("JP_ContractContent_ID", null);
 		order.saveEx(get_TrxName());
 
 		estimation.setLink_Order_ID(order.getC_Order_ID());
@@ -203,7 +206,7 @@ public class CreateSOfromEstimation extends SvrProcess {
 			op.saveEx(get_TrxName());
 		}
 
-		return order.getDocumentInfo();
+		return "";
 	}
 
 
