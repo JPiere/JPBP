@@ -8,6 +8,7 @@ import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -87,8 +88,13 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 				{
 					if (result)
 					{
-						returnMsg = createContract();
-						isCreateSO = true;
+						try {
+							returnMsg = createContract();
+						}catch (Exception e) {
+							returnMsg = e.getMessage();
+						}finally {
+							isCreateSO = true;
+						}
 
 					}else{
 
@@ -148,7 +154,7 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 		try {
 			m_Contract.saveEx(get_TrxName());
 		}catch (Exception e) {
-			return e.toString();
+			return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "JP_Contract_ID")+ " >>> "+ e.getMessage();
 		}
 
 		MContractContentT[] contractContentTemplates = contractTemplate.getContractContentTemplates();
@@ -163,7 +169,11 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 			contractContent.setAD_OrgTrx_ID(estimation.getAD_OrgTrx_ID());
 			contractContent.setJP_Contract_ID(m_Contract.getJP_Contract_ID());
 			contractContent.setJP_ContractContentT_ID(contractContentTemplates[i].getJP_ContractContentT_ID());
+			contractContent.setC_DocType_ID(contractContentTemplates[i].getC_DocType_ID());
+			if(contractContent.getC_DocType().isDocNoControlled())
+				contractContent.setDocumentNo(null);
 			contractContent.setJP_Contract_Acct_ID(contractContentTemplates[i].getJP_Contract_Acct_ID());
+
 			contractContent.setDateDoc(m_Contract.getDateDoc());
 			contractContent.setDateAcct(m_Contract.getDateAcct());
 			contractContent.setDatePromised(calculateDate(m_Contract.getDateAcct(), contractContentTemplates[i].getDeliveryTime_Promised()));
@@ -196,7 +206,7 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 			try {
 				setWarehouseOfContractContent(contractContentTemplates[i], contractContent);
 			} catch (Exception e) {
-				return e.toString();
+				return e.getMessage();
 			}
 
 
@@ -204,22 +214,31 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 
 				contractContent.saveEx(get_TrxName());
 			} catch (Exception e) {
-				return e.toString();
+				return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContentT_ID") + "_" + contractContentTemplates[i].getValue() + " >>> " + e.getMessage();
 			}
 
 			try {
 				createContractLine(contractContent,contractContentTemplates[i]);
 			} catch (Exception e) {
-				return e.toString();
+				return Msg.getMsg(getCtx(), "Error") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContentT_ID") + "_" + contractContentTemplates[i].getValue() + " >>> " + e.getMessage();
 			}
 
+		}//for i
+
+		estimation.setJP_Contract_ID(m_Contract.getJP_Contract_ID());
+		try {
+			estimation.saveEx(get_TrxName());
+		}catch (Exception e) {
+			return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "JP_Estimation_ID") + " >>> " + e.getMessage();
 		}
 
 		return "";
 	}
 
 
-	protected void createContractLine(MContractContent contractContent, MContractContentT template)
+	protected void createContractLine(MContractContent contractContent, MContractContentT template) throws Exception
 	{
 
 		//Create Contract Content Line
@@ -279,7 +298,12 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 				}
 			}
 
-			contrctLine.saveEx(get_TrxName());
+			try {
+				contrctLine.saveEx(get_TrxName());
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+										+ Msg.getElement(getCtx(), "JP_ContractLineT_ID") + "_" + m_ContractLineTemplates[i].getLine() + " >>> " + e.getMessage() );
+			}
 		}//For i
 
 	}//createContractLine

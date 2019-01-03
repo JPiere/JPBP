@@ -28,7 +28,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractLineT;
 import jpiere.base.plugin.org.adempiere.model.MContractProcessList;
 import jpiere.base.plugin.org.adempiere.model.MContractProcessRef;
 
-/** JPIERE-0363
+/**
+*  JPIERE-0363
 *
 * @author Hideaki Hagiwara
 *
@@ -106,11 +107,27 @@ public class DefaultCreateContractFromTemplate extends AbstractCreateContractFro
 			contractContent.setDocAction(DocAction.ACTION_Complete);
 			contractContent.setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed);
 
-			setWarehouseOfContractContent(m_ContractContentTemplates[i], contractContent);
+			try {
+				setWarehouseOfContractContent(m_ContractContentTemplates[i], contractContent);
+			} catch (Exception e) {
+				throw e;
+			}
 
 			contractContent.setC_Currency_ID(contractContent.getM_PriceList().getC_Currency_ID());
-			contractContent.saveEx(get_TrxName());
-			createContractLine(contractContent,m_ContractContentTemplates[i]);
+
+			try {
+				contractContent.saveEx(get_TrxName());
+			}catch (Exception e) {
+				throw new Exception( Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContentT_ID") + "_" + m_ContractContentTemplates[i].getValue() + " >>> " + e.getMessage() );
+			}
+
+			try {
+				createContractLine(contractContent,m_ContractContentTemplates[i]);
+			}catch (Exception e) {
+				throw new Exception( Msg.getMsg(getCtx(), "Error") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" +  m_ContractContentTemplates[i].getValue() + " >>> " + e.getMessage() );
+			}
 
 		}//For i
 
@@ -183,7 +200,13 @@ public class DefaultCreateContractFromTemplate extends AbstractCreateContractFro
 				}
 			}
 
-			contrctLine.saveEx(get_TrxName());
+			try {
+				contrctLine.saveEx(get_TrxName());
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractLineT_ID") + "_" + m_ContractLineTemplates[i].getLine() + " >>> " + e.getMessage() );
+			}
+
 		}//For i
 
 	}//createContractLine

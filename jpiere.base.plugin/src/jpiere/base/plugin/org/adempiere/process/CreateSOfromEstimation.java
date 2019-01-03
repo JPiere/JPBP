@@ -114,8 +114,14 @@ public class CreateSOfromEstimation extends SvrProcess {
 				{
 					if (result)
 					{
-						returnMsg = createSO();
-						isCreateSO = true;
+						try {
+							returnMsg = createSO();
+						}catch (Exception e) {
+							returnMsg = e.getMessage();
+						}finally {
+							isCreateSO = true;
+						}
+
 					}else{
 						isAskAnswer = false;
 					}
@@ -132,6 +138,11 @@ public class CreateSOfromEstimation extends SvrProcess {
 		while (isOpenDialog && isAskAnswer && !isCreateSO)
 		{
 			Thread.sleep(1000*2);
+		}
+
+		if(!Util.isEmpty(returnMsg))
+		{
+			throw new Exception(returnMsg);
 		}
 
 		if(isCreateSO)

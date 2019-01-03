@@ -83,11 +83,26 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 
 			setDocumentNoOfContractContent(from_ContractContents[i], to_ContractContent);
 			setBPartnerOfContractContent(from_ContractContents[i], to_ContractContent);
-			setWarehouseOfContractContent(from_ContractContents[i], to_ContractContent);
+			try {
+				setWarehouseOfContractContent(from_ContractContents[i], to_ContractContent);
+			} catch (Exception e) {
+				throw e;
+			}
 
 			to_ContractContent.setC_Currency_ID(to_ContractContent.getM_PriceList().getC_Currency_ID());
-			to_ContractContent.saveEx(get_TrxName());
-			createContractLine(to_ContractContent, from_ContractContents[i], false);
+			try {
+				to_ContractContent.saveEx(get_TrxName());
+			}catch (Exception e) {
+				throw new Exception( Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContents[i].getDocumentNo() + " >>> " + e.getMessage() );
+			}
+
+			try {
+				createContractLine(to_ContractContent, from_ContractContents[i], false);
+			}catch (Exception e) {
+				throw new Exception( Msg.getMsg(getCtx(), "Error") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContents[i].getDocumentNo() + " >>> " + e.getMessage() );
+			}
 
 		}//For i
 
@@ -127,7 +142,8 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 			{
 				to_ContractLine.saveEx(get_TrxName());
 			}catch (Exception e) {
-				throw e;
+				throw new Exception(Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractLine_ID") + "_" + from_ContractLines[i].getLine() + " >>> " + e.getMessage() );
 			}
 
 		}//For i

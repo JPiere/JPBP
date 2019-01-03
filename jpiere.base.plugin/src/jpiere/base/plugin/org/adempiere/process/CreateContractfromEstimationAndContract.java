@@ -10,6 +10,7 @@ import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -93,8 +94,13 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 				{
 					if (result)
 					{
-						returnMsg = createContract();
-						isCreateSO = true;
+						try {
+							returnMsg = createContract();
+						}catch (Exception e) {
+							returnMsg = e.getMessage();
+						}finally {
+							isCreateSO = true;
+						}
 
 					}else{
 
@@ -129,7 +135,7 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 
 	}
 
-	private String createContract()
+	private String createContract()  throws Exception
 	{
 		MContract to_Contract = new MContract(getCtx(), 0, get_TrxName());
 		MContract from_Contract = MContract.get(getCtx(), from_JP_Contract_ID);
@@ -165,7 +171,7 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 		try {
 			to_Contract.saveEx(get_TrxName());
 		}catch (Exception e) {
-			return e.toString();
+			return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "JP_Contract_ID")+ " >>> "+ e.getMessage();
 		}
 
 
@@ -183,6 +189,9 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 			to_ContractContent.setJP_Contract_ID(to_Contract.get_ID());
 			to_ContractContent.setJP_ContractContentT_ID(from_ContractContents[i].getJP_ContractContentT_ID());
 			to_ContractContent.setJP_Contract_Acct_ID(from_ContractContents[i].getJP_Contract_Acct_ID());
+			if(to_ContractContent.getC_DocType().isDocNoControlled())
+				to_ContractContent.setDocumentNo(null);
+
 			to_ContractContent.setDateDoc(to_Contract.getDateDoc());
 			to_ContractContent.setDateAcct(to_Contract.getDateAcct());
 			to_ContractContent.setDatePromised(calculateDate(to_Contract.getDateAcct(), from_ContractContents[i].getJP_ContractContentT().getDeliveryTime_Promised())) ;
@@ -201,7 +210,7 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 			try {
 				setWarehouseOfContractContent(from_ContractContents[i], to_ContractContent);
 			} catch (Exception e) {
-				return e.toString();
+				return e.getMessage();
 			}
 
 			to_ContractContent.setC_Currency_ID(to_ContractContent.getM_PriceList().getC_Currency_ID());
@@ -209,13 +218,15 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 			try {
 				to_ContractContent.saveEx(get_TrxName());
 			} catch (Exception e) {
-				return e.toString();
+				return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+										+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContents[i].getDocumentNo() + " >>> " + e.getMessage();
 			}
 
 			try {
 				createContractLine(to_ContractContent, from_ContractContents[i], true);
 			} catch (Exception e) {
-				return e.toString();
+				return Msg.getMsg(getCtx(), "Error") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContents[i].getDocumentNo() + " >>> " + e.getMessage();
 			}
 
 		}//For i
@@ -226,7 +237,7 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 		try {
 			estimation.saveEx(get_TrxName());
 		}catch (Exception e) {
-			return e.toString();
+			return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "JP_Estimation_ID") + " >>> " + e.getMessage();
 		}
 
 		return "";
@@ -245,7 +256,7 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 			to_ContractLine.setAD_Org_ID(to_ContractContent.getAD_Org_ID());
 			to_ContractLine.setAD_OrgTrx_ID(to_ContractContent.getAD_OrgTrx_ID());
 			to_ContractLine.setDateOrdered(to_ContractContent.getDateOrdered());
-			to_ContractLine.setDatePromised(to_ContractLine.getDatePromised()) ;
+			to_ContractLine.setDatePromised(calculateDate(to_ContractContent.getDateAcct(), from_ContractLines[i].getJP_ContractLineT().getDeliveryTime_Promised())) ;
 			to_ContractLine.setJP_ContractContent_ID(to_ContractContent.getJP_ContractContent_ID());
 			to_ContractLine.setJP_ContractLineT_ID(from_ContractLines[i].getJP_ContractLineT_ID());
 
@@ -260,7 +271,8 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 			{
 				to_ContractLine.saveEx(get_TrxName());
 			}catch (Exception e) {
-				throw e;
+				throw new Exception(Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+										+ Msg.getElement(getCtx(), "JP_ContractLine_ID") + "_" + from_ContractLines[i].getLine() + " >>> " + e.getMessage() );
 			}
 
 		}//For i

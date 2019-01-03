@@ -262,7 +262,7 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 				}else {
 
 					throw new Exception(Msg.getMsg(Env.getCtx(),"NotFound") + Msg.getElement(getCtx(), "M_Warehouse_ID") + " : "
-										+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + " - "+  from.getDocumentInfo());
+											+ Msg.getElement(getCtx(), "CopyFrom") + " : " + Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_"+  from.getDocumentNo());
 
 				}
 
