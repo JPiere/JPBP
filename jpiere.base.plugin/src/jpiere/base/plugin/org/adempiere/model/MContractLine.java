@@ -1122,6 +1122,12 @@ public class MContractLine extends X_JP_ContractLine {
 			}else {
 
 				MContractCalender inOut_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_InOut_ID());
+				if(inOut_Calender == null)
+				{
+					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " + Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") );
+					return false;
+				}
+
 				MContractProcPeriod inOut_Start_ProcPeriod = inOut_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
 				if(inOut_Start_ProcPeriod == null)
 				{
@@ -1339,6 +1345,12 @@ public class MContractLine extends X_JP_ContractLine {
 			}else {
 
 				MContractCalender inv_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_Inv_ID());
+				if(inv_Calender == null)
+				{
+					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID"));
+					return false;
+				}
+
 				MContractProcPeriod inv_Start_ProcPeriod = inv_Calender.getContractProcessPeriod(getCtx(), getParent().getJP_ContractProcDate_From());
 				if(inv_Start_ProcPeriod == null)
 				{

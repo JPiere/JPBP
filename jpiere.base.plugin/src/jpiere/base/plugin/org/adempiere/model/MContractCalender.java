@@ -53,6 +53,9 @@ public class MContractCalender extends X_JP_ContractCalender {
 	 */
 	public static MContractCalender get (Properties ctx, int JP_ContractCalender_ID)
 	{
+		if(JP_ContractCalender_ID == 0)
+			return null;
+
 		Integer ii = Integer.valueOf(JP_ContractCalender_ID);
 		MContractCalender retValue = (MContractCalender)s_cache.get(ii);
 		if (retValue != null)
