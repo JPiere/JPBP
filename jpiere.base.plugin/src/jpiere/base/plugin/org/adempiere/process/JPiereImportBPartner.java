@@ -2751,7 +2751,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					}
 				}
 
-				if(!Util.isEmpty(users[i].getValue()))
+				if(!Util.isEmpty(users[i].getValue()) && !Util.isEmpty(importBPartner.getJP_User_Value()))
 				{
 					if(importBPartner.getJP_User_Value().equals(users[i].getValue()))
 					{
