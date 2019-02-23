@@ -156,6 +156,14 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 					list.add(new JPiereContractContentCallout());
 				}
 
+				if(tableName.equals(MContractContent.Table_Name))
+				{
+					if(columnName.equals("IsAutomaticUpdateJP"))
+					{
+						list.add(new JPiereContractContentCallout());
+					}
+				}
+
 			}else if(tableName.equals(MContractLine.Table_Name)){//JPIERE-0363
 
 				if(columnName.equals("JP_ContractCalender_InOut_ID")

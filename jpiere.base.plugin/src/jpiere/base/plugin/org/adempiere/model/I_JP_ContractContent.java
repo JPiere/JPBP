@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 6.1
+ *  @version Release 6.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractContent 
@@ -658,6 +658,15 @@ public interface I_JP_ContractContent
 	public int getJP_BaseDocDocType_ID();
 
 	public org.compiere.model.I_C_DocType getJP_BaseDocDocType() throws RuntimeException;
+
+    /** Column name JP_ContractC_AutoUpdatePolicy */
+    public static final String COLUMNNAME_JP_ContractC_AutoUpdatePolicy = "JP_ContractC_AutoUpdatePolicy";
+
+	/** Set Auto Update Policy	  */
+	public void setJP_ContractC_AutoUpdatePolicy (String JP_ContractC_AutoUpdatePolicy);
+
+	/** Get Auto Update Policy	  */
+	public String getJP_ContractC_AutoUpdatePolicy();
 
     /** Column name JP_ContractCalender_ID */
     public static final String COLUMNNAME_JP_ContractCalender_ID = "JP_ContractCalender_ID";

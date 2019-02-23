@@ -812,18 +812,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 
 			//JP_ContractProcDate_To and isAutomaticUpdateJP())
-			if(getParent().isAutomaticUpdateJP())
+			if(getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP() )
 			{
 				setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
 
-			}else{
+			}else if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP()) {
 
-				if(isAutomaticUpdateJP())
-				{
-					//You can not Automatic update, because Contract document is not Automatic update.
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_IsAutomaticUpdateJP_UpdateError"));
-					return false;
-				}
+				//You can not Automatic update, because Contract document is not Automatic update.
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_IsAutomaticUpdateJP_UpdateError"));
+				return false;
 
 			}
 

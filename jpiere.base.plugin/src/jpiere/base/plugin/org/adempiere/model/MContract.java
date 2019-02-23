@@ -581,6 +581,22 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			setJP_ContractCancelDeadline(null);
 		}
 
+		if(is_ValueChanged("IsAutomaticUpdateJP") && !isAutomaticUpdateJP())
+		{
+			MContractContent[] contents = getContractContents();
+			{
+				for(int i = 0; i < contents.length; i++)
+				{
+					if(contents[i].isAutomaticUpdateJP())
+					{
+						//Contract has Auto Renew Contract Content
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_ContractHasAutoRenewContractContent") +" : " + Msg.getElement(getCtx(), "DocumentNo") + "  " + contents[i].getDocumentNo());
+						return false;
+					}
+				}
+			}
+		}
+
 		//Check Counter Contract Info
 		if(getJP_CounterContract_ID() > 0 && (newRecord || is_ValueChanged("JP_CounterContract_ID")))
 		{
@@ -678,38 +694,11 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 					if(content.isAutomaticUpdateJP())
 					{
 
-						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-						if (no != 1)
+						if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess)
+								&& content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate) )
 						{
-							log.warning("(1) #" + no);
-							return false;
-						}
 
-					}else{
-
-						Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
-						if(JP_ContractProcDate_To == null)
-						{
-							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-							if (no != 1)
-							{
-								log.warning("(1) #" + no);
-								return false;
-							}
-
-						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
-
-							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-							if (no != 1)
-							{
-								log.warning("(1) #" + no);
-								return false;
-							}
-
-						}else if(JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) < 0){
-
-							//Assumption need sync, In case of same date between JP_ContractPeriodDate_To and JP_ContractProcDate_To.
-							if(JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
+							if(old_ContractPeriodDate_To != null && content.getJP_ContractProcDate_To().compareTo(old_ContractPeriodDate_To) == 0)
 							{
 								int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
 								if (no != 1)
@@ -718,6 +707,58 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 									return false;
 								}
 							}
+
+						}else if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess)
+									&& content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent) ){
+
+							;//Noting to do;
+
+						}else if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)
+								&& content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate) ) {
+
+							;//Noting to do;
+
+						}else if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)
+								&& content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent) ) {
+
+							;//Noting to do;
+						}
+
+					}else{
+
+						Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
+						if(JP_ContractProcDate_To != null && old_ContractPeriodDate_To != null
+								&& JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
+						{
+							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+							if (no != 1)
+							{
+								log.warning("(1) #" + no);
+								return false;
+							}
+						}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To == null) {
+
+							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+							if (no != 1)
+							{
+								log.warning("(1) #" + no);
+								return false;
+							}
+
+						}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
+
+							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+							if (no != 1)
+							{
+								log.warning("(1) #" + no);
+								return false;
+							}
+
+						}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) < 0){
+
+
+							;//Noting to do
+
 						}
 
 					}//if(content.isAutomaticUpdateJP())

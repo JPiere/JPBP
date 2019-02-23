@@ -278,7 +278,26 @@ public class JPiereContractContentCallout implements IColumnCallout {
 
 			}//if
 
+		}else if(mField.getColumnName().equals("IsAutomaticUpdateJP")){
+
+			boolean  isAutomaticUpdateJP = mTab.getValueAsBoolean("IsAutomaticUpdateJP");
+			if(isAutomaticUpdateJP)
+			{
+				Integer JP_Contract_ID = (Integer) mTab.getValue("JP_Contract_ID");
+				MContract contract = new MContract(ctx, JP_Contract_ID.intValue(), null);
+				if(contract.isAutomaticUpdateJP())
+				{
+					mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+
+				}else {
+					return Msg.getMsg(ctx, "JP_IsAutomaticUpdateJP_UpdateError");
+				}
+
+			}
+
 		}
+
+
 
 		return "";
 	}
