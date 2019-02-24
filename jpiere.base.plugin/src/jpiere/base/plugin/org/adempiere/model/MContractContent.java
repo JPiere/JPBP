@@ -945,6 +945,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}//if(JP_Contract_Acct_ID > 0)
 		}//Check Contract Acct
 
+
 		//Check Contract Process Method
 		if(newRecord || (is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcessMethod)
 							|| is_ValueChanged(MContractContent.COLUMNNAME_C_DocType_ID)) )
@@ -1000,6 +1001,48 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 
 		}//Check Contract Process Method
+
+
+		//JPIERE-0435 Check Extend Contract Period and Renew Contract
+		if(newRecord || is_ValueChanged(MContractContent.COLUMNNAME_IsAutomaticUpdateJP))
+		{
+			if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP())
+			{
+				//You can not tick Automatic Update, Because Contract document template is not Automatic Update.
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_CheckIsAutomaticUpdateJP"));
+				return false ;
+
+			}
+
+			if(isAutomaticUpdateJP() && getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+
+				if(Util.isEmpty(getJP_ContractC_AutoUpdatePolicy()))
+				{
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractC_AutoUpdatePolicy")};
+					log.saveError("Error",Msg.getMsg(getCtx(), "JP_Mandatory",objs));
+					return false ;
+				}
+
+				if(getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+				{
+					if(getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate))
+					{
+						//You can not select "Extend Contract Process Date" of Auto update policy in case of Indirect Contract Process.
+						log.saveError("Error",Msg.getMsg(getCtx(), "JP_CanNotSelect_ExtendContractProcessDate"));
+						return false ;
+					}
+
+				}
+
+			}else {
+
+				setIsAutomaticUpdateJP(false);
+				setJP_ContractC_AutoUpdatePolicy(null);
+
+			}
+
+		}
 
 		//Check Price List and IsSotrx
 		if(newRecord || is_ValueChanged("M_PriceList_ID") || is_ValueChanged("IsSOTrx"))
