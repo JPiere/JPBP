@@ -913,4 +913,12 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 
 	}
 
+	@Override
+	public String toString() {
+
+		return "DocumentNo[" + getDocumentNo() +"]";
+	}
+
+
+
 }	//	MContract

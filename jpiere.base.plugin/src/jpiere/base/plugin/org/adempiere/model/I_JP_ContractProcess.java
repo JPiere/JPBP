@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractProcess
  *  @author iDempiere (generated) 
- *  @version Release 6.1
+ *  @version Release 6.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractProcess 
@@ -154,6 +154,19 @@ public interface I_JP_ContractProcess
 	/** Get Create Base Doc	  */
 	public boolean isCreateBaseDocJP();
 
+    /** Column name JP_ContractAutoRenewClass */
+    public static final String COLUMNNAME_JP_ContractAutoRenewClass = "JP_ContractAutoRenewClass";
+
+	/** Set Class(Auto Renew Contract).
+	  * Java Classname
+	  */
+	public void setJP_ContractAutoRenewClass (String JP_ContractAutoRenewClass);
+
+	/** Get Class(Auto Renew Contract).
+	  * Java Classname
+	  */
+	public String getJP_ContractAutoRenewClass();
+
     /** Column name JP_ContractProcess_ID */
     public static final String COLUMNNAME_JP_ContractProcess_ID = "JP_ContractProcess_ID";
 
@@ -171,6 +184,19 @@ public interface I_JP_ContractProcess
 
 	/** Get Contract Process(UU)	  */
 	public String getJP_ContractProcess_UU();
+
+    /** Column name JP_ContractStatusUpdateClass */
+    public static final String COLUMNNAME_JP_ContractStatusUpdateClass = "JP_ContractStatusUpdateClass";
+
+	/** Set Class(Contract Status Update).
+	  * Java Classname
+	  */
+	public void setJP_ContractStatusUpdateClass (String JP_ContractStatusUpdateClass);
+
+	/** Get Class(Contract Status Update).
+	  * Java Classname
+	  */
+	public String getJP_ContractStatusUpdateClass();
 
     /** Column name JP_CreateContractPSClass */
     public static final String COLUMNNAME_JP_CreateContractPSClass = "JP_CreateContractPSClass";
