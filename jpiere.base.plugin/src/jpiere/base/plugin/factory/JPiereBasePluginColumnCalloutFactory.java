@@ -142,7 +142,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			}else if(tableName.equals(MContract.Table_Name)){	//JPIERE-0363
 
 				if(columnName.equals("JP_ContractT_ID") || columnName.equals("JP_ContractPeriodDate_To")
-						|| columnName.equals("JP_ContractCancelTerm_ID") || columnName.equals("JP_ContractCancelDate") )
+						|| columnName.equals("JP_ContractCancelTerm_ID") || columnName.equals("JP_ContractCancelDate") || columnName.equals("JP_ContractCancelOfferDate") )
 				{
 					list.add(new JPiereContractCallout());
 				}
