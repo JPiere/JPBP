@@ -34,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190223L;
+	private static final long serialVersionUID = 20190228L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -73,6 +73,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			setIsDiscountPrinted (false);
 // N
 			setIsDropShip (false);
+// N
+			setIsRenewedContractContentJP (false);
 // N
 			setIsSOTrx (true);
 // Y
@@ -1126,6 +1128,27 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return false;
 	}
 
+	/** Set Renewed Contract Content.
+		@param IsRenewedContractContentJP Renewed Contract Content	  */
+	public void setIsRenewedContractContentJP (boolean IsRenewedContractContentJP)
+	{
+		set_Value (COLUMNNAME_IsRenewedContractContentJP, Boolean.valueOf(IsRenewedContractContentJP));
+	}
+
+	/** Get Renewed Contract Content.
+		@return Renewed Contract Content	  */
+	public boolean isRenewedContractContentJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsRenewedContractContentJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Sales Transaction.
 		@param IsSOTrx 
 		This is a Sales Transaction
@@ -1361,6 +1384,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public static final String JP_CONTRACTPROCSTATUS_Processed = "PD";
 	/** Suspend = SD */
 	public static final String JP_CONTRACTPROCSTATUS_Suspend = "SD";
+	/** -- = -- */
+	public static final String JP_CONTRACTPROCSTATUS___ = "--";
 	/** Set Contract Process Status.
 		@param JP_ContractProcStatus Contract Process Status	  */
 	public void setJP_ContractProcStatus (String JP_ContractProcStatus)

@@ -22,7 +22,6 @@ import java.util.logging.Level;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MWarehouse;
 import org.compiere.process.ProcessInfoParameter;
-import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -44,7 +43,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractT;
 * @author Hideaki Hagiwara
 *
 */
-public abstract class AbstractCreateContractFromTemplate extends SvrProcess {
+public abstract class AbstractCreateContractFromTemplate extends AbstractContractProcess {
 
 
 	protected MContract m_Contract = null;

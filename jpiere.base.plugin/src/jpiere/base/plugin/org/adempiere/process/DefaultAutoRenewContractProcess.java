@@ -2,6 +2,11 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+import org.compiere.process.ProcessInfo;
+import org.compiere.process.ProcessInfoParameter;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCancelTerm;
@@ -84,22 +89,26 @@ public class DefaultAutoRenewContractProcess extends AbstractContractProcess {
 			{
 				if(contractContents[i].isAutomaticUpdateJP())
 				{
-					if(contractContents[i].getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
+
+					String className = contractContents[i].getJP_ContractProcess().getJP_ContractAutoRenewClass();
+
+					if(Util.isEmpty(className))
 					{
-						if(contractContents[i].getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent))
-						{
-							renewTheContractContent(contractContents[i]);
-
-						}else if(contractContents[i].getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
-
-							extendContractProcessDate(contractContents[i]);
-						}
-
-					}else if(contractContents[i].getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)) {
-
-						renewTheContractContent(contractContents[i]);
-
+						className = "jpiere.base.plugin.org.adempiere.process.DefaultAutoRenewContractContent";
 					}
+
+					ProcessInfo pi = new ProcessInfo("Auto Renew the Contract Content", 0);
+					pi.setClassName(className);
+					pi.setAD_Client_ID(getAD_Client_ID());
+					pi.setAD_User_ID(getAD_User_ID());
+					pi.setAD_PInstance_ID(getAD_PInstance_ID());
+					pi.setRecord_ID(contractContents[i].getJP_ContractContent_ID());
+
+					ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
+					list.add (new ProcessInfoParameter("JP_ContractContent_ID", contractContents[i].getJP_ContractContent_ID(), null, null, null ));
+					list.add (new ProcessInfoParameter("m_ContractContent", contractContents[i], null, null, null ));
+					list.add (new ProcessInfoParameter("m_Contract", contract, null, null, null ));
+					list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
 
 				}
 
@@ -108,13 +117,4 @@ public class DefaultAutoRenewContractProcess extends AbstractContractProcess {
 
 	}
 
-	private void renewTheContractContent(MContractContent contractContent)
-	{
-
-	}
-
-	private void extendContractProcessDate(MContractContent contractContent)
-	{
-
-	}
 }

@@ -304,8 +304,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
-		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend))
+
+		//Contract Process Status Update
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				&& getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend))
+		{
 			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
+		}
 
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
@@ -371,8 +376,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return false;
 
 		setProcessed(true);
-		setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Invalid);
 		setDocAction(DOCACTION_None);
+
+		//Contract Process Status Update
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Invalid);
+		}
+
+
 
 		return true;
 	}	//	voidIt
@@ -387,8 +399,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
 
 		setProcessed(true);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
-		setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
 		setDocAction(DOCACTION_None);
+
+		//Contract Process Status Update
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
+		}
+
 		return true;
 	}	//	closeIt
 
@@ -434,8 +452,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		setDocAction(DOCACTION_Complete);
 		setProcessed(false);
-		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))
+
+		//Contract Process Status Update
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				&& getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))
+		{
 			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Suspend);
+		}
 
 		return true;
 	}	//	reActivateIt
@@ -612,7 +635,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 
 		//Can not update for Not Unprocecced.
-		if(!getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
+		if(contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				&& !getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed))
 		{
 			if(is_ValueChanged(MContractContent.COLUMNNAME_DocBaseType)
 					|| is_ValueChanged(MContractContent.COLUMNNAME_JP_BaseDocDocType_ID)
@@ -867,6 +891,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if(newRecord)
 		{
 			;//We can not check. because Create Contract content from template process can not set JP_ContractProcess_ID automatically.
+
 		}else{
 
 			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
@@ -877,23 +902,25 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
 					log.saveError("Error",msg);
 					return false;
+
+				}else {
+
+					if(is_ValueChanged("JP_ContractProcess_ID"))
+					{
+						MContractProcess contractProcess = MContractProcess.get(getCtx(), getJP_ContractProcess_ID());
+						if(!contractProcess.getDocBaseType().equals(getDocBaseType()) || !contractProcess.isCreateBaseDocJP())
+						{
+							log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcess_ID")
+								+ " and  " + Msg.getElement(getCtx(), "DocBaseType"));
+							return false;
+						}
+					}
 				}
 
 			}else{
-				;//Noting to do.
+				setJP_ContractProcess_ID(0);
 			}
-
-			if(is_ValueChanged("JP_ContractProcess_ID"))
-			{
-				MContractProcess contractProcess = MContractProcess.get(getCtx(), getJP_ContractProcess_ID());
-				if(!contractProcess.getDocBaseType().equals(getDocBaseType()) || !contractProcess.isCreateBaseDocJP())
-				{
-					log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcess_ID")
-						+ " and  " + Msg.getElement(getCtx(), "DocBaseType"));
-					return false;
-				}
-			}
-		}
+		}//Check JP_ContractProcess_ID()
 
 
 		//Check Contract Acct
@@ -947,8 +974,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 
 		//Check Contract Process Method
-		if(newRecord || (is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcessMethod)
-							|| is_ValueChanged(MContractContent.COLUMNNAME_C_DocType_ID)) )
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				&& (newRecord || (is_ValueChanged(MContractContent.COLUMNNAME_JP_ContractProcessMethod)
+									|| is_ValueChanged(MContractContent.COLUMNNAME_C_DocType_ID))) )
 		{
 			String JP_ContractProcessMethod = getJP_ContractProcessMethod();
 			if(JP_ContractProcessMethod == null)
@@ -1083,6 +1111,23 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID");
 				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
 				return false;
+			}
+		}
+
+		//Check Contract Process Status
+		if(newRecord)
+		{
+			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed);
+			}else {
+				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS___);
+			}
+		}else {
+
+			if(!getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS___);
 			}
 		}
 

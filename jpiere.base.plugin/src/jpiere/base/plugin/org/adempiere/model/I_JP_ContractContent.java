@@ -613,6 +613,15 @@ public interface I_JP_ContractContent
 	  */
 	public boolean isDropShip();
 
+    /** Column name IsRenewedContractContentJP */
+    public static final String COLUMNNAME_IsRenewedContractContentJP = "IsRenewedContractContentJP";
+
+	/** Set Renewed Contract Content	  */
+	public void setIsRenewedContractContentJP (boolean IsRenewedContractContentJP);
+
+	/** Get Renewed Contract Content	  */
+	public boolean isRenewedContractContentJP();
+
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
 
