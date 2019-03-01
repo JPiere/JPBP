@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MColumn;
@@ -61,6 +60,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 {
 	protected int Record_ID = 0;
 	protected MContractContent m_ContractContent = null;
+	protected MContract m_Contract = null;
 	protected MContractLog m_ContractLog = null;
 
 	protected String p_JP_ContractProcessUnit = null;
@@ -83,6 +83,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 	protected String p_JP_ContractProcessMethod = null;
 	protected String p_JP_ContractProcessTraceLevel = MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Warning;
 	protected String p_JP_IndirectContractProcType = JP_IndirectContractProcType_AllValidContractProcessSchedule ;
+	protected String p_JP_ContractProcessType = null;
 
 
 	protected int p_JP_ContractProcess_ID = 0; //use to create derivative Doc
@@ -106,17 +107,14 @@ public abstract class AbstractContractProcess extends SvrProcess
 	public static final String JP_ContractProcessType_AutoRenewContract = "AR";
 	public static final String JP_ContractProcessType_ContractStatusUpdate = "CS";
 
+	protected String p_JP_ContractTabLevel = null;
+	protected  static final String JP_ContractTabLevel_Document  = "CD";
+	protected  static final String JP_ContractTabLevel_Content  = "CC";
 
 	@Override
 	protected void prepare()
 	{
 		Record_ID = getRecord_ID();
-		if(Record_ID > 0)
-		{
-			m_ContractContent = new MContractContent(getCtx(), Record_ID, get_TrxName());
-		}else{
-			log.log(Level.SEVERE, "Record_ID <= 0 ");
-		}
 
 		processUI = Env.getProcessUI(getCtx());
 
@@ -204,6 +202,14 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 				m_ContractLog = (MContractLog)para[i].getParameter();
 
+			}else if (name.equals("JP_Contract")){
+
+				m_Contract = (MContract)para[i].getParameter();
+
+			}else if (name.equals("JP_ContractContent") && Record_ID == 0){
+
+				m_ContractContent = (MContractContent)para[i].getParameter();
+
 			}else if (name.equals("JP_ContractProcess_ID")){
 
 				p_JP_ContractProcess_ID = para[i].getParameterAsInt();
@@ -216,11 +222,37 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 				p_JP_IndirectContractProcType = para[i].getParameterAsString();
 
+			}else if (name.equals("JP_ContractProcessType")) {
+
+				p_JP_ContractProcessType = para[i].getParameterAsString();
+
+			}else if (name.equals("JP_ContractTabLevel")){
+
+				p_JP_ContractTabLevel = para[i].getParameterAsString();
+
 			}else{
 //				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if
 
-		}//fo
+		}//for
+
+		if(Record_ID > 0)
+		{
+			if(Util.isEmpty(p_JP_ContractTabLevel))
+			{
+				m_ContractContent = new MContractContent(getCtx(), Record_ID, get_TrxName());
+				m_Contract = m_ContractContent.getParent();
+
+			}else if(p_JP_ContractTabLevel.equals(JP_ContractTabLevel_Document)) {
+
+				m_Contract = new MContract(getCtx(), Record_ID, get_TrxName());
+
+			}else if(p_JP_ContractTabLevel.equals(JP_ContractTabLevel_Content)){
+
+				m_ContractContent = new MContractContent(getCtx(), Record_ID, get_TrxName());
+				m_Contract = m_ContractContent.getParent();
+			}
+		}
 
 	}
 
@@ -561,6 +593,14 @@ public abstract class AbstractContractProcess extends SvrProcess
 
 			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
 
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_ExtendContractProcessDateOfContractContent )) {//S4;
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+
+		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_RenewTheContractContent )) {//S5;
+
+			createContractLogDetail(ContractLogMsg, ContractLine, po, descriptionMsg, MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+
 		/** W **/
 		}else if(ContractLogMsg.equals(MContractLogDetail.JP_CONTRACTLOGMSG_NotFoundLocator)) {//W1;
 
@@ -735,8 +775,16 @@ public abstract class AbstractContractProcess extends SvrProcess
 			logDetail.setDescription(descriptionMsg);
 
 		//Set Contract Info
-		logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
-		logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+		if(m_ContractContent != null)
+		{
+			logDetail.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
+			logDetail.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+
+		}else if(m_Contract != null) {
+
+			logDetail.setJP_Contract_ID(m_Contract.getJP_Contract_ID());
+		}
+
 		if(ContractLine != null)
 			logDetail.setJP_ContractLine_ID(ContractLine.getJP_ContractLine_ID());
 

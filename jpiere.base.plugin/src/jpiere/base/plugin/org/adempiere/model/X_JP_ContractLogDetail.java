@@ -24,14 +24,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractLogDetail
  *  @author iDempiere (generated) 
- *  @version Release 6.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181229L;
+	private static final long serialVersionUID = 20190301L;
 
     /** Standard Constructor */
     public X_JP_ContractLogDetail (Properties ctx, int JP_ContractLogDetail_ID, String trxName)
@@ -437,6 +437,10 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTLOGMSG_SkippedForNoContractProcessScheduleLines = "BG";
 	/** Skipped for No Contract Invoice Schedule = BI */
 	public static final String JP_CONTRACTLOGMSG_SkippedForNoContractInvoiceSchedule = "BI";
+	/** Extend Contract Process Date of Contract Content = S4 */
+	public static final String JP_CONTRACTLOGMSG_ExtendContractProcessDateOfContractContent = "S4";
+	/** Renew the contract Content = S5 */
+	public static final String JP_CONTRACTLOGMSG_RenewTheContractContent = "S5";
 	/** Set Contract Log Message.
 		@param JP_ContractLogMsg Contract Log Message	  */
 	public void setJP_ContractLogMsg (String JP_ContractLogMsg)
@@ -612,6 +616,8 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTPROCSTATUS_FROM_Processed = "PD";
 	/** Suspend = SD */
 	public static final String JP_CONTRACTPROCSTATUS_FROM_Suspend = "SD";
+	/** -- = -- */
+	public static final String JP_CONTRACTPROCSTATUS_FROM___ = "--";
 	/** Set Contract Process Status(From).
 		@param JP_ContractProcStatus_From Contract Process Status(From)	  */
 	public void setJP_ContractProcStatus_From (String JP_ContractProcStatus_From)
@@ -637,6 +643,8 @@ public class X_JP_ContractLogDetail extends PO implements I_JP_ContractLogDetail
 	public static final String JP_CONTRACTPROCSTATUS_TO_Processed = "PD";
 	/** Suspend = SD */
 	public static final String JP_CONTRACTPROCSTATUS_TO_Suspend = "SD";
+	/** -- = -- */
+	public static final String JP_CONTRACTPROCSTATUS_TO___ = "--";
 	/** Set Contract Process Status(To).
 		@param JP_ContractProcStatus_To Contract Process Status(To)	  */
 	public void setJP_ContractProcStatus_To (String JP_ContractProcStatus_To)

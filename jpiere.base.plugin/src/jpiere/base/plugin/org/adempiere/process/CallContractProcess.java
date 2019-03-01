@@ -1503,11 +1503,12 @@ public class CallContractProcess extends SvrProcess {
 		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
-		pi.setRecord_ID(autoRenewContract.getJP_Contract_ID());
+		pi.setRecord_ID(0);
 
 		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
-		list.add (new ProcessInfoParameter("JP_Contract_ID", autoRenewContract.getJP_Contract_ID(), null, null, null ));
+		list.add (new ProcessInfoParameter("JP_Contract", autoRenewContract, null, null, null ));
 		list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
+		setProcessInfoParameter(pi, list, null);
 
 		if(startProcess(pi))
 			successNum++;

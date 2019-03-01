@@ -1,41 +1,14 @@
 package jpiere.base.plugin.org.adempiere.process;
 
-import org.compiere.process.ProcessInfoParameter;
-import org.compiere.util.Msg;
-
-import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
+import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 
 public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy {
-
-	private MContractContent m_ContractContent = null;
-	private MContract m_Contract = null;
 
 	@Override
 	protected void prepare()
 	{
-		ProcessInfoParameter[] para = getParameter();
-		for (int i = 0; i < para.length; i++)
-		{
-			String name = para[i].getParameterName();
-
-			if (para[i].getParameter() == null)
-			{
-				;
-
-			}else if (name.equals("m_ContractContent")){
-
-				m_ContractContent = (MContractContent)para[i].getParameter();
-
-			}else if (name.equals("m_Contract")){
-
-				m_Contract = (MContract)para[i].getParameter();
-
-			}else{
-//				log.log(Level.SEVERE, "Unknown Parameter: " + name);
-			}//if
-		}
-
+		super.prepare();
 	}
 
 	@Override
@@ -46,16 +19,31 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 		{
 			if(m_ContractContent.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent) && !m_ContractContent.isRenewedContractContentJP())
 			{
-				renewTheContractContent();
+				try
+				{
+					renewTheContractContent();
+				}catch (Exception e) {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
+				}
 
 			}else if(m_ContractContent.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
 
-				extendContractProcessDate();
+				try
+				{
+					extendContractProcessDate();
+				}catch (Exception e) {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
+				}
 			}
 
 		}else if(m_ContractContent.getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess) && !m_ContractContent.isRenewedContractContentJP()) {
 
-			renewTheContractContent();
+			try
+			{
+				renewTheContractContent();
+			}catch (Exception e) {
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
+			}
 
 		}
 
@@ -77,10 +65,11 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 			{
 				m_ContractContent.saveEx(get_TrxName());
 			}catch (Exception e) {
-				throw new Exception(Msg.getMsg(getCtx(), "SaveError") + " " + Msg.getElement(getCtx(), "JP_Contract_ID") + "_" + m_ContractContent.getDocumentNo() + " >>> " + e.getMessage() );
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
 			}
 		}
 
+		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_ExtendContractProcessDateOfContractContent, null, to_ContractContent, null);
 
 	}
 
@@ -88,14 +77,23 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 	{
 		MContractContent to_ContractContent = new MContractContent(getCtx(), 0, get_TrxName());
 		createContractContent(m_ContractContent, to_ContractContent, true);
+		to_ContractContent.setJP_PreContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+		try
+		{
+			to_ContractContent.saveEx(get_TrxName());
+		}catch (Exception e) {
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, to_ContractContent, e.getMessage());
+		}
 
 		m_ContractContent.setIsRenewedContractContentJP(true);
 		try
 		{
 			m_ContractContent.saveEx(get_TrxName());
 		}catch (Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "SaveError") + " " + Msg.getElement(getCtx(), "JP_Contract_ID") + "_" + m_ContractContent.getDocumentNo() + " >>> " + e.getMessage() );
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, to_ContractContent, e.getMessage());
 		}
+
+		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_RenewTheContractContent, null, to_ContractContent, null);
 	}
 
 }

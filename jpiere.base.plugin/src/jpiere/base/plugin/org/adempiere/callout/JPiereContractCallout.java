@@ -80,7 +80,7 @@ public class JPiereContractCallout implements IColumnCallout {
 				mTab.setValue("JP_ContractCancelDeadline", calculateCancelDeadLine(ctx, mTab, (Timestamp)mTab.getValue("JP_ContractPeriodDate_To") ) );
 			}
 
-		}else if(mField.getColumnName().equals("JP_ContractCancelDate") && value != null){
+		}else if(mField.getColumnName().equals("JP_ContractCancelDate") && value != null){// Please Check MContract.beforSave()
 
 			Timestamp JP_ContractPeriodDate_To = (Timestamp)mTab.getValue("JP_ContractPeriodDate_To");
 			Timestamp JP_ContractCancelDate = (Timestamp)value;
@@ -103,8 +103,8 @@ public class JPiereContractCallout implements IColumnCallout {
 
 			}else if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) > 0 ) {
 
-				;//Noting to do
-
+//				mTab.setValue("JP_ContractPeriodDate_To", (Timestamp)value);
+//				mTab.fireDataStatusEEvent("Updated", Msg.getElement(ctx, "JP_ContractPeriodDate_To"), false);
 			}
 
 		}else if(mField.getColumnName().equals("JP_ContractCancelOfferDate") && value != null){

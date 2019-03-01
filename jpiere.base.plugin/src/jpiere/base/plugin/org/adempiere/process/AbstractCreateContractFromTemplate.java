@@ -17,11 +17,9 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.logging.Level;
 
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MWarehouse;
-import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -46,14 +44,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractT;
 public abstract class AbstractCreateContractFromTemplate extends AbstractContractProcess {
 
 
-	protected MContract m_Contract = null;
-	protected MContractContent m_ContractContent = null;
 	protected MContractT m_ContractTemplate = null;
 	protected MContractContentT[] m_ContractContentTemplates = null;
-
-	protected String p_JP_ContractTabLevel = null;
-	protected  static final String JP_ContractTabLevel_Document  = "CD";
-	protected  static final String JP_ContractTabLevel_Content  = "CC";
 
 
 	int Record_ID = 0;
@@ -62,44 +54,24 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 	@Override
 	protected void prepare()
 	{
+		super.prepare();
+
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
-
-			ProcessInfoParameter[] para = getParameter();
-			for (int i = 0; i < para.length; i++)
-			{
-				String name = para[i].getParameterName();
-
-				if (para[i].getParameter() == null)
-				{
-					;
-
-				}else if (name.equals("JP_ContractTabLevel")){
-
-					p_JP_ContractTabLevel = para[i].getParameterAsString();
-
-				}else{
-					log.log(Level.SEVERE, "Unknown Parameter: " + name);
-				}//if
-			}//for
-
-
 			if(p_JP_ContractTabLevel.equals(JP_ContractTabLevel_Document))
 			{
-				m_Contract = new MContract(getCtx(), Record_ID, get_TrxName());
 				m_ContractTemplate = new MContractT(getCtx(),m_Contract.getJP_ContractT_ID(), get_TrxName());
 				m_ContractContentTemplates = m_ContractTemplate.getContractContentTemplates();
 
 			}else if(p_JP_ContractTabLevel.equals(JP_ContractTabLevel_Content)){
 
-				m_ContractContent = new MContractContent(getCtx(), Record_ID, get_TrxName());
-				m_Contract = m_ContractContent.getParent();
+				;
 			}
 
 
 		}else{
-			log.log(Level.SEVERE, "Record_ID <= 0 ");
+//			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
 	}
 
@@ -274,8 +246,9 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 
 	protected void setDerivativeInOutLineProcPeriod(MContractLine contractLine, MContractLineT lineTemplate)
 	{
-		if(!contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
-				&& !contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+		if(Util.isEmpty(contractLine.getParent().getJP_CreateDerivativeDocPolicy()) ||
+				(!contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+				&& !contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)) )
 		{
 			contractLine.setJP_ContractCalender_InOut_ID(0);
 			contractLine.setJP_ProcPeriod_Lump_InOut_ID(0);
@@ -349,8 +322,9 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 	protected void setDerivativeInvoiceLineProcPeriod(MContractLine contractLine, MContractLineT lineTemplate)
 	{
 
-		if(!contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
-				&& !contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+		if(Util.isEmpty(contractLine.getParent().getJP_CreateDerivativeDocPolicy()) ||
+				(!contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+				&& !contractLine.getParent().getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice)) )
 		{
 			contractLine.setJP_ContractCalender_Inv_ID(0);
 			contractLine.setJP_ProcPeriod_Lump_Inv_ID(0);

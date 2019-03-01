@@ -540,18 +540,26 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		}
 
 
-		//Check JP_ContractCancelDate
-		if(newRecord || ( getJP_ContractCancelDate() != null && is_ValueChanged("JP_ContractCancelDate")) )
+		//Check JP_ContractCancelDate --- Please Check Callout of JP_ContractCancelDate calumn at JPiereContractCallout.java
+		if( (getJP_ContractCancelDate() != null && newRecord ) || ( getJP_ContractCancelDate() != null && is_ValueChanged("JP_ContractCancelDate")) )
 		{
 			if(getJP_ContractPeriodDate_To() == null)
 			{
 				setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
-			}
-			else if(getJP_ContractCancelDate() != null && getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) < 0 )
-			{
+
+			}else if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) < 0 ){
+
 				//You can not enter contract cancel date before contract Period data(to).
 				log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getMsg(getCtx(), "JP_ContractCancelDate_UpdateError"));
 				return false;
+
+			}else if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) == 0 ){
+
+				;//Noting to do
+
+			}else if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) < 0 ){
+
+//				setJP_ContractPeriodDate_To(getJP_ContractCancelDate());
 			}
 		}
 
@@ -791,6 +799,8 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 				|| getDocStatus().equals(DocAction.STATUS_Voided))
 			return ;
 
+
+
 		if(docAction.equals(DocAction.ACTION_Complete) ||
 				(docAction.equals(DocAction.ACTION_None) && getDocStatus().equals(DocAction.STATUS_Completed)) )
 		{
@@ -833,6 +843,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Invalid);
 			setJP_ContractStatus_IN_Date(new Timestamp (System.currentTimeMillis()));
 		}
+
 
 	}//contractStatusUpdate
 

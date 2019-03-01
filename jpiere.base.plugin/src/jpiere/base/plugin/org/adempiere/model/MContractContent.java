@@ -229,6 +229,17 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					return DocAction.STATUS_Invalid;
 				}
 
+				if(isAutomaticUpdateJP() && !Util.isEmpty(getJP_ContractC_AutoUpdatePolicy()) && getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent))
+				{
+					if(Util.isEmpty(lines[i].getJP_ContractL_AutoUpdatePolicy()))
+					{
+						Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractL_AutoUpdatePolicy")};
+						m_processMsg = Msg.getElement(getCtx(), MContractLine.COLUMNNAME_Line)+" : "+ lines[i].getLine() +"  " + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+						return DocAction.STATUS_Invalid;
+					}
+
+				}
+
 			}//for i
 
 		}
@@ -838,7 +849,31 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			//JP_ContractProcDate_To and isAutomaticUpdateJP())
 			if(getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP() )
 			{
-				setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+				if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+				{
+					if(getJP_ContractProcDate_To() == null)
+					{
+						setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+
+					}else if(!Util.isEmpty(getJP_ContractC_AutoUpdatePolicy())
+							&& getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent))
+					{
+
+						if(getDocStatus().equals(DocAction.ACTION_Complete))
+						{
+							; // noting to do
+						}else if(getDocStatus().equals(DocAction.ACTION_Close)){
+							; // noting to do
+						}else if(isRenewedContractContentJP()) {
+							; // noting to do
+						}else {
+							setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+						}
+
+					}else {
+						setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+					}
+				}
 
 			}else if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP()) {
 
@@ -1032,45 +1067,43 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 
 		//JPIERE-0435 Check Extend Contract Period and Renew Contract
-		if(newRecord || is_ValueChanged(MContractContent.COLUMNNAME_IsAutomaticUpdateJP))
+		if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP())
 		{
-			if(!getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP())
-			{
-				//You can not tick Automatic Update, Because Contract document template is not Automatic Update.
-				log.saveError("Error",Msg.getMsg(getCtx(), "JP_CheckIsAutomaticUpdateJP"));
-				return false ;
+			//You can not tick Automatic Update, Because Contract document template is not Automatic Update.
+			log.saveError("Error",Msg.getMsg(getCtx(), "JP_CheckIsAutomaticUpdateJP"));
+			return false ;
 
+		}
+
+		if(isAutomaticUpdateJP() && getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+
+			if(Util.isEmpty(getJP_ContractC_AutoUpdatePolicy()))
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractC_AutoUpdatePolicy")};
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_Mandatory",objs));
+				return false ;
 			}
 
-			if(isAutomaticUpdateJP() && getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			if(getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
 			{
-
-				if(Util.isEmpty(getJP_ContractC_AutoUpdatePolicy()))
+				if(getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate))
 				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractC_AutoUpdatePolicy")};
-					log.saveError("Error",Msg.getMsg(getCtx(), "JP_Mandatory",objs));
+					//You can not select "Extend Contract Process Date" of Auto update policy in case of Indirect Contract Process.
+					log.saveError("Error",Msg.getMsg(getCtx(), "JP_CanNotSelect_ExtendContractProcessDate"));
 					return false ;
 				}
 
-				if(getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
-				{
-					if(getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate))
-					{
-						//You can not select "Extend Contract Process Date" of Auto update policy in case of Indirect Contract Process.
-						log.saveError("Error",Msg.getMsg(getCtx(), "JP_CanNotSelect_ExtendContractProcessDate"));
-						return false ;
-					}
-
-				}
-
-			}else {
-
-				setIsAutomaticUpdateJP(false);
-				setJP_ContractC_AutoUpdatePolicy(null);
-
 			}
 
+		}else {
+
+			setIsAutomaticUpdateJP(false);
+			setJP_ContractC_AutoUpdatePolicy(null);
+
 		}
+
+
 
 		//Check Price List and IsSotrx
 		if(newRecord || is_ValueChanged("M_PriceList_ID") || is_ValueChanged("IsSOTrx"))
