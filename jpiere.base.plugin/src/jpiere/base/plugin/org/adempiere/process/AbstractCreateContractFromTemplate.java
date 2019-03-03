@@ -209,9 +209,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 
 
 			MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getParent().getJP_ContractCalender_ID());
-			MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From(), null , processPeriodOffset);
-			if(period != null)
-				contractLine.setJP_ProcPeriod_Lump_ID(period.getJP_ContractProcPeriod_ID());
+			if(calender != null)
+			{
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From(), null , processPeriodOffset);
+				if(period != null)
+					contractLine.setJP_ProcPeriod_Lump_ID(period.getJP_ContractProcPeriod_ID());
+			}
 		}
 
 		if(contractLine.getJP_BaseDocLinePolicy().equals("PS") || contractLine.getJP_BaseDocLinePolicy().equals("PB"))
@@ -224,9 +227,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 
 
 			MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getParent().getJP_ContractCalender_ID());
-			MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From(), null , processPeriodOffset);
-			if(period != null)
-				contractLine.setJP_ProcPeriod_Start_ID(period.getJP_ContractProcPeriod_ID());
+			if(calender != null)
+			{
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From(), null , processPeriodOffset);
+				if(period != null)
+					contractLine.setJP_ProcPeriod_Start_ID(period.getJP_ContractProcPeriod_ID());
+			}
 		}
 
 		if(contractLine.getJP_BaseDocLinePolicy().equals("PE") || contractLine.getJP_BaseDocLinePolicy().equals("PB"))
@@ -238,9 +244,13 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 				processPeriodOffset--;
 
 			MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getParent().getJP_ContractCalender_ID());
-			MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From(), null , processPeriodOffset);
-			if(period != null)
-				contractLine.setJP_ProcPeriod_End_ID(period.getJP_ContractProcPeriod_ID());
+			if(calender != null)
+			{
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From(), null , processPeriodOffset);
+				if(period != null)
+					contractLine.setJP_ProcPeriod_End_ID(period.getJP_ContractProcPeriod_ID());
+			}
+
 		}
 	}
 
@@ -281,10 +291,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 					processPeriodOffset--;
 
 				MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_InOut_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
-				if(period != null)
-					contractLine.setJP_ProcPeriod_Lump_InOut_ID(period.getJP_ContractProcPeriod_ID());
-
+				if(calender != null)
+				{
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period != null)
+						contractLine.setJP_ProcPeriod_Lump_InOut_ID(period.getJP_ContractProcPeriod_ID());
+				}
 			}
 
 			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("PS") || contractLine.getJP_DerivativeDocPolicy_InOut().equals("PB"))
@@ -296,9 +308,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 					processPeriodOffset--;
 
 				MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_InOut_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
-				if(period != null)
-					contractLine.setJP_ProcPeriod_Start_InOut_ID(period.getJP_ContractProcPeriod_ID());
+				if(calender != null)
+				{
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period != null)
+						contractLine.setJP_ProcPeriod_Start_InOut_ID(period.getJP_ContractProcPeriod_ID());
+				}
 			}
 
 			if(contractLine.getJP_DerivativeDocPolicy_InOut().equals("PE") || contractLine.getJP_DerivativeDocPolicy_InOut().equals("PB"))
@@ -310,10 +325,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 					processPeriodOffset--;
 
 				MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_InOut_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
-				if(period != null)
-					contractLine.setJP_ProcPeriod_End_InOut_ID(period.getJP_ContractProcPeriod_ID());
-
+				if(calender != null)
+				{
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period != null)
+						contractLine.setJP_ProcPeriod_End_InOut_ID(period.getJP_ContractProcPeriod_ID());
+				}
 			}
 		}
 
@@ -357,10 +374,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 					processPeriodOffset--;
 
 				MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_Inv_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
-				if(period != null)
-					contractLine.setJP_ProcPeriod_Lump_Inv_ID(period.getJP_ContractProcPeriod_ID());
-
+				if(calender != null)
+				{
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period != null)
+						contractLine.setJP_ProcPeriod_Lump_Inv_ID(period.getJP_ContractProcPeriod_ID());
+				}
 			}
 
 			if(contractLine.getJP_DerivativeDocPolicy_Inv().equals("PS") || contractLine.getJP_DerivativeDocPolicy_Inv().equals("PB"))
@@ -372,9 +391,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 					processPeriodOffset--;
 
 				MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_Inv_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
-				if(period != null)
-					contractLine.setJP_ProcPeriod_Start_Inv_ID(period.getJP_ContractProcPeriod_ID());
+				if(calender != null)
+				{
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(),contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period != null)
+						contractLine.setJP_ProcPeriod_Start_Inv_ID(period.getJP_ContractProcPeriod_ID());
+				}
 			}
 
 			if(contractLine.getJP_DerivativeDocPolicy_Inv().equals("PE") || contractLine.getJP_DerivativeDocPolicy_Inv().equals("PB"))
@@ -386,10 +408,12 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 					processPeriodOffset--;
 
 				MContractCalender calender = MContractCalender.get(getCtx(), contractLine.getJP_ContractCalender_Inv_ID());
-				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
-				if(period != null)
-					contractLine.setJP_ProcPeriod_End_Inv_ID(period.getJP_ContractProcPeriod_ID());
-
+				if(calender != null)
+				{
+					MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractLine.getParent().getJP_ContractProcDate_From() , null ,processPeriodOffset);
+					if(period != null)
+						contractLine.setJP_ProcPeriod_End_Inv_ID(period.getJP_ContractProcPeriod_ID());
+				}
 			}
 		}
 

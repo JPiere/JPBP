@@ -834,29 +834,41 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			//JP_ContractProcDate_To and isAutomaticUpdateJP())
 			if(getParent().isAutomaticUpdateJP() && isAutomaticUpdateJP() )
 			{
-				if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+				if(Util.isEmpty(getJP_ContractC_AutoUpdatePolicy()))
 				{
-					if(getJP_ContractProcDate_To() == null)
-					{
-						setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractC_AutoUpdatePolicy")};
+					String msg = Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+					log.saveError("Error",msg);
+					return false;
+				}
 
-					}else if(!Util.isEmpty(getJP_ContractC_AutoUpdatePolicy())
-							&& getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent))
-					{
+				if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
+						|| getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
+				{
+					;//Noting to do;
+				}else {
 
-						if(getDocStatus().equals(DocAction.ACTION_Complete))
+					if(getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent))
+					{
+						if(getDocStatus().equals(DocAction.STATUS_Closed) || getDocStatus().equals(DocAction.STATUS_Reversed) || getDocStatus().equals(DocAction.STATUS_Voided))
 						{
-							; // noting to do
-						}else if(getDocStatus().equals(DocAction.ACTION_Close)){
-							; // noting to do
+							;//Noting to do;
 						}else if(isRenewedContractContentJP()) {
-							; // noting to do
+							;//Noting to do;
 						}else {
 							setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
 						}
 
-					}else {
-						setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+					}else if(getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
+
+						if(getDocStatus().equals(DocAction.STATUS_Closed) || getDocStatus().equals(DocAction.STATUS_Reversed) || getDocStatus().equals(DocAction.STATUS_Voided))
+						{
+							;//Noting to do;
+
+						}else {
+							setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+						}
+
 					}
 				}
 
@@ -869,10 +881,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 
 
-			if(getJP_ContractProcDate_To() != null && getParent().getJP_ContractPeriodDate_To() != null)
+			if(getParent().getJP_ContractPeriodDate_To() != null)
 			{
-				if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 )
+				if(getJP_ContractProcDate_To() == null)
 				{
+					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_Mandatory_JP_ContractProcDate_To"));//TODO
+					return false;
+
+				}else if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 ) {
+
 					log.saveError("Error",Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
 					return false;
 				}
@@ -1128,6 +1145,17 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				String msg0 = Msg.getElement(Env.getCtx(), "JP_CounterContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID");
 				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID") +" - " + Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID");
 				log.saveError("Error", Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));//Different between {0} and {1}
+				return false;
+			}
+		}
+
+		//Check Contract Process Date(To)
+		if(!newRecord)
+		{
+			String msg = checkJP_ContractProcDate_To();
+			if(!Util.isEmpty(msg))
+			{
+				log.saveError("Error", msg);
 				return false;
 			}
 		}
@@ -1625,4 +1653,70 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		return getJP_ContractProcStatus();
 	}
 
+	public String checkJP_ContractProcDate_To()
+	{
+		if(!getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			return "";
+
+		Timestamp JP_ContractPeriodDate_To = getParent().getJP_ContractPeriodDate_To();
+		if(JP_ContractPeriodDate_To == null)
+			return "";
+
+
+		if(getJP_ContractProcDate_To() == null)
+		{
+			return Msg.getMsg(Env.getCtx(), "JP_Mandatory_JP_ContractProcDate_To");
+		}
+
+		if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
+				|| getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
+		{
+			return "";
+		}
+
+		if(getDocStatus().equals(DocAction.STATUS_Closed)
+				|| getDocStatus().equals(DocAction.STATUS_Reversed)
+				|| getDocStatus().equals(DocAction.STATUS_Voided))
+		{
+			return "";
+		}
+
+		if(getParent().isAutomaticUpdateJP())
+		{
+			if(isAutomaticUpdateJP())
+			{
+				if(isRenewedContractContentJP())
+				{
+					return "";
+
+				}else {
+
+					if(getJP_ContractProcDate_To().compareTo(JP_ContractPeriodDate_To) != 0)
+					{
+						String msg0 = Msg.getElement(Env.getCtx(), "JP_Contract_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractPeriodDate_To");
+						String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractContent_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractProcDate_To");
+						return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+
+					}
+				}
+
+			}else {
+
+				if(getJP_ContractProcDate_To().compareTo(JP_ContractPeriodDate_To) > 0)
+				{
+					return Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To");
+				}
+			}
+
+		}else {
+
+			if(getJP_ContractProcDate_To().compareTo(JP_ContractPeriodDate_To) > 0)
+			{
+				return Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To");
+			}
+
+		}
+
+		return "";
+	}
 }	//	MContractContent

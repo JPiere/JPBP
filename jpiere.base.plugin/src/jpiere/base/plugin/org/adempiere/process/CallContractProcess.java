@@ -388,7 +388,7 @@ public class CallContractProcess extends SvrProcess {
 
 			;//not implemented yet.
 
-		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_AutoRenewContract)){//TODO
+		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_AutoRenewContract)){
 
 			ArrayList<MContract> autoRenewContractList = getAutoRenewContractList();
 			for(MContract autoRenewContract : autoRenewContractList)
