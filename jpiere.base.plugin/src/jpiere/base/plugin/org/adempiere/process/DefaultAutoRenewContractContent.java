@@ -1,5 +1,7 @@
 package jpiere.base.plugin.org.adempiere.process;
 
+import org.compiere.util.Msg;
+
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 
@@ -74,9 +76,12 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 			}catch (Exception e) {
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, null, e.getMessage());
 			}
+
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_ExtendContractProcessDateOfContractContent, null, to_ContractContent, Msg.getMsg(getCtx(), "JP_Success"));
+
 		}
 
-		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_ExtendContractProcessDateOfContractContent, null, to_ContractContent, null);
+
 
 	}
 
@@ -84,13 +89,6 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 	{
 		MContractContent to_ContractContent = new MContractContent(getCtx(), 0, get_TrxName());
 		createContractContent(m_ContractContent, to_ContractContent, true);
-		to_ContractContent.setJP_PreContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
-		try
-		{
-			to_ContractContent.saveEx(get_TrxName());
-		}catch (Exception e) {
-			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, to_ContractContent, e.getMessage());
-		}
 
 		m_ContractContent.setIsRenewedContractContentJP(true);
 		try
@@ -100,7 +98,7 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, to_ContractContent, e.getMessage());
 		}
 
-		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_RenewTheContractContent, null, to_ContractContent, null);
+		createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_RenewTheContractContent, null, to_ContractContent, Msg.getMsg(getCtx(), "JP_Success"));
 	}
 
 }

@@ -218,7 +218,15 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 				MContractLine[] lines = contents[i].getLines();
 				if (lines.length == 0)
 				{
-					m_processMsg = "@NoLines@";
+					if(contents[i].getDocStatus().equals(DocAction.STATUS_Closed)
+							|| contents[i].getDocStatus().equals(DocAction.STATUS_Reversed)
+							|| contents[i].getDocStatus().equals(DocAction.STATUS_Voided))
+					{
+						continue;
+					}
+
+					m_processMsg = Msg.getElement(getCtx(), "JP_ContractContent_ID")  + " - " + Msg.getElement(getCtx(), "DocumentNo")
+												+ " - " + contents[i].getDocumentNo() + " - " +  Msg.getMsg(getCtx(), "NoLines");
 					return DocAction.STATUS_Invalid;
 				}
 
@@ -226,7 +234,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 				if(!Util.isEmpty(msg))
 				{
 					m_processMsg = Msg.getElement(getCtx(), "JP_ContractContent_ID")  + " - " + Msg.getElement(getCtx(), "DocumentNo")
-												+ " " + contents[i].getDocumentNo() + "  " +  msg;
+												+ " - " + contents[i].getDocumentNo() + " - " +  msg;
 					return DocAction.STATUS_Invalid;
 				}
 			}
@@ -698,131 +706,131 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			return true;
 
 		//Sync JP_ContractPeriodDate_To at Contract Doc and JP_ContractProcDate_To at Contract Content
-		if(is_ValueChanged(MContract.COLUMNNAME_JP_ContractPeriodDate_To) && getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			Timestamp old_ContractPeriodDate_To = (Timestamp)get_ValueOld(MContract.COLUMNNAME_JP_ContractPeriodDate_To);
-			Timestamp new_ContractPeriodDate_To = getJP_ContractPeriodDate_To();
-
-			String sql = "UPDATE JP_ContractContent SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
-			MContractContent[] contents = getContractContents(true, "");
-			for(int i = 0; i < contents.length; i++)
-			{
-				MContractContent content = contents[i];
-				content.setParent(this);//Reset cache for beforSave at MContract Content
-
-				if(content.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
-						|| content.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
-				{
-					continue;
-				}
-
-
-				if(content.isAutomaticUpdateJP())
-				{
-
-					if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
-					{
-
-						if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate) )
-						{
-
-							if(content.getDocStatus().equals(DocAction.STATUS_Closed) || content.getDocStatus().equals(DocAction.STATUS_Reversed) || content.getDocStatus().equals(DocAction.STATUS_Voided))
-								continue;
-
-
-							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-							if (no != 1)
-							{
-								log.warning("(1) #" + no);
-								return false;
-							}
-
-						}else if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)) {
-
-							if(content.getDocStatus().equals(DocAction.STATUS_Closed) || content.getDocStatus().equals(DocAction.STATUS_Reversed) || content.getDocStatus().equals(DocAction.STATUS_Voided))
-								continue;
-
-							if(content.isRenewedContractContentJP())
-								continue;
-
-							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-							if (no != 1)
-							{
-								log.warning("(1) #" + no);
-								return false;
-							}
-
-						}
-
-					}else if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)){
-
-						if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate) )
-						{
-							;//Noting to do;
-
-						}else if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)) {
-
-							if(content.getDocStatus().equals(DocAction.STATUS_Closed) || content.getDocStatus().equals(DocAction.STATUS_Reversed) || content.getDocStatus().equals(DocAction.STATUS_Voided))
-								continue;
-
-							if(content.isRenewedContractContentJP())
-								continue;
-
-							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-							if (no != 1)
-							{
-								log.warning("(1) #" + no);
-								return false;
-							}
-						}
-
-					}
-
-				}else{
-
-					Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
-					if(JP_ContractProcDate_To != null && old_ContractPeriodDate_To != null
-							&& JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
-					{
-						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-						if (no != 1)
-						{
-							log.warning("(1) #" + no);
-							return false;
-						}
-
-					}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To == null) {
-
-						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-						if (no != 1)
-						{
-							log.warning("(1) #" + no);
-							return false;
-						}
-
-					}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
-
-						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
-						if (no != 1)
-						{
-							log.warning("(1) #" + no);
-							return false;
-						}
-
-					}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) < 0){
-
-
-						;//Noting to do
-
-					}
-
-				}//if(content.isAutomaticUpdateJP())
-
-
-
-			}//for i
-
-		}//if
+//		if(is_ValueChanged(MContract.COLUMNNAME_JP_ContractPeriodDate_To) && getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+//		{
+//			Timestamp old_ContractPeriodDate_To = (Timestamp)get_ValueOld(MContract.COLUMNNAME_JP_ContractPeriodDate_To);
+//			Timestamp new_ContractPeriodDate_To = getJP_ContractPeriodDate_To();
+//
+//			String sql = "UPDATE JP_ContractContent SET JP_ContractProcDate_To = ? WHERE JP_ContractContent_ID=?";
+//			MContractContent[] contents = getContractContents(true, "");
+//			for(int i = 0; i < contents.length; i++)
+//			{
+//				MContractContent content = contents[i];
+//				content.setParent(this);//Reset cache for beforSave at MContract Content
+//
+//				if(content.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
+//						|| content.getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
+//				{
+//					continue;
+//				}
+//
+//
+//				if(content.isAutomaticUpdateJP())
+//				{
+//
+//					if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
+//					{
+//
+//						if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate) )
+//						{
+//
+//							if(content.getDocStatus().equals(DocAction.STATUS_Closed) || content.getDocStatus().equals(DocAction.STATUS_Reversed) || content.getDocStatus().equals(DocAction.STATUS_Voided))
+//								continue;
+//
+//
+//							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+//							if (no != 1)
+//							{
+//								log.warning("(1) #" + no);
+//								return false;
+//							}
+//
+//						}else if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)) {
+//
+//							if(content.getDocStatus().equals(DocAction.STATUS_Closed) || content.getDocStatus().equals(DocAction.STATUS_Reversed) || content.getDocStatus().equals(DocAction.STATUS_Voided))
+//								continue;
+//
+//							if(content.isRenewedContractContentJP())
+//								continue;
+//
+//							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+//							if (no != 1)
+//							{
+//								log.warning("(1) #" + no);
+//								return false;
+//							}
+//
+//						}
+//
+//					}else if(content.getJP_ContractProcessMethod().contentEquals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)){
+//
+//						if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate) )
+//						{
+//							;//Noting to do;
+//
+//						}else if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)) {
+//
+//							if(content.getDocStatus().equals(DocAction.STATUS_Closed) || content.getDocStatus().equals(DocAction.STATUS_Reversed) || content.getDocStatus().equals(DocAction.STATUS_Voided))
+//								continue;
+//
+//							if(content.isRenewedContractContentJP())
+//								continue;
+//
+//							int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+//							if (no != 1)
+//							{
+//								log.warning("(1) #" + no);
+//								return false;
+//							}
+//						}
+//
+//					}
+//
+//				}else{
+//
+//					Timestamp JP_ContractProcDate_To = content.getJP_ContractProcDate_To();
+//					if(JP_ContractProcDate_To != null && old_ContractPeriodDate_To != null
+//							&& JP_ContractProcDate_To.compareTo(old_ContractPeriodDate_To) == 0)
+//					{
+//						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+//						if (no != 1)
+//						{
+//							log.warning("(1) #" + no);
+//							return false;
+//						}
+//
+//					}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To == null) {
+//
+//						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+//						if (no != 1)
+//						{
+//							log.warning("(1) #" + no);
+//							return false;
+//						}
+//
+//					}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) > 0){
+//
+//						int no = DB.executeUpdate(sql, new Object[]{new_ContractPeriodDate_To,Integer.valueOf(content.getJP_ContractContent_ID())}, false, get_TrxName(), 0);
+//						if (no != 1)
+//						{
+//							log.warning("(1) #" + no);
+//							return false;
+//						}
+//
+//					}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) < 0){
+//
+//
+//						;//Noting to do
+//
+//					}
+//
+//				}//if(content.isAutomaticUpdateJP())
+//
+//
+//
+//			}//for i
+//
+//		}//if
 
 
 		//JPIERE-0408:Reset Counter Contract Info

@@ -810,7 +810,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 
 
-		//Check Contract Process Period and Automatic Update
+		//JPIERE-0435:Check Contract Process Period and Automatic Update
 		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
 		{
 			//Check JP_ContractProcDate_From
@@ -881,11 +881,11 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 
 
-			if(getParent().getJP_ContractPeriodDate_To() != null)
+			if(!newRecord && getParent().getJP_ContractPeriodDate_To() != null)
 			{
 				if(getJP_ContractProcDate_To() == null)
 				{
-					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_Mandatory_JP_ContractProcDate_To"));//TODO
+					log.saveError("Error",Msg.getMsg(Env.getCtx(), "JP_Mandatory_JP_ContractProcDate_To"));
 					return false;
 
 				}else if(getJP_ContractProcDate_To().compareTo(getParent().getJP_ContractPeriodDate_To()) > 0 ) {

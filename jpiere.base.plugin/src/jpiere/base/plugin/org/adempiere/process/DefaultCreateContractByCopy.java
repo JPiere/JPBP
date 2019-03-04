@@ -25,6 +25,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractLineT;
+import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 /** JPIERE-0363
@@ -151,6 +152,9 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 		}
 
 		to_ContractContent.setC_Currency_ID(to_ContractContent.getM_PriceList().getC_Currency_ID());
+
+		to_ContractContent.setJP_PreContractContent_ID(from_ContractContent.getJP_ContractContent_ID());
+
 		try {
 			to_ContractContent.saveEx(get_TrxName());
 		}catch (Exception e) {
@@ -212,8 +216,15 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 			{
 				to_ContractLine.saveEx(get_TrxName());
 			}catch (Exception e) {
-				throw new Exception(Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
-						+ Msg.getElement(getCtx(), "JP_ContractLine_ID") + "_" + from_ContractLines[i].getLine() + " >>> " + e.getMessage() );
+
+				if(m_ContractLog == null)
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+							+ Msg.getElement(getCtx(), "JP_ContractLine_ID") + "_" + from_ContractLines[i].getLine() + " >>> " + e.getMessage() );
+				}else {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, from_ContractLines[i], to_ContractContent, e.getMessage());
+				}
+
 			}
 
 		}//For i

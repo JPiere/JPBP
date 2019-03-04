@@ -412,18 +412,57 @@ public class CallContractProcess extends SvrProcess {
 			return "";
 
 		StringBuilder returnMsg = new StringBuilder("");
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_CreateDocNum")).append(":").append(m_ContractLog.createDocNum).append(" / ");//Number of documents to create
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" / ");//Number of To Be Confirmed
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append(" / ");//Number of errors
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractContent")).append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //Number of skips(Contract Content)
-		returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractLine")).append(":").append(m_ContractLog.skipContractLineNum).append("  ");  //Number of skips(Contract Content Line)
+		if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_CreateDocument))
+		{
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_CreateDocNum")).append(":").append(m_ContractLog.createDocNum).append(" / ");//Number of documents to create
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" / ");//Number of To Be Confirmed
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append(" / ");//Number of errors
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractContent")).append(":").append(m_ContractLog.skipContractContentNum).append(" / ");  //Number of skips(Contract Content)
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_SkipNum_ContractLine")).append(":").append(m_ContractLog.skipContractLineNum).append("  ");  //Number of skips(Contract Content Line)
+
+		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_Report)){
+
+			;//not implemented yet.
+
+		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_AutoRenewContract)){
+
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" / ");//Number of To Be Confirmed
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append(" / ");//Number of errors
+
+		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_ContractStatusUpdate)){
+
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_ToBeConfirmed")).append(":").append(m_ContractLog.confirmNum).append(" / ");//Number of To Be Confirmed
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfWarnings")).append(":").append(m_ContractLog.warnNum).append(" / ");//Number of warnings
+			returnMsg.append(Msg.getMsg(getCtx(), "JP_NumberOfErrors")).append(":").append(m_ContractLog.errorNum).append(" / ");//Number of errors
+
+		}
 
 		StringBuilder systemProcessLog = new StringBuilder("");
-		systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
-		systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  / ");
-		systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
-		systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractLine_ID")).append(":").append(processContractLineNum).append(" ");
+		if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_CreateDocument))
+		{
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  / ");
+			systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractContent_ID")).append(":").append(processContractContentNum).append(" / ");
+			systemProcessLog.append(Msg.getElement(getCtx(), "JP_ContractLine_ID")).append(":").append(processContractLineNum).append(" ");
+
+		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_Report)){
+
+			;//not implemented yet.
+
+		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_AutoRenewContract)){
+
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  / ");
+
+		}else if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_ContractStatusUpdate)){
+
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Success")).append(":").append(successNum).append(" / ");
+			systemProcessLog.append(Msg.getMsg(getCtx(), "JP_Failure")).append(":").append(failureNum).append("  / ");
+
+		}
+
 
 
 
