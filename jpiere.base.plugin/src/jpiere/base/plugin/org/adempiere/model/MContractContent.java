@@ -316,12 +316,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
 
+
 		//Contract Process Status Update
-		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
-				&& getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend))
-		{
-			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
-		}
+		updateContractProcStatus(DocAction.ACTION_Complete,false);
 
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
@@ -390,12 +387,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setDocAction(DOCACTION_None);
 
 		//Contract Process Status Update
-		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Invalid);
-		}
-
-
+		updateContractProcStatus(DocAction.ACTION_Void, false);
 
 		return true;
 	}	//	voidIt
@@ -413,10 +405,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setDocAction(DOCACTION_None);
 
 		//Contract Process Status Update
-		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
-		}
+		updateContractProcStatus(DocAction.ACTION_Close,false);
 
 		return true;
 	}	//	closeIt
@@ -465,11 +454,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		setProcessed(false);
 
 		//Contract Process Status Update
-		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
-				&& getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))
-		{
-			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Suspend);
-		}
+		updateContractProcStatus(DocAction.ACTION_ReActivate,false);
 
 		return true;
 	}	//	reActivateIt
@@ -1148,21 +1133,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 
 		//Check Contract Process Status
-		if(newRecord)
-		{
-			if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			{
-				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed);
-			}else {
-				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS___);
-			}
-		}else {
-
-			if(!getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			{
-				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS___);
-			}
-		}
+		updateContractProcStatus(DocAction.ACTION_None, newRecord);
 
 		return true;
 
@@ -1572,6 +1543,86 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	public int getPrecision()
 	{
 		return MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
+	}
+
+	/**
+	 * Update & check Contract Process Status
+	 *
+	 *
+	 * @param docAction
+	 * @param newRecord
+	 * @return Contract Process Status
+	 */
+	public String updateContractProcStatus(String docAction,boolean newRecord)
+	{
+
+		if(getDocStatus().equals(DocAction.STATUS_Closed)
+				|| getDocStatus().equals(DocAction.STATUS_Voided))
+			return getJP_ContractProcStatus();
+
+
+		if(Util.isEmpty(docAction))
+			docAction = DocAction.ACTION_None;
+
+
+		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			if(docAction.equals(DocAction.ACTION_None))
+			{
+				if(newRecord)
+				{
+					setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Unprocessed);
+
+				}else{
+
+					Timestamp now = new Timestamp(System.currentTimeMillis());
+					Timestamp yesterday = Timestamp.valueOf(now.toLocalDateTime().minusDays(1));
+					if(getJP_ContractProcDate_To() != null && yesterday.compareTo(getJP_ContractProcDate_To()) > 0)
+					{
+						if(getDocStatus().equals(DocAction.ACTION_Complete))
+						{
+							setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
+						}
+					}
+				}
+
+			}else if(docAction.equals(DocAction.ACTION_ReActivate)) {
+
+				if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_InProgress))
+				{
+					setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Suspend);
+				}
+
+			}else if(docAction.equals(DocAction.ACTION_Close)) {
+
+				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
+
+			}else if(docAction.equals(DocAction.ACTION_Void)) {
+
+				setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Invalid);
+
+			}else if(docAction.equals(DocAction.ACTION_Complete)){
+
+				if(getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Suspend))
+				{
+					setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_InProgress);
+				}
+
+				Timestamp now = new Timestamp(System.currentTimeMillis());
+				Timestamp yesterday = Timestamp.valueOf(now.toLocalDateTime().minusDays(1));
+				if(getJP_ContractProcDate_To() != null && yesterday.compareTo(getJP_ContractProcDate_To()) > 0)
+				{
+					setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS_Processed);
+				}
+			}
+
+		}else {
+
+			setJP_ContractProcStatus(MContractContent.JP_CONTRACTPROCSTATUS___);
+
+		}
+
+		return getJP_ContractProcStatus();
 	}
 
 }	//	MContractContent

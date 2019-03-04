@@ -533,9 +533,16 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 
 			if( getJP_ContractCancelDate() != null && !is_ValueChanged("JP_ContractCancelDate"))
 			{
-				//You can not update Contract Period Data(To) because Contract Cancel date have been entered.
-				log.saveError("Error", Msg.getMsg(getCtx(), "JP_ContractPeriodDate_To_UpdateError"));
-				return false;
+				if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) == 0 )
+				{
+					;//Noting to do
+				}else {
+
+					//You can not update Contract Period Data(To) because Contract Period Data(To) is different from Contract Cancel date.
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_ContractPeriodDate_To_UpdateError"));
+					return false;
+
+				}
 			}
 		}
 
@@ -793,24 +800,45 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		return true;
 	}
 
-	private void updateContractStatus(String docAction)
+	/**
+	 * Update and Check Contract Status
+	 *
+	 * @param docAction
+	 * @return Contract Status
+	 */
+	public String updateContractStatus(String docAction)
 	{
+
 		if(getDocStatus().equals(DocAction.STATUS_Closed)
 				|| getDocStatus().equals(DocAction.STATUS_Voided))
-			return ;
+			return getJP_ContractStatus();
 
 
+		if(Util.isEmpty(docAction))
+			docAction = DocAction.ACTION_None;
 
 		if(docAction.equals(DocAction.ACTION_Complete) ||
 				(docAction.equals(DocAction.ACTION_None) && getDocStatus().equals(DocAction.STATUS_Completed)) )
 		{
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 
-			if(now.compareTo(getJP_ContractPeriodDate_From()) > 0 )
+			if(now.compareTo(getJP_ContractPeriodDate_From()) < 0 )
 			{
+				setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
+				setJP_ContractStatus_UC_Date(null);
+				setJP_ContractStatus_EC_Date(null);
 
-				if(getJP_ContractPeriodDate_To()==null || now.compareTo(getJP_ContractPeriodDate_To()) < 0)
+			}else {
+
+				Timestamp yesterday = Timestamp.valueOf(now.toLocalDateTime().minusDays(1));
+
+				if(getJP_ContractPeriodDate_To() != null && yesterday.compareTo(getJP_ContractPeriodDate_To()) > 0)
 				{
+					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
+					setJP_ContractStatus_EC_Date(now);
+
+				}else {
+
 					if(getJP_ContractStatus().equals(MContract.JP_CONTRACTSTATUS_Prepare))
 					{
 						setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_UnderContract);
@@ -822,15 +850,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 
 					setJP_ContractStatus_EC_Date(null);
 
-				}else{
-					setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_ExpirationOfContract);
-					setJP_ContractStatus_EC_Date(now);
 				}
-
-			}else{
-				setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
-				setJP_ContractStatus_UC_Date(null);
-				setJP_ContractStatus_EC_Date(null);
 			}
 
 		}else if(docAction.equals(DocAction.ACTION_Close)) {
@@ -844,6 +864,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			setJP_ContractStatus_IN_Date(new Timestamp (System.currentTimeMillis()));
 		}
 
+		return getJP_ContractStatus();
 
 	}//contractStatusUpdate
 

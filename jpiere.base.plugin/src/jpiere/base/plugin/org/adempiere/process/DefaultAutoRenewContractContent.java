@@ -3,6 +3,13 @@ package jpiere.base.plugin.org.adempiere.process;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 
+/**
+ *
+ * JPIERE-0435 : Extend Contract Period and Renew Contract and Contract Status Update
+ *
+ * @author hhagi
+ *
+ */
 public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy {
 
 	@Override

@@ -20,7 +20,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 /**
- * JPIERE-0435
+ *
+ * JPIERE-0435 : Extend Contract Period and Renew Contract and Contract Status Update
  *
  *
  * @author hhagi
