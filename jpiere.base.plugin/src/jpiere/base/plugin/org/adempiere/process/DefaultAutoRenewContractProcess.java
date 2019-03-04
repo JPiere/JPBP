@@ -58,88 +58,88 @@ public class DefaultAutoRenewContractProcess extends AbstractContractProcess {
 				if(m_Contract.getJP_ContractCancelDeadline().compareTo(now_Timestamp) <= 0 )
 				{
 					autoRenewContract(m_Contract);
+
+					if(m_Contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+					{
+						MContractContent[] contractContents = m_Contract.getContractContents(true, null);
+						for(int i = 0; i < contractContents.length; i++)
+						{
+							if(contractContents[i].isAutomaticUpdateJP())
+							{
+
+								if(contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
+										|| contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
+								{
+									continue;
+								}
+
+								if(contractContents[i].getDocStatus().equals(DocAction.STATUS_Closed)
+										|| contractContents[i].getDocStatus().equals(DocAction.STATUS_Reversed)
+										|| contractContents[i].getDocStatus().equals(DocAction.STATUS_Voided))
+								{
+									continue;
+								}
+
+								if(contractContents[i].isRenewedContractContentJP())
+								{
+									continue;
+								}
+
+
+								if(m_Contract.getJP_ContractPeriodDate_To().compareTo(contractContents[i].getJP_ContractProcDate_To()) == 0)
+								{
+									continue;
+
+								}else if(m_Contract.getJP_ContractPeriodDate_To().compareTo(contractContents[i].getJP_ContractProcDate_To()) < 0) {
+
+									//Outside the specified period
+									createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null,Msg.getMsg(getCtx(),"JP_OutsidePperiod"));
+								}
+
+								String className = contractContents[i].getJP_ContractProcess().getJP_ContractAutoRenewClass();
+
+								if(Util.isEmpty(className))
+								{
+									className = "jpiere.base.plugin.org.adempiere.process.DefaultAutoRenewContractContent";
+								}
+
+								ProcessInfo pi = new ProcessInfo("Auto Renew the Contract Content", 0);
+								pi.setClassName(className);
+								pi.setAD_Client_ID(getAD_Client_ID());
+								pi.setAD_User_ID(getAD_User_ID());
+								pi.setAD_PInstance_ID(getAD_PInstance_ID());
+								pi.setRecord_ID(0);
+
+								ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
+								list.add (new ProcessInfoParameter("JP_ContractContent_ID", contractContents[i].getJP_ContractContent_ID(), null, null, null ));
+								list.add (new ProcessInfoParameter("JP_ContractContent", contractContents[i], null, null, null ));
+								list.add (new ProcessInfoParameter("JP_Contract", m_Contract, null, null, null ));
+								list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
+								list.add(new ProcessInfoParameter("JP_ContractTabLevel", AbstractCreateContractFromTemplate.JP_ContractTabLevel_Content, null, null, null ));
+								setProcessInfoParameter(pi, list, null);
+
+								if(processUI == null)
+								{
+									processUI = Env.getProcessUI(getCtx());
+
+								}
+
+								boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI);
+								if(success)
+								{
+									;
+
+								}else{
+
+									;
+								}
+
+							}
+
+						}//for
+					}
 				}
 
-			}
-
-			if(m_Contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
-			{
-				MContractContent[] contractContents = m_Contract.getContractContents(true, null);
-				for(int i = 0; i < contractContents.length; i++)
-				{
-					if(contractContents[i].isAutomaticUpdateJP())
-					{
-
-						if(contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
-								|| contractContents[i].getJP_ContractProcStatus().equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
-						{
-							continue;
-						}
-
-						if(contractContents[i].getDocStatus().equals(DocAction.STATUS_Closed)
-								|| contractContents[i].getDocStatus().equals(DocAction.STATUS_Reversed)
-								|| contractContents[i].getDocStatus().equals(DocAction.STATUS_Voided))
-						{
-							continue;
-						}
-
-						if(contractContents[i].isRenewedContractContentJP())
-						{
-							continue;
-						}
-
-
-						if(m_Contract.getJP_ContractPeriodDate_To().compareTo(contractContents[i].getJP_ContractProcDate_To()) == 0)
-						{
-							continue;
-
-						}else if(m_Contract.getJP_ContractPeriodDate_To().compareTo(contractContents[i].getJP_ContractProcDate_To()) < 0) {
-
-							//Outside the specified period
-							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null,Msg.getMsg(getCtx(),"JP_OutsidePperiod"));
-						}
-
-						String className = contractContents[i].getJP_ContractProcess().getJP_ContractAutoRenewClass();
-
-						if(Util.isEmpty(className))
-						{
-							className = "jpiere.base.plugin.org.adempiere.process.DefaultAutoRenewContractContent";
-						}
-
-						ProcessInfo pi = new ProcessInfo("Auto Renew the Contract Content", 0);
-						pi.setClassName(className);
-						pi.setAD_Client_ID(getAD_Client_ID());
-						pi.setAD_User_ID(getAD_User_ID());
-						pi.setAD_PInstance_ID(getAD_PInstance_ID());
-						pi.setRecord_ID(0);
-
-						ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
-						list.add (new ProcessInfoParameter("JP_ContractContent_ID", contractContents[i].getJP_ContractContent_ID(), null, null, null ));
-						list.add (new ProcessInfoParameter("JP_ContractContent", contractContents[i], null, null, null ));
-						list.add (new ProcessInfoParameter("JP_Contract", m_Contract, null, null, null ));
-						list.add (new ProcessInfoParameter("JP_ContractLog", m_ContractLog, null, null, null ));
-						list.add(new ProcessInfoParameter("JP_ContractTabLevel", AbstractCreateContractFromTemplate.JP_ContractTabLevel_Content, null, null, null ));
-						setProcessInfoParameter(pi, list, null);
-
-						if(processUI == null)
-						{
-							processUI = Env.getProcessUI(getCtx());
-
-						}
-
-						boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI);
-						if(success)
-						{
-							;
-
-						}else{
-
-							;
-						}
-
-					}
-
-				}//for
 			}
 		}
 

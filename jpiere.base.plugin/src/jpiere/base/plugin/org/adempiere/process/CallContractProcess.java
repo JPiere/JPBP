@@ -640,9 +640,12 @@ public class CallContractProcess extends SvrProcess {
 	private ArrayList<MContract> getAutoRenewContractList() throws Exception //TODO
 	{
 		ArrayList<MContract> list = new ArrayList<MContract>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM JP_Contract c WHERE c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR' ,'UC') ")
+		StringBuilder sql = new StringBuilder("SELECT c.* FROM JP_Contract c ")
+												.append(" INNER JOIN JP_ContractCategory cc ON (c.JP_ContractCategory_ID=cc.JP_ContractCategory_ID) ")
+												.append(" LEFT OUTER JOIN JP_ContractCategoryL1 l1 ON (cc.JP_ContractCategoryL1_ID=l1.JP_ContractCategoryL1_ID) ")
+												.append(" WHERE c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR' ,'UC') ")
 												.append(" AND c.IsAutomaticUpdateJP='Y' ")
-												.append(" AND (c.JP_ContractCancelDate IS NULL OR c.JP_ContractCancelDate < ? ) ");
+												.append(" AND c.JP_ContractCancelDate IS NULL AND c.JP_ContractCancelDeadline < ?  ");
 
 		LocalDateTime now_LocalDateTime = new Timestamp(System.currentTimeMillis()).toLocalDateTime();
 		now_LocalDateTime = now_LocalDateTime.minusDays(1);
@@ -653,12 +656,12 @@ public class CallContractProcess extends SvrProcess {
 
 		if(p_JP_ContractCategoryL2_ID > 0)
 		{
-			sql.append(" AND c.JP_ContractCategoryL2_ID  = ? ");
+			sql.append(" AND l1.JP_ContractCategoryL2_ID  = ? ");
 
 			if(p_JP_ContractCategoryL1_ID > 0)
 			{
 
-				sql.append(" AND c.JP_ContractCategoryL1_ID  = ? ");
+				sql.append(" AND cc.JP_ContractCategoryL1_ID  = ? ");
 
 				if(p_JP_ContractCategory_ID > 0)
 				{
@@ -714,19 +717,22 @@ public class CallContractProcess extends SvrProcess {
 	private ArrayList<MContract> getContractStatusUpdateList() throws Exception //TODO
 	{
 		ArrayList<MContract> list = new ArrayList<MContract>();
-		final StringBuilder sql = new StringBuilder("SELECT * FROM JP_Contract c WHERE c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR' ,'UC') ");
+		final StringBuilder sql = new StringBuilder("SELECT * FROM JP_Contract c")
+										.append(" INNER JOIN JP_ContractCategory cc ON (c.JP_ContractCategory_ID=cc.JP_ContractCategory_ID) ")
+										.append(" LEFT OUTER JOIN JP_ContractCategoryL1 l1 ON (cc.JP_ContractCategoryL1_ID=l1.JP_ContractCategoryL1_ID) ")
+										.append(" WHERE c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR' ,'UC') ");
 
 		if(p_AD_Org_ID > 0)
 			sql.append(" AND c.AD_Org_ID = ? ");
 
 		if(p_JP_ContractCategoryL2_ID > 0)
 		{
-			sql.append(" AND c.JP_ContractCategoryL2_ID  = ? ");
+			sql.append(" AND l1.JP_ContractCategoryL2_ID  = ? ");
 
 			if(p_JP_ContractCategoryL1_ID > 0)
 			{
 
-				sql.append(" AND c.JP_ContractCategoryL1_ID  = ? ");
+				sql.append(" AND cc.JP_ContractCategoryL1_ID  = ? ");
 
 				if(p_JP_ContractCategory_ID > 0)
 				{
