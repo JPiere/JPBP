@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractLine
  *  @author iDempiere (generated) 
- *  @version Release 5.1
+ *  @version Release 6.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractLine 
@@ -406,6 +406,15 @@ public interface I_JP_ContractLine
 	public int getJP_ContractContent_ID();
 
 	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException;
+
+    /** Column name JP_ContractL_AutoUpdatePolicy */
+    public static final String COLUMNNAME_JP_ContractL_AutoUpdatePolicy = "JP_ContractL_AutoUpdatePolicy";
+
+	/** Set Auto Update Policy of Line	  */
+	public void setJP_ContractL_AutoUpdatePolicy (String JP_ContractL_AutoUpdatePolicy);
+
+	/** Get Auto Update Policy of Line	  */
+	public String getJP_ContractL_AutoUpdatePolicy();
 
     /** Column name JP_ContractLineT_ID */
     public static final String COLUMNNAME_JP_ContractLineT_ID = "JP_ContractLineT_ID";

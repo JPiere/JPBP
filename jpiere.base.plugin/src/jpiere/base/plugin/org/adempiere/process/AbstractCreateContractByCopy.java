@@ -15,8 +15,6 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.util.logging.Level;
-
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MDocType;
 import org.compiere.model.MOrgInfo;
@@ -56,6 +54,8 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 	@Override
 	protected void prepare()
 	{
+		super.prepare();
+
 		Record_ID = getRecord_ID();
 		if(Record_ID > 0)
 		{
@@ -82,7 +82,7 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 
 				}else{
 
-					log.log(Level.SEVERE, "Unknown Parameter: " + name);
+//					log.log(Level.SEVERE, "Unknown Parameter: " + name);
 
 				}//if
 
@@ -107,7 +107,7 @@ public abstract class AbstractCreateContractByCopy extends AbstractCreateContrac
 			}
 
 		}else{
-			log.log(Level.SEVERE, "Record_ID <= 0 ");
+//			log.log(Level.SEVERE, "Record_ID <= 0 ");
 		}
 
 	}

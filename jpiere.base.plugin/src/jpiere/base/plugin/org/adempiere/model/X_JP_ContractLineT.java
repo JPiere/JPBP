@@ -25,14 +25,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ContractLineT
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181008L;
+	private static final long serialVersionUID = 20190224L;
 
     /** Standard Constructor */
     public X_JP_ContractLineT (Properties ctx, int JP_ContractLineT_ID, String trxName)
@@ -598,6 +598,8 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public static final String DOCBASETYPE_JPiereRevenueRecognitionCreditMemo = "JPS";
 	/** JPiere Expense Recognition(Credit Memo) = JPY */
 	public static final String DOCBASETYPE_JPiereExpenseRecognitionCreditMemo = "JPY";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -605,7 +607,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public void setDocBaseType (String DocBaseType)
 	{
 
-		set_Value (COLUMNNAME_DocBaseType, DocBaseType);
+		set_ValueNoCheck (COLUMNNAME_DocBaseType, DocBaseType);
 	}
 
 	/** Get Document BaseType.
@@ -667,7 +669,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	  */
 	public void setIsSOTrx (boolean IsSOTrx)
 	{
-		set_Value (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+		set_ValueNoCheck (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
 	}
 
 	/** Get Sales Transaction.
@@ -691,7 +693,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	  */
 	public void setIsTaxIncluded (boolean IsTaxIncluded)
 	{
-		set_Value (COLUMNNAME_IsTaxIncluded, Boolean.valueOf(IsTaxIncluded));
+		set_ValueNoCheck (COLUMNNAME_IsTaxIncluded, Boolean.valueOf(IsTaxIncluded));
 	}
 
 	/** Get Price includes Tax.
@@ -809,6 +811,25 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 		return ii.intValue();
 	}
 
+	/** Take over to renew the contract = TO */
+	public static final String JP_CONTRACTL_AUTOUPDATEPOLICY_TakeOverToRenewTheContract = "TO";
+	/** Not Take over to renew the contract = NO */
+	public static final String JP_CONTRACTL_AUTOUPDATEPOLICY_NotTakeOverToRenewTheContract = "NO";
+	/** Set Auto Update Policy of Line.
+		@param JP_ContractL_AutoUpdatePolicy Auto Update Policy of Line	  */
+	public void setJP_ContractL_AutoUpdatePolicy (String JP_ContractL_AutoUpdatePolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractL_AutoUpdatePolicy, JP_ContractL_AutoUpdatePolicy);
+	}
+
+	/** Get Auto Update Policy of Line.
+		@return Auto Update Policy of Line	  */
+	public String getJP_ContractL_AutoUpdatePolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractL_AutoUpdatePolicy);
+	}
+
 	/** Set Contract Content Line Template.
 		@param JP_ContractLineT_ID Contract Content Line Template	  */
 	public void setJP_ContractLineT_ID (int JP_ContractLineT_ID)
@@ -904,7 +925,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public void setJP_ContractType (String JP_ContractType)
 	{
 
-		set_Value (COLUMNNAME_JP_ContractType, JP_ContractType);
+		set_ValueNoCheck (COLUMNNAME_JP_ContractType, JP_ContractType);
 	}
 
 	/** Get Contract Type.
@@ -927,7 +948,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy)
 	{
 
-		set_Value (COLUMNNAME_JP_CreateDerivativeDocPolicy, JP_CreateDerivativeDocPolicy);
+		set_ValueNoCheck (COLUMNNAME_JP_CreateDerivativeDocPolicy, JP_CreateDerivativeDocPolicy);
 	}
 
 	/** Get Create Derivative Doc Policy.
@@ -1291,9 +1312,9 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public void setM_PriceList_ID (int M_PriceList_ID)
 	{
 		if (M_PriceList_ID < 1) 
-			set_Value (COLUMNNAME_M_PriceList_ID, null);
+			set_ValueNoCheck (COLUMNNAME_M_PriceList_ID, null);
 		else 
-			set_Value (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
+			set_ValueNoCheck (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
 	}
 
 	/** Get Price List.
@@ -1397,7 +1418,7 @@ public class X_JP_ContractLineT extends PO implements I_JP_ContractLineT, I_Pers
 	public void setOrderType (String OrderType)
 	{
 
-		set_Value (COLUMNNAME_OrderType, OrderType);
+		set_ValueNoCheck (COLUMNNAME_OrderType, OrderType);
 	}
 
 	/** Get Order Type.

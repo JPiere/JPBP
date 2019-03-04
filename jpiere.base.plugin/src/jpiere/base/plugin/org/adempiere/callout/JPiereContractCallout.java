@@ -61,54 +61,70 @@ public class JPiereContractCallout implements IColumnCallout {
 		        }
 
 			});//FDialog.
-			
+
 		}else if(mField.getColumnName().equals("JP_ContractPeriodDate_To") && value != null){
-						
+
 			boolean IsAutomaticUpdateJP = (boolean)mTab.getValue("IsAutomaticUpdateJP");
-			
+
 			if(IsAutomaticUpdateJP && mTab.getValue("JP_ContractCancelTerm_ID") != null)
 			{
 				mTab.setValue("JP_ContractCancelDeadline", calculateCancelDeadLine(ctx, mTab, (Timestamp)value) );
 			}
-			
+
 		}else if(mField.getColumnName().equals("JP_ContractCancelTerm_ID") && value != null){
-			
+
 			boolean IsAutomaticUpdateJP = (boolean)mTab.getValue("IsAutomaticUpdateJP");
-			
+
 			if(IsAutomaticUpdateJP && mTab.getValue("JP_ContractPeriodDate_To") != null)
 			{
 				mTab.setValue("JP_ContractCancelDeadline", calculateCancelDeadLine(ctx, mTab, (Timestamp)mTab.getValue("JP_ContractPeriodDate_To") ) );
 			}
-			
-		}else if(mField.getColumnName().equals("JP_ContractCancelDate") && value != null){
 
-			GridField  G_ContractPeriodDate_To = mTab.getField("JP_ContractPeriodDate_To");
-			Timestamp JP_ContractPeriodDate_To = (Timestamp)G_ContractPeriodDate_To.getValue();
+		}else if(mField.getColumnName().equals("JP_ContractCancelDate") && value != null){// Please Check MContract.beforSave()
+
+			Timestamp JP_ContractPeriodDate_To = (Timestamp)mTab.getValue("JP_ContractPeriodDate_To");
 			Timestamp JP_ContractCancelDate = (Timestamp)value;
-			
+
 			if(JP_ContractPeriodDate_To == null)
-				return "";
-			
-			if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) < 0 )
 			{
+				mTab.setValue("JP_ContractPeriodDate_To", (Timestamp)value);
+				mTab.fireDataStatusEEvent("Updated", Msg.getElement(ctx, "JP_ContractPeriodDate_To"), false);
+
+			}else if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) < 0 ){
+
 				mTab.setValue("JP_ContractCancelDate", (Timestamp)oldValue);
-				
+
 				//You can not enter contract cancel date before contract Period data(to).
 				return Msg.getMsg(ctx, "JP_ContractCancelDate_UpdateError");
-				
-				
-			}else{
-				
-				mTab.setValue("JP_ContractPeriodDate_To", (Timestamp)value);
-				
+
+			}else if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) == 0 ) {
+
+				;//Noting to do
+
+			}else if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) > 0 ) {
+
+//				mTab.setValue("JP_ContractPeriodDate_To", (Timestamp)value);
+//				mTab.fireDataStatusEEvent("Updated", Msg.getElement(ctx, "JP_ContractPeriodDate_To"), false);
 			}
-	
+
+		}else if(mField.getColumnName().equals("JP_ContractCancelOfferDate") && value != null){
+
+			Timestamp JP_ContractCancelDate = (Timestamp)mTab.getValue("JP_ContractCancelDate");
+			if(JP_ContractCancelDate == null)
+			{
+				Timestamp JP_ContractPeriodDate_To = (Timestamp)mTab.getValue("JP_ContractPeriodDate_To");
+				if(JP_ContractPeriodDate_To != null)
+				{
+					mTab.setValue("JP_ContractCancelDate", JP_ContractPeriodDate_To);
+				}
+			}
+
 		}
 
 		return "";
 	}
-	
-	
+
+
 	private void updateContract(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 		MContractT contractTemplate = MContractT.get(ctx, ((Integer)value).intValue());
@@ -126,23 +142,23 @@ public class JPiereContractCallout implements IColumnCallout {
 			{
 				LocalDateTime JP_ContractPeriodDate_From = ((Timestamp)mTab.getValue("JP_ContractPeriodDate_From")).toLocalDateTime();
 				Timestamp JP_ContractPeriodDate_To = calculatePeriodEndDate(ctx, mTab, JP_ContractPeriodDate_From.minusDays(1) );
-				
+
 				mTab.setValue("JP_ContractPeriodDate_To", JP_ContractPeriodDate_To);
 			}
 		}
 	}
-	
+
 	private Timestamp calculatePeriodEndDate(Properties ctx, GridTab mTab, LocalDateTime old_PeriodEndDate)
 	{
 		int JP_ContractExtendPeriod_ID = ((Integer)mTab.getValue("JP_ContractExtendPeriod_ID")).intValue();
 		MContractExtendPeriod contractExtendPeriod = MContractExtendPeriod.get(ctx, JP_ContractExtendPeriod_ID);
 		return contractExtendPeriod.calculateNewPeriodEndDate(old_PeriodEndDate);
 	}
-	
+
 	private Timestamp calculateCancelDeadLine(Properties ctx, GridTab mTab, Timestamp JP_ContractPeriodDate_To)
 	{
 		int JP_ContractCancelTerm_ID = ((Integer)mTab.getValue("JP_ContractCancelTerm_ID")).intValue();
-		MContractCancelTerm cancelTerm =  MContractCancelTerm.get(ctx, JP_ContractCancelTerm_ID);	
+		MContractCancelTerm cancelTerm =  MContractCancelTerm.get(ctx, JP_ContractCancelTerm_ID);
 		return cancelTerm.calculateCancelDeadLine(JP_ContractPeriodDate_To);
 	}
 

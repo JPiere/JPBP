@@ -226,6 +226,22 @@ public class MContractLine extends X_JP_ContractLine {
 			setNullCreateDerivativeInvoiceInfo();
 		}
 
+		//JPIERE-0435 Check Extend Contract Period and Renew Contract
+		if(getParent().isAutomaticUpdateJP() && getParent().getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)
+				&& getParent().getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+		{
+			if(Util.isEmpty(getJP_ContractL_AutoUpdatePolicy()))
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractL_AutoUpdatePolicy")};
+				log.saveError("Error",Msg.getMsg(getCtx(), "JP_Mandatory",objs));
+				return false ;
+			}
+
+		}else {
+
+			setJP_ContractL_AutoUpdatePolicy(null);
+
+		}
 
 		//	Get Defaults from Parent
 		if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0)
