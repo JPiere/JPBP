@@ -641,8 +641,8 @@ public class CallContractProcess extends SvrProcess {
 	{
 		ArrayList<MContract> list = new ArrayList<MContract>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM JP_Contract c WHERE c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR' ,'UC') ")
-												.append(" AND c.IsAutomaticUpdateJP='Y' AND c.JP_ContractCancelDate IS NULL")
-												.append(" AND c.JP_ContractCancelDeadline < ? ");
+												.append(" AND c.IsAutomaticUpdateJP='Y' ")
+												.append(" AND (c.JP_ContractCancelDate IS NULL OR c.JP_ContractCancelDate < ? ) ");
 
 		LocalDateTime now_LocalDateTime = new Timestamp(System.currentTimeMillis()).toLocalDateTime();
 		now_LocalDateTime = now_LocalDateTime.minusDays(1);

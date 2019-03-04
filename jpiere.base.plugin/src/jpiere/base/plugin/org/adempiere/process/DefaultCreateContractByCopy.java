@@ -19,6 +19,7 @@ import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
@@ -75,7 +76,7 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 	}//createContractContent
 
 
-	protected void createContractContent(MContractContent from_ContractContent, MContractContent to_ContractContent, boolean isRenewedContractContentJP) throws Exception
+	protected void createContractContent(MContractContent from_ContractContent, MContractContent to_ContractContent, boolean isRenewContractContent) throws Exception
 	{
 
 		PO.copyValues(from_ContractContent, to_ContractContent);
@@ -99,8 +100,9 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 		to_ContractContent.setJP_ContractC_AutoUpdatePolicy(from_ContractContent.getJP_ContractC_AutoUpdatePolicy());
 		to_ContractContent.setIsRenewedContractContentJP(false);
 
+		to_ContractContent.setJP_CounterContractContent_ID(0);
 
-		if(isRenewedContractContentJP)
+		if(isRenewContractContent)
 		{
 			to_ContractContent.setJP_ContractProcDate_From(calculateDate(from_ContractContent.getJP_ContractProcDate_To(),1));
 		}
@@ -111,9 +113,10 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 		to_ContractContent.setDateAcct(period.getDateAcct());
 		to_ContractContent.setDateInvoiced(period.getDateDoc());
 
+
 		if(from_Contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			if(!isRenewedContractContentJP)
+			if(!isRenewContractContent)
 			{
 				if(from_ContractContent.getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0)
 				{
@@ -125,7 +128,7 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 
 			if(to_ContractContent.isAutomaticUpdateJP())
 			{
-				to_ContractContent.setJP_ContractProcDate_To(from_Contract.getJP_ContractDocDate_To());
+				to_ContractContent.setJP_ContractProcDate_To(from_Contract.getJP_ContractPeriodDate_To());
 			}
 
 		}else if(from_Contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_SpotContract)) {
@@ -158,27 +161,43 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 		try {
 			to_ContractContent.saveEx(get_TrxName());
 		}catch (Exception e) {
-			throw new Exception( Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
-					+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContent.getDocumentNo() + " >>> " + e.getMessage() );
+
+			if(m_ContractLog == null)
+			{
+				throw new Exception( Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContent.getDocumentNo() + " >>> " + e.getMessage() );
+			}else {
+
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, to_ContractContent, e.getMessage());
+
+			}
 		}
 
 		try {
-			if(isRenewedContractContentJP)
+			if(isRenewContractContent)
 			{
-				createContractLine(to_ContractContent, from_ContractContent, isRenewedContractContentJP, true);
+				createContractLine(to_ContractContent, from_ContractContent, isRenewContractContent, true);
 			}else {
-				createContractLine(to_ContractContent, from_ContractContent, isRenewedContractContentJP, false);
+				createContractLine(to_ContractContent, from_ContractContent, isRenewContractContent, false);
 			}
 
 		}catch (Exception e) {
-			throw new Exception( Msg.getMsg(getCtx(), "Error") + Msg.getElement(getCtx(), "CopyFrom") + " : "
-					+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContent.getDocumentNo() + " >>> " + e.getMessage() );
+
+			if(m_ContractLog == null)
+			{
+				throw new Exception( Msg.getMsg(getCtx(), "Error") + Msg.getElement(getCtx(), "CopyFrom") + " : "
+						+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContent.getDocumentNo() + " >>> " + e.getMessage() );
+			}else {
+
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, to_ContractContent, e.getMessage());
+
+			}
 		}
 
 	}
 
 
-	protected void createContractLine(MContractContent to_ContractContent, MContractContent from_ContractContent, boolean isRenewedContractContentJP, boolean isReSetPeriod) throws Exception
+	protected void createContractLine(MContractContent to_ContractContent, MContractContent from_ContractContent, boolean isRenewContractContent, boolean isReSetPeriod) throws Exception
 	{
 		MContractLine[] to_ContractLines = to_ContractContent.getLines();
 		if(to_ContractLines.length > 0)
@@ -191,9 +210,28 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 		MContractLine[] from_ContractLines = from_ContractContent.getLines();
 		for(int i = 0; i < from_ContractLines.length; i++)
 		{
-			if(isRenewedContractContentJP && from_ContractLines[i].getJP_ContractL_AutoUpdatePolicy().equals(MContractLine.JP_CONTRACTL_AUTOUPDATEPOLICY_NotTakeOverToRenewTheContract))
+			if(isRenewContractContent && from_ContractLines[i].getJP_ContractL_AutoUpdatePolicy().equals(MContractLine.JP_CONTRACTL_AUTOUPDATEPOLICY_NotTakeOverToRenewTheContract))
 			{
 				continue;
+			}
+
+			if(isRenewContractContent && from_ContractLines[i].getJP_ContractLineT_ID() == 0)
+			{
+				if(from_ContractLines[i].getJP_ProcPeriod_End_ID() != 0
+						|| from_ContractLines[i].getJP_ProcPeriod_End_InOut_ID() != 0
+						|| from_ContractLines[i].getJP_ProcPeriod_End_Inv_ID() != 0
+						|| from_ContractLines[i].getJP_ProcPeriod_Lump_ID() != 0
+						|| from_ContractLines[i].getJP_ProcPeriod_Lump_InOut_ID() != 0
+						|| from_ContractLines[i].getJP_ProcPeriod_Lump_Inv_ID() != 0 )
+				{
+					if(m_ContractLog != null)
+					{
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_Skipped, from_ContractLines[i], to_ContractContent
+								, Msg.getMsg(getCtx(), "JP_CouldNotTakeOverToRenewTheContract") + " - " + "JP_ContractLineT_ID() == 0", MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+					}
+					continue;
+				}
+
 			}
 
 			MContractLine to_ContractLine = new MContractLine(getCtx(), 0, get_TrxName());
@@ -207,6 +245,35 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 
 			if(isReSetPeriod)
 			{
+
+				if(from_ContractLines[i].getJP_ContractLineT_ID() == 0)
+				{
+					if(!Util.isEmpty(from_ContractLines[i].getJP_BaseDocLinePolicy()))
+					{
+						to_ContractLine.setJP_BaseDocLinePolicy(MContractLine.JP_BASEDOCLINEPOLICY_ForTheDurationOfContractProcessPeriod);
+						to_ContractLine.setJP_ProcPeriod_Lump_ID(0);
+						to_ContractLine.setJP_ProcPeriod_Start_ID(0);
+						to_ContractLine.setJP_ProcPeriod_End_ID(0);
+					}
+
+					if(!Util.isEmpty(from_ContractLines[i].getJP_DerivativeDocPolicy_InOut()))
+					{
+						to_ContractLine.setJP_DerivativeDocPolicy_InOut(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod);
+						to_ContractLine.setJP_ProcPeriod_Lump_InOut_ID(0);
+						to_ContractLine.setJP_ProcPeriod_Start_InOut_ID(0);
+						to_ContractLine.setJP_ProcPeriod_End_InOut_ID(0);
+					}
+
+					if(!Util.isEmpty(from_ContractLines[i].getJP_DerivativeDocPolicy_Inv()))
+					{
+						to_ContractLine.setJP_DerivativeDocPolicy_Inv(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod);
+						to_ContractLine.setJP_ProcPeriod_Lump_Inv_ID(0);
+						to_ContractLine.setJP_ProcPeriod_Start_Inv_ID(0);
+						to_ContractLine.setJP_ProcPeriod_End_Inv_ID(0);
+					}
+
+				}
+
 				setBaseDocLineProcPeriod(to_ContractLine, MContractLineT.get(getCtx(), to_ContractLine.getJP_ContractLineT_ID()));
 				setDerivativeInOutLineProcPeriod(to_ContractLine, MContractLineT.get(getCtx(), to_ContractLine.getJP_ContractLineT_ID()));
 				setDerivativeInvoiceLineProcPeriod(to_ContractLine, MContractLineT.get(getCtx(), to_ContractLine.getJP_ContractLineT_ID()));
@@ -225,6 +292,12 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, from_ContractLines[i], to_ContractContent, e.getMessage());
 				}
 
+			}
+
+			if(m_ContractLog != null)
+			{
+				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_CreatedDocumentLine, to_ContractLine, to_ContractContent
+																	, Msg.getMsg(getCtx(), "JP_Success"), MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_Information);
 			}
 
 		}//For i

@@ -210,6 +210,14 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			return DocAction.STATUS_Invalid;
 		}
 
+
+		String msg = checkJP_ContractProcDate_To();
+		if(!Util.isEmpty(msg))
+		{
+			m_processMsg = msg;
+			return DocAction.STATUS_Invalid;
+		}
+
 		//Check Lines
 		if(getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
@@ -856,7 +864,8 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 						}else if(isRenewedContractContentJP()) {
 							;//Noting to do;
 						}else {
-							setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+
+							//setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
 						}
 
 					}else if(getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
@@ -866,7 +875,9 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 							;//Noting to do;
 
 						}else {
-							setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+
+							//setJP_ContractProcDate_To(getParent().getJP_ContractPeriodDate_To());
+
 						}
 
 					}
@@ -1150,15 +1161,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 
 		//Check Contract Process Date(To)
-		if(!newRecord)
-		{
-			String msg = checkJP_ContractProcDate_To();
-			if(!Util.isEmpty(msg))
-			{
-				log.saveError("Error", msg);
-				return false;
-			}
-		}
+//		if(!newRecord)
+//		{
+//			String msg = checkJP_ContractProcDate_To();
+//			if(!Util.isEmpty(msg))
+//			{
+//				log.saveError("Error", msg);
+//				return false;
+//			}
+//		}
 
 		//Check Contract Process Status
 		updateContractProcStatus(DocAction.ACTION_None, newRecord);

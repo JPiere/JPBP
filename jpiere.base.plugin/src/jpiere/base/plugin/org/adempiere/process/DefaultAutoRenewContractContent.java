@@ -88,7 +88,12 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 	private void renewTheContractContent() throws Exception
 	{
 		MContractContent to_ContractContent = new MContractContent(getCtx(), 0, get_TrxName());
-		createContractContent(m_ContractContent, to_ContractContent, true);
+		try {
+			createContractContent(m_ContractContent, to_ContractContent, true);
+		}catch (Exception e) {
+			createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, to_ContractContent, e.getMessage());
+		}
+
 
 		m_ContractContent.setIsRenewedContractContentJP(true);
 		try
