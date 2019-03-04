@@ -25,6 +25,7 @@ import org.compiere.model.MOrgInfo;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MWarehouse;
+import org.compiere.process.DocAction;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -34,6 +35,7 @@ import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractCalender;
 import jpiere.base.plugin.org.adempiere.model.MContractCalenderList;
 import jpiere.base.plugin.org.adempiere.model.MContractCalenderRef;
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcessList;
@@ -278,7 +280,73 @@ public class JPiereContractContentCallout implements IColumnCallout {
 
 			}//if
 
+		}else if(mField.getColumnName().equals("IsAutomaticUpdateJP")){
+
+			boolean  isAutomaticUpdateJP = mTab.getValueAsBoolean("IsAutomaticUpdateJP");
+
+			if(isAutomaticUpdateJP)
+			{
+				Integer JP_Contract_ID = (Integer) mTab.getValue("JP_Contract_ID");
+				MContract contract = new MContract(ctx, JP_Contract_ID.intValue(), null);
+
+				if(contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract))
+				{
+					if(contract.isAutomaticUpdateJP())
+					{
+						String JP_ContractProcStatus = (String) mTab.getValue("JP_ContractProcStatus");
+
+						if(JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
+								|| JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
+						{
+							;//Noting to do;
+						}else {
+
+							String JP_ContractC_AutoUpdatePolicy = (String) mTab.getValue("JP_ContractC_AutoUpdatePolicy");
+							String DocStatus = (String) mTab.getValue("DocStatus");
+
+							if(JP_ContractC_AutoUpdatePolicy == null)
+							{
+								if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
+								{
+									;//Noting to do;
+
+								}else {
+									mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+								}
+
+							}else if(JP_ContractC_AutoUpdatePolicy.equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)){
+
+								if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
+								{
+									;//Noting to do;
+								}else if(mTab.getValueAsBoolean("IsRenewedContractContentJP")) {
+									;//Noting to do;
+								}else {
+									mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+								}
+
+							}else if(JP_ContractC_AutoUpdatePolicy.equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
+
+								if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
+								{
+									;//Noting to do;
+
+								}else {
+									mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+								}
+
+							}
+						}
+
+					}else {
+						return Msg.getMsg(ctx, "JP_IsAutomaticUpdateJP_UpdateError");
+					}
+				}
+			}
+
 		}
+
+
 
 		return "";
 	}

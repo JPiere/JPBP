@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractLine
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181015L;
+	private static final long serialVersionUID = 20190224L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -692,6 +692,25 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
     {
         return new KeyNamePair(get_ID(), String.valueOf(getJP_ContractContent_ID()));
     }
+
+	/** Take over to renew the contract = TO */
+	public static final String JP_CONTRACTL_AUTOUPDATEPOLICY_TakeOverToRenewTheContract = "TO";
+	/** Not Take over to renew the contract = NO */
+	public static final String JP_CONTRACTL_AUTOUPDATEPOLICY_NotTakeOverToRenewTheContract = "NO";
+	/** Set Auto Update Policy of Line.
+		@param JP_ContractL_AutoUpdatePolicy Auto Update Policy of Line	  */
+	public void setJP_ContractL_AutoUpdatePolicy (String JP_ContractL_AutoUpdatePolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractL_AutoUpdatePolicy, JP_ContractL_AutoUpdatePolicy);
+	}
+
+	/** Get Auto Update Policy of Line.
+		@return Auto Update Policy of Line	  */
+	public String getJP_ContractL_AutoUpdatePolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractL_AutoUpdatePolicy);
+	}
 
 	public I_JP_ContractLineT getJP_ContractLineT() throws RuntimeException
     {

@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractProcess
  *  @author iDempiere (generated) 
- *  @version Release 6.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181205L;
+	private static final long serialVersionUID = 20190225L;
 
     /** Standard Constructor */
     public X_JP_ContractProcess (Properties ctx, int JP_ContractProcess_ID, String trxName)
@@ -169,8 +169,8 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
-	/** Contract Proc Schedule = CPS */
-	public static final String DOCBASETYPE_ContractProcSchedule = "CPS";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -210,6 +210,23 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 		return false;
 	}
 
+	/** Set Class(Auto Renew Contract).
+		@param JP_ContractAutoRenewClass 
+		Java Classname
+	  */
+	public void setJP_ContractAutoRenewClass (String JP_ContractAutoRenewClass)
+	{
+		set_Value (COLUMNNAME_JP_ContractAutoRenewClass, JP_ContractAutoRenewClass);
+	}
+
+	/** Get Class(Auto Renew Contract).
+		@return Java Classname
+	  */
+	public String getJP_ContractAutoRenewClass () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractAutoRenewClass);
+	}
+
 	/** Set Contract Process.
 		@param JP_ContractProcess_ID Contract Process	  */
 	public void setJP_ContractProcess_ID (int JP_ContractProcess_ID)
@@ -242,6 +259,23 @@ public class X_JP_ContractProcess extends PO implements I_JP_ContractProcess, I_
 	public String getJP_ContractProcess_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractProcess_UU);
+	}
+
+	/** Set Class(Contract Status Update).
+		@param JP_ContractStatusUpdateClass 
+		Java Classname
+	  */
+	public void setJP_ContractStatusUpdateClass (String JP_ContractStatusUpdateClass)
+	{
+		set_Value (COLUMNNAME_JP_ContractStatusUpdateClass, JP_ContractStatusUpdateClass);
+	}
+
+	/** Get Class(Contract Status Update).
+		@return Java Classname
+	  */
+	public String getJP_ContractStatusUpdateClass () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractStatusUpdateClass);
 	}
 
 	/** Set Class(Create Contract Process Schedule).

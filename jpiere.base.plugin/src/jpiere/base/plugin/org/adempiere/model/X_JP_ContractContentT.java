@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ContractContentT
  *  @author iDempiere (generated) 
- *  @version Release 6.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181129L;
+	private static final long serialVersionUID = 20190223L;
 
     /** Standard Constructor */
     public X_JP_ContractContentT (Properties ctx, int JP_ContractContentT_ID, String trxName)
@@ -625,6 +625,8 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -964,6 +966,25 @@ public class X_JP_ContractContentT extends PO implements I_JP_ContractContentT, 
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Extend Contract Process Date  = EX */
+	public static final String JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate = "EX";
+	/** Renew the contract Content  = RE */
+	public static final String JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent = "RE";
+	/** Set Auto Update Policy.
+		@param JP_ContractC_AutoUpdatePolicy Auto Update Policy	  */
+	public void setJP_ContractC_AutoUpdatePolicy (String JP_ContractC_AutoUpdatePolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractC_AutoUpdatePolicy, JP_ContractC_AutoUpdatePolicy);
+	}
+
+	/** Get Auto Update Policy.
+		@return Auto Update Policy	  */
+	public String getJP_ContractC_AutoUpdatePolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractC_AutoUpdatePolicy);
 	}
 
 	public I_JP_ContractCalenderRef getJP_ContractCalenderRef() throws RuntimeException

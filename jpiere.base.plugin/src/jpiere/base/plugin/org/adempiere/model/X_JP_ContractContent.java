@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 6.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190101L;
+	private static final long serialVersionUID = 20190228L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -73,6 +73,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			setIsDiscountPrinted (false);
 // N
 			setIsDropShip (false);
+// N
+			setIsRenewedContractContentJP (false);
 // N
 			setIsSOTrx (true);
 // Y
@@ -1126,6 +1128,27 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return false;
 	}
 
+	/** Set Renewed Contract Content.
+		@param IsRenewedContractContentJP Renewed Contract Content	  */
+	public void setIsRenewedContractContentJP (boolean IsRenewedContractContentJP)
+	{
+		set_Value (COLUMNNAME_IsRenewedContractContentJP, Boolean.valueOf(IsRenewedContractContentJP));
+	}
+
+	/** Get Renewed Contract Content.
+		@return Renewed Contract Content	  */
+	public boolean isRenewedContractContentJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsRenewedContractContentJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Sales Transaction.
 		@param IsSOTrx 
 		This is a Sales Transaction
@@ -1218,6 +1241,25 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Extend Contract Process Date  = EX */
+	public static final String JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate = "EX";
+	/** Renew the contract Content  = RE */
+	public static final String JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent = "RE";
+	/** Set Auto Update Policy.
+		@param JP_ContractC_AutoUpdatePolicy Auto Update Policy	  */
+	public void setJP_ContractC_AutoUpdatePolicy (String JP_ContractC_AutoUpdatePolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_ContractC_AutoUpdatePolicy, JP_ContractC_AutoUpdatePolicy);
+	}
+
+	/** Get Auto Update Policy.
+		@return Auto Update Policy	  */
+	public String getJP_ContractC_AutoUpdatePolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_ContractC_AutoUpdatePolicy);
 	}
 
 	public I_JP_ContractCalender getJP_ContractCalender() throws RuntimeException
@@ -1342,6 +1384,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public static final String JP_CONTRACTPROCSTATUS_Processed = "PD";
 	/** Suspend = SD */
 	public static final String JP_CONTRACTPROCSTATUS_Suspend = "SD";
+	/** -- = -- */
+	public static final String JP_CONTRACTPROCSTATUS___ = "--";
 	/** Set Contract Process Status.
 		@param JP_ContractProcStatus Contract Process Status	  */
 	public void setJP_ContractProcStatus (String JP_ContractProcStatus)
