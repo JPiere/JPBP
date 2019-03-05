@@ -44,6 +44,7 @@ public class DefaultContractProcStatusUpdateProcess extends AbstractContractProc
 			contentLog.setJP_ContractLog_ID(m_ContractLog.getJP_ContractLog_ID());
 			contentLog.setJP_ContractLogMsg(MContractLogDetail.JP_CONTRACTLOGMSG_ContractProcessStatusUpdated);
 			contentLog.setJP_ContractProcessTraceLevel(MContractLogDetail.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed);
+			m_ContractLog.confirmNum++;
 			contentLog.setJP_Contract_ID(m_Contract.getJP_Contract_ID());
 			contentLog.setJP_ContractProcStatus_From(JP_ContractProcStatus_Before);
 			contentLog.setJP_ContractProcStatus_To(JP_ContractProcStatus_After);
