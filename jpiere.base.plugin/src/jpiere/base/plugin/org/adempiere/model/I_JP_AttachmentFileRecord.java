@@ -339,6 +339,24 @@ public interface I_JP_AttachmentFileRecord
 
 	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
 
+    /** Column name JP_MediaContentType */
+    public static final String COLUMNNAME_JP_MediaContentType = "JP_MediaContentType";
+
+	/** Set Media Content Type	  */
+	public void setJP_MediaContentType (String JP_MediaContentType);
+
+	/** Get Media Content Type	  */
+	public String getJP_MediaContentType();
+
+    /** Column name JP_MediaFormat */
+    public static final String COLUMNNAME_JP_MediaFormat = "JP_MediaFormat";
+
+	/** Set Media Format	  */
+	public void setJP_MediaFormat (String JP_MediaFormat);
+
+	/** Get Media Format	  */
+	public String getJP_MediaFormat();
+
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";
 

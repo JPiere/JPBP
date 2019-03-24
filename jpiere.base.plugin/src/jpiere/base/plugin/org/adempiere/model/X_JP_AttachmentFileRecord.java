@@ -31,7 +31,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190323L;
+	private static final long serialVersionUID = 20190324L;
 
     /** Standard Constructor */
     public X_JP_AttachmentFileRecord (Properties ctx, int JP_AttachmentFileRecord_ID, String trxName)
@@ -109,9 +109,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setAD_Table_ID (int AD_Table_ID)
 	{
 		if (AD_Table_ID < 1) 
-			set_Value (COLUMNNAME_AD_Table_ID, null);
+			set_ValueNoCheck (COLUMNNAME_AD_Table_ID, null);
 		else 
-			set_Value (COLUMNNAME_AD_Table_ID, Integer.valueOf(AD_Table_ID));
+			set_ValueNoCheck (COLUMNNAME_AD_Table_ID, Integer.valueOf(AD_Table_ID));
 	}
 
 	/** Get Table.
@@ -137,9 +137,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setAD_User_ID (int AD_User_ID)
 	{
 		if (AD_User_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_AD_User_ID, null);
+			set_Value (COLUMNNAME_AD_User_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
+			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
 	}
 
 	/** Get User/Contact.
@@ -165,9 +165,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
 		if (C_BPartner_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
 	/** Get Business Partner .
@@ -193,9 +193,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setC_Invoice_ID (int C_Invoice_ID)
 	{
 		if (C_Invoice_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
+			set_Value (COLUMNNAME_C_Invoice_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
 	}
 
 	/** Get Invoice.
@@ -221,9 +221,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setC_Order_ID (int C_Order_ID)
 	{
 		if (C_Order_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Order_ID, null);
+			set_Value (COLUMNNAME_C_Order_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
+			set_Value (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
 	}
 
 	/** Get Order.
@@ -249,9 +249,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setC_Payment_ID (int C_Payment_ID)
 	{
 		if (C_Payment_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Payment_ID, null);
+			set_Value (COLUMNNAME_C_Payment_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
+			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
 	}
 
 	/** Get Payment.
@@ -271,7 +271,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	  */
 	public void setDateAcct (Timestamp DateAcct)
 	{
-		set_ValueNoCheck (COLUMNNAME_DateAcct, DateAcct);
+		set_Value (COLUMNNAME_DateAcct, DateAcct);
 	}
 
 	/** Get Account Date.
@@ -322,7 +322,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	  */
 	public void setDocumentNo (String DocumentNo)
 	{
-		set_ValueNoCheck (COLUMNNAME_DocumentNo, DocumentNo);
+		set_Value (COLUMNNAME_DocumentNo, DocumentNo);
 	}
 
 	/** Get Document No.
@@ -339,7 +339,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	  */
 	public void setIsSOTrx (boolean IsSOTrx)
 	{
-		set_ValueNoCheck (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
+		set_Value (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
 	}
 
 	/** Get Sales Transaction.
@@ -375,7 +375,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 		@param JP_AttachmentFileName Name of Attachment	  */
 	public void setJP_AttachmentFileName (String JP_AttachmentFileName)
 	{
-		set_Value (COLUMNNAME_JP_AttachmentFileName, JP_AttachmentFileName);
+		set_ValueNoCheck (COLUMNNAME_JP_AttachmentFileName, JP_AttachmentFileName);
 	}
 
 	/** Get Name of Attachment.
@@ -389,7 +389,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 		@param JP_AttachmentFilePath Path of Attachment	  */
 	public void setJP_AttachmentFilePath (String JP_AttachmentFilePath)
 	{
-		set_Value (COLUMNNAME_JP_AttachmentFilePath, JP_AttachmentFilePath);
+		set_ValueNoCheck (COLUMNNAME_JP_AttachmentFilePath, JP_AttachmentFilePath);
 	}
 
 	/** Get Path of Attachment.
@@ -443,9 +443,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setJP_ContractContent_ID (int JP_ContractContent_ID)
 	{
 		if (JP_ContractContent_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractContent_ID, null);
+			set_Value (COLUMNNAME_JP_ContractContent_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
+			set_Value (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
 	}
 
 	/** Get Contract Content.
@@ -468,9 +468,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setJP_Contract_ID (int JP_Contract_ID)
 	{
 		if (JP_Contract_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_Contract_ID, null);
+			set_Value (COLUMNNAME_JP_Contract_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
+			set_Value (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
 	}
 
 	/** Get Contract Document.
@@ -493,9 +493,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setJP_Estimation_ID (int JP_Estimation_ID)
 	{
 		if (JP_Estimation_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_Estimation_ID, null);
+			set_Value (COLUMNNAME_JP_Estimation_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_Estimation_ID, Integer.valueOf(JP_Estimation_ID));
+			set_Value (COLUMNNAME_JP_Estimation_ID, Integer.valueOf(JP_Estimation_ID));
 	}
 
 	/** Get Estimation & Handwritten.
@@ -508,13 +508,41 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 		return ii.intValue();
 	}
 
+	/** Set Media Content Type.
+		@param JP_MediaContentType Media Content Type	  */
+	public void setJP_MediaContentType (String JP_MediaContentType)
+	{
+		set_Value (COLUMNNAME_JP_MediaContentType, JP_MediaContentType);
+	}
+
+	/** Get Media Content Type.
+		@return Media Content Type	  */
+	public String getJP_MediaContentType () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_MediaContentType);
+	}
+
+	/** Set Media Format.
+		@param JP_MediaFormat Media Format	  */
+	public void setJP_MediaFormat (String JP_MediaFormat)
+	{
+		set_Value (COLUMNNAME_JP_MediaFormat, JP_MediaFormat);
+	}
+
+	/** Get Media Format.
+		@return Media Format	  */
+	public String getJP_MediaFormat () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_MediaFormat);
+	}
+
 	/** Set Line No.
 		@param Line 
 		Unique line for this document
 	  */
 	public void setLine (int Line)
 	{
-		set_ValueNoCheck (COLUMNNAME_Line, Integer.valueOf(Line));
+		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
 	}
 
 	/** Get Line No.
@@ -540,9 +568,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setM_InOut_ID (int M_InOut_ID)
 	{
 		if (M_InOut_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, null);
+			set_Value (COLUMNNAME_M_InOut_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, Integer.valueOf(M_InOut_ID));
+			set_Value (COLUMNNAME_M_InOut_ID, Integer.valueOf(M_InOut_ID));
 	}
 
 	/** Get Shipment/Receipt.
@@ -568,9 +596,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setM_Product_ID (int M_Product_ID)
 	{
 		if (M_Product_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_Product_ID, null);
+			set_Value (COLUMNNAME_M_Product_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
+			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
 	}
 
 	/** Get Product.
@@ -624,7 +652,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	  */
 	public void setPOReference (String POReference)
 	{
-		set_ValueNoCheck (COLUMNNAME_POReference, POReference);
+		set_Value (COLUMNNAME_POReference, POReference);
 	}
 
 	/** Get Order Reference.
@@ -670,9 +698,9 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public void setSalesRep_ID (int SalesRep_ID)
 	{
 		if (SalesRep_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_SalesRep_ID, null);
+			set_Value (COLUMNNAME_SalesRep_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
+			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
 	}
 
 	/** Get Sales Rep.

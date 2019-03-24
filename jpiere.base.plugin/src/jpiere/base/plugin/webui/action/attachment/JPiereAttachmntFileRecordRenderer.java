@@ -291,7 +291,8 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 						Object[] row = (Object[] )model.getElementAt(rowIndex);
 						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
 						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
-						attachmentFileRecord.deleteEx(true);
+						if(attachmentFileRecord.get_ID() != 0)
+							attachmentFileRecord.deleteEx(true);
 
 						List<Row> rowList = _grid.getRows().getChildren();
 						rowList.remove(rowIndex);

@@ -86,6 +86,7 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
     	//Attchment Button
     	Button btnAttachment = new Button();
         btnAttachment.setAttribute("name","btnAttachment");
+        btnAttachment.setSclass("img-btn");
         if (ThemeManager.isUseFontIconForImage())
         	btnAttachment.setIconSclass("z-icon-Attachment");
         else
@@ -102,6 +103,7 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
     	//DownLoad Button
         Button btnExport = new Button();
     	btnExport.setAttribute("name","btnExport");
+    	btnExport.setSclass("img-btn");
         if (ThemeManager.isUseFontIconForImage())
         	btnExport.setIconSclass("z-icon-Export");
         else
@@ -116,6 +118,7 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
     	//Zoom Across Button
         Button btnZoomAcross = new Button();
+        btnZoomAcross.setSclass("img-btn");
     	btnZoomAcross.setAttribute("name","btnZoomAcross");
         if (ThemeManager.isUseFontIconForImage())
         	btnZoomAcross.setIconSclass("z-icon-Edit");
@@ -224,25 +227,34 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 					}
 				};
 
-				attachmentWindow = new JPiereAttachmentWindow (adWindow, null, listener);
-				attachmentWindow.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
-					@Override
-					public void onEvent(Event event) throws Exception
-					{
-						ArrayList<MAttachmentFileRecord>  attachmentFileRecordList = MAttachmentFileRecord.getAttachmentFileRecordPO(Env.getCtx(), AD_Table_ID, Record_ID, true, null);
-						JPiereAttachmentFileRecordGridTable AFRGridTable= new JPiereAttachmentFileRecordGridTable(attachmentFileRecordList, adWindow);
-						JPiereAttachmentFileRecordListModel listModel = new JPiereAttachmentFileRecordListModel(AFRGridTable);
-						if(grid != null)
+				if(attachmentWindow == null)
+				{
+					attachmentWindow = new JPiereAttachmentWindow (adWindow, null, listener);
+					attachmentWindow.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
+						@Override
+						public void onEvent(Event event) throws Exception
 						{
-							grid.setModel(listModel);
-//							grid.renderAll();
-						}
+							ArrayList<MAttachmentFileRecord>  attachmentFileRecordList = MAttachmentFileRecord.getAttachmentFileRecordPO(Env.getCtx(), AD_Table_ID, Record_ID, true, null);
+							JPiereAttachmentFileRecordGridTable AFRGridTable= new JPiereAttachmentFileRecordGridTable(attachmentFileRecordList, adWindow);
+							JPiereAttachmentFileRecordListModel listModel = new JPiereAttachmentFileRecordListModel(AFRGridTable);
+							if(grid != null)
+							{
+								grid.setModel(listModel);
+								//grid.renderAll();
+							}
 
-					}
-				});
-				this.getParent().appendChild(attachmentWindow);
-				LayoutUtils.openOverlappedWindow(this, attachmentWindow, "middle_center");
+						}
+					});
+
+					this.getParent().appendChild(attachmentWindow);
+					//this.appendChild(attachmentWindow);
+				}
+
+//				this.getParent().appendChild(attachmentWindow);
+//				this.appendChild(attachmentWindow);
+				LayoutUtils.openOverlappedWindow(btn, attachmentWindow, "after_pointer");//after_start,middle_center
 				attachmentWindow.focus();
+
 				return;
 
 			}else if(btn.getId().equals("btnExport")) {

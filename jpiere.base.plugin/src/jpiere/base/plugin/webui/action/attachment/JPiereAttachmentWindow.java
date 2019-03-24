@@ -14,52 +14,41 @@
 
 package jpiere.base.plugin.webui.action.attachment;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.adwindow.ADWindowContent;
 import org.adempiere.webui.adwindow.IADTabbox;
-import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
-import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Label;
-import org.adempiere.webui.component.ListItem;
-import org.adempiere.webui.component.Listbox;
-import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.event.DialogEvents;
-import org.adempiere.webui.factory.ButtonFactory;
+import org.adempiere.webui.event.ValueChangeEvent;
+import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
-import org.compiere.model.MAttachment;
-import org.compiere.model.MAttachmentEntry;
+import org.compiere.model.GridField;
+import org.compiere.model.GridTab;
+import org.compiere.model.MColumn;
+import org.compiere.model.MLookup;
+import org.compiere.model.MLookupFactory;
 import org.compiere.util.CLogger;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Util;
-import org.zkoss.util.media.AMedia;
 import org.zkoss.util.media.Media;
-import org.zkoss.zk.au.out.AuEcho;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.UploadEvent;
-import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
-import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Iframe;
@@ -78,7 +67,7 @@ import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
 * @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
 *
 */
-public class JPiereAttachmentWindow extends Window implements EventListener<Event>
+public class JPiereAttachmentWindow extends Window implements EventListener<Event>,ValueChangeListener
 {
 	/**
 	 *
@@ -87,40 +76,21 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 
 	private static CLogger log = CLogger.getCLogger(JPiereAttachmentWindow.class);
 
-	/**	Window No				*/
-	private int	m_WindowNo;
+	/** Attachment File Record	*/
+	private MAttachmentFileRecord m_attachmentFileRecord = null;
 
-	/** Attachment				*/
-	private MAttachment m_attachment = null;
-
-	/** Change					*/
-	private boolean m_change = false;
 
 	private Iframe preview = new Iframe();
 
-	private Textbox text = new Textbox();
+	private Textbox JP_AttachmentFileDescription = new Textbox();
 
-	private Label sizeLabel = new Label();
-
-	private Listbox cbContent = new Listbox();
-
-	private Button bDelete = ButtonFactory.createNamedButton(ConfirmPanel.A_DELETE, false, true);
-	private Button bSave = new Button();
-	private Button bDeleteAll = new Button();
 	private Button bLoad = new Button();
-	private Button bCancel = ButtonFactory.createNamedButton(ConfirmPanel.A_CANCEL, false, true);
-	private Button bOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK, false, true);
-	private Button bRefresh = ButtonFactory.createNamedButton(ConfirmPanel.A_REFRESH, false, true);
-
-	private Panel previewPanel = new Panel();
 
 	private Borderlayout mainPanel = new Borderlayout();
 
 	private Hbox toolBar = new Hbox();
 
 	private Hlayout confirmPanel = new Hlayout();
-
-	private int displayIndex;
 
 	private String orientation;
 
@@ -136,41 +106,14 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 		autoPreviewList.add("text/html");
 	}
 
-	/**
-	 *	Constructor.
-	 *	loads Attachment, if ID <> 0
-	 *  @param WindowNo window no
-	 *  @param AD_Attachment_ID attachment
-	 *  @param AD_Table_ID table
-	 *  @param Record_ID record key
-	 *  @param trxName transaction
-	 */
-
-	public JPiereAttachmentWindow(	int WindowNo, int AD_Attachment_ID,
-						int AD_Table_ID, int Record_ID, String trxName)
-	{
-//		this(WindowNo, AD_Attachment_ID, AD_Table_ID, Record_ID, trxName, (EventListener<Event>)null);
-	}
-
-
 
 	protected ADWindow adWindow;
 	protected ADWindowContent  adWindowContent;
 
-	protected IADTabbox          	 adTabbox;
+	protected IADTabbox adTabbox;
 	protected int AD_Table_ID = 0;
 	protected int Record_ID = 0;
-
-
-	/**
-	 *	Constructor.
-	 *	loads Attachment, if ID <> 0
-	 *  @param WindowNo window no
-	 *  @param AD_Attachment_ID attachment
-	 *  @param AD_Table_ID table
-	 *  @param Record_ID record key
-	 *  @param trxName transaction
-	 */
+	int windowNo = 0;
 
 	public JPiereAttachmentWindow(ADWindow adWindow, String trxName, EventListener<Event> eventListener)
 	{
@@ -181,23 +124,8 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 		this.adTabbox = adWindowContent.getADTab();
 		this.AD_Table_ID =adTabbox.getSelectedGridTab().getAD_Table_ID();
 		this.Record_ID =  adTabbox.getSelectedGridTab().getRecord_ID();
+		this.windowNo = adWindowContent.getWindowNo();
 
-
-		//TODO:テストコード
-		MAttachmentFileRecord afr = new MAttachmentFileRecord(Env.getCtx(),0,null);
-		afr.setAD_Table_ID(AD_Table_ID);
-		afr.setRecord_ID(Record_ID);
-		afr.setJP_AttachmentFileName("UHOUHO");
-		afr.setJP_AttachmentFilePath("UHOUHO");
-		afr.setName("UHOUHO");
-		afr.setDocumentNo((String)adTabbox.getSelectedGridTab().getValue("DocumentNo"));
-		afr.saveEx(null);
-		//TODO:テストコード
-
-
-//		if (log.isLoggable(Level.CONFIG)) log.config("ID=" + AD_Attachment_ID + ", Table=" + AD_Table_ID + ", Record=" + Record_ID);
-
-		m_WindowNo = adWindowContent.getWindowNo();
 		this.addEventListener(DialogEvents.ON_WINDOW_CLOSE, this);
 		if (eventListener != null)
 		{
@@ -213,55 +141,31 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 			log.log(Level.SEVERE, "", ex);
 		}
 
-		//	Create Model
-
-//		if (AD_Attachment_ID > 0)
-//			m_attachment = new MAttachment (Env.getCtx(), AD_Attachment_ID, trxName);
-//		else
-//			m_attachment = new MAttachment (Env.getCtx(), AD_Table_ID, Record_ID, trxName);
-
-//		loadAttachments();
 
 		try
 		{
 			setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-			AEnv.showWindow(this);
-			if (autoPreview(0, true))
-			{
-				//String script = "setTimeout(\"zk.Widget.$('"+ preview.getUuid() + "').$n().src = zk.Widget.$('" +
-				//preview.getUuid() + "').$n().src\", 1000)";
-				//Clients.response(new AuScript(null, script));
-			}
 
 		}
 		catch (Exception e)
 		{
 		}
 
-	} // WAttachment
+	} // JPiereAttachmentWindow
 
-	/**
-	 *	Static setup.
-	 *  <pre>
-	 *  - northPanel
-	 *      - toolBar
-	 *      - title
-	 *  - centerPane [split]
-	 * 		- previewPanel (left)
-	 *  	- text (right)
-	 *  - confirmPanel
-	 *  </pre>
-	 *  @throws Exception
-	 */
+
+	Label Invoice_Org_Label = new Label();					//売上請求伝票検索用組織マスタラベル
+	WSearchEditor Invoice_Org_Editor;						//売上請求伝票検索用組織マスタ選択リスト
 
 	void staticInit() throws Exception
 	{
+
 		this.setAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "attachment");
-		this.setMaximizable(true);
+//		this.setMaximizable(true);
 		if (!ThemeManager.isUseCSSForWindowSize())
 		{
-			ZKUpdateUtil.setWindowWidthX(this, 700);
-			ZKUpdateUtil.setHeight(this, "85%");
+			ZKUpdateUtil.setWindowWidthX(this, 600);
+			ZKUpdateUtil.setHeight(this, "40%");
 		}
 		else
 		{
@@ -274,48 +178,69 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 		this.setClosable(true);
 		this.setSizable(true);
 		this.setBorder("normal");
-		this.setSclass("popup-dialog attachment-dialog");
+//		this.setSclass("popup-dialog attachment-dialog");
+		this.setSclass("popup-dialog");
 		this.setShadow(true);
 		this.appendChild(mainPanel);
 		ZKUpdateUtil.setHeight(mainPanel, "100%");
 		ZKUpdateUtil.setWidth(mainPanel, "100%");
+
+		ZKUpdateUtil.setHeight(this, "250px");
+		ZKUpdateUtil.setWidth(this, "560px");
+
 
 		North northPanel = new North();
 		northPanel.setStyle("padding: 4px");
 		northPanel.setCollapsible(false);
 		northPanel.setSplittable(false);
 
-		cbContent.setMold("select");
-		cbContent.setRows(0);
-		cbContent.addEventListener(Events.ON_SELECT, this);
 
-		toolBar.setAlign("center");
-		toolBar.setPack("start");
-		toolBar.appendChild(bLoad);
-		toolBar.appendChild(bDelete);
-		toolBar.appendChild(bSave);
-		toolBar.appendChild(cbContent);
-		toolBar.appendChild(sizeLabel);
+		int AD_Column_ID = 0;
+
+		Integer AD_Org_ID = (Integer)adTabbox.getSelectedGridTab().getValue("AD_Org_ID");
+		// Initialization of Org
+		AD_Column_ID = MColumn.getColumn_ID("C_Invoice", "AD_Org_ID");
+		MLookup lookupOrg = MLookupFactory.get(Env.getCtx(), windowNo, 0, AD_Column_ID,  DisplayType.Search);
+		Invoice_Org_Editor = new WSearchEditor("Invoice_Org_ID", true, false, true, lookupOrg);
+		Invoice_Org_Editor.setValue(AD_Org_ID.intValue());
+		Invoice_Org_Editor.addValueChangeListener(this);
+
+		Invoice_Org_Label.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
+		toolBar.appendChild(Invoice_Org_Label.rightAlign());
+		ZKUpdateUtil.setHflex(Invoice_Org_Editor.getComponent(), "true");
+		toolBar.appendChild(Invoice_Org_Editor.getComponent());
 
 		mainPanel.appendChild(northPanel);
 		Vlayout div = new Vlayout();
 		div.appendChild(toolBar);
-		text.setRows(3);
-		ZKUpdateUtil.setHflex(text, "1");
-		ZKUpdateUtil.setHeight(text, "100%");
-
-		div.appendChild(text);
+		JP_AttachmentFileDescription.setRows(3);
+		ZKUpdateUtil.setHflex(JP_AttachmentFileDescription, "2");
+		ZKUpdateUtil.setHeight(JP_AttachmentFileDescription, "100%");
 		northPanel.appendChild(div);
 
-		bSave.setEnabled(false);
-		bSave.setSclass("img-btn");
-		if (ThemeManager.isUseFontIconForImage())
-			bSave.setIconSclass("z-icon-Export");
-		else
-			bSave.setImage(ThemeManager.getThemeResource("images/Export24.png"));
-		bSave.setTooltiptext(Msg.getMsg(Env.getCtx(), "AttachmentSave"));
-		bSave.addEventListener(Events.ON_CLICK, this);
 
+		div.appendChild(new Label(Msg.getElement(Env.getCtx(), "JP_AttachmentFileDescription")));
+		div.appendChild(JP_AttachmentFileDescription);
+
+
+
+		Center centerPane = new Center();
+		centerPane.setSclass("dialog-content");
+
+
+		South southPane = new South();
+		southPane.setSclass("dialog-footer");
+		mainPanel.appendChild(southPane);
+		southPane.appendChild(confirmPanel);
+		ZKUpdateUtil.setVflex(southPane, "min");
+
+
+		ZKUpdateUtil.setHflex(confirmPanel, "1");
+		Hbox hbox = new Hbox();
+		hbox.setPack("end");
+		ZKUpdateUtil.setHflex(hbox, "1");
+		confirmPanel.appendChild(hbox);
+		hbox.appendChild(bLoad);
 		if (ThemeManager.isUseFontIconForImage())
 			bLoad.setIconSclass("z-icon-Import");
 		else
@@ -325,53 +250,10 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 //		bLoad.setAttribute("org.zkoss.zul.image.preload", Boolean.TRUE);
 		bLoad.setTooltiptext(Msg.getMsg(Env.getCtx(), "Load"));
 		bLoad.setUpload("multiple=true," + AdempiereWebUI.getUploadSetting());
+		bLoad.setLabel(Msg.getMsg(Env.getCtx(), "JP_Upload"));
 		bLoad.addEventListener(Events.ON_UPLOAD, this);
 
-		bDelete.addEventListener(Events.ON_CLICK, this);
-
-		previewPanel.appendChild(preview);
-		ZKUpdateUtil.setVflex(preview, "1");
-		ZKUpdateUtil.setHflex(preview, "1");
-
-		Center centerPane = new Center();
-		centerPane.setSclass("dialog-content");
-		//centerPane.setAutoscroll(true); // not required the preview has its own scroll bar
-		mainPanel.appendChild(centerPane);
-		centerPane.appendChild(previewPanel);
-		ZKUpdateUtil.setVflex(previewPanel, "1");
-		ZKUpdateUtil.setHflex(previewPanel, "1");
-
-		South southPane = new South();
-		southPane.setSclass("dialog-footer");
-		mainPanel.appendChild(southPane);
-		southPane.appendChild(confirmPanel);
-		ZKUpdateUtil.setVflex(southPane, "min");
-
-		bCancel.addEventListener(Events.ON_CLICK, this);
-		bOk.addEventListener(Events.ON_CLICK, this);
-
-		if (ThemeManager.isUseFontIconForImage())
-			bDeleteAll.setIconSclass("z-icon-Delete");
-		else
-			bDeleteAll.setImage(ThemeManager.getThemeResource("images/Delete24.png"));
-		bDeleteAll.setSclass("img-btn");
-		bDeleteAll.addEventListener(Events.ON_CLICK, this);
-		bDeleteAll.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "DeleteAll")));
-
-		bRefresh.addEventListener(Events.ON_CLICK, this);
-
-		confirmPanel.appendChild(bDeleteAll);
-		confirmPanel.appendChild(bRefresh);
-		ZKUpdateUtil.setHflex(confirmPanel, "1");
-		Hbox hbox = new Hbox();
-		hbox.setPack("end");
-		ZKUpdateUtil.setHflex(hbox, "1");
-		confirmPanel.appendChild(hbox);
-		hbox.appendChild(bOk);
-		hbox.appendChild(bCancel);
-
-
-		text.setTooltiptext(Msg.getElement(Env.getCtx(), "TextMsg"));
+		JP_AttachmentFileDescription.setTooltiptext(Msg.getElement(Env.getCtx(), "TextMsg"));
 
 		if (ClientInfo.isMobile())
 		{
@@ -401,362 +283,102 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 
 	public void dispose ()
 	{
-		preview = null;
 		this.detach();
 	} // dispose
 
-	/**
-	 *	Load Attachments
-	 */
-
-	private void loadAttachments()
-	{
-		log.config("");
-
-		//	Set Text/Description
-
-		String sText = m_attachment.getTextMsg();
-
-		if (sText == null)
-			text .setText("");
-		else
-			text.setText(sText);
-
-		//	Set Combo
-
-		int size = m_attachment.getEntryCount();
-
-		for (int i = 0; i < size; i++)
-			cbContent.appendItem(m_attachment.getEntryName(i), m_attachment.getEntryName(i));
-
-		if (size > 0)
-		{
-			cbContent.setSelectedIndex(0);
-		}
-
-	} // loadAttachment
-
-	private boolean autoPreview(int index, boolean immediate)
-	{
-		MAttachmentEntry entry = m_attachment.getEntry(index);
-		if (entry != null)
-		{
-			String mimeType = entry.getContentType();
-			byte[] data = entry.getData();
-			String unit = " KB";
-			BigDecimal size = new BigDecimal(data != null ? data.length : 0);
-			size = size.divide(new BigDecimal("1024"));
-			if (size.compareTo(new BigDecimal("1024")) >= 0)
-			{
-				size = size.divide(new BigDecimal("1024"));
-				unit = " MB";
-			}
-			size = size.setScale(2, RoundingMode.HALF_EVEN);
-			sizeLabel.setText(size.toPlainString() + unit);
-
-			bSave.setEnabled(true);
-			bDelete.setEnabled(true);
-
-			if (autoPreviewList.contains(mimeType))
-			{
-				displayData(index, immediate);
-				return true;
-			}
-			else
-			{
-				clearPreview();
-				return false;
-			}
-		}
-		else
-		{
-			bSave.setEnabled(false);
-			bDelete.setEnabled(false);
-			sizeLabel.setText("");
-			return false;
-		}
-	}
-
-	/**
-	 *  Display gif or jpg in gifPanel
-	 * 	@param index index
-	 */
-
-	private void displayData (int index, boolean immediate)
-	{
-		//	Reset UI
-		preview.setSrc(null);
-
-		displayIndex = index;
-
-		if (immediate)
-			displaySelected();
-		else
-			Clients.response(new AuEcho(this, "displaySelected", null));
-	}   //  displayData
-
-	private void clearPreview()
-	{
-		preview.setSrc(null);
-		preview.setVisible(false);
-	}
-
-	/**
-	 * Use to refresh preview frame, don't call directly.
-	 */
-	public void displaySelected() {
-		MAttachmentEntry entry = m_attachment.getEntry(displayIndex);
-		if (log.isLoggable(Level.CONFIG)) log.config("Index=" + displayIndex + " - " + entry);
-		if (entry != null && entry.getData() != null && autoPreviewList.contains(entry.getContentType()))
-		{
-			if (log.isLoggable(Level.CONFIG)) log.config(entry.toStringX());
-
-			try
-			{
-				String contentType = entry.getContentType();
-				AMedia media = new AMedia(entry.getName(), null, contentType, entry.getData());
-
-				preview.setContent(media);
-				preview.setVisible(true);
-				preview.invalidate();
-			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, "attachment", e);
-			}
-		}
-	}
-
-	/**
-	 * 	Get File Name with index
-	 *	@param index index
-	 *	@return file name or null
-	 */
-
-	private String getFileName (int index)
-	{
-		String fileName = null;
-
-		if (index>=0 && cbContent.getItemCount() > index)
-		{
-			ListItem listitem = cbContent.getItemAtIndex(index);
-			fileName = (String)listitem.getValue();
-		}
-
-		return fileName;
-	}	//	getFileName
-
-	/**
-	 *	Action Listener
-	 *  @param e event
-	 */
 
 	public void onEvent(Event e)
 	{
 		//	Save and Close
-		if (e instanceof UploadEvent) {
+		if (e instanceof UploadEvent)
+		{
 			preview.setVisible(false);
 			UploadEvent ue = (UploadEvent) e;
 			for (Media media : ue.getMedias()) {
 				processUploadMedia(media);
 			}
-			clearPreview();
-			autoPreview (cbContent.getSelectedIndex(), false);
-		} else if (e.getTarget() == bOk || DialogEvents.ON_WINDOW_CLOSE.equals(e.getName())) {
-			if (m_attachment != null) {
-				String newText = text.getText();
-				if (newText == null)
-					newText = "";
-				String oldText = m_attachment.getTextMsg();
-				if (oldText == null)
-					oldText = "";
 
-				if (!m_change)
-					m_change = !newText.equals(oldText);
+			dispose();
 
-				if (newText.length() > 0 || m_attachment.getEntryCount() > 0) {
-					if (m_change) {
-						m_attachment.setBinaryData(new byte[0]); // ATTENTION! HEAVY HACK HERE... Else it will not save :(
-						m_attachment.setTextMsg(text.getText());
-						m_attachment.saveEx();
-						m_change = false;
-					}
-				} else {
-					m_attachment.delete(true);
-					m_attachment = null;
-				}
-
+		} else if (DialogEvents.ON_WINDOW_CLOSE.equals(e.getName())) {
+			if (m_attachmentFileRecord != null)
+			{
 				dispose();
 			}
-		} else if (e.getTarget() == bCancel) {
-			//	Cancel
-			dispose();
-		} else if (e.getTarget() == bDeleteAll) {
-			//	Delete Attachment
-			deleteAttachment();
-			dispose();
-		} else if (e.getTarget() == bDelete) {
-			//	Delete individual entry and Return
-			deleteAttachmentEntry();
-		} else if (e.getTarget() == cbContent) {
-			//	Show Data
-			clearPreview();
-			autoPreview (cbContent.getSelectedIndex(), false);
-		} else if (e.getTarget() == bSave) {
-			//	Open Attachment
-			saveAttachmentToFile();
-		} else if (e.getTarget() == bRefresh) {
-			displayData(cbContent.getSelectedIndex(), true);
 		}
 
 	}	//	onEvent
 
-	private void processUploadMedia(Media media) {
+	private void processUploadMedia(Media media)
+	{
 		if (media != null && media.getByteData().length>0)
 		{
-//				pdfViewer.setContent(media);
-			;
+			;//Noting to do;
 		}
 		else
 		{
-			preview.setVisible(true);
-			preview.invalidate();
 			return;
 		}
 
+		m_attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(), 0, null);
+		m_attachmentFileRecord.setAD_Table_ID(AD_Table_ID);
+		m_attachmentFileRecord.setRecord_ID(Record_ID);
+		m_attachmentFileRecord.setJP_AttachmentFileName(media.getName());
+		m_attachmentFileRecord.setJP_AttachmentFileDescription(JP_AttachmentFileDescription.getValue());
+		m_attachmentFileRecord.setJP_MediaContentType(media.getContentType());
+		m_attachmentFileRecord.setJP_MediaFormat(media.getFormat());
+
+		GridTab mTab = adTabbox.getSelectedGridTab();
+		GridField[] fields = mTab.getFields();
+		String columnName = null;
+		int columnIndex = -1;
+		Object objectValue = null;
+		for(int i = 0 ; i < fields.length; i++)
+		{
+			columnName = fields[i].getColumnName();
+			columnIndex = -1;
+			objectValue = null;
+			if(columnName.equals("JP_AttachmentFileRecord_ID")
+					|| columnName.equals("AD_Client_ID")
+//					|| columnName.equals("AD_Org_ID")
+					|| columnName.equals("Created")
+					|| columnName.equals("CreatedBy")
+					|| columnName.equals("Updated")
+					|| columnName.equals("UpdatedBy")
+				)
+			{
+				continue;
+			}
+
+			columnIndex = m_attachmentFileRecord.get_ColumnIndex(columnName);
+			if(columnIndex > -1)
+			{
+				if(columnName.equals("AD_Org_ID"))
+				{
+					m_attachmentFileRecord.set_ValueNoCheck("AD_Org_ID", Invoice_Org_Editor.getValue());
+
+				}else {
+
+					objectValue = mTab.getValue(columnName);
+					if(objectValue != null)
+					{
+						m_attachmentFileRecord.set_ValueNoCheck(columnName, objectValue);
+					}
+				}
+			}
+
+		}//for
+
+		m_attachmentFileRecord.upLoadLFile(media.getByteData());
 		String fileName = media.getName();
+
+
+
+
 		log.config(fileName);
-		int cnt = m_attachment.getEntryCount();
 
-		//update
-		for (int i = 0; i < cnt; i++)
-		{
-			if (m_attachment.getEntryName(i).equals(fileName))
-			{
-				m_attachment.updateEntry(i, getMediaData(media));
-				cbContent.setSelectedIndex(i);
-				m_change = true;
-				return;
-			}
-		}
-
-		//new
-		if (m_attachment.addEntry(fileName, getMediaData(media)))
-		{
-			cbContent.appendItem(media.getName(), media.getName());
-			cbContent.setSelectedIndex(cbContent.getItemCount()-1);
-			m_change = true;
-		}
 	}
 
-	private byte[] getMediaData(Media media)  {
-		byte[] bytes = null;
-
-		try{
-
-	      if (media.inMemory())
-		     	bytes = media.isBinary() ? media.getByteData() : media.getStringData().getBytes(getCharset(media.getContentType()));
-		  else {
-			 InputStream is = media.getStreamData();
-			 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			 byte[] buf = new byte[ 1000 ];
-			 int byteread = 0;
-
-				  while (( byteread=is.read(buf) )!=-1)
-					baos.write(buf,0,byteread);
-
-			bytes = baos.toByteArray();
-		 }
-		} catch (IOException e) {
-			log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			throw new IllegalStateException(e.getLocalizedMessage());
-		}
-
-		return bytes;
-	}
-
-	/**
-	 *	Delete entire Attachment
-	 */
-	private void deleteAttachment()
-	{
-		log.info("");
-
-		FDialog.ask(m_WindowNo, this, "AttachmentDelete?", new Callback<Boolean>() {
-
-			@Override
-			public void onCallback(Boolean result)
-			{
-				if (result)
-				{
-					if (m_attachment != null) {
-						m_attachment.delete(true);
-						m_attachment = null;
-					}
-				}
-			}
-		});
-	}	//	deleteAttachment
-
-	/**
-	 *	Delete Attachment Entry
-	 */
-
-	private void deleteAttachmentEntry()
-	{
-		log.info("");
-
-		final int index = cbContent.getSelectedIndex();
-		String fileName = getFileName(index);
-
-		if (fileName == null)
-			return;
-
-		FDialog.ask(m_WindowNo, this, "AttachmentDeleteEntry?", new Callback<Boolean>() {
-
-			@Override
-			public void onCallback(Boolean result)
-			{
-				if (result)
-				{
-					if (m_attachment.deleteEntry(index)) {
-						cbContent.removeItemAt(index);
-						clearPreview();
-						autoPreview (cbContent.getSelectedIndex(), true);
-					}
-
-					m_change = true;
-				}
-			}
-		});
-	}	//	deleteAttachment
-
-	/**
-	 *	Save Attachment to File
-	 */
-
-	private void saveAttachmentToFile()
-	{
-		int index = cbContent.getSelectedIndex();
-		log.info("index=" + index);
-
-		if (m_attachment.getEntryCount() < index)
-			return;
-
-		MAttachmentEntry entry = m_attachment.getEntry(index);
-		if (entry != null && entry.getData() != null)
-		{
-			try
-			{
-				AMedia media = new AMedia(entry.getName(), null, entry.getContentType(), entry.getData());
-				Filedownload.save(media);
-			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, "attachment", e);
-			}
-		}
-	}	//	saveAttachmentToFile
 
 
 	static private String getCharset(String contentType) {
@@ -768,5 +390,19 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 			}
 		}
 		return "UTF-8";
+	}
+
+	@Override
+	public void onClose()
+	{
+		super.onClose();
+	}
+
+
+	@Override
+	public void valueChange(ValueChangeEvent evt)
+	{
+
+
 	}
 }

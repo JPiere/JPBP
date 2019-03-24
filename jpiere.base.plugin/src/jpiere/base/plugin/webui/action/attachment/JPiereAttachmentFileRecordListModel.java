@@ -14,17 +14,11 @@
 
 package jpiere.base.plugin.webui.action.attachment;
 
-import java.util.ArrayList;
-
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.event.WTableModelListener;
-import org.compiere.model.PO;
 import org.zkoss.zul.AbstractListModel;
-
-import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
 
 /**
 *
@@ -72,45 +66,45 @@ public class JPiereAttachmentFileRecordListModel extends AbstractListModel<Objec
 	}
 
 
-	public PO getPO(int rowIndex)
-	{
-		if (pageSize > 0) {
-			rowIndex = (pageNo * pageSize) + rowIndex;
-		}
-		if (rowIndex < tableModel.getRowCount()) {
-			return tableModel.getPOs().get(rowIndex);
-		}
+//	public PO getPO(int rowIndex)
+//	{
+//		if (pageSize > 0) {
+//			rowIndex = (pageNo * pageSize) + rowIndex;
+//		}
+//		if (rowIndex < tableModel.getRowCount()) {
+//			return tableModel.getPOs().get(rowIndex);
+//		}
+//
+//		return null;
+//	}
+//
+//
+//	public int getRowIndexFromID(int po_id)
+//	{
+//		ArrayList<MAttachmentFileRecord>  list_POs = tableModel.getPOs();
+//		int i = 0;
+//		for(PO po: list_POs)
+//		{
+//			if(po.get_ID()==po_id)
+//			{
+//				return i;
+//			}
+//			i++;
+//		}
+//		return -1;
+//	}
 
-		return null;
-	}
-
-
-	public int getRowIndexFromID(int po_id)
-	{
-		ArrayList<MAttachmentFileRecord>  list_POs = tableModel.getPOs();
-		int i = 0;
-		for(PO po: list_POs)
-		{
-			if(po.get_ID()==po_id)
-			{
-				return i;
-			}
-			i++;
-		}
-		return -1;
-	}
-
-	public void setPO(MAttachmentFileRecord po)
-	{
-		tableModel.setPO(po);
-		WTableModelEvent tcEvent = new WTableModelEvent(this, 0, 0);
-		fireTableChange(tcEvent);
-	}
-
-	public void removePO(int rowIndex)
-	{
-		tableModel.removePO(rowIndex);
-	}
+//	public void setPO(MAttachmentFileRecord po)
+//	{
+//		tableModel.setPO(po);
+//		WTableModelEvent tcEvent = new WTableModelEvent(this, 0, 0);
+//		fireTableChange(tcEvent);
+//	}
+//
+//	public void removePO(int rowIndex)
+//	{
+//		tableModel.removePO(rowIndex);
+//	}
 
 	public int getSize() {
 		int total = tableModel.getRowCount();
@@ -128,10 +122,10 @@ public class JPiereAttachmentFileRecordListModel extends AbstractListModel<Objec
 		}
 	}
 
-	private void fireTableChange(WTableModelEvent event)
-	{
-		;
-	}
+//	private void fireTableChange(WTableModelEvent event)
+//	{
+//		;
+//	}
 
 	public void addTableModelListener(WTableModelListener listener)
 	{
