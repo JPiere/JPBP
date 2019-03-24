@@ -66,46 +66,6 @@ public class JPiereAttachmentFileRecordListModel extends AbstractListModel<Objec
 	}
 
 
-//	public PO getPO(int rowIndex)
-//	{
-//		if (pageSize > 0) {
-//			rowIndex = (pageNo * pageSize) + rowIndex;
-//		}
-//		if (rowIndex < tableModel.getRowCount()) {
-//			return tableModel.getPOs().get(rowIndex);
-//		}
-//
-//		return null;
-//	}
-//
-//
-//	public int getRowIndexFromID(int po_id)
-//	{
-//		ArrayList<MAttachmentFileRecord>  list_POs = tableModel.getPOs();
-//		int i = 0;
-//		for(PO po: list_POs)
-//		{
-//			if(po.get_ID()==po_id)
-//			{
-//				return i;
-//			}
-//			i++;
-//		}
-//		return -1;
-//	}
-
-//	public void setPO(MAttachmentFileRecord po)
-//	{
-//		tableModel.setPO(po);
-//		WTableModelEvent tcEvent = new WTableModelEvent(this, 0, 0);
-//		fireTableChange(tcEvent);
-//	}
-//
-//	public void removePO(int rowIndex)
-//	{
-//		tableModel.removePO(rowIndex);
-//	}
-
 	public int getSize() {
 		int total = tableModel.getRowCount();
 		if (pageSize <= 0)
@@ -122,10 +82,6 @@ public class JPiereAttachmentFileRecordListModel extends AbstractListModel<Objec
 		}
 	}
 
-//	private void fireTableChange(WTableModelEvent event)
-//	{
-//		;
-//	}
 
 	public void addTableModelListener(WTableModelListener listener)
 	{

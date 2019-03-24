@@ -1,17 +1,24 @@
+/******************************************************************************
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
+ *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.model;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 
-import org.compiere.model.MAttachmentEntry;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
@@ -19,6 +26,14 @@ import org.compiere.util.DB;
 import jpiere.base.plugin.webui.action.attachment.IJPiereAttachmentStore;
 import jpiere.base.plugin.webui.action.attachment.MJPiereStorageProvider;
 
+/**
+*
+* JPIERE-0436: JPiere Attachment File
+*
+*
+* @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
+*
+*/
 public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 
 	public MAttachmentFileRecord(Properties ctx, int JP_AttachmentFileRecord_ID, String trxName)
@@ -83,115 +98,56 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 
 	}
 
-	/**	List of Entry Data		*/
-	public ArrayList<MAttachmentEntry> m_items = null;
+	private MJPiereStorageProvider storageProvider;
+	private IJPiereAttachmentStore attachmentStore;
 
-//	/**
-//	 * 	Get Attachment Entry
-//	 * 	@param index index of the item
-//	 * 	@return Entry or null
-//	 */
-//	public MAttachmentEntry getEntry (int index)
-//	{
-//		if (m_items == null)
-//			loadLOBData();
-//		if (index < 0 || index >= m_items.size())
-//			return null;
-//		return (MAttachmentEntry)m_items.get(index);
-//	}	//	getEntry
-
-	private MJPiereStorageProvider provider;
 	private void initAttachmentStoreDetails(Properties ctx, String trxName)
 	{
 		MClientInfo clientInfo = MClientInfo.get(ctx, getAD_Client_ID());
-		provider= new MJPiereStorageProvider(ctx, clientInfo.getAD_StorageProvider_ID(), trxName);
+		storageProvider= new MJPiereStorageProvider(ctx, clientInfo.getAD_StorageProvider_ID(), trxName);
 	}
-
 
 
 	@Override
 	protected boolean afterDelete(boolean success)
 	{
-		IJPiereAttachmentStore prov = provider.getAttachmentStore();
-		if (prov != null)
+		if (attachmentStore == null)
+			attachmentStore = storageProvider.getAttachmentStore();
+
+		if (attachmentStore != null)
 		{
-			return prov.deleteFile(this, provider);
+			return attachmentStore.deleteFile(this, storageProvider);
 		}
 
 		return false;
 	}
 
-	/**
-	 * 	Load Data into local m_data
-	 *	@return true if success
-	 */
+
 	public boolean upLoadLFile (byte[] data)
 	{
-		IJPiereAttachmentStore prov = provider.getAttachmentStore();
-		if (prov != null)
+		if (attachmentStore == null)
+			attachmentStore = storageProvider.getAttachmentStore();
+
+		if (attachmentStore != null)
 		{
-			return prov.upLoadFile(this, data, provider);
+			return attachmentStore.upLoadFile(this, data, storageProvider);
 		}
 
 		return false;
 	}
 
-	public boolean addEntry (File file)
+	public String getAbsoluteFilePath()
 	{
+		if (attachmentStore == null)
+			attachmentStore = storageProvider.getAttachmentStore();
 
-		if (file == null)
+		if (attachmentStore != null)
 		{
-			log.warning("No File");
-			return false;
-		}
-		if (!file.exists() || file.isDirectory() || !file.canRead())
-		{
-			log.warning("not added - " + file
-				+ ", Exists=" + file.exists() + ", Directory=" + file.isDirectory());
-			return false;
-		}
-		if (log.isLoggable(Level.FINE)) log.fine("addEntry - " + file);
-		//
-		String name = file.getName();
-		byte[] data = null;
-
-		// F3P: BF [2992291] modified to be able to close streams in "finally" block
-
-		FileInputStream fis = null;
-		ByteArrayOutputStream os = null;
-
-		try
-		{
-			fis = new FileInputStream (file);
-			os = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024*8];   //  8kB
-			int length = -1;
-			while ((length = fis.read(buffer)) != -1)
-				os.write(buffer, 0, length);
-
-			data = os.toByteArray();
-
-		}
-		catch (IOException ioe)
-		{
-			log.log(Level.SEVERE, "(file)", ioe);
-		}
-		finally
-		{
-			if(fis != null)
-			{
-				try { fis.close(); } catch (IOException ex) { log.log(Level.SEVERE, "(file)", ex); };
-			}
-
-			if(os != null)
-			{
-				try { os.close(); } catch (IOException ex) { log.log(Level.SEVERE, "(file)", ex); };
-			}
+			return attachmentStore.getAbsoluteFilePath(this, storageProvider);
 		}
 
-
-		return upLoadLFile(data);
-	}	//	addEntry
+		return null;
+	}
 
 
 }

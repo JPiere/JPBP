@@ -72,19 +72,4 @@ public class JPiereAttachmentFileRecordGridTable extends AbstractTableModel {
 		return list_POs.get(rowIndex).getJP_AttachmentFileRecord_ID();
 	}
 
-//	public ArrayList<MAttachmentFileRecord>  getPOs()
-//	{
-//		return list_POs;
-//	}
-//
-//	public void removePO(int rowIndex){
-//		list_POs.remove(rowIndex);
-//	}
-//
-//	public void setPO(MAttachmentFileRecord po)
-//	{
-//		list_POs.add(po);
-//	}
-
-
 }

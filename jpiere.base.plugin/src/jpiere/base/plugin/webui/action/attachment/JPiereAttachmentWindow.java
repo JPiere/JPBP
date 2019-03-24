@@ -109,11 +109,10 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 
 	protected ADWindow adWindow;
 	protected ADWindowContent  adWindowContent;
-
 	protected IADTabbox adTabbox;
 	protected int AD_Table_ID = 0;
 	protected int Record_ID = 0;
-	int windowNo = 0;
+	protected int windowNo = 0;
 
 	public JPiereAttachmentWindow(ADWindow adWindow, String trxName, EventListener<Event> eventListener)
 	{

@@ -31,4 +31,6 @@ public interface IJPiereAttachmentStore {
 
     public boolean deleteFile(MAttachmentFileRecord attach, MJPiereStorageProvider prov);
 
+    public String getAbsoluteFilePath(MAttachmentFileRecord attach, MJPiereStorageProvider prov);
+
 }

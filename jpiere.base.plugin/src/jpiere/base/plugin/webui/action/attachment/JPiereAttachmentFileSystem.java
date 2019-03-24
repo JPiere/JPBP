@@ -46,7 +46,7 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	public boolean upLoadFile(MAttachmentFileRecord attachmentFileRecord, byte[] data, MJPiereStorageProvider prov)
 	{
 
-		StringBuilder path = createPath(attachmentFileRecord, prov);
+		StringBuilder path = getAbsolutePath(attachmentFileRecord, prov);
 		if (path == null) {
 			log.severe("no attachmentPath defined");
 			return false;
@@ -113,14 +113,19 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	@Override
 	public boolean deleteFile(MAttachmentFileRecord attach, MJPiereStorageProvider prov)
 	{
-
-		StringBuilder msgfile = createPath(attach,prov);
-		final File destFile = new File(msgfile.append(File.separator).append(attach.getJP_AttachmentFileName()).toString());
-
+		final File destFile = new File(getAbsoluteFilePath(attach,prov));
 		return destFile.delete();
 	}
 
-	private StringBuilder createPath(MAttachmentFileRecord attachmentFileRecord, MJPiereStorageProvider prov)
+	@Override
+	public String getAbsoluteFilePath(MAttachmentFileRecord attach, MJPiereStorageProvider prov)
+	{
+		StringBuilder msgfile = getAbsolutePath(attach,prov);
+
+		return msgfile.append(File.separator).append(attach.getJP_AttachmentFileName()).toString();
+	}
+
+	private StringBuilder getAbsolutePath(MAttachmentFileRecord attachmentFileRecord, MJPiereStorageProvider prov)
 	{
 		String attachmentPathRoot = getAttachmentPathRoot(prov);
 		if (Util.isEmpty(attachmentPathRoot)) {
@@ -159,6 +164,9 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 		}
 		return attachmentPathRoot;
 	}
+
+
+
 
 
 }

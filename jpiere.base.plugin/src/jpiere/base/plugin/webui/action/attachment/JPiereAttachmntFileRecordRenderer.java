@@ -13,6 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.webui.action.attachment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,9 @@ import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.window.MultiFileDownloadDialog;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -265,27 +268,55 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 
 				if (Events.ON_CLICK.equals(event.getName()))
 				{
-					if(columnIndex == 0)
+					if(columnIndex == 0)	//Download File
 					{
+						ListModel<Object> model = _grid.getModel();
+						Object[] row = (Object[] )model.getElementAt(rowIndex);
+						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
+						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
 
-						;
+						ArrayList<File> downloadFiles = new ArrayList<File>();
+						File downloadFile = new File(attachmentFileRecord.getAbsoluteFilePath());
+						downloadFiles.add(downloadFile);
 
-					}else if(columnIndex == 1) {//Edit Record
+						MultiFileDownloadDialog downloadDialog = new MultiFileDownloadDialog(downloadFiles.toArray(new File[0]));
+						downloadDialog.setPage(adWindow.getComponent().getPage());
+						downloadDialog.setTitle(Msg.getMsg(Env.getCtx(), "Attachment"));
+						Events.postEvent(downloadDialog, new Event(MultiFileDownloadDialog.ON_SHOW));
+
+					}else if(columnIndex == 1) {	//Edit Record
 
 						ListModel<Object> model = _grid.getModel();
 						Object[] row = (Object[] )model.getElementAt(rowIndex);
 						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
 						AEnv.zoom(MAttachmentFileRecord.Table_ID, JP_AttachmentFileRecord_ID.intValue());
 
-					}else if(columnIndex == 2) {
+					}else if(columnIndex == 2) {	// Preview
+
+						ListModel<Object> model = _grid.getModel();
+						Object[] row = (Object[] )model.getElementAt(rowIndex);
+						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
+						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
+
+						EventListener<Event> listener = new EventListener<Event>()
+						{
+							@Override
+							public void onEvent(Event event) throws Exception {
+//								toolbar.getButton("Attachment").setPressed(adTabbox.getSelectedGridTab().hasAttachment());
+//								focusToActivePanel();
+							}
+						};
+
+						JPiereAttachmentPreviewWindow attachmentPreviewWindow = new JPiereAttachmentPreviewWindow (adWindow, attachmentFileRecord, listener);
+
+						LayoutUtils.openOverlappedWindow(event.getTarget() , attachmentPreviewWindow, "after_pointer");//after_pointer
+						attachmentPreviewWindow.focus();
+
+					}else if(columnIndex == 3) {	// Name
 
 						;
 
-					}else if(columnIndex == 3) {
-
-						;
-
-					}else if(columnIndex == 4) {
+					}else if(columnIndex == 4) {	// Delete
 
 						ListModel<Object> model = _grid.getModel();
 						Object[] row = (Object[] )model.getElementAt(rowIndex);

@@ -247,12 +247,9 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 					});
 
 					this.getParent().appendChild(attachmentWindow);
-					//this.appendChild(attachmentWindow);
 				}
 
-//				this.getParent().appendChild(attachmentWindow);
-//				this.appendChild(attachmentWindow);
-				LayoutUtils.openOverlappedWindow(btn, attachmentWindow, "after_pointer");//after_start,middle_center
+				LayoutUtils.openOverlappedWindow(btn, attachmentWindow, "after_pointer");
 				attachmentWindow.focus();
 
 				return;
