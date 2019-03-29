@@ -45,7 +45,7 @@ public class MJPiereStorageProvider extends X_AD_StorageProvider {
 		ServiceQuery query=new ServiceQuery();
 		String method = this.getMethod();
 		if (method == null)
-			method = "DB";
+			method = "FileSystem";
 		query.put("method", method);
 		IJPiereAttachmentStore store = Service.locator().locate(IJPiereAttachmentStore.class, query).getService();
 		if (store == null) {

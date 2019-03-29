@@ -113,8 +113,14 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	@Override
 	public boolean deleteFile(MAttachmentFileRecord attach, MJPiereStorageProvider prov)
 	{
-		final File destFile = new File(getAbsoluteFilePath(attach,prov));
-		return destFile.delete();
+		final File deleteFile = new File(getAbsoluteFilePath(attach,prov));
+
+		if(!deleteFile.exists())
+		{
+			return true;
+		}
+
+		return deleteFile.delete();
 	}
 
 	@Override

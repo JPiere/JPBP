@@ -22,6 +22,7 @@ import java.util.Properties;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.webui.action.attachment.IJPiereAttachmentStore;
 import jpiere.base.plugin.webui.action.attachment.MJPiereStorageProvider;
@@ -116,10 +117,17 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 
 		if (attachmentStore != null)
 		{
-			return attachmentStore.deleteFile(this, storageProvider);
+			boolean isDelete =attachmentStore.deleteFile(this, storageProvider);
+
+			if(!isDelete)
+			{
+				//Could not delte the file;
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_CouldNotDeleteFile"));
+				return false;
+			}
 		}
 
-		return false;
+		return true;
 	}
 
 

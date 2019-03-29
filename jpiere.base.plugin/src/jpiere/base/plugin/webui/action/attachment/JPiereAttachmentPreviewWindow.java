@@ -1,22 +1,22 @@
 /******************************************************************************
- * Copyright (C) 2008 Low Heng Sin  All Rights Reserved.                      *
- * This program is free software; you can redistribute it and/or modify it    *
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
  * under the terms version 2 of the GNU General Public License as published   *
  * by the Free Software Foundation. This program is distributed in the hope   *
- * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
  * See the GNU General Public License for more details.                       *
- * You should have received a copy of the GNU General Public License along    *
- * with this program; if not, write to the Free Software Foundation, Inc.,    *
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
- * For the text or an alternative of this public license, you may reach us    *
- * Posterita Ltd., 3, Draper Avenue, Quatre Bornes, Mauritius                 *
- * or via info@posterita.org or http://www.posterita.org/                     *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
  *****************************************************************************/
+
 
 package jpiere.base.plugin.webui.action.attachment;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,6 +31,7 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -43,11 +44,15 @@ import org.zkoss.zul.Iframe;
 
 import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
 
+
 /**
- *
- * @author Low Heng Sin
- *
- */
+*
+* JPIERE-0436: JPiere Attachment File
+*
+*
+* @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
+*
+*/
 public class JPiereAttachmentPreviewWindow extends Window implements EventListener<Event>
 {
 	private static final long serialVersionUID = 4311076973993361653L;
@@ -64,13 +69,15 @@ public class JPiereAttachmentPreviewWindow extends Window implements EventListen
 
 	private static List<String> autoPreviewList;
 
-	protected ADWindow adWindow;
-	protected ADWindowContent  adWindowContent;
-	protected IADTabbox adTabbox;
-	protected int AD_Table_ID = 0;
-	protected int Record_ID = 0;
-	protected int windowNo = 0;
-	protected MAttachmentFileRecord attachmentFileRecord;
+	private ADWindow adWindow;
+	private ADWindowContent  adWindowContent;
+	private IADTabbox adTabbox;
+	private int AD_Table_ID = 0;
+	private int Record_ID = 0;
+	private int windowNo = 0;
+	private MAttachmentFileRecord attachmentFileRecord;
+
+	private boolean isFileLoad = false;
 
 	static {
 		autoPreviewList = new ArrayList<String>();
@@ -122,7 +129,7 @@ public class JPiereAttachmentPreviewWindow extends Window implements EventListen
 		try
 		{
 			setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-//			AEnv.showWindow(this);
+			//AEnv.showWindow(this);
 		}
 		catch (Exception e)
 		{
@@ -162,8 +169,28 @@ public class JPiereAttachmentPreviewWindow extends Window implements EventListen
 
 
 		File file = new File(attachmentFileRecord.getAbsoluteFilePath());
-		AMedia media = new AMedia(attachmentFileRecord.getJP_AttachmentFileName(),attachmentFileRecord.getJP_MediaFormat()
-										,attachmentFileRecord.getJP_MediaContentType(),file,true);
+		AMedia media = null;
+		try {
+			media = new AMedia(attachmentFileRecord.getJP_AttachmentFileName(),attachmentFileRecord.getJP_MediaFormat()
+					,attachmentFileRecord.getJP_MediaContentType(),file,true);
+
+		}catch (FileNotFoundException e) {
+
+			FDialog.error(windowNo, this, "AttachmentNotFound", e.toString());
+			dispose();
+			log.saveError("Error", e);
+
+		}catch (Exception e) {
+
+			FDialog.error(windowNo, this, "Error", e.toString());
+			dispose();
+			log.saveError("Error", e);
+		}
+
+		if(media == null)
+			return ;
+
+		isFileLoad = true;
 
 		preview.setContent(media);
 		preview.setVisible(true);
@@ -213,6 +240,10 @@ public class JPiereAttachmentPreviewWindow extends Window implements EventListen
 	} // dispose
 
 
+	public boolean isFileLoad()
+	{
+		return isFileLoad;
+	}
 
 	public void onEvent(Event e)
 	{

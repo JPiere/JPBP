@@ -23,6 +23,7 @@ import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.MultiFileDownloadDialog;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -277,8 +278,15 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 
 						ArrayList<File> downloadFiles = new ArrayList<File>();
 						File downloadFile = new File(attachmentFileRecord.getAbsoluteFilePath());
-						downloadFiles.add(downloadFile);
 
+						if(!downloadFile.exists())
+						{
+							FDialog.error(0, "AttachmentNotFound", attachmentFileRecord.getAbsoluteFilePath());
+							return ;
+
+						}
+
+						downloadFiles.add(downloadFile);
 						MultiFileDownloadDialog downloadDialog = new MultiFileDownloadDialog(downloadFiles.toArray(new File[0]));
 						downloadDialog.setPage(adWindow.getComponent().getPage());
 						downloadDialog.setTitle(Msg.getMsg(Env.getCtx(), "Attachment"));
@@ -309,8 +317,13 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 
 						JPiereAttachmentPreviewWindow attachmentPreviewWindow = new JPiereAttachmentPreviewWindow (adWindow, attachmentFileRecord, listener);
 
-						LayoutUtils.openOverlappedWindow(event.getTarget() , attachmentPreviewWindow, "after_pointer");//after_pointer
-						attachmentPreviewWindow.focus();
+						if(attachmentPreviewWindow.isFileLoad())
+						{
+							LayoutUtils.openOverlappedWindow(event.getTarget() , attachmentPreviewWindow, "after_pointer");//after_pointer
+							attachmentPreviewWindow.focus();
+						}else {
+							attachmentPreviewWindow = null;
+						}
 
 					}else if(columnIndex == 3) {	// Name
 
@@ -323,7 +336,18 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
 						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
 						if(attachmentFileRecord.get_ID() != 0)
-							attachmentFileRecord.deleteEx(true);
+						{
+							if(attachmentFileRecord.delete(true))
+							{
+								;//Noting to do
+							}else {
+
+								FDialog.error(0, "JP_CouldNotDeleteFile", attachmentFileRecord.getAbsoluteFilePath());
+								return ;
+
+							}
+
+						}
 
 						List<Row> rowList = _grid.getRows().getChildren();
 						rowList.remove(rowIndex);
