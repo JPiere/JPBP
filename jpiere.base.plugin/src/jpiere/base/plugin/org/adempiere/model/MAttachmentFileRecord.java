@@ -157,5 +157,12 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 		return null;
 	}
 
+	public static int getID(int Table_ID, int Record_ID)
+	{
+		String sql="SELECT JP_AttachmentFileRecord_ID FROM JP_AttachmentFileRecord WHERE AD_Table_ID=? AND Record_ID=?";
+		int attachid = DB.getSQLValue(null, sql, Table_ID, Record_ID);
+		return attachid;
+	}
+
 
 }

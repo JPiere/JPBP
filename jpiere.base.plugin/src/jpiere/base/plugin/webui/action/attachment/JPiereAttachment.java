@@ -16,10 +16,16 @@ package jpiere.base.plugin.webui.action.attachment;
 
 import org.adempiere.webui.action.IAction;
 import org.adempiere.webui.adwindow.ADWindow;
+import org.adempiere.webui.adwindow.ADWindowToolbar;
 import org.adempiere.webui.window.FDialog;
+import org.compiere.model.GridTab;
 import org.compiere.model.MClientInfo;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+
+import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
 
 /**
 *
@@ -31,6 +37,8 @@ import org.compiere.util.Msg;
 */
 public class JPiereAttachment implements IAction {
 
+	protected ADWindowToolbar toolbar ;
+
 	@Override
 	public void execute(Object target)
 	{
@@ -41,8 +49,41 @@ public class JPiereAttachment implements IAction {
 			 return ;
 		 }
 
-		new JPiereAttchmentBaseWindow((ADWindow)target);
+		ADWindow adWindow = (ADWindow)target;
+		this.toolbar = adWindow.getADWindowContent().getToolbar();
+
+		EventListener<Event> listener = new EventListener<Event>()
+		{
+			@Override
+			public void onEvent(Event event) throws Exception
+			{
+				toolbar.getButton("JPiereAttachment").setPressed(hasAttachment(adWindow.getADWindowContent().getADTab().getSelectedGridTab()));
+			}
+		};
+
+		new JPiereAttchmentBaseWindow(adWindow,listener);
 	}
 
+
+	/**
+	 *	Returns true, if current row has an Attachment
+	 *  @return true if record has attachment
+	 */
+	public boolean hasAttachment(GridTab gridTab)
+	{
+		return getAD_AttachmentID(gridTab) > 0;
+	}	//	hasAttachment
+
+	/**
+	 *	Get Attachment_ID for current record.
+	 *	@return ID or 0, if not found
+	 */
+	public int getAD_AttachmentID(GridTab gridTab)
+	{
+//		if (!canHaveAttachment())
+//			return 0;
+		int recordID = gridTab.getKeyID(gridTab.getCurrentRow());
+		return MAttachmentFileRecord.getID(gridTab.getAD_Table_ID(), recordID);
+	}	//	getAttachmentID
 
 }

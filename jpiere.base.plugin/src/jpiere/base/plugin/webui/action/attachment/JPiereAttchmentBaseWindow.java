@@ -57,7 +57,7 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 	protected int AD_Table_ID = 0;
 	protected int Record_ID = 0;
 
-	public JPiereAttchmentBaseWindow(ADWindow adWindow)
+	public JPiereAttchmentBaseWindow(ADWindow adWindow, EventListener<Event> eventListener)
 	{
 		super();
 
@@ -66,7 +66,11 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 		this.adTabbox = adWindowContent.getADTab();
 		this.AD_Table_ID =adTabbox.getSelectedGridTab().getAD_Table_ID();
 		this.Record_ID =  adTabbox.getSelectedGridTab().getRecord_ID();
-
+		this.addEventListener(DialogEvents.ON_WINDOW_CLOSE, this);
+		if (eventListener != null)
+		{
+			this.addEventListener(DialogEvents.ON_WINDOW_CLOSE, eventListener);
+		}
 
 //		setStyle("height: 25%; width: 25%;");
 		setSclass("popup-dialog");
@@ -151,7 +155,7 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
         adWindowContent.showBusyMask(this);
 
 
-        ToolBarButton toolbarButton =  adWindowContent.getToolbar().getButton("JPiere Attachment");
+        ToolBarButton toolbarButton =  adWindowContent.getToolbar().getButton("JPiereAttachment");
         LayoutUtils.openOverlappedWindow(toolbarButton, this, "after_start");
 
 	}
