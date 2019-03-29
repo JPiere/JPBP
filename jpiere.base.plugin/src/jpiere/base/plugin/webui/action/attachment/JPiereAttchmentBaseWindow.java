@@ -14,6 +14,7 @@
 
 package jpiere.base.plugin.webui.action.attachment;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.adempiere.webui.AdempiereWebUI;
@@ -29,6 +30,7 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.MultiFileDownloadDialog;
 import org.compiere.model.MQuery;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.Env;
@@ -37,6 +39,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
+import org.zkoss.zul.ListModel;
 
 import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
 
@@ -260,7 +263,24 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
 			}else if(btn.getId().equals("btnExport")) {
 
-				;
+				ArrayList<File> downloadFiles = new ArrayList<File>();
+				ListModel<Object> model = grid.getModel();
+				for(int i = 0; i < model.getSize(); i++)
+				{
+					Object[] row = (Object[] )model.getElementAt(i);
+					Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
+					MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
+					File downloadFile = new File(attachmentFileRecord.getAbsoluteFilePath());
+					if(!downloadFile.exists())
+						continue;
+
+					downloadFiles.add(downloadFile);
+				}
+
+				MultiFileDownloadDialog downloadDialog = new MultiFileDownloadDialog(downloadFiles.toArray(new File[downloadFiles.size()]));
+				downloadDialog.setPage(adWindow.getComponent().getPage());
+				downloadDialog.setTitle(Msg.getMsg(Env.getCtx(), "Attachment"));
+				Events.postEvent(downloadDialog, new Event(MultiFileDownloadDialog.ON_SHOW));
 
 			}else if(btn.getId().equals("btnZoomAcross")) {
 
@@ -274,5 +294,6 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
 
 	}
+
 
 }
