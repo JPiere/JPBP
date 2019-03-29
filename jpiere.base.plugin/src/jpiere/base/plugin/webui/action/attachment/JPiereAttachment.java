@@ -65,19 +65,11 @@ public class JPiereAttachment implements IAction {
 	}
 
 
-	/**
-	 *	Returns true, if current row has an Attachment
-	 *  @return true if record has attachment
-	 */
 	public boolean hasAttachment(GridTab gridTab)
 	{
 		return getAD_AttachmentID(gridTab) > 0;
 	}	//	hasAttachment
 
-	/**
-	 *	Get Attachment_ID for current record.
-	 *	@return ID or 0, if not found
-	 */
 	public int getAD_AttachmentID(GridTab gridTab)
 	{
 //		if (!canHaveAttachment())
