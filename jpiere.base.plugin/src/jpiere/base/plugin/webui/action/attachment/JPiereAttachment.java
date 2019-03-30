@@ -41,6 +41,9 @@ public class JPiereAttachment implements IAction {
 	@Override
 	public void execute(Object target)
 	{
+		 if(target == null)
+			 return ;
+
 		 if(MClientInfo.get(Env.getCtx()).getAD_StorageProvider_ID() == 0)
 		 {
 			 FDialog.error(0, "Error", Msg.getMsg(Env.getCtx(), "NotFound")
