@@ -31,8 +31,10 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.MultiFileDownloadDialog;
+import org.compiere.model.GridWindowVO;
 import org.compiere.model.MQuery;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.event.Event;
@@ -59,6 +61,7 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 	protected IADTabbox          	 adTabbox;
 	protected int AD_Table_ID = 0;
 	protected int Record_ID = 0;
+	protected Boolean isAccessEditRecord = true;
 
 	public JPiereAttchmentBaseWindow(ADWindow adWindow, EventListener<Event> eventListener)
 	{
@@ -74,6 +77,18 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 		{
 			this.addEventListener(DialogEvents.ON_WINDOW_CLOSE, eventListener);
 		}
+
+
+		//MRole role = MRole.getDefault(Env.getCtx(), false);
+		MTable m_Table =MTable.get(Env.getCtx(), MAttachmentFileRecord.Table_Name);
+		int AD_Window_ID = Env.getZoomWindowID(m_Table.getAD_Table_ID(),  0, 0);
+		GridWindowVO gWindowVO = AEnv.getMWindowVO(adWindowContent.getWindowNo(), AD_Window_ID, 0);
+        if (gWindowVO == null)
+        {
+        	isAccessEditRecord = false;
+        }
+
+
 
 //		setStyle("height: 25%; width: 25%;");
 		setSclass("popup-dialog");
@@ -124,21 +139,27 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
         div.appendChild(btnExport);
 
     	//Zoom Across Button
-        Button btnZoomAcross = new Button();
-        btnZoomAcross.setSclass("img-btn");
-    	btnZoomAcross.setAttribute("name","btnZoomAcross");
-        if (ThemeManager.isUseFontIconForImage())
-        	btnZoomAcross.setIconSclass("z-icon-Edit");
-        else
-        	btnZoomAcross.setImage(ThemeManager.getThemeResource("images/Editor24.png"));//Editor24.png or ZoomAcross24.png
-        btnZoomAcross.addEventListener(Events.ON_CLICK, this);
-        btnZoomAcross.setId("btnZoomAcross");
-        btnZoomAcross.setStyle("vertical-align: middle;");
-        if (ThemeManager.isUseFontIconForImage())
-        	LayoutUtils.addSclass("large-toolbarbutton", btnZoomAcross);
+        if(isAccessEditRecord)
+        {
+	        Button btnZoomAcross = new Button();
+	        btnZoomAcross.setSclass("img-btn");
+	    	btnZoomAcross.setAttribute("name","btnZoomAcross");
+	        if (ThemeManager.isUseFontIconForImage() && isAccessEditRecord)
+	        {
+	        	btnZoomAcross.setIconSclass("z-icon-Edit");
+	        }else {
+	        	btnZoomAcross.setImage(ThemeManager.getThemeResource("images/Editor24.png"));//Editor24.png or ZoomAcross24.png
+	        }
 
-        div.appendChild(btnZoomAcross);
+	        btnZoomAcross.addEventListener(Events.ON_CLICK, this);
+	        btnZoomAcross.addEventListener(Events.ON_CLICK, this);
+	        btnZoomAcross.setId("btnZoomAcross");
+	        btnZoomAcross.setStyle("vertical-align: middle;");
+	        if (ThemeManager.isUseFontIconForImage())
+	        	LayoutUtils.addSclass("large-toolbarbutton", btnZoomAcross);
 
+	        div.appendChild(btnZoomAcross);
+        }
 
 
         createAttachemntBaseWindowGridView(div);
@@ -188,7 +209,7 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
 	        grid.setModel(listModel);
 
-	        JPiereAttachmntFileRecordRenderer renderer = new JPiereAttachmntFileRecordRenderer(listModel);
+	        JPiereAttachmntFileRecordRenderer renderer = new JPiereAttachmntFileRecordRenderer(listModel,isAccessEditRecord);
 
 	        grid.setRowRenderer(renderer);
 	        grid.setMold("paging");

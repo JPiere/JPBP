@@ -248,6 +248,19 @@ public interface I_JP_AttachmentFileRecord
 	  */
 	public boolean isActive();
 
+    /** Column name IsDeleteable */
+    public static final String COLUMNNAME_IsDeleteable = "IsDeleteable";
+
+	/** Set Records deletable.
+	  * Indicates if records can be deleted from the database
+	  */
+	public void setIsDeleteable (boolean IsDeleteable);
+
+	/** Get Records deletable.
+	  * Indicates if records can be deleted from the database
+	  */
+	public boolean isDeleteable();
+
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
 
@@ -356,6 +369,24 @@ public interface I_JP_AttachmentFileRecord
 
 	/** Get Media Format	  */
 	public String getJP_MediaFormat();
+
+    /** Column name JP_Processing1 */
+    public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
+
+	/** Set Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1);
+
+	/** Get Process Now	  */
+	public String getJP_Processing1();
+
+    /** Column name JP_Processing2 */
+    public static final String COLUMNNAME_JP_Processing2 = "JP_Processing2";
+
+	/** Set Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2);
+
+	/** Get Process Now	  */
+	public String getJP_Processing2();
 
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";

@@ -108,6 +108,19 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 		storageProvider= new MJPiereStorageProvider(ctx, clientInfo.getAD_StorageProvider_ID(), trxName);
 	}
 
+	@Override
+	protected boolean beforeDelete()
+	{
+		if(!isDeleteable())
+		{
+			//Could not delte the file;
+			log.saveError("Error", Msg.getMsg(getCtx(), "JP_CouldNotDeleteFile"));
+			return false;
+		}
+
+
+		return true;
+	}
 
 	@Override
 	protected boolean afterDelete(boolean success)

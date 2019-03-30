@@ -31,7 +31,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190324L;
+	private static final long serialVersionUID = 20190330L;
 
     /** Standard Constructor */
     public X_JP_AttachmentFileRecord (Properties ctx, int JP_AttachmentFileRecord_ID, String trxName)
@@ -39,6 +39,8 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
       super (ctx, JP_AttachmentFileRecord_ID, trxName);
       /** if (JP_AttachmentFileRecord_ID == 0)
         {
+			setIsDeleteable (true);
+// Y
 			setIsSOTrx (false);
 // N
 			setJP_AttachmentFileName (null);
@@ -333,6 +335,30 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
 
+	/** Set Records deletable.
+		@param IsDeleteable 
+		Indicates if records can be deleted from the database
+	  */
+	public void setIsDeleteable (boolean IsDeleteable)
+	{
+		set_Value (COLUMNNAME_IsDeleteable, Boolean.valueOf(IsDeleteable));
+	}
+
+	/** Get Records deletable.
+		@return Indicates if records can be deleted from the database
+	  */
+	public boolean isDeleteable () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsDeleteable);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Sales Transaction.
 		@param IsSOTrx 
 		This is a Sales Transaction
@@ -512,7 +538,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 		@param JP_MediaContentType Media Content Type	  */
 	public void setJP_MediaContentType (String JP_MediaContentType)
 	{
-		set_Value (COLUMNNAME_JP_MediaContentType, JP_MediaContentType);
+		set_ValueNoCheck (COLUMNNAME_JP_MediaContentType, JP_MediaContentType);
 	}
 
 	/** Get Media Content Type.
@@ -526,7 +552,7 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 		@param JP_MediaFormat Media Format	  */
 	public void setJP_MediaFormat (String JP_MediaFormat)
 	{
-		set_Value (COLUMNNAME_JP_MediaFormat, JP_MediaFormat);
+		set_ValueNoCheck (COLUMNNAME_JP_MediaFormat, JP_MediaFormat);
 	}
 
 	/** Get Media Format.
@@ -534,6 +560,34 @@ public class X_JP_AttachmentFileRecord extends PO implements I_JP_AttachmentFile
 	public String getJP_MediaFormat () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_MediaFormat);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
 	}
 
 	/** Set Line No.

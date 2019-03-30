@@ -57,9 +57,23 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 	private RowListener rowListener;
 	private ADWindow adWindow;
 
-	public JPiereAttachmntFileRecordRenderer(JPiereAttachmentFileRecordListModel listModel)
+	private static List<String> autoPreviewList;
+	private Boolean isAccessEditRecord = false;
+
+	static {
+		autoPreviewList = new ArrayList<String>();
+		autoPreviewList.add("image/jpeg");
+		autoPreviewList.add("image/png");
+		autoPreviewList.add("image/gif");
+		autoPreviewList.add("text/plain");
+		autoPreviewList.add("application/pdf");
+		autoPreviewList.add("text/html");
+	}
+
+	public JPiereAttachmntFileRecordRenderer(JPiereAttachmentFileRecordListModel listModel, Boolean isAccessEditRecord)
 	{
 		this.listModel = listModel;
+		this.isAccessEditRecord = isAccessEditRecord;
 	}
 
 	@Override
@@ -120,9 +134,8 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 		Cell div = null;
 		for(int i = 0; i < data.length; i++)
 		{
-			if(i == 0)
+			if(i == 0)//DownLoad Button
 			{
-				//DownLoad Button
 				div = new Cell();
 		    	ToolBarButton btnExport = new ToolBarButton();
 		    	btnExport.setAttribute("name","btnExport");
@@ -139,43 +152,72 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 		        div.appendChild(btnExport);
 		        div.setStyle("width:30px;");
 
-			}else if(i == 1){
 
-		    	//Zoom Across Button
+			}else if(i == 1){//Zoom Across Button
+
+				if(isAccessEditRecord)
+				{
+					div = new Cell();
+			    	ToolBarButton btnEditRecord = new ToolBarButton();
+			    	btnEditRecord.setAttribute("name","btnEditRecord");
+			        if (ThemeManager.isUseFontIconForImage())
+			        {
+			        	btnEditRecord.setIconSclass("z-icon-Edit");
+			        }else {
+			        	btnEditRecord.setImage(ThemeManager.getThemeResource("images/Editor16.png"));//Editor16.png or EditRecord16.png
+			        }
+			        btnEditRecord.addEventListener(Events.ON_CLICK, rowListener);
+			        btnEditRecord.setId(String.valueOf(row.getIndex())+"_"+String.valueOf(i));//Set RowIndex(Y-axis) and Column(X-axis) in ID of Cell(div)
+			        btnEditRecord.setStyle("vertical-align: middle;");
+			        if (ThemeManager.isUseFontIconForImage())
+			        	LayoutUtils.addSclass("large-toolbarbutton", btnEditRecord);
+
+//			        btnZoomAcross.setDisabled(true);
+			        div.appendChild(btnEditRecord);
+			        div.setStyle("width:30px;");
+				}
+
+			}else if(i == 2) {//Review
+
+
+				String mimeType = (String)data[i];
+
+				if (autoPreviewList.contains(mimeType))
+				{
+
+				}
+
+
 				div = new Cell();
-		    	ToolBarButton btnZoomAcross = new ToolBarButton();
-		    	btnZoomAcross.setAttribute("name","btnEditRecord");
-		        if (ThemeManager.isUseFontIconForImage())
-		        	btnZoomAcross.setIconSclass("z-icon-Edit");
-		        else
-		        	btnZoomAcross.setImage(ThemeManager.getThemeResource("images/Editor16.png"));//Editor16.png or EditRecord16.png
-		        btnZoomAcross.addEventListener(Events.ON_CLICK, rowListener);
-		        btnZoomAcross.setId(String.valueOf(row.getIndex())+"_"+String.valueOf(i));//Set RowIndex(Y-axis) and Column(X-axis) in ID of Cell(div)
-		        btnZoomAcross.setStyle("vertical-align: middle;");
-		        if (ThemeManager.isUseFontIconForImage())
-		        	LayoutUtils.addSclass("large-toolbarbutton", btnZoomAcross);
+		    	ToolBarButton btnReview = new ToolBarButton();
+		    	btnReview.setAttribute("name","btnReview");
+		        if (ThemeManager.isUseFontIconForImage() && autoPreviewList.contains(mimeType))
+		        {
+		        	btnReview.setIconSclass("z-icon-ZoomAcross");
+		        	btnReview.addEventListener(Events.ON_CLICK, rowListener);
 
-//		        btnZoomAcross.setDisabled(true);
-		        div.appendChild(btnZoomAcross);
-		        div.setStyle("width:30px;");
+		        }else if(ThemeManager.isUseFontIconForImage() && !autoPreviewList.contains(mimeType)) {
 
-			}else if(i == 2) {
+		        	btnReview.setIconSclass("z-icon-ZoomAcross");
+		        	btnReview.setDisabled(true);
 
-		    	//review
-				div = new Cell();
-		    	ToolBarButton btnZoomAcross = new ToolBarButton();
-		    	btnZoomAcross.setAttribute("name","btnReview");
+		        }else if(autoPreviewList.contains(mimeType)) {
+
+		        	btnReview.setImage(ThemeManager.getThemeResource("images/Zoom16.png"));
+		        	btnReview.addEventListener(Events.ON_CLICK, rowListener);
+
+		        }else {
+
+		        	btnReview.setImage(ThemeManager.getThemeResource("images/Zoom16.png"));
+		        	btnReview.setDisabled(true);
+		        }
+
+		        btnReview.setId(String.valueOf(row.getIndex())+"_"+String.valueOf(i));//Set RowIndex(Y-axis) and Column(X-axis) in ID of Cell(div)
+		        btnReview.setStyle("vertical-align: middle;");
 		        if (ThemeManager.isUseFontIconForImage())
-		        	btnZoomAcross.setIconSclass("z-icon-ZoomAcross");
-		        else
-		        	btnZoomAcross.setImage(ThemeManager.getThemeResource("images/Zoom16.png"));
-		        btnZoomAcross.addEventListener(Events.ON_CLICK, rowListener);
-		        btnZoomAcross.setId(String.valueOf(row.getIndex())+"_"+String.valueOf(i));//Set RowIndex(Y-axis) and Column(X-axis) in ID of Cell(div)
-		        btnZoomAcross.setStyle("vertical-align: middle;");
-		        if (ThemeManager.isUseFontIconForImage())
-		        	LayoutUtils.addSclass("large-toolbarbutton", btnZoomAcross);
+		        	LayoutUtils.addSclass("large-toolbarbutton", btnReview);
 
-		        div.appendChild(btnZoomAcross);
+		        div.appendChild(btnReview);
 		        div.setStyle("width:30px;");
 
 			}else if(i == 3) {
@@ -184,23 +226,44 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 				div.appendChild(new Label(data[i].toString()));
 
 
-			}else if(i == 4) {
+			}else if(i == 4) {//Delete Button
 
-		    	//Delete
+
+				boolean isDeleteable = (boolean)data[i];
+
 				div = new Cell();
-		    	ToolBarButton btnZoomAcross = new ToolBarButton();
-		    	btnZoomAcross.setAttribute("name","btnDelete");
-		        if (ThemeManager.isUseFontIconForImage())
-		        	btnZoomAcross.setIconSclass("z-icon-Trash");
-		        else
-		        	btnZoomAcross.setImage(ThemeManager.getThemeResource("images/Delete16.png"));
-		        btnZoomAcross.addEventListener(Events.ON_CLICK, rowListener);
-		        btnZoomAcross.setId(String.valueOf(row.getIndex())+"_"+String.valueOf(i));//Set RowIndex(Y-axis) and Column(X-axis) in ID of Cell(div)
-		        btnZoomAcross.setStyle("vertical-align: middle;");
-		        if (ThemeManager.isUseFontIconForImage())
-		        	LayoutUtils.addSclass("large-toolbarbutton", btnZoomAcross);
+		    	ToolBarButton btnDelete = new ToolBarButton();
+		    	btnDelete.setAttribute("name","btnDelete");
 
-		        div.appendChild(btnZoomAcross);
+		        if (ThemeManager.isUseFontIconForImage() && isDeleteable )
+		        {
+		        	btnDelete.setIconSclass("z-icon-Trash");
+		        	btnDelete.addEventListener(Events.ON_CLICK, rowListener);
+
+		        }else if (ThemeManager.isUseFontIconForImage() && !isDeleteable ) {
+
+		        	btnDelete.setIconSclass("z-icon-Trash");//z-icon-lock
+		        	btnDelete.setDisabled(true);
+
+		        }else if(isDeleteable) {
+
+		        	btnDelete.setImage(ThemeManager.getThemeResource("images/Delete16.png"));
+		        	btnDelete.addEventListener(Events.ON_CLICK, rowListener);
+
+		        }else {
+
+		        	btnDelete.setImage(ThemeManager.getThemeResource("images/Delete16.png"));//images/LockX16.png
+		        	btnDelete.setDisabled(true);
+
+		        }
+
+
+		        btnDelete.setId(String.valueOf(row.getIndex())+"_"+String.valueOf(i));//Set RowIndex(Y-axis) and Column(X-axis) in ID of Cell(div)
+		        btnDelete.setStyle("vertical-align: middle;");
+		        if (ThemeManager.isUseFontIconForImage())
+		        	LayoutUtils.addSclass("large-toolbarbutton", btnDelete);
+
+		        div.appendChild(btnDelete);
 		        div.setStyle("width:30px;");
 
 

@@ -37,7 +37,6 @@ import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
 */
 public class JPiereAttachment implements IAction {
 
-	protected ADWindowToolbar toolbar ;
 
 	@Override
 	public void execute(Object target)
@@ -50,7 +49,7 @@ public class JPiereAttachment implements IAction {
 		 }
 
 		ADWindow adWindow = (ADWindow)target;
-		this.toolbar = adWindow.getADWindowContent().getToolbar();
+		ADWindowToolbar toolbar = adWindow.getADWindowContent().getToolbar();
 
 		EventListener<Event> listener = new EventListener<Event>()
 		{

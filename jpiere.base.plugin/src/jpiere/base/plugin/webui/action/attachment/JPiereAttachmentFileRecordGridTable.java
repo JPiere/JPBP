@@ -64,9 +64,20 @@ public class JPiereAttachmentFileRecordGridTable extends AbstractTableModel {
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
-		if(columnIndex == 3)
+		if(columnIndex == 1)//Edit Record
 		{
+
+		}else if(columnIndex == 2) { //Preview
+
+			return list_POs.get(rowIndex).getJP_MediaContentType();
+
+		}else if(columnIndex == 3) {//File Name
+
 			return list_POs.get(rowIndex).getJP_AttachmentFileName();
+
+		}else if(columnIndex == 4){ //Deleteable
+
+			return list_POs.get(rowIndex).isDeleteable();
 		}
 
 		return list_POs.get(rowIndex).getJP_AttachmentFileRecord_ID();
