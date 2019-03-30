@@ -15,11 +15,9 @@
 package jpiere.base.plugin.webui.action.attachment;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.logging.Level;
 
 import org.compiere.model.MTable;
@@ -68,9 +66,9 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 			}
 		}
 
-		FileChannel in = null;
-		FileChannel out = null;
-		FileInputStream fis = null;
+//		FileChannel in = null;
+//		FileChannel out = null;
+//		FileInputStream fis = null;
 		FileOutputStream fos = null;
 
 		attachmentFileRecord.setJP_AttachmentFilePath(getAttachmentPathSnippet(attachmentFileRecord));
@@ -150,8 +148,8 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	{
 		String tableName = MTable.getTableName(Env.getCtx(), attachmentFileRecord.getAD_Table_ID());
 
-		StringBuilder msgreturn = new StringBuilder().append(tableName).append(File.separator).append(attachmentFileRecord.getAD_Client_ID()).append(File.separator)
-				.append(attachmentFileRecord.getAD_Org_ID()).append(File.separator).append(attachmentFileRecord.getRecord_ID());
+		StringBuilder msgreturn = new StringBuilder().append(attachmentFileRecord.getAD_Client_ID()).append(File.separator).append(attachmentFileRecord.getAD_Org_ID())
+										.append(File.separator).append(tableName).append(File.separator).append(attachmentFileRecord.getRecord_ID());
 
 		return msgreturn.toString();
 	}

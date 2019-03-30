@@ -40,6 +40,7 @@ import org.zkoss.zul.RowRenderer;
 import org.zkoss.zul.RowRendererExt;
 
 import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
+import jpiere.base.plugin.webui.apps.form.AttachmentFileViewer;
 
 
 /**
@@ -367,7 +368,6 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 						ListModel<Object> model = _grid.getModel();
 						Object[] row = (Object[] )model.getElementAt(rowIndex);
 						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
-						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
 
 						EventListener<Event> listener = new EventListener<Event>()
 						{
@@ -378,15 +378,42 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 							}
 						};
 
-						JPiereAttachmentPreviewWindow attachmentPreviewWindow = new JPiereAttachmentPreviewWindow (adWindow, attachmentFileRecord, listener);
+						AttachmentFileViewer attachmentPreviewWindow = new AttachmentFileViewer (listener);
+						attachmentPreviewWindow.setRecord_ID(JP_AttachmentFileRecord_ID.intValue());
 
 						if(attachmentPreviewWindow.isFileLoad())
 						{
-							LayoutUtils.openOverlappedWindow(event.getTarget() , attachmentPreviewWindow, "after_pointer");//after_pointer
+							AEnv.showCenterScreen(attachmentPreviewWindow);
 							attachmentPreviewWindow.focus();
 						}else {
 							attachmentPreviewWindow = null;
 						}
+
+
+
+//						ListModel<Object> model = _grid.getModel();
+//						Object[] row = (Object[] )model.getElementAt(rowIndex);
+//						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
+//						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
+//
+//						EventListener<Event> listener = new EventListener<Event>()
+//						{
+//							@Override
+//							public void onEvent(Event event) throws Exception {
+////								toolbar.getButton("Attachment").setPressed(adTabbox.getSelectedGridTab().hasAttachment());
+////								focusToActivePanel();
+//							}
+//						};
+//
+//						JPiereAttachmentPreviewWindow attachmentPreviewWindow = new JPiereAttachmentPreviewWindow (adWindow, attachmentFileRecord, listener);
+//
+//						if(attachmentPreviewWindow.isFileLoad())
+//						{
+//							LayoutUtils.openOverlappedWindow(event.getTarget() , attachmentPreviewWindow, "after_pointer");//after_pointer
+//							attachmentPreviewWindow.focus();
+//						}else {
+//							attachmentPreviewWindow = null;
+//						}
 
 					}else if(columnIndex == 3) {	// Name
 

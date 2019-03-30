@@ -1,0 +1,229 @@
+package jpiere.base.plugin.webui.apps.form;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.adempiere.webui.AdempiereWebUI;
+import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.component.Panel;
+import org.adempiere.webui.event.DialogEvents;
+import org.adempiere.webui.panel.CustomForm;
+import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.FDialog;
+import org.compiere.process.ProcessInfo;
+import org.compiere.util.CLogger;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.zkoss.util.media.AMedia;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zul.Borderlayout;
+import org.zkoss.zul.Center;
+import org.zkoss.zul.Iframe;
+
+import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
+
+public class AttachmentFileViewer extends CustomForm implements EventListener<Event>
+{
+	private static CLogger log = CLogger.getCLogger(AttachmentFileViewer.class);
+
+	private Iframe preview = new Iframe();
+
+	private Panel previewPanel = new Panel();
+
+	private Borderlayout mainPanel = new Borderlayout();
+
+	private String orientation;
+
+	private int windowNo = 0;
+	private int Record_ID = 0;
+	private MAttachmentFileRecord attachmentFileRecord;
+
+	private boolean isFileLoad = false;
+
+	private static List<String> autoPreviewList;
+	static {
+		autoPreviewList = new ArrayList<String>();
+		autoPreviewList.add("image/jpeg");
+		autoPreviewList.add("image/png");
+		autoPreviewList.add("image/gif");
+		autoPreviewList.add("text/plain");
+		autoPreviewList.add("application/pdf");
+		autoPreviewList.add("text/html");
+	}
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -8498084996736578534L;
+
+	public AttachmentFileViewer(EventListener<Event> eventListener)
+	{
+		super();
+
+		this.addEventListener(DialogEvents.ON_WINDOW_CLOSE, this);
+		if (eventListener != null)
+		{
+			this.addEventListener(DialogEvents.ON_WINDOW_CLOSE, eventListener);
+		}
+
+	}
+
+	public AttachmentFileViewer()
+	{
+		;
+	}
+
+	@Override
+	protected void initForm()
+	{
+		;
+	}
+
+	@Override
+	public Mode getWindowMode()
+	{
+		return Mode.HIGHLIGHTED;
+	}
+
+	@Override
+	public void setProcessInfo(ProcessInfo pi)
+	{
+		super.setProcessInfo(pi);
+		Record_ID = getProcessInfo().getRecord_ID();
+		try {
+			init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void setRecord_ID(int Record_ID)
+	{
+		this.Record_ID = Record_ID;
+		try {
+			init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private void init() throws Exception
+	{
+
+
+		attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(), Record_ID, null);
+
+		this.setAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "attachment");
+		this.setMaximizable(true);
+
+		ZKUpdateUtil.setWidth(this, "50%");
+		ZKUpdateUtil.setHeight(this, "80%");
+
+
+		this.setTitle(Msg.getMsg(Env.getCtx(), "Attachment"));
+		this.setClosable(true);
+		this.setSizable(true);
+		this.setBorder("normal");
+		this.setSclass("popup-dialog attachment-dialog");
+		this.setShadow(true);
+		this.appendChild(mainPanel);
+		ZKUpdateUtil.setHeight(mainPanel, "100%");
+		ZKUpdateUtil.setWidth(mainPanel, "100%");
+
+		previewPanel.appendChild(preview);
+		ZKUpdateUtil.setVflex(preview, "1");
+		ZKUpdateUtil.setHflex(preview, "1");
+
+
+		File file = new File(attachmentFileRecord.getAbsoluteFilePath());
+		AMedia media = null;
+		try {
+			media = new AMedia(attachmentFileRecord.getJP_AttachmentFileName(),attachmentFileRecord.getJP_MediaFormat()
+					,attachmentFileRecord.getJP_MediaContentType(),file,true);
+
+		}catch (FileNotFoundException e) {
+
+			FDialog.error(windowNo, this, "AttachmentNotFound", e.toString());
+			this.dispose();
+			log.saveError("Error", e);
+
+		}catch (Exception e) {
+
+			FDialog.error(windowNo, this, "Error", e.toString());
+			this.dispose();
+			log.saveError("Error", e);
+		}
+
+		if(media == null)
+			return ;
+
+		isFileLoad = true;
+
+		preview.setContent(media);
+		preview.setVisible(true);
+		preview.invalidate();
+//		preview.setStyle("position:center");
+//		previewPanel.setStyle("position:center");
+//		mainPanel.setStyle("position:center");
+
+		Center centerPane = new Center();
+		centerPane.setSclass("dialog-content");
+		//centerPane.setAutoscroll(true); // not required the preview has its own scroll bar
+		mainPanel.appendChild(centerPane);
+		centerPane.appendChild(previewPanel);
+		ZKUpdateUtil.setVflex(previewPanel, "1");
+		ZKUpdateUtil.setHflex(previewPanel, "1");
+
+		if (ClientInfo.isMobile())
+		{
+			orientation = ClientInfo.get().orientation;
+			ClientInfo.onClientInfo(this, this::onClientInfo);
+		}
+
+	}
+
+	protected void onClientInfo()
+	{
+		if (getPage() != null)
+		{
+			String newOrienation = ClientInfo.get().orientation;
+			if (!newOrienation.equals(orientation))
+			{
+				orientation = newOrienation;
+				ZKUpdateUtil.setCSSHeight(this);
+				ZKUpdateUtil.setCSSWidth(this);
+				invalidate();
+			}
+		}
+	}
+
+
+	public void dispose ()
+	{
+		preview = null;
+		this.detach();
+	} // dispose
+
+
+	public boolean isFileLoad()
+	{
+		return isFileLoad;
+	}
+
+
+	public void onEvent(Event e)
+	{
+		//	Save and Close
+		if (DialogEvents.ON_WINDOW_CLOSE.equals(e.getName()))
+		{
+			dispose();
+		}
+
+	}	//	onEvent
+
+}

@@ -378,19 +378,6 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 
 	}
 
-
-
-	static private String getCharset(String contentType) {
-		if (contentType != null) {
-			int j = contentType.indexOf("charset=");
-			if (j >= 0) {
-				String cs = contentType.substring(j + 8).trim();
-				if (cs.length() > 0) return cs;
-			}
-		}
-		return "UTF-8";
-	}
-
 	@Override
 	public void onClose()
 	{
