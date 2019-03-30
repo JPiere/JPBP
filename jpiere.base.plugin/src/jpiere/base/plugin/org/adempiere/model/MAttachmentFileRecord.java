@@ -16,13 +16,13 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import org.compiere.model.MClientInfo;
-import org.compiere.model.Query;
+import org.compiere.model.MRole;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.webui.action.attachment.IJPiereAttachmentStore;
 import jpiere.base.plugin.webui.action.attachment.MJPiereStorageProvider;
@@ -49,34 +49,26 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 		initAttachmentStoreDetails(ctx, trxName);
 	}
 
-	//TODO アクセス権限を考慮した実装。
-	static public MAttachmentFileRecord[] getAttachmentFileRecord(Properties ctx, int AD_Table_ID, int Record_ID, boolean isCheckRole, String trxName)
-	{
-
-		StringBuilder whereClauseFinal = new StringBuilder(MAttachmentFileRecord.COLUMNNAME_AD_Table_ID + "=? AND "
-												+ MAttachmentFileRecord.COLUMNNAME_Record_ID + "=? ");
-
-		//
-		List<MAttachmentFileRecord> list = new Query(ctx, MAttachmentFileRecord.Table_Name, whereClauseFinal.toString(), trxName)
-										.setParameters(AD_Table_ID,Record_ID)
-										.list();
-
-		//
-		return list.toArray(new MAttachmentFileRecord[list.size()]);
-
-	}
-
-	//TODO アクセス権限を考慮した実装。
 	static public ArrayList<MAttachmentFileRecord> getAttachmentFileRecordPO(Properties ctx, int AD_Table_ID, int Record_ID, boolean isCheckRole, String trxName)
 	{
+		MRole role = MRole.getDefault(ctx, false);
+		String orgWhere =role.getOrgWhere(false);
 
 		ArrayList<MAttachmentFileRecord> list = new ArrayList<MAttachmentFileRecord>();
-		String sql = "SELECT * FROM JP_AttachmentFileRecord WHERE AD_Table_ID=? AND Record_ID=? ORDER BY JP_AttachmentFileRecord_ID";
+		StringBuilder sql = new StringBuilder("SELECT * FROM JP_AttachmentFileRecord WHERE AD_Table_ID=? AND Record_ID=? ");
+		if(!Util.isEmpty(orgWhere))
+		{
+			sql = sql.append(" AND ").append(orgWhere);
+
+		}
+
+		sql = sql.append(" ORDER BY JP_AttachmentFileRecord_ID");
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt = DB.prepareStatement(sql.toString(), trxName);
 			pstmt.setInt(1, AD_Table_ID);
 			pstmt.setInt(2, Record_ID);
 			rs = pstmt.executeQuery();
