@@ -55,7 +55,7 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 		String orgWhere =role.getOrgWhere(false);
 
 		ArrayList<MAttachmentFileRecord> list = new ArrayList<MAttachmentFileRecord>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM JP_AttachmentFileRecord WHERE AD_Table_ID=? AND Record_ID=? ");
+		StringBuilder sql = new StringBuilder("SELECT * FROM JP_AttachmentFileRecord WHERE AD_Table_ID=? AND Record_ID=? AND IsActive='Y'");
 		if(!Util.isEmpty(orgWhere))
 		{
 			sql = sql.append(" AND ").append(orgWhere);

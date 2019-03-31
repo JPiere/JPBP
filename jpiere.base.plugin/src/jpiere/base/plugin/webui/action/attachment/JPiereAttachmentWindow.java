@@ -356,6 +356,7 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 				{
 					m_attachmentFileRecord.set_ValueNoCheck("AD_Org_ID", Invoice_Org_Editor.getValue());
 
+
 				}else {
 
 					objectValue = mTab.getValue(columnName);
@@ -363,7 +364,26 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 					{
 						m_attachmentFileRecord.set_ValueNoCheck(columnName, objectValue);
 					}
+
 				}
+
+			}else if(columnIndex == -1) {
+
+				 if(columnName.equals("DateOrdered")
+						|| columnName.equals("MovementDate")
+						|| columnName.equals("DateInvoiced")
+						|| columnName.equals("DateTrx")
+						|| columnName.equals("StatementDate"))
+				 {
+					if(mTab.getTableModel().getPO(0).get_ColumnIndex("DateDoc") == -1)
+					{
+						objectValue = mTab.getValue(columnName);
+						if(objectValue != null)
+						{
+							m_attachmentFileRecord.set_ValueNoCheck("DateDoc", objectValue);
+						}
+					}
+				 }
 			}
 
 		}//for

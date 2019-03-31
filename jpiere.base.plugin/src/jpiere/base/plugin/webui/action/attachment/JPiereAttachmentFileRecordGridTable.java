@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 import org.adempiere.webui.adwindow.ADWindow;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
 
@@ -64,8 +65,18 @@ public class JPiereAttachmentFileRecordGridTable extends AbstractTableModel {
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
-		if(columnIndex == 1)//Edit Record
+		if(columnIndex == 0)//Download
 		{
+			return list_POs.get(rowIndex).getJP_AttachmentFileRecord_ID();
+
+		}else if(columnIndex == 1) { //Edit Record
+
+			if(Util.isEmpty(list_POs.get(rowIndex).getJP_AttachmentFileDescription()))
+			{
+				return "";
+			}else {
+				return list_POs.get(rowIndex).getJP_AttachmentFileDescription();
+			}
 
 		}else if(columnIndex == 2) { //Preview
 

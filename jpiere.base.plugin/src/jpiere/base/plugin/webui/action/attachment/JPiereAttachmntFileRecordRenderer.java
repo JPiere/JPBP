@@ -226,7 +226,6 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 				div = new Cell();
 				div.appendChild(new Label(data[i].toString()));
 
-
 			}else if(i == 4) {//Delete Button
 
 
@@ -275,7 +274,7 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 
 //		row.setStyle("cursor:pointer");
 		row.addEventListener(Events.ON_CLICK, rowListener);
-		row.setTooltiptext("Row " + (index+1));
+		row.setTooltiptext(data[1].toString());
 
 		row.addEventListener(Events.ON_CLICK, rowListener);
 
@@ -389,31 +388,6 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 							attachmentPreviewWindow = null;
 						}
 
-
-
-//						ListModel<Object> model = _grid.getModel();
-//						Object[] row = (Object[] )model.getElementAt(rowIndex);
-//						Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
-//						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
-//
-//						EventListener<Event> listener = new EventListener<Event>()
-//						{
-//							@Override
-//							public void onEvent(Event event) throws Exception {
-////								toolbar.getButton("Attachment").setPressed(adTabbox.getSelectedGridTab().hasAttachment());
-////								focusToActivePanel();
-//							}
-//						};
-//
-//						JPiereAttachmentPreviewWindow attachmentPreviewWindow = new JPiereAttachmentPreviewWindow (adWindow, attachmentFileRecord, listener);
-//
-//						if(attachmentPreviewWindow.isFileLoad())
-//						{
-//							LayoutUtils.openOverlappedWindow(event.getTarget() , attachmentPreviewWindow, "after_pointer");//after_pointer
-//							attachmentPreviewWindow.focus();
-//						}else {
-//							attachmentPreviewWindow = null;
-//						}
 
 					}else if(columnIndex == 3) {	// Name
 
