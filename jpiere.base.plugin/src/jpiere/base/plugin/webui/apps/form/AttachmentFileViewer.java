@@ -2,11 +2,15 @@ package jpiere.base.plugin.webui.apps.form;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.component.Label;
+import org.adempiere.webui.component.ListItem;
+import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.panel.CustomForm;
@@ -15,12 +19,15 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Ini;
 import org.compiere.util.Msg;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
+import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Iframe;
 
 import jpiere.base.plugin.org.adempiere.model.MAttachmentFileRecord;
@@ -42,6 +49,8 @@ public class AttachmentFileViewer extends CustomForm implements EventListener<Ev
 	private MAttachmentFileRecord attachmentFileRecord;
 
 	private boolean isFileLoad = false;
+
+	private Listbox fCharset = new Listbox();
 
 	private static List<String> autoPreviewList;
 	static {
@@ -114,9 +123,41 @@ public class AttachmentFileViewer extends CustomForm implements EventListener<Ev
 
 	private void init() throws Exception
 	{
-
-
 		attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(), Record_ID, null);
+
+		Charset charset = null;
+		if(attachmentFileRecord.getJP_MediaContentType().equals("text/plain"))
+		{
+			Charset[] charsets = Ini.getAvailableCharsets();
+
+			for (int i = 0; i < charsets.length; i++)
+				fCharset.appendItem(charsets[i].displayName(), charsets[i]);
+
+			fCharset.setMold("select");
+			fCharset.setRows(0);
+			fCharset.setTooltiptext(Msg.getMsg(Env.getCtx(), "Charset", false));
+
+			charset = Ini.getCharset();
+			for (int i = 0; i < fCharset.getItemCount(); i++)
+			{
+				ListItem listitem = fCharset.getItemAtIndex(i);
+				Charset compare = (Charset)listitem.getValue();
+
+				if (charset == compare)
+				{
+					fCharset.setSelectedIndex(i);
+					break;
+				}
+			}
+
+			fCharset.addEventListener(Events.ON_SELECT, this);
+			Hbox hbox = new Hbox();
+			hbox.setAlign("center");
+			hbox.setStyle("padding:4px;");
+			hbox.appendChild(new Label(Msg.getElement(Env.getCtx(), "CharacterSet")));
+			hbox.appendChild(fCharset);
+			this.appendChild(hbox);
+		}
 
 		this.setAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "attachment");
 		this.setMaximizable(true);
@@ -143,8 +184,18 @@ public class AttachmentFileViewer extends CustomForm implements EventListener<Ev
 		File file = new File(attachmentFileRecord.getAbsoluteFilePath());
 		AMedia media = null;
 		try {
-			media = new AMedia(attachmentFileRecord.getJP_AttachmentFileName(),attachmentFileRecord.getJP_MediaFormat()
+
+			if(attachmentFileRecord.getJP_MediaContentType().equals("text/plain"))
+			{
+				media = new AMedia(attachmentFileRecord.getJP_AttachmentFileName(),attachmentFileRecord.getJP_MediaFormat()
+						,attachmentFileRecord.getJP_MediaContentType(),file,charset.name());//shift-jis or UTF-8
+
+			}else {
+
+				media = new AMedia(attachmentFileRecord.getJP_AttachmentFileName(),attachmentFileRecord.getJP_MediaFormat()
 					,attachmentFileRecord.getJP_MediaContentType(),file,true);
+
+			}
 
 		}catch (FileNotFoundException e) {
 
@@ -167,9 +218,6 @@ public class AttachmentFileViewer extends CustomForm implements EventListener<Ev
 		preview.setContent(media);
 		preview.setVisible(true);
 		preview.invalidate();
-//		preview.setStyle("position:center");
-//		previewPanel.setStyle("position:center");
-//		mainPanel.setStyle("position:center");
 
 		Center centerPane = new Center();
 		centerPane.setSclass("dialog-content");
@@ -222,6 +270,27 @@ public class AttachmentFileViewer extends CustomForm implements EventListener<Ev
 		if (DialogEvents.ON_WINDOW_CLOSE.equals(e.getName()))
 		{
 			dispose();
+
+		}else if (e.getTarget() == fCharset) {
+
+			ListItem listitem = fCharset.getSelectedItem();
+			if (listitem == null)
+				return;
+
+			Charset charset = (Charset)listitem.getValue();
+
+			File file = new File(attachmentFileRecord.getAbsoluteFilePath());
+			AMedia media = null;
+
+			try {
+				media = new AMedia(attachmentFileRecord.getJP_AttachmentFileName(),attachmentFileRecord.getJP_MediaFormat()
+						,attachmentFileRecord.getJP_MediaContentType(),file,charset.name());
+			} catch (FileNotFoundException e1) {
+				;
+			}
+
+			preview.setContent(media);
+
 		}
 
 	}	//	onEvent
