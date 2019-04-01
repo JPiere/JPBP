@@ -44,13 +44,11 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	public boolean upLoadFile(MAttachmentFileRecord attachmentFileRecord, byte[] data, MJPiereStorageProvider prov)
 	{
 
-		StringBuilder path = getAbsolutePath(attachmentFileRecord, prov);
-		if (path == null) {
+		StringBuilder folderPath = getDirectoryAbsolutePath(attachmentFileRecord, prov);
+		if (folderPath == null) {
 			log.severe("no attachmentPath defined");
 			return false;
 		}
-
-
 
 		if (data == null)
 			return true;
@@ -59,21 +57,18 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 			return true;
 
 
-		final File destFolder = new File(path.toString());
-		if(!destFolder.exists()){
-			if(!destFolder.mkdirs()){
-				log.warning("unable to create folder: " + destFolder.getPath());
+		final File folder = new File(folderPath.toString());
+		if(!folder.exists()){
+			if(!folder.mkdirs()){
+				log.warning("unable to create folder: " + folder.getPath());
 			}
 		}
 
-//		FileChannel in = null;
-//		FileChannel out = null;
-//		FileInputStream fis = null;
 		FileOutputStream fos = null;
 
-		attachmentFileRecord.setJP_AttachmentFilePath(getAttachmentPathSnippet(attachmentFileRecord));
+		attachmentFileRecord.setJP_AttachmentFilePath(getAttachmentRelativePath(attachmentFileRecord));
 
-		final File destFile = new File(path.append(File.separator).append(attachmentFileRecord.getJP_AttachmentFileName()).toString());
+		final File destFile = new File(folderPath.append(File.separator).append(attachmentFileRecord.getJP_AttachmentFileName()).toString());
 		try
 		{
 			fos = new FileOutputStream(destFile);
@@ -82,7 +77,7 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-//			out = fos.getChannel();
+
 			try {
 				fos.close();
 			} catch (IOException e) {
@@ -94,14 +89,6 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 			e.printStackTrace();
 		}
 
-		/* IDEMPIERE-2864
-		if(entryFile.exists()){
-			if(!entryFile.delete()){
-				entryFile.deleteOnExit();
-			}
-		}*/
-//		entryFile = destFile;
-
 		attachmentFileRecord.saveEx();
 
 		return true;
@@ -111,7 +98,7 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	@Override
 	public boolean deleteFile(MAttachmentFileRecord attach, MJPiereStorageProvider prov)
 	{
-		final File deleteFile = new File(getAbsoluteFilePath(attach,prov));
+		final File deleteFile = new File(getFileAbsolutePath(attach,prov).toString());
 
 		if(!deleteFile.exists())
 		{
@@ -122,29 +109,27 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	}
 
 	@Override
-	public String getAbsoluteFilePath(MAttachmentFileRecord attach, MJPiereStorageProvider prov)
+	public StringBuilder getFileAbsolutePath(MAttachmentFileRecord attach, MJPiereStorageProvider prov)
 	{
-		StringBuilder msgfile = getAbsolutePath(attach,prov);
-
-		return msgfile.append(File.separator).append(attach.getJP_AttachmentFileName()).toString();
+		return getDirectoryAbsolutePath(attach,prov).append(File.separator).append(attach.getJP_AttachmentFileName());
 	}
 
-	private StringBuilder getAbsolutePath(MAttachmentFileRecord attachmentFileRecord, MJPiereStorageProvider prov)
+	@Override
+	public StringBuilder getDirectoryAbsolutePath(MAttachmentFileRecord attachmentFileRecord, MJPiereStorageProvider prov)
 	{
-		String attachmentPathRoot = getAttachmentPathRoot(prov);
-		if (Util.isEmpty(attachmentPathRoot)) {
+		String rootPath = getAttachmentRootRoot(prov);
+		if (Util.isEmpty(rootPath)) {
 			log.severe("no attachmentPath defined");
 			return null;
 		}
 
-		String attachmentPathSnippet = getAttachmentPathSnippet(attachmentFileRecord);
+		String relativePath = getAttachmentRelativePath(attachmentFileRecord);
 
-		StringBuilder msgfile = new StringBuilder().append(attachmentPathRoot).append(attachmentPathSnippet);
-
-		return msgfile;
+		return new StringBuilder(rootPath).append(relativePath);
 	}
 
-	private String getAttachmentPathSnippet(MAttachmentFileRecord attachmentFileRecord)
+
+	private String getAttachmentRelativePath(MAttachmentFileRecord attachmentFileRecord)
 	{
 		String tableName = MTable.getTableName(Env.getCtx(), attachmentFileRecord.getAD_Table_ID());
 
@@ -155,7 +140,7 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 	}
 
 
-	private String getAttachmentPathRoot(MJPiereStorageProvider prov)
+	private String getAttachmentRootRoot(MJPiereStorageProvider prov)
 	{
 		String attachmentPathRoot = prov.getFolder();
 		if (attachmentPathRoot == null)
@@ -168,6 +153,8 @@ public class JPiereAttachmentFileSystem implements IJPiereAttachmentStore {
 		}
 		return attachmentPathRoot;
 	}
+
+
 
 
 

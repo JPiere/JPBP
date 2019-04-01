@@ -181,7 +181,7 @@ public class AttachmentFileViewer extends CustomForm implements EventListener<Ev
 		ZKUpdateUtil.setHflex(preview, "1");
 
 
-		File file = new File(attachmentFileRecord.getAbsoluteFilePath());
+		File file = new File(attachmentFileRecord.getFileAbsolutePath());
 		AMedia media = null;
 		try {
 
@@ -279,7 +279,7 @@ public class AttachmentFileViewer extends CustomForm implements EventListener<Ev
 
 			Charset charset = (Charset)listitem.getValue();
 
-			File file = new File(attachmentFileRecord.getAbsoluteFilePath());
+			File file = new File(attachmentFileRecord.getFileAbsolutePath());
 			AMedia media = null;
 
 			try {

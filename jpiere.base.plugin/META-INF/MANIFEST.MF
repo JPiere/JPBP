@@ -15,10 +15,12 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  zkplus;bundle-version="8.0.1",
  zul;bundle-version="8.0.1",
  zweb;bundle-version="8.0.1",
+ org.apache.ant,
  slf4j.api;bundle-version="1.7.25"
 Bundle-Activator: org.adempiere.plugin.utils.AdempiereActivator
 Bundle-Vendor: OSS ERP Solutions
-Import-Package: org.compiere.apps,
+Import-Package: org.apache.tools.ant.taskdefs;version="1.10.5",
+ org.compiere.apps,
  org.compiere.apps.form,
  org.compiere.grid,
  org.compiere.minigrid,

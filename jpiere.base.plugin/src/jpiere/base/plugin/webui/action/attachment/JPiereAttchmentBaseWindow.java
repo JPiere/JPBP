@@ -15,8 +15,10 @@
 package jpiere.base.plugin.webui.action.attachment;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.ADWindow;
@@ -30,11 +32,17 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.MultiFileDownloadDialog;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Target;
+import org.apache.tools.ant.taskdefs.Zip;
 import org.compiere.model.GridWindowVO;
+import org.compiere.model.MOrg;
 import org.compiere.model.MQuery;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
+import org.compiere.tools.FileUtil;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.event.Event;
@@ -284,24 +292,22 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
 			}else if(btn.getId().equals("btnExport")) {
 
-				ArrayList<File> downloadFiles = new ArrayList<File>();
-				ListModel<Object> model = grid.getModel();
-				for(int i = 0; i < model.getSize(); i++)
-				{
-					Object[] row = (Object[] )model.getElementAt(i);
-					Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
-					MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
-					File downloadFile = new File(attachmentFileRecord.getAbsoluteFilePath());
-					if(!downloadFile.exists())
-						continue;
+				//Do you compress attachment files by ZIP?
+				FDialog.ask(adWindowContent.getWindowNo(), adWindowContent.getComponent(), "JP_AttachemntDownloadZIP", Msg.getMsg(Env.getCtx(), "JP_AttachemntDownloadZIP_Description"), new Callback<Boolean>() {
 
-					downloadFiles.add(downloadFile);
-				}
-
-				MultiFileDownloadDialog downloadDialog = new MultiFileDownloadDialog(downloadFiles.toArray(new File[downloadFiles.size()]));
-				downloadDialog.setPage(adWindow.getComponent().getPage());
-				downloadDialog.setTitle(Msg.getMsg(Env.getCtx(), "Attachment"));
-				Events.postEvent(downloadDialog, new Event(MultiFileDownloadDialog.ON_SHOW));
+					@Override
+					public void onCallback(Boolean result)
+					{
+						if (result)
+						{
+							createDownloadZipFiles();
+						}
+						else
+						{
+							createDownloadFileList();
+						}
+					}
+				});
 
 			}else if(btn.getId().equals("btnZoomAcross")) {
 
@@ -316,5 +322,86 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
 	}
 
+	private void createDownloadZipFiles()
+	{
+		ArrayList<File> downloadFiles = new ArrayList<File>();
+		ArrayList<MOrg>  attachmentFileOrgList = MAttachmentFileRecord.getAttachmentFileOrgList(Env.getCtx(), AD_Table_ID, Record_ID, true, null);
+		for(MOrg org :attachmentFileOrgList)
+		{
+			String directory = MAttachmentFileRecord.getAttachmentDirectory(Env.getCtx(),AD_Table_ID, Record_ID, org.getAD_Org_ID(),null);
+			File srcFolder = new File(directory);
+			File destZipFile = new File(srcFolder + File.separator + org.getValue() +".zip");
+			if(destZipFile.exists())
+			{
+				try {
+					FileUtil.deleteFolderRecursive(destZipFile);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+
+			//create the compressed packages
+			Zip zipper = new Zip();
+		    zipper.setDestFile(destZipFile);
+		    zipper.setBasedir(srcFolder);
+		    //zipper.setIncludes(includesdir.replace(" ", "*"));
+		    zipper.setUpdate(true);
+		    zipper.setCompress(true);
+		    zipper.setCaseSensitive(false);
+		    zipper.setFilesonly(false);
+		    zipper.setTaskName("zip");
+		    zipper.setTaskType("zip");
+		    zipper.setProject(new Project());
+		    zipper.setOwningTarget(new Target());
+		    zipper.execute();
+			downloadFiles.add(destZipFile);
+		}
+
+		MultiFileDownloadDialog downloadDialog = new MultiFileDownloadDialog(downloadFiles.toArray(new File[downloadFiles.size()]));
+		downloadDialog.setPage(adWindow.getComponent().getPage());
+		downloadDialog.setTitle(Msg.getMsg(Env.getCtx(), "Attachment"));
+		downloadDialog.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>()
+		{
+			@Override
+			public void onEvent(Event event) throws Exception
+			{
+				for(File file : downloadFiles)
+				{
+					try {
+						FileUtil.deleteFolderRecursive(file);
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+				}
+
+			}
+		});
+
+		Events.postEvent(downloadDialog, new Event(MultiFileDownloadDialog.ON_SHOW));
+
+		return ;
+	}
+
+	private void createDownloadFileList()
+	{
+		ArrayList<File> downloadFiles = new ArrayList<File>();
+		ListModel<Object> model = grid.getModel();
+		for(int i = 0; i < model.getSize(); i++)
+		{
+			Object[] row = (Object[] )model.getElementAt(i);
+			Integer JP_AttachmentFileRecord_ID = (Integer)row[0];
+			MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
+			File downloadFile = new File(attachmentFileRecord.getFileAbsolutePath());
+			if(!downloadFile.exists())
+				continue;
+
+			downloadFiles.add(downloadFile);
+		}
+
+		MultiFileDownloadDialog downloadDialog = new MultiFileDownloadDialog(downloadFiles.toArray(new File[downloadFiles.size()]));
+		downloadDialog.setPage(adWindow.getComponent().getPage());
+		downloadDialog.setTitle(Msg.getMsg(Env.getCtx(), "Attachment"));
+		Events.postEvent(downloadDialog, new Event(MultiFileDownloadDialog.ON_SHOW));
+	}
 
 }

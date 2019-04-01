@@ -153,8 +153,8 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 	} // JPiereAttachmentWindow
 
 
-	Label Invoice_Org_Label = new Label();					//売上請求伝票検索用組織マスタラベル
-	WSearchEditor Invoice_Org_Editor;						//売上請求伝票検索用組織マスタ選択リスト
+	Label orgLabel = new Label();
+	WSearchEditor orgEditor;
 
 	void staticInit() throws Exception
 	{
@@ -200,14 +200,14 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 		// Initialization of Org
 		AD_Column_ID = MColumn.getColumn_ID("C_Invoice", "AD_Org_ID");
 		MLookup lookupOrg = MLookupFactory.get(Env.getCtx(), windowNo, 0, AD_Column_ID,  DisplayType.Search);
-		Invoice_Org_Editor = new WSearchEditor("Invoice_Org_ID", true, false, true, lookupOrg);
-		Invoice_Org_Editor.setValue(AD_Org_ID.intValue());
-		Invoice_Org_Editor.addValueChangeListener(this);
+		orgEditor = new WSearchEditor("Invoice_Org_ID", true, false, true, lookupOrg);
+		orgEditor.setValue(AD_Org_ID.intValue());
+		orgEditor.addValueChangeListener(this);
 
-		Invoice_Org_Label.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
-		toolBar.appendChild(Invoice_Org_Label.rightAlign());
-		ZKUpdateUtil.setHflex(Invoice_Org_Editor.getComponent(), "true");
-		toolBar.appendChild(Invoice_Org_Editor.getComponent());
+		orgLabel.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
+		toolBar.appendChild(orgLabel.rightAlign());
+		ZKUpdateUtil.setHflex(orgEditor.getComponent(), "true");
+		toolBar.appendChild(orgEditor.getComponent());
 
 		mainPanel.appendChild(northPanel);
 		Vlayout div = new Vlayout();
@@ -354,7 +354,7 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 			{
 				if(columnName.equals("AD_Org_ID"))
 				{
-					m_attachmentFileRecord.set_ValueNoCheck("AD_Org_ID", Invoice_Org_Editor.getValue());
+					m_attachmentFileRecord.set_ValueNoCheck("AD_Org_ID", orgEditor.getValue());
 
 
 				}else {
@@ -390,9 +390,6 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 
 		m_attachmentFileRecord.upLoadLFile(media.getByteData());
 		String fileName = media.getName();
-
-
-
 
 		log.config(fileName);
 

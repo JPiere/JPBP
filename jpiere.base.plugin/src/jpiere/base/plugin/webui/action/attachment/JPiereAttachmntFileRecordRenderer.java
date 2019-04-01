@@ -340,11 +340,11 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 						MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID.intValue(), null);
 
 						ArrayList<File> downloadFiles = new ArrayList<File>();
-						File downloadFile = new File(attachmentFileRecord.getAbsoluteFilePath());
+						File downloadFile = new File(attachmentFileRecord.getFileAbsolutePath());
 
 						if(!downloadFile.exists())
 						{
-							FDialog.error(0, "AttachmentNotFound", attachmentFileRecord.getAbsoluteFilePath());
+							FDialog.error(0, "AttachmentNotFound", attachmentFileRecord.getFileAbsolutePath());
 							return ;
 
 						}
@@ -406,7 +406,7 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 								;//Noting to do
 							}else {
 
-								FDialog.error(0, "JP_CouldNotDeleteFile", attachmentFileRecord.getAbsoluteFilePath());
+								FDialog.error(0, "JP_CouldNotDeleteFile", attachmentFileRecord.getFileAbsolutePath());
 								return ;
 
 							}

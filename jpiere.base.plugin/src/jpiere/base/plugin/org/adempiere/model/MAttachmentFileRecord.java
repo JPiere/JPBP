@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import org.compiere.model.MClientInfo;
+import org.compiere.model.MOrg;
 import org.compiere.model.MRole;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
@@ -49,10 +50,44 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 		initAttachmentStoreDetails(ctx, trxName);
 	}
 
+	static public String getAttachmentDirectory(Properties ctx, int AD_Table_ID, int Record_ID, int AD_Org_ID , String trxName)
+	{
+		StringBuilder sql = new StringBuilder("SELECT * FROM JP_AttachmentFileRecord WHERE AD_Table_ID=? AND Record_ID=? AND AD_Org_ID=? AND IsActive='Y'");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		MAttachmentFileRecord attachmentFileRecord = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), trxName);
+			pstmt.setInt(1, AD_Table_ID);
+			pstmt.setInt(2, Record_ID);
+			pstmt.setInt(3, AD_Org_ID);
+			rs = pstmt.executeQuery();
+
+			if (rs.next())
+				attachmentFileRecord = new MAttachmentFileRecord (ctx, rs, trxName);
+		}
+		catch (Exception e)
+		{
+//			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+
+		return attachmentFileRecord.getDirectoryAbsolutePath();
+	}
+
 	static public ArrayList<MAttachmentFileRecord> getAttachmentFileRecordPO(Properties ctx, int AD_Table_ID, int Record_ID, boolean isCheckRole, String trxName)
 	{
 		MRole role = MRole.getDefault(ctx, false);
-		String orgWhere =role.getOrgWhere(false);
+		String orgWhere = null;
+		if(isCheckRole)
+			orgWhere =role.getOrgWhere(false);
 
 		ArrayList<MAttachmentFileRecord> list = new ArrayList<MAttachmentFileRecord>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM JP_AttachmentFileRecord WHERE AD_Table_ID=? AND Record_ID=? AND IsActive='Y'");
@@ -74,6 +109,50 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 			rs = pstmt.executeQuery();
 			while (rs.next())
 				list.add(new MAttachmentFileRecord (ctx, rs, trxName));
+		}
+		catch (Exception e)
+		{
+//			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+
+		return list;
+
+	}
+
+	static public ArrayList<MOrg> getAttachmentFileOrgList(Properties ctx, int AD_Table_ID, int Record_ID, boolean isCheckRole, String trxName)
+	{
+		MRole role = MRole.getDefault(ctx, false);
+		String orgWhere = null;
+		if(isCheckRole)
+			orgWhere =role.getOrgWhere(false);
+
+		ArrayList<MOrg> list = new ArrayList<MOrg>();
+		StringBuilder sql = new StringBuilder("SELECT DISTINCT org.* FROM JP_AttachmentFileRecord af INNER JOIN AD_Org org ON (af.AD_Org_ID = org.AD_Org_ID) WHERE af.AD_Table_ID=? AND af.Record_ID=? AND af.IsActive='Y'");
+		if(!Util.isEmpty(orgWhere))
+		{
+			sql = sql.append(" AND ").append(orgWhere);
+
+		}
+
+		sql = sql.append(" ORDER BY org.Value");
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), trxName);
+			pstmt.setInt(1, AD_Table_ID);
+			pstmt.setInt(2, Record_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MOrg (ctx, rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -149,18 +228,34 @@ public class MAttachmentFileRecord extends X_JP_AttachmentFileRecord {
 		return false;
 	}
 
-	public String getAbsoluteFilePath()
+
+	public String getFileAbsolutePath()
 	{
 		if (attachmentStore == null)
 			attachmentStore = storageProvider.getAttachmentStore();
 
 		if (attachmentStore != null)
 		{
-			return attachmentStore.getAbsoluteFilePath(this, storageProvider);
+			return attachmentStore.getFileAbsolutePath(this, storageProvider).toString();
 		}
 
 		return null;
 	}
+
+
+	public String getDirectoryAbsolutePath()
+	{
+		if (attachmentStore == null)
+			attachmentStore = storageProvider.getAttachmentStore();
+
+		if (attachmentStore != null)
+		{
+			return attachmentStore.getDirectoryAbsolutePath(this, storageProvider).toString();
+		}
+
+		return null;
+	}
+
 
 	public static int getID(int Table_ID, int Record_ID)
 	{

@@ -48,7 +48,7 @@ public class JPiereAttachmentFileDownload extends SvrProcess {
 		IProcessUI processMonitor = Env.getProcessUI(getCtx());
 
 		MAttachmentFileRecord  attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(),JP_AttachmentFileRecord_ID, null);
-		File downloadFile = new File(attachmentFileRecord.getAbsoluteFilePath());
+		File downloadFile = new File(attachmentFileRecord.getFileAbsolutePath());
 
 		if(!downloadFile.exists())
 		{
