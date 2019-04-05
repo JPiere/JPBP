@@ -33,11 +33,13 @@ import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
+import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -317,6 +319,43 @@ public class JPiereAttachmentWindow extends Window implements EventListener<Even
 		else
 		{
 			return;
+		}
+
+		String blackFiles = MSysConfig.getValue("JP_ATTACHMENT_BLACK_FILE_LIST", "NONE");
+		if(!blackFiles.equalsIgnoreCase("NONE"))
+		{
+			String[] extensions =  blackFiles.split(",");
+			for(int i = 0; i < extensions.length; i++)
+			{
+				if(extensions[i].equalsIgnoreCase(media.getFormat()))
+				{
+					//This extension of file can not upload.
+					FDialog.error(0, "Error", media.getFormat() + " - " +"JP_CanNotUploadFileExtension");
+					return;
+				}
+			}
+		}
+
+		String whiteFiles = MSysConfig.getValue("JP_ATTACHMENT_WHITE_FILE_LIST", "NONE");
+		if(!whiteFiles.equalsIgnoreCase("NONE"))
+		{
+			String[] extensions =  whiteFiles.split(",");
+			boolean isOK = false;
+			for(int i = 0; i < extensions.length; i++)
+			{
+				if(extensions[i].equalsIgnoreCase(media.getFormat()))
+				{
+					isOK = true;
+					break;
+				}
+			}
+
+			if(!isOK)
+			{
+				//This extension of file can not upload.
+				FDialog.error(0, "Error", media.getFormat() + " - " +"JP_CanNotUploadFileExtension");
+				return;
+			}
 		}
 
 		m_attachmentFileRecord = new MAttachmentFileRecord(Env.getCtx(), 0, null);
