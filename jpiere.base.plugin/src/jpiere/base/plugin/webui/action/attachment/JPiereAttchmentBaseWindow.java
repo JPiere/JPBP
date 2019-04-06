@@ -37,9 +37,9 @@ import org.adempiere.webui.window.MultiFileDownloadDialog;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Target;
 import org.apache.tools.ant.taskdefs.Zip;
-import org.compiere.model.GridWindowVO;
 import org.compiere.model.MOrg;
 import org.compiere.model.MQuery;
+import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.tools.FileUtil;
@@ -71,6 +71,11 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 	protected int Record_ID = 0;
 	protected Boolean isAccessEditRecord = true;
 
+	protected Button btnAttachment = new Button();
+	protected Button btnExport = new Button();
+	protected Button btnZoomAcross = new Button();
+
+
 	public JPiereAttchmentBaseWindow(ADWindow adWindow, EventListener<Event> eventListener)
 	{
 		super();
@@ -90,11 +95,12 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 		//MRole role = MRole.getDefault(Env.getCtx(), false);
 		MTable m_Table =MTable.get(Env.getCtx(), MAttachmentFileRecord.Table_Name);
 		int AD_Window_ID = Env.getZoomWindowID(m_Table.getAD_Table_ID(),  0, 0);
-		GridWindowVO gWindowVO = AEnv.getMWindowVO(adWindowContent.getWindowNo(), AD_Window_ID, 0);
-        if (gWindowVO == null)
-        {
-        	isAccessEditRecord = false;
-        }
+		MRole role = MRole.getDefault(Env.getCtx(), false);
+		final Boolean windowAccess = role.getWindowAccess(AD_Window_ID);
+		if(windowAccess == null)
+		{
+			isAccessEditRecord = false;
+		}
 
 
 
@@ -114,7 +120,6 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
     	this.appendChild(div);
 
     	//Attchment Button
-    	Button btnAttachment = new Button();
         btnAttachment.setAttribute("name","btnAttachment");
         btnAttachment.setSclass("img-btn");
         if (ThemeManager.isUseFontIconForImage())
@@ -131,7 +136,6 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
 
     	//DownLoad Button
-        Button btnExport = new Button();
     	btnExport.setAttribute("name","btnExport");
     	btnExport.setSclass("img-btn");
         if (ThemeManager.isUseFontIconForImage())
@@ -149,7 +153,6 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
     	//Zoom Across Button
         if(isAccessEditRecord)
         {
-	        Button btnZoomAcross = new Button();
 	        btnZoomAcross.setSclass("img-btn");
 	    	btnZoomAcross.setAttribute("name","btnZoomAcross");
 	        if (ThemeManager.isUseFontIconForImage() && isAccessEditRecord)
@@ -217,14 +220,23 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 
 	        grid.setModel(listModel);
 
-	        JPiereAttachmntFileRecordRenderer renderer = new JPiereAttachmntFileRecordRenderer(listModel,isAccessEditRecord);
+	        JPiereAttachmntFileRecordRenderer renderer = new JPiereAttachmntFileRecordRenderer(listModel,isAccessEditRecord, this);
 
 	        grid.setRowRenderer(renderer);
 	        grid.setMold("paging");
 	        int pageSize = MSysConfig.getIntValue("JPIERE_ATTACHMENT_FILE_RECORD_PAGING_SIZE", DEFAULT_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
 	        grid.setPageSize(pageSize);
 
+	        if(attachmentFileRecordList.size() == 0)
+	        {
+	        	btnExport.setDisabled(true);
+				if(isAccessEditRecord)
+		        {
+					btnZoomAcross.setDisabled(true);
+		        }
+	        }
 		}
+
 	}
 
 
@@ -276,7 +288,25 @@ public class JPiereAttchmentBaseWindow extends Window implements EventListener<E
 							if(grid != null)
 							{
 								grid.setModel(listModel);
-								//grid.renderAll();
+
+
+						        if(attachmentFileRecordList.size() == 0)
+						        {
+						        	btnExport.setDisabled(true);
+									if(isAccessEditRecord)
+							        {
+										btnZoomAcross.setDisabled(true);
+							        }
+
+						        }else {
+
+						        	btnExport.setDisabled(false);
+									if(isAccessEditRecord)
+							        {
+										btnZoomAcross.setDisabled(false);
+							        }
+						        }
+
 							}
 
 						}

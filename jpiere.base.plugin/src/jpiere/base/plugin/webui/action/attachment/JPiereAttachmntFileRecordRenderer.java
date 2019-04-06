@@ -61,6 +61,8 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 	private static List<String> autoPreviewList;
 	private Boolean isAccessEditRecord = false;
 
+	private JPiereAttchmentBaseWindow baseWindow;
+
 	static {
 		autoPreviewList = new ArrayList<String>();
 		autoPreviewList.add("image/jpeg");
@@ -71,10 +73,11 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 		autoPreviewList.add("text/html");
 	}
 
-	public JPiereAttachmntFileRecordRenderer(JPiereAttachmentFileRecordListModel listModel, Boolean isAccessEditRecord)
+	public JPiereAttachmntFileRecordRenderer(JPiereAttachmentFileRecordListModel listModel, Boolean isAccessEditRecord, JPiereAttchmentBaseWindow baseWindow)
 	{
 		this.listModel = listModel;
 		this.isAccessEditRecord = isAccessEditRecord;
+		this.baseWindow = baseWindow;
 	}
 
 	@Override
@@ -420,7 +423,23 @@ public class JPiereAttachmntFileRecordRenderer implements RowRenderer<Object[]> 
 						JPiereAttachmentFileRecordGridTable AFRGridTable= new JPiereAttachmentFileRecordGridTable(attachmentFileRecordList,adWindow);
 						JPiereAttachmentFileRecordListModel listModel = new JPiereAttachmentFileRecordListModel(AFRGridTable);
 						grid.setModel(listModel);
-//						grid.renderAll();
+				        if(attachmentFileRecordList.size() == 0)
+				        {
+				        	baseWindow.btnExport.setDisabled(true);
+							if(isAccessEditRecord)
+					        {
+								baseWindow.btnZoomAcross.setDisabled(true);
+					        }
+
+				        }else {
+
+				        	baseWindow.btnExport.setDisabled(false);
+							if(isAccessEditRecord)
+					        {
+								baseWindow.btnZoomAcross.setDisabled(false);
+					        }
+				        }
+
 
 					}
 
