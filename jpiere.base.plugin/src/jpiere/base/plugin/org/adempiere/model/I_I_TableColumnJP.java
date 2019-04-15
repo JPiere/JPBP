@@ -77,6 +77,15 @@ public interface I_I_TableColumnJP
 
 	public org.compiere.model.I_AD_Column getAD_Column() throws RuntimeException;
 
+    /** Column name AD_Column_UU */
+    public static final String COLUMNNAME_AD_Column_UU = "AD_Column_UU";
+
+	/** Set AD_Column_UU	  */
+	public void setAD_Column_UU (String AD_Column_UU);
+
+	/** Get AD_Column_UU	  */
+	public String getAD_Column_UU();
+
     /** Column name AD_Element_ID */
     public static final String COLUMNNAME_AD_Element_ID = "AD_Element_ID";
 
@@ -91,6 +100,24 @@ public interface I_I_TableColumnJP
 	public int getAD_Element_ID();
 
 	public org.compiere.model.I_AD_Element getAD_Element() throws RuntimeException;
+
+    /** Column name AD_Element_Trl_UU */
+    public static final String COLUMNNAME_AD_Element_Trl_UU = "AD_Element_Trl_UU";
+
+	/** Set AD_Element_Trl_UU	  */
+	public void setAD_Element_Trl_UU (String AD_Element_Trl_UU);
+
+	/** Get AD_Element_Trl_UU	  */
+	public String getAD_Element_Trl_UU();
+
+    /** Column name AD_Element_UU */
+    public static final String COLUMNNAME_AD_Element_UU = "AD_Element_UU";
+
+	/** Set AD_Element_UU	  */
+	public void setAD_Element_UU (String AD_Element_UU);
+
+	/** Get AD_Element_UU	  */
+	public String getAD_Element_UU();
 
     /** Column name AD_Language */
     public static final String COLUMNNAME_AD_Language = "AD_Language";
@@ -177,6 +204,15 @@ public interface I_I_TableColumnJP
 	public int getAD_Table_ID();
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
+
+    /** Column name AD_Table_UU */
+    public static final String COLUMNNAME_AD_Table_UU = "AD_Table_UU";
+
+	/** Set AD_Table_UU	  */
+	public void setAD_Table_UU (String AD_Table_UU);
+
+	/** Get AD_Table_UU	  */
+	public String getAD_Table_UU();
 
     /** Column name AD_Val_Rule_ID */
     public static final String COLUMNNAME_AD_Val_Rule_ID = "AD_Val_Rule_ID";

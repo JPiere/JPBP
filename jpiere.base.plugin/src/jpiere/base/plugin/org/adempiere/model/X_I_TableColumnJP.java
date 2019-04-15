@@ -32,7 +32,7 @@ public class X_I_TableColumnJP extends PO implements I_I_TableColumnJP, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190414L;
+	private static final long serialVersionUID = 20190415L;
 
     /** Standard Constructor */
     public X_I_TableColumnJP (Properties ctx, int I_TableColumnJP_ID, String trxName)
@@ -125,6 +125,20 @@ public class X_I_TableColumnJP extends PO implements I_I_TableColumnJP, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set AD_Column_UU.
+		@param AD_Column_UU AD_Column_UU	  */
+	public void setAD_Column_UU (String AD_Column_UU)
+	{
+		set_Value (COLUMNNAME_AD_Column_UU, AD_Column_UU);
+	}
+
+	/** Get AD_Column_UU.
+		@return AD_Column_UU	  */
+	public String getAD_Column_UU () 
+	{
+		return (String)get_Value(COLUMNNAME_AD_Column_UU);
+	}
+
 	public org.compiere.model.I_AD_Element getAD_Element() throws RuntimeException
     {
 		return (org.compiere.model.I_AD_Element)MTable.get(getCtx(), org.compiere.model.I_AD_Element.Table_Name)
@@ -151,6 +165,34 @@ public class X_I_TableColumnJP extends PO implements I_I_TableColumnJP, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set AD_Element_Trl_UU.
+		@param AD_Element_Trl_UU AD_Element_Trl_UU	  */
+	public void setAD_Element_Trl_UU (String AD_Element_Trl_UU)
+	{
+		set_Value (COLUMNNAME_AD_Element_Trl_UU, AD_Element_Trl_UU);
+	}
+
+	/** Get AD_Element_Trl_UU.
+		@return AD_Element_Trl_UU	  */
+	public String getAD_Element_Trl_UU () 
+	{
+		return (String)get_Value(COLUMNNAME_AD_Element_Trl_UU);
+	}
+
+	/** Set AD_Element_UU.
+		@param AD_Element_UU AD_Element_UU	  */
+	public void setAD_Element_UU (String AD_Element_UU)
+	{
+		set_Value (COLUMNNAME_AD_Element_UU, AD_Element_UU);
+	}
+
+	/** Get AD_Element_UU.
+		@return AD_Element_UU	  */
+	public String getAD_Element_UU () 
+	{
+		return (String)get_Value(COLUMNNAME_AD_Element_UU);
 	}
 
 	/** AD_Language AD_Reference_ID=106 */
@@ -283,6 +325,20 @@ public class X_I_TableColumnJP extends PO implements I_I_TableColumnJP, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set AD_Table_UU.
+		@param AD_Table_UU AD_Table_UU	  */
+	public void setAD_Table_UU (String AD_Table_UU)
+	{
+		set_Value (COLUMNNAME_AD_Table_UU, AD_Table_UU);
+	}
+
+	/** Get AD_Table_UU.
+		@return AD_Table_UU	  */
+	public String getAD_Table_UU () 
+	{
+		return (String)get_Value(COLUMNNAME_AD_Table_UU);
 	}
 
 	public org.compiere.model.I_AD_Val_Rule getAD_Val_Rule() throws RuntimeException

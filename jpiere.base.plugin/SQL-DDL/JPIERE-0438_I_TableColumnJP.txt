@@ -19,6 +19,7 @@ CREATE TABLE adempiere.I_TableColumnJP
 
   --Table---
   AD_Table_ID numeric(10,0),
+  AD_Table_UU character varying(36) DEFAULT NULL::character varying,
   TableName character varying(40),
   JP_Table_Name character varying(60),
   JP_Table_Description character varying(255),
@@ -37,6 +38,7 @@ CREATE TABLE adempiere.I_TableColumnJP
 
   --Element--
   AD_Element_ID numeric(10,0),
+  AD_Element_UU character varying(36) DEFAULT NULL::character varying,
   JP_Element_EntityType character varying(40),
   ColumnName character varying(30),
   JP_Element_Name character varying(60),
@@ -51,6 +53,7 @@ CREATE TABLE adempiere.I_TableColumnJP
 
   --Element Trl--
   AD_Language character varying(6),
+  AD_Element_Trl_UU character varying(36) DEFAULT NULL::character varying,
   JP_Element_Trl_Name character varying(60),
   JP_Element_Trl_PrintName character varying(60),
   JP_Element_Trl_Description character varying(255),
@@ -63,6 +66,7 @@ CREATE TABLE adempiere.I_TableColumnJP
 
   --Column--
   AD_Column_ID numeric(10,0),
+  AD_Column_UU character varying(36) DEFAULT NULL::character varying,
   JP_Column_EntityType character varying(40),
   JP_Column_Name character varying(60),
   JP_Column_Description character varying(255),

@@ -382,6 +382,12 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		{
 			element = new M_Element(getCtx(), 0, get_TrxName());
 			element.setColumnName(impData.getColumnName());
+			if(!Util.isEmpty(impData.getAD_Element_UU()))
+			{
+				element.setAD_Element_UU(impData.getAD_Element_UU());
+			}
+
+
 			if(Util.isEmpty(impData.getJP_Element_Name()))
 			{
 				element.setName(element.getColumnName());
@@ -470,6 +476,12 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 				DB.close(rs, pstmt);
 				rs = null; pstmt = null;
 			}
+		}
+
+		if(!Util.isEmpty(impData.getAD_Element_UU()) && !impData.getAD_Element_UU().equals(element.getAD_Element_UU()))
+		{
+			element.setAD_Element_UU(impData.getAD_Element_UU());
+			isUpdate = true;
 		}
 
 		if(!Util.isEmpty(impData.getJP_Element_Name()) && !impData.getJP_Element_Name().equals(element.getName()))
@@ -567,9 +579,19 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		StringBuilder sql = new StringBuilder("UPDATE AD_Element_Trl SET ");
 		int i = 0;
 
+
 		if(!Util.isEmpty(impData.getJP_Element_Trl_Name()) && !impData.getJP_Element_Trl_Name().equals(element.get_Translation("Name")) )
 		{
 			sql = sql.append("Name='").append(impData.getJP_Element_Trl_Name()).append("'");
+			isUpdate = true;
+			i++;
+		}
+
+		if(!Util.isEmpty(impData.getAD_Element_Trl_UU()))
+		{
+			if(i > 0)
+				sql = sql.append(",");
+			sql = sql.append("AD_Element_Trl_UU='").append(impData.getAD_Element_Trl_UU()).append("'");
 			isUpdate = true;
 			i++;
 		}
@@ -683,6 +705,9 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		MTable table = new MTable(getCtx(), 0, get_TrxName());
 		table.setTableName(imp.getTableName());
 
+		if(!Util.isEmpty(imp.getAD_Table_UU()))
+			table.setAD_Table_UU(imp.getAD_Table_UU());
+
 		if(Util.isEmpty(imp.getJP_Table_Name()))
 		{
 			table.setName(imp.getTableName());
@@ -763,6 +788,12 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 	{
 		MTable table = new MTable(getCtx(), imp.getAD_Table_ID(), get_TrxName());
 		boolean isUpdate = false;
+
+		if(!Util.isEmpty(imp.getAD_Table_UU()) && !imp.getAD_Table_UU().equals(table.getAD_Table_UU()))
+		{
+			table.setAD_Table_UU(imp.getAD_Table_UU());
+			isUpdate = true;
+		}
 
 		if(!Util.isEmpty(imp.getJP_Table_Name()) && !imp.getJP_Table_Name().equals(table.getName()))
 		{
@@ -871,13 +902,20 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			column.setAD_Element_ID(impData.getAD_Element_ID());
 		}
 
+		//UU
+		if(!Util.isEmpty(impData.getAD_Column_UU()) && !impData.getAD_Column_UU().equals(column.getAD_Column_UU()))
+		{
+			column.setAD_Column_UU(impData.getAD_Column_UU());
+			isUpdate = true;
+		}
+
 		//Name
 		if(column.getAD_Column_ID() == 0 && Util.isEmpty(impData.getJP_Column_Name())) //New Record
 		{
 			column.setName(impData.getAD_Element().getName());
 
-		}else if(!Util.isEmpty(impData.getJP_Column_Name()) && !impData.getJP_Column_Name().equals(column.getName()) )
-		{
+		}else if(!Util.isEmpty(impData.getJP_Column_Name()) && !impData.getJP_Column_Name().equals(column.getName()) ){
+
 			column.setName(impData.getJP_Column_Name());
 			isUpdate = true;
 		}
