@@ -20,17 +20,20 @@ import java.util.logging.Level;
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
+import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MColumn;
 import org.compiere.model.MEntityType;
 import org.compiere.model.MLanguage;
 import org.compiere.model.MTable;
 import org.compiere.model.M_Element;
 import org.compiere.model.ModelValidationEngine;
+import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.X_I_TableColumnJP;
@@ -319,6 +322,8 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 				impData.saveEx(get_TrxName());
 
+				commitEx();
+
 			}//while (rs.next())
 
 		}catch (Exception e){
@@ -330,7 +335,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			pstmt = null;
 		}
 
-		return records + recordsNum + "( "+  success + " : " + successNum + "  /  " +  failure + " : " + failureNum + " ) + ";
+		return records + recordsNum + "( "+  success + " : " + successNum + "  /  " +  failure + " : " + failureNum + " )";
 
 	}	//	doIt
 
@@ -840,6 +845,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 	{
 		MColumn column = null;
 		boolean isUpdate = false;
+		boolean isColumnSync = false;
 
 		if(impData.getAD_Column_ID() > 0)
 		{
@@ -847,6 +853,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}else {
 			column = new MColumn(getCtx(), 0 , get_TrxName());
 			isUpdate = true;
+			isColumnSync = true;
 
 			if(impData.getAD_Element_ID() == 0)
 			{
@@ -858,8 +865,11 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			}
 		}
 
-		column.setAD_Table_ID(impData.getAD_Table_ID());
-		column.setAD_Element_ID(impData.getAD_Element_ID());
+		if(column.getAD_Column_ID() == 0)
+		{
+			column.setAD_Table_ID(impData.getAD_Table_ID());
+			column.setAD_Element_ID(impData.getAD_Element_ID());
+		}
 
 		//Name
 		if(column.getAD_Column_ID() == 0 && Util.isEmpty(impData.getJP_Column_Name())) //New Record
@@ -901,7 +911,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//Version
-		if(impData.getVersion() != null && impData.getVersion() != column.getVersion())
+		if(impData.getVersion() != null && impData.getVersion().compareTo(Env.ZERO) != 0 && impData.getVersion() != column.getVersion())
 		{
 			column.setVersion(impData.getVersion());
 			isUpdate = true;
@@ -938,10 +948,11 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//FieldLength
-		if(impData.getFieldLength() != column.getFieldLength())
+		if(impData.getFieldLength() !=0 && impData.getFieldLength() != column.getFieldLength())
 		{
 			column.setFieldLength(impData.getFieldLength());
 			isUpdate = true;
+			isColumnSync = true;
 		}
 
 		//IsKey
@@ -963,6 +974,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		{
 			column.setIsMandatory("Y".equals(impData.getIsMandatory()));
 			isUpdate = true;
+			isColumnSync = true;
 		}
 
 		//IsUpdateable
@@ -987,7 +999,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//SeqNo
-		if(impData.getSeqNo() != column.getSeqNo())
+		if(impData.getSeqNo() != 0 && impData.getSeqNo() != column.getSeqNo())
 		{
 			column.setSeqNo(impData.getSeqNo());
 			isUpdate = true;
@@ -1001,7 +1013,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//SeqNoSelection
-		if(impData.getSeqNoSelection() != column.getSeqNoSelection())
+		if(impData.getSeqNoSelection() != 0  && impData.getSeqNoSelection() != column.getSeqNoSelection())
 		{
 			column.setSeqNoSelection(impData.getSeqNoSelection());
 			isUpdate = true;
@@ -1075,6 +1087,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		{
 			column.setFKConstraintType(impData.getFKConstraintType());
 			isUpdate = true;
+			isColumnSync = true;
 		}
 
 		//Placeholder
@@ -1190,6 +1203,21 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		if(impData.getAD_Column_ID() == 0)
 			impData.setAD_Column_ID(column.getAD_Column_ID());
+
+		if(isColumnSync)
+		{
+			ProcessInfo pi = new ProcessInfo("Synchronize Column", 0);
+			pi.setClassName("org.compiere.process.ColumnSync");
+			pi.setAD_Client_ID(getAD_Client_ID());
+			pi.setAD_User_ID(getAD_User_ID());
+			pi.setAD_PInstance_ID(getAD_PInstance_ID());
+			pi.setRecord_ID(column.getAD_Column_ID());
+			boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI);
+			if(!success)
+			{
+				impData.setI_ErrorMsg(Msg.getMsg(getCtx(),"ProcessFailed") + " : Synchronize Column");
+			}
+		}
 
 		return true;
 	}
