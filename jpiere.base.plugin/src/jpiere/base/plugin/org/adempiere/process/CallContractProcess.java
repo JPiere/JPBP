@@ -717,7 +717,7 @@ public class CallContractProcess extends SvrProcess {
 	private ArrayList<MContract> getContractStatusUpdateList() throws Exception //TODO
 	{
 		ArrayList<MContract> list = new ArrayList<MContract>();
-		final StringBuilder sql = new StringBuilder("SELECT * FROM JP_Contract c")
+		final StringBuilder sql = new StringBuilder("SELECT c.* FROM JP_Contract c")
 										.append(" INNER JOIN JP_ContractCategory cc ON (c.JP_ContractCategory_ID=cc.JP_ContractCategory_ID) ")
 										.append(" LEFT OUTER JOIN JP_ContractCategoryL1 l1 ON (cc.JP_ContractCategoryL1_ID=l1.JP_ContractCategoryL1_ID) ")
 										.append(" WHERE c.DocStatus = 'CO' AND c.JP_ContractStatus IN ('PR' ,'UC') ");
