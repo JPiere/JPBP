@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="JPiereAttachmentStoreFileSystem">
+   <implementation class="jpiere.base.plugin.webui.action.attachment.JPiereAttachmentFileSystem"/>
+   <service>
+      <provide interface="jpiere.base.plugin.webui.action.attachment.IJPiereAttachmentStore"/>
+   </service>
+   <property name="method" type="String" value="FileSystem"/>
+</scr:component>

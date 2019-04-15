@@ -14,22 +14,18 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  zkbind;bundle-version="8.0.1",
  zkplus;bundle-version="8.0.1",
  zul;bundle-version="8.0.1",
- zweb;bundle-version="8.0.1"
+ zweb;bundle-version="8.0.1",
+ org.apache.ant,
+ slf4j.api;bundle-version="1.7.25"
 Bundle-Activator: org.adempiere.plugin.utils.AdempiereActivator
 Bundle-Vendor: OSS ERP Solutions
-Import-Package: org.compiere.apps,
+Import-Package: org.apache.tools.ant.taskdefs;version="1.10.5",
+ org.compiere.apps,
  org.compiere.apps.form,
  org.compiere.grid,
  org.compiere.minigrid,
  org.compiere.model
-Service-Component: OSGI-INF/JPiereBasePluginFormFactory.xml,
- OSGI-INF/JPiereBasePluginTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginModelValidatorFactory.xml,
- OSGI-INF/JPiereBasePluginDocFactory.xml,OSGI-INF/JPiereBasePluginModelFactory.xml,OSGI-INF/JPiereBasePluginEditorFactory.xml,
- OSGI-INF/JPiereBasePluginDisplayTypeFactory.xml,OSGI-INF/JPiereBasePluginCreateFromFactory.xml,
- OSGI-INF/JPiereBasePluginColumnCalloutFactory.xml,OSGI-INF/JPiereBasePluginProcessFactory.xml,
- OSGI-INF/JPiereBasePluginJPiereTaxProviderFactory.xml,OSGI-INF/JPiereBasePluginInfoFactory.xml,
- OSGI-INF/JPiereBasePluginCreateBillFactory.xml,OSGI-INF/JPiereBasePluginContractOrderWindowValidator.xml,OSGI-INF/JPiereBasePluginContractInvoiceWindowValidator.xml,OSGI-INF/JPiereBasePluginContractRecognitionWindowValidator.xml,OSGI-INF/JPiereBasePluginContractInOutWindowValidator.xml,OSGI-INF/JPiereBasePluginContractDocumentWindowValidator.xml,
- OSGI-INF/JPiereBasePluginProductPricingFactory.xml
+Service-Component: OSGI-INF/*.xml
 Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
  jpiere.base.plugin.org.adempiere.model,
