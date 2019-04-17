@@ -1,5 +1,5 @@
 /******************************************************************************
- * Product: JPiere                                                            *
+AD_Org (Trx) * Product: JPiere                                                            *
  * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
  *                                                                            *
  * This program is free software, you can redistribute it and/or modify it    *
@@ -31,6 +31,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
@@ -210,7 +211,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		//
 		sql = new StringBuilder ("SELECT * FROM I_TableColumnJP WHERE I_IsImported='N'")
-					.append(clientCheck).append(" ORDER BY TableName,ColumnName ");
+					.append(clientCheck).append(" ORDER BY AD_Table_ID,TableName, AD_Column_ID, ColumnName ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -275,6 +276,8 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 						insertTable(impData);
 						preTableName = impData.getTableName();
 						preAD_Table_ID = impData.getAD_Table_ID();
+					}else {
+						impData.setAD_Table_ID(preAD_Table_ID);
 					}
 
 				}else if(impData.getAD_Table_ID() > 0){
@@ -1244,12 +1247,23 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		if(isColumnSync)
 		{
+			if(impData.getAD_Table().isView())
+				return true;
+
+			if(!Util.isEmpty(column.getColumnSQL()))
+				return true;
+
+			if(column.getAD_Reference_ID() == DisplayType.Chart)
+				return true;
+
 			ProcessInfo pi = new ProcessInfo("Synchronize Column", 0);
 			pi.setClassName("org.compiere.process.ColumnSync");
 			pi.setAD_Client_ID(getAD_Client_ID());
 			pi.setAD_User_ID(getAD_User_ID());
 			pi.setAD_PInstance_ID(getAD_PInstance_ID());
 			pi.setRecord_ID(column.getAD_Column_ID());
+			ProcessInfoParameter[] pars = new ProcessInfoParameter[0];
+			pi.setParameter(pars);
 			boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI);
 			if(!success)
 			{
