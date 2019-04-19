@@ -360,27 +360,33 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 	private boolean createElement(X_I_TableColumnJP impData)
 	{
 		M_Element element = null;
-		final String sql = "SELECT * FROM AD_Element WHERE AD_Element_ID=? ";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
+
+		if(impData.getAD_Element_ID() == 0)
 		{
-			pstmt = DB.prepareStatement(sql, get_TrxName());
-			pstmt.setInt(1, impData.getAD_Element_ID());
-			rs = pstmt.executeQuery();
-			if (rs.next())
+			final String sql = "SELECT * FROM AD_Element WHERE ColumnName=? ";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
 			{
-				element = new M_Element(getCtx(), rs, get_TrxName());
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setString(1, impData.getColumnName());
+				rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					element = new M_Element(getCtx(), rs, get_TrxName());
+				}
 			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null; pstmt = null;
+			}
+		}else {
+			element = new M_Element(getCtx(), impData.getAD_Element_ID(), get_TrxName());
 		}
 
 		if(element == null)
@@ -420,14 +426,14 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 				element.setEntityType("U");
 			}else {
 
-				MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Table_EntityType());
+				MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Element_EntityType());
 				if(entityTye == null)
 				{
 					element.setEntityType("U");
 				}else if(entityTye.getAD_EntityType_ID() == 0) {
 					element.setEntityType("U");
 				}else {
-					element.setEntityType(impData.getJP_Table_EntityType());
+					element.setEntityType(impData.getJP_Element_EntityType());
 				}
 			}
 
@@ -601,6 +607,24 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}else if(!Util.isEmpty(impData.getJP_Element_Placeholder()) && !impData.getJP_Element_Placeholder().equals(element.getPlaceholder())){
 			element.setPlaceholder(impData.getJP_Element_Placeholder());
 			isUpdate = true;
+		}
+
+		//Entity Type
+		if(!Util.isEmpty(impData.getJP_Element_EntityType()) && !impData.getJP_Element_EntityType().equals(element.getEntityType()))
+		{
+			if(!("D").equals(element.getEntityType()))
+			{
+				MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Element_EntityType());
+				if(entityTye == null)
+				{
+					;
+				}else if(entityTye.getAD_EntityType_ID() == 0) {
+					;
+				}else {
+					element.setEntityType(impData.getJP_Element_EntityType());
+					isUpdate = true;
+				}
+			}
 		}
 
 		if(isUpdate)
@@ -1050,6 +1074,24 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}else if(imp.getPO_Window_ID() > 0 && imp.getPO_Window_ID() != table.getPO_Window_ID()){
 			table.setPO_Window_ID(imp.getPO_Window_ID());
 			isUpdate = true;
+		}
+
+		//Entity Type
+		if(!Util.isEmpty(imp.getJP_Table_EntityType()) && !imp.getJP_Table_EntityType().equals(table.getEntityType()))
+		{
+			if(!("D").equals(table.getEntityType()))
+			{
+				MEntityType entityTye = MEntityType.get(getCtx(), imp.getJP_Table_EntityType());
+				if(entityTye == null)
+				{
+					;
+				}else if(entityTye.getAD_EntityType_ID() == 0) {
+					;
+				}else {
+					table.setEntityType(imp.getJP_Table_EntityType());
+					isUpdate = true;
+				}
+			}
 		}
 
 		if(isUpdate)
@@ -1568,6 +1610,25 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 					column.setEntityType("U");
 				}else {
 					column.setEntityType(impData.getJP_Column_EntityType());
+				}
+			}
+		}else {
+
+			if(!Util.isEmpty(impData.getJP_Column_EntityType()) && !impData.getJP_Column_EntityType().equals(column.getEntityType()))
+			{
+				if(!("D").equals(column.getEntityType()))
+				{
+
+					MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Column_EntityType());
+					if(entityTye == null)
+					{
+						;
+					}else if(entityTye.getAD_EntityType_ID() == 0) {
+						;
+					}else {
+						column.setEntityType(impData.getJP_Column_EntityType());
+						isUpdate = true;
+					}
 				}
 			}
 		}
