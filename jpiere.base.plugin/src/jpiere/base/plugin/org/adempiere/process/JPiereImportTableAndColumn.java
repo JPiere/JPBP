@@ -1,5 +1,5 @@
 /******************************************************************************
- * Product: JPiere                                                            *
+AD_Org (Trx) * Product: JPiere                                                            *
  * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
  *                                                                            *
  * This program is free software, you can redistribute it and/or modify it    *
@@ -31,6 +31,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
@@ -57,6 +58,8 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 	private IProcessUI processMonitor = null;
 
 	private String message = null;
+
+	private static String BLANK = "blank";
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -210,7 +213,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		//
 		sql = new StringBuilder ("SELECT * FROM I_TableColumnJP WHERE I_IsImported='N'")
-					.append(clientCheck).append(" ORDER BY TableName,ColumnName ");
+					.append(clientCheck).append(" ORDER BY AD_Table_ID,TableName, AD_Column_ID, ColumnName ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int recordsNum = 0;
@@ -275,6 +278,8 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 						insertTable(impData);
 						preTableName = impData.getTableName();
 						preAD_Table_ID = impData.getAD_Table_ID();
+					}else {
+						impData.setAD_Table_ID(preAD_Table_ID);
 					}
 
 				}else if(impData.getAD_Table_ID() > 0){
@@ -355,27 +360,33 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 	private boolean createElement(X_I_TableColumnJP impData)
 	{
 		M_Element element = null;
-		final String sql = "SELECT * FROM AD_Element WHERE AD_Element_ID=? ";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
+
+		if(impData.getAD_Element_ID() == 0)
 		{
-			pstmt = DB.prepareStatement(sql, get_TrxName());
-			pstmt.setInt(1, impData.getAD_Element_ID());
-			rs = pstmt.executeQuery();
-			if (rs.next())
+			final String sql = "SELECT * FROM AD_Element WHERE ColumnName=? ";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
 			{
-				element = new M_Element(getCtx(), rs, get_TrxName());
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setString(1, impData.getColumnName());
+				rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					element = new M_Element(getCtx(), rs, get_TrxName());
+				}
 			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null; pstmt = null;
+			}
+		}else {
+			element = new M_Element(getCtx(), impData.getAD_Element_ID(), get_TrxName());
 		}
 
 		if(element == null)
@@ -388,6 +399,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			}
 
 
+			//Name(Mandatory)
 			if(Util.isEmpty(impData.getJP_Element_Name()))
 			{
 				element.setName(element.getColumnName());
@@ -395,6 +407,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 				element.setName(impData.getJP_Element_Name());
 			}
 
+			//PrintName(Mandatory)
 			if(Util.isEmpty(impData.getJP_Element_PrintName()))
 			{
 				element.setPrintName(element.getName());
@@ -413,14 +426,14 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 				element.setEntityType("U");
 			}else {
 
-				MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Table_EntityType());
+				MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Element_EntityType());
 				if(entityTye == null)
 				{
 					element.setEntityType("U");
 				}else if(entityTye.getAD_EntityType_ID() == 0) {
 					element.setEntityType("U");
 				}else {
-					element.setEntityType(impData.getJP_Table_EntityType());
+					element.setEntityType(impData.getJP_Element_EntityType());
 				}
 			}
 
@@ -484,58 +497,134 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			isUpdate = true;
 		}
 
+		//Name(Mandatory)
 		if(!Util.isEmpty(impData.getJP_Element_Name()) && !impData.getJP_Element_Name().equals(element.getName()))
 		{
 			element.setName(impData.getJP_Element_Name());
 			isUpdate = true;
 		}
 
+		//PrintName(Mandatory)
 		if(!Util.isEmpty(impData.getJP_Element_PrintName()) && !impData.getJP_Element_PrintName().equals(element.getPrintName()))
 		{
 			element.setPrintName(impData.getJP_Element_PrintName());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Description()) && !impData.getJP_Element_Description().equals(element.getDescription()))
+		//Description
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Description()))
 		{
+			if(element.getDescription() != null)
+			{
+				element.setDescription(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Description()) && !impData.getJP_Element_Description().equals(element.getDescription())){
 			element.setDescription(impData.getJP_Element_Description());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Help()) && !impData.getJP_Element_Help().equals(element.getHelp()))
+		//Help
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Help()))
 		{
+			if(element.getHelp() != null )
+			{
+				element.setHelp(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Help()) && !impData.getJP_Element_Help().equals(element.getHelp())){
 			element.setHelp(impData.getJP_Element_Help());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_PO_Name()) && !impData.getJP_Element_PO_Name().equals(element.getPO_Name()))
+		//PO_Name
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_PO_Name()))
 		{
+			if(element.getPO_Name() != null )
+			{
+				element.setPO_Name(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_PO_Name()) && !impData.getJP_Element_PO_Name().equals(element.getPO_Name())){
 			element.setPO_Name(impData.getJP_Element_PO_Name());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_PO_PrintName()) && !impData.getJP_Element_PO_PrintName().equals(element.getPO_PrintName()))
+		//PO_PrintName
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_PO_PrintName()))
 		{
+			if(element.getPO_PrintName() != null)
+			{
+				element.setPO_PrintName(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_PO_PrintName()) && !impData.getJP_Element_PO_PrintName().equals(element.getPO_PrintName())){
 			element.setPO_PrintName(impData.getJP_Element_PO_PrintName());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_PO_Description()) && !impData.getJP_Element_PO_Description().equals(element.getPO_Description()))
+		//PO_Description
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_PO_Description()))
 		{
+			if(element.getPO_Description() != null)
+			{
+				element.setPO_Description(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_PO_Description()) && !impData.getJP_Element_PO_Description().equals(element.getPO_Description())){
 			element.setPO_Description(impData.getJP_Element_PO_Description());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_PO_Help()) && !impData.getJP_Element_PO_Help().equals(element.getPO_Help()))
+		//PO_Help
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_PO_Help()))
 		{
+			if(element.getPO_Help() != null )
+			{
+				element.setPO_Help(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_PO_Help()) && !impData.getJP_Element_PO_Help().equals(element.getPO_Help())){
 			element.setPO_Help(impData.getJP_Element_PO_Help());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Placeholder()) && !impData.getJP_Element_Placeholder().equals(element.getPlaceholder()))
+		//Placeholder
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Placeholder()))
 		{
+			if(element.getPlaceholder() != null)
+			{
+				element.setPlaceholder(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Placeholder()) && !impData.getJP_Element_Placeholder().equals(element.getPlaceholder())){
 			element.setPlaceholder(impData.getJP_Element_Placeholder());
 			isUpdate = true;
+		}
+
+		//Entity Type
+		if(!Util.isEmpty(impData.getJP_Element_EntityType()) && !impData.getJP_Element_EntityType().equals(element.getEntityType()))
+		{
+			if(!("D").equals(element.getEntityType()))
+			{
+				MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Element_EntityType());
+				if(entityTye == null)
+				{
+					;
+				}else if(entityTye.getAD_EntityType_ID() == 0) {
+					;
+				}else {
+					element.setEntityType(impData.getJP_Element_EntityType());
+					isUpdate = true;
+				}
+			}
 		}
 
 		if(isUpdate)
@@ -580,6 +669,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		int i = 0;
 
 
+		//Name(Mandatory)
 		if(!Util.isEmpty(impData.getJP_Element_Trl_Name()) && !impData.getJP_Element_Trl_Name().equals(element.get_Translation("Name")) )
 		{
 			sql = sql.append("Name='").append(impData.getJP_Element_Trl_Name()).append("'");
@@ -587,6 +677,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
+		//AD_Element_Trl_UU
 		if(!Util.isEmpty(impData.getAD_Element_Trl_UU()))
 		{
 			if(i > 0)
@@ -596,6 +687,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
+		//PrintName(Mandatory)
 		if(!Util.isEmpty(impData.getJP_Element_Trl_PrintName()) && !impData.getJP_Element_Trl_PrintName().equals(element.get_Translation("PrintName")))
 		{
 			if(i > 0)
@@ -605,8 +697,21 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Trl_Description()) && !impData.getJP_Element_Trl_Description().equals(element.get_Translation("Description")))
+
+		//Description
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Trl_Description()))
 		{
+			if(!Util.isEmpty(element.get_Translation("Description",impData.getAD_Language(),true,false)))
+			{
+				if(i > 0)
+					sql = sql.append(",");
+				sql = sql.append("Description=null");
+				isUpdate = true;
+				i++;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Trl_Description()) && !impData.getJP_Element_Trl_Description().equals(element.get_Translation("Description"))){
+
 			if(i > 0)
 				sql = sql.append(",");
 			sql = sql.append("Description='").append(impData.getJP_Element_Trl_Description()).append("'");
@@ -614,8 +719,20 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Trl_Help()) && !impData.getJP_Element_Trl_Help().equals(element.get_Translation("Help")))
+		//Help
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Trl_Help()))
 		{
+			if(!Util.isEmpty(element.get_Translation("Help",impData.getAD_Language(),true,false)))
+			{
+				if(i > 0)
+					sql = sql.append(",");
+				sql = sql.append("Help=null");
+				isUpdate = true;
+				i++;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Trl_Help()) && !impData.getJP_Element_Trl_Help().equals(element.get_Translation("Help"))){
+
 			if(i > 0)
 				sql = sql.append(",");
 			sql = sql.append("Help='").append(impData.getJP_Element_Trl_Help()).append("'");
@@ -623,8 +740,20 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Trl_PO_Name()) && !impData.getJP_Element_Trl_PO_Name().equals(element.get_Translation("PO_Name")))
+		//PO_Name
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Trl_PO_Name()))
 		{
+			if(!Util.isEmpty(element.get_Translation("PO_Name",impData.getAD_Language(),true,false)))
+			{
+				if(i > 0)
+					sql = sql.append(",");
+				sql = sql.append("PO_Name=null");
+				isUpdate = true;
+				i++;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Trl_PO_Name()) && !impData.getJP_Element_Trl_PO_Name().equals(element.get_Translation("PO_Name"))){
+
 			if(i > 0)
 				sql = sql.append(",");
 			sql = sql.append("PO_Name='").append(impData.getJP_Element_Trl_PO_Name()).append("'");
@@ -632,8 +761,20 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Trl_PO_PrintName()) && !impData.getJP_Element_Trl_PO_PrintName().equals(element.get_Translation("PO_PrintName")))
+		//PO_PrintName
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Trl_PO_PrintName()))
 		{
+			if(!Util.isEmpty(element.get_Translation("PO_PrintName",impData.getAD_Language(),true,false)))
+			{
+				if(i > 0)
+					sql = sql.append(",");
+				sql = sql.append("PO_PrintName=null");
+				isUpdate = true;
+				i++;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Trl_PO_PrintName()) && !impData.getJP_Element_Trl_PO_PrintName().equals(element.get_Translation("PO_PrintName"))){
+
 			if(i > 0)
 				sql = sql.append(",");
 			sql = sql.append("PO_PrintName='").append(impData.getJP_Element_Trl_PO_PrintName()).append("'");
@@ -641,8 +782,20 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Trl_PO_Description()) && !impData.getJP_Element_Trl_PO_Description().equals(element.get_Translation("PO_Description")))
+		//PO_Description
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Trl_PO_Description()))
 		{
+			if(!Util.isEmpty(element.get_Translation("PO_Description",impData.getAD_Language(),true,false)))
+			{
+				if(i > 0)
+					sql = sql.append(",");
+				sql = sql.append("PO_Description=null");
+				isUpdate = true;
+				i++;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Trl_PO_Description()) && !impData.getJP_Element_Trl_PO_Description().equals(element.get_Translation("PO_Description"))){
+
 			if(i > 0)
 				sql = sql.append(",");
 			sql = sql.append("PO_Description='").append(impData.getJP_Element_Trl_PO_Description()).append("'");
@@ -650,8 +803,20 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Trl_PO_Help()) && !impData.getJP_Element_Trl_PO_Help().equals(element.get_Translation("PO_Help")))
+		//PO_Help
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Trl_PO_Help()))
 		{
+			if(!Util.isEmpty(element.get_Translation("PO_Help",impData.getAD_Language(),true,false)))
+			{
+				if(i > 0)
+					sql = sql.append(",");
+				sql = sql.append("PO_Help=null");
+				isUpdate = true;
+				i++;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Trl_PO_Help()) && !impData.getJP_Element_Trl_PO_Help().equals(element.get_Translation("PO_Help"))){
+
 			if(i > 0)
 				sql = sql.append(",");
 			sql = sql.append("PO_Help='").append(impData.getJP_Element_Trl_PO_Help()).append("'");
@@ -659,8 +824,21 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			i++;
 		}
 
-		if(!Util.isEmpty(impData.getJP_Element_Trl_Placeholder()) && !impData.getJP_Element_Trl_Placeholder().equals(element.get_Translation("Placeholder")))
+
+		//PO_Help
+		if(BLANK.equalsIgnoreCase(impData.getJP_Element_Trl_PO_Help()))
 		{
+			if(!Util.isEmpty(element.get_Translation("Placeholder",impData.getAD_Language(),true,false)))
+			{
+				if(i > 0)
+					sql = sql.append(",");
+				sql = sql.append("Placeholder=null");
+				isUpdate = true;
+				i++;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Element_Trl_Placeholder()) && !impData.getJP_Element_Trl_Placeholder().equals(element.get_Translation("Placeholder"))){
+
 			if(i > 0)
 				sql = sql.append(",");
 			sql = sql.append("Placeholder='").append(impData.getJP_Element_Trl_PO_Help()).append("'");
@@ -705,9 +883,11 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		MTable table = new MTable(getCtx(), 0, get_TrxName());
 		table.setTableName(imp.getTableName());
 
+		//AD_Table_UU
 		if(!Util.isEmpty(imp.getAD_Table_UU()))
 			table.setAD_Table_UU(imp.getAD_Table_UU());
 
+		//Name(Mandatory)
 		if(Util.isEmpty(imp.getJP_Table_Name()))
 		{
 			table.setName(imp.getTableName());
@@ -789,70 +969,129 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		MTable table = new MTable(getCtx(), imp.getAD_Table_ID(), get_TrxName());
 		boolean isUpdate = false;
 
+		//AD_Table_UU
 		if(!Util.isEmpty(imp.getAD_Table_UU()) && !imp.getAD_Table_UU().equals(table.getAD_Table_UU()))
 		{
 			table.setAD_Table_UU(imp.getAD_Table_UU());
 			isUpdate = true;
 		}
 
+		//Name
 		if(!Util.isEmpty(imp.getJP_Table_Name()) && !imp.getJP_Table_Name().equals(table.getName()))
 		{
 			table.setName(imp.getJP_Table_Name());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(imp.getJP_Table_Description()) && !imp.getJP_Table_Description().equals(table.getDescription()))
+		//Description
+		if(BLANK.equalsIgnoreCase(imp.getJP_Table_Description()))
 		{
+			if(table.getDescription() != null)
+			{
+				table.setDescription(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(imp.getJP_Table_Description()) && !imp.getJP_Table_Description().equals(table.getDescription())){
+
 			table.setDescription(imp.getJP_Table_Description());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(imp.getJP_Table_Help()) && !imp.getJP_Table_Help().equals(table.getHelp()))
+		//Help
+		if(BLANK.equalsIgnoreCase(imp.getJP_Table_Help()))
 		{
+			if(table.getHelp() != null)
+			{
+				table.setHelp(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(imp.getJP_Table_Help()) && !imp.getJP_Table_Help().equals(table.getHelp())){
+
 			table.setHelp(imp.getJP_Table_Help());
 			isUpdate = true;
 		}
 
-		if(!Util.isEmpty(imp.getAccessLevel()) && !imp.getAccessLevel().equals(table.getAccessLevel()))
-		{
+
+		//AccessLevel(Mandatory)
+		if(!Util.isEmpty(imp.getAccessLevel()) && !imp.getAccessLevel().equals(table.getAccessLevel())){
 			table.setAccessLevel(imp.getAccessLevel());
 			isUpdate = true;
 		}
 
+		//IsView
 		if(!Util.isEmpty(imp.getIsView()) && "Y".equals(imp.getIsView()) != table.isView())
 		{
 			table.setIsView("Y".equals(imp.getIsView()));
 			isUpdate = true;
 		}
 
+		//IsChangeLog
 		if(!Util.isEmpty(imp.getIsChangeLog()) && "Y".equals(imp.getIsChangeLog()) != table.isChangeLog())
 		{
 			table.setIsChangeLog("Y".equals(imp.getIsChangeLog()));
 			isUpdate = true;
 		}
 
+		//IsDeleteable
 		if(!Util.isEmpty(imp.getIsDeleteable()) && "Y".equals(imp.getIsDeleteable()) != table.isDeleteable())
 		{
 			table.setIsDeleteable("Y".equals(imp.getIsDeleteable()));
 			isUpdate = true;
 		}
 
+		//IsHighVolume
 		if(!Util.isEmpty(imp.getIsHighVolume()) && "Y".equals(imp.getIsHighVolume()) != table.isHighVolume())
 		{
 			table.setIsHighVolume("Y".equals(imp.getIsHighVolume()));
 			isUpdate = true;
 		}
 
-		if(imp.getAD_Window_ID() > 0 && imp.getAD_Window_ID() != table.getAD_Window_ID())
+		//AD_Window_ID
+		if(BLANK.equalsIgnoreCase(imp.getJP_Window_Name()))
 		{
+			if(table.getAD_Window_ID() > 0)
+			{
+				table.setAD_Window_ID(0);
+				isUpdate = true;
+			}
+
+		}else if(imp.getAD_Window_ID() > 0 && imp.getAD_Window_ID() != table.getAD_Window_ID()){
 			table.setAD_Window_ID(imp.getAD_Window_ID());
 			isUpdate = true;
 		}
 
-		if(imp.getPO_Window_ID() > 0 && imp.getPO_Window_ID() != table.getPO_Window_ID())
+		//PO_Window_ID
+		if(BLANK.equalsIgnoreCase(imp.getJP_PO_Window_Name()))
 		{
+			if(table.getPO_Window_ID() > 0)
+			{
+				table.setPO_Window_ID(0);
+				isUpdate = true;
+			}
+
+		}else if(imp.getPO_Window_ID() > 0 && imp.getPO_Window_ID() != table.getPO_Window_ID()){
 			table.setPO_Window_ID(imp.getPO_Window_ID());
 			isUpdate = true;
+		}
+
+		//Entity Type
+		if(!Util.isEmpty(imp.getJP_Table_EntityType()) && !imp.getJP_Table_EntityType().equals(table.getEntityType()))
+		{
+			if(!("D").equals(table.getEntityType()))
+			{
+				MEntityType entityTye = MEntityType.get(getCtx(), imp.getJP_Table_EntityType());
+				if(entityTye == null)
+				{
+					;
+				}else if(entityTye.getAD_EntityType_ID() == 0) {
+					;
+				}else {
+					table.setEntityType(imp.getJP_Table_EntityType());
+					isUpdate = true;
+				}
+			}
 		}
 
 		if(isUpdate)
@@ -882,9 +1121,24 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		{
 			column = new MColumn(getCtx(), impData.getAD_Column_ID() , get_TrxName());
 		}else {
-			column = new MColumn(getCtx(), 0 , get_TrxName());
-			isUpdate = true;
-			isColumnSync = true;
+
+			MTable table = new MTable(getCtx(), impData.getAD_Table_ID(), get_TrxName());
+			MColumn[] columns = table.getColumns(true);
+			for(int i = 0; i < columns.length; i++)
+			{
+				if(columns[i].getColumnName().equalsIgnoreCase(impData.getColumnName()))
+				{
+					column = columns[i];
+					break;
+				}
+			}
+
+			if(column == null)
+			{
+				column = new MColumn(getCtx(), 0 , get_TrxName());
+				isUpdate = true;
+				isColumnSync = true;
+			}
 
 			if(impData.getAD_Element_ID() == 0)
 			{
@@ -902,14 +1156,14 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			column.setAD_Element_ID(impData.getAD_Element_ID());
 		}
 
-		//UU
+		//AD_Column_UU
 		if(!Util.isEmpty(impData.getAD_Column_UU()) && !impData.getAD_Column_UU().equals(column.getAD_Column_UU()))
 		{
 			column.setAD_Column_UU(impData.getAD_Column_UU());
 			isUpdate = true;
 		}
 
-		//Name
+		//Name(Mandatory)
 		if(column.getAD_Column_ID() == 0 && Util.isEmpty(impData.getJP_Column_Name())) //New Record
 		{
 			column.setName(impData.getAD_Element().getName());
@@ -921,41 +1175,69 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//Description
-		if(!Util.isEmpty(impData.getJP_Column_Description()) && !impData.getJP_Column_Description().equals(column.getDescription()))
+		if(BLANK.equalsIgnoreCase(impData.getJP_Column_Description()))
 		{
+			if(column.getDescription() != null)
+			{
+				column.setDescription(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Column_Description()) && !impData.getJP_Column_Description().equals(column.getDescription())){
 			column.setDescription(impData.getJP_Column_Description());
 			isUpdate = true;
 		}
 
 		//Help
-		if(!Util.isEmpty(impData.getJP_Column_Help()) && !impData.getJP_Column_Help().equals(column.getHelp()))
+		if(BLANK.equalsIgnoreCase(impData.getJP_Column_Help()))
 		{
+			if(column.getHelp() != null)
+			{
+				column.setHelp(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Column_Help()) && !impData.getJP_Column_Help().equals(column.getHelp())){
 			column.setHelp(impData.getJP_Column_Help());
 			isUpdate = true;
 		}
 
 		//Placeholder
-		if(!Util.isEmpty(impData.getJP_Column_Placeholder()) && !impData.getJP_Column_Placeholder().equals(column.getPlaceholder()))
+		if(BLANK.equalsIgnoreCase(impData.getJP_Column_Placeholder()))
 		{
+			if(column.getPlaceholder() != null)
+			{
+				column.setPlaceholder(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Column_Placeholder()) && !impData.getJP_Column_Placeholder().equals(column.getPlaceholder())){
 			column.setPlaceholder(impData.getJP_Column_Placeholder());
 			isUpdate = true;
 		}
 
 		//ColumnSQL
-		if(!Util.isEmpty(impData.getColumnSQL()) && !impData.getColumnSQL().equals(column.getColumnSQL()))
+		if(BLANK.equalsIgnoreCase(impData.getColumnSQL()))
 		{
+			if(column.getColumnSQL() != null)
+			{
+				column.setColumnSQL(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getColumnSQL()) && !impData.getColumnSQL().equals(column.getColumnSQL())){
 			column.setColumnSQL(impData.getColumnSQL());
 			isUpdate = true;
 		}
 
-		//Version
+		//Version(Mandatory)
 		if(impData.getVersion() != null && impData.getVersion().compareTo(Env.ZERO) != 0 && impData.getVersion() != column.getVersion())
 		{
 			column.setVersion(impData.getVersion());
 			isUpdate = true;
 		}
 
-		//AD_Reference_ID
+		//AD_Reference_ID(Mandatory)
 		if(column.getAD_Column_ID() == 0)//New Record
 		{
 			if(impData.getAD_Reference_ID() == 0)
@@ -972,15 +1254,30 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//AD_Reference_Value_ID
-		if(impData.getAD_Reference_Value_ID() > 0 && impData.getAD_Reference_Value_ID() != column.getAD_Reference_Value_ID())
+		if(BLANK.equalsIgnoreCase(impData.getJP_Reference_Value_Name()))
 		{
+			if(column.getAD_Reference_Value_ID() > 0)
+			{
+				column.setAD_Reference_Value_ID(0);
+				isUpdate = true;
+			}
+
+		}else if(impData.getAD_Reference_Value_ID() > 0 && impData.getAD_Reference_Value_ID() != column.getAD_Reference_Value_ID()){
+
 			column.setAD_Reference_Value_ID(impData.getAD_Reference_Value_ID());
 			isUpdate = true;
 		}
 
 		//AD_Val_Rule_ID
-		if(impData.getAD_Val_Rule_ID() > 0 && impData.getAD_Val_Rule_ID() != column.getAD_Val_Rule_ID())
+		if(BLANK.equalsIgnoreCase(impData.getJP_Val_Rule_Name()))
 		{
+			if(column.getAD_Val_Rule_ID() > 0)
+			{
+				column.setAD_Val_Rule_ID(0);
+				isUpdate = true;
+			}
+
+		}else if(impData.getAD_Val_Rule_ID() > 0 && impData.getAD_Val_Rule_ID() != column.getAD_Val_Rule_ID()){
 			column.setAD_Val_Rule_ID(impData.getAD_Val_Rule_ID());
 			isUpdate = true;
 		}
@@ -1058,36 +1355,73 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//VFormat
-		if(!Util.isEmpty(impData.getVFormat()) && !impData.getVFormat().equals(column.getVFormat()))
+		if(BLANK.equalsIgnoreCase(impData.getVFormat()))
 		{
+			if(column.getVFormat() != null)
+			{
+				column.setVFormat(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getVFormat()) && !impData.getVFormat().equals(column.getVFormat())) {
 			column.setVFormat(impData.getVFormat());
 			isUpdate = true;
 		}
 
 		//FormatPattern
-		if(!Util.isEmpty(impData.getFormatPattern()) && !impData.getFormatPattern().equals(column.getFormatPattern()))
+		if(BLANK.equalsIgnoreCase(impData.getFormatPattern()))
 		{
+			if(column.getFormatPattern() != null)
+			{
+				column.setFormatPattern(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getFormatPattern()) && !impData.getFormatPattern().equals(column.getFormatPattern())){
+
 			column.setFormatPattern(impData.getFormatPattern());
 			isUpdate = true;
 		}
 
 		//ValueMin
-		if(!Util.isEmpty(impData.getValueMin()) && !impData.getValueMin().equals(column.getValueMin()))
+		if(BLANK.equalsIgnoreCase(impData.getValueMin()))
 		{
+			if(column.getValueMin() != null)
+			{
+				column.setValueMin(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getValueMin()) && !impData.getValueMin().equals(column.getValueMin())){
 			column.setValueMin(impData.getValueMin());
 			isUpdate = true;
 		}
 
 		//ValueMax
-		if(!Util.isEmpty(impData.getValueMax()) && !impData.getValueMax().equals(column.getValueMax()))
+		if(BLANK.equalsIgnoreCase(impData.getValueMax()))
 		{
+			if(column.getValueMax() != null)
+			{
+				column.setValueMax(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getValueMax()) && !impData.getValueMax().equals(column.getValueMax())){
+
 			column.setValueMax(impData.getValueMax());
 			isUpdate = true;
 		}
 
 		//AD_Process_ID
-		if(impData.getAD_Process_ID() != column.getAD_Process_ID())
+		if(BLANK.equalsIgnoreCase(impData.getJP_Process_Value()))
 		{
+			if(column.getAD_Process_ID() > 0)
+			{
+				column.setAD_Process_ID(0);
+				isUpdate = true;
+			}
+
+		}else if(impData.getAD_Process_ID() != column.getAD_Process_ID()){
 			column.setAD_Process_ID(impData.getAD_Process_ID());
 			isUpdate = true;
 		}
@@ -1100,17 +1434,34 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//AD_Chart_ID
-		if(impData.getAD_Chart_ID() != column.getAD_Chart_ID())
+		if(BLANK.equalsIgnoreCase(impData.getJP_Chart_Name()))
 		{
+			if(column.getAD_Chart_ID() > 0)
+			{
+				column.setAD_Chart_ID(0);
+				isUpdate = true;
+			}
+
+		}else if(impData.getAD_Chart_ID() != column.getAD_Chart_ID()){
+
 			column.setAD_Chart_ID(impData.getAD_Chart_ID());
 			isUpdate = true;
 		}
 
 		//PA_DashboardContent_ID
-		if(impData.getPA_DashboardContent_ID() != column.getPA_DashboardContent_ID())
+		if(BLANK.equalsIgnoreCase(impData.getJP_DashboardContent_Name()))
 		{
+			if(column.getPA_DashboardContent_ID() > 0)
+			{
+				column.setPA_DashboardContent_ID(0);
+				isUpdate = true;
+			}
+
+		}else if(impData.getPA_DashboardContent_ID() != column.getPA_DashboardContent_ID()){
+
 			column.setPA_DashboardContent_ID(impData.getPA_DashboardContent_ID());
 			isUpdate = true;
+
 		}
 
 		//FKConstraintName
@@ -1129,29 +1480,58 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//Placeholder
-		if(!Util.isEmpty(impData.getJP_Column_Placeholder()) && !impData.getJP_Column_Placeholder().equals(column.getPlaceholder()))
+		if(BLANK.equalsIgnoreCase(impData.getJP_Column_Placeholder()))
 		{
+			if(column.getPlaceholder() != null)
+			{
+				column.setPlaceholder(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getJP_Column_Placeholder()) && !impData.getJP_Column_Placeholder().equals(column.getPlaceholder())){
+
 			column.setPlaceholder(impData.getJP_Column_Placeholder());
 			isUpdate = true;
 		}
 
 		//DefaultValue
-		if(!Util.isEmpty(impData.getDefaultValue()) && !impData.getDefaultValue().equals(column.getDefaultValue()))
+		if(BLANK.equalsIgnoreCase(impData.getDefaultValue()))
 		{
+			if(column.getDefaultValue() != null)
+			{
+				column.setDefaultValue(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getDefaultValue()) && !impData.getDefaultValue().equals(column.getDefaultValue())){
 			column.setDefaultValue(impData.getDefaultValue());
 			isUpdate = true;
 		}
 
 		//ReadOnlyLogic
-		if(!Util.isEmpty(impData.getReadOnlyLogic()) && !impData.getReadOnlyLogic().equals(column.getReadOnlyLogic()))
+		if(BLANK.equalsIgnoreCase(impData.getReadOnlyLogic()))
 		{
+			if(column.getReadOnlyLogic() != null)
+			{
+				column.setReadOnlyLogic(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getReadOnlyLogic()) && !impData.getReadOnlyLogic().equals(column.getReadOnlyLogic())){
 			column.setReadOnlyLogic(impData.getReadOnlyLogic());
 			isUpdate = true;
 		}
 
 		//MandatoryLogic
-		if(!Util.isEmpty(impData.getMandatoryLogic()) && !impData.getMandatoryLogic().equals(column.getMandatoryLogic()))
+		if(BLANK.equalsIgnoreCase(impData.getMandatoryLogic()))
 		{
+			if(column.getMandatoryLogic() != null)
+			{
+				column.setMandatoryLogic(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getMandatoryLogic()) && !impData.getMandatoryLogic().equals(column.getMandatoryLogic())){
 			column.setMandatoryLogic(impData.getMandatoryLogic());
 			isUpdate = true;
 		}
@@ -1199,8 +1579,16 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		}
 
 		//Callout
-		if(!Util.isEmpty(impData.getCallout()) && !impData.getCallout().equals(column.getCallout()))
+		//MandatoryLogic
+		if(BLANK.equalsIgnoreCase(impData.getCallout()))
 		{
+			if(column.getCallout() != null)
+			{
+				column.setCallout(null);
+				isUpdate = true;
+			}
+
+		}else if(!Util.isEmpty(impData.getCallout()) && !impData.getCallout().equals(column.getCallout())){
 			column.setCallout(impData.getCallout());
 			isUpdate = true;
 		}
@@ -1224,6 +1612,25 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 					column.setEntityType(impData.getJP_Column_EntityType());
 				}
 			}
+		}else {
+
+			if(!Util.isEmpty(impData.getJP_Column_EntityType()) && !impData.getJP_Column_EntityType().equals(column.getEntityType()))
+			{
+				if(!("D").equals(column.getEntityType()))
+				{
+
+					MEntityType entityTye = MEntityType.get(getCtx(), impData.getJP_Column_EntityType());
+					if(entityTye == null)
+					{
+						;
+					}else if(entityTye.getAD_EntityType_ID() == 0) {
+						;
+					}else {
+						column.setEntityType(impData.getJP_Column_EntityType());
+						isUpdate = true;
+					}
+				}
+			}
 		}
 
 		if(isUpdate)
@@ -1244,12 +1651,23 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		if(isColumnSync)
 		{
+			if(impData.getAD_Table().isView())
+				return true;
+
+			if(!Util.isEmpty(column.getColumnSQL()))
+				return true;
+
+			if(column.getAD_Reference_ID() == DisplayType.Chart)
+				return true;
+
 			ProcessInfo pi = new ProcessInfo("Synchronize Column", 0);
 			pi.setClassName("org.compiere.process.ColumnSync");
 			pi.setAD_Client_ID(getAD_Client_ID());
 			pi.setAD_User_ID(getAD_User_ID());
 			pi.setAD_PInstance_ID(getAD_PInstance_ID());
 			pi.setRecord_ID(column.getAD_Column_ID());
+			ProcessInfoParameter[] pars = new ProcessInfoParameter[0];
+			pi.setParameter(pars);
 			boolean success = ProcessUtil.startJavaProcess(getCtx(), pi, Trx.get(get_TrxName(), true), false, processUI);
 			if(!success)
 			{
@@ -1272,7 +1690,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		sql = new StringBuilder ("UPDATE I_TableColumnJP i ")
 				.append("SET AD_Table_ID=(SELECT AD_Table_ID FROM AD_Table p")
-				.append(" WHERE i.TableName=p.TableName AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE Upper(i.TableName)=Upper(p.TableName) AND p.AD_Client_ID=i.AD_Client_ID) ")
 				.append(" WHERE i.AD_Table_ID IS NULL AND i.TableName IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
@@ -1375,7 +1793,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		sql = new StringBuilder ("UPDATE I_TableColumnJP i ")
 			.append("SET AD_Element_ID=(SELECT AD_Element_ID FROM AD_Element p")
-			.append(" WHERE i.ColumnName=p.ColumnName AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE Upper(i.ColumnName)=Upper(p.ColumnName) AND i.AD_Client_ID=p.AD_Client_ID) ")
 			.append("WHERE i.AD_Element_ID IS NULL AND i.ColumnName IS NOT NULL ")
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
@@ -1402,7 +1820,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		sql = new StringBuilder ("UPDATE I_TableColumnJP i ")
 			.append("SET AD_Column_ID=(SELECT AD_Column_ID FROM AD_Column p")
-			.append(" WHERE i.ColumnName=p.ColumnName AND i.AD_Client_ID=p.AD_Client_ID AND i.AD_Table_ID = p.AD_Table_ID ) ")
+			.append(" WHERE Upper(i.ColumnName)=Upper(p.ColumnName) AND i.AD_Client_ID=p.AD_Client_ID AND i.AD_Table_ID = p.AD_Table_ID ) ")
 			.append("WHERE i.AD_Column_ID IS NULL AND i.ColumnName IS NOT NULL ")
 			.append(" AND i.I_IsImported<>'Y' ").append(getWhereClause());
 		try {
