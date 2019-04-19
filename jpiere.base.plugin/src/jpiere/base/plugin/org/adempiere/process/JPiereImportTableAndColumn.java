@@ -1,5 +1,5 @@
 /******************************************************************************
-AD_Org (Trx) * Product: JPiere                                                            *
+ * Product: JPiere                                                            *
  * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
  *                                                                            *
  * This program is free software, you can redistribute it and/or modify it    *
