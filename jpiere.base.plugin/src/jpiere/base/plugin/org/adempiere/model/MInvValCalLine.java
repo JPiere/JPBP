@@ -71,4 +71,16 @@ public class MInvValCalLine extends X_JP_InvValCalLine {
 
 		return beginInvValCalLine;
 	}
+
+	private MInvValCal m_InvValCal = null;
+
+	public MInvValCal getParent()
+	{
+		if(m_InvValCal == null)
+		{
+			m_InvValCal = new MInvValCal(getCtx(), getJP_InvValCal_ID(), get_TrxName());
+		}
+
+		return m_InvValCal;
+	}
 }
