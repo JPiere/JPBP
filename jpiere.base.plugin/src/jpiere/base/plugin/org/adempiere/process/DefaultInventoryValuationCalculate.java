@@ -68,6 +68,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 	private MPriceList m_PriceList = null;
 	private MPriceListVersion m_PriceListVersionOfLastDateValue = null ;
+	private MPriceListVersion m_PriceListVersionOfDateValue = null;
 
 	int Record_ID = 0;
 
@@ -89,7 +90,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 			if(m_PriceList != null && m_InvValCal.getJP_LastDateValue() != null)
 			{
-				m_PriceListVersionOfLastDateValue = m_PriceList.getPriceListVersion(m_InvValCal.getJP_LastDateValue());
+				m_PriceListVersionOfLastDateValue = JPiereInvValUtil.getPriceListVersion(getCtx(), m_PriceList.getM_PriceList_ID(), m_InvValCal.getJP_LastDateValue(), get_TrxName());
+
 			}
 
 			//Delete InvValCalLog
@@ -123,11 +125,27 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+
+		if(m_InvValProfile.getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_RetailInventoryMethod))
+		{
+			if(m_PriceList != null && m_InvValCal.getDateValue() != null)
+			{
+				m_PriceListVersionOfDateValue = JPiereInvValUtil.getPriceListVersion(getCtx(), m_PriceList.getM_PriceList_ID(), m_InvValCal.getDateValue(), get_TrxName());
+			}
+
+			if(m_PriceListVersionOfDateValue == null)
+			{
+
+				throw new Exception(Msg.getMsg(getCtx(), "JP_DateValue_PriceListVersion"));
+			}
+		}
+
 		if(m_InvValCal.getJP_LastDateValue() != null
 				&& (m_InvValProfile.getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_AveragePO) || m_InvValProfile.getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_AverageInvoice)) )
 		{
 			map_Product_Qty_LastDateValue = JPiereInvValUtil.getAllQtyBookFromStockOrg(getCtx(), m_InvValCal.getJP_LastDateValue() , m_InvValProfile.getOrgs(), " p.M_Product_Category_ID, p.Value");
 		}
+
 
 		for(int i = 0; i < lines.length; i++)
 		{
@@ -144,6 +162,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				calculate_AveragePO(lines[i]);
 			}else if(lines[i].getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_AverageInvoice)){
 				calculate_AverageInvoice(lines[i]);
+			}else if(lines[i].getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_RetailInventoryMethod)){
+				calculate_RetailInventoryMethod(lines[i]);
 			}else if(lines[i].getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_StandardCosting)){
 				return Msg.getMsg(getCtx(), "JP_Can_Not_Calculate_Costing_Method");
 			}else{
@@ -1504,6 +1524,43 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		line.saveEx(get_TrxName());
 
 	}//calculate_AverageInvoice
+
+
+	private void calculate_RetailInventoryMethod(MInvValCalLine line) //TODO
+	{
+
+		MPriceListVersion m_PriceListVersionOfDateValue = null;
+		MProductPrice m_ProductPrice = null;
+
+		if(m_PriceList != null && m_InvValCal.getDateValue() != null)
+		{
+			m_PriceListVersionOfDateValue = m_PriceList.getPriceListVersion(m_InvValCal.getDateValue());
+		}
+
+		if(m_PriceListVersionOfDateValue != null)
+		{
+			m_ProductPrice = MProductPrice.get(getCtx(), m_PriceListVersionOfDateValue.getM_PriceList_Version_ID(), line.getM_Product_ID(), get_TrxName());
+		}
+
+		if(m_ProductPrice != null)
+		{
+			line.setJP_InvValAmt(m_ProductPrice.getPriceStd().setScale(m_Currency.getCostingPrecision() ,RoundingMode.HALF_UP));
+
+		}else {
+
+			line.setJP_InvValAmt(line.getCurrentCostPrice());
+
+		}
+
+		if(line.getQtyBook().compareTo(Env.ZERO)==0)
+		{
+			line.setJP_InvValTotalAmt(Env.ZERO);
+		}else{
+			line.setJP_InvValTotalAmt(line.getQtyBook().multiply(line.getJP_InvValAmt()).setScale(m_Currency.getStdPrecision(), RoundingMode.HALF_UP));
+		}
+		line.saveEx(get_TrxName());
+
+	}
 
 //	private void calculate_StandardCosting(MInvValCalLine line)
 //	{

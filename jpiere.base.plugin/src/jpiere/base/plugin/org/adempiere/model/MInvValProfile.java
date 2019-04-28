@@ -89,6 +89,27 @@ public class MInvValProfile extends X_JP_InvValProfile {
 
 		}
 
+
+		if(getCostingMethod().equals(MInvValCalLine.COSTINGMETHOD_RetailInventoryMethod))
+		{
+			if(getM_PriceList_ID() == 0 )
+			{
+				//In case of Retail Inventory Method , Price List is Mandatory.
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_RetailInventoryMethod_PriceList"));
+				return false;
+			}
+		}
+
+		if(getM_PriceList_ID() != 0 && (newRecord || is_ValueChanged("M_PriceList_ID")))
+		{
+			if(getC_AcctSchema().getC_Currency_ID() != getM_PriceList().getC_Currency_ID())
+			{
+				//Currency of Price list is different from Currency of Account Schema.
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_Diff_Currency_PriceList-AcctSchema"));
+				return false;
+			}
+		}
+
 		return true;
 	}
 

@@ -10,12 +10,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
-import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
-
 import org.compiere.model.I_C_InvoiceLine;
 import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.I_M_MatchInv;
+import org.compiere.model.I_M_PriceList_Version;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
@@ -23,12 +21,16 @@ import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MPriceListVersion;
 import org.compiere.model.Query;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
+
+import jpiere.base.plugin.org.adempiere.model.MInvValCalLog;
+import jpiere.base.plugin.org.adempiere.model.MInvValProfileOrg;
 
 public class JPiereInvValUtil {
 
@@ -585,4 +587,17 @@ public class JPiereInvValUtil {
 			s_cache.put (key, retValue);
 		return retValue;
 	} //	get
+
+
+	public static MPriceListVersion getPriceListVersion (Properties ctx, int M_PriceList_ID, Timestamp valid, String trxName )
+	{
+
+		final String whereClause = "M_PriceList_ID=? AND TRUNC(ValidFrom)=?";
+		MPriceListVersion m_plv = new Query(ctx, I_M_PriceList_Version.Table_Name, whereClause, trxName)
+					.setParameters(M_PriceList_ID, valid)
+					.setOnlyActiveRecords(true)
+					.first();
+
+		return m_plv;
+	}	//	getPriceListVersion
 }

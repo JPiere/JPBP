@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_InvValProfile
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 6.2
  */
 @SuppressWarnings("all")
 public interface I_JP_InvValProfile 

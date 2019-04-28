@@ -16,7 +16,6 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
-import org.compiere.model.I_M_PriceList_Version;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCost;
 import org.compiere.model.MCostElement;
@@ -24,7 +23,6 @@ import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductCategoryAcct;
 import org.compiere.model.MProductPrice;
-import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
@@ -101,7 +99,7 @@ public class UpdateCostFromPriceList extends SvrProcess {
 		int C_AcctSchema_ID = m_InvValProfile.getC_AcctSchema_ID();
 		int M_CostType_ID = m_InvValProfile.getC_AcctSchema().getM_CostType_ID();
 		int M_PriceList_ID = m_InvValProfile.getM_PriceList_ID();
-		MPriceListVersion m_PriceList_Version =getPriceListVersion(M_PriceList_ID, p_DateValue);
+		MPriceListVersion m_PriceList_Version = JPiereInvValUtil.getPriceListVersion(getCtx(), M_PriceList_ID, p_DateValue, get_TrxName());
 		if(m_PriceList_Version == null)
 			throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " +Msg.getElement(getCtx(), "M_PriceList_Version_ID"));
 
@@ -196,15 +194,4 @@ public class UpdateCostFromPriceList extends SvrProcess {
 		}//for j
 	}
 
-	private MPriceListVersion getPriceListVersion (int M_PriceList_ID, Timestamp valid)
-	{
-
-		final String whereClause = "M_PriceList_ID=? AND TRUNC(ValidFrom)=?";
-		MPriceListVersion m_plv = new Query(getCtx(), I_M_PriceList_Version.Table_Name, whereClause, get_TrxName())
-					.setParameters(M_PriceList_ID, valid)
-					.setOnlyActiveRecords(true)
-					.first();
-
-		return m_plv;
-	}	//	getPriceListVersion
 }

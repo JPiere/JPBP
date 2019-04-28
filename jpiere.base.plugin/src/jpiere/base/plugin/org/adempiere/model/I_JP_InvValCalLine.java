@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_InvValCalLine
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 6.2
  */
 @SuppressWarnings("all")
 public interface I_JP_InvValCalLine 
@@ -243,12 +243,12 @@ public interface I_JP_InvValCalLine
     /** Column name M_AttributeSetInstance_ID */
     public static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
 
-	/** Set Attribute Set Instance.
+	/** Set Attribute Info.
 	  * Product Attribute Set Instance
 	  */
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID);
 
-	/** Get Attribute Set Instance.
+	/** Get Attribute Info.
 	  * Product Attribute Set Instance
 	  */
 	public int getM_AttributeSetInstance_ID();

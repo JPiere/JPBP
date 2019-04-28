@@ -26,14 +26,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_InvValAdjustLine
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160413L;
+	private static final long serialVersionUID = 20190427L;
 
     /** Standard Constructor */
     public X_JP_InvValAdjustLine (Properties ctx, int JP_InvValAdjustLine_ID, String trxName)
@@ -266,26 +266,26 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 		return (String)get_Value(COLUMNNAME_CostingLevel);
 	}
 
-	/** CostingMethod AD_Reference_ID=122 */
-	public static final int COSTINGMETHOD_AD_Reference_ID=122;
-	/** Standard Costing = S */
-	public static final String COSTINGMETHOD_StandardCosting = "S";
 	/** Average PO = A */
 	public static final String COSTINGMETHOD_AveragePO = "A";
-	/** Lifo = L */
-	public static final String COSTINGMETHOD_Lifo = "L";
 	/** Fifo = F */
 	public static final String COSTINGMETHOD_Fifo = "F";
-	/** Last PO Price = p */
-	public static final String COSTINGMETHOD_LastPOPrice = "p";
 	/** Average Invoice = I */
 	public static final String COSTINGMETHOD_AverageInvoice = "I";
-	/** Last Invoice = i */
-	public static final String COSTINGMETHOD_LastInvoice = "i";
+	/** Lifo = L */
+	public static final String COSTINGMETHOD_Lifo = "L";
+	/** Standard Costing = S */
+	public static final String COSTINGMETHOD_StandardCosting = "S";
 	/** User Defined = U */
 	public static final String COSTINGMETHOD_UserDefined = "U";
+	/** Last Invoice = i */
+	public static final String COSTINGMETHOD_LastInvoice = "i";
+	/** Last PO Price = p */
+	public static final String COSTINGMETHOD_LastPOPrice = "p";
 	/** _ = x */
 	public static final String COSTINGMETHOD__ = "x";
+	/** Retail Inventory method = R */
+	public static final String COSTINGMETHOD_RetailInventoryMethod = "R";
 	/** Set Costing Method.
 		@param CostingMethod 
 		Indicates how Costs will be calculated
@@ -586,7 +586,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
 			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());	}
 
-	/** Set Attribute Set Instance.
+	/** Set Attribute Info.
 		@param M_AttributeSetInstance_ID 
 		Product Attribute Set Instance
 	  */
@@ -598,7 +598,7 @@ public class X_JP_InvValAdjustLine extends PO implements I_JP_InvValAdjustLine, 
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
 	}
 
-	/** Get Attribute Set Instance.
+	/** Get Attribute Info.
 		@return Product Attribute Set Instance
 	  */
 	public int getM_AttributeSetInstance_ID () 
