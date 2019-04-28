@@ -135,7 +135,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 			if(m_PriceListVersionOfDateValue == null)
 			{
-
+				//Price List of Inventory Valuation Profile has not version of Value Date.
 				throw new Exception(Msg.getMsg(getCtx(), "JP_DateValue_PriceListVersion"));
 			}
 		}
@@ -1528,15 +1528,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 	private void calculate_RetailInventoryMethod(MInvValCalLine line) //TODO
 	{
-
-		MPriceListVersion m_PriceListVersionOfDateValue = null;
 		MProductPrice m_ProductPrice = null;
-
-		if(m_PriceList != null && m_InvValCal.getDateValue() != null)
-		{
-			m_PriceListVersionOfDateValue = m_PriceList.getPriceListVersion(m_InvValCal.getDateValue());
-		}
-
 		if(m_PriceListVersionOfDateValue != null)
 		{
 			m_ProductPrice = MProductPrice.get(getCtx(), m_PriceListVersionOfDateValue.getM_PriceList_Version_ID(), line.getM_Product_ID(), get_TrxName());
