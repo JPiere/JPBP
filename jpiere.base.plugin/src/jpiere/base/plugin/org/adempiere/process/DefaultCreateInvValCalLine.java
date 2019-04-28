@@ -107,6 +107,12 @@ public class DefaultCreateInvValCalLine extends SvrProcess {
 					continue;
 			}
 
+			if(m_InvValProfile.getM_Product_Category_ID() > 0 )
+			{
+				if(m_InvValProfile.getM_Product_Category_ID() !=  product.getM_Product_Category_ID())
+					continue;
+			}
+
 			MInvValCalLine ivcLine = new MInvValCalLine(m_InvValCal);
 			line++;
 			ivcLine.setLine(line*10);
