@@ -21,10 +21,10 @@ import jpiere.base.plugin.org.adempiere.model.MContractLineT;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 
 /**
- * JPIERE-0434: Create New Contract From Estimation and  Existing Contract Template
+ * JPIERE-0434: Create New Contract From Estimation and  Existing Contract
+ * JPIERE-0444: Create New Contract Content From Estimation and Existing Contract
  *
- *
- * @author hhagi
+ * @author Hideaki Hagiwara
  *
  */
 public class CreateContractfromEstimationAndContract extends AbstractCreateContractByCopy {
@@ -32,6 +32,8 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 	private int	p_JP_Estimation_ID = 0;
 	private int	from_JP_Contract_ID = 0;
 	private int	from_JP_ContractContent_ID = 0;
+	private int	p_JP_CreateTo_Contract_ID = 0;
+
 	private MEstimation 	estimation = null;
 	private IProcessUI 		processUI = null;
 	private boolean 		isCreateSO = false;
@@ -51,6 +53,10 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 			String name = para[i].getParameterName();
 			if (para[i].getParameter() == null){
 				;
+			}else if (name.equals("JP_CreateTo_Contract_ID")){
+
+				p_JP_CreateTo_Contract_ID = para[i].getParameterAsInt();
+
 			}else if (name.equals("JP_CopyFrom_Contract_ID")){
 
 				from_JP_Contract_ID = para[i].getParameterAsInt();
@@ -146,41 +152,50 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 
 	private String createContract()  throws Exception
 	{
-		MContract to_Contract = new MContract(getCtx(), 0, get_TrxName());
 		MContract from_Contract = MContract.get(getCtx(), from_JP_Contract_ID);
-		PO.copyValues(from_Contract, to_Contract);
-		PO.copyValues(estimation, to_Contract);
+		MContract to_Contract = null;
 
-		to_Contract.setJP_Contract_Link_ID(from_Contract.getJP_Contract_ID());
-		to_Contract.setAD_Org_ID(estimation.getAD_Org_ID());
-		to_Contract.setJP_ContractT_ID(from_Contract.getJP_ContractT_ID());
-		to_Contract.setC_DocType_ID(from_Contract.getC_DocType_ID());
-		to_Contract.setDateDoc(estimation.getDateOrdered());
-		to_Contract.setDateAcct(estimation.getDateAcct());
-		to_Contract.setJP_ContractPeriodDate_From(estimation.getDateAcct());
-		if(from_Contract.getJP_ContractPeriodDate_To() != null)
+		if(p_JP_CreateTo_Contract_ID == 0) // Create Contract Document and Contract Content.
 		{
-			LocalDateTime from_Date = from_Contract.getJP_ContractPeriodDate_From().toLocalDateTime();
-			LocalDateTime to_Date = from_Contract.getJP_ContractPeriodDate_To().toLocalDateTime();
-			Duration duration = Duration.between(from_Date, to_Date);
-			to_Contract.setJP_ContractPeriodDate_To(calculateDate(to_Contract.getJP_ContractPeriodDate_From(), (int)duration.toDays()));
+			to_Contract = new MContract(getCtx(), 0, get_TrxName());
+			PO.copyValues(from_Contract, to_Contract);
+			PO.copyValues(estimation, to_Contract);
+			to_Contract.setJP_Contract_Link_ID(from_Contract.getJP_Contract_ID());
+			to_Contract.setAD_Org_ID(estimation.getAD_Org_ID());
+			to_Contract.setJP_ContractT_ID(from_Contract.getJP_ContractT_ID());
+			to_Contract.setC_DocType_ID(from_Contract.getC_DocType_ID());
+			to_Contract.setDateDoc(estimation.getDateOrdered());
+			to_Contract.setDateAcct(estimation.getDateAcct());
+			to_Contract.setJP_ContractPeriodDate_From(estimation.getDateAcct());
+			if(from_Contract.getJP_ContractPeriodDate_To() != null)
+			{
+				LocalDateTime from_Date = from_Contract.getJP_ContractPeriodDate_From().toLocalDateTime();
+				LocalDateTime to_Date = from_Contract.getJP_ContractPeriodDate_To().toLocalDateTime();
+				Duration duration = Duration.between(from_Date, to_Date);
+				to_Contract.setJP_ContractPeriodDate_To(calculateDate(to_Contract.getJP_ContractPeriodDate_From(), (int)duration.toDays()));
 
-		}else {
-			to_Contract.setJP_ContractPeriodDate_To(null);
-		}
+			}else {
+				to_Contract.setJP_ContractPeriodDate_To(null);
+			}
 
-		//Set DocumentNo
-		if(from_Contract.getC_DocType().isDocNoControlled())
-			to_Contract.setDocumentNo(null);
+			//Set DocumentNo
+			if(from_Contract.getC_DocType().isDocNoControlled())
+				to_Contract.setDocumentNo(null);
 
-		to_Contract.setJP_Estimation_ID(estimation.getJP_Estimation_ID());
-		to_Contract.setDocStatus(DocAction.STATUS_Drafted);
-		to_Contract.setDocAction(DocAction.ACTION_Complete);
-		to_Contract.setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
-		try {
-			to_Contract.saveEx(get_TrxName());
-		}catch (Exception e) {
-			return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "JP_Contract_ID")+ " >>> "+ e.getMessage();
+			to_Contract.setJP_Estimation_ID(estimation.getJP_Estimation_ID());
+			to_Contract.setDocStatus(DocAction.STATUS_Drafted);
+			to_Contract.setDocAction(DocAction.ACTION_Complete);
+			to_Contract.setJP_ContractStatus(MContract.JP_CONTRACTSTATUS_Prepare);
+			try {
+				to_Contract.saveEx(get_TrxName());
+			}catch (Exception e) {
+				return Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), "JP_Contract_ID")+ " >>> "+ e.getMessage();
+			}
+
+		}else {//Create Contract Content, Not create Contract Document.
+
+			to_Contract = new MContract(getCtx(), p_JP_CreateTo_Contract_ID, get_TrxName());
+
 		}
 
 
@@ -207,6 +222,7 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 			to_ContractContent.setDateInvoiced(from_ContractContents[i].getDateInvoiced());
 			setContractContentProcDate(to_ContractContent, MContractContentT.get(getCtx(), from_ContractContents[i].getJP_ContractContentT_ID()) );
 
+			to_ContractContent.setJP_Estimation_ID(estimation.getJP_Estimation_ID());
 			to_ContractContent.setTotalLines(Env.ZERO);
 			to_ContractContent.setDocStatus(DocAction.STATUS_Drafted);
 			to_ContractContent.setDocAction(DocAction.ACTION_Complete);
