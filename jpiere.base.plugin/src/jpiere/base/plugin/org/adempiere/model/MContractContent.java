@@ -1730,4 +1730,18 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		return "";
 	}
+
+	public static MContractContent[] getContractContentByEstimation(Properties ctx,int JP_Contract_ID, int JP_Estimation_ID, String trxName)//TODO
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MContractContent.COLUMNNAME_JP_Contract_ID+"=? AND " + MContractContent.COLUMNNAME_JP_Estimation_ID+"=? ");
+		StringBuilder orderClause = new StringBuilder(MContractContent.COLUMNNAME_JP_ContractContent_ID);
+		//
+		List<MContractContent> list = new Query(ctx, MContractContent.Table_Name, whereClauseFinal.toString(), trxName)
+										.setParameters(JP_Contract_ID,JP_Estimation_ID)
+										.setOrderBy(orderClause.toString())
+										.list();
+
+		return list.toArray(new MContractContent[list.size()]);
+
+	}
 }	//	MContractContent

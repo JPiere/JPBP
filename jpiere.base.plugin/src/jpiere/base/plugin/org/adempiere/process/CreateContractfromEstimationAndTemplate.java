@@ -125,13 +125,26 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 
 
 		MContract[] contracts = MContract.getContractByEstimation(getCtx(), p_JP_Estimation_ID, get_TrxName());
+		MContractContent[] contractContents = MContractContent.getContractContentByEstimation(getCtx(), p_JP_CreateTo_Contract_ID, p_JP_Estimation_ID, get_TrxName());
 
 
-		if(processUI != null && contracts.length > 0)
+		if( (p_JP_CreateTo_Contract_ID == 0 && processUI != null && contracts.length > 0) || (p_JP_CreateTo_Contract_ID > 0 && processUI != null && contractContents.length > 0))
 		{
 			isOpenDialog = true;
-			//Already Contract created, Do you want to create Contract again?
-			processUI.ask("JP_CreateContractFromEstimationAgain", new Callback<Boolean>() {
+
+			String msg = null;
+			if(p_JP_CreateTo_Contract_ID == 0)
+			{
+				//Already Contract was created from this Estimation, Do you want to create Contract again?
+				msg = "JP_CreateContractFromEstimationAgain";
+			}else {
+
+				//Already Contract Content was created from this Estimation, Do you want to create Contract Content again?
+				msg = "JP_CreateContracContentFromEstimationAgain";
+
+			}
+
+			processUI.ask(msg, new Callback<Boolean>() {
 
 				@Override
 				public void onCallback(Boolean result)
@@ -230,11 +243,11 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 				throw new Exception(Msg.getMsg(getCtx(), "JP_GeneralContract_NotHave_ContractContent"));
 			}
 
-			if(!m_Contract.getJP_ContractType().equals(contractTemplate.getJP_ContractType()))
+			if(!m_Contract.getJP_ContractType().equals(MContractContentT.get(getCtx(), p_JP_ContractContentT_ID).getJP_ContractType()))
 			{
 				//Different between {0} and {1}
 				String msg0 = Msg.getElement(Env.getCtx(), "JP_CreateTo_Contract_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractType");
-				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractT_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractType");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractContentT_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractType");
 				return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
 			}
 		}
