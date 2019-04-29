@@ -183,13 +183,15 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 	 * Create Contract
 	 *
 	 * @return
+	 * @throws Exception
 	 */
-	private String createContract()
+	private String createContract() throws Exception
 	{
+		MContractT contractTemplate = MContractT.get(getCtx(), p_JP_ContractT_ID);
+
 		if(p_JP_CreateTo_Contract_ID == 0) // Create Contract Document and Contract Content.
 		{
 			m_Contract = new MContract(getCtx(), 0, get_TrxName());
-			MContractT contractTemplate = MContractT.get(getCtx(), p_JP_ContractT_ID);
 			PO.copyValues(contractTemplate, m_Contract);
 			PO.copyValues(estimation, m_Contract);
 
@@ -222,9 +224,22 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 
 			m_Contract = new MContract(getCtx(), p_JP_CreateTo_Contract_ID, get_TrxName());
 
+			if(m_Contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract))
+			{
+				//General Contract can not have Contract Content.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_GeneralContract_NotHave_ContractContent"));
+			}
+
+			if(!m_Contract.getJP_ContractType().equals(contractTemplate.getJP_ContractType()))
+			{
+				//Different between {0} and {1}
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CreateTo_Contract_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractType");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_ContractT_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractType");
+				return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+			}
 		}
 
-		MContractT contractTemplate = MContractT.get(getCtx(), m_Contract.getJP_ContractT_ID());
+
 
 		if(p_JP_ContractContentT_ID == 0)
 		{

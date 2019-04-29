@@ -196,6 +196,19 @@ public class CreateContractfromEstimationAndContract extends AbstractCreateContr
 
 			to_Contract = new MContract(getCtx(), p_JP_CreateTo_Contract_ID, get_TrxName());
 
+			if(to_Contract.getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_GeneralContract))
+			{
+				//General Contract can not have Contract Content.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_GeneralContract_NotHave_ContractContent"));
+			}
+
+			if(!to_Contract.getJP_ContractType().equals(from_Contract.getJP_ContractType()))
+			{
+				//Different between {0} and {1}
+				String msg0 = Msg.getElement(Env.getCtx(), "JP_CreateTo_Contract_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractType");
+				String msg1 = Msg.getElement(Env.getCtx(), "JP_CopyFrom_Contract_ID")+" - " + Msg.getElement(Env.getCtx(), "JP_ContractType");
+				return Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+			}
 		}
 
 
