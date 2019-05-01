@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,8 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-
-import jpiere.base.plugin.util.JPierePaymentTerms;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MBPartner;
@@ -51,6 +50,8 @@ import org.compiere.util.Env;
 import org.compiere.util.Language;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+
+import jpiere.base.plugin.util.JPierePaymentTerms;
 
 /**
  *	JPIERE-0154,0155
@@ -377,7 +378,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 				MPaymentTerm[] paymentTerms = JPierePaymentTerms.getPaymentTerms(getCtx(),m_invoice.getC_BPartner_ID());
 				Timestamp dateAcct = m_invoice.getDateAcct();
 				String dateString = new SimpleDateFormat("dd").format(dateAcct);
-				Integer dateInt = new Integer(dateString);
+				Integer dateInt = Integer.valueOf(dateString);
 
 				for(int i = 0; i < paymentTerms.length; i++)
 				{
@@ -402,7 +403,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 				BigDecimal igt = m_invoice.getGrandTotal();
 				BigDecimal percent = Env.ONE;
 				if (ogt.compareTo(igt) != 0)
-					percent = igt.divide(ogt, 10, BigDecimal.ROUND_HALF_UP);
+					percent = igt.divide(ogt, 10,  RoundingMode.HALF_UP);
 				MCurrency cur = MCurrency.get(order.getCtx(), order.getC_Currency_ID());
 				int scale = cur.getStdPrecision();
 
@@ -412,7 +413,7 @@ public class DeliveryDaysInvoiceGenerate extends SvrProcess
 					if (percent != Env.ONE) {
 						BigDecimal propDueAmt = ops.getDueAmt().multiply(percent);
 						if (propDueAmt.scale() > scale)
-							propDueAmt = propDueAmt.setScale(scale, BigDecimal.ROUND_HALF_UP);
+							propDueAmt = propDueAmt.setScale(scale,  RoundingMode.HALF_UP);
 						ips.setDueAmt(propDueAmt);
 					}
 					ips.setC_Invoice_ID(m_invoice.getC_Invoice_ID());

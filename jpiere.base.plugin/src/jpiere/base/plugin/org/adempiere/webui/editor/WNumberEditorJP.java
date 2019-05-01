@@ -15,9 +15,11 @@
 package jpiere.base.plugin.org.adempiere.webui.editor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import org.adempiere.webui.ClientInfo;
 import org.adempiere.base.IDisplayTypeFactory;
 import org.adempiere.base.Service;
 import org.adempiere.webui.ValuePreference;
@@ -156,6 +158,11 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     	addChangeLogMenu(popupMenu);
 
     	originalStyle = getComponent().getDecimalbox().getStyle();
+    	if (ClientInfo.isMobile())
+    		getComponent().getButton().setVisible(false);
+
+    	if (gridField != null)
+    		getComponent().getDecimalbox().setPlaceholder(gridField.getPlaceholder());
     }
 
 	/**
@@ -173,10 +180,10 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 
 	        if (displayType == DisplayType.Integer) {
 		        if (newValue != null && newValue instanceof BigDecimal) {
-		        	newValue = new Integer(((BigDecimal)newValue).intValue());
+		        	newValue = Integer.valueOf(((BigDecimal)newValue).intValue());
 		        }
 		        if (oldValue != null && oldValue instanceof BigDecimal) {
-		        	oldValue = new Integer(((BigDecimal)oldValue).intValue());
+		        	oldValue = Integer.valueOf(((BigDecimal)oldValue).intValue());
 		        }
 	        }
 
@@ -218,7 +225,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     		divisor = BigDecimal.TEN;
     	else
     		divisor = BigDecimal.TEN.pow(decimalPlaces);
-    	BigDecimal newValue = oldValue.divide(divisor, decimalPlaces, BigDecimal.ROUND_HALF_UP);
+    	BigDecimal newValue = oldValue.divide(divisor, decimalPlaces, RoundingMode.HALF_UP);
     	return newValue;
     } //getAddDecimalPlaces
 

@@ -13,9 +13,6 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
-import jpiere.base.plugin.org.adempiere.model.JPiereBankStatementTaxProvider;
-import jpiere.base.plugin.org.adempiere.model.MBankStatementTax;
-
 import java.math.BigDecimal;
 
 import org.compiere.model.MBankAccount;
@@ -33,6 +30,9 @@ import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.JPiereBankStatementTaxProvider;
+import jpiere.base.plugin.org.adempiere.model.MBankStatementTax;
 
 
 /**
@@ -108,7 +108,7 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 		{
 
 			MBankStatementLine bsl = (MBankStatementLine)po;
-			
+
 			//JPIERE-0300
 			if(type == ModelValidator.TYPE_AFTER_NEW || bsl.is_ValueChanged("C_Payment_ID"))
 			{
@@ -125,33 +125,33 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 							|| newPayment.getDocStatus().equals(DocAction.STATUS_Invalid) )
 					{
 						return Msg.getMsg(bsl.getCtx(), "JP_NotValidDocStatus");//Not Valid Doc Status
-						
+
 					}else{
-						
+
 						MBankStatement bs = bsl.getParent();
 						if(bs.getDocStatus().equals(DocAction.STATUS_Completed) || bs.getDocStatus().equals(DocAction.STATUS_Closed))
 						{
 							return Msg.getMsg(bsl.getCtx(), "JP_NotMatchIncompletePaymentAndCompleteBS");//Not match incomplete Payment and complete Bank Statement
 						}
-						
+
 					}
-					
-					
+
+
 					if(newPayment.isReconciled())
 						return Msg.getMsg(bsl.getCtx(), "JP_AlreadyReconciled");//Payment was reconciled with bank statement already
-					
+
 					if(bsl.getC_BPartner_ID() != newPayment.getC_BPartner_ID())
 						return Msg.getMsg(bsl.getCtx(), "JP_DifferentBusinessPartner_Payment");//Different business partner between Payment and BP field
-					
+
 					BigDecimal payAmt = newPayment.getPayAmt();
 					if(!newPayment.isReceipt())
 						payAmt = payAmt.negate();
-					
+
 					if(bsl.getTrxAmt().compareTo(payAmt) != 0)
 					{
 						return Msg.getMsg(bsl.getCtx(), "JP_DifferentAmt");//Different Amount
-					}					
-					
+					}
+
 
 					MBankStatement bs = bsl.getParent();
 					if(bs.getDocStatus().equals(DocAction.STATUS_Completed) || bs.getDocStatus().equals(DocAction.STATUS_Closed))
@@ -159,9 +159,9 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 						newPayment.setIsReconciled(true);
 						newPayment.saveEx(bsl.get_TrxName());
 					}
-					
+
 				}
-				
+
 				if(old_Payment_ID > 0 && new_Payment_ID != old_Payment_ID)
 				{
 					old_Payment_ID = bsl.get_ValueOldAsInt("C_Payment_ID");
@@ -170,7 +170,7 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 					oldPayment.saveEx(bsl.get_TrxName());
 				}
 			}
-			
+
 			//JPIERE-0300
 			if(type == ModelValidator.TYPE_AFTER_NEW || bsl.is_ValueChanged("C_BPartner_ID"))
 			{
@@ -182,7 +182,7 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 					if(new_BPartner_ID != payment.getC_BPartner_ID())
 						return Msg.getMsg(bsl.getCtx(), "JP_DifferentBusinessPartner_Payment");//Different business partner between Payment and BP field
 				}
-	
+
 				int C_Invoice_ID = bsl.getC_Invoice_ID();
 				if(C_Invoice_ID > 0)
 				{
@@ -190,10 +190,10 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 					if(new_BPartner_ID != invoice.getC_BPartner_ID())
 						return Msg.getMsg(bsl.getCtx(), "JP_DifferentBusinessPartner_Invoice");//Different business partner between Invoice and BP field
 				}
-				
+
 			}
-			
-			
+
+
 			//JPIERE-0012
 			boolean newRecord = true;
 			if(type == ModelValidator.TYPE_AFTER_CHANGE)
@@ -216,7 +216,7 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 				return null;
 			}
 
-			MTax tax = new MTax(po.getCtx(), new Integer(C_Tax_ID.toString()).intValue(), po.get_TrxName());
+			MTax tax = new MTax(po.getCtx(), Integer.valueOf(C_Tax_ID.toString()).intValue(), po.get_TrxName());
 			if(tax.getC_TaxProvider_ID()==0){
 				return Msg.getMsg(bsl.getCtx(), "JP_SetTaxProvider");
 			}
@@ -228,7 +228,7 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 	        if(provider.getTaxProviderClass().equals("jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider")){
 
 				Class<?> ppClass = Class.forName("jpiere.base.plugin.org.adempiere.model.JPiereBankStatementTaxProvider");
-				JPiereBankStatementTaxProvider calculator = (JPiereBankStatementTaxProvider)ppClass.newInstance();
+				JPiereBankStatementTaxProvider calculator = (JPiereBankStatementTaxProvider)ppClass.getDeclaredConstructor().newInstance();
 				boolean isCalculate = calculator.recalculateTax(provider, bsl, newRecord);
 				if(!isCalculate)
 					return Msg.getMsg(bsl.getCtx(), "Error");

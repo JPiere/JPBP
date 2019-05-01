@@ -166,7 +166,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 						+ " SET JP_ScheduledCostTotalLines = "
 						    + "(SELECT COALESCE(SUM(JP_ScheduledCostLineAmt),0) FROM C_OrderLine il WHERE i.C_Order_ID=il.C_Order_ID)"
 						+ "WHERE C_Order_ID = ?";
-				int no = DB.executeUpdate(sql, new Object[]{new Integer(ol.getC_Order_ID())}, false, ol.get_TrxName(), 0);
+				int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(ol.getC_Order_ID())}, false, ol.get_TrxName(), 0);
 				if (no != 1)
 					return "Error";
 			}

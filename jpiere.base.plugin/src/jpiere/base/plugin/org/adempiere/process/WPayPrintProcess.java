@@ -114,7 +114,7 @@ public class WPayPrintProcess extends SvrProcess{
 			try
 			{
 				Class<?> clazz = Class.forName(m_PaymentExportClass);
-				custom = (PaymentExport)clazz.newInstance();
+				custom = (PaymentExport)clazz.getDeclaredConstructor().newInstance();
 				no = custom.exportToFile(m_checks, tempFile, err);
 			}
 			catch (ClassNotFoundException e)

@@ -66,7 +66,7 @@ public class JPierePaymentTerms {
 	{
 		MPaymentTerm[] paymentTerms = JPierePaymentTerms.getPaymentTerms(Env.getCtx(), C_PaymentTerm_ID);
 		String dateString = new SimpleDateFormat("dd").format(date);
-		Integer dateInt = new Integer(dateString);
+		Integer dateInt = Integer.valueOf(dateString);
 
 		for(int i = 0; i < paymentTerms.length; i++)
 		{

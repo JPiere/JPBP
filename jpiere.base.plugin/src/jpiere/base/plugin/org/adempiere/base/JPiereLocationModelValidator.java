@@ -135,7 +135,7 @@ public class JPiereLocationModelValidator implements ModelValidator {
 				String sql = "UPDATE C_Location l"
 					+ " SET JP_Location_Label='"+JP_Location_Label+"'"
 					+ " WHERE C_Location_ID = ?";
-				int no = DB.executeUpdate(sql, new Object[]{new Integer(C_Location_ID)}, false, location.get_TrxName(), 0);
+				int no = DB.executeUpdate(sql, new Object[]{Integer.valueOf(C_Location_ID)}, false, location.get_TrxName(), 0);
 				if (no != 1)
 					log.warning("(1) #" + no);
 

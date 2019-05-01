@@ -328,12 +328,12 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		MLookup lookupCur = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), AD_Column_ID,
 				 DisplayType.Search, Env.getLanguage(Env.getCtx()), "C_Currency_ID", 1000033,false,"");
 		Invoice_Currency_Editor = new WSearchEditor("Invoice_Currency_ID", true, false, true, lookupCur);
-		Invoice_Currency_Editor.setValue(new Integer(Invoice_Currency_ID));
+		Invoice_Currency_Editor.setValue(Integer.valueOf(Invoice_Currency_ID));
 		Invoice_Currency_Editor.addValueChangeListener(this);
 		Env.setContext(Env.getCtx(), form.getWindowNo(), "C_Currency_ID", Invoice_Currency_ID);//for Dynamic Validation
 
 		Payment_Currency_Editor = new WTableDirEditor("Payment_Currency_ID", true, true, true, lookupCur);
-		Payment_Currency_Editor.setValue(new Integer(Invoice_Currency_ID));
+		Payment_Currency_Editor.setValue(Integer.valueOf(Invoice_Currency_ID));
 
 
 		//
@@ -717,7 +717,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			return;
 
 		//	Async BPartner Test
-		Integer key = new Integer(Invoice_BP_ID);
+		Integer key = Integer.valueOf(Invoice_BP_ID);
 		if (!m_bpartnerCheck.contains(key))
 		{
 			new Thread()

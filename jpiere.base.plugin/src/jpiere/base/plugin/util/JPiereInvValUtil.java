@@ -578,7 +578,7 @@ public class JPiereInvValUtil {
 	 */
 	public static MOrder getMOrder (Properties ctx, int C_Order_ID)
 	{
-		Integer key = new Integer (C_Order_ID);
+		Integer key = Integer.valueOf(C_Order_ID);
 		MOrder retValue = (MOrder) s_cache.get (key);
 		if (retValue != null)
 			return retValue;

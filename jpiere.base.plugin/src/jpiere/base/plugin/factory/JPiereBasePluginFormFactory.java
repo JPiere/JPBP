@@ -37,10 +37,10 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 	private static final CLogger log = CLogger.getCLogger(JPiereBasePluginFormFactory.class);
 
 	@Override
-	public ADForm newFormInstance(String formName) 
+	public ADForm newFormInstance(String formName)
 	{
 		Object form = null;
-	     if (formName.startsWith("jpiere.base.plugin")) 
+	     if (formName.startsWith("jpiere.base.plugin"))
 	     {
 	           ClassLoader cl = getClass().getClassLoader();
 	           Class<?> clazz = null;
@@ -57,7 +57,7 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 			  }
 		         try
 			  {
-			    form = clazz.newInstance();
+			    form = clazz.getDeclaredConstructor().newInstance();
 			  }
 			  catch (Exception e)
 			  {
@@ -76,13 +76,13 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 					return adForm;
 			     }
 		     }
-		      
+
 	     }else  if (formName.startsWith("JP_PivotWindow_ID=")){
-	    	 
-	    	 ADForm adForm = new ADForm() 
+
+	    	 ADForm adForm = new ADForm()
 	    	 {
 				@Override
-				protected void initForm() 
+				protected void initForm()
 				{
 					Vlayout div = new Vlayout();
 					this.appendChild(div);
@@ -91,15 +91,15 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 					div.appendChild(new Html(Msg.getMsg(Env.getCtx(), "JP_SupporterURL")));
 					div.appendChild(new Html(Msg.getMsg(Env.getCtx(), "JP_PivotWindow_Demo")));//You can try Pivot Window at JPiere Demo site.
 					div.appendChild(new Html(Msg.getMsg(Env.getCtx(), "JP_DemoSiteURL")));//<p>JPiere Demo Site: <a href="http://jpiere.net/webui/" target="_blank">http://jpiere.net/webui/</a></p>
-			
-					
+
+
 				}
 			};
-			
+
 			return adForm;
-	    	 
+
 	     }
-	     
+
 	     return null;
 	}
 

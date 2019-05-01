@@ -60,7 +60,7 @@ public class JPiereBasePluginModelValidatorFactory implements IModelValidatorFac
 			}
 			if (clazz != null) {
 				try {
-					validator = (ModelValidator)clazz.newInstance();
+					validator = (ModelValidator)clazz.getDeclaredConstructor().newInstance();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

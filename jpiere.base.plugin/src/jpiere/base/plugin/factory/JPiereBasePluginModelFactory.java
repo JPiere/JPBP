@@ -139,7 +139,7 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 					s_log.warning("No transaction Constructor for " + clazz + " (" + msg + ")");
 				}
 
-				PO po = constructor!=null ? (PO)constructor.newInstance(new Object[] {Env.getCtx(), new Integer(Record_ID), trxName}) : null;
+				PO po = constructor!=null ? (PO)constructor.newInstance(new Object[] {Env.getCtx(), Integer.valueOf(Record_ID), trxName}) : null;
 				return po;
 			}
 			catch (Exception e)

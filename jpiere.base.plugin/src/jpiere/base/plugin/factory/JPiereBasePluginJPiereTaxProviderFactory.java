@@ -15,11 +15,11 @@ package jpiere.base.plugin.factory;
 
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
-import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProviderFactory;
-
 import org.adempiere.base.equinox.EquinoxExtensionLocator;
 import org.compiere.util.CLogger;
+
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProviderFactory;
 
 /**
  * JPIERE-0165:
@@ -39,7 +39,7 @@ public class JPiereBasePluginJPiereTaxProviderFactory implements IJPiereTaxProvi
 
 		if(className==null)
 			return null;
-		
+
 		if(className.startsWith("jpiere.base.plugin")){
 
 
@@ -51,7 +51,7 @@ public class JPiereBasePluginJPiereTaxProviderFactory implements IJPiereTaxProvi
 				{
 					Class<?> ppClass = Class.forName(className);
 					if (ppClass != null)
-						myCalculator = (IJPiereTaxProvider) ppClass.newInstance();
+						myCalculator = (IJPiereTaxProvider) ppClass.getDeclaredConstructor().newInstance();
 				}
 				catch (Error e1)
 				{   //  NoClassDefFound

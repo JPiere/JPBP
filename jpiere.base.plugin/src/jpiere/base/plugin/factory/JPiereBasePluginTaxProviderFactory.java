@@ -46,7 +46,7 @@ public class JPiereBasePluginTaxProviderFactory implements ITaxProviderFactory {
 				{
 					Class<?> ppClass = Class.forName(className);
 					if (ppClass != null)
-						myCalculator = (ITaxProvider) ppClass.newInstance();
+						myCalculator = (ITaxProvider) ppClass.getDeclaredConstructor().newInstance();
 				}
 				catch (Error e1)
 				{   //  NoClassDefFound
