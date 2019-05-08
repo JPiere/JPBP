@@ -70,7 +70,7 @@ public class MContractContentT extends X_JP_ContractContentT {
 			}
 
 			//Check - Template of Spot Contract can have only one Contract Content template.
-			if(getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract)
+			if(getParent() != null && getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_SpotContract)
 					&& getParent().getContractContentTemplates(true, null).length > 0 )
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "JP_SpotContractContentTemplate"));
