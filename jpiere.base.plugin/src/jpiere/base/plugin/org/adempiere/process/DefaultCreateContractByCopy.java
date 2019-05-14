@@ -29,7 +29,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractLineT;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
-/** JPIERE-0363
+/**
+* JPIERE-0363 Default Create Contract By Copy
 *
 * @author Hideaki Hagiwara
 *
@@ -60,30 +61,54 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 		return Msg.getMsg(getCtx(), "Success");
 	}
 
+	/**
+	 *
+	 * Create COntract Contents
+	 *
+	 *
+	 *
+	 * @throws Exception
+	 */
 	protected void createContractContents() throws Exception
 	{
-
-		MContractContent[]  from_ContractContents = from_Contract.getContractContents();
-
-		//Create Contract Content
-		for(int i = 0 ; i < from_ContractContents.length; i++)
+		if(from_JP_ContractContent_ID > 0)
 		{
 			MContractContent to_ContractContent = new MContractContent(getCtx(), 0, get_TrxName());
-			createContractContent(from_ContractContents[i], to_ContractContent,false);
+			createContractContent(new MContractContent(getCtx(),from_JP_ContractContent_ID,get_TrxName()), to_ContractContent,false);
 
-		}//For i
+		}else {
+
+			MContractContent[]  from_ContractContents = from_Contract.getContractContents();
+			for(int i = 0 ; i < from_ContractContents.length; i++)
+			{
+				MContractContent to_ContractContent = new MContractContent(getCtx(), 0, get_TrxName());
+				createContractContent(from_ContractContents[i], to_ContractContent,false);
+
+			}//For i
+		}
 
 	}//createContractContent
 
 
+	/**
+	 *
+	 * Create Contract Content
+	 *
+	 * @param from_ContractContent
+	 * @param to_ContractContent
+	 * @param isRenewContractContent
+	 * @throws Exception
+	 */
 	protected void createContractContent(MContractContent from_ContractContent, MContractContent to_ContractContent, boolean isRenewContractContent) throws Exception
 	{
 
 		PO.copyValues(from_ContractContent, to_ContractContent);
 		MContract from_Contract = new MContract(getCtx(), from_ContractContent.getJP_Contract_ID(), get_TrxName());
-		to_ContractContent.setAD_Org_ID(from_Contract.getAD_Org_ID());
-		to_ContractContent.setAD_OrgTrx_ID(from_Contract.getAD_OrgTrx_ID());
-		to_ContractContent.setJP_Contract_ID(from_Contract.getJP_Contract_ID());
+
+		to_ContractContent.setAD_Org_ID(to_Contract.getAD_Org_ID());
+		to_ContractContent.setAD_OrgTrx_ID(to_Contract.getAD_OrgTrx_ID());
+		to_ContractContent.setJP_Contract_ID(to_Contract.getJP_Contract_ID());
+
 		to_ContractContent.setJP_ContractContentT_ID(from_ContractContent.getJP_ContractContentT_ID());
 		to_ContractContent.setC_DocType_ID(from_ContractContent.getC_DocType_ID());
 		to_ContractContent.setDocBaseType(from_ContractContent.getDocBaseType());
@@ -102,22 +127,46 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 
 		to_ContractContent.setJP_CounterContractContent_ID(0);
 
-		if(isRenewContractContent)
+		if(isRenewContractContent && from_Contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
 			to_ContractContent.setJP_ContractProcDate_From(calculateDate(from_ContractContent.getJP_ContractProcDate_To(),1));
-		}
 
-		MContractCalender calender =  MContractCalender.get(getCtx(), to_ContractContent.getJP_ContractCalender_ID());
-		MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), to_ContractContent.getJP_ContractProcDate_From());
-		to_ContractContent.setDateDoc(period.getDateDoc());
-		to_ContractContent.setDateAcct(period.getDateAcct());
-		to_ContractContent.setDateInvoiced(period.getDateDoc());
-
-
-		if(from_Contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract))
-		{
-			if(!isRenewContractContent)
+			MContractCalender calender =  MContractCalender.get(getCtx(), to_ContractContent.getJP_ContractCalender_ID());
+			if(calender == null)
 			{
+				to_ContractContent.setDateDoc(from_ContractContent.getDateDoc());
+				to_ContractContent.setDateAcct(from_ContractContent.getDateAcct());
+				to_ContractContent.setDateInvoiced(from_ContractContent.getDateDoc());
+
+			}else {
+
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), to_ContractContent.getJP_ContractProcDate_From());
+				to_ContractContent.setDateDoc(period.getDateDoc());
+				to_ContractContent.setDateAcct(period.getDateAcct());
+				to_ContractContent.setDateInvoiced(period.getDateDoc());
+			}
+
+			if(to_ContractContent.isAutomaticUpdateJP())
+			{
+				to_ContractContent.setJP_ContractProcDate_To(from_Contract.getJP_ContractPeriodDate_To());
+			}
+
+		}else if(!isRenewContractContent && from_Contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract)){
+
+			MContractCalender calender =  MContractCalender.get(getCtx(), to_ContractContent.getJP_ContractCalender_ID());
+			if(calender == null)
+			{
+				to_ContractContent.setDateDoc(from_ContractContent.getDateDoc());
+				to_ContractContent.setDateAcct(from_ContractContent.getDateAcct());
+				to_ContractContent.setDateInvoiced(from_ContractContent.getDateDoc());
+
+			}else {
+
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), to_ContractContent.getJP_ContractProcDate_From());
+				to_ContractContent.setDateDoc(period.getDateDoc());
+				to_ContractContent.setDateAcct(period.getDateAcct());
+				to_ContractContent.setDateInvoiced(period.getDateDoc());
+
 				if(from_ContractContent.getJP_ContractProcDate_From().compareTo(period.getStartDate()) > 0)
 				{
 					to_ContractContent.setJP_ContractProcDate_From(from_ContractContent.getJP_ContractProcDate_From());
@@ -133,11 +182,16 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 
 		}else if(from_Contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_SpotContract)) {
 
+			to_ContractContent.setDateDoc(from_ContractContent.getDateDoc());
+			to_ContractContent.setDateAcct(from_ContractContent.getDateAcct());
+			to_ContractContent.setDateInvoiced(from_ContractContent.getDateDoc());
+
 			if(to_ContractContent.getOrderType().contentEquals(MContractContent.ORDERTYPE_StandardOrder)
 					|| to_ContractContent.getOrderType().contentEquals(MContractContent.ORDERTYPE_Quotation))
 			{
-				to_ContractContent.setDatePromised(calculateDate(period.getDateAcct(),to_ContractContent.getJP_ContractContentT().getDeliveryTime_Promised())) ;
+				to_ContractContent.setDatePromised(calculateDate(from_ContractContent.getDateAcct(),to_ContractContent.getJP_ContractContentT().getDeliveryTime_Promised())) ;
 			}
+
 		}
 
 		to_ContractContent.setTotalLines(Env.ZERO);
@@ -173,8 +227,9 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 			}
 		}
 
-		try {
-			if(isRenewContractContent)
+		try
+		{
+			if(isRenewContractContent && from_Contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract))
 			{
 				createContractLine(to_ContractContent, from_ContractContent, isRenewContractContent, true);
 			}else {
@@ -196,7 +251,16 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 
 	}
 
-
+	/**
+	 *
+	 * Create Contract Line
+	 *
+	 * @param to_ContractContent
+	 * @param from_ContractContent
+	 * @param isRenewContractContent
+	 * @param isReSetPeriod
+	 * @throws Exception
+	 */
 	protected void createContractLine(MContractContent to_ContractContent, MContractContent from_ContractContent, boolean isRenewContractContent, boolean isReSetPeriod) throws Exception
 	{
 		MContractLine[] to_ContractLines = to_ContractContent.getLines();

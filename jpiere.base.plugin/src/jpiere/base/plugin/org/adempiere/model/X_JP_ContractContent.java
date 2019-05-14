@@ -34,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190228L;
+	private static final long serialVersionUID = 20190514L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -86,8 +86,6 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			setJP_ContractContent_ID (0);
 			setJP_ContractProcStatus (null);
 // UN
-			setJP_ContractProcessMethod (null);
-// IC
 			setJP_Contract_Acct_ID (0);
 			setJP_Contract_ID (0);
 			setM_PriceList_ID (0);
@@ -1245,7 +1243,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** Extend Contract Process Date  = EX */
 	public static final String JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate = "EX";
-	/** Renew the contract Content  = RE */
+	/** Renew the contract Content = RE */
 	public static final String JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent = "RE";
 	/** Set Auto Update Policy.
 		@param JP_ContractC_AutoUpdatePolicy Auto Update Policy	  */
@@ -1658,6 +1656,20 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getJP_Processing3 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing3);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing4 Process Now	  */
+	public void setJP_Processing4 (String JP_Processing4)
+	{
+		set_Value (COLUMNNAME_JP_Processing4, JP_Processing4);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing4 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing4);
 	}
 
 	public org.compiere.model.I_M_FreightCategory getM_FreightCategory() throws RuntimeException
