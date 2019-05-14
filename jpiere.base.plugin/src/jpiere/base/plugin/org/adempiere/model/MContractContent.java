@@ -938,7 +938,17 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		//Check JP_ContractProcess_ID()
 		if(newRecord)
 		{
-			;//We can not check. because Create Contract content from template process can not set JP_ContractProcess_ID automatically.
+
+			if(getJP_ContractProcess_ID() != 0)
+			{
+				MContractProcess contractProcess = MContractProcess.get(getCtx(), getJP_ContractProcess_ID());
+				if(!contractProcess.getDocBaseType().equals(getDocBaseType()) || !contractProcess.isCreateBaseDocJP())
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcess_ID")
+						+ " and  " + Msg.getElement(getCtx(), "DocBaseType"));
+					return false;
+				}
+			}
 
 		}else{
 
@@ -951,23 +961,27 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 					log.saveError("Error",msg);
 					return false;
 
-				}else {
+				}
 
-					if(is_ValueChanged("JP_ContractProcess_ID"))
+				if(is_ValueChanged("JP_ContractProcess_ID"))
+				{
+					MContractProcess contractProcess = MContractProcess.get(getCtx(), getJP_ContractProcess_ID());
+					if(!contractProcess.getDocBaseType().equals(getDocBaseType()) || !contractProcess.isCreateBaseDocJP())
 					{
-						MContractProcess contractProcess = MContractProcess.get(getCtx(), getJP_ContractProcess_ID());
-						if(!contractProcess.getDocBaseType().equals(getDocBaseType()) || !contractProcess.isCreateBaseDocJP())
-						{
-							log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcess_ID")
-								+ " and  " + Msg.getElement(getCtx(), "DocBaseType"));
-							return false;
-						}
+						log.saveError("Error", Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcess_ID")
+							+ " and  " + Msg.getElement(getCtx(), "DocBaseType"));
+						return false;
 					}
 				}
 
-			}else{
+			}else {
+
 				setJP_ContractProcess_ID(0);
+
 			}
+
+
+
 		}//Check JP_ContractProcess_ID()
 
 
@@ -1076,7 +1090,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				}
 			}
 
-		}//Check Contract Process Method
+		}
+
+		if(!getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && ( newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessMethod)) )
+		{
+			setJP_ContractProcessMethod(null);
+		}
 
 
 		//JPIERE-0435 Check Extend Contract Period and Renew Contract

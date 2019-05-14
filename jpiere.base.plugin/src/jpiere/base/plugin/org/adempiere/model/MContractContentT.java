@@ -48,11 +48,13 @@ public class MContractContentT extends X_JP_ContractContentT {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Synchronize Contract Type with Parent.
 		if((newRecord && getJP_ContractT_ID() > 0) || (getJP_ContractT_ID() > 0 && is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractType)))
 		{
 			setJP_ContractType(getParent().getJP_ContractType());
 		}
 
+		//Mandatory Check of Contract Type
 		if(Util.isEmpty(getJP_ContractType()))
 		{
 			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractType")};
@@ -79,7 +81,6 @@ public class MContractContentT extends X_JP_ContractContentT {
 		}
 
 
-
 		//For callout of Product in Line
 		if(newRecord)
 		{
@@ -90,9 +91,9 @@ public class MContractContentT extends X_JP_ContractContentT {
 		if(!newRecord
 				&&( is_ValueChanged(MContractContentT.COLUMNNAME_DocBaseType)
 				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_BaseDocDocType_ID)
-				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_CreateDerivativeDocPolicy)
-				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractCalenderRef_ID)
-				|| is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID) ))
+				|| (is_ValueChanged(MContractContentT.COLUMNNAME_JP_CreateDerivativeDocPolicy) && getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+				|| (is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractCalenderRef_ID) && getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+				|| (is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessRef_ID) && getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))  ))
 		{
 			MContractLineT[] lines = getContractLineTemplates(true,"");
 			if(lines.length > 0)
@@ -229,7 +230,9 @@ public class MContractContentT extends X_JP_ContractContentT {
 				}
 
 			}else{
+
 				setJP_CreateDerivativeDocPolicy(null);
+
 			}
 
 		}
@@ -265,6 +268,10 @@ public class MContractContentT extends X_JP_ContractContentT {
 					log.saveError("Error",msg);
 					return false;
 				}
+			}else {
+
+				setJP_ContractProcessRef_ID(0);
+
 			}
 		}
 
@@ -320,8 +327,9 @@ public class MContractContentT extends X_JP_ContractContentT {
 
 
 		//Check Contract Process Method
-		if(newRecord || (is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessMethod)
-							|| is_ValueChanged(MContractContentT.COLUMNNAME_C_DocType_ID)) )
+		if(getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract)
+				&& ( newRecord || (is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessMethod)
+							|| is_ValueChanged(MContractContentT.COLUMNNAME_C_DocType_ID))) )
 		{
 			String JP_ContractProcessMethod = getJP_ContractProcessMethod();
 			if(JP_ContractProcessMethod == null)
@@ -347,7 +355,12 @@ public class MContractContentT extends X_JP_ContractContentT {
 					return false ;
 				}
 			}
-		}//Check Contract Process Method
+		}
+
+		if(!getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract) && ( newRecord || is_ValueChanged(MContractContentT.COLUMNNAME_JP_ContractProcessMethod)) )
+		{
+			setJP_ContractProcessMethod(null);
+		}
 
 
 		//JPIERE-0435 Check Extend Contract Period and Renew Contract
