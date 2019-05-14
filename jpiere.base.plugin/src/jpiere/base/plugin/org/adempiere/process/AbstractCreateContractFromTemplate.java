@@ -128,63 +128,66 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 		}
 
 		//Set JP_ContractProcDate_To
-		if(contractContent.getJP_ContractCalender_ID() > 0)
+		if(contentTemplate.getJP_ContractType().equals(MContractContentT.JP_CONTRACTTYPE_PeriodContract))
 		{
-			MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
-			MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From(), null, contentTemplate.getJP_ContractProcPeriodNum());
-			if(contractContent.getParent().getJP_ContractPeriodDate_To() == null)
+			if(contractContent.getJP_ContractCalender_ID() > 0)
 			{
-				if(contentTemplate.getJP_ContractProcPeriodNum() == 0)
+				MContractCalender calender = MContractCalender.get(getCtx(), contractContent.getJP_ContractCalender_ID());
+				MContractProcPeriod period = calender.getContractProcessPeriod(getCtx(), contractContent.getJP_ContractProcDate_From(), null, contentTemplate.getJP_ContractProcPeriodNum());
+				if(contractContent.getParent().getJP_ContractPeriodDate_To() == null)
 				{
-					if(contentTemplate.getJP_ContractProcessMethod().equals(MContractContentT.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+					if(contentTemplate.getJP_ContractProcPeriodNum() == 0)
 					{
-						contractContent.setJP_ContractProcDate_To(period.getEndDate());
+						if(contentTemplate.getJP_ContractProcessMethod().equals(MContractContentT.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
+						{
+							contractContent.setJP_ContractProcDate_To(period.getEndDate());
+						}else {
+							contractContent.setJP_ContractProcDate_To(null);
+						}
+
 					}else {
-						contractContent.setJP_ContractProcDate_To(null);
+
+						contractContent.setJP_ContractProcDate_To(period.getEndDate());
 					}
 
-				}else {
+				}else{
 
-					contractContent.setJP_ContractProcDate_To(period.getEndDate());
+					if(contentTemplate.getJP_ContractProcPeriodNum() == 0)
+					{
+						contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
+
+					}else {
+
+						if(contractContent.getParent().getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+						{
+							contractContent.setJP_ContractProcDate_To(period.getEndDate());
+
+						}else{
+
+							contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
+
+						}
+					}
+
 				}
 
-			}else{
+			}else {
 
-				if(contentTemplate.getJP_ContractProcPeriodNum() == 0)
+				if(contractContent.getParent().getJP_ContractPeriodDate_To() != null)
 				{
 					contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
 
 				}else {
 
-					if(contractContent.getParent().getJP_ContractPeriodDate_To().compareTo(period.getEndDate()) >= 0)
+					if(contentTemplate.getJP_ContractProcessMethod().equals(MContractContentT.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
 					{
-						contractContent.setJP_ContractProcDate_To(period.getEndDate());
-
-					}else{
-
-						contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
-
+						contractContent.setJP_ContractProcDate_To(contractContent.getJP_ContractProcDate_From());
+					}else {
+						contractContent.setJP_ContractProcDate_To(null);
 					}
 				}
-
 			}
-
-		}else {
-
-			if(contractContent.getParent().getJP_ContractPeriodDate_To() != null)
-			{
-				contractContent.setJP_ContractProcDate_To(contractContent.getParent().getJP_ContractPeriodDate_To());
-
-			}else {
-
-				if(contentTemplate.getJP_ContractProcessMethod().equals(MContractContentT.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess))
-				{
-					contractContent.setJP_ContractProcDate_To(contractContent.getJP_ContractProcDate_From());
-				}else {
-					contractContent.setJP_ContractProcDate_To(null);
-				}
-			}
-		}
+		}//if(contentTemplate.getJP_ContractType().equals(MContractContentT.JP_CONTRACTTYPE_PeriodContract))
 
 	}
 

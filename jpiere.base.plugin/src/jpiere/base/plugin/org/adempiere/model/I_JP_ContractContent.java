@@ -866,6 +866,15 @@ public interface I_JP_ContractContent
 	/** Get Process Now	  */
 	public String getJP_Processing3();
 
+    /** Column name JP_Processing4 */
+    public static final String COLUMNNAME_JP_Processing4 = "JP_Processing4";
+
+	/** Set Process Now	  */
+	public void setJP_Processing4 (String JP_Processing4);
+
+	/** Get Process Now	  */
+	public String getJP_Processing4();
+
     /** Column name M_FreightCategory_ID */
     public static final String COLUMNNAME_M_FreightCategory_ID = "M_FreightCategory_ID";
 

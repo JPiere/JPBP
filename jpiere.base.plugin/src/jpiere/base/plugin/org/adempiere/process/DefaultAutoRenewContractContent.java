@@ -2,6 +2,7 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import org.compiere.util.Msg;
 
+import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLogDetail;
 
@@ -23,11 +24,31 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 	@Override
 	protected String doIt() throws Exception
 	{
-
-		if(m_ContractContent.getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
+		if(m_ContractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 		{
-			if(m_ContractContent.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent) && !m_ContractContent.isRenewedContractContentJP())
+			if(m_ContractContent.getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess))
 			{
+				if(m_ContractContent.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent) && !m_ContractContent.isRenewedContractContentJP())
+				{
+					try
+					{
+						renewTheContractContent();
+					}catch (Exception e) {
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
+					}
+
+				}else if(m_ContractContent.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
+
+					try
+					{
+						extendContractProcessDate();
+					}catch (Exception e) {
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
+					}
+				}
+
+			}else if(m_ContractContent.getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess) && !m_ContractContent.isRenewedContractContentJP()) {
+
 				try
 				{
 					renewTheContractContent();
@@ -35,27 +56,8 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
 				}
 
-			}else if(m_ContractContent.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
-
-				try
-				{
-					extendContractProcessDate();
-				}catch (Exception e) {
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
-				}
 			}
-
-		}else if(m_ContractContent.getJP_ContractProcessMethod().equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess) && !m_ContractContent.isRenewedContractContentJP()) {
-
-			try
-			{
-				renewTheContractContent();
-			}catch (Exception e) {
-				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null, e.getMessage());
-			}
-
 		}
-
 
 		return null;
 	}
