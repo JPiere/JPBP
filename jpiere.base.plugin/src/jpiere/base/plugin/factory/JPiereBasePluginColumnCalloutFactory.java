@@ -119,7 +119,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				if(columnName.equals(MEstimation.COLUMNNAME_JP_DocTypeSO_ID)
 						|| columnName.equals(MEstimation.COLUMNNAME_C_DocTypeTarget_ID)
 						|| columnName.equals(MEstimation.COLUMNNAME_C_Opportunity_ID)
-						|| columnName.equals("M_PriceList_ID") ||  columnName.equals("DateOrdered") )
+						|| columnName.equals(MEstimation.COLUMNNAME_M_PriceList_ID) ||  columnName.equals(MEstimation.COLUMNNAME_DateOrdered)  ||  columnName.equals(MEstimation.COLUMNNAME_JP_Estimation_ID))
 				{
 					list.add(new JPiereEstimationCallout());
 				}
