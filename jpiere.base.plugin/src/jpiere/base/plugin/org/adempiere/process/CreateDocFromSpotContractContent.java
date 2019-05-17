@@ -106,6 +106,7 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 
 		order.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		order.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
+		order.setC_DocType_ID(m_ContractContent.getJP_BaseDocDocType_ID());
 		if(order.getC_DocType().isDocNoControlled())
 		{
 			order.setDocumentNo(null);
@@ -155,6 +156,7 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 		invoice.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		invoice.setDateInvoiced(m_ContractContent.getDateDoc());
 		invoice.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
+		invoice.setC_DocType_ID(m_ContractContent.getJP_BaseDocDocType_ID());
 		if(invoice.getC_DocType().isDocNoControlled())
 		{
 			invoice.setDocumentNo(null);
