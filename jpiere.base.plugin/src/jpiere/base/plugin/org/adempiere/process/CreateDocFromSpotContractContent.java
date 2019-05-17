@@ -23,6 +23,7 @@ import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -144,6 +145,12 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 	{
 		MOrderLine oLine = new MOrderLine(order);
 		PO.copyValues(cLine, oLine);
+		oLine.setQtyEntered(cLine.getQtyEntered());
+		oLine.setQtyOrdered(cLine.getQtyOrdered());
+		oLine.setQtyInvoiced(Env.ZERO);
+		oLine.setQtyDelivered(Env.ZERO);
+		oLine.set_ValueNoCheck("JP_QtyRecognized", Env.ZERO);
+		oLine.setQtyReserved(Env.ZERO);
 		oLine.saveEx(get_TrxName());
 	}
 
@@ -192,6 +199,8 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 	{
 		MInvoiceLine iLine = new MInvoiceLine(invoice);
 		PO.copyValues(cLine, iLine);
+		iLine.setQtyEntered(cLine.getQtyEntered());
+		iLine.setQtyInvoiced(cLine.getQtyOrdered());
 		iLine.saveEx(get_TrxName());
 	}
 

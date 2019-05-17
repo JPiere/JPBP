@@ -151,12 +151,13 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 				if(columnName.equals("JP_BaseDocDocType_ID")
 						|| columnName.equals("JP_ContractCalender_ID")
-						|| (tableName.equals(MContractContent.Table_Name) && columnName.equals("JP_ContractContentT_ID"))
-						|| (tableName.equals(MContractContentT.Table_Name) && columnName.equals("JP_ContractContentT_ID"))
+						|| columnName.equals("JP_ContractContentT_ID")
 						|| columnName.equals("M_PriceList_ID")
 						|| columnName.equals("DateDoc")
 						|| columnName.equals("DateInvoiced")
 						|| columnName.equals("JP_ContractContent_ID")
+						|| columnName.equals("C_BPartner_ID")
+						|| columnName.equals("DocBaseType")
 						)
 				{
 					list.add(new JPiereContractContentCallout());
@@ -207,7 +208,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 			}else if(tableName.equals(MRecognition.Table_Name)){//JPIERE-0364
 
-				if(columnName.equals("M_InOut_ID") || columnName.equals("M_PriceList_ID") ||  columnName.equals("DateOrdered") )
+				if(columnName.equals("M_InOut_ID") || columnName.equals("M_PriceList_ID") ||  columnName.equals("DateOrdered") || columnName.equals("JP_Recognition_ID") )
 				{
 					list.add(new JPiereRecognitionCallout());
 				}

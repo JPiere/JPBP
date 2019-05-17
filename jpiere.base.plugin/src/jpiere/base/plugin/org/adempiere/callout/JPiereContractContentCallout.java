@@ -13,19 +13,27 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.callout;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
+import org.compiere.model.MOrder;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MWarehouse;
+import org.compiere.model.X_C_Order;
 import org.compiere.process.DocAction;
+import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -84,6 +92,13 @@ public class JPiereContractContentCallout implements IColumnCallout {
 
 			msg = calloutIsAutomaticUpdateJP(ctx, WindowNo, mTab, mField, value, oldValue);
 
+		}else if(mField.getColumnName().equals("C_BPartner_ID")){
+
+			msg = calloutC_BPartner_ID(ctx, WindowNo, mTab, mField, value, oldValue);
+
+		}else if(mField.getColumnName().equals("DocBaseType")){
+
+			msg = calloutDocBaseType(ctx, WindowNo, mTab, mField, value, oldValue);
 		}
 
 		return msg;
@@ -389,6 +404,220 @@ public class JPiereContractContentCallout implements IColumnCallout {
 				}
 			}
 		}
+
+		return null;
+	}
+
+	private String calloutC_BPartner_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		Integer C_BPartner_ID = (Integer)value;
+		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
+			return "";
+		String sql = "SELECT p.AD_Language,p.C_PaymentTerm_ID,"
+			+ " COALESCE(p.M_PriceList_ID,g.M_PriceList_ID) AS M_PriceList_ID, p.PaymentRule,p.POReference,"
+			+ " p.SO_Description,p.IsDiscountPrinted,"
+			+ " p.InvoiceRule,p.DeliveryRule,p.FreightCostRule,DeliveryViaRule,"
+			+ " p.SO_CreditLimit, p.SO_CreditLimit-p.SO_CreditUsed AS CreditAvailable,"
+			+ " (select max(lship.C_BPartner_Location_ID) from C_BPartner_Location lship where p.C_BPartner_ID=lship.C_BPartner_ID AND lship.IsShipTo='Y' AND lship.IsActive='Y') as C_BPartner_Location_ID,"
+			+ " (select max(c.AD_User_ID) from AD_User c where p.C_BPartner_ID=c.C_BPartner_ID AND c.IsActive='Y') as AD_User_ID,"
+			+ " COALESCE(p.PO_PriceList_ID,g.PO_PriceList_ID) AS PO_PriceList_ID, p.PaymentRulePO,p.PO_PaymentTerm_ID,"
+			+ " (select max(lbill.C_BPartner_Location_ID) from C_BPartner_Location lbill where p.C_BPartner_ID=lbill.C_BPartner_ID AND lbill.IsBillTo='Y' AND lbill.IsActive='Y') AS Bill_Location_ID, "
+			+ " p.SOCreditStatus, "
+			+ " p.SalesRep_ID "
+			+ "FROM C_BPartner p"
+			+ " INNER JOIN C_BP_Group g ON (p.C_BP_Group_ID=g.C_BP_Group_ID)"
+			+ "WHERE p.C_BPartner_ID=? AND p.IsActive='Y'";		//	#1
+
+		boolean IsSOTrx = "Y".equals(Env.getContext(ctx, WindowNo, mTab.getTabNo(), "IsSOTrx"));
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, C_BPartner_ID.intValue());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				// Sales Rep - If BP has a default SalesRep then default it
+				Integer salesRep = rs.getInt("SalesRep_ID");
+				if (IsSOTrx && salesRep != 0 )
+				{
+					mTab.setValue("SalesRep_ID", salesRep);
+				}
+
+				//	PriceList (indirect: IsTaxIncluded & Currency)
+				Integer ii = Integer.valueOf(rs.getInt(IsSOTrx ? "M_PriceList_ID" : "PO_PriceList_ID"));
+				if (!rs.wasNull())
+					mTab.setValue("M_PriceList_ID", ii);
+				else
+				{	//	get default PriceList
+					int i = Env.getContextAsInt(ctx, "#M_PriceList_ID");
+					if (i != 0)
+					{
+						MPriceList pl = new MPriceList(ctx, i, null);
+						if (IsSOTrx == pl.isSOPriceList())
+							mTab.setValue("M_PriceList_ID", Integer.valueOf(i));
+						else
+						{
+							String sql2 = "SELECT M_PriceList_ID FROM M_PriceList WHERE AD_Client_ID=? AND IsSOPriceList=? AND IsActive='Y' ORDER BY IsDefault DESC";
+							ii = DB.getSQLValue (null, sql2, Env.getAD_Client_ID(ctx), IsSOTrx);
+							if (ii != 0)
+								mTab.setValue("M_PriceList_ID", Integer.valueOf(ii));
+						}
+					}
+				}
+
+				//	Bill-To
+				mTab.setValue("Bill_BPartner_ID", C_BPartner_ID);
+
+				int shipTo_ID = 0;
+				int bill_Location_ID =0;
+				//	overwritten by InfoBP selection - works only if InfoWindow
+				//	was used otherwise creates error (uses last value, may belong to different BP)
+				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
+				{
+					String loc = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_Location_ID");
+					int locationId = 0;
+					if (loc.length() > 0)
+						locationId = Integer.parseInt(loc);
+					if (locationId > 0) {
+						MBPartnerLocation bpLocation = new MBPartnerLocation(ctx, locationId, null);
+						if (bpLocation.isBillTo())
+							bill_Location_ID = locationId;
+						if (bpLocation.isShipTo())
+							shipTo_ID = locationId;
+					}
+				}
+				if (bill_Location_ID == 0)
+					bill_Location_ID = rs.getInt("Bill_Location_ID");
+				if (bill_Location_ID == 0)
+					mTab.setValue("Bill_Location_ID", null);
+				else
+					mTab.setValue("Bill_Location_ID", Integer.valueOf(bill_Location_ID));
+				// Ship-To Location
+				if (shipTo_ID == 0)
+					shipTo_ID = rs.getInt("C_BPartner_Location_ID");
+
+				if (shipTo_ID == 0)
+					mTab.setValue("C_BPartner_Location_ID", null);
+				else
+					mTab.setValue("C_BPartner_Location_ID", Integer.valueOf(shipTo_ID));
+
+				//	Contact - overwritten by InfoBP selection
+				int contID = rs.getInt("AD_User_ID");
+				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
+				{
+					String cont = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "AD_User_ID");
+					if (cont.length() > 0)
+						contID = Integer.parseInt(cont);
+				}
+				if (contID == 0)
+					mTab.setValue("AD_User_ID", null);
+				else
+				{
+					mTab.setValue("AD_User_ID", Integer.valueOf(contID));
+					mTab.setValue("Bill_User_ID", Integer.valueOf(contID));
+				}
+
+				//	CreditAvailable
+				if (IsSOTrx)
+				{
+					double CreditLimit = rs.getDouble("SO_CreditLimit");
+					if (CreditLimit != 0)
+					{
+						double CreditAvailable = rs.getDouble("CreditAvailable");
+						if (!rs.wasNull() && CreditAvailable < 0)
+							mTab.fireDataStatusEEvent("CreditLimitOver",
+								DisplayType.getNumberFormat(DisplayType.Amount).format(CreditAvailable),
+								false);
+					}
+				}
+
+				//	PO Reference
+				String s = rs.getString("POReference");
+				if (s != null && s.length() != 0)
+					mTab.setValue("POReference", s);
+				//	SO Description
+				s = rs.getString("SO_Description");
+				if (s != null && s.trim().length() != 0)
+					mTab.setValue("Description", s);
+				//	IsDiscountPrinted
+				s = rs.getString("IsDiscountPrinted");
+				if (s != null && s.length() != 0)
+					mTab.setValue("IsDiscountPrinted", s);
+				else
+					mTab.setValue("IsDiscountPrinted", "N");
+
+				//	Defaults, if not Walkin Receipt or Walkin Invoice
+				String OrderType = Env.getContext(ctx, WindowNo, "OrderType");
+				mTab.setValue("InvoiceRule", X_C_Order.INVOICERULE_AfterDelivery);
+				mTab.setValue("DeliveryRule", X_C_Order.DELIVERYRULE_Availability);
+				mTab.setValue("PaymentRule", X_C_Order.PAYMENTRULE_OnCredit);
+				if (OrderType.equals(MOrder.DocSubTypeSO_Prepay))
+				{
+					mTab.setValue("InvoiceRule", X_C_Order.INVOICERULE_Immediate);
+					mTab.setValue("DeliveryRule", X_C_Order.DELIVERYRULE_AfterReceipt);
+				}
+				else if (OrderType.equals(MOrder.DocSubTypeSO_POS))	//  for POS
+					mTab.setValue("PaymentRule", X_C_Order.PAYMENTRULE_Cash);
+				else
+				{
+					//	PaymentRule
+					s = rs.getString(IsSOTrx ? "PaymentRule" : "PaymentRulePO");
+					if (s != null && s.length() != 0)
+						mTab.setValue("PaymentRule", s);
+					//	Payment Term
+					ii = Integer.valueOf(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
+					if (!rs.wasNull())
+						mTab.setValue("C_PaymentTerm_ID", ii);
+					//	InvoiceRule
+					s = rs.getString("InvoiceRule");
+					if (s != null && s.length() != 0)
+						mTab.setValue("InvoiceRule", s);
+					//	DeliveryRule
+					s = rs.getString("DeliveryRule");
+					if (s != null && s.length() != 0)
+						mTab.setValue("DeliveryRule", s);
+					//	FreightCostRule
+					s = rs.getString("FreightCostRule");
+					if (s != null && s.length() != 0)
+						mTab.setValue("FreightCostRule", s);
+					//	DeliveryViaRule
+					s = rs.getString("DeliveryViaRule");
+					if (s != null && s.length() != 0)
+						mTab.setValue("DeliveryViaRule", s);
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			return e.getLocalizedMessage();
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+
+		return null;
+	}
+
+	private String calloutDocBaseType(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		if( value == null)
+			return null;
+
+		String docBaseType = (String)value;
+		if(docBaseType.equals(MContractContent.DOCBASETYPE_SalesOrder)
+				|| docBaseType.equals(MContractContent.DOCBASETYPE_MaterialDelivery)
+				|| docBaseType.equals(MContractContent.DOCBASETYPE_ARInvoice))
+		{
+			mTab.setValue("IsSOTrx", true);
+		}else {
+			mTab.setValue("IsSOTrx", false);
+		}
+
 
 		return null;
 	}
