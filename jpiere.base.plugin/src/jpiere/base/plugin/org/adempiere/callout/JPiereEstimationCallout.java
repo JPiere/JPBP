@@ -280,7 +280,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 			return "";
 		}
 
-		if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateDoc") ){
+		if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateOrdered") ){
 
 			Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
 			if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)
