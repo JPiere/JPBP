@@ -56,299 +56,340 @@ public class JPiereContractContentCallout implements IColumnCallout {
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 
+		String msg = null;
+
 		if(mField.getColumnName().equals("JP_BaseDocDocType_ID"))
 		{
-			if( value == null)
-			{
-				mTab.setValue ("OrderType",  "--");
-			}else{
 
-				Integer JP_BaseDocDocType_ID = (Integer)value;
-				MDocType docType = MDocType.get(ctx, JP_BaseDocDocType_ID.intValue());
-				mTab.setValue("IsSOTrx", docType.isSOTrx());
-
-				if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)
-						|| docType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))
-				{
-					String DocSubTypeSO = docType.getDocSubTypeSO();
-					mTab.setValue ("OrderType", DocSubTypeSO);
-
-					if(!docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_StandardOrder)
-							&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Quotation)
-							&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Proposal) )
-					{
-						String JP_ContractType = (String)Env.getContext(ctx, WindowNo, "JP_ContractType");
-						if(JP_ContractType.equals("PDC"))
-							mTab.setValue("JP_CreateDerivativeDocPolicy", "MA");
-						else if(JP_ContractType.equals("STC"))
-							mTab.setValue("JP_CreateDerivativeDocPolicy", null);
-					}
-
-				}else{
-					mTab.setValue ("OrderType", "--");
-					mTab.setValue("JP_CreateDerivativeDocPolicy", null);
-				}
-
-
-			}
+			msg = calloutJP_BaseDocDocType_ID(ctx, WindowNo, mTab, mField, value, oldValue);
 
 		}else if(mField.getColumnName().equals("JP_ContractCalender_ID")){
 
-			if( value != null)
-			{
-				int JP_ContractContentT_ID =  ((Integer)mTab.getValue("JP_ContractContentT_ID")).intValue();
-				MContractContentT contentTemplate= MContractContentT.get(ctx, JP_ContractContentT_ID);
-				int JP_Contract_ID = ((Integer)mTab.getValue("JP_Contract_ID")).intValue();
-				MContract contract = MContract.get(ctx, JP_Contract_ID);
+			msg = calloutJP_ContractCalender_ID(ctx, WindowNo, mTab, mField, value, oldValue);
 
-				//Calculate JP_ContractProcDate_From
-				if(contentTemplate.getJP_ContractProcPOffset()==0)
-				{
-					mTab.setValue ("JP_ContractProcDate_From", contract.getJP_ContractPeriodDate_From());
+		}else if(mTab.getTableName().equals(MContractContent.Table_Name) &&  mField.getColumnName().equals("JP_ContractContentT_ID")){
 
-				}else{
+			msg = calloutJP_ContractContentT_ID(ctx, WindowNo, mTab, mField, value, oldValue);
 
-					int processPeriodOffset = contentTemplate.getJP_ContractProcPOffset();
-					if(processPeriodOffset > 0)
-						processPeriodOffset++;
-					else
-						processPeriodOffset--;
+		}else if(mTab.getTableName().equals(MContractContentT.Table_Name) &&  mField.getColumnName().equals("JP_ContractContentT_ID")){
 
-					int JP_ContractCalender_ID = ((Integer)value).intValue();
-					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
-					MContractProcPeriod period = calender.getContractProcessPeriod(ctx, contract.getJP_ContractPeriodDate_From(), null ,processPeriodOffset);
-					if(period == null)
-						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
+			msg = calloutSetPriceListInfo(ctx, WindowNo, mTab, mField, value, oldValue);
 
-					mTab.setValue ("JP_ContractProcDate_From", period.getStartDate());
-				}
+		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateDoc")
+				|| mField.getColumnName().equals("JP_ContractContent_ID") || mField.getColumnName().equals("DateInvoiced") ){
 
-				//Calculate JP_ContractProcDate_To
-				if(contentTemplate.getJP_ContractProcPeriodNum()==0)
-				{
-					mTab.setValue ("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
-				}else{
-
-					int JP_ContractCalender_ID = ((Integer)value).intValue();
-					MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
-					MContractProcPeriod period = calender.getContractProcessPeriod(ctx, (Timestamp)mTab.getValue("JP_ContractProcDate_From"), null
-																		,contentTemplate.getJP_ContractProcPeriodNum());
-
-					if(period == null)
-						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
-
-					mTab.setValue ("JP_ContractProcDate_To", period.getEndDate());
-				}
-			}
-
-		}else if(mField.getColumnName().equals("JP_ContractContentT_ID")){
-
-			if( value != null)
-			{
-				int JP_ContractContentT_ID =  Integer.parseInt(value.toString());
-				MContractContentT contentTemplate= MContractContentT.get(ctx, JP_ContractContentT_ID);
-				GridField[] fields = mTab.getFields();
-				String columnName = null;
-				int columnIndex = -1;
-				Object objectValue = null;
-				for(int i = 0 ; i < fields.length; i++)
-				{
-					columnName = fields[i].getColumnName();
-					columnIndex = -1;
-					objectValue = null;
-					if(columnName.equals("JP_ContractContentT_ID")
-							|| columnName.equals("JP_ContractContent_ID")
-							|| columnName.equals("JP_ContractContent_UU")
-							|| columnName.equals("JP_Contract_ID")
-							|| columnName.equals("AD_Client_ID")
-							|| columnName.equals("AD_Org_ID")
-							|| columnName.equals("AD_OrgTrx_ID")
-							|| columnName.equals("IsActive")
-							|| columnName.equals("Created")
-							|| columnName.equals("CreatedBy")
-							|| columnName.equals("Updated")
-							|| columnName.equals("UpdatedBy")
-							|| columnName.equals("TotalLines")
-						)
-					{
-						continue;
-					}
-
-					if(!fields[i].isAllowCopy())
-						continue;
-
-					columnIndex = contentTemplate.get_ColumnIndex(columnName);
-					if(columnIndex > -1)
-					{
-						objectValue = contentTemplate.get_Value(columnIndex);
-						if(objectValue != null)
-						{
-							if(columnName.equals("M_Warehouse_ID"))
-							{
-								MWarehouse wh = MWarehouse.get(Env.getCtx(), Integer.parseInt(objectValue.toString()));
-								int AD_Org_ID =  ((Integer)mTab.getValue("AD_Org_ID")).intValue();
-								if(wh.getAD_Org_ID() == AD_Org_ID)
-								{
-									mTab.setValue(columnName, objectValue);
-								}else {
-
-									MOrgInfo orgInfo = MOrgInfo.get(Env.getCtx(), AD_Org_ID, null);
-									if(orgInfo.getM_Warehouse_ID() > 0)
-									{
-										mTab.setValue(columnName, orgInfo.getM_Warehouse_ID());
-									}
-
-								}
-
-							}else if(columnName.equals("JP_Locator_ID")) {
-
-								MLocator loc = MLocator.get(Env.getCtx(), Integer.parseInt(objectValue.toString()));
-								MWarehouse wh = MWarehouse.get(Env.getCtx(), loc.getM_Warehouse_ID());
-								int AD_Org_ID =  ((Integer)mTab.getValue("AD_Org_ID")).intValue();
-								Object objectM_Warehouse_ID = contentTemplate.get_Value("M_Warehouse_ID");
-								int M_Warehouse_ID = Integer.parseInt(objectM_Warehouse_ID.toString());
-
-								if(wh.getAD_Org_ID() == AD_Org_ID && wh.getM_Warehouse_ID() == M_Warehouse_ID)
-								{
-									mTab.setValue(columnName, objectValue);
-								}
-
-							}else {
-								mTab.setValue(columnName, objectValue);
-							}
-						}
-
-					}else if(columnName.equals("JP_ContractCalender_ID")) {
-
-						int JP_ContractCalenderRef_ID = contentTemplate.getJP_ContractCalenderRef_ID();
-						if(JP_ContractCalenderRef_ID > 0)
-						{
-							MContractCalenderRef   ccr = MContractCalenderRef.get(Env.getCtx(), JP_ContractCalenderRef_ID);
-							MContractCalenderList[]  ccList =  ccr.getContractCalenderList(Env.getCtx(), false, null);
-							if(ccList.length==1)
-							{
-								mTab.setValue("JP_ContractCalender_ID", ccList[0].getJP_ContractCalender_ID());
-							}
-						}
-
-					}else if(columnName.equals("JP_ContractProcess_ID")) {
-
-						int JP_ContractProcessRef_ID = contentTemplate.getJP_ContractProcessRef_ID();
-						if(JP_ContractProcessRef_ID > 0)
-						{
-							MContractProcessRef   cpr = MContractProcessRef.get(Env.getCtx(), JP_ContractProcessRef_ID);
-							MContractProcessList[]  cpList =  cpr.getContractProcessList(Env.getCtx(), false, null);
-							if(cpList.length==1)
-							{
-								mTab.setValue("JP_ContractProcess_ID", cpList[0].getJP_ContractProcess_ID());
-							}
-						}
-					}
-				}//for
-			}
-		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateDoc") ){
-
-			Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
-			if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)
-				return "";
-
-			MPriceList pl = MPriceList.get(ctx, M_PriceList_ID, null);
-			if (pl != null && pl.getM_PriceList_ID() == M_PriceList_ID)
-			{
-
-				//	Tax Included
-				mTab.setValue("IsTaxIncluded", pl.isTaxIncluded());
-				//	Currency
-				mTab.setValue("C_Currency_ID", pl.getC_Currency_ID());
-
-				//	Price Limit Enforce
-				Env.setContext(ctx, WindowNo, "EnforcePriceLimit", pl.isEnforcePriceLimit());
-
-				//PriceList Version
-				Timestamp date = null;
-				if (mTab.getAD_Table_ID() == I_JP_ContractContent.Table_ID)
-					date =(Timestamp)mTab.getValue("DateDoc");
-				else if (mTab.getAD_Table_ID() == I_JP_ContractContentT.Table_ID)
-					date = Env.getContextAsDate(ctx, "@#Date@");
-
-				MPriceListVersion plv = pl.getPriceListVersion(date);
-				if (plv != null && plv.getM_PriceList_Version_ID() > 0) {
-					Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", plv.getM_PriceList_Version_ID());
-				} else {
-					Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", (String) null);
-				}
-
-			}//if
+			msg = calloutSetPriceListInfo(ctx, WindowNo, mTab, mField, value, oldValue);
 
 		}else if(mField.getColumnName().equals("IsAutomaticUpdateJP")){
 
-			boolean  isAutomaticUpdateJP = mTab.getValueAsBoolean("IsAutomaticUpdateJP");
-
-			if(isAutomaticUpdateJP)
-			{
-				Integer JP_Contract_ID = (Integer) mTab.getValue("JP_Contract_ID");
-				MContract contract = new MContract(ctx, JP_Contract_ID.intValue(), null);
-
-				if(contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract))
-				{
-					if(contract.isAutomaticUpdateJP())
-					{
-						String JP_ContractProcStatus = (String) mTab.getValue("JP_ContractProcStatus");
-
-						if(JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
-								|| JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
-						{
-							;//Noting to do;
-						}else {
-
-							String JP_ContractC_AutoUpdatePolicy = (String) mTab.getValue("JP_ContractC_AutoUpdatePolicy");
-							String DocStatus = (String) mTab.getValue("DocStatus");
-
-							if(JP_ContractC_AutoUpdatePolicy == null)
-							{
-								if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
-								{
-									;//Noting to do;
-
-								}else {
-									mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
-								}
-
-							}else if(JP_ContractC_AutoUpdatePolicy.equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)){
-
-								if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
-								{
-									;//Noting to do;
-								}else if(mTab.getValueAsBoolean("IsRenewedContractContentJP")) {
-									;//Noting to do;
-								}else {
-									mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
-								}
-
-							}else if(JP_ContractC_AutoUpdatePolicy.equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
-
-								if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
-								{
-									;//Noting to do;
-
-								}else {
-									mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
-								}
-
-							}
-						}
-
-					}else {
-						return Msg.getMsg(ctx, "JP_IsAutomaticUpdateJP_UpdateError");
-					}
-				}
-			}
+			msg = calloutIsAutomaticUpdateJP(ctx, WindowNo, mTab, mField, value, oldValue);
 
 		}
 
+		return msg;
 
-
-		return "";
 	}
 
+	private String calloutJP_BaseDocDocType_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		if( value == null)
+		{
+			mTab.setValue ("OrderType",  "--");
+		}else{
+
+			Integer JP_BaseDocDocType_ID = (Integer)value;
+			MDocType docType = MDocType.get(ctx, JP_BaseDocDocType_ID.intValue());
+			mTab.setValue("IsSOTrx", docType.isSOTrx());
+
+			if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)
+					|| docType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))
+			{
+				String DocSubTypeSO = docType.getDocSubTypeSO();
+				mTab.setValue ("OrderType", DocSubTypeSO);
+
+				if(!docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_StandardOrder)
+						&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Quotation)
+						&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Proposal) )
+				{
+					String JP_ContractType = (String)Env.getContext(ctx, WindowNo, "JP_ContractType");
+					if(JP_ContractType.equals("PDC"))
+						mTab.setValue("JP_CreateDerivativeDocPolicy", "MA");
+					else if(JP_ContractType.equals("STC"))
+						mTab.setValue("JP_CreateDerivativeDocPolicy", null);
+				}
+
+			}else{
+				mTab.setValue ("OrderType", "--");
+				mTab.setValue("JP_CreateDerivativeDocPolicy", null);
+			}
+
+
+		}
+
+		return null;
+	}
+
+	private String calloutJP_ContractCalender_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		if( value != null)
+		{
+			int JP_ContractContentT_ID =  ((Integer)mTab.getValue("JP_ContractContentT_ID")).intValue();
+			MContractContentT contentTemplate= MContractContentT.get(ctx, JP_ContractContentT_ID);
+			int JP_Contract_ID = ((Integer)mTab.getValue("JP_Contract_ID")).intValue();
+			MContract contract = MContract.get(ctx, JP_Contract_ID);
+
+			//Calculate JP_ContractProcDate_From
+			if(contentTemplate.getJP_ContractProcPOffset()==0)
+			{
+				mTab.setValue ("JP_ContractProcDate_From", contract.getJP_ContractPeriodDate_From());
+
+			}else{
+
+				int processPeriodOffset = contentTemplate.getJP_ContractProcPOffset();
+				if(processPeriodOffset > 0)
+					processPeriodOffset++;
+				else
+					processPeriodOffset--;
+
+				int JP_ContractCalender_ID = ((Integer)value).intValue();
+				MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+				MContractProcPeriod period = calender.getContractProcessPeriod(ctx, contract.getJP_ContractPeriodDate_From(), null ,processPeriodOffset);
+				if(period == null)
+					return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
+
+				mTab.setValue ("JP_ContractProcDate_From", period.getStartDate());
+			}
+
+			//Calculate JP_ContractProcDate_To
+			if(contentTemplate.getJP_ContractProcPeriodNum()==0)
+			{
+				mTab.setValue ("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+			}else{
+
+				int JP_ContractCalender_ID = ((Integer)value).intValue();
+				MContractCalender calender = MContractCalender.get(ctx, JP_ContractCalender_ID);
+				MContractProcPeriod period = calender.getContractProcessPeriod(ctx, (Timestamp)mTab.getValue("JP_ContractProcDate_From"), null
+																	,contentTemplate.getJP_ContractProcPeriodNum());
+
+				if(period == null)
+					return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ContractProcPeriod_ID");
+
+				mTab.setValue ("JP_ContractProcDate_To", period.getEndDate());
+			}
+		}
+
+		return null;
+	}
+
+	private String calloutJP_ContractContentT_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		if( value != null)
+		{
+			int JP_ContractContentT_ID =  Integer.parseInt(value.toString());
+			MContractContentT contentTemplate= MContractContentT.get(ctx, JP_ContractContentT_ID);
+			GridField[] fields = mTab.getFields();
+			String columnName = null;
+			int columnIndex = -1;
+			Object objectValue = null;
+			for(int i = 0 ; i < fields.length; i++)
+			{
+				columnName = fields[i].getColumnName();
+				columnIndex = -1;
+				objectValue = null;
+				if(columnName.equals("JP_ContractContentT_ID")
+						|| columnName.equals("JP_ContractContent_ID")
+						|| columnName.equals("JP_ContractContent_UU")
+						|| columnName.equals("JP_Contract_ID")
+						|| columnName.equals("AD_Client_ID")
+						|| columnName.equals("AD_Org_ID")
+						|| columnName.equals("AD_OrgTrx_ID")
+						|| columnName.equals("IsActive")
+						|| columnName.equals("Created")
+						|| columnName.equals("CreatedBy")
+						|| columnName.equals("Updated")
+						|| columnName.equals("UpdatedBy")
+						|| columnName.equals("TotalLines")
+					)
+				{
+					continue;
+				}
+
+				if(!fields[i].isAllowCopy())
+					continue;
+
+				columnIndex = contentTemplate.get_ColumnIndex(columnName);
+				if(columnIndex > -1)
+				{
+					objectValue = contentTemplate.get_Value(columnIndex);
+					if(objectValue != null)
+					{
+						if(columnName.equals("M_Warehouse_ID"))
+						{
+							MWarehouse wh = MWarehouse.get(Env.getCtx(), Integer.parseInt(objectValue.toString()));
+							int AD_Org_ID =  ((Integer)mTab.getValue("AD_Org_ID")).intValue();
+							if(wh.getAD_Org_ID() == AD_Org_ID)
+							{
+								mTab.setValue(columnName, objectValue);
+							}else {
+
+								MOrgInfo orgInfo = MOrgInfo.get(Env.getCtx(), AD_Org_ID, null);
+								if(orgInfo.getM_Warehouse_ID() > 0)
+								{
+									mTab.setValue(columnName, orgInfo.getM_Warehouse_ID());
+								}
+
+							}
+
+						}else if(columnName.equals("JP_Locator_ID")) {
+
+							MLocator loc = MLocator.get(Env.getCtx(), Integer.parseInt(objectValue.toString()));
+							MWarehouse wh = MWarehouse.get(Env.getCtx(), loc.getM_Warehouse_ID());
+							int AD_Org_ID =  ((Integer)mTab.getValue("AD_Org_ID")).intValue();
+							Object objectM_Warehouse_ID = contentTemplate.get_Value("M_Warehouse_ID");
+							int M_Warehouse_ID = Integer.parseInt(objectM_Warehouse_ID.toString());
+
+							if(wh.getAD_Org_ID() == AD_Org_ID && wh.getM_Warehouse_ID() == M_Warehouse_ID)
+							{
+								mTab.setValue(columnName, objectValue);
+							}
+
+						}else {
+							mTab.setValue(columnName, objectValue);
+						}
+					}
+
+				}else if(columnName.equals("JP_ContractCalender_ID")) {
+
+					int JP_ContractCalenderRef_ID = contentTemplate.getJP_ContractCalenderRef_ID();
+					if(JP_ContractCalenderRef_ID > 0)
+					{
+						MContractCalenderRef   ccr = MContractCalenderRef.get(Env.getCtx(), JP_ContractCalenderRef_ID);
+						MContractCalenderList[]  ccList =  ccr.getContractCalenderList(Env.getCtx(), false, null);
+						if(ccList.length==1)
+						{
+							mTab.setValue("JP_ContractCalender_ID", ccList[0].getJP_ContractCalender_ID());
+						}
+					}
+
+				}else if(columnName.equals("JP_ContractProcess_ID")) {
+
+					int JP_ContractProcessRef_ID = contentTemplate.getJP_ContractProcessRef_ID();
+					if(JP_ContractProcessRef_ID > 0)
+					{
+						MContractProcessRef   cpr = MContractProcessRef.get(Env.getCtx(), JP_ContractProcessRef_ID);
+						MContractProcessList[]  cpList =  cpr.getContractProcessList(Env.getCtx(), false, null);
+						if(cpList.length==1)
+						{
+							mTab.setValue("JP_ContractProcess_ID", cpList[0].getJP_ContractProcess_ID());
+						}
+					}
+				}
+			}//for
+		}
+		return null;
+	}
+
+	private String calloutSetPriceListInfo(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
+		if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)
+			return "";
+
+		MPriceList pl = MPriceList.get(ctx, M_PriceList_ID, null);
+		if (pl != null && pl.getM_PriceList_ID() == M_PriceList_ID)
+		{
+
+			//	Tax Included
+			mTab.setValue("IsTaxIncluded", pl.isTaxIncluded());
+			//	Currency
+			mTab.setValue("C_Currency_ID", pl.getC_Currency_ID());
+
+			//	Price Limit Enforce
+			Env.setContext(ctx, WindowNo, "EnforcePriceLimit", pl.isEnforcePriceLimit());
+
+			//PriceList Version
+			Timestamp date = null;
+			if (mTab.getAD_Table_ID() == I_JP_ContractContent.Table_ID)
+				date =(Timestamp)mTab.getValue("DateDoc");
+			else if (mTab.getAD_Table_ID() == I_JP_ContractContentT.Table_ID)
+				date = (Timestamp)mTab.getValue("DateInvoiced");
+
+			MPriceListVersion plv = pl.getPriceListVersion(date);
+			if (plv != null && plv.getM_PriceList_Version_ID() > 0) {
+				Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", plv.getM_PriceList_Version_ID());
+			} else {
+				Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", (String) null);
+			}
+
+		}//if
+
+		return null;
+	}
+
+	private String calloutIsAutomaticUpdateJP(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		boolean  isAutomaticUpdateJP = mTab.getValueAsBoolean("IsAutomaticUpdateJP");
+
+		if(isAutomaticUpdateJP)
+		{
+			Integer JP_Contract_ID = (Integer) mTab.getValue("JP_Contract_ID");
+			MContract contract = new MContract(ctx, JP_Contract_ID.intValue(), null);
+
+			if(contract.getJP_ContractType().contentEquals(MContract.JP_CONTRACTTYPE_PeriodContract))
+			{
+				if(contract.isAutomaticUpdateJP())
+				{
+					String JP_ContractProcStatus = (String) mTab.getValue("JP_ContractProcStatus");
+
+					if(JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
+							|| JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
+					{
+						;//Noting to do;
+					}else {
+
+						String JP_ContractC_AutoUpdatePolicy = (String) mTab.getValue("JP_ContractC_AutoUpdatePolicy");
+						String DocStatus = (String) mTab.getValue("DocStatus");
+
+						if(JP_ContractC_AutoUpdatePolicy == null)
+						{
+							if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
+							{
+								;//Noting to do;
+
+							}else {
+								mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+							}
+
+						}else if(JP_ContractC_AutoUpdatePolicy.equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)){
+
+							if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
+							{
+								;//Noting to do;
+							}else if(mTab.getValueAsBoolean("IsRenewedContractContentJP")) {
+								;//Noting to do;
+							}else {
+								mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+							}
+
+						}else if(JP_ContractC_AutoUpdatePolicy.equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate)) {
+
+							if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
+							{
+								;//Noting to do;
+
+							}else {
+								mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
+							}
+
+						}
+					}
+
+				}else {
+					return Msg.getMsg(ctx, "JP_IsAutomaticUpdateJP_UpdateError");
+				}
+			}
+		}
+
+		return null;
+	}
 }
