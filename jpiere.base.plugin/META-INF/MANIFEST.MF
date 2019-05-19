@@ -7,15 +7,12 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  org.adempiere.ui.zk;bundle-version="2.1.0",
  zcommon;bundle-version="8.0.1",
  zk,
- zul;bundle-version="8.0.1",
- org.apache.ant
+ zul;bundle-version="8.0.1"
 Bundle-Vendor: OSS ERP Solutions
-Import-Package: org.apache.tools.ant.taskdefs;version="1.10.5",
- org.compiere.apps,
+Import-Package: org.compiere.apps,
  org.compiere.grid,
  org.compiere.minigrid,
- org.compiere.model,
- org.slf4j;version="1.7.25"
+ org.compiere.model
 Service-Component: OSGI-INF/*.xml
 Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
