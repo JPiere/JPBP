@@ -9,7 +9,6 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  zk,
  zul;bundle-version="8.0.1",
  org.apache.ant
-Bundle-Activator: org.adempiere.plugin.utils.AdempiereActivator
 Bundle-Vendor: OSS ERP Solutions
 Import-Package: org.apache.tools.ant.taskdefs;version="1.10.5",
  org.compiere.apps,
