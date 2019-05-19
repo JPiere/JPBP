@@ -56,7 +56,7 @@ public class JPiereRecognitionCallout implements IColumnCallout {
 			mTab.setValue("JP_ContractProcPeriod_ID", io.get_Value("JP_ContractProcPeriod_ID"));
 
 
-		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateDoc") ){
+		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateOrdered") || mField.getColumnName().equals("JP_Recognition_ID") ){
 
 			Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
 			if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)

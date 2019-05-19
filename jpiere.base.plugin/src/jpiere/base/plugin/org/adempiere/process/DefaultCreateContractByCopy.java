@@ -105,9 +105,35 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 		PO.copyValues(from_ContractContent, to_ContractContent);
 		MContract from_Contract = new MContract(getCtx(), from_ContractContent.getJP_Contract_ID(), get_TrxName());
 
-		to_ContractContent.setAD_Org_ID(to_Contract.getAD_Org_ID());
-		to_ContractContent.setAD_OrgTrx_ID(to_Contract.getAD_OrgTrx_ID());
-		to_ContractContent.setJP_Contract_ID(to_Contract.getJP_Contract_ID());
+		if(isRenewContractContent)
+		{
+			to_ContractContent.setAD_Org_ID(from_Contract.getAD_Org_ID());
+			to_ContractContent.setAD_OrgTrx_ID(from_Contract.getAD_OrgTrx_ID());
+			to_ContractContent.setJP_Contract_ID(from_Contract.getJP_Contract_ID());
+
+		}else {
+
+			if(to_Contract != null) // Process was kicked from Window;
+			{
+				to_ContractContent.setAD_Org_ID(to_Contract.getAD_Org_ID());
+				to_ContractContent.setAD_OrgTrx_ID(to_Contract.getAD_OrgTrx_ID());
+				to_ContractContent.setJP_Contract_ID(to_Contract.getJP_Contract_ID());
+
+			}else {
+
+				if(m_ContractLog == null)
+				{
+					throw new Exception( Msg.getMsg(getCtx(), "JP_UnexpectedError") + " - " + Msg.getElement(getCtx(), "CopyFrom") + " : "
+							+ Msg.getElement(getCtx(), "JP_ContractContent_ID") + "_" + from_ContractContent.getDocumentNo() + " >>> " + "DefaultCreateContractByCopy#createContractContent()" );
+				}else {
+
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, to_ContractContent, "DefaultCreateContractByCopy#createContractContent()");
+
+				}
+
+				return ;
+			}
+		}
 
 		to_ContractContent.setJP_ContractContentT_ID(from_ContractContent.getJP_ContractContentT_ID());
 		to_ContractContent.setC_DocType_ID(from_ContractContent.getC_DocType_ID());
@@ -210,7 +236,8 @@ public class DefaultCreateContractByCopy extends AbstractCreateContractByCopy {
 
 		to_ContractContent.setC_Currency_ID(to_ContractContent.getM_PriceList().getC_Currency_ID());
 
-		to_ContractContent.setJP_PreContractContent_ID(from_ContractContent.getJP_ContractContent_ID());
+		if(isRenewContractContent)
+			to_ContractContent.setJP_PreContractContent_ID(from_ContractContent.getJP_ContractContent_ID());
 
 		try {
 			to_ContractContent.saveEx(get_TrxName());
