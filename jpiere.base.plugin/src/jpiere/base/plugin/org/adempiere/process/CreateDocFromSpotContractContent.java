@@ -23,6 +23,7 @@ import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -79,6 +80,14 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 			throw new Exception(Msg.getMsg(getCtx(), "JP_SpotContractOnly"));
 		}
 
+
+		if(m_ContractContent.getDocStatus().equals(DocAction.STATUS_Reversed)
+				|| m_ContractContent.getDocStatus().equals(DocAction.STATUS_Voided))
+		{
+			throw new Exception(Msg.getMsg(getCtx(), "JP_NotValidDocStatus"));
+		}
+
+
 		if(m_ContractContent.getDocBaseType().equals(MContractContent.DOCBASETYPE_SalesOrder)
 			|| m_ContractContent.getDocBaseType().equals(MContractContent.DOCBASETYPE_PurchaseOrder))
 		{
@@ -101,17 +110,22 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 
 	private void createOrder() throws Exception
 	{
+
 		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
 		PO.copyValues(m_ContractContent, order);
 
 		order.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		order.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
+		order.setC_DocType_ID(m_ContractContent.getJP_BaseDocDocType_ID());
 		if(order.getC_DocType().isDocNoControlled())
 		{
 			order.setDocumentNo(null);
 		}
 		order.set_ValueNoCheck("JP_Contract_ID", m_ContractContent.getJP_Contract_ID());
 		order.set_ValueNoCheck("JP_ContractContent_ID", m_ContractContent.getJP_ContractContent_ID());
+		order.setDocStatus(DocAction.STATUS_Drafted);
+		order.setDocAction(DocAction.ACTION_Complete);
+		order.setProcessed(false);
 
 		order.saveEx(get_TrxName());
 
@@ -135,7 +149,7 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 				order.saveEx(get_TrxName());
 		}
 
-		addBufferLog(0, null, null, order.getDocumentNo(), MOrder.Table_ID, order.getC_Order_ID());
+		addBufferLog(0, null, null, Msg.getElement(getCtx(), "DocumentNo") + " : " + order.getDocumentNo(), MOrder.Table_ID, order.getC_Order_ID());
 
 	}
 
@@ -143,6 +157,14 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 	{
 		MOrderLine oLine = new MOrderLine(order);
 		PO.copyValues(cLine, oLine);
+		oLine.setQtyEntered(cLine.getQtyEntered());
+		oLine.setQtyOrdered(cLine.getQtyOrdered());
+		oLine.setQtyInvoiced(Env.ZERO);
+		oLine.setQtyDelivered(Env.ZERO);
+		oLine.set_ValueNoCheck("JP_QtyRecognized", Env.ZERO);
+		oLine.setQtyReserved(Env.ZERO);
+		oLine.set_ValueNoCheck("JP_ContractLine_ID", cLine.getJP_ContractLine_ID());
+		oLine.setProcessed(false);
 		oLine.saveEx(get_TrxName());
 	}
 
@@ -155,12 +177,17 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 		invoice.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 		invoice.setDateInvoiced(m_ContractContent.getDateDoc());
 		invoice.setC_DocTypeTarget_ID(m_ContractContent.getJP_BaseDocDocType_ID());
+		invoice.setC_DocType_ID(m_ContractContent.getJP_BaseDocDocType_ID());
 		if(invoice.getC_DocType().isDocNoControlled())
 		{
 			invoice.setDocumentNo(null);
 		}
 		invoice.set_ValueNoCheck("JP_Contract_ID", m_ContractContent.getJP_Contract_ID());
 		invoice.set_ValueNoCheck("JP_ContractContent_ID", m_ContractContent.getJP_ContractContent_ID());
+		invoice.setDocStatus(DocAction.STATUS_Drafted);
+		invoice.setDocAction(DocAction.ACTION_Complete);
+		invoice.setProcessed(false);
+
 		invoice.saveEx(get_TrxName());
 
 		MContractLine[] cLines = m_ContractContent.getLines();
@@ -183,13 +210,17 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 				invoice.saveEx(get_TrxName());
 		}
 
-		addBufferLog(0, null, null, invoice.getDocumentNo(), MInvoice.Table_ID, invoice.getC_Invoice_ID());
+		addBufferLog(0, null, null, Msg.getElement(getCtx(), "DocumentNo") + " : " + invoice.getDocumentNo(), MInvoice.Table_ID, invoice.getC_Invoice_ID());
 	}
 
 	private void createInvoiceLine(MInvoice invoice, MContractLine cLine)
 	{
 		MInvoiceLine iLine = new MInvoiceLine(invoice);
 		PO.copyValues(cLine, iLine);
+		iLine.setQtyEntered(cLine.getQtyEntered());
+		iLine.setQtyInvoiced(cLine.getQtyOrdered());
+		iLine.set_ValueNoCheck("JP_ContractLine_ID", cLine.getJP_ContractLine_ID());
+		iLine.setProcessed(false);
 		iLine.saveEx(get_TrxName());
 	}
 

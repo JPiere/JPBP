@@ -896,6 +896,7 @@ public class JPiereProductPricing extends MProductPricing
 	public void setPriceDate(Timestamp priceDate)
 	{
 		super.setPriceDate(priceDate);
+		m_PriceDate = priceDate;
 		m_calculated = false;
 	}	//	setPriceDate
 

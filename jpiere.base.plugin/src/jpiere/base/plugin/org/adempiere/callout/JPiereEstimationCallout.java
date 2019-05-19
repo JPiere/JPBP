@@ -31,6 +31,8 @@ import org.compiere.model.X_C_Order;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
+import jpiere.base.plugin.org.adempiere.model.MEstimation;
+
 /**
  *
  *  JPiere Estimation Document CallOut
@@ -280,7 +282,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 			return "";
 		}
 
-		if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateDoc") ){
+		if(mField.getColumnName().equals(MEstimation.COLUMNNAME_M_PriceList_ID) || mField.getColumnName().equals(MEstimation.COLUMNNAME_DateOrdered)  || mField.getColumnName().equals(MEstimation.COLUMNNAME_JP_Estimation_ID) ){
 
 			Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
 			if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)

@@ -94,6 +94,7 @@ public class DefaultAutoRenewContractProcess extends AbstractContractProcess {
 
 									//Outside the specified period
 									createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, null, null,Msg.getMsg(getCtx(),"JP_OutsidePperiod"));
+									continue;
 								}
 
 								String className = contractContents[i].getJP_ContractProcess().getJP_ContractAutoRenewClass();
