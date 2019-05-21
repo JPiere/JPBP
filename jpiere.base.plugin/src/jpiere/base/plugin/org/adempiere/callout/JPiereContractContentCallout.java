@@ -36,6 +36,7 @@ import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.I_JP_ContractContent;
 import jpiere.base.plugin.org.adempiere.model.I_JP_ContractContentT;
@@ -110,6 +111,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 		if( value == null)
 		{
 			mTab.setValue ("OrderType",  "--");
+
 		}else{
 
 			Integer JP_BaseDocDocType_ID = (Integer)value;
@@ -121,6 +123,11 @@ public class JPiereContractContentCallout implements IColumnCallout {
 			{
 				String DocSubTypeSO = docType.getDocSubTypeSO();
 				mTab.setValue ("OrderType", DocSubTypeSO);
+				if(Util.isEmpty(DocSubTypeSO))
+				{
+					return Msg.getMsg(ctx,"JP_Null") + Msg.getElement(ctx, "DocSubTypeSO") +" - " + Msg.getElement(ctx, "C_DocType_ID")  ;
+				}
+
 
 				if(!docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_StandardOrder)
 						&& !docType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_Quotation)
