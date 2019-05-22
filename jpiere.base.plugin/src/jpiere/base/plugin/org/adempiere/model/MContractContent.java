@@ -693,7 +693,15 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 				if(getDocBaseType().equals("POO") || getDocBaseType().equals("SOO") )
 				{
-					setOrderType(docType.getDocSubTypeSO());
+					String DocSubTypeSO = docType.getDocSubTypeSO();
+					if(Util.isEmpty(DocSubTypeSO))
+					{
+						log.saveError("Error",Msg.getMsg(getCtx(),"JP_Null") + Msg.getElement(getCtx(), "DocSubTypeSO") +" - " + Msg.getElement(getCtx(), "C_DocType_ID") );
+						return false;
+
+					}else {
+						setOrderType(docType.getDocSubTypeSO());
+					}
 
 					if(getJP_CreateDerivativeDocPolicy() != null
 							&& !getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
