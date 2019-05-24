@@ -828,7 +828,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 
 	private long getContractDays(Timestamp startDate, Timestamp endDate)
 	{
-		return Duration.between(startDate.toLocalDateTime(), endDate.toLocalDateTime()).toDays();
+		return Duration.between(startDate.toLocalDateTime(), endDate.toLocalDateTime()).toDays()+1;
 
 	}//getContractDays
 
