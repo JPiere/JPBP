@@ -564,7 +564,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		else
 			uom = MUOM.get(getCtx(),contractLine.getC_UOM_ID());
 
-		if(isFirstPeriod && isLastPeriod)
+		if(isFirstPeriod && isLastPeriod)//All Qty
 		{
 			contractPSInOutLine.setQtyEntered(contractLine.getMovementQty());
 			contractPSInOutLine.setC_UOM_ID(uom.getC_UOM_ID());
@@ -593,24 +593,60 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 
 		}else if(!isFirstPeriod && isLastPeriod){
 
-			if(m_ContractContent.getJP_ContractProcDate_To().compareTo(contractProcPeriod.getEndDate()) == 0)
+			//Remain Qty
+			BigDecimal qtyOrdered = contractPSLine.getQtyOrdered();
+			BigDecimal totalMovementQty = Env.ZERO;
+
+			String sql = "SELECT COALESCE(SUM(MovementQty),0) FROM JP_ContractPSInOutLine WHERE JP_ContractPSLine_ID=? ";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
 			{
-				contractPSInOutLine.setQtyEntered(contractLine.getMovementQty());
-				contractPSInOutLine.setC_UOM_ID(uom.getC_UOM_ID());
-				contractPSInOutLine.setMovementQty(contractLine.getMovementQty());
-
-			}else {//per diem
-
-				BigDecimal umerator = new BigDecimal(getContractDays(contractProcPeriod.getStartDate(), m_ContractContent.getJP_ContractProcDate_To()));
-				BigDecimal denominator = new BigDecimal(contractProcPeriod.getContractProcPeriodDays());
-
-				BigDecimal qtyEntered = umerator.divide(denominator, uom.getStdPrecision()+2, RoundingMode.HALF_UP).multiply(contractLine.getMovementQty());
-				qtyEntered = qtyEntered.divide(Env.ONE,uom.getStdPrecision(), RoundingMode.HALF_UP);
-				contractPSInOutLine.setQtyEntered(qtyEntered);
-				contractPSInOutLine.setC_UOM_ID(uom.getC_UOM_ID());
-				contractPSInOutLine.setMovementQty(qtyEntered);
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setInt(1, contractPSLine.getJP_ContractPSLine_ID());
+				rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					totalMovementQty = rs.getBigDecimal(1);
+				}
 
 			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+
+			BigDecimal qtyLastPeriod =  qtyOrdered.subtract(totalMovementQty);
+
+			contractPSInOutLine.setQtyEntered(qtyLastPeriod);
+			contractPSInOutLine.setC_UOM_ID(uom.getC_UOM_ID());
+			contractPSInOutLine.setMovementQty(qtyLastPeriod);
+
+			//per diem
+//			if(m_ContractContent.getJP_ContractProcDate_To().compareTo(contractProcPeriod.getEndDate()) == 0)
+//			{
+//				contractPSInOutLine.setQtyEntered(contractLine.getMovementQty());
+//				contractPSInOutLine.setC_UOM_ID(uom.getC_UOM_ID());
+//				contractPSInOutLine.setMovementQty(contractLine.getMovementQty());
+//
+//			}else {
+//
+//				BigDecimal umerator = new BigDecimal(getContractDays(contractProcPeriod.getStartDate(), m_ContractContent.getJP_ContractProcDate_To()));
+//				BigDecimal denominator = new BigDecimal(contractProcPeriod.getContractProcPeriodDays());
+//
+//				BigDecimal qtyEntered = umerator.divide(denominator, uom.getStdPrecision()+2, RoundingMode.HALF_UP).multiply(contractLine.getMovementQty());
+//				qtyEntered = qtyEntered.divide(Env.ONE,uom.getStdPrecision(), RoundingMode.HALF_UP);
+//				contractPSInOutLine.setQtyEntered(qtyEntered);
+//				contractPSInOutLine.setC_UOM_ID(uom.getC_UOM_ID());
+//				contractPSInOutLine.setMovementQty(qtyEntered);
+//
+//			}
 
 		}else if(!isFirstPeriod && !isLastPeriod) {
 			contractPSInOutLine.setQtyEntered(contractLine.getMovementQty());
@@ -753,7 +789,7 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 			uom = MUOM.get(getCtx(),contractLine.getC_UOM_ID());
 
 		//Set Qty
-		if(isFirstPeriod && isLastPeriod)
+		if(isFirstPeriod && isLastPeriod)//All Qty
 		{
 			contractPSInvoiceLine.setQtyEntered(contractLine.getQtyInvoiced());
 			contractPSInvoiceLine.setC_UOM_ID(uom.getC_UOM_ID());
@@ -782,24 +818,61 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 
 		}else if(!isFirstPeriod && isLastPeriod){
 
-			if(m_ContractContent.getJP_ContractProcDate_To().compareTo(contractProcPeriod.getEndDate()) == 0)
+			//Remain Qty
+			BigDecimal qtyOrdered = contractPSLine.getQtyOrdered();
+			BigDecimal totalQtyInvoiced = Env.ZERO;
+
+			String sql = "SELECT COALESCE(SUM(QtyInvoiced),0) FROM JP_ContractPSInvoiceLine WHERE JP_ContractPSLine_ID=? ";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
 			{
-				contractPSInvoiceLine.setQtyEntered(contractLine.getQtyInvoiced());
-				contractPSInvoiceLine.setC_UOM_ID(uom.getC_UOM_ID());
-				contractPSInvoiceLine.setQtyInvoiced(contractLine.getQtyInvoiced());
-
-			}else {//per diem
-
-				BigDecimal umerator = new BigDecimal(getContractDays(contractProcPeriod.getStartDate(), m_ContractContent.getJP_ContractProcDate_To()));
-				BigDecimal denominator = new BigDecimal(contractProcPeriod.getContractProcPeriodDays());
-
-				BigDecimal qtyEntered = umerator.divide(denominator, uom.getStdPrecision()+2, RoundingMode.HALF_UP).multiply(contractLine.getQtyInvoiced());
-				qtyEntered = qtyEntered.divide(Env.ONE,uom.getStdPrecision(), RoundingMode.HALF_UP);
-				contractPSInvoiceLine.setQtyEntered(qtyEntered);
-				contractPSInvoiceLine.setC_UOM_ID(uom.getC_UOM_ID());
-				contractPSInvoiceLine.setQtyInvoiced(qtyEntered);
+				pstmt = DB.prepareStatement(sql, get_TrxName());
+				pstmt.setInt(1, contractPSLine.getJP_ContractPSLine_ID());
+				rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					totalQtyInvoiced = rs.getBigDecimal(1);
+				}
 
 			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+
+			BigDecimal qtyLastPeriod =  qtyOrdered.subtract(totalQtyInvoiced);
+
+			contractPSInvoiceLine.setQtyEntered(qtyLastPeriod);
+			contractPSInvoiceLine.setC_UOM_ID(uom.getC_UOM_ID());
+			contractPSInvoiceLine.setQtyInvoiced(qtyLastPeriod);
+
+
+			//per diem
+//			if(m_ContractContent.getJP_ContractProcDate_To().compareTo(contractProcPeriod.getEndDate()) == 0)
+//			{
+//				contractPSInvoiceLine.setQtyEntered(contractLine.getQtyInvoiced());
+//				contractPSInvoiceLine.setC_UOM_ID(uom.getC_UOM_ID());
+//				contractPSInvoiceLine.setQtyInvoiced(contractLine.getQtyInvoiced());
+//
+//			}else {
+
+//				BigDecimal umerator = new BigDecimal(getContractDays(contractProcPeriod.getStartDate(), m_ContractContent.getJP_ContractProcDate_To()));
+//				BigDecimal denominator = new BigDecimal(contractProcPeriod.getContractProcPeriodDays());
+//
+//				BigDecimal qtyEntered = umerator.divide(denominator, uom.getStdPrecision()+2, RoundingMode.HALF_UP).multiply(contractLine.getQtyInvoiced());
+//				qtyEntered = qtyEntered.divide(Env.ONE,uom.getStdPrecision(), RoundingMode.HALF_UP);
+//				contractPSInvoiceLine.setQtyEntered(qtyEntered);
+//				contractPSInvoiceLine.setC_UOM_ID(uom.getC_UOM_ID());
+//				contractPSInvoiceLine.setQtyInvoiced(qtyEntered);
+//
+//			}
 
 		}else if(!isFirstPeriod && !isLastPeriod) {
 			contractPSInvoiceLine.setQtyEntered(contractLine.getQtyInvoiced());
