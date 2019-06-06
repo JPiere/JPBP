@@ -30,6 +30,8 @@ import org.compiere.util.Util;
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
+import jpiere.base.plugin.org.adempiere.model.MOrderJP;
 
 
 /**
@@ -111,7 +113,7 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 	private void createOrder() throws Exception
 	{
 
-		MOrder order = new MOrder(getCtx(), 0, get_TrxName());
+		MOrderJP order = new MOrderJP(getCtx(), 0, get_TrxName());
 		PO.copyValues(m_ContractContent, order);
 
 		order.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
@@ -171,7 +173,7 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 
 	private void createInvoice() throws Exception
 	{
-		MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
+		MInvoiceJP invoice = new MInvoiceJP(getCtx(), 0, get_TrxName());
 		PO.copyValues(m_ContractContent, invoice);
 
 		invoice.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
