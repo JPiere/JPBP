@@ -629,6 +629,7 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 					MBPartnerLocation bpLocation = new MBPartnerLocation(getCtx(),C_BPartner_Location_ID,get_TrxName());
 					MLocation loc = bpLocation.getLocation(false);
 					MCountry country = MCountry.get(getCtx(), loc.getC_Country_ID());
+					String address = "";
 					String postal = loc.getPostal();
 					if(!Util.isEmpty(postal))
 					{
@@ -646,13 +647,22 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 								postal = "〒" + postal + "-0000";
 						}
 
-						setJP_BP_Address(postal + " " + loc.getAddress1() + loc.getAddress2());
-
-					}else{
-						setJP_BP_Address(loc.getAddress1() + loc.getAddress2());
 					}
 
+					if(!Util.isEmpty(postal))
+						address = postal + " ";
+
+					if(!Util.isEmpty(loc.getAddress1()))
+						address = address + loc.getAddress1() ;
+
+					if(!Util.isEmpty(loc.getAddress2()))
+						address = address + loc.getAddress2() ;
+
+					if(!Util.isEmpty(address))
+						setJP_BP_Address(address);
+
 				}
+
 			}//Address
 
 			if(Util.isEmpty(getJP_BP_User_Name()))
