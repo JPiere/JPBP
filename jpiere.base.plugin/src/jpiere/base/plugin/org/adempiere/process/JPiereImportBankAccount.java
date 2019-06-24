@@ -288,7 +288,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				imp.setB_InTransit_Acct(B_InTransit_Acct);
 				if(acct.getB_InTransit_Acct() != B_InTransit_Acct)
 				{
-					acct.setB_Asset_Acct(B_InTransit_Acct);
+					acct.setB_InTransit_Acct(B_InTransit_Acct);
 					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_InTransit_Acct");
 
 					if(Util.isEmpty(imp.getI_ErrorMsg()))
@@ -310,7 +310,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				imp.setB_PaymentSelect_Acct(B_PaymentSelect_Acct);
 				if(acct.getB_PaymentSelect_Acct() != B_PaymentSelect_Acct)
 				{
-					acct.setB_Asset_Acct(B_PaymentSelect_Acct);
+					acct.setB_PaymentSelect_Acct(B_PaymentSelect_Acct);
 					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_PaymentSelect_Acct");
 
 					if(Util.isEmpty(imp.getI_ErrorMsg()))
@@ -332,7 +332,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				imp.setB_UnallocatedCash_Acct(B_UnallocatedCash_Acct);
 				if(acct.getB_UnallocatedCash_Acct() != B_UnallocatedCash_Acct)
 				{
-					acct.setB_Asset_Acct(B_UnallocatedCash_Acct);
+					acct.setB_UnallocatedCash_Acct(B_UnallocatedCash_Acct);
 					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_UnallocatedCash_Acct");
 
 					if(Util.isEmpty(imp.getI_ErrorMsg()))
@@ -354,7 +354,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				imp.setB_InterestExp_Acct(B_InterestExp_Acct);
 				if(acct.getB_InterestExp_Acct() != B_InterestExp_Acct)
 				{
-					acct.setB_Asset_Acct(B_InterestExp_Acct);
+					acct.setB_InterestExp_Acct(B_InterestExp_Acct);
 					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_InterestExp_Acct");
 
 					if(Util.isEmpty(imp.getI_ErrorMsg()))
@@ -376,7 +376,7 @@ public class JPiereImportBankAccount extends SvrProcess implements ImportProcess
 				imp.setB_InterestRev_Acct(B_InterestRev_Acct);
 				if(acct.getB_InterestRev_Acct() != B_InterestRev_Acct)
 				{
-					acct.setB_Asset_Acct(B_InterestRev_Acct);
+					acct.setB_InterestRev_Acct(B_InterestRev_Acct);
 					String msg = Msg.getMsg(getCtx(), "Update") + ": " + Msg.getElement(getCtx(), "B_InterestRev_Acct");
 
 					if(Util.isEmpty(imp.getI_ErrorMsg()))
