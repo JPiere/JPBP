@@ -48,6 +48,32 @@ public class JPiereReferenceTestCallout implements IColumnCallout {
 				button.getVO().IsReadOnly = false;
 			}
 
+			if(!Util.isEmpty(docStatus) && docStatus.equals(DocAction.STATUS_Voided))
+			{
+				mTab.getVO().IsReadOnly  = true;
+			}else {
+				mTab.getVO().IsReadOnly  = false;
+			}
+
+		}else if(mField.getColumnName().equals(MReferenceTest.COLUMNNAME_DocStatus)) {
+
+			String docStatus = (String)value;
+			GridField button = mTab.getField(MReferenceTest.COLUMNNAME_Processing);
+			if(!Util.isEmpty(docStatus) && docStatus.equals(DocAction.STATUS_Completed))
+			{
+				button.getVO().IsReadOnly = true;
+			}else {
+				button.getVO().IsReadOnly = false;
+			}
+
+			if(!Util.isEmpty(docStatus) && docStatus.equals(DocAction.STATUS_Voided))
+			{
+				mTab.getVO().IsReadOnly  = true;
+			}else {
+				mTab.getVO().IsReadOnly  = false;
+			}
+
+
 		}else if(mField.getColumnName().equals(MReferenceTest.COLUMNNAME_M_Product_ID)){
 
 			Integer M_Product_ID = (Integer)value;

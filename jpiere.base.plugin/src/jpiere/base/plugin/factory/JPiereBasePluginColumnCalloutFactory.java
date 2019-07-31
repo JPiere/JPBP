@@ -250,6 +250,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 			}else if(tableName.equals(MReferenceTest.Table_Name)) {//JPIERE-0084
 
 				if(columnName.equals(MReferenceTest.COLUMNNAME_JP_ReferenceTest_ID)
+						|| columnName.equals(MReferenceTest.COLUMNNAME_DocStatus)
 						|| columnName.equals(MReferenceTest.COLUMNNAME_M_Product_ID) )
 				{
 					list.add(new JPiereReferenceTestCallout());
