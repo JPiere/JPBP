@@ -236,6 +236,13 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		else
 			return message;
 
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Currency_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Currency_ID())
+			commitEx();
+		else
+			return message;
+
 
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
@@ -275,13 +282,19 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			while (rs.next())
 			{
 				X_I_ProductJP imp = new X_I_ProductJP (getCtx (), rs, get_TrxName());
-
-				isNew = true;
-				if(imp.getM_Product_ID()!=0)
+				if(imp.getM_Product_ID() != 0)
 				{
-					isNew =false;
 					product = new MProduct(getCtx(), imp.getM_Product_ID(), get_TrxName());
-					lastValue = product.getValue();
+					if(Util.isEmpty(product.getValue()))
+					{
+						isNew =true;
+						lastValue = imp.getValue();
+
+					}else {
+
+						isNew =false;
+						lastValue = product.getValue();
+					}
 
 				}else{
 
@@ -291,11 +304,12 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 					}else {
 
+						isNew = true;
 						lastValue = imp.getValue();
 
 					}
-
 				}
+
 
 				if(isNew)
 				{
@@ -1094,6 +1108,46 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	}//reverseLookupM_Locator_ID
 
 
+	/**
+	 * Reverese Look up C_Currency_ID From ISO_Code
+	 *
+	 * @throws Exception
+	 */
+	private boolean reverseLookupC_Currency_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_ProductJP i ")
+				.append("SET C_Currency_ID=(SELECT C_Currency_ID FROM C_Currency p")
+				.append(" WHERE i.ISO_Code=p.ISO_Code AND (p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0) ) ")
+				.append(" WHERE i.C_Currency_ID IS NULL AND ISO_Code IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
+		}
+
+		//Invalid ISO_Code
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "ISO_Code");
+		sql = new StringBuilder ("UPDATE I_ProductJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE C_Currency_ID IS NULL AND ISO_Code IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message + " : " + e.toString() + " : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupC_Currency_ID
 
 	/**
 	 * Create New Product

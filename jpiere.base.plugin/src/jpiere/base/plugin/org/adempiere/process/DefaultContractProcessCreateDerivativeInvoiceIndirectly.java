@@ -80,7 +80,7 @@ public class DefaultContractProcessCreateDerivativeInvoiceIndirectly extends Abs
 		}
 
 
-		MContractProcSchedule[] contractProcSchedules= MContractProcSchedule.getMContractProcSchedules(m_ContractContent.getJP_ContractContent_ID(), JP_ContractProcPeriod_ID, get_TrxName());
+		MContractProcSchedule[] contractProcSchedules= MContractProcSchedule.getMContractProcSchedules(m_ContractContent.getJP_ContractContent_ID(), orderProcPeriod.getJP_ContractProcPeriod_ID(), get_TrxName());
 		for(int i = 0;  i < contractProcSchedules.length; i++)
 		{
 

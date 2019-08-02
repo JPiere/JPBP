@@ -427,6 +427,48 @@ public class JPiereImportPriceList extends SvrProcess
 						DB.executeUpdate(sql0.toString(), get_TrxName());
 						continue;
 					}
+
+				} else if (imp.getBreakValue() != null && imp.getBreakValue().compareTo(Env.ZERO) > 0 ) { //JPIERE-0410
+					// M_ProductPriceVendorBreak
+					int M_ProductPriceVendorBreak_ID = DB.getSQLValue(get_TrxName(),
+							"SELECT M_ProductPriceVendorBreak_ID " +
+							"FROM M_ProductPriceVendorBreak " +
+							"WHERE M_PriceList_Version_ID=? AND " +
+							"IsActive='Y' AND " +
+							"M_Product_ID=? AND " +
+							"BreakValue=?",
+							new Object[]{pricelistversion.getM_PriceList_Version_ID(), imp.getM_Product_ID(), imp.getBreakValue()});
+					if (M_ProductPriceVendorBreak_ID < 0)
+						M_ProductPriceVendorBreak_ID = 0;
+					X_M_ProductPriceVendorBreak ppvb = new X_M_ProductPriceVendorBreak(getCtx(), M_ProductPriceVendorBreak_ID, get_TrxName());
+					boolean isInsert = false;
+					if (M_ProductPriceVendorBreak_ID == 0) {
+						ppvb.setM_PriceList_Version_ID(pricelistversion.getM_PriceList_Version_ID());
+						ppvb.setM_Product_ID(imp.getM_Product_ID());
+						ppvb.setBreakValue(imp.getBreakValue());
+						isInsert = true;
+					}
+					if (p_importPriceLimit) ppvb.setPriceLimit(imp.getPriceLimit());
+					if (p_importPriceList) ppvb.setPriceList(imp.getPriceList());
+					if (p_importPriceStd) ppvb.setPriceStd(imp.getPriceStd());
+					if (ppvb.save())
+					{
+						if (isInsert)
+							noInsertppvb++;
+						else
+							noUpdateppvb++;
+						log.finer("Insert/Update Product Price Vendor Break");
+					}
+					else
+					{
+						StringBuilder sql0 = new StringBuilder ("UPDATE I_PriceList i ")
+							.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||").append(DB.TO_STRING("Insert/Update Product Price Vendor Break Version failed"))
+							.append("WHERE I_PriceList_ID=").append(I_PriceList_ID);
+						DB.executeUpdate(sql0.toString(), get_TrxName());
+						continue;
+					}
+
+
 				} else {
 					// M_ProductPrice
 					MProductPrice pp = MProductPrice.get(getCtx(), pricelistversion.getM_PriceList_Version_ID(), imp.getM_Product_ID(), get_TrxName());

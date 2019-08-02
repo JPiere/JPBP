@@ -49,6 +49,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereInvValProfileCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereInvoiceLineCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRecognitionCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereReferenceTestCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
@@ -67,6 +68,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
+import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
 
 /**
  *  JPiere Base Plugin Callout Factory
@@ -235,6 +237,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereContractPSInOutLineCallout());
 				}
+
 			}else if(tableName.equals(MContractPSInvoiceLine.Table_Name)){//JPIERE-0431
 
 				if(columnName.equals("JP_ContractPSLine_ID")
@@ -243,6 +246,16 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				{
 					list.add(new JPiereContractPSInvoiceLineCallout());
 				}
+
+			}else if(tableName.equals(MReferenceTest.Table_Name)) {//JPIERE-0084
+
+				if(columnName.equals(MReferenceTest.COLUMNNAME_JP_ReferenceTest_ID)
+						|| columnName.equals(MReferenceTest.COLUMNNAME_DocStatus)
+						|| columnName.equals(MReferenceTest.COLUMNNAME_M_Product_ID) )
+				{
+					list.add(new JPiereReferenceTestCallout());
+				}
+
 			}
 
 		}else{
