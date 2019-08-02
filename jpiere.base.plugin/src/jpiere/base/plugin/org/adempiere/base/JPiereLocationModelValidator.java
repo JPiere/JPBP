@@ -131,7 +131,6 @@ public class JPiereLocationModelValidator implements ModelValidator {
 					return Msg.getMsg(location.getCtx(), "JP_UnexpectedError");
 				}
 
-				//		Update Order Header
 				String sql = "UPDATE C_Location l"
 					+ " SET JP_Location_Label='"+JP_Location_Label+"'"
 					+ " WHERE C_Location_ID = ?";
