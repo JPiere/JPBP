@@ -76,9 +76,12 @@ public class JPiereReferenceTestCallout implements IColumnCallout {
 
 		}else if(mField.getColumnName().equals(MReferenceTest.COLUMNNAME_M_Product_ID)){
 
-			Integer M_Product_ID = (Integer)value;
-			MProduct product = new MProduct(ctx,M_Product_ID.intValue(), null );
-			mTab.setValue("M_Product_Category_ID", product.getM_Product_Category_ID());
+			if(value != null)
+			{
+				Integer M_Product_ID = (Integer)value;
+				MProduct product = new MProduct(ctx,M_Product_ID.intValue(), null );
+				mTab.setValue("M_Product_Category_ID", product.getM_Product_Category_ID());
+			}
 
 		}
 

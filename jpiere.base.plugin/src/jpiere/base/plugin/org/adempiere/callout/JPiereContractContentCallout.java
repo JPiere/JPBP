@@ -308,16 +308,22 @@ public class JPiereContractContentCallout implements IColumnCallout {
 				}
 			}//for
 		}
-		return null;
+
+		return calloutSetPriceListInfo(ctx, WindowNo, mTab,mField, value, oldValue);
 	}
 
 	private String calloutSetPriceListInfo(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 		Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
 		if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)
+		{
+			Env.setContext(ctx, WindowNo, "M_PriceList_ID", "");
+			Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", "");
 			return "";
+		}
 
 		MPriceList pl = MPriceList.get(ctx, M_PriceList_ID, null);
+		Env.setContext(ctx, WindowNo, "M_PriceList_ID", M_PriceList_ID);
 		if (pl != null && pl.getM_PriceList_ID() == M_PriceList_ID)
 		{
 
@@ -328,6 +334,9 @@ public class JPiereContractContentCallout implements IColumnCallout {
 
 			//	Price Limit Enforce
 			Env.setContext(ctx, WindowNo, "EnforcePriceLimit", pl.isEnforcePriceLimit());
+
+			if(mTab.getValue("C_BPartner_ID") != null)
+				Env.setContext(ctx, WindowNo, "C_BPartner_ID", (Integer)mTab.getValue("C_BPartner_ID"));
 
 			//PriceList Version
 			Timestamp date = null;
@@ -340,7 +349,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 			if (plv != null && plv.getM_PriceList_Version_ID() > 0) {
 				Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", plv.getM_PriceList_Version_ID());
 			} else {
-				Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", (String) null);
+				Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", "");
 			}
 
 		}//if
@@ -419,7 +428,12 @@ public class JPiereContractContentCallout implements IColumnCallout {
 	{
 		Integer C_BPartner_ID = (Integer)value;
 		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
+		{
+			Env.setContext(ctx, WindowNo, "C_BPartner_ID", "");
 			return "";
+		}
+
+		Env.setContext(ctx, WindowNo, "C_BPartner_ID", C_BPartner_ID);
 		String sql = "SELECT p.AD_Language,p.C_PaymentTerm_ID,"
 			+ " COALESCE(p.M_PriceList_ID,g.M_PriceList_ID) AS M_PriceList_ID, p.PaymentRule,p.POReference,"
 			+ " p.SO_Description,p.IsDiscountPrinted,"
