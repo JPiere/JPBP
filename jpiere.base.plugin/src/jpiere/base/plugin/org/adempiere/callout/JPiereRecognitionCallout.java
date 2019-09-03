@@ -56,7 +56,7 @@ public class JPiereRecognitionCallout implements IColumnCallout {
 			mTab.setValue("JP_ContractProcPeriod_ID", io.get_Value("JP_ContractProcPeriod_ID"));
 
 
-		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateOrdered") || mField.getColumnName().equals("JP_Recognition_ID") ){
+		}else if(mField.getColumnName().equals("M_PriceList_ID") || mField.getColumnName().equals("DateInvoiced") || mField.getColumnName().equals("JP_Recognition_ID") ){
 
 			Integer M_PriceList_ID = (Integer) mTab.getValue("M_PriceList_ID");
 			if (M_PriceList_ID == null || M_PriceList_ID.intValue()== 0)
@@ -75,7 +75,7 @@ public class JPiereRecognitionCallout implements IColumnCallout {
 				Env.setContext(ctx, WindowNo, "EnforcePriceLimit", pl.isEnforcePriceLimit());
 
 				//PriceList Version
-				Timestamp date =(Timestamp)mTab.getValue("DateOrdered");
+				Timestamp date =(Timestamp)mTab.getValue("DateInvoiced");
 
 				MPriceListVersion plv = pl.getPriceListVersion(date);
 				if (plv != null && plv.getM_PriceList_Version_ID() > 0) {

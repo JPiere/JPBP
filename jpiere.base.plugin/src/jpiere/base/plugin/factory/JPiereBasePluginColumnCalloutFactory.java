@@ -210,7 +210,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 			}else if(tableName.equals(MRecognition.Table_Name)){//JPIERE-0364
 
-				if(columnName.equals("M_InOut_ID") || columnName.equals("M_PriceList_ID") ||  columnName.equals("DateOrdered") || columnName.equals("JP_Recognition_ID") )
+				if(columnName.equals("M_InOut_ID") || columnName.equals("M_PriceList_ID") ||  columnName.equals("DateInvoiced") || columnName.equals("JP_Recognition_ID") )
 				{
 					list.add(new JPiereRecognitionCallout());
 				}
