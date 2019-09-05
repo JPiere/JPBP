@@ -14,6 +14,7 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.Properties;
@@ -344,12 +345,24 @@ public class MContractLineT extends X_JP_ContractLineT {
 		setDiscount(m_productPrice.getDiscount());
 		//	Set UOM
 		setC_UOM_ID(m_productPrice.getC_UOM_ID());
+
+		setLineNetAmt ();
 	}	//	setPrice
+
+	public void setLineNetAmt ()
+	{
+		//	Calculations & Rounding
+		BigDecimal bd = getPriceActual().multiply(getQtyOrdered());
+		int precision = Integer.valueOf(getParent().getPrecision());
+		if (bd.scale() > precision)
+			bd = bd.setScale(precision, RoundingMode.HALF_UP);
+		super.setLineNetAmt (bd);
+	}	//	setLineNetAmt
 
 	protected MProductPricing getProductPricing (int M_PriceList_ID)
 	{
 		m_productPrice = new MProductPricing (getM_Product_ID(),
-			getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx, get_TrxName());
+			getC_BPartner_ID(), getQtyOrdered(), getParent().isSOTrx(), get_TrxName());
 		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
 //		m_productPrice.setPriceDate(getDateOrdered());
 		//

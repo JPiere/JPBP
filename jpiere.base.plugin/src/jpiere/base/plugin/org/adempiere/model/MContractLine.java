@@ -488,7 +488,7 @@ public class MContractLine extends X_JP_ContractLine {
 	{
 		//	Calculations & Rounding
 		BigDecimal bd = getPriceActual().multiply(getQtyOrdered());
-		int precision = Integer.valueOf(m_parent.getPrecision());
+		int precision = Integer.valueOf(getParent().getPrecision());
 		if (bd.scale() > precision)
 			bd = bd.setScale(precision, RoundingMode.HALF_UP);
 		super.setLineNetAmt (bd);
@@ -498,7 +498,7 @@ public class MContractLine extends X_JP_ContractLine {
 	protected MProductPricing getProductPricing (int M_PriceList_ID)
 	{
 		m_productPrice = new MProductPricing (getM_Product_ID(),
-			getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx, get_TrxName());
+			getC_BPartner_ID(), getQtyOrdered(), getParent().isSOTrx(), get_TrxName());
 		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
 		m_productPrice.setPriceDate(m_DateDoc);
 		//
