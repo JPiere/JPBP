@@ -16,10 +16,15 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MOrg;
+import org.compiere.model.Query;
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
 
@@ -119,5 +124,63 @@ public class MOrgHistory extends X_JP_Org_History {
 		return m_OrgHistories;
 	}
 
+
+	/**	Cache						*/
+	private static CCache<Integer,MOrgHistory[]> s_cache	= new CCache<Integer,MOrgHistory[]>(Table_Name, 100, 10);	//	10 minutes
+
+	public static MOrgHistory[] getOrgHistories (Properties ctx, int AD_Org_ID, String trxName)
+	{
+		MOrgHistory[] m_OrgHistoryies = s_cache.get (Integer.valueOf(AD_Org_ID));
+		if (m_OrgHistoryies != null)
+		{
+			return m_OrgHistoryies;
+		}
+
+		final String whereClause = "AD_Org_ID=?";
+		List <MOrgHistory> list = new Query(ctx, I_JP_Org_History.Table_Name, whereClause, trxName)
+		.setParameters(AD_Org_ID)
+		.setOrderBy("DateFrom DESC")
+		.list();
+
+		m_OrgHistoryies = new MOrgHistory[list.size()];
+		list.toArray(m_OrgHistoryies);
+		s_cache.put(Integer.valueOf(AD_Org_ID), m_OrgHistoryies);
+
+		return m_OrgHistoryies;
+
+	}	//	getOrgHistories
+
+	public static MOrgHistory getOrgHistory (Properties ctx, int AD_Org_ID, Timestamp date, String trxName)
+	{
+		MOrgHistory m_OrgHistory = null;
+		MOrgHistory[] m_OrgHistoryies = getOrgHistories(ctx, AD_Org_ID, trxName);
+		for(int i =0 ; i < m_OrgHistoryies.length; i++)
+		{
+			if(m_OrgHistoryies[i].getDateFrom().compareTo(date) <= 0
+					&& m_OrgHistoryies[i].getDateTo().compareTo(date) >= 0)
+			{
+				m_OrgHistory = m_OrgHistoryies[i];
+				break;
+			}
+		}
+
+		return m_OrgHistory;
+
+	}//getOrgHistory
+
+	public static String getOrgHistoryName (Properties ctx, int AD_Org_ID, Timestamp date, String trxName)
+	{
+		MOrgHistory m_OrgHistory = getOrgHistory(ctx, AD_Org_ID, date, trxName);
+		if(m_OrgHistory == null)
+		{
+			return MOrg.get(ctx, AD_Org_ID).getName();
+
+		}else {
+
+			return m_OrgHistory.getName();
+
+		}
+
+	}//getOrgHistoryName
 
 }
