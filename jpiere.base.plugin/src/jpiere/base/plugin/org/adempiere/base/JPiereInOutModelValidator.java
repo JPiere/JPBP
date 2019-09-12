@@ -28,8 +28,6 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
-import org.compiere.model.MRMA;
-import org.compiere.model.MRMALine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -41,16 +39,21 @@ import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
-import jpiere.base.plugin.org.adempiere.model.MRecognition;
-import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
+
+/**
+ * JPIERE-0219:Create Invoice When Ship/Receipt Complete
+ * JPIERE-0229:Inspection basis
+ * JPIERE-0295:Explode BOM
+ * JPIERE-0317:Physical Warehouse - check same physical warehouse between locator and document.
+ *
+ * @author h.hagiwara
+ *
+ */
 
 public class JPiereInOutModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereInOutModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
 	public void initialize(ModelValidationEngine engine, MClient client) {
@@ -67,11 +70,8 @@ public class JPiereInOutModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
@@ -98,9 +98,9 @@ public class JPiereInOutModelValidator implements ModelValidator {
 				{
 					MOrder order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
 					MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
-					if(orderDocType.equals(MOrder.DocSubTypeSO_OnCredit)
-							|| orderDocType.equals(MOrder.DocSubTypeSO_POS)
-							|| orderDocType.equals(MOrder.DocSubTypeSO_Prepay))
+					if(orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_OnCredit)
+							|| orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_POS)
+							|| orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_Prepay))
 					{
 						;//Nothing to do because InOut Doc is created automatically.
 					}else{
@@ -124,11 +124,11 @@ public class JPiereInOutModelValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
-		
+
 		if(!po.get_TableName().equals(MInOut.Table_Name))
 			return null;
-		
-		
+
+
 		//JPIERE-0317  Physical Warehouse - check same physical warehouse between locator and document.
 		if(timing == ModelValidator.TIMING_BEFORE_PREPARE
 				&& MSysConfig.getBooleanValue("JP_INOUT_PHYWH_LOCATOR_CHECK", true, po.getAD_Client_ID(), po.getAD_Org_ID()))
@@ -151,9 +151,9 @@ public class JPiereInOutModelValidator implements ModelValidator {
 					}
 				}//for
 			}
-		}//JPIERE-0317  
-		
-		
+		}//JPIERE-0317
+
+
 		//JPIERE-0229
 		if(timing == ModelValidator.TIMING_BEFORE_COMPLETE)
 		{
@@ -166,9 +166,9 @@ public class JPiereInOutModelValidator implements ModelValidator {
 			{
 				MOrder order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
 				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
-				if(orderDocType.equals(MOrder.DocSubTypeSO_OnCredit)
-						|| orderDocType.equals(MOrder.DocSubTypeSO_POS)
-						|| orderDocType.equals(MOrder.DocSubTypeSO_Prepay))
+				if(orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_OnCredit)
+						|| orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_POS)
+						|| orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_Prepay))
 				{
 					;//Nothing to do because InOut Doc is created automatically.
 				}else{
@@ -198,27 +198,27 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 				MOrder order = new MOrder(po.getCtx(), io.getC_Order_ID(), trxName);
 				MDocType orderDocType = MDocType.get(po.getCtx(), order.getC_DocTypeTarget_ID());
-				if(orderDocType.equals(MOrder.DocSubTypeSO_OnCredit)
-						|| orderDocType.equals(MOrder.DocSubTypeSO_POS)
-						|| orderDocType.equals(MOrder.DocSubTypeSO_Prepay))
-				{					
-					
+				if(orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_OnCredit)
+						|| orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_POS)
+						|| orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_Prepay))
+				{
+
 					;//Noting to DO
-					
+
 				}else{//Create invoice
-					
-				
+
+
 
 					if(orderDocType.getC_DocTypeInvoice_ID() == 0)
 						return null;
-	
+
 					MInvoiceJP invoice = new MInvoiceJP (order, orderDocType.getC_DocTypeInvoice_ID(), io.getDateAcct());//JPIERE-0295
 					if (!invoice.save(trxName))
 					{
 						log.warning("Could not create Invoice: "+ io.getDocumentInfo());
 						return null;
 					}
-	
+
 					MInOutLine[] sLines = io.getLines(false);
 					for (int i = 0; i < sLines.length; i++)
 					{
@@ -245,21 +245,21 @@ public class JPiereInOutModelValidator implements ModelValidator {
 							log.warning("Could not update Shipment line: " + sLine);
 						}
 					}//for
-	
+
 					if (!invoice.processIt(DocAction.ACTION_Complete))
 						throw new AdempiereException("Failed when processing document - " + invoice.getProcessMsg());
-	
+
 					invoice.saveEx(trxName);
 					if (!invoice.getDocStatus().equals(DocAction.STATUS_Completed))
 					{
 						log.warning("Could not Completed Invoice: "+ invoice.getDocumentInfo());
 						return null;
 					}
-	
+
 					//Allocation
 					if(!isReversal && order.getC_Payment_ID() > 0)
 					{
-	
+
 						MPayment payment = new MPayment(io.getCtx(),order.getC_Payment_ID(), trxName);
 						if(!payment.isAllocated() && payment.getC_Order_ID()== order.getC_Order_ID() && payment.isPrepayment()
 								&& (payment.getDocStatus().equals(DocAction.STATUS_Completed) || payment.getDocStatus().equals(DocAction.STATUS_Closed))
@@ -270,7 +270,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 							BigDecimal allocatAmt = payAmt;
 							if(allocatedAmt == null)
 								allocatedAmt = Env.ZERO;
-	
+
 							if(payment.isReceipt()){
 								allocatAmt = payAmt.subtract(allocatedAmt);
 								allocatAmt = invoice.getGrandTotal().compareTo(allocatAmt) > 0 ? allocatAmt : invoice.getGrandTotal();
@@ -279,7 +279,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 								allocatAmt = invoice.getGrandTotal().compareTo(allocatAmt) > 0 ? allocatAmt : invoice.getGrandTotal();
 								allocatAmt = allocatAmt.negate();
 							}
-	
+
 							if((payment.isReceipt() && allocatAmt.compareTo(Env.ZERO) > 0)
 									|| (!payment.isReceipt() && allocatAmt.compareTo(Env.ZERO) < 0) )
 							{
@@ -292,13 +292,13 @@ public class JPiereInOutModelValidator implements ModelValidator {
 									log.severe("Allocations not created");
 									return null;
 								}
-	
+
 								MAllocationLine aLine = new MAllocationLine (alloc, allocatAmt, Env.ZERO, Env.ZERO, Env.ZERO);
 								aLine.setDocInfo(invoice.getC_BPartner_ID(), order.getC_Order_ID(), invoice.getC_Invoice_ID());
 								aLine.setPaymentInfo(payment.getC_Payment_ID(), 0);
 								if (!aLine.save(trxName))
 									log.warning("P.Allocations - line not saved");
-	
+
 								if (!alloc.processIt(DocAction.ACTION_Complete))
 									throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
 								if (!alloc.save(trxName))
@@ -308,16 +308,16 @@ public class JPiereInOutModelValidator implements ModelValidator {
 								}
 							}
 						}
-	
+
 					}//Allocation
-					
+
 				}//Create invoice
 
 			}//if(ioDocType.get_ValueAsBoolean("IsCreateInvoiceJP"))
 
 		}//JPiere-0219
 
-		
+
 		return null;
 	}
 
