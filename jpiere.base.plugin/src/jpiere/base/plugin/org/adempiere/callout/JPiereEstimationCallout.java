@@ -37,7 +37,9 @@ import jpiere.base.plugin.org.adempiere.model.MEstimation;
  *
  *  JPiere Estimation Document CallOut
  *
- *  JPIERE-0183:JPBP
+ *  JPIERE-0183: Estimation Doc
+ *  JPIERE-0227: Common Warehouse
+ *  JPIERE-0317: Physical Warehouse
  *
  * @author Hideaki Hagiwara
  *
@@ -79,7 +81,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 			boolean newDocNo = (oldDocNo == null);
 			if (!newDocNo && oldDocNo.startsWith("<") && oldDocNo.endsWith(">"))
 				newDocNo = true;
-			Integer oldC_DocType_ID = (Integer)mTab.getValue("C_DocType_ID");
+//			Integer oldC_DocType_ID = (Integer)mTab.getValue("C_DocType_ID");
 
 			String sql = "SELECT d.DocSubTypeSO,d.HasCharges,"			//	1..2
 				+ "d.IsDocNoControlled,"     //  3
@@ -91,20 +93,20 @@ public class JPiereEstimationCallout implements IColumnCallout {
 			ResultSet rs = null;
 			try
 			{
-				int oldAD_Sequence_ID = 0;
-
-				//	Get old AD_SeqNo for comparison
-				if (!newDocNo && oldC_DocType_ID.intValue() != 0)
-				{
-					pstmt = DB.prepareStatement(sql, null);
-					pstmt.setInt(1, oldC_DocType_ID.intValue());
-					rs = pstmt.executeQuery();
-					if (rs.next())
-						oldAD_Sequence_ID = rs.getInt("AD_Sequence_ID");
-					DB.close(rs, pstmt);
-					rs = null;
-					pstmt = null;
-				}
+//				int oldAD_Sequence_ID = 0;
+//
+//				//	Get old AD_SeqNo for comparison
+//				if (!newDocNo && oldC_DocType_ID.intValue() != 0)
+//				{
+//					pstmt = DB.prepareStatement(sql, null);
+//					pstmt.setInt(1, oldC_DocType_ID.intValue());
+//					rs = pstmt.executeQuery();
+//					if (rs.next())
+//						oldAD_Sequence_ID = rs.getInt("AD_Sequence_ID");
+//					DB.close(rs, pstmt);
+//					rs = null;
+//					pstmt = null;
+//				}
 
 				pstmt = DB.prepareStatement(sql, null);
 				pstmt.setInt(1, JP_DocTypeSO_ID.intValue());
@@ -147,15 +149,15 @@ public class JPiereEstimationCallout implements IColumnCallout {
 					Env.setContext(ctx, WindowNo, "HasCharges", rs.getString("HasCharges"));
 
 					//	DocumentNo
-	//				if (rs.getString("IsDocNoControlled").equals("Y"))			//	IsDocNoControlled
-	//				{
-	//					if (!newDocNo && oldAD_Sequence_ID != rs.getInt("AD_Sequence_ID"))
-	//						newDocNo = true;
-	//					if (newDocNo) {
-	//						int AD_Sequence_ID = rs.getInt("AD_Sequence_ID");
-	//						mTab.setValue("DocumentNo", MSequence.getPreliminaryNo(mTab, AD_Sequence_ID));
-	//					}
-	//				}
+//					if (rs.getString("IsDocNoControlled").equals("Y"))			//	IsDocNoControlled
+//					{
+//						if (!newDocNo && oldAD_Sequence_ID != rs.getInt("AD_Sequence_ID"))
+//							newDocNo = true;
+//						if (newDocNo) {
+//							int AD_Sequence_ID = rs.getInt("AD_Sequence_ID");
+//							mTab.setValue("DocumentNo", MSequence.getPreliminaryNo(mTab, AD_Sequence_ID));
+//						}
+//					}
 				}
 
 				DB.close(rs, pstmt);

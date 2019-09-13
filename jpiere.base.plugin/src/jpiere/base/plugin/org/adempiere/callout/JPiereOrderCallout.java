@@ -16,20 +16,19 @@ package jpiere.base.plugin.org.adempiere.callout;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MLocator;
-import org.compiere.model.MUser;
 import org.compiere.util.DB;
-
-import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
 
 /**
  *
  *  JPiere Order Document CallOut
+ *
+ *  JPIERE-0227 Common Warehouse
+ *  JPIERE-0317 Physical Warehouse
  *
  * @author Hideaki Hagiwara
  *
@@ -46,7 +45,7 @@ public class JPiereOrderCallout implements IColumnCallout {
 				;
 			else
 				mTab.setValue("JP_Locator_ID", value);
-			
+
 			return "";
 		}
 
@@ -60,11 +59,11 @@ public class JPiereOrderCallout implements IColumnCallout {
 				mTab.setValue("JP_LocatorTo_ID",toLocator.getM_Locator_ID()) ;
 				mTab.setValue("JP_Locator_ID", toLocator.getM_Locator_ID());
 			}
-			
+
 			return "";
 		}
-		
-		
+
+
 		return "";
 	}
 
@@ -72,7 +71,7 @@ public class JPiereOrderCallout implements IColumnCallout {
 	{
 		int JP_PhysicalWarehouse_ID = fromLocator.get_ValueAsInt("JP_PhysicalWarehouse_ID");
 		int M_LocatorType_ID = fromLocator.get_ValueAsInt("M_LocatorType_ID");
-		
+
 		final String sql = "SELECT * FROM M_Locator WHERE M_Warehouse_ID=? AND JP_PhysicalWarehouse_ID = ? AND M_LocatorType_ID = ? ORDER BY IsDefault DESC, PriorityNo DESC";
 		MLocator toLocator = null;
 		PreparedStatement pstmt = null;
@@ -96,8 +95,8 @@ public class JPiereOrderCallout implements IColumnCallout {
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		
+
 		return toLocator;
 	}
-	
+
 }
