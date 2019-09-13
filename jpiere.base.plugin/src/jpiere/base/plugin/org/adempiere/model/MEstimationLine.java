@@ -19,6 +19,8 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.IProductPricing;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.compiere.model.MAcctSchema;
@@ -29,7 +31,6 @@ import org.compiere.model.MLocator;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
-import org.compiere.model.MProductPricing;
 import org.compiere.model.MResourceAssignment;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
@@ -54,7 +55,7 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	//
 	protected boolean			m_IsSOTrx = true;
 	//	Product Pricing
-	protected MProductPricing	m_productPrice = null;
+	protected IProductPricing	m_productPrice = null;
 
 	/** Tax							*/
 	protected MTax 		m_tax = null;
@@ -366,10 +367,10 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	 *	@param M_PriceList_ID id
 	 *	@return product pricing
 	 */
-	protected MProductPricing getProductPricing (int M_PriceList_ID)
+	protected IProductPricing getProductPricing (int M_PriceList_ID)
 	{
-		m_productPrice = new MProductPricing (getM_Product_ID(),
-			getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx);
+		m_productPrice = Core.getProductPricing();
+		m_productPrice.setInitialValues(getM_Product_ID(), getC_BPartner_ID(), getQtyOrdered(), m_IsSOTrx, get_TrxName());
 		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
 		m_productPrice.setPriceDate(getDateOrdered());
 		//

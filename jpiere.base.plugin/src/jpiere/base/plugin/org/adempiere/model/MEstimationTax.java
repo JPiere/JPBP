@@ -119,6 +119,17 @@ public class MEstimationTax extends X_JP_EstimationTax {
 	}	//	get
 
 	/**
+	 * 	Get Precision
+	 * 	@return Returns the precision or 2
+	 */
+	public int getPrecision ()
+	{
+		if (m_precision == null)
+			return 2;
+		return m_precision.intValue();
+	}	//	getPrecision
+
+	/**
 	 * 	Set Precision
 	 *	@param precision The precision to set.
 	 */

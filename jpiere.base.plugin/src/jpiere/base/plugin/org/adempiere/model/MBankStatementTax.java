@@ -25,8 +25,9 @@ import org.compiere.util.Env;
 /**
  *  JPiere Bank Statement Tax Model
  *
- *  @author  Hideaki Hagiwara（萩原 秀明:h.hagiwara@oss-erp.co.jp）
- *  @version  $Id: MBankStatementTax.java,v 1.0 2014/08/20
+ *  JPIERE-0012: Bank Statment Tax
+ *
+ *  @author  Hideaki Hagiwara（hagiwara@oss-erp.co.jp）
  *
  */
 
@@ -50,7 +51,7 @@ public class MBankStatementTax extends X_JP_BankStatementTax {
 	 * 	Get Precision
 	 * 	@return Returns the precision or 2
 	 */
-	private int getPrecision ()
+	public int getPrecision ()
 	{
 		if (m_precision == null)
 			return 2;

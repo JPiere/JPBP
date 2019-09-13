@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.IProductPricing;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_M_InOutLine;
@@ -33,7 +35,6 @@ import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
-import org.compiere.model.MProductPricing;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MRole;
 import org.compiere.model.MTax;
@@ -211,7 +212,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	/** Cached Precision			*/
 	private Integer		m_precision = null;
 	/** Product Pricing				*/
-	private MProductPricing	m_productPricing = null;
+	private IProductPricing m_productPricing = null;
 	/** Parent						*/
 	private MRecognition	m_parent = null;
 
@@ -412,8 +413,8 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			return;
 		//
 		if (log.isLoggable(Level.FINE)) log.fine("M_PriceList_ID=" + M_PriceList_ID);
-		m_productPricing = new MProductPricing (getM_Product_ID(),
-			C_BPartner_ID, getQtyInvoiced(), m_IsSOTrx);
+		m_productPricing = Core.getProductPricing();
+		m_productPricing.setInitialValues(getM_Product_ID(), C_BPartner_ID, getQtyInvoiced(), m_IsSOTrx, get_TrxName());
 		m_productPricing.setM_PriceList_ID(M_PriceList_ID);
 		m_productPricing.setPriceDate(m_DateInvoiced);
 		//

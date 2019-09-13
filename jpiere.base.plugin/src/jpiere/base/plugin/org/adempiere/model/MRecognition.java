@@ -59,7 +59,6 @@ import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.CCache;
-import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -339,8 +338,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	private MRecognitionLine[]	m_lines;
 	/**	Invoice Taxes			*/
 	private MRecognitionTax[]	m_taxes;
-	/**	Logger			*/
-	private static CLogger s_log = CLogger.getCLogger(MRecognition.class);
+
 
 	/**
 	 * 	Overwrite Client/Org if required
@@ -835,7 +833,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		}
 
 
-		log.fine("");
 		//	No Partner Info - set Template
 		if (getC_BPartner_ID() == 0)
 			setBPartner(MBPartner.getTemplate(getCtx(), getAD_Client_ID()));
