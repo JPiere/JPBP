@@ -13,7 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
-import jpiere.base.plugin.util.ZenginCheck;
+import java.util.logging.Level;
 
 import org.compiere.model.MBPBankAccount;
 import org.compiere.model.MClient;
@@ -25,33 +25,43 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.util.ZenginCheck;
+
+
+/**
+ *  JPiere BP Bank Account Model Validator
+ *
+ *  JPIERE-0102: check of Farm Banking info
+ *
+ *
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
+ *
+ */
 public class JPiereBPBankAccountModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereBPBankAccountModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MBPBankAccount.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereBPBankAccountModelValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 

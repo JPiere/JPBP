@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MClient;
@@ -37,8 +38,10 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 
 /**
- *  JPIERE-0363: Contract Management
  *  JPiere Contract Recognition Validator
+ *
+ *  JPIERE-0363: Contract Management
+ *
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -47,9 +50,6 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 
 	private static CLogger log = CLogger.getCLogger(JPiereContractRecognitionValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 
 	@Override
@@ -61,20 +61,19 @@ public class JPiereContractRecognitionValidator extends AbstractContractValidato
 		engine.addModelChange(MRecognitionLine.Table_Name, this);
 		engine.addDocValidate(MRecognition.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereContractRecognitionValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
-
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 

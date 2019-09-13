@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.util.logging.Level;
+
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MClient;
 import org.compiere.model.ModelValidationEngine;
@@ -25,38 +27,45 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.util.ZenginCheck;
 
+/**
+ *  JPiere Bank Account Model Validator
+ *
+ *  JPIERE-0102: Check of Farm Banking Data
+ *
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
+ *
+ */
 public class JPiereBankAccountModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereBankAccountModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MBankAccount.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereBankAccountModelValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception {
+	public String modelChange(PO po, int type) throws Exception
+	{
 		//JPIERE-0102
 		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
 		{
@@ -75,7 +84,7 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 
 				if(jp_RequesterName.length() > ZenginCheck.JP_RequesterName)
 				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"),ZenginCheck.JP_RequesterName};
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_RequesterName"),ZenginCheck.JP_RequesterName};
 					return Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs);//{0} is less than {1} characters.
 				}
 
@@ -183,8 +192,8 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String docValidate(PO po, int timing) {
-
+	public String docValidate(PO po, int timing)
+	{
 		return null;
 	}
 

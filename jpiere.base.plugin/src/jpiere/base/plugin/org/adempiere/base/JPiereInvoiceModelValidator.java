@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.sql.Timestamp;
+import java.util.logging.Level;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
@@ -29,39 +30,52 @@ import org.compiere.util.Msg;
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 import jpiere.base.plugin.util.JPierePaymentTerms;
 
+/**
+*
+* JPiere Invoice Model Validator
+*
+* JPIERE-0105: Multi cut off date.
+* JPIERE-0175: Simple Input Window (AR Invoice)
+* JPIERE-0176: Simple Input Window (AP Invoice)
+* JPIERE-0223: Restrict Match Inv.
+* JPIERE-0295: Explode BOM
+* JPIERE-0368: Period Closing by Payment Term
+*
+* @author h.hagiwara
+*
+*/
 public class JPiereInvoiceModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereInvoiceModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MInvoice.Table_Name, this);
 		engine.addDocValidate(MInvoice.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereInvoiceModelValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception {
+	public String modelChange(PO po, int type) throws Exception
+	{
 		//JPIERE-0105
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_PaymentTerm_ID")))

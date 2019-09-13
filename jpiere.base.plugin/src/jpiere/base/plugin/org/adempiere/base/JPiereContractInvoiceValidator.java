@@ -15,6 +15,7 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.adempiere.webui.window.FDialog;
 import org.compiere.acct.Fact;
@@ -52,8 +53,10 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 
 /**
- *  JPIERE-0363: Contract Management
  *  JPiere Contract Invoice Validator
+ *
+ *  JPIERE-0363: Contract Management
+ *  JPIERE-0408: Set Counter Doc Info
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -62,9 +65,6 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 	private static CLogger log = CLogger.getCLogger(JPiereContractInvoiceValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 
 	@Override
@@ -77,6 +77,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		engine.addDocValidate(MInvoice.Table_Name, this);
 		engine.addFactsValidate(MInvoice.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereContractInvoiceValidator");
+
 	}
 
 	@Override
@@ -86,11 +88,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 

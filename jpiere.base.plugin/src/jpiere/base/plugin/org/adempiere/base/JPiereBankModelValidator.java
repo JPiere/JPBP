@@ -13,7 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
-import jpiere.base.plugin.util.ZenginCheck;
+import java.util.logging.Level;
 
 import org.compiere.model.MBank;
 import org.compiere.model.MClient;
@@ -24,20 +24,30 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+import jpiere.base.plugin.util.ZenginCheck;
 
+
+/**
+ *  JPiere Bank Model Validator
+ *
+ *  JPIERE-0102: Check of Farm Banking Data
+ *
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
+ *
+ */
 public class JPiereBankModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereBankModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MBank.Table_Name, this);
+
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereBankModelValidator");
 	}
 
 	@Override
@@ -46,16 +56,14 @@ public class JPiereBankModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception {
+	public String modelChange(PO po, int type) throws Exception
+	{
 
 		//JPIERE-0102
 		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
@@ -69,23 +77,30 @@ public class JPiereBankModelValidator implements ModelValidator {
 				{
 					if(!ZenginCheck.charCheck(characters.charAt(i)))
 					{
-						return "「"+characters.charAt(i) + "」は使えない文字です。";
+						Object[] objs = new Object[]{characters.charAt(i)};
+						return Msg.getMsg(Env.getCtx(),"JP_CanNotUseChar",objs);//You can not use this character : {0}.
 					}
 				}//for
 
 				if(characters.length() > ZenginCheck.JP_BankName_Kana)
 				{
-					return Msg.getElement(Env.getCtx(), "JP_BankName_Kana") + "は" + ZenginCheck.JP_BankName_Kana + "以内です。";
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_BankName_Kana"), ZenginCheck.JP_BankName_Kana};
+					return Msg.getMsg(Env.getCtx(),"JP_LessThanChars",objs);//{0} is less than {1} characters.
 				}
 
 				if(bank.getRoutingNo().length()!= ZenginCheck.JP_RoutingNo)
 				{
-					return Msg.getElement(Env.getCtx(), "RoutingNo") + "は" + ZenginCheck.JP_RoutingNo + "桁です。";
+					//{0} is {1} characters.
+					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "RoutingNo"), ZenginCheck.JP_RoutingNo};
+					return Msg.getMsg(Env.getCtx(),"JP_Characters",objs);
 				}
 
 				if(!ZenginCheck.numStringCheck(bank.getRoutingNo()))
 				{
-					return Msg.getElement(Env.getCtx(), "RoutingNo") + "に半角数値以外の文字が使用されています。";
+					//You can not use this String : {0}.
+					Object[] objs = new Object[]{bank.getRoutingNo()};
+					return Msg.getElement(Env.getCtx(), "RoutingNo") + " : " + Msg.getMsg(Env.getCtx(),"JP_CanNotUseString",objs);
+
 				}
 
 			}//if(characters != null)
@@ -96,8 +111,8 @@ public class JPiereBankModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String docValidate(PO po, int timing) {
-		// TODO 自動生成されたメソッド・スタブ
+	public String docValidate(PO po, int timing)
+	{
 		return null;
 	}
 

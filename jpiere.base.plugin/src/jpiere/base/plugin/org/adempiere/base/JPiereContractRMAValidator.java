@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
+import java.util.logging.Level;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MInOut;
@@ -32,8 +33,10 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
 
 
 /**
- *  JPIERE-0363: Contract Management
  *  JPiere Contract RMA Validator
+ *
+ *  JPIERE-0363: Contract Management
+ *  JPIERE-0384: Processing RMA
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -42,9 +45,6 @@ public class JPiereContractRMAValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereContractRMAValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 
 	@Override
@@ -56,20 +56,19 @@ public class JPiereContractRMAValidator implements ModelValidator {
 		engine.addModelChange(MRMALine.Table_Name, this);
 		engine.addDocValidate(MRMA.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereContractRMAValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
-
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
@@ -91,7 +90,6 @@ public class JPiereContractRMAValidator implements ModelValidator {
 	@Override
 	public String docValidate(PO po, int timing)
 	{
-
 		return null;
 	}
 
@@ -198,7 +196,7 @@ public class JPiereContractRMAValidator implements ModelValidator {
 				return null;
 			}
 
-		}//JPiere-0383
+		}//JPiere-0384
 
 
 		if( type == ModelValidator.TYPE_BEFORE_NEW

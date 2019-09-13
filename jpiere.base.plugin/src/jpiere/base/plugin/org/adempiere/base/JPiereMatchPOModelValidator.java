@@ -1,5 +1,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.util.logging.Level;
+
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
@@ -12,20 +14,28 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Msg;
 
+/**
+*
+* JPiere Match PO Model Validator
+*
+* JPIERE-0225: Match PO control.
+*
+* @author h.hagiwara
+*
+*/
 public class JPiereMatchPOModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereMatchPOModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MMatchPO.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereMatchPOModelValidator");
 	}
 
 	@Override
@@ -34,16 +44,14 @@ public class JPiereMatchPOModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception {
+	public String modelChange(PO po, int type) throws Exception
+	{
 
 		//JPIERE-0225:Match PO control
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||

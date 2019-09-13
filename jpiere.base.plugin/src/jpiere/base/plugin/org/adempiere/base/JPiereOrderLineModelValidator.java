@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.logging.Level;
 
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCharge;
@@ -33,6 +34,7 @@ import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.ProductCost;
 import org.compiere.process.DocAction;
+import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -40,7 +42,28 @@ import org.compiere.util.Msg;
 import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
 
+/**
+*
+* JPiere Order Line model Validator
+*
+* JPIERE-0165: Tax amt at Line and IJPiereTaxProvider
+* JPIERE-0202: Set Product Cost at Order Line and Estmation Line
+* JPIERE-0207: Check Re-Active at Order
+* JPIERE-0227: Common Warehouse
+* JPIERE-0317: Physical Warehouse
+* JPIERE-0334: Locator Level Reserved
+* JPIERE-0369: Mix Tax Include or Exclude at Line a Doc.
+* JPIERE-0375: Check Over Qty Invoiced
+* JPIERE-0376: Check Over Qty Delivered
+* JPIERE-0377: Check Over Qty Recognized
+* JPIERE-0409: Set Counter Doc Line Info
+*
+* @author h.hagiwara
+*
+*/
 public class JPiereOrderLineModelValidator implements ModelValidator {
+
+	private static CLogger log = CLogger.getCLogger(JPiereOrderLineModelValidator.class);
 
 	//Qty
 	static final String PROHIBIT_CHANGE_QTY = "PCQ";
@@ -57,26 +80,32 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MOrderLine.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereOrderLineModelValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 
 		return null;
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception {
+	public String modelChange(PO po, int type) throws Exception
+	{
 
 		//JPIERE-0165
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
@@ -312,9 +341,9 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			int now_Locator_ID = oLine.get_ValueAsInt("JP_Locator_ID");
 			int old_Locator_ID = oLine.get_ValueOldAsInt("JP_Locator_ID");
 			Timestamp now_DateReserved  = (Timestamp)oLine.get_Value("JP_DateReserved");
-			Timestamp old_DateReserved  = (Timestamp)oLine.get_ValueOld("JP_DateReserved");
+//			Timestamp old_DateReserved  = (Timestamp)oLine.get_ValueOld("JP_DateReserved");
 			BigDecimal now_QtyReserved = (BigDecimal)oLine.getQtyReserved();
-			BigDecimal old_QtyReserved = (BigDecimal)oLine.get_ValueOld("QtyReserved");
+//			BigDecimal old_QtyReserved = (BigDecimal)oLine.get_ValueOld("QtyReserved");
 
 			if(now_Locator_ID <= 0)
 			{

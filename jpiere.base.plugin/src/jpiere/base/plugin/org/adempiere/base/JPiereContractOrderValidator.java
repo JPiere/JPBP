@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
+import java.util.logging.Level;
 
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MClient;
@@ -37,8 +38,11 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 
 
 /**
- *  JPIERE-0363: Contract Management
  *  JPiere Contract Order Validator
+ *
+ *  JPIERE-0363: Contract Management
+ *  JPIERE-0383: Processing Order
+ *  JPIERE-0408: Set Counter Doc Info
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -47,9 +51,6 @@ public class JPiereContractOrderValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereContractOrderValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 
 	@Override
@@ -62,6 +63,8 @@ public class JPiereContractOrderValidator implements ModelValidator {
 		engine.addDocValidate(MOrder.Table_Name, this);
 		engine.addDocValidate(MOrderLine.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereContractOrderValidator");
+
 	}
 
 	@Override
@@ -71,11 +74,8 @@ public class JPiereContractOrderValidator implements ModelValidator {
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 

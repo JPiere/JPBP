@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
+import java.util.logging.Level;
 
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MCharge;
@@ -35,38 +36,51 @@ import org.compiere.util.Msg;
 import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
 
+/**
+ *  JPiere Invoice Line Model Validator
+ *
+ *  JPIERE-0165: Invoice Line Tax
+ *  JPIERE-0223: Restrict Match Inv.
+ *  JPIERE-0295: Explode BOM
+ *  JPIERE-0369: Mix Include Tax and Exclude Tax Line a Doc.
+ *  JPIERE-0375: Check Over Qty Invoice
+ *  JPIERE-0409:Set Counter Doc Line Info
+ *
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
+ *
+ */
 public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereInvoiceLineModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
+
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MInvoiceLine.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereInvoiceLineModelValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception {
+	public String modelChange(PO po, int type) throws Exception
+	{
 
 		//JPIERE-0165:Invoice Line Tax
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||

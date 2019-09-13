@@ -14,6 +14,7 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import org.compiere.model.I_M_Movement;
 import org.compiere.model.MClient;
@@ -29,13 +30,20 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 
+
+/**
+ *
+ * JPIERE-0146
+ * JPIERE-0147
+ * JPIERE-0227
+ *
+ * @author h.hagiwara
+ *
+ */
 public class JPiereOrderModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereOrderModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
 	public void initialize(ModelValidationEngine engine, MClient client) {
@@ -44,6 +52,7 @@ public class JPiereOrderModelValidator implements ModelValidator {
 		engine.addModelChange(MOrder.Table_Name, this);
 		engine.addDocValidate(MOrder.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereOrderModelValidator");
 	}
 
 	@Override
@@ -52,17 +61,14 @@ public class JPiereOrderModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 
 	@Override
-	public String modelChange(PO po, int type) throws Exception {
-
+	public String modelChange(PO po, int type) throws Exception
+	{
 		//For Simple Input Window(JPIERE-0146/JPIERE-0147)
 		if(type == ModelValidator.TYPE_BEFORE_NEW
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_DocTypeTarget_ID"))

@@ -15,6 +15,7 @@ package jpiere.base.plugin.org.adempiere.base;
 
 
 import java.math.BigDecimal;
+import java.util.logging.Level;
 
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MClient;
@@ -33,19 +34,33 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+/**
+*
+* JPiere InOut Line Model Validator
+*
+* JPIERE-0211: Check Product of Order Line and InOut Line.
+* JPIERE-0212: Check InOutLineConfirm
+* JPIERE-0225: Match PO control
+* JPIERE-0294: Explode BOM
+* JPIERE-0317: Physical Warehouse
+* JPIERE-0376: Check Over Qty Delivered
+*
+* @author h.hagiwara
+*
+*/
 public class JPiereInOutLineModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereInOutLineModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MInOutLine.Table_Name, this);
+
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereInOutLineModelValidator");
 
 	}
 
@@ -55,11 +70,8 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 	}
 
 	@Override
-	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
+	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
+	{
 		return null;
 	}
 

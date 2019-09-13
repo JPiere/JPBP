@@ -25,14 +25,16 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 
-
+/**
+ *  JPiere Attachment Undeletable Model Validator
+ *
+ *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
+ *
+ */
 public class JPiereAttachmentUndeletableModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereAttachmentUndeletableModelValidator.class);
 	private int AD_Client_ID = -1;
-	private int AD_Org_ID = -1;
-	private int AD_Role_ID = -1;
-	private int AD_User_ID = -1;
 
 	private String columnName = null;
 	private Object columnValue = null;
@@ -112,10 +114,6 @@ public class JPiereAttachmentUndeletableModelValidator implements ModelValidator
 	@Override
 	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID)
 	{
-		this.AD_Org_ID = AD_Org_ID;
-		this.AD_Role_ID = AD_Role_ID;
-		this.AD_User_ID = AD_User_ID;
-
 		return null;
 	}
 

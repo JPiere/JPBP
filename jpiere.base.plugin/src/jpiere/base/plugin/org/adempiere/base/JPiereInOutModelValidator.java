@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAllocationHdr;
@@ -41,6 +42,9 @@ import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 
 /**
+ *
+ * JPiere InOut Model Validator
+ *
  * JPIERE-0219:Create Invoice When Ship/Receipt Complete
  * JPIERE-0229:Inspection basis
  * JPIERE-0295:Explode BOM
@@ -49,23 +53,26 @@ import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
  * @author h.hagiwara
  *
  */
-
 public class JPiereInOutModelValidator implements ModelValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPiereInOutModelValidator.class);
 	private int AD_Client_ID = -1;
 
 	@Override
-	public void initialize(ModelValidationEngine engine, MClient client) {
+	public void initialize(ModelValidationEngine engine, MClient client)
+	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MInOut.Table_Name, this);
 		engine.addDocValidate(MInOut.Table_Name, this);
 
+		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereInOutModelValidator");
+
 	}
 
 	@Override
-	public int getAD_Client_ID() {
+	public int getAD_Client_ID()
+	{
 		return AD_Client_ID;
 	}
 
