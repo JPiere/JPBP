@@ -24,3 +24,4 @@ Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.webui.apps.form
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: jpiere.base.plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-11
