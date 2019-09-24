@@ -93,6 +93,7 @@ public class CreateReversingEntry extends SvrProcess {
 		//Delete I_GLJournalJP
 		String deleteSQL = "DELETE I_GLJournalJP WHERE AD_Client_ID=?";
 		int deleteNum = DB.executeUpdate(deleteSQL, getAD_Client_ID(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Delete I_GLJournalJP -> #" + deleteNum);
 		commitEx();
 
 		//Get Target data of Fact_Acct Table.

@@ -161,6 +161,7 @@ public class CreateEstimationByCopyAtContract extends SvrProcess
 
 		//
 		int no = to_Estimation.copyLinesFrom (from_Estimation, false, false);		//	no Attributes
+		if (log.isLoggable(Level.FINE)) log.fine("copy Lines -> #" + no);
 		addBufferLog(0, null, null, Msg.getElement(getCtx(), "DocumentNo") + " : "+  to_Estimation.getDocumentNo(), MEstimation.Table_ID, to_Estimation.get_ID());
 		//
 		return to_Estimation.getDocumentInfo();
