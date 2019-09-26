@@ -1696,6 +1696,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverese Look up  AD_Table_ID From Name =#" + no + ":" + sql);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -1722,8 +1723,9 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse lookup AD_Window_ID From JP_Window_Namee =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
+			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql.toString() );
 		}
 
 		//Invalid JP_Window_Name
@@ -1734,6 +1736,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse lookup AD_Window_ID From JP_Window_Namee =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}

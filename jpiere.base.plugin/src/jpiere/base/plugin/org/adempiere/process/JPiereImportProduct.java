@@ -960,6 +960,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 			try {
 				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Reverse Look up SalesRep_ID From JP_User_Value =#" + no + ":" + sql);
 			}catch(Exception e) {
 				throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 			}

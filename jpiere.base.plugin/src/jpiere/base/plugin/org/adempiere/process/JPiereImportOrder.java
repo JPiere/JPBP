@@ -714,6 +714,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Lookup C_Order_ID = #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -2275,6 +2276,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Lookup C_BPartner_ID = #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -2300,6 +2302,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Lookup C_BPartner_Location_ID = 1#" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -2312,6 +2315,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Lookup C_BPartner_Location_ID = 2#" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
