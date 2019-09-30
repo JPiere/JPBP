@@ -562,6 +562,7 @@ public class JPiereImportBPBankAccount extends SvrProcess implements ImportProce
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Look up C_BP_BankAccount_ID From Bank Info -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}

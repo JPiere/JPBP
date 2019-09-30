@@ -773,6 +773,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 				}
 
+				if (log.isLoggable(Level.FINE)) log.fine("Reverse Look up SalesRep_ID -> #" + no);
+
 			}catch(Exception e) {
 				message = message + " : " +e.toString()+ " : "+sql.toString();
 				return false;
@@ -1706,6 +1708,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 				DB.executeUpdateEx(sql.toString(), get_TrxName());
 			}
 
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Look up C_Location_ID From JP_Location_Label -> #" + no);
+
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -1789,7 +1793,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 			return true;
 
 		StringBuilder sql = null;
-		int no = 0;
+		//int no = 0;
 
 
 		if(Util.isEmpty(p_JP_ImportUserIdentifier)) {
@@ -1998,7 +2002,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupInvoice_PrintFormat_ID() throws Exception
 	{
-		int no = 0;
+		//int no = 0;
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 				.append("SET Invoice_PrintFormat_ID=(SELECT AD_PrintFormat_ID FROM AD_PrintFormat p")

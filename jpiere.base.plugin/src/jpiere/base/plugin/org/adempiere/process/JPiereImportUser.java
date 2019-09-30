@@ -527,6 +527,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 			try {
 				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Reverse Look up User From E-Mail and (Value && Name) =#" + no + ":" + sql.toString());
 			}catch(Exception e) {
 				throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 			}
@@ -558,6 +559,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 
 			try {
 				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+				if (log.isLoggable(Level.FINE)) log.fine("Reverse Look up User From E-Mail and (Value && Name) =#" + no + ":" + sql.toString());
 			}catch(Exception e) {
 				throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 			}
@@ -807,6 +809,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse look up JP_Corporation_ID From JP_Corporation_Value =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
@@ -819,6 +822,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse look up JP_Corporation_ID From JP_Corporation_Value =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
@@ -846,6 +850,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse look up C_BPartner_ID From JP_BPartner_Value =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -858,6 +863,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Invalid BPartner_Value =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : "+ e.toString() + " : " + sql );
 		}
@@ -884,6 +890,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse look up C_BPartner_Location_ID From JP_BPartner_Location_Name =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -896,6 +903,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Invalid JP_BPartner_Location_Name =#" + no + ":" + sql.toString());
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
@@ -1106,6 +1114,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Look up Supervisor_ID From E-Mail of User =#" + no + ":" + sql.toString());
 
 		}catch(Exception e) {
 
@@ -1276,6 +1285,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		try {
 
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Look up SalesRep_ID From JP_SalesRep_Email =#" + no + ":" + sql.toString());
 
 		}catch(Exception e) {
 

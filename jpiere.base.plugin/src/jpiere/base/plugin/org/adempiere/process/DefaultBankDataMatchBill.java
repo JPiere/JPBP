@@ -16,11 +16,9 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
-import org.compiere.model.MInvoice;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
@@ -33,23 +31,23 @@ import jpiere.base.plugin.org.adempiere.model.MBill;
 
 /**
  * JPIERE-0306 : Default Bank Data match Bill
- * 
- * @author 
+ *
+ * @author
  *
  */
 public class DefaultBankDataMatchBill extends SvrProcess {
-	
+
 
 	private int p_JP_BankData_ID = 0;
 	private MBankData m_BankData = null;
-	
+
 	private MBankDataSchema BDSchema = null;
-	
+
 	private int p_AD_Client_ID = 0;
-	
+
 	private Timestamp promisedPayDate_From = null;
 	private Timestamp promisedPayDate_To = null;
-	
+
 	@Override
 	protected void prepare()
 	{
@@ -57,7 +55,7 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 		p_JP_BankData_ID = getRecord_ID();
 		m_BankData = new MBankData(getCtx(), p_JP_BankData_ID, get_TrxName());
 		BDSchema = new MBankDataSchema(getCtx(), m_BankData.getJP_BankDataSchema_ID(), get_TrxName());
-		
+
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
 		{
@@ -71,16 +69,16 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 			}else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
-		
-		
+
+
 	}
-	
+
 	@Override
-	protected String doIt() throws Exception 
+	protected String doIt() throws Exception
 	{
 		if(promisedPayDate_From == null || promisedPayDate_To== null)
 			throw new Exception("FillMandatory");
-		
+
 		BigDecimal acceptableDiffAmt = BDSchema.getJP_AcceptableDiffAmt();
 		MBankDataLine[] lines =  m_BankData.getLines();
 		String sql = "SELECT JP_Bill_ID FROM JP_Bill WHERE AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )"
@@ -102,7 +100,7 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 				{
 					if(lines[i].isMatchedJP())
 						break;
-					
+
 					int JP_Bill_ID = rs.getInt(1);
 					MBill bill = new MBill(getCtx(), JP_Bill_ID, get_TrxName());
 					BigDecimal openAmt = bill.getCurrentOpenAmt();
@@ -110,7 +108,7 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 					if(diffAmt.abs().compareTo(acceptableDiffAmt.abs()) <= 0)
 					{
 						lines[i].setJP_Bill_ID(JP_Bill_ID);
-						
+
 						if(diffAmt.compareTo(Env.ZERO) !=0)
 						{
 							lines[i].setTrxAmt(openAmt);
@@ -118,7 +116,7 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 							lines[i].setC_Charge_ID(BDSchema.getC_Charge_ID());
 							lines[i].setC_Tax_ID(BDSchema.getC_Tax_ID());
 						}
-						
+
 						lines[i].setIsMatchedJP(true);
 						lines[i].saveEx(get_TrxName());
 						break;
@@ -137,8 +135,8 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 			}
 
 		}
-		
+
 		return null;
 	}
-	
+
 }
