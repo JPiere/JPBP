@@ -102,7 +102,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 	public static final String JP_IndirectContractProcType_AllValidContractProcessSchedule = "AVC";
 	public static final String JP_IndirectContractProcType_ValidContractProcessScheduleInValidContractDoc = "VCI";
 
-	public static final String JP_ContractProcessType_CreateDocument = "DC";
+	public static final String JP_ContractProcessType_CreateDocument = "CD";
 	public static final String JP_ContractProcessType_Report = "RE";
 	public static final String JP_ContractProcessType_AutoRenewContract = "AR";
 	public static final String JP_ContractProcessType_ContractStatusUpdate = "CS";
