@@ -44,7 +44,7 @@ import org.compiere.util.Util;
 */
 public class JPiereCalendarBulkOpenClose extends SvrProcess {
 
-	private int p_AD_Client_ID = 0;
+	//private int p_AD_Client_ID = 0;
 	private int p_C_Calendar_ID = 0;
 	private Timestamp p_EndDate = null;
 	private String p_DocBaseType = null;
@@ -54,7 +54,7 @@ public class JPiereCalendarBulkOpenClose extends SvrProcess {
 	@Override
 	protected void prepare()
 	{
-		p_AD_Client_ID =getProcessInfo().getAD_Client_ID();
+		//p_AD_Client_ID =getProcessInfo().getAD_Client_ID();
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
 		{

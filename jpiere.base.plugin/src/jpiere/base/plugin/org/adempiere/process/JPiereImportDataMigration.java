@@ -423,7 +423,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery();
 			String lastJP_DataMigration_Identifier = "";
-			String lastDocumentNo = "";
+			//String lastDocumentNo = "";
 			MDataMigration dataMigration = null;
 			MDataMigrationLine dataMigrationLine = null;
 
@@ -498,7 +498,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 				}else {
 
 					lastJP_DataMigration_Identifier = imp.getJP_DataMigration_Identifier();
-					lastDocumentNo = imp.getDocumentNo();
+					//lastDocumentNo = imp.getDocumentNo();
 				}
 
 
@@ -510,9 +510,11 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 
 						//Delete Migration Data Line
 						int deleteJournalLineNum =DB.executeUpdate(deleteSQL_DataMigrationLine, imp.getJP_DataMigration_ID(), get_TrxName());
+						if (log.isLoggable(Level.FINE)) log.fine("Delete Migration Data Line -> #" + deleteJournalLineNum);
 
 						//Delete Migration Data
 						int deleteJournalNum =DB.executeUpdate(deleteSQL_DataMigration, imp.getJP_DataMigration_ID(), get_TrxName());
+						if (log.isLoggable(Level.FINE)) log.fine("Delete Migration Data -> #" + deleteJournalNum);
 
 					}
 
@@ -723,6 +725,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Look up JP_DataMigration_ID ID From JP_DataMigration_Identifier -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -910,6 +913,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse lookup C_BPartner_ID From JP_BPartner_Value -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -937,6 +941,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse lookup JP_Line_BPartner_ID From JP_Line_BPartner_Value -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
@@ -962,6 +967,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 				.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Lookup C_BPartner_Location_ID -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}
@@ -1582,6 +1588,7 @@ public class JPiereImportDataMigration extends SvrProcess implements ImportProce
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse Lookup C_BankAccount_ID -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}

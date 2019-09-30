@@ -357,6 +357,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 			String updateSQL = "UPDATE C_ElementValue SET IsDocControlled='N' WHERE IsSummary='N' AND IsDocControlled='Y' AND AD_Client_ID=?";
 			int updateNum =  DB.executeUpdate(updateSQL, getAD_Client_ID(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Doc Controlled Account -> #" + updateNum);
 			commitEx();
 
 		}
@@ -628,12 +629,15 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 					{
 						//Delete FACT_ACCT
 						int deleteFactNum = DB.executeUpdate(deleteSQL_Fact_ACCT, imp.getGL_Journal_ID(), get_TrxName());
+						if (log.isLoggable(Level.FINE)) log.fine("Delete FACT_ACCT -> #" + deleteFactNum);
 
 						//Delete GL Journal Line
 						int deleteJournalLineNum =DB.executeUpdate(deleteSQL_JournalLine, imp.getGL_Journal_ID(), get_TrxName());
+						if (log.isLoggable(Level.FINE)) log.fine("Delete GL Journal Line -> #" + deleteJournalLineNum);
 
 						//Delete GL Journal
 						int deleteJournalNum =DB.executeUpdate(deleteSQL_Journal, imp.getGL_Journal_ID(), get_TrxName());
+						if (log.isLoggable(Level.FINE)) log.fine("Delete GL Journal -> #" + deleteJournalNum);
 
 					}
 
@@ -832,6 +836,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverese Look up  GL_Journal_ID -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : "+ e.toString() +" : "+ sql );
 		}
@@ -858,6 +863,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(" Reverse Lookup GL_JournalLine_ID -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : " + e.toString() + " : " + sql );
 		}
@@ -1088,6 +1094,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
 		try {
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Reverse lookup GL_Category_ID From JP_GL_Category_Name -> #" + no);
 		}catch(Exception e) {
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
 		}

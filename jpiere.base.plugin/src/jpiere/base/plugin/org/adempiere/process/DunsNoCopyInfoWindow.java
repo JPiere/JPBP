@@ -16,13 +16,13 @@ package jpiere.base.plugin.org.adempiere.process;
 
 import java.util.Collection;
 
-import jpiere.base.plugin.org.adempiere.model.MCorporation;
-
 import org.adempiere.model.GenericPO;
 import org.compiere.model.MBPartner;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.SvrProcess;
+
+import jpiere.base.plugin.org.adempiere.model.MCorporation;
 
 /**
  *  DUNS Number Copy at Info Window.
@@ -61,7 +61,7 @@ public class DunsNoCopyInfoWindow extends SvrProcess {
 				BPs[i].setDUNS(DUNS);
 				BPs[i].saveEx(get_TrxName());
 				String msg = BPs[i].getValue() + "_" + BPs[i].getName();
-				//addBufferLog(getAD_PInstance_ID(), null, null, msg, MBPartner.Table_ID, BPs[i].get_ID());
+				addBufferLog(getAD_PInstance_ID(), null, null, msg, MBPartner.Table_ID, BPs[i].get_ID());
 				bpNum++;
 			}
 		}
