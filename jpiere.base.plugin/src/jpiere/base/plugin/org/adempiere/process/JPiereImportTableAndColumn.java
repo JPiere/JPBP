@@ -61,6 +61,8 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 	private static String BLANK = "blank";
 
+	private boolean p_IsElementUpdateJP = false;
+
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -74,6 +76,8 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 				p_deleteOldImported = "Y".equals(para[i].getParameter());
 			else if (name.equals("IsValidateOnly"))
 				p_IsValidateOnly = para[i].getParameterAsBoolean();
+			else if (name.equals("IsElementUpdateJP"))
+				p_IsElementUpdateJP = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -256,7 +260,10 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 
 				}else {
 
-					updateElement(impData,null);
+					if(p_IsElementUpdateJP)
+					{
+						updateElement(impData,null);
+					}
 
 				}
 
