@@ -321,10 +321,17 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 			contractContent.setDocumentNo(null);
 		contractContent.setJP_Contract_Acct_ID(contractContentTemplate.getJP_Contract_Acct_ID());
 
-		if(contractContentTemplate.getC_BPartner_ID() == 0 && p_JP_Para_BPartner_ID != 0)
+		if(contractContentTemplate.getC_BPartner_ID() == 0)
 		{
-			contractContent.setC_BPartner_ID(p_JP_Para_BPartner_ID);
-			contractContent.setC_BPartner_Location_ID(p_JP_Para_BPartner_Location_ID);
+			if(p_JP_Para_BPartner_ID != 0)
+			{
+				contractContent.setC_BPartner_ID(p_JP_Para_BPartner_ID);
+				contractContent.setC_BPartner_Location_ID(p_JP_Para_BPartner_Location_ID);
+			}else {
+				contractContent.setC_BPartner_ID(m_Contract.getC_BPartner_ID());
+				contractContent.setC_BPartner_Location_ID(m_Contract.getC_BPartner_Location_ID());
+				contractContent.setAD_User_ID(m_Contract.getAD_User_ID());
+			}
 		}
 
 		contractContent.setDateDoc(m_Contract.getDateDoc());
@@ -340,14 +347,6 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 			MContractProcessList[] contractProcessLists = contractProcessRef.getContractProcessList(getCtx(), true, get_TrxName());
 			if(contractProcessLists.length==1)
 				contractContent.setJP_ContractProcess_ID(contractProcessLists[0].getJP_ContractProcess_ID());
-		}
-
-
-		if(contractContentTemplate.getC_BPartner_ID()==0)
-		{
-			contractContent.setC_BPartner_ID(m_Contract.getC_BPartner_ID());
-			contractContent.setC_BPartner_Location_ID(m_Contract.getC_BPartner_Location_ID());
-			contractContent.setAD_User_ID(m_Contract.getAD_User_ID());
 		}
 
 		contractContent.setTotalLines(Env.ZERO);
