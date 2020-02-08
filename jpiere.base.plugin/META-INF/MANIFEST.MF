@@ -7,12 +7,15 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  org.adempiere.ui.zk;bundle-version="2.1.0",
  zcommon;bundle-version="8.0.1",
  zk,
- zul;bundle-version="8.0.1"
+ zul;bundle-version="8.0.1",
+ net.sf.supercsv.super-csv
 Bundle-Vendor: OSS ERP Solutions
 Import-Package: org.compiere.apps,
  org.compiere.grid,
  org.compiere.minigrid,
- org.compiere.model
+ org.compiere.model,
+ org.supercsv.io;version="2.4.0",
+ org.supercsv.prefs;version="2.4.0"
 Service-Component: OSGI-INF/*.xml
 Export-Package: jpiere.base.plugin.factory,
  jpiere.base.plugin.org.adempiere.base,
