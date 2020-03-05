@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ReferenceTest
  *  @author iDempiere (generated) 
- *  @version Release 2.1 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150511L;
+	private static final long serialVersionUID = 20200224L;
 
     /** Standard Constructor */
     public X_JP_ReferenceTest (Properties ctx, int JP_ReferenceTest_ID, String trxName)
@@ -42,6 +42,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
       /** if (JP_ReferenceTest_ID == 0)
         {
 			setJP_ReferenceTest_ID (0);
+			setM_PriceList_ID (0);
+			setM_Product_ID (0);
         } */
     }
 
@@ -476,6 +478,95 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return (String)get_Value(COLUMNNAME_Help);
 	}
 
+	/** JP_BPartner_Multi AD_Reference_ID=138 */
+	public static final int JP_BPARTNER_MULTI_AD_Reference_ID=138;
+	/** Set Business Partner(Multi Select).
+		@param JP_BPartner_Multi Business Partner(Multi Select)	  */
+	public void setJP_BPartner_Multi (String JP_BPartner_Multi)
+	{
+
+		set_Value (COLUMNNAME_JP_BPartner_Multi, JP_BPartner_Multi);
+	}
+
+	/** Get Business Partner(Multi Select).
+		@return Business Partner(Multi Select)	  */
+	public String getJP_BPartner_Multi () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_BPartner_Multi);
+	}
+
+	/** Set Multiple Selection Grid.
+		@param JP_Multi_Grid Multiple Selection Grid	  */
+	public void setJP_Multi_Grid (String JP_Multi_Grid)
+	{
+		set_Value (COLUMNNAME_JP_Multi_Grid, JP_Multi_Grid);
+	}
+
+	/** Get Multiple Selection Grid.
+		@return Multiple Selection Grid	  */
+	public String getJP_Multi_Grid () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Multi_Grid);
+	}
+
+	/** JP_Multi_List AD_Reference_ID=151 */
+	public static final int JP_MULTI_LIST_AD_Reference_ID=151;
+	/** After Receipt = R */
+	public static final String JP_MULTI_LIST_AfterReceipt = "R";
+	/** Availability = A */
+	public static final String JP_MULTI_LIST_Availability = "A";
+	/** Complete Line = L */
+	public static final String JP_MULTI_LIST_CompleteLine = "L";
+	/** Complete Order = O */
+	public static final String JP_MULTI_LIST_CompleteOrder = "O";
+	/** Force = F */
+	public static final String JP_MULTI_LIST_Force = "F";
+	/** Manual = M */
+	public static final String JP_MULTI_LIST_Manual = "M";
+	/** Set Multiple Selection List.
+		@param JP_Multi_List Multiple Selection List	  */
+	public void setJP_Multi_List (String JP_Multi_List)
+	{
+
+		set_Value (COLUMNNAME_JP_Multi_List, JP_Multi_List);
+	}
+
+	/** Get Multiple Selection List.
+		@return Multiple Selection List	  */
+	public String getJP_Multi_List () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Multi_List);
+	}
+
+	/** Set Org Name(History).
+		@param JP_Org_History_Name Org Name(History)	  */
+	public void setJP_Org_History_Name (String JP_Org_History_Name)
+	{
+		set_Value (COLUMNNAME_JP_Org_History_Name, JP_Org_History_Name);
+	}
+
+	/** Get Org Name(History).
+		@return Org Name(History)	  */
+	public String getJP_Org_History_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Org_History_Name);
+	}
+
+	/** Set Product(Multi Select).
+		@param JP_Product_Multi Product(Multi Select)	  */
+	public void setJP_Product_Multi (String JP_Product_Multi)
+	{
+
+		set_Value (COLUMNNAME_JP_Product_Multi, JP_Product_Multi);
+	}
+
+	/** Get Product(Multi Select).
+		@return Product(Multi Select)	  */
+	public String getJP_Product_Multi () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Product_Multi);
+	}
+
 	/** Set JP_ReferenceTest.
 		@param JP_ReferenceTest_ID JP_ReferenceTest	  */
 	public void setJP_ReferenceTest_ID (int JP_ReferenceTest_ID)
@@ -549,7 +640,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
 			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());	}
 
-	/** Set Attribute Set Instance.
+	/** Set Attribute Info.
 		@param M_AttributeSetInstance_ID 
 		Product Attribute Set Instance
 	  */
@@ -561,7 +652,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
 	}
 
-	/** Get Attribute Set Instance.
+	/** Get Attribute Info.
 		@return Product Attribute Set Instance
 	  */
 	public int getM_AttributeSetInstance_ID () 
@@ -623,6 +714,34 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public int getM_Locator_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Locator_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
+			.getPO(getM_PriceList_ID(), get_TrxName());	}
+
+	/** Set Price List.
+		@param M_PriceList_ID 
+		Unique identifier of a Price List
+	  */
+	public void setM_PriceList_ID (int M_PriceList_ID)
+	{
+		if (M_PriceList_ID < 1) 
+			set_Value (COLUMNNAME_M_PriceList_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
+	}
+
+	/** Get Price List.
+		@return Unique identifier of a Price List
+	  */
+	public int getM_PriceList_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_PriceList_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -834,7 +953,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return (String)get_Value(COLUMNNAME_ReferenceNo);
 	}
 
-	/** Set Resource Assignment.
+	/** Set Resource Assign.
 		@param S_ResourceAssignment_ID 
 		Resource Assignment
 	  */
@@ -846,7 +965,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 			set_Value (COLUMNNAME_S_ResourceAssignment_ID, Integer.valueOf(S_ResourceAssignment_ID));
 	}
 
-	/** Get Resource Assignment.
+	/** Get Resource Assign.
 		@return Resource Assignment
 	  */
 	public int getS_ResourceAssignment_ID () 

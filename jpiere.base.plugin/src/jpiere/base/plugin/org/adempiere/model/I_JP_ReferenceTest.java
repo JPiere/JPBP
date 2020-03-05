@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ReferenceTest
  *  @author iDempiere (generated) 
- *  @version Release 2.1
+ *  @version Release 7.1
  */
 @SuppressWarnings("all")
 public interface I_JP_ReferenceTest 
@@ -333,6 +333,51 @@ public interface I_JP_ReferenceTest
 	  */
 	public boolean isActive();
 
+    /** Column name JP_BPartner_Multi */
+    public static final String COLUMNNAME_JP_BPartner_Multi = "JP_BPartner_Multi";
+
+	/** Set Business Partner(Multi Select)	  */
+	public void setJP_BPartner_Multi (String JP_BPartner_Multi);
+
+	/** Get Business Partner(Multi Select)	  */
+	public String getJP_BPartner_Multi();
+
+    /** Column name JP_Multi_Grid */
+    public static final String COLUMNNAME_JP_Multi_Grid = "JP_Multi_Grid";
+
+	/** Set Multiple Selection Grid	  */
+	public void setJP_Multi_Grid (String JP_Multi_Grid);
+
+	/** Get Multiple Selection Grid	  */
+	public String getJP_Multi_Grid();
+
+    /** Column name JP_Multi_List */
+    public static final String COLUMNNAME_JP_Multi_List = "JP_Multi_List";
+
+	/** Set Multiple Selection List	  */
+	public void setJP_Multi_List (String JP_Multi_List);
+
+	/** Get Multiple Selection List	  */
+	public String getJP_Multi_List();
+
+    /** Column name JP_Org_History_Name */
+    public static final String COLUMNNAME_JP_Org_History_Name = "JP_Org_History_Name";
+
+	/** Set Org Name(History)	  */
+	public void setJP_Org_History_Name (String JP_Org_History_Name);
+
+	/** Get Org Name(History)	  */
+	public String getJP_Org_History_Name();
+
+    /** Column name JP_Product_Multi */
+    public static final String COLUMNNAME_JP_Product_Multi = "JP_Product_Multi";
+
+	/** Set Product(Multi Select)	  */
+	public void setJP_Product_Multi (String JP_Product_Multi);
+
+	/** Get Product(Multi Select)	  */
+	public String getJP_Product_Multi();
+
     /** Column name JP_ReferenceTest_ID */
     public static final String COLUMNNAME_JP_ReferenceTest_ID = "JP_ReferenceTest_ID";
 
@@ -376,12 +421,12 @@ public interface I_JP_ReferenceTest
     /** Column name M_AttributeSetInstance_ID */
     public static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
 
-	/** Set Attribute Set Instance.
+	/** Set Attribute Info.
 	  * Product Attribute Set Instance
 	  */
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID);
 
-	/** Get Attribute Set Instance.
+	/** Get Attribute Info.
 	  * Product Attribute Set Instance
 	  */
 	public int getM_AttributeSetInstance_ID();
@@ -417,6 +462,21 @@ public interface I_JP_ReferenceTest
 	public int getM_Locator_ID();
 
 	public I_M_Locator getM_Locator() throws RuntimeException;
+
+    /** Column name M_PriceList_ID */
+    public static final String COLUMNNAME_M_PriceList_ID = "M_PriceList_ID";
+
+	/** Set Price List.
+	  * Unique identifier of a Price List
+	  */
+	public void setM_PriceList_ID (int M_PriceList_ID);
+
+	/** Get Price List.
+	  * Unique identifier of a Price List
+	  */
+	public int getM_PriceList_ID();
+
+	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException;
 
     /** Column name M_Product_Category_ID */
     public static final String COLUMNNAME_M_Product_Category_ID = "M_Product_Category_ID";
@@ -540,12 +600,12 @@ public interface I_JP_ReferenceTest
     /** Column name S_ResourceAssignment_ID */
     public static final String COLUMNNAME_S_ResourceAssignment_ID = "S_ResourceAssignment_ID";
 
-	/** Set Resource Assignment.
+	/** Set Resource Assign.
 	  * Resource Assignment
 	  */
 	public void setS_ResourceAssignment_ID (int S_ResourceAssignment_ID);
 
-	/** Get Resource Assignment.
+	/** Get Resource Assign.
 	  * Resource Assignment
 	  */
 	public int getS_ResourceAssignment_ID();

@@ -18,26 +18,24 @@ import java.util.Properties;
 
 public class MReferenceTest extends X_JP_ReferenceTest {
 
-	public MReferenceTest(Properties ctx, int JP_ReferenceTest_ID,
-			String trxName) {
+	public MReferenceTest(Properties ctx, int JP_ReferenceTest_ID,String trxName) {
 		super(ctx, JP_ReferenceTest_ID, trxName);
-		// TODO 自動生成されたコンストラクター・スタブ
 	}
 
 	public MReferenceTest(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
-		// TODO 自動生成されたコンストラクター・スタブ
 	}
 
 	@Override
-	protected boolean beforeSave(boolean newRecord) {
-		// TODO 自動生成されたメソッド・スタブ
+	protected boolean beforeSave(boolean newRecord)
+	{
 		return super.beforeSave(newRecord);
 	}
 
 	@Override
-	protected boolean afterSave(boolean newRecord, boolean success) {
-		// TODO 自動生成されたメソッド・スタブ
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+
 		return super.afterSave(newRecord, success);
 	}
 
