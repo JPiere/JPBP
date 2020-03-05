@@ -428,7 +428,7 @@ public abstract class AbstractCreateContractFromTemplate extends AbstractContrac
 				|| from.getDocBaseType().equals(MContractContent.DOCBASETYPE_ARInvoice) )
 			return ;
 
-		if(from.getM_Warehouse() != null && from.getM_Warehouse().getAD_Org_ID() == to.getAD_Org_ID())
+		if(from.getM_Warehouse_ID() > 0 && from.getM_Warehouse().getAD_Org_ID() == to.getAD_Org_ID())
 		{
 			to.setM_Warehouse_ID(from.getM_Warehouse_ID());
 

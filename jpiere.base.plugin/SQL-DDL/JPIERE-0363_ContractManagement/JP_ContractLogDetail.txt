@@ -1,18 +1,20 @@
-CREATE TABLE adempiere.JP_ContractLogDetail
+-- Table: adempiere.jp_contractlogdetail
+
+-- DROP TABLE adempiere.jp_contractlogdetail;
+
+CREATE TABLE adempiere.jp_contractlogdetail
 (
-  JP_ContractLog_ID numeric(10,0) NOT NULL,
-  JP_ContractLogDetail_ID numeric(10,0) NOT NULL,
-  JP_ContractLogDetail_uu character varying(36) DEFAULT NULL::character varying,
-  AD_Client_ID numeric(10,0) NOT NULL,
-  AD_Org_ID numeric(10,0) NOT NULL,
-  IsActive character(1) NOT NULL DEFAULT 'Y'::bpchar,
-  Created timestamp without time zone NOT NULL DEFAULT now(),
-  CreatedBy numeric(10,0) NOT NULL,
-  Updated timestamp without time zone NOT NULL DEFAULT now(),
-  UpdatedBy numeric(10,0) NOT NULL,
-
-  Description character varying(255),
-
+    jp_contractlog_id numeric(10,0),
+    jp_contractlogdetail_id numeric(10,0) NOT NULL,
+    jp_contractlogdetail_uu character varying(36) COLLATE pg_catalog."default" DEFAULT NULL::character varying,
+    ad_client_id numeric(10,0) NOT NULL,
+    ad_org_id numeric(10,0) NOT NULL,
+    isactive character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'Y'::bpchar,
+    created timestamp without time zone NOT NULL DEFAULT now(),
+    createdby numeric(10,0) NOT NULL,
+    updated timestamp without time zone NOT NULL DEFAULT now(),
+    updatedby numeric(10,0) NOT NULL,
+    description character varying(255) COLLATE pg_catalog."default",
     jp_contract_id numeric(10,0) DEFAULT NULL::numeric,
     jp_contractcontent_id numeric(10,0) DEFAULT NULL::numeric,
     jp_contractprocperiod_id numeric(10,0) DEFAULT NULL::numeric,
@@ -37,7 +39,7 @@ CREATE TABLE adempiere.JP_ContractLogDetail
     jp_processing1 character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
     jp_processing2 character(1) COLLATE pg_catalog."default" NOT NULL DEFAULT 'N'::bpchar,
     help character varying(2000) COLLATE pg_catalog."default" DEFAULT NULL::character varying,
-    jp_confirmedby character varying(10) COLLATE pg_catalog."default" DEFAULT NULL::character varying,
+    jp_confirmedby numeric(10,0) ,
     jp_confirmed timestamp without time zone,
     jp_recognition_id numeric(10,0) DEFAULT NULL::numeric,
     jp_recognitionline_id numeric(10,0) DEFAULT NULL::numeric,
@@ -45,6 +47,85 @@ CREATE TABLE adempiere.JP_ContractLogDetail
     jp_contractpsline_id numeric(10,0) DEFAULT NULL::numeric,
     jp_contractpsinoutline_id numeric(10,0) DEFAULT NULL::numeric,
     jp_contractpsinvoiceline_id numeric(10,0) DEFAULT NULL::numeric,
-
-  CONSTRAINT JP_ContractLogDetail_pkey PRIMARY KEY (JP_ContractLogDetail_ID)
+    CONSTRAINT jp_contractlogdetail_pkey PRIMARY KEY (jp_contractlogdetail_id),
+    CONSTRAINT jpcontractprocschedule_jpcontr FOREIGN KEY (jp_contractprocschedule_id)
+        REFERENCES adempiere.jp_contractprocschedule (jp_contractprocschedule_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID,
+    CONSTRAINT jpcontractpsinoutline_jpcontra FOREIGN KEY (jp_contractpsinoutline_id)
+        REFERENCES adempiere.jp_contractpsinoutline (jp_contractpsinoutline_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID,
+    CONSTRAINT jpcontractpsinvoiceline_jpcont FOREIGN KEY (jp_contractpsinvoiceline_id)
+        REFERENCES adempiere.jp_contractpsinvoiceline (jp_contractpsinvoiceline_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID,
+    CONSTRAINT jpcontractpsline_jpcontractlog FOREIGN KEY (jp_contractpsline_id)
+        REFERENCES adempiere.jp_contractpsline (jp_contractpsline_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID,
+    CONSTRAINT jprecognition_jpcontractlogdet FOREIGN KEY (jp_recognition_id)
+        REFERENCES adempiere.jp_recognition (jp_recognition_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID,
+    CONSTRAINT jprecognitionline_jpcontractlo FOREIGN KEY (jp_recognitionline_id)
+        REFERENCES adempiere.jp_recognitionline (jp_recognitionline_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        DEFERRABLE INITIALLY DEFERRED
+        NOT VALID,
+    CONSTRAINT jp_contractlogdetail_processed_check CHECK (processed = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))
 )
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE adempiere.jp_contractlogdetail
+    OWNER to adempiere;
+
+-- Index: jp_contractlogdetail_contract
+
+-- DROP INDEX adempiere.jp_contractlogdetail_contract;
+
+CREATE INDEX jp_contractlogdetail_contract
+    ON adempiere.jp_contractlogdetail USING btree
+    (jp_contract_id)
+    TABLESPACE pg_default;
+
+-- Index: jp_contractlogdetail_contractcontent
+
+-- DROP INDEX adempiere.jp_contractlogdetail_contractcontent;
+
+CREATE INDEX jp_contractlogdetail_contractcontent
+    ON adempiere.jp_contractlogdetail USING btree
+    (jp_contractcontent_id)
+    TABLESPACE pg_default;
+
+-- Index: jp_contractlogdetail_contractline
+
+-- DROP INDEX adempiere.jp_contractlogdetail_contractline;
+
+CREATE INDEX jp_contractlogdetail_contractline
+    ON adempiere.jp_contractlogdetail USING btree
+    (jp_contractline_id)
+    TABLESPACE pg_default;
+
+-- Index: jp_contractlogdetail_log
+
+-- DROP INDEX adempiere.jp_contractlogdetail_log;
+
+CREATE INDEX jp_contractlogdetail_log
+    ON adempiere.jp_contractlogdetail USING btree
+    (jp_contractlog_id)
+    TABLESPACE pg_default;
