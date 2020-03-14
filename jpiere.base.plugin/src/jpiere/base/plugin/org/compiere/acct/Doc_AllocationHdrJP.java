@@ -981,48 +981,6 @@ public class Doc_AllocationHdrJP extends Doc
 
 	}	//	createTaxCorrection
 
-	/**
-	 * JPIERE
-	 *
-	 * @param contractAcct
-	 * @param as
-	 * @return
-	 */
-	private MAccount getReceivableAccount(MContractAcct contractAcct, MAcctSchema as)
-	{
-		if(contractAcct != null)
-		{
-			MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
-			if(bpAcct != null && bpAcct.getC_Receivable_Acct() > 0)
-			{
-				return MAccount.get(getCtx(),bpAcct.getC_Receivable_Acct());
-			}
-		}
-
-		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as));
-	}
-
-	/**
-	 * JPIERE
-	 *
-	 * @param contractAcct
-	 * @param as
-	 * @return
-	 */
-	private MAccount getPayableAccount(MContractAcct contractAcct, MAcctSchema as)
-	{
-		if(contractAcct != null)
-		{
-			MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
-			if(bpAcct != null && bpAcct.getV_Liability_Acct() > 0)
-			{
-				return MAccount.get(Env.getCtx(),bpAcct.getV_Liability_Acct());
-			}
-		}
-
-		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_V_Liability, as));
-	}
-
 	/**************************************************************************
 	 * 	Create Rounding Correction.
 	 * 	Compares the Accounted Amount of the Payment to the
@@ -1594,6 +1552,48 @@ public class Doc_AllocationHdrJP extends Doc
 		return null;
 
 	}	//	createInvoiceRounding
+
+	/**
+	 * JPIERE
+	 *
+	 * @param contractAcct
+	 * @param as
+	 * @return
+	 */
+	private MAccount getReceivableAccount(MContractAcct contractAcct, MAcctSchema as)
+	{
+		if(contractAcct != null)
+		{
+			MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
+			if(bpAcct != null && bpAcct.getC_Receivable_Acct() > 0)
+			{
+				return MAccount.get(getCtx(),bpAcct.getC_Receivable_Acct());
+			}
+		}
+
+		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as));
+	}
+
+	/**
+	 * JPIERE
+	 *
+	 * @param contractAcct
+	 * @param as
+	 * @return
+	 */
+	private MAccount getPayableAccount(MContractAcct contractAcct, MAcctSchema as)
+	{
+		if(contractAcct != null)
+		{
+			MContractBPAcct bpAcct = contractAcct.getContractBPAcct(as.getC_AcctSchema_ID(), false);
+			if(bpAcct != null && bpAcct.getV_Liability_Acct() > 0)
+			{
+				return MAccount.get(Env.getCtx(),bpAcct.getV_Liability_Acct());
+			}
+		}
+
+		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_V_Liability, as));
+	}
 
 }   //  Doc_Allocation
 
