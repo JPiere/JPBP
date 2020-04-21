@@ -43,6 +43,7 @@ import org.compiere.model.MColumn;
 import org.compiere.model.MLocation;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRefList;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTab;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
@@ -84,11 +85,14 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		try {
 			FileOutputStream fileOut = new FileOutputStream (file);
 
-			//JPIERE-0451
-			fileOut.write(0xef);
-			fileOut.write(0xbb);
-			fileOut.write(0xbf);
-
+			//JPIERE-0451 Export CSV with BOM -- Start
+	        if(MSysConfig.getBooleanValue("JP_EXPORT_CSV_WITH_BOM", false, Env.getAD_Client_ID(Env.getCtx())))
+	        {
+				fileOut.write(0xef);
+				fileOut.write(0xbb);
+				fileOut.write(0xbf);
+	        }
+	      //JPIERE-0451 Export CSV with BOM -- End
 
 			OutputStreamWriter oStrW = new OutputStreamWriter(fileOut, Ini.getCharset());
 			BufferedWriter bw = new BufferedWriter(oStrW);
