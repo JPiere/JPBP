@@ -35,7 +35,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.util.JPiereInvoiceUtil;
 
 /**
- * JPIERE-0270,0271
+ * JPIERE-0270,0271 Open Amount of Invoice at that time.
  *
  *
  * @author h.hagiwara
@@ -351,7 +351,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 				invoice2 = new MInvoice(getCtx(), rs2, get_TrxName());
 				account_ID2 = rs2.getInt(3) ;
 
-				//Update: Comment out for JPIERE-0363:Contract Management
+				//Update for JPIERE-0363:Contract Management
 				if(invoice2.get_ValueAsInt("JP_ContractContent_ID") > 0)
 				{
 					contractContent2 = MContractContent.get(getCtx(), invoice2.get_ValueAsInt("JP_ContractContent_ID"));
@@ -541,7 +541,7 @@ public class OpenAmtInvoiceListPointOfTime extends SvrProcess {
 			this.DocBaseType = DocBaseType;
 			this.JP_Corporation_ID = JP_Corporation_ID;
 			this.Account_ID = Account_ID;
-			OpenAmt =invoice.getOpenAmt(true, null);
+			OpenAmt = JPiereInvoiceUtil.getOpenAmtNow(getCtx(), invoice, true, get_TrxName());
 			JP_OpenAmtPointOfTime = JPiereInvoiceUtil.getOpenAmtPointOfTime(getCtx(), invoice, p_JP_PointOfTime, true, get_TrxName());
 
 
