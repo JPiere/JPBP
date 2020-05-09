@@ -27,9 +27,12 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
+import org.compiere.model.MBPartner;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -45,11 +48,12 @@ public class Allocation
 	public DecimalFormat format = DisplayType.getNumberFormat(DisplayType.Amount);
 
 	/**	Logger			*/
-	public static CLogger log = CLogger.getCLogger(Allocation.class);
+	public static final CLogger log = CLogger.getCLogger(Allocation.class);
 
 	private boolean     m_calculating = false;
 	public int         	m_C_Currency_ID = 0;
 	public int         m_C_Charge_ID = 0;
+	public int         m_C_DocType_ID = 0;
 	public int         	m_C_BPartner_ID = 0;
 	public int         	m_C_BPartner2_ID = 0;
 	private int         m_noInvoices = 0;
@@ -81,6 +85,8 @@ public class Allocation
 		if (log.isLoggable(Level.INFO)) log.info("Currency=" + m_C_Currency_ID);
 
 		m_AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());
+		m_C_DocType_ID= MDocType.getDocType("CMA");
+
 	}
 
 	/**
@@ -447,9 +453,11 @@ public class Allocation
 
 			if (col == i_payment)
 			{
-				if ( applied.signum() == -open.signum() )
+				if (! MSysConfig.getBooleanValue(MSysConfig.ALLOW_APPLY_PAYMENT_TO_CREDITMEMO, false, Env.getAD_Client_ID(Env.getCtx()))
+						&& open.signum() > 0 && applied.signum() == -open.signum() )
 					applied = applied.negate();
-				if ( open.abs().compareTo( applied.abs() ) < 0 )
+				if (! MSysConfig.getBooleanValue(MSysConfig.ALLOW_OVER_APPLIED_PAYMENT, false, Env.getAD_Client_ID(Env.getCtx())))
+					if ( open.abs().compareTo( applied.abs() ) < 0 )
 							applied = open;
 			}
 
@@ -631,6 +639,7 @@ public class Allocation
 		int AD_Client_ID = Env.getContextAsInt(Env.getCtx(), m_WindowNo, "AD_Client_ID");
 		int AD_Org_ID = Env.getContextAsInt(Env.getCtx(), m_WindowNo, "AD_Org_ID");
 		int C_BPartner_ID = m_C_BPartner_ID;
+		int C_BPartner2_ID = m_C_BPartner2_ID;
 		int C_Order_ID = 0;
 		int C_CashLine_ID = 0;
 		Timestamp DateTrx = (Timestamp)date;
@@ -678,6 +687,8 @@ public class Allocation
 		MAllocationHdr alloc = new MAllocationHdr (Env.getCtx(), true,	//	manual
 			DateTrx, C_Currency_ID, Env.getContext(Env.getCtx(), "#AD_User_Name"), trxName);
 		alloc.setAD_Org_ID(AD_Org_ID);
+		alloc.setC_DocType_ID(m_C_DocType_ID);
+		alloc.setDescription(alloc.getDescriptionForManualAllocation(m_C_BPartner_ID, trxName));
 		alloc.saveEx();
 		//	For all invoices
 		BigDecimal unmatchedApplied = Env.ZERO;
@@ -738,7 +749,7 @@ public class Allocation
 					//	Allocation Line
 					MAllocationLine aLine = new MAllocationLine (alloc, AppliedAmt,
 						DiscountAmt, WriteOffAmt, OverUnderAmt);
-					aLine.setDocInfo(C_BPartner_ID, C_Order_ID, C_Invoice_ID);
+					aLine.setDocInfo(C_BPartner2_ID, C_Order_ID, C_Invoice_ID);
 					aLine.setPaymentInfo(C_Payment_ID, C_CashLine_ID);
 					aLine.saveEx();
 					if (log.isLoggable(Level.FINE)) log.fine("Allocation Amount=" + AppliedAmt);
@@ -783,7 +794,7 @@ public class Allocation
 		}
 
 		if ( unmatchedApplied.signum() != 0 )
-			log.log(Level.SEVERE, "Allocation not balanced -- out by " + unmatchedApplied );
+			throw new AdempiereException("Allocation not balanced -- out by " + unmatchedApplied);
 
 		//	Should start WF
 		if (alloc.get_ID() != 0)
@@ -825,6 +836,9 @@ public class Allocation
 			if (log.isLoggable(Level.CONFIG)) log.config("Payment #" + i + (pay.isAllocated() ? " not" : " is")
 					+ " fully allocated");
 		}
+		MBPartner bpartner = new MBPartner(Env.getCtx(), m_C_BPartner_ID, trxName);
+		bpartner.setTotalOpenBalance();
+		bpartner.saveEx();
 		paymentList.clear();
 		amountList.clear();
 

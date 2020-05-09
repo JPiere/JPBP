@@ -19,11 +19,66 @@ import java.util.Properties;
 
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.util.Env;
 
 public class JPiereInvoiceUtil {
-	
+
+	/**
+	 * 	Get Open Invoice Amount Point of Time
+	 * 	@param ctx
+	 *  @param C_Invoice_ID
+	 * 	@param Point Of Time expect DateAcct
+	 * 	@param creditMemoAdjusted
+	 *  @param trxName
+	 *  @return Open Amt Point of Time
+	 */
+	public static BigDecimal getOpenAmtNow (Properties ctx, MInvoice invoice, boolean creditMemoAdjusted, String trxName )
+	{
+
+		BigDecimal allocatedNow = invoice.getAllocatedAmt();
+		if(allocatedNow == null)
+			allocatedNow = Env.ZERO;
+
+		if (invoice.isSOTrx())//AR Invice
+		{
+
+			if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARI"))
+			{
+				;//Noting to do;
+
+			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARC")) {
+
+				allocatedNow = allocatedNow.negate();
+
+			}
+
+		}else { //AP Invoice
+
+			if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("API"))
+			{
+				allocatedNow = allocatedNow.negate();
+
+			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("APC")) {
+
+				;//Noting to do;
+
+			}
+
+		}
+
+		BigDecimal m_openAmt = invoice.getGrandTotal().subtract(allocatedNow);
+
+		if (!creditMemoAdjusted)
+			return m_openAmt;
+		if (invoice.isCreditMemo())
+			return m_openAmt.negate();
+
+		return m_openAmt;
+
+	}	//	getOpenAmtNow
+
 	/**
 	 * 	Get Open Invoice Amount Point of Time
 	 * 	@param ctx
@@ -35,7 +90,7 @@ public class JPiereInvoiceUtil {
 	 */
 	public static BigDecimal getOpenAmtPointOfTime (Properties ctx, MInvoice invoice, Timestamp pointOfTime, boolean creditMemoAdjusted, String trxName )
 	{
-		
+
 		if( pointOfTime == null )
 		{
 			return invoice.getOpenAmt(creditMemoAdjusted,null);
@@ -51,8 +106,8 @@ public class JPiereInvoiceUtil {
 			allocatedDate = allocationHdr[i].getDateAcct();
 			if(allocatedDate.after(pointOfTime))
 				continue;
-			
-			
+
+
 			MAllocationLine[] allocationLine = allocationHdr[i].getLines(false);
 			for( int j = 0; j < allocationLine.length; j++ )
 			{
@@ -60,24 +115,46 @@ public class JPiereInvoiceUtil {
 					continue;
 
 				allocatedAmtPointOfTime = allocatedAmtPointOfTime.add(allocationLine[j].getAmount()).add(allocationLine[j].getDiscountAmt()).add(allocationLine[j].getWriteOffAmt());
-				
+
 			}//for j
-			
+
 		}//for i
 
-		
-		if (allocatedAmtPointOfTime.signum() < 0 )
-			allocatedAmtPointOfTime = allocatedAmtPointOfTime.abs();	//	is absolute
-		
+
+		if (invoice.isSOTrx())//AR Invice
+		{
+
+			if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARI"))
+			{
+				;//Noting to do;
+
+			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARC")) {
+
+				allocatedAmtPointOfTime = allocatedAmtPointOfTime.negate();
+			}
+
+		}else { //AP Invoice
+
+			if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("API"))
+			{
+				allocatedAmtPointOfTime = allocatedAmtPointOfTime.negate();
+
+			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("APC")) {
+
+				;//Noting to do;
+			}
+
+		}
+
 		BigDecimal m_openAmt = invoice.getGrandTotal().subtract(allocatedAmtPointOfTime);
-		
+
 		if (!creditMemoAdjusted)
 			return m_openAmt;
 		if (invoice.isCreditMemo())
 			return m_openAmt.negate();
-		
+
 		return m_openAmt;
-		
+
 	}	//	getOpenAmtPointOfTime
-	
+
 }

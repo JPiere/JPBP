@@ -88,6 +88,15 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 
+
+/**
+ *
+ * JPIERE-0095
+ *
+ *
+ * @author h.hagiwara
+ *
+ */
 public class JPARInvoiceAllocation implements IFormController, EventListener<Event>, ValueChangeListener,WTableModelListener{
 
 	//form
@@ -572,9 +581,9 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT i.DateInvoiced,i.DocumentNo,i.C_Invoice_ID," //  1,2,3
 			+ "c.ISO_Code,i.GrandTotal*i.MultiplierAP, "                            //  4,5
-			+ "i.GrandTotal, " //  6 - GrandTotal
-			+ "invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID), "  //  7 - OpenAmt
-			+ "invoiceDiscount(i.C_Invoice_ID,?,C_InvoicePaySchedule_ID)," //  8 - AllowedDiscount #1
+			+ "i.GrandTotal*i.MultiplierAP, " //  6 - GrandTotal
+			+ "invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID)*i.MultiplierAP, "  //  7 - OpenAmt
+			+ "invoiceDiscount(i.C_Invoice_ID,?,C_InvoicePaySchedule_ID)*i.MultiplierAP," //  8 - AllowedDiscount #1
 			+ "i.MultiplierAP ,org.Name, bp.Name "); //9, 10, 11
 
 		sql.append("FROM C_Invoice_v i"		//  corrected for CM/Split
@@ -1109,7 +1118,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			}
 
 		}else if(name.equals("DateInvoiceTo")){
-			DateInvoiedFrom = value != null ? ((Timestamp) value) : null;
+			DateInvoiedTo = value != null ? ((Timestamp) value) : null;
 			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
 			{
 				loadBPartner();
@@ -1338,7 +1347,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 				BigDecimal DiscountAmt = (BigDecimal)invoice.getValueAt(i, i_Discount);
 				BigDecimal WriteOffAmt = (BigDecimal)invoice.getValueAt(i, i_WriteOff);
 				BigDecimal AppliedAmt = (BigDecimal)invoice.getValueAt(i, i_AppliedAmt);
-				BigDecimal OverUnderAmt = ((BigDecimal)invoice.getValueAt(i, i_OverUnderAmt))
+				BigDecimal OverUnderAmt = ((BigDecimal)invoice.getValueAt(i, i_OpenAmt))
 					.subtract(AppliedAmt).subtract(DiscountAmt).subtract(WriteOffAmt);
 
 				if (log.isLoggable(Level.CONFIG)) log.config(".. with payment #" + ", Amt=" + availablePaymentAmt);
