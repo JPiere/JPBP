@@ -88,6 +88,15 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 
+
+/**
+ *
+ * JPIERE-0095
+ *
+ *
+ * @author h.hagiwara
+ *
+ */
 public class JPARInvoiceAllocation implements IFormController, EventListener<Event>, ValueChangeListener,WTableModelListener{
 
 	//form
@@ -1109,7 +1118,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 			}
 
 		}else if(name.equals("DateInvoiceTo")){
-			DateInvoiedFrom = value != null ? ((Timestamp) value) : null;
+			DateInvoiedTo = value != null ? ((Timestamp) value) : null;
 			if(Invoice_BP_ID > 0 && Invoice_Currency_ID > 0)
 			{
 				loadBPartner();
