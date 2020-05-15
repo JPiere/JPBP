@@ -38,6 +38,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
+import org.compiere.model.MPeriod;
 import org.compiere.util.DB;
 import org.compiere.util.KeyNamePair;
 
@@ -245,5 +246,127 @@ public class MReportCubeJP extends X_PA_ReportCubeJP {
 			DB.executeUpdateEx(unlockSQL, parameters, get_TrxName());
 		}
 		return result;
+	}
+
+
+
+	public String updateBS(int C_AcctSchema_ID ,int C_Calendar_ID, int C_Year_ID, MPeriod m_Period, boolean isDeleteDataOnlyJP )
+	{
+		String result = getName() + ": ";
+		Timestamp ts = null;
+		long start;
+		long elapsed;
+
+		try
+		{
+			// delete
+			String delSQL = "DELETE FROM Fact_Acct_BS_JP WHERE PA_ReportCubeJP_ID = ? AND C_AcctSchema_ID = ? AND C_Period_ID = ?";
+			Object[] deleteParams = new Object[] { getPA_ReportCubeJP_ID(), C_AcctSchema_ID, m_Period.getC_Period_ID() };
+			start = System.currentTimeMillis();
+			int deleted = DB.executeUpdateEx(delSQL, deleteParams, get_TrxName());
+
+			if(isDeleteDataOnlyJP)
+				return "";
+
+			// insert
+			StringBuilder insert = new StringBuilder("INSERT " +
+					"INTO FACT_ACCT_BS_JP (PA_ReportCubeJP_ID , AD_Client_ID, " +
+					"AD_Org_ID, Created, CreatedBy, Updated, UpdatedBy, IsActive, " +
+					"C_AcctSchema_ID, Account_ID, PostingType, " +
+			"GL_Budget_ID, C_Period_ID, DateAcct, AmtAcctDr, AmtAcctCr, Qty");
+
+			StringBuilder select = new StringBuilder(" ) SELECT " +
+					"?, f.AD_CLIENT_ID, f.AD_ORG_ID, " +								//?1
+					"max(f.Created), max(f.CreatedBy), max(f.Updated), max(f.UpdatedBy), 'Y', " +
+					"f.C_ACCTSCHEMA_ID, f.ACCOUNT_ID, f.POSTINGTYPE, GL_Budget_ID, " +
+					"?,	?, COALESCE(SUM(AmtAcctDr),0), COALESCE(SUM(AmtAcctCr),0), " + //?2, ?3
+			"COALESCE(SUM(Qty),0)");
+			String from = " FROM Fact_Acct_SummaryJP f " +
+					" INNER JOIN C_ElementValue ev ON ( f.Account_ID = ev.C_ElementValue_ID ) " +
+			" WHERE f.C_AcctSchema_ID = ? AND f.PA_ReportCubeJP_ID = ? AND f.DateAcct <= ?  AND ev.AccountType IN ('A','L','O')";	//?4, ?5, ?6
+
+			StringBuilder groups = new StringBuilder(" GROUP BY " +
+					"f.AD_CLIENT_ID, f.AD_ORG_ID, f.C_ACCTSCHEMA_ID, f.ACCOUNT_ID, " +
+			"f.POSTINGTYPE, f.GL_Budget_ID");
+
+			ArrayList<String> values = new ArrayList<String>();
+
+			if ( isProductDim() )
+				values.add("M_Product_ID");
+			if ( isBPartnerDim() )
+				values.add("C_BPartner_ID");
+			if ( isProjectDim() )
+				values.add("C_Project_ID");
+			if ( isOrgTrxDim() )
+				values.add("AD_OrgTrx_ID");
+			if ( isSalesRegionDim() )
+				values.add("C_SalesRegion_ID");
+			if ( isActivityDim() )
+				values.add("C_Activity_ID");
+			if ( isCampaignDim() )
+				values.add("C_Campaign_ID");
+			if ( isLocToDim() )
+				values.add("C_LocTo_ID");
+			if ( isLocFromDim() )
+				values.add("C_LocFrom_ID");
+			if ( isUser1Dim() )
+				values.add("User1_ID");
+			if ( isUser2Dim() )
+				values.add("User2_ID");
+			if ( isUserElement1Dim() )
+				values.add("UserElement1_ID");
+			if ( isUserElement2Dim() )
+				values.add("UserElement2_ID");
+			if ( isSubAcctDim() )
+				values.add("C_SubAcct_ID");
+			if ( isProjectPhaseDim() )
+				values.add("C_ProjectPhase_ID");
+			if ( isProjectTaskDim() )
+				values.add("C_ProjectTask_ID");
+			if ( isContractDimJP() )
+				values.add("JP_ContractContent_ID");
+
+			//  --(CASE v.IsGL_Category_ID WHEN 'Y' THEN f."GL_Category_ID END) GL_Category_ID
+
+			Iterator<String> iter = values.iterator();
+			while ( iter.hasNext() )
+			{
+				String dim = iter.next();
+				insert.append(", " + dim );
+				select.append(", f." + dim);
+				groups.append(", f." + dim);
+			}
+
+
+			String sql = insert.append(select.toString()).append(from).append(groups.toString()).toString();
+			Object[] params = new Object[] { getPA_ReportCubeJP_ID(), m_Period.getC_Period_ID(), m_Period.getStartDate(), C_AcctSchema_ID, getPA_ReportCubeJP_ID(), m_Period.getEndDate() };
+
+			start = System.currentTimeMillis();
+			int rows = DB.executeUpdateEx(sql, params, get_TrxName());
+			long seconds = (System.currentTimeMillis() - start)/1000;
+
+			String insertResult = "Inserted " + rows  + " in " + seconds + " s.";
+			if (log.isLoggable(Level.FINE))log.log(Level.FINE, insertResult);
+			result += insertResult;
+
+
+		}
+		catch (DBException e)
+		{
+			// failure results in null timestamp => rebuild on next run
+			// nothing else to do
+			if (log.isLoggable(Level.FINE))log.log(Level.FINE, getName() + " update failed:" + e.getMessage());
+		}
+		finally
+		{
+			// unlock
+//			String unlockSQL = "UPDATE PA_ReportCubeJP SET Processing = 'N', " +
+//			"LastRecalculated = " + ( ts == null ? "null" : "?") +
+//			" WHERE PA_ReportCubeJP_ID = " + getPA_ReportCubeJP_ID();
+//			Object[] parameters = ts == null ? new Object[] {} : new Object[] {ts};
+//			DB.executeUpdateEx(unlockSQL, parameters, get_TrxName());
+		}
+
+		return null;
 	}
 }
