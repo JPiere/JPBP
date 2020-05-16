@@ -64,6 +64,8 @@ import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
 /**
+ * JPIERE-0451 - Export CSV with BOM
+ *
  * JPiere CSV Exporter for GridTab (Copy from GridTabCSVExporter)
  *
  * @author Carlos Ruiz
