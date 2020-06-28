@@ -80,6 +80,7 @@ import org.supercsv.prefs.CsvPreference;
 
 /**
  * JPIERE-0462 - CSV Import file loader - format of Date
+ * JPIERE-0468 - Import Value of List by Translation Name
  *
  * JPiere CSV Importer for GridTab (Copy from GridTabCSVImporter)
  * @author Carlos Ruiz
@@ -1498,6 +1499,17 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		StringBuilder select = new StringBuilder("SELECT Value FROM AD_Ref_List WHERE ")
 			.append(foreignColumn).append("=? AND AD_Reference_ID=? AND IsActive='Y'");
 		idS = DB.getSQLValueStringEx(trxName, select.toString(), value, column.getAD_Reference_Value_ID());
+
+		//JPIERE-0468 start
+		if(Util.isEmpty(idS) && !foreignColumn.equalsIgnoreCase("value"))
+		{
+			select = new StringBuilder("SELECT DISTINCT rl.Value FROM AD_Ref_List rl INNER JOIN AD_Ref_List_Trl trl ON (rl.AD_Ref_List_ID = trl.AD_Ref_List_ID ) WHERE ")
+					.append("trl.").append(foreignColumn).append("=? AND rl.AD_Reference_ID=? AND rl.IsActive='Y'")
+					.append("");
+			idS = DB.getSQLValueStringEx(trxName, select.toString(), value, column.getAD_Reference_Value_ID());
+		}
+		//JPIERE-0468 End
+
 		return idS;
 	}
 
