@@ -68,7 +68,7 @@ public class CreateInvOrgBalanceTimeStamp extends SvrProcess {
 		//YYYY-MM-DD HH24:MI:SS.mmmm  JDBC Timestamp format
 		StringBuilder DateValue = new StringBuilder(p_DateValue.toString());
 		StringBuilder DateValue_00 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
-		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
+		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");
 
 		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InvOrgBalance ")
 										.append(" WHERE DateValue=").append(DateValue_00)
@@ -85,7 +85,7 @@ public class CreateInvOrgBalanceTimeStamp extends SvrProcess {
 		.append("TO_DATE('").append(sdf.format(calendar.getTime()) + "' ,'YYYY-MM-DD HH24:MI:SS')")	//Updated
 		.append("," + p_AD_User_ID + ",")															//UpdatedBy
 		.append("f.C_AcctSchema_ID,")									//C_AcctSchema_ID
-		.append(DateValue_00).append(", f.M_Product_ID, f.Account_ID,")	//DateValue, M_Product_ID, Account_ID, 
+		.append(DateValue_00).append(", f.M_Product_ID, f.Account_ID,")	//DateValue, M_Product_ID, Account_ID,
 		.append("sum(f.Qty),sum(f.AmtAcctDr) ,sum(f.AmtAcctCr) , sum(f.AmtAcctDr-f.AmtAcctCr)")		//QtyBook,AmtAcctDr,AmtAcctCr
 		.append("FROM FACT_ACCT f")
 		.append(" INNER JOIN M_Product_Acct pa ON(pa.M_Product_ID = f.M_Product_ID and pa.C_AcctSchema_ID=f.C_AcctSchema_ID) ")

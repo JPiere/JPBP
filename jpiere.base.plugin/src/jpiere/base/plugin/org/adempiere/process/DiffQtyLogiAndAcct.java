@@ -22,19 +22,19 @@ import org.compiere.util.DB;
 
 /**
  * JPIERE-0164:Check List of Difference Qty between Logistics and Acct
- * 
+ *
  * @author Hideaki Hagiwara
  *
  */
 public class DiffQtyLogiAndAcct extends SvrProcess {
-	
+
 	private int			p_AD_Org_ID = 0;
 	private int			p_M_Warehouse_ID = 0;
 	private int			p_M_Product_ID = 0;
 	private Timestamp  	p_DateValue = null;
-	
+
 	@Override
-	protected void prepare() 
+	protected void prepare()
 	{
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
@@ -54,26 +54,26 @@ public class DiffQtyLogiAndAcct extends SvrProcess {
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}//for
 	}
-	
+
 	@Override
 	protected String doIt() throws Exception
 	{
 		String sql = CreateSQL(true);
 		DB.executeUpdateEx(sql.toString(), get_TrxName());
-		
+
 		sql = CreateSQL(false);
 		DB.executeUpdateEx(sql.toString(), get_TrxName());
-		
+
 		return "";
 	}
 
 	private String CreateSQL(boolean IsFutureDateAcct)
-	{		 
+	{
 		//YYYY-MM-DD HH24:MI:SS.mmmm  JDBC Timestamp format
 		StringBuilder DateValue = new StringBuilder(p_DateValue.toString());
 		StringBuilder DateValue_00 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
-		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
-		
+		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");
+
 		StringBuilder sql = new StringBuilder ("INSERT INTO T_InOutTransactionJP ( ")
 			.append("AD_Pinstance_ID")
 			.append(",AD_Client_ID")
@@ -108,7 +108,7 @@ public class DiffQtyLogiAndAcct extends SvrProcess {
 			.append(",DateValue")
 			.append(",JP_AdjustToAcctQty")
 			.append(")");
-		
+
 		sql.append(" SELECT ")
 			.append(getAD_PInstance_ID())
 			.append(",AD_Client_ID")
@@ -141,32 +141,32 @@ public class DiffQtyLogiAndAcct extends SvrProcess {
 			.append(",MovementQty")
 			.append(",DocbaseType")
 			.append("," + DateValue_00);
-		
+
 		if(IsFutureDateAcct)
 			sql.append(",MovementQty*-1");//JP_AdjustToAcctQty
 		else
 			sql.append(",MovementQty");
-			
+
 		sql.append(" FROM JP_InOutTransaction ")
 			.append("WHERE AD_Client_ID = " + getAD_Client_ID() + " AND DocStatus IN ('CO', 'CL')");
-		
+
 		if(IsFutureDateAcct)
 		{
 			sql.append(" AND MovementDate < " + DateValue_24)
 				.append(" AND DateAcct >= " + DateValue_24);
 		}else{
 			sql.append(" AND DateAcct < " + DateValue_24)
-				.append(" AND MovementDate >= " + DateValue_24);		
+				.append(" AND MovementDate >= " + DateValue_24);
 		}
-		
+
 		if(p_AD_Org_ID != 0)
 			sql.append(" AND AD_Org_ID = " + p_AD_Org_ID);
-		
+
 		if(p_M_Warehouse_ID != 0)
 			sql.append(" AND M_Warehouse_ID = " + p_M_Warehouse_ID);
 		if(p_M_Product_ID != 0)
 			sql.append(" AND M_Product_ID = " + p_M_Product_ID);
-		
+
 		return sql.toString();
 	}
 }
