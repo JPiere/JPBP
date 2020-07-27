@@ -68,13 +68,13 @@ public class CreateStockOrgTimeStamp extends SvrProcess {
 		//YYYY-MM-DD HH24:MI:SS.mmmm  JDBC Timestamp format
 		StringBuilder DateValue = new StringBuilder(p_DateValue.toString());
 		StringBuilder DateValue_00 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
-		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
+		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");
 
 		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_StockOrg ")
 										.append(" WHERE DateValue=").append(DateValue_00)
 										.append(" AND AD_Client_ID=").append(p_AD_Client_ID);
 		int deleteNo = DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
-		
+
 		int insertedNo = 0;
 		if(!p_isDeleteDataOnlyJP)
 		{

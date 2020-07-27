@@ -22,11 +22,17 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Util;
 
+/**
+ * JPIERE-0171:Check List of Tax Line Summary
+ *
+ * @author Hideaki Hagiwara
+ *
+ */
 public class TaxLineSummary extends SvrProcess {
 
 
 	private int			p_AD_Client_ID;
-	
+
 	private Timestamp	p_DateAcct_From = null;	//Mandatory
 	private Timestamp	p_DateAcct_To = null;	//Mandatory
 	private int			p_AD_Org_ID = 0;
@@ -65,12 +71,12 @@ public class TaxLineSummary extends SvrProcess {
 	}
 
 	@Override
-	protected String doIt() throws Exception {		 
+	protected String doIt() throws Exception {
 		String DateFrom = p_DateAcct_From.toString();
 		String DateTo = p_DateAcct_To.toString();
-		
+
 		StringBuilder DateValue_from = new StringBuilder("TO_DATE('").append(DateFrom.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
-		StringBuilder DateValue_to = new StringBuilder("TO_DATE('").append(DateTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");
+		StringBuilder DateValue_to = new StringBuilder("TO_DATE('").append(DateTo.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");
 
 		StringBuilder sql = new StringBuilder ("INSERT INTO T_TaxLineSumJP ")
 							.append("(AD_PInstance_ID, DateAcct, AD_Client_ID, AD_Org_ID,C_DocType_ID,IsSOTrx ,C_Tax_ID, C_Currency_ID, DocStatus, JP_Posted, TaxbaseAmt, TaxAmt)")
@@ -80,7 +86,7 @@ public class TaxLineSummary extends SvrProcess {
 							.append(" WHERE AD_Client_ID = " + p_AD_Client_ID)
 							.append(" AND DateAcct >=" + DateValue_from.toString())
 							.append(" AND DateAcct < " + DateValue_to.toString());
-							
+
 						if(p_AD_Org_ID != 0)
 						{
 							sql = sql.append(" AND AD_Org_ID=").append(p_AD_Org_ID);
@@ -92,7 +98,7 @@ public class TaxLineSummary extends SvrProcess {
 						}else{
 							sql = sql.append(" AND IsSOTrx='N'");
 						}
-						
+
 						if(!Util.isEmpty(p_Posted))
 						{
 							sql = sql.append(" AND Posted='"+p_Posted+"'");
