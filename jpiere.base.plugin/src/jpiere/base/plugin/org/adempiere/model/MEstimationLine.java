@@ -151,6 +151,10 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			setQtyOrdered(getQtyOrdered());
 
 
+		//	Calculations & Rounding
+		setLineNetAmt();	//	extended Amount with or without tax
+		setDiscount();
+
 		//Tax Calculation
 		if(newRecord || is_ValueChanged("LineNetAmt") || is_ValueChanged("C_Tax_ID"))
 		{
@@ -598,4 +602,34 @@ public class MEstimationLine extends X_JP_EstimationLine {
 	{
 		this.m_parent = null;
 	}
+
+
+	/**
+	 * 	Calculate Extended Amt.
+	 * 	May or may not include tax
+	 */
+	public void setLineNetAmt ()
+	{
+		BigDecimal bd = getPriceActual().multiply(getQtyOrdered());
+		int precision = getPrecision();
+		if (bd.scale() > precision)
+			bd = bd.setScale(precision, RoundingMode.HALF_UP);
+		super.setLineNetAmt (bd);
+	}	//	setLineNetAmt
+
+
+	/**
+	 *	Set Discount
+	 */
+	public void setDiscount()
+	{
+		BigDecimal list = getPriceList();
+		//	No List Price
+		if (Env.ZERO.compareTo(list) == 0)
+			return;
+		BigDecimal discount = list.subtract(getPriceActual())
+			.multiply(Env.ONEHUNDRED)
+			.divide(list, getPrecision(), RoundingMode.HALF_UP);
+		setDiscount(discount);
+	}	//	setDiscount
 }
