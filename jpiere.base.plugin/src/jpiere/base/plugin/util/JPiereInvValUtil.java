@@ -281,19 +281,19 @@ public class JPiereInvValUtil {
 			DateValueFrom = new StringBuilder(lastDateValue.toString());
 			DateValueTo = new StringBuilder(dateValue.toString());
 
-			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Except lastDateValue
-			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Include all DateValue
+			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");//Except lastDateValue
+			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");//Include all DateValue
 
 			sql.append(" AND io.MovementDate >=").append(DateValueFrom).append(" AND io.MovementDate < ").append(DateValueTo);
 
 		}else if(lastDateValue != null){
 			DateValueFrom = new StringBuilder(lastDateValue.toString());
-			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Except lastDateValue
+			DateValueFrom = new StringBuilder("TO_DATE('").append(DateValueFrom.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");//Except lastDateValue
 			sql.append(" AND io.MovementDate >=").append(DateValueFrom);
 
 		}else if(dateValue != null){
 			DateValueTo = new StringBuilder(dateValue.toString());
-			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 24:00:00','YYYY-MM-DD HH24:MI:SS')");//Include all DateValue
+			DateValueTo = new StringBuilder("TO_DATE('").append(DateValueTo.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");//Include all DateValue
 			sql.append(" AND io.MovementDate < ").append(DateValueTo);
 		}
 
