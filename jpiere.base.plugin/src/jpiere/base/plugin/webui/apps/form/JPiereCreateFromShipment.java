@@ -428,7 +428,7 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 				int M_Product_ID = pp.getKey();
 
 				pp = (KeyNamePair) miniTable.getValueAt(i, 6); // Locator
-				int JP_ScheduledShipLocator＿ID = pp.getKey();
+				int JP_ScheduledShipLocator_ID = pp.getKey();
 
 				int C_OrderLine_ID = 0;
 				pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
@@ -489,9 +489,9 @@ public abstract class JPiereCreateFromShipment extends CreateFrom
 						iol.setC_Charge_ID(ol.getC_Charge_ID());
 				}
 				// Set locator
-				if(isShipFromScheduledShipLocator && JP_ScheduledShipLocator＿ID > 0)
+				if(isShipFromScheduledShipLocator && JP_ScheduledShipLocator_ID > 0)
 				{
-					iol.setM_Locator_ID(JP_ScheduledShipLocator＿ID);
+					iol.setM_Locator_ID(JP_ScheduledShipLocator_ID);
 				}else if(M_Locator_ID > 0){
 					iol.setM_Locator_ID(M_Locator_ID);
 				}else{
