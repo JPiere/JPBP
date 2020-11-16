@@ -511,7 +511,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 						}else {
 
-							if(!imp.getDocAction().equals(DocAction.ACTION_None))
+							if(!order.getDocAction().equals(DocAction.ACTION_None))//TODO
 							{
 								if(!order.processIt(order.getDocAction()))
 								{
@@ -2945,10 +2945,13 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		if(Util.isEmpty(impOrder.getDocStatus()))
 		{
 			order.setDocStatus(DocAction.STATUS_Drafted);
+			impOrder.setDocStatus(DocAction.STATUS_Drafted);
+
 		}else {
 			order.setDocStatus(impOrder.getDocStatus());
 		}
 
+		//DocAction
 		if(Util.isEmpty(impOrder.getDocAction()))
 		{
 			if (p_docAction != null && p_docAction.length() > 0)
