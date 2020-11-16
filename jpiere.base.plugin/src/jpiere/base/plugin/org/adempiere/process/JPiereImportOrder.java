@@ -511,7 +511,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 						}else {
 
-							if(!order.getDocAction().equals(DocAction.ACTION_None))//TODO
+							if(!order.getDocAction().equals(DocAction.ACTION_None))
 							{
 								if(!order.processIt(order.getDocAction()))
 								{
