@@ -511,7 +511,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 						}else {
 
-							if(!order.getDocAction().equals(DocAction.ACTION_None))//TODO
+							if(!order.getDocAction().equals(DocAction.ACTION_None))
 							{
 								if(!order.processIt(order.getDocAction()))
 								{
@@ -3161,6 +3161,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		if(order.getM_PriceList_ID() <= 0 || line.getM_Product_ID() <= 0)
 			return false;
 
+
 		MPriceList m_PriceList = new MPriceList(getCtx(), order.getM_PriceList_ID(),get_TrxName());
 		MPriceListVersion m_PriceListVersion = m_PriceList.getPriceListVersion(order.getDateOrdered());
 		MProductPrice m_ProductPrice = MProductPrice.get(getCtx(), m_PriceListVersion.getM_PriceList_Version_ID(), line.getM_Product_ID(), get_TrxName());
@@ -3169,7 +3170,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			m_ProductPrice = new MProductPrice(getCtx(),m_PriceListVersion.getM_PriceList_Version_ID(),line.getM_Product_ID(), get_TrxName());
 			try {
 				m_ProductPrice.saveEx(get_TrxName());
-				line.setPrice(order.getM_PriceList_ID());
+				//line.setPrice(order.getM_PriceList_ID());
 			}catch (Exception e) {
 				return false;
 			}

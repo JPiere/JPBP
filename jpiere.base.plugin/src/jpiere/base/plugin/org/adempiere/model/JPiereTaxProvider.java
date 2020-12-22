@@ -117,7 +117,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			MOrderTax oTax = taxes[i];
 			if (oTax.getC_TaxProvider_ID() == 0) {
-				if (!order.isTaxIncluded())
+				if (!oTax.isTaxIncluded())	//JPIERE-0369
 					grandTotal = grandTotal.add(oTax.getTaxAmt());
 				continue;
 			}
