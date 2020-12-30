@@ -109,8 +109,11 @@ public class Doc_BankStatementJP extends Doc
 		for (int i = 0; i < lines.length; i++)
 		{
 			MBankStatementLine line = lines[i];
-			DocLine_BankStatementJP docLine = new DocLine_BankStatementJP(line, this);
-			list.add(docLine);
+						if(line.isActive())
+			{
+				DocLine_BankStatementJP docLine = new DocLine_BankStatementJP(line, this);
+				list.add(docLine);
+			}
 		}
 
 		//	Return Array

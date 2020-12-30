@@ -16,6 +16,7 @@
 package jpiere.base.plugin.org.compiere.acct;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -26,15 +27,21 @@ import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MConversionRate;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInOutLineMA;
+import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
@@ -49,17 +56,20 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 *
 */
 public class Doc_InOutJP extends Doc_InOut {
-	
-	public Doc_InOutJP(MAcctSchema as, ResultSet rs, String trxName) 
+
+	public Doc_InOutJP(MAcctSchema as, ResultSet rs, String trxName)
 	{
 		super(as, rs, trxName);
 	}
 
 	private int				m_Reversal_ID = 0;
-	
-	
+	@SuppressWarnings("unused")
+	private String			m_DocStatus = "";
+	private boolean 			m_deferPosting = false;
+
+
 	@Override
-	protected String loadDocumentDetails() 
+	protected String loadDocumentDetails()
 	{
 		MInOut inout = (MInOut)getPO();
 		m_Reversal_ID = inout.getReversal_ID();//store original (voided/reversed) document
@@ -67,63 +77,63 @@ public class Doc_InOutJP extends Doc_InOut {
 	}
 
 	ArrayList<Fact> facts = new ArrayList<Fact>();
-	
+
 	@Override
-	public ArrayList<Fact> createFacts(MAcctSchema as) 
+	public ArrayList<Fact> createFacts(MAcctSchema as)
 	{
 		if (!as.isAccrual())
 			return super.createFacts(as);
-		
+
 		MInOut inOut = (MInOut)getPO();
-		
+
 		/**iDempiere Standard Posting*/
 		int JP_ContractContent_ID = inOut.get_ValueAsInt("JP_ContractContent_ID");
 		if(JP_ContractContent_ID == 0)
 		{
 			return super.createFacts(as);
 		}
-		
+
 		MContractContent contractContent = MContractContent.get(getCtx(), JP_ContractContent_ID);
 		if(contractContent.getJP_Contract_Acct_ID() == 0)
 		{
 			return super.createFacts(as);
 		}
-		
+
 		MContractAcct contractAcct = MContractAcct.get(Env.getCtx(),contractContent.getJP_Contract_Acct_ID());
 		if(!contractAcct.isPostingContractAcctJP())
 		{
 			return super.createFacts(as);
 		}
-		
+
 		/**JPiere Posting Logic*/
 //		ArrayList<Fact> facts = new ArrayList<Fact>();
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
-		
+
 		if(!contractAcct.isPostingRecognitionDocJP())
 		{
 			if (getDocumentType().equals(DOCTYPE_MatShipment) && isSOTrx()) //Sales - Shipment
 			{
 				postSalesShipment(as, contractAcct, fact);
-				
+
 			}else if ( getDocumentType().equals(DOCTYPE_MatReceipt) && isSOTrx() ){//Sales - Return
-				
+
 				postSalesReturn(as, contractAcct, fact);
-				
+
 			}else if (getDocumentType().equals(DOCTYPE_MatReceipt) && !isSOTrx()){//Purchasing - Receipt
-				
+
 				return super.createFacts(as);
-				
+
 			}else if (getDocumentType().equals(DOCTYPE_MatShipment) && !isSOTrx()){ //Purchasing - return
-			
+
 				return super.createFacts(as);
-				
+
 			}else{
 				p_Error = "DocumentType unknown: " + getDocumentType();
 				log.log(Level.SEVERE, p_Error);
 				return null;
 			}
-			
+
 			FactLine[]  factLine = fact.getLines();
 			for(int i = 0; i < factLine.length; i++)
 			{
@@ -137,62 +147,62 @@ public class Doc_InOutJP extends Doc_InOut {
 					if(JP_Order_ID > 0)
 						factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
 				}
-				
+
 				factLine[i].set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
 			}//for
-			
+
 		}else if(contractAcct.isPostingRecognitionDocJP()){
-			
+
 			if (getDocumentType().equals(DOCTYPE_MatShipment) && isSOTrx()) //Sales - Shipment
 			{
 				;//Noting to do;
-				
+
 			}else if ( getDocumentType().equals(DOCTYPE_MatReceipt) && isSOTrx() ){//Sales - Return
-				
+
 				;//Noting to do;
-				
+
 			}else if (getDocumentType().equals(DOCTYPE_MatReceipt) && !isSOTrx()){//Purchasing - Receipt
-				
+
 				return super.createFacts(as);
-				
+
 			}else if (getDocumentType().equals(DOCTYPE_MatShipment) && !isSOTrx()){ //Purchasing - return
-			
+
 				return super.createFacts(as);
-				
+
 			}else{
 				p_Error = "DocumentType unknown: " + getDocumentType();
 				log.log(Level.SEVERE, p_Error);
 				return null;
 			}
-			
+
 		}else{
-			
+
 			//It is impossible to reach this code. I know. But I write it daringly.
 			p_Error = "DocumentType unknown: " + getDocumentType();
 			log.log(Level.SEVERE, p_Error);
 			return null;
 		}
-		
+
 		facts.add(fact);
 		return facts;
 	}
-	
+
 	private String postSalesShipment(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-		
+
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			DocLine line = p_lines[i];				
+			DocLine line = p_lines[i];
 			MProduct product = line.getProduct();
 			BigDecimal costs = null;
 			if (!isReversal(line))
 			{
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-				{	
-					if (line.getM_AttributeSetInstance_ID() == 0 ) 
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+				{
+					if (line.getM_AttributeSetInstance_ID() == 0 )
 					{
 						MInOutLine ioLine = (MInOutLine) line.getPO();
 						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
@@ -207,30 +217,30 @@ public class Doc_InOutJP extends Doc_InOut {
 								pc.setQty(QtyMA);
 								pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
 								BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-							
+
 								costs = costs.add(maCosts);
-							}						
+							}
 						}
-					} 
-					else 
-					{							
-						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");				
 					}
-				} 
+					else
+					{
+						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+					}
+				}
 				else
 				{
 					// MZ Goodwill
 					// if Shipment CostDetail exist then get Cost from Cost Detail
-					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");			
+					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
 				}
-		
+
 				// end MZ
 				if (costs == null || costs.signum() == 0)	//	zero costs OK
 				{
 					if (product.isStocked())
 					{
 						//ok if we have purchased zero cost item from vendor before
-						int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)", 
+						int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)",
 								product.getM_Product_ID());
 						if (count > 0)
 						{
@@ -238,7 +248,7 @@ public class Doc_InOutJP extends Doc_InOut {
 						}
 						else
 						{
-							p_Error = "No Costs for " + line.getProduct().getName();
+							p_Error = Msg.getMsg(getCtx(), "No Costs for") + " " + line.getProduct().getName();
 							log.log(Level.WARNING, p_Error);
 							return null;
 						}
@@ -252,14 +262,14 @@ public class Doc_InOutJP extends Doc_InOut {
 				//temp to avoid NPE
 				costs = BigDecimal.ZERO;
 			}
-			
+
 			//  CoGS            DR
 			dr = fact.createLine(line,
 				getCOGSAccount(line, contractAcct, as),
 				as.getC_Currency_ID(), costs, null);
 			if (dr == null)
 			{
-				p_Error = "FactLine DR not created: " + line;
+				p_Error = Msg.getMsg(getCtx(),"FactLine DR not created:" + " ") + line;
 				log.log(Level.WARNING, p_Error);
 				return null;
 			}
@@ -268,7 +278,7 @@ public class Doc_InOutJP extends Doc_InOut {
 			dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
 			dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
 			dr.setQty(line.getQty().negate());
-			
+
 			if (isReversal(line))
 			{
 				//	Set AmtAcctDr from Original Shipment/Receipt
@@ -279,7 +289,7 @@ public class Doc_InOutJP extends Doc_InOut {
 						fact.remove(dr);
 						continue;
 					}
-					p_Error = "Original Shipment/Receipt not posted yet";
+					p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 					return null;
 				}
 			}
@@ -290,28 +300,28 @@ public class Doc_InOutJP extends Doc_InOut {
 				as.getC_Currency_ID(), null, costs);
 			if (cr == null)
 			{
-				p_Error = "FactLine CR not created: " + line;
+				p_Error = Msg.getMsg(getCtx(),"FactLine CR not created:") + " " + line;
 				log.log(Level.WARNING, p_Error);
 				return null;
 			}
 			cr.setM_Locator_ID(line.getM_Locator_ID());
 			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
 			cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
-			
+
 			if (isReversal(line))
 			{
 				//	Set AmtAcctCr from Original Shipment/Receipt
 				if (!cr.updateReverseLine (MInOut.Table_ID,
 						m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 				{
-					p_Error = "Original Shipment/Receipt not posted yet";
+					p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 					return null;
 				}
 				costs = cr.getAcctBalance(); //get original cost
 			}
-			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-			{	
-				if (line.getM_AttributeSetInstance_ID() == 0 ) 
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+			{
+				if (line.getM_AttributeSetInstance_ID() == 0 )
 				{
 					MInOutLine ioLine = (MInOutLine) line.getPO();
 					MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
@@ -326,12 +336,12 @@ public class Doc_InOutJP extends Doc_InOut {
 									costs, ma.getMovementQty().negate(),
 									line.getDescription(), true, getTrxName()))
 							{
-								p_Error = "Failed to create cost detail record";
+								p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 								return null;
-							}							
-						}						
+							}
+						}
 					}
-				} 
+				}
 				else
 				{
 					//
@@ -343,12 +353,12 @@ public class Doc_InOutJP extends Doc_InOut {
 							costs, line.getQty(),
 							line.getDescription(), true, getTrxName()))
 						{
-							p_Error = "Failed to create cost detail record";
+							p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 							return null;
 						}
 					}
 				}
-			} 
+			}
 			else
 			{
 				//
@@ -360,7 +370,7 @@ public class Doc_InOutJP extends Doc_InOut {
 						costs, line.getQty(),
 						line.getDescription(), true, getTrxName()))
 					{
-						p_Error = "Failed to create cost detail record";
+						p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 						return null;
 					}
 				}
@@ -379,26 +389,26 @@ public class Doc_InOutJP extends Doc_InOut {
 //					facts.add(factcomm);
 //			}
 //		}	//	Commitment
-		
+
 		return null;
 	}
-	
+
 	private String postSalesReturn(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-		
+
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			DocLine line = p_lines[i];
 			MProduct product = line.getProduct();
 			BigDecimal costs = null;
-			if (!isReversal(line)) 
+			if (!isReversal(line))
 			{
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-				{	
-					if (line.getM_AttributeSetInstance_ID() == 0 ) 
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+				{
+					if (line.getM_AttributeSetInstance_ID() == 0 )
 					{
 						MInOutLine ioLine = (MInOutLine) line.getPO();
 						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
@@ -413,11 +423,11 @@ public class Doc_InOutJP extends Doc_InOut {
 								pc.setQty(QtyMA);
 								pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
 								BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-							
+
 								costs = costs.add(maCosts);
 							}
 						}
-					} 
+					}
 					else
 					{
 						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
@@ -434,14 +444,14 @@ public class Doc_InOutJP extends Doc_InOut {
 				{
 					if (product.isStocked())
 					{
-						p_Error = "No Costs for " + line.getProduct().getName();
+						p_Error = Msg.getMsg(getCtx(),"No Costs for") + " " + line.getProduct().getName();
 						log.log(Level.WARNING, p_Error);
 						return null;
 					}
 					else	//	ignore service
 						continue;
 				}
-			} 
+			}
 			else
 			{
 				costs = BigDecimal.ZERO;
@@ -452,7 +462,7 @@ public class Doc_InOutJP extends Doc_InOut {
 				as.getC_Currency_ID(), costs, null);
 			if (dr == null)
 			{
-				p_Error = "FactLine DR not created: " + line;
+				p_Error = Msg.getMsg(getCtx(),"FactLine DR not created:" + " ") + line;
 				log.log(Level.WARNING, p_Error);
 				return null;
 			}
@@ -469,15 +479,15 @@ public class Doc_InOutJP extends Doc_InOut {
 						fact.remove(dr);
 						continue;
 					}
-					p_Error = "Original Shipment/Receipt not posted yet";
+					p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 					return null;
 				}
 				costs = dr.getAcctBalance(); //get original cost
 			}
 			//
-			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-			{	
-				if (line.getM_AttributeSetInstance_ID() == 0 ) 
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) )
+			{
+				if (line.getM_AttributeSetInstance_ID() == 0 )
 				{
 					MInOutLine ioLine = (MInOutLine) line.getPO();
 					MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
@@ -492,7 +502,7 @@ public class Doc_InOutJP extends Doc_InOut {
 									costs, ma.getMovementQty(),
 									line.getDescription(), true, getTrxName()))
 							{
-								p_Error = "Failed to create cost detail record";
+								p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 								return null;
 							}
 						}
@@ -507,7 +517,7 @@ public class Doc_InOutJP extends Doc_InOut {
 							costs, line.getQty(),
 							line.getDescription(), true, getTrxName()))
 						{
-							p_Error = "Failed to create cost detail record";
+							p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 							return null;
 						}
 					}
@@ -523,7 +533,7 @@ public class Doc_InOutJP extends Doc_InOut {
 						costs, line.getQty(),
 						line.getDescription(), true, getTrxName()))
 					{
-						p_Error = "Failed to create cost detail record";
+						p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 						return null;
 					}
 				}
@@ -555,14 +565,14 @@ public class Doc_InOutJP extends Doc_InOut {
 				}
 			}
 		}	//	for all lines
-		
+
 		return null;
 	}
-	
+
 	private boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
-	
+
 	private MAccount getCOGSAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
@@ -576,7 +586,7 @@ public class Doc_InOutJP extends Doc_InOut {
 			}else{
 				return docLine.getAccount(ProductCost.ACCTTYPE_P_Cogs, as) ;
 			}
-			
+
 		}else if(line.getM_Product_ID() > 0){
 			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_COGS_Acct() > 0)
