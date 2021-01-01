@@ -39,8 +39,13 @@ import org.compiere.util.Env;
  *  Refer:Doc_BankStatement.java
  *
  *  Table:              C_BankStatement (392)
- *
+ *  Document Types:     CMB
+ *  </pre>
  *  @author Jorg Janke
+ *  @version  $Id: Doc_Bank.java,v 1.3 2006/07/30 00:53:33 jjanke Exp $
+ *
+ *  FR [ 1840016 ] Avoid usage of clearing accounts - subject to C_AcctSchema.IsPostIfClearingEqual
+ *  Avoid posting if both accounts BankAsset and BankInTransit are equal
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *  @version  $Id: Doc_JPiereBankStatementTax.java,v 1.0 2014/08/20
@@ -222,6 +227,9 @@ public class Doc_BankStatementJP extends Doc
 	{
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
+		// boolean isInterOrg = isInterOrg(as);
+
+		//  Header -- there may be different currency amounts
 
 		FactLine fl = null;
 		int AD_Org_ID = getBank_Org_ID();	//	Bank Account Org

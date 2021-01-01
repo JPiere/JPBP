@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ReferenceTest
  *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200224L;
+	private static final long serialVersionUID = 20210101L;
 
     /** Standard Constructor */
     public X_JP_ReferenceTest (Properties ctx, int JP_ReferenceTest_ID, String trxName)
@@ -41,9 +41,17 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
       super (ctx, JP_ReferenceTest_ID, trxName);
       /** if (JP_ReferenceTest_ID == 0)
         {
+			setInvoiceRule (null);
+// D
+			setIsCustomer (true);
+// Y
 			setJP_ReferenceTest_ID (0);
 			setM_PriceList_ID (0);
 			setM_Product_ID (0);
+			setProcessed (false);
+// N
+			setTenderType (null);
+// D
         } */
     }
 
@@ -70,7 +78,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ReferenceTest[")
+      StringBuilder sb = new StringBuilder ("X_JP_ReferenceTest[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -366,6 +374,38 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return (Timestamp)get_Value(COLUMNNAME_DateTrx);
 	}
 
+	/** DeliveryRule AD_Reference_ID=151 */
+	public static final int DELIVERYRULE_AD_Reference_ID=151;
+	/** After Receipt = R */
+	public static final String DELIVERYRULE_AfterReceipt = "R";
+	/** Availability = A */
+	public static final String DELIVERYRULE_Availability = "A";
+	/** Complete Line = L */
+	public static final String DELIVERYRULE_CompleteLine = "L";
+	/** Complete Order = O */
+	public static final String DELIVERYRULE_CompleteOrder = "O";
+	/** Force = F */
+	public static final String DELIVERYRULE_Force = "F";
+	/** Manual = M */
+	public static final String DELIVERYRULE_Manual = "M";
+	/** Set Delivery Rule.
+		@param DeliveryRule 
+		Defines the timing of Delivery
+	  */
+	public void setDeliveryRule (String DeliveryRule)
+	{
+
+		set_Value (COLUMNNAME_DeliveryRule, DeliveryRule);
+	}
+
+	/** Get Delivery Rule.
+		@return Defines the timing of Delivery
+	  */
+	public String getDeliveryRule () 
+	{
+		return (String)get_Value(COLUMNNAME_DeliveryRule);
+	}
+
 	/** DocStatus AD_Reference_ID=131 */
 	public static final int DOCSTATUS_AD_Reference_ID=131;
 	/** Drafted = DR */
@@ -476,6 +516,58 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public String getHelp () 
 	{
 		return (String)get_Value(COLUMNNAME_Help);
+	}
+
+	/** InvoiceRule AD_Reference_ID=150 */
+	public static final int INVOICERULE_AD_Reference_ID=150;
+	/** After Order delivered = O */
+	public static final String INVOICERULE_AfterOrderDelivered = "O";
+	/** After Delivery = D */
+	public static final String INVOICERULE_AfterDelivery = "D";
+	/** Customer Schedule after Delivery = S */
+	public static final String INVOICERULE_CustomerScheduleAfterDelivery = "S";
+	/** Immediate = I */
+	public static final String INVOICERULE_Immediate = "I";
+	/** Set Invoice Rule.
+		@param InvoiceRule 
+		Frequency and method of invoicing 
+	  */
+	public void setInvoiceRule (String InvoiceRule)
+	{
+
+		set_Value (COLUMNNAME_InvoiceRule, InvoiceRule);
+	}
+
+	/** Get Invoice Rule.
+		@return Frequency and method of invoicing 
+	  */
+	public String getInvoiceRule () 
+	{
+		return (String)get_Value(COLUMNNAME_InvoiceRule);
+	}
+
+	/** Set Customer.
+		@param IsCustomer 
+		Indicates if this Business Partner is a Customer
+	  */
+	public void setIsCustomer (boolean IsCustomer)
+	{
+		set_Value (COLUMNNAME_IsCustomer, Boolean.valueOf(IsCustomer));
+	}
+
+	/** Get Customer.
+		@return Indicates if this Business Partner is a Customer
+	  */
+	public boolean isCustomer () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCustomer);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** JP_BPartner_Multi AD_Reference_ID=138 */
@@ -875,6 +967,30 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return (String)get_Value(COLUMNNAME_PaymentRule);
 	}
 
+	/** Set Processed.
+		@param Processed 
+		The document has been processed
+	  */
+	public void setProcessed (boolean Processed)
+	{
+		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
+	}
+
+	/** Get Processed.
+		@return The document has been processed
+	  */
+	public boolean isProcessed () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processed);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Process Now.
 		@param Processing Process Now	  */
 	public void setProcessing (boolean Processing)
@@ -993,6 +1109,38 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** TenderType AD_Reference_ID=214 */
+	public static final int TENDERTYPE_AD_Reference_ID=214;
+	/** Credit Card = C */
+	public static final String TENDERTYPE_CreditCard = "C";
+	/** Check = K */
+	public static final String TENDERTYPE_Check = "K";
+	/** Direct Deposit = A */
+	public static final String TENDERTYPE_DirectDeposit = "A";
+	/** Direct Debit = D */
+	public static final String TENDERTYPE_DirectDebit = "D";
+	/** Account = T */
+	public static final String TENDERTYPE_Account = "T";
+	/** Cash = X */
+	public static final String TENDERTYPE_Cash = "X";
+	/** Set Tender type.
+		@param TenderType 
+		Method of Payment
+	  */
+	public void setTenderType (String TenderType)
+	{
+
+		set_Value (COLUMNNAME_TenderType, TenderType);
+	}
+
+	/** Get Tender type.
+		@return Method of Payment
+	  */
+	public String getTenderType () 
+	{
+		return (String)get_Value(COLUMNNAME_TenderType);
 	}
 
 	/** Set URL.

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ReferenceTest
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ReferenceTest 
@@ -259,6 +259,19 @@ public interface I_JP_ReferenceTest
 	  */
 	public Timestamp getDateTrx();
 
+    /** Column name DeliveryRule */
+    public static final String COLUMNNAME_DeliveryRule = "DeliveryRule";
+
+	/** Set Delivery Rule.
+	  * Defines the timing of Delivery
+	  */
+	public void setDeliveryRule (String DeliveryRule);
+
+	/** Get Delivery Rule.
+	  * Defines the timing of Delivery
+	  */
+	public String getDeliveryRule();
+
     /** Column name DocStatus */
     public static final String COLUMNNAME_DocStatus = "DocStatus";
 
@@ -320,6 +333,19 @@ public interface I_JP_ReferenceTest
 	  */
 	public String getHelp();
 
+    /** Column name InvoiceRule */
+    public static final String COLUMNNAME_InvoiceRule = "InvoiceRule";
+
+	/** Set Invoice Rule.
+	  * Frequency and method of invoicing 
+	  */
+	public void setInvoiceRule (String InvoiceRule);
+
+	/** Get Invoice Rule.
+	  * Frequency and method of invoicing 
+	  */
+	public String getInvoiceRule();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -332,6 +358,19 @@ public interface I_JP_ReferenceTest
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsCustomer */
+    public static final String COLUMNNAME_IsCustomer = "IsCustomer";
+
+	/** Set Customer.
+	  * Indicates if this Business Partner is a Customer
+	  */
+	public void setIsCustomer (boolean IsCustomer);
+
+	/** Get Customer.
+	  * Indicates if this Business Partner is a Customer
+	  */
+	public boolean isCustomer();
 
     /** Column name JP_BPartner_Multi */
     public static final String COLUMNNAME_JP_BPartner_Multi = "JP_BPartner_Multi";
@@ -549,6 +588,19 @@ public interface I_JP_ReferenceTest
 	  */
 	public String getPaymentRule();
 
+    /** Column name Processed */
+    public static final String COLUMNNAME_Processed = "Processed";
+
+	/** Set Processed.
+	  * The document has been processed
+	  */
+	public void setProcessed (boolean Processed);
+
+	/** Get Processed.
+	  * The document has been processed
+	  */
+	public boolean isProcessed();
+
     /** Column name Processing */
     public static final String COLUMNNAME_Processing = "Processing";
 
@@ -622,6 +674,19 @@ public interface I_JP_ReferenceTest
 	  * Total Volume of Sales in Thousands of Currency
 	  */
 	public int getSalesVolume();
+
+    /** Column name TenderType */
+    public static final String COLUMNNAME_TenderType = "TenderType";
+
+	/** Set Tender type.
+	  * Method of Payment
+	  */
+	public void setTenderType (String TenderType);
+
+	/** Get Tender type.
+	  * Method of Payment
+	  */
+	public String getTenderType();
 
     /** Column name URL */
     public static final String COLUMNNAME_URL = "URL";

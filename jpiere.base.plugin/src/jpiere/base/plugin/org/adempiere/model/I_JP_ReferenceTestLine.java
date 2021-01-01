@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ReferenceTestLine
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ReferenceTestLine 

@@ -24,14 +24,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ReferenceTestLine
  *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_ReferenceTestLine extends PO implements I_JP_ReferenceTestLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200224L;
+	private static final long serialVersionUID = 20210101L;
 
     /** Standard Constructor */
     public X_JP_ReferenceTestLine (Properties ctx, int JP_ReferenceTestLine_ID, String trxName)
@@ -67,8 +67,8 @@ public class X_JP_ReferenceTestLine extends PO implements I_JP_ReferenceTestLine
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ReferenceTestLine[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_ReferenceTestLine[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
