@@ -16,7 +16,6 @@
 package jpiere.base.plugin.org.compiere.acct;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -27,21 +26,16 @@ import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
-import org.compiere.model.MConversionRate;
 import org.compiere.model.MCostDetail;
-import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInOutLineMA;
-import org.compiere.model.MOrderLandedCostAllocation;
-import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
@@ -265,7 +259,7 @@ public class Doc_InOutJP extends Doc_InOut {
 
 			//  CoGS            DR
 			dr = fact.createLine(line,
-				getCOGSAccount(line, contractAcct, as),
+				getCOGSAccount(line, contractAcct, as),//JPIERE-0363
 				as.getC_Currency_ID(), costs, null);
 			if (dr == null)
 			{
@@ -377,7 +371,8 @@ public class Doc_InOutJP extends Doc_InOut {
 			}
 		}	//	for all lines
 
-//		/** Commitment release										****/
+		/** Commitment release										****/
+		//JPIERE-0363 Comment Out because Doc_Order.getCommitmentRelease() method is protected method
 //		if (as.isAccrual() && as.isCreateSOCommitment())
 //		{
 //			for (int i = 0; i < p_lines.length; i++)
@@ -541,11 +536,11 @@ public class Doc_InOutJP extends Doc_InOut {
 
 			//  CoGS            CR
 			cr = fact.createLine(line,
-				getCOGSAccount(line, contractAcct, as),
+				getCOGSAccount(line, contractAcct, as),//JPIERE-0363
 				as.getC_Currency_ID(), null, costs);
 			if (cr == null)
 			{
-				p_Error = "FactLine CR not created: " + line;
+				p_Error = Msg.getMsg(getCtx(),"FactLine CR not created:") + " " + line;
 				log.log(Level.WARNING, p_Error);
 				return null;
 			}
@@ -560,7 +555,7 @@ public class Doc_InOutJP extends Doc_InOut {
 				if (!cr.updateReverseLine (MInOut.Table_ID,
 						m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 				{
-					p_Error = "Original Shipment/Receipt not posted yet";
+					p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 					return null;
 				}
 			}

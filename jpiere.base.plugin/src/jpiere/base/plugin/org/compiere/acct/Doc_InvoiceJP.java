@@ -615,6 +615,19 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			amt = p_lines[i].getAmtSource();
+
+			//JPIERE-369:Start
+			int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
+			if(C_Charge_ID != 0)
+			{
+				MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+				if(!charge.isSameTax() && charge.isTaxIncluded())
+				{
+					amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
+				}
+			}
+			//JPiere-0369:finish
+
 			BigDecimal dAmt = null;
 			//DR : Posting Trade Discount
 			if (as.isTradeDiscountPosted())
@@ -678,6 +691,19 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			amt = p_lines[i].getAmtSource();
+
+			//JPIERE-369:Start
+			int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
+			if(C_Charge_ID != 0)
+			{
+				MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+				if(!charge.isSameTax() && charge.isTaxIncluded())
+				{
+					amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
+				}
+			}
+			//JPiere-0369:finish
+
 			BigDecimal dAmt = null;
 			//CR:Posting Trade Discount
 			if (as.isTradeDiscountPosted())
@@ -754,6 +780,19 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				MAccount expense =  getInvoiceExpenseAccount(line, contractAcct, as);
 				BigDecimal amt = line.getAmtSource();
+
+				//JPIERE-369:Start
+				int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
+				if(C_Charge_ID != 0)
+				{
+					MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+					if(!charge.isSameTax() && charge.isTaxIncluded())
+					{
+						amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
+					}
+				}
+				//JPiere-0369:finish
+
 				BigDecimal dAmt = null;
 				if (as.isTradeDiscountPosted() && !line.isItem())
 				{
@@ -842,6 +881,19 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				MAccount expense = getInvoiceExpenseAccount(line, contractAcct, as);
 				BigDecimal amt = line.getAmtSource();
+
+				//JPIERE-369:Start
+				int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
+				if(C_Charge_ID != 0)
+				{
+					MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+					if(!charge.isSameTax() && charge.isTaxIncluded())
+					{
+						amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
+					}
+				}
+				//JPiere-0369:finish
+
 				BigDecimal dAmt = null;
 				if (as.isTradeDiscountPosted() && !line.isItem())
 				{

@@ -131,8 +131,16 @@ public class JPiereContractRMAValidator implements ModelValidator {
 			}else{
 
 				po.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
-				po.set_ValueNoCheck("JP_ContractContent_ID", io.get_ValueAsInt("JP_ContractContent_ID"));
-				po.set_ValueNoCheck("JP_ContractProcPeriod_ID", io.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+
+				if(io.get_ValueAsInt("JP_ContractContent_ID") > 0)
+					po.set_ValueNoCheck("JP_ContractContent_ID", io.get_ValueAsInt("JP_ContractContent_ID"));
+				else
+					po.set_ValueNoCheck("JP_ContractContent_ID", null);
+
+				if(io.get_ValueAsInt("JP_ContractProcPeriod_ID") > 0)
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", io.get_ValueAsInt("JP_ContractProcPeriod_ID"));
+				else
+					po.set_ValueNoCheck("JP_ContractProcPeriod_ID", null);
 
 				po.set_ValueNoCheck("JP_Order_ID", io.getC_Order_ID());
 

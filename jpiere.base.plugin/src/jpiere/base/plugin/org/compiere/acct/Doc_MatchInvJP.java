@@ -73,6 +73,13 @@ import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
  *  Avoid posting if both accounts Not Invoiced Receipts and Inventory Clearing are equal
  *  BF [ 2789949 ] Multicurrency in matching posting
  */
+
+/**
+*  JPIERE-0363 : Contract Management
+*
+* @author Hideaki Hagiwara
+*
+*/
 public class Doc_MatchInvJP extends Doc
 {
 	/**
@@ -126,7 +133,7 @@ public class Doc_MatchInvJP extends Doc
 			getM_Product_ID(), m_matchInv.getM_AttributeSetInstance_ID(), getTrxName());
 		m_pc.setQty(getQty());
 
-		//JPIERE-0363
+		//JPIERE-0363-Start
 		int JP_ContractContent_ID = m_invoiceLine.getParent().get_ValueAsInt("JP_ContractContent_ID");
 		if(JP_ContractContent_ID > 0)
 		{
@@ -135,6 +142,7 @@ public class Doc_MatchInvJP extends Doc
 			if(JP_Contract_Acct_ID > 0)
 				m_contractAcct = MContractAcct.get(getCtx(), JP_Contract_Acct_ID);
 		}
+		//JPIERE-0363-End
 
 		return null;
 	}   //  loadDocumentDetails
@@ -289,7 +297,7 @@ public class Doc_MatchInvJP extends Doc
 			{
 				cr.setQty(getQty().negate());
 
-				//JPIERE-0363 -- Start : Override Account
+				//JPIERE-0363 -- Start : Override Account //TODO
 				if(m_pc.isService() && m_contractAcct != null)
 					cr.setAccount(as, getInvoiceExpenseAccount(as));
 
@@ -411,7 +419,8 @@ public class Doc_MatchInvJP extends Doc
 		//  Invoice Price Variance 	difference
 		BigDecimal ipv = cr.getAcctBalance().add(dr.getAcctBalance()).negate();
 		processInvoicePriceVariance(as, fact, ipv);
-//		if (log.isLoggable(Level.FINE)) log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());//JPIERE-0363 Comment Out
+		//JPIERE-0363 Comment Out because getSourceBalance() method is protected method
+		//if (log.isLoggable(Level.FINE)) log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());
 
 		String error = createMatchInvCostDetail(as);
 		if (error != null && error.trim().length() > 0)
@@ -423,6 +432,7 @@ public class Doc_MatchInvJP extends Doc
 		facts.add(fact);
 
 		/** Commitment release										****/
+		//JPIERE-0363 Comment Out because Doc_Order.getCommitmentRelease() method is protected method
 //		if (as.isAccrual() && as.isCreatePOCommitment())//JPIERE-0363 Comment Out
 //		{
 //			fact = Doc_Order.getCommitmentRelease(as, this,
@@ -744,6 +754,10 @@ public class Doc_MatchInvJP extends Doc
 			{
 				cr.setQty(getQty().negate());
 
+				//JPIERE-0363 -- Start : Override Account //TODO
+				if(m_pc.isService() && m_contractAcct != null)
+					cr.setAccount(as, getInvoiceExpenseAccount(as));
+
 				//	Set AmtAcctCr/Dr from Invoice (sets also Project)
 				if (!cr.updateReverseLine (MInvoice.Table_ID, 		//	Amt updated
 					m_invoiceLine.getC_Invoice_ID(), m_invoiceLine.getC_InvoiceLine_ID(), multiplier))
@@ -751,6 +765,10 @@ public class Doc_MatchInvJP extends Doc
 					p_Error = "Invoice not posted yet";
 					return null;
 				}
+
+				if(m_pc.isService() && m_contractAcct != null)
+					cr.setAccount(as,expense);
+				//JPIERE-0363 -- finish : Override Account
 			}
 			if (log.isLoggable(Level.FINE)) log.fine("DR - Amt(" + temp + "->" + cr.getAcctBalance()
 				+ ") - " + cr.toString());
@@ -858,7 +876,8 @@ public class Doc_MatchInvJP extends Doc
 		//  Invoice Price Variance 	difference
 		BigDecimal ipv = cr.getAcctBalance().add(dr.getAcctBalance()).negate();
 		processInvoicePriceVariance(as, fact, ipv);
-		//if (log.isLoggable(Level.FINE)) log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());//JPIERE-0363 Comment Out
+		//JPIERE-0363 Comment Out because getSourceBalance() method is protected method
+		//if (log.isLoggable(Level.FINE)) log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());
 
 		String error = createMatchInvCostDetail(as);
 		if (error != null && error.trim().length() > 0)
@@ -870,7 +889,8 @@ public class Doc_MatchInvJP extends Doc
 		facts.add(fact);
 
 		/** Commitment release										****/
-//		if (as.isAccrual() && as.isCreatePOCommitment())//JPIERE-0363 Comment Out
+		//JPIERE-0363 Comment Out because Doc_Order.getCommitmentRelease() method is protected method
+//		if (as.isAccrual() && as.isCreatePOCommitment())
 //		{
 //			fact = Doc_Order.getCommitmentRelease(as, this,
 //				getQty(), m_invoiceLine.getC_InvoiceLine_ID(), Env.ONE);
@@ -945,6 +965,10 @@ public class Doc_MatchInvJP extends Doc
 			{
 				dr.setQty(getQty().negate());
 
+				//JPIERE-0363 -- Start : Override Account //TODO
+				if(m_pc.isService() && m_contractAcct != null)
+					dr.setAccount(as, getInvoiceExpenseAccount(as));
+
 				//	Set AmtAcctCr/Dr from Invoice (sets also Project)
 				if (!dr.updateReverseLine (MInvoice.Table_ID, 		//	Amt updated
 						refInvLine.getC_Invoice_ID(), refInvLine.getC_InvoiceLine_ID(), multiplier))
@@ -952,6 +976,10 @@ public class Doc_MatchInvJP extends Doc
 					p_Error = "Invoice not posted yet";
 					return null;
 				}
+
+				if(m_pc.isService() && m_contractAcct != null)
+					dr.setAccount(as,expense);
+				//JPIERE-0363 -- finish : Override Account
 			}
 			if (log.isLoggable(Level.FINE)) log.fine("DR - Amt(" + temp + "->" + dr.getAcctBalance()
 				+ ") - " + dr.toString());
@@ -1166,7 +1194,8 @@ public class Doc_MatchInvJP extends Doc
 		facts.add(fact);
 
 		/** Commitment release										****/
-//		if (as.isAccrual() && as.isCreatePOCommitment())//JPIERE-0363 Comment Out
+		//JPIERE-0363 Comment Out because Doc_Order.getCommitmentRelease() method is protected method
+//		if (as.isAccrual() && as.isCreatePOCommitment())
 //		{
 //			fact = Doc_Order.getCommitmentRelease(as, this,
 //				getQty(), m_invoiceLine.getC_InvoiceLine_ID(), Env.ONE);
