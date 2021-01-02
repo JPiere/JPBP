@@ -597,7 +597,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	{
 		BigDecimal amt = Env.ZERO;
 
-		//DR :  TaxDue
+		//CR :  TaxDue
 		for (int i = 0; i < m_taxes.length; i++)
 		{
 			amt = m_taxes[i].getAmount();
@@ -637,6 +637,11 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 
 		}//For
 
+		//DR : Receivables
+		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, getReceivableAccount(contractAcct,  as),getC_Currency_ID(), grossAmt, null);
+
 		//  Set Locations
 		FactLine[] fLines = fact.getLines();
 		for (int i = 0; i < fLines.length; i++)
@@ -648,11 +653,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			}
 		}
 
-		//DR : Receivables
-		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-		if (grossAmt.signum() != 0)
-			fact.createLine(null, getReceivableAccount(contractAcct,  as),getC_Currency_ID(), grossAmt, null);
-	}
+	}//postARI
 
 
 	private void postARC(MAcctSchema as, MContractAcct contractAcct, Fact fact)
@@ -699,6 +700,11 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 
 		}//For
 
+		//CR : Receivables
+		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, getReceivableAccount(contractAcct,  as), getC_Currency_ID(), null, grossAmt);
+
 		//  Set Locations
 		FactLine[] fLines = fact.getLines();
 		for (int i = 0; i < fLines.length; i++)
@@ -710,11 +716,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			}
 		}
 
-		//CR : Receivables
-		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-		if (grossAmt.signum() != 0)
-			fact.createLine(null, getReceivableAccount(contractAcct,  as), getC_Currency_ID(), null, grossAmt);
-	}
+	}//postARC
 
 	private void postAPI(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
@@ -782,6 +784,13 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						line.getDescription(), getTrxName());
 			}
 		}
+
+		//  Liability               CR
+		grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, getPayableAccount(contractAcct, as),
+				getC_Currency_ID(), null, grossAmt);
+
 		//  Set Locations
 		FactLine[] fLines = fact.getLines();
 		for (int i = 0; i < fLines.length; i++)
@@ -793,15 +802,9 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			}
 		}
 
-		//  Liability               CR
-		grossAmt = getAmount(Doc.AMTTYPE_Gross);
-		if (grossAmt.signum() != 0)
-			fact.createLine(null, getPayableAccount(contractAcct, as),
-				getC_Currency_ID(), null, grossAmt);
-
 		//
 		updateProductPO(as);	//	Only API
-	}
+	}//postAPI
 
 	private void postAPC(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
@@ -869,6 +872,12 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						line.getDescription(), getTrxName());
 			}
 		}
+
+		//  Liability       DR
+		grossAmt = getAmount(Doc.AMTTYPE_Gross);
+		if (grossAmt.signum() != 0)
+			fact.createLine(null, getPayableAccount(contractAcct, as),	getC_Currency_ID(), grossAmt, null);
+
 		//  Set Locations
 		FactLine[] fLines = fact.getLines();
 		for (int i = 0; i < fLines.length; i++)
@@ -879,14 +888,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), false);    //  to Loc
 			}
 		}
-		//  Liability       DR
-		grossAmt = getAmount(Doc.AMTTYPE_Gross);
 
-		if (grossAmt.signum() != 0)
-			fact.createLine(null, getPayableAccount(contractAcct, as),
-				getC_Currency_ID(), grossAmt, null);
-
-	}
+	}//postAPC
 
 
 
