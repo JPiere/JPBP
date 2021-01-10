@@ -19,6 +19,7 @@ import java.util.logging.Level;
 
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
@@ -63,13 +64,14 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 
 
 		MInvValProfileOrg[]  Orgs = m_InvValProfile.getOrgs();
-		StringBuilder sql = new StringBuilder("SELECT AD_Org_ID, M_Product_ID, Account_ID ")//1 - 3
-								.append(",QtyBook, AmtAcctDr, AmtAcctCr, AmtAcctBalance ")	//4 - 7
-		.append("FROM JP_InvOrgBalance ")
-		.append("WHERE C_AcctSchema_ID=? AND dateValue=? ");
+		StringBuilder sql = new StringBuilder("SELECT iob.AD_Org_ID, iob.M_Product_ID, iob.Account_ID ")//1 - 3
+								.append(",iob.QtyBook, iob.AmtAcctDr, iob.AmtAcctCr, iob.AmtAcctBalance ")	//4 - 7
+								.append(",p.Discontinued ") //8
+		.append("FROM JP_InvOrgBalance iob INNER JOIN M_Product p ON (iob.M_Product_ID = p.M_Product_ID)")
+		.append("WHERE iob.C_AcctSchema_ID=? AND iob.dateValue=? ");
 		if(Orgs!=null && Orgs.length > 0)
 		{
-			sql.append(" AND AD_Org_ID IN (");
+			sql.append(" AND iob.AD_Org_ID IN (");
 			for(int i = 0; i < Orgs.length; i++)
 			{
 				if(i==0)
@@ -80,7 +82,7 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 			sql.append(")");
 		}
 
-		sql.append(" ORDER BY M_Product_ID, AD_Org_ID");
+		sql.append(" ORDER BY iob.M_Product_ID, iob.AD_Org_ID");
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -94,6 +96,13 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
+				if(!m_InvValProfile.isZeroStockInvValJP()
+						&& rs.getBoolean(8)	//p.Discontinued
+						&& Env.ZERO.compareTo(rs.getBigDecimal(7)) == 0) //iob.AmtAcctBalance
+				{
+					continue;
+				}
+
 				line = line + 10;
 				ivaLine = new MInvValAdjustLine(getCtx(), 0, get_TrxName());
 				ivaLine.setAD_Org_ID(m_InvValAdjust.getAD_Org_ID());
