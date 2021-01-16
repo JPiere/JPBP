@@ -875,9 +875,9 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 			Integer taxID = Integer.valueOf(line.getC_Tax_ID());
 			if (!taxList.contains(taxID))
 			{
-				MTax tax = new MTax(estimation.getCtx(), taxID, estimation.get_TrxName());
-				if (tax.getC_TaxProvider_ID() == 0)
-					continue;
+//				MTax tax = new MTax(estimation.getCtx(), taxID, estimation.get_TrxName());
+//				if (tax.getC_TaxProvider_ID() == 0)
+//					continue;
 				MEstimationTax eTax = MEstimationTax.get (line, estimation.getPrecision(), false, estimation.get_TrxName());	//	current Tax
 				//JPIERE-0369:Start
 				eTax.setIsTaxIncluded(estimation.isTaxIncluded());
@@ -908,11 +908,11 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		for (int i = 0; i < taxes.length; i++)
 		{
 			MEstimationTax eTax = taxes[i];
-			if (eTax.getC_TaxProvider_ID() == 0) {
-				if (!eTax.isTaxIncluded())	//JPIERE-0369
-					grandTotal = grandTotal.add(eTax.getTaxAmt());
-				continue;
-			}
+//			if (eTax.getC_TaxProvider_ID() == 0) {
+//				if (!eTax.isTaxIncluded())	//JPIERE-0369
+//					grandTotal = grandTotal.add(eTax.getTaxAmt());
+//				continue;
+//			}
 			MTax tax = MTax.get(eTax.getCtx(), eTax.getC_Tax_ID());
 			if (tax.isSummary())
 			{

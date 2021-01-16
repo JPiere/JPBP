@@ -17,10 +17,12 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MCountry;
@@ -35,6 +37,8 @@ import org.compiere.model.MPeriod;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -52,6 +56,9 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
+import jpiere.base.plugin.util.JPiereUtil;
 
 /**
  *	JPIERE-0183: Estimation
@@ -233,8 +240,13 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 
+		if (!calculateTaxTotal())
+		{
+			m_processMsg = "Error calculating tax";
+			return DocAction.STATUS_Invalid;
+		}
 
-		//	Add up Amounts
+
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -243,6 +255,74 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 			setDocAction(DOCACTION_Complete);
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
+
+
+	/**
+	 * 	Calculate Tax and Total
+	 * 	@return true if tax total calculated
+	 */
+	public boolean calculateTaxTotal()
+	{
+		log.fine("");
+		//	Delete Taxes
+		DB.executeUpdateEx("DELETE FROM JP_EstimationTax WHERE JP_Estimation_ID = " + getJP_Estimation_ID(), get_TrxName());
+		m_taxes = null;
+
+		MTax[] taxes = getTaxes();
+		for (MTax tax : taxes)
+		{
+			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(tax);
+			if (taxCalculater == null)
+				throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+
+			//MTaxProvider provider = new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName());
+			if (!taxCalculater.calculateEstimationTaxTotal(null, this))
+				return false;
+		}
+		return true;
+	}	//	calculateTaxTotal
+
+
+	public MTax[] getTaxes()
+	{
+		Hashtable<Integer, MTax> taxes = new Hashtable<Integer, MTax>();
+		MEstimationLine[] lines = getLines();
+		for (MEstimationLine line : lines)
+		{
+            MTax tax = taxes.get(line.getC_Tax_ID());
+            if (tax == null)
+            {
+            	tax = MTax.get(getCtx(), line.getC_Tax_ID());
+            	taxes.put(tax.getC_Tax_ID(), tax);
+            }
+		}
+
+		MTax[] retValue = new MTax[taxes.size()];
+		taxes.values().toArray(retValue);
+
+		return retValue;
+	}
+
+	/**
+	 * Get tax providers
+	 * @return array of tax provider
+	 */
+	public MTaxProvider[] getTaxProviders()//ToDO
+	{
+		Hashtable<Integer, MTaxProvider> providers = new Hashtable<Integer, MTaxProvider>();
+		MEstimationLine[] lines = getLines();
+		for (MEstimationLine line : lines)
+		{
+            MTax tax = new MTax(line.getCtx(), line.getC_Tax_ID(), line.get_TrxName());
+            MTaxProvider provider = providers.get(tax.getC_TaxProvider_ID());
+            if (provider == null)
+            	providers.put(tax.getC_TaxProvider_ID(), new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName()));
+		}
+
+		MTaxProvider[] retValue = new MTaxProvider[providers.size()];
+		providers.values().toArray(retValue);
+		return retValue;
+	}
 
 	/**
 	 * 	Approve Document

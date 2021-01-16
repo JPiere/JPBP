@@ -458,10 +458,10 @@ public class MEstimationLine extends X_JP_EstimationLine {
 			|| is_ValueChanged(MEstimationLine.COLUMNNAME_LineNetAmt)) {
 			MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
-			MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
+			//MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
 			if (taxCalculater == null)
 				throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-	    	success = taxCalculater.recalculateTax(provider, this, newRecord);
+	    	success = taxCalculater.recalculateTax(null, this, newRecord);
 	    	if(!success)
 	    		return false;
 		}
