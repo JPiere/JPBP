@@ -63,6 +63,9 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
+import jpiere.base.plugin.util.JPiereUtil;
+
 
 /**
  * JPIERE-0363
@@ -1148,6 +1151,12 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			return DocAction.STATUS_Invalid;
 		}
 
+		if (!calculateTaxTotal())
+		{
+			m_processMsg = "Error calculating tax";
+			return DocAction.STATUS_Invalid;
+		}
+
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -1158,6 +1167,55 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			setDocAction(DOCACTION_Complete);
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
+
+
+	/**
+	 * 	Calculate Tax and Total
+	 * 	@return true if tax total calculated
+	 */
+	public boolean calculateTaxTotal()
+	{
+		log.fine("");
+		//	Delete Taxes
+		DB.executeUpdateEx("DELETE FROM JP_RecognitionTax WHERE JP_Recognition_ID = " + getJP_Recognition_ID(), get_TrxName());
+		m_taxes = null;
+
+		MTax[] taxes = getTaxes();
+		for (MTax tax : taxes)
+		{
+			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(tax);
+			if (taxCalculater == null)
+				throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+
+			//MTaxProvider provider = new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName());
+			if (!taxCalculater.calculateRecognitionTaxTotal(null, this))
+				return false;
+		}
+		return true;
+	}	//	calculateTaxTotal
+
+
+	public MTax[] getTaxes()
+	{
+		Hashtable<Integer, MTax> taxes = new Hashtable<Integer, MTax>();
+		MRecognitionLine[] lines = getLines();
+		for (MRecognitionLine line : lines)
+		{
+            MTax tax = taxes.get(line.getC_Tax_ID());
+            if (tax == null)
+            {
+            	tax = MTax.get(getCtx(), line.getC_Tax_ID());
+            	taxes.put(tax.getC_Tax_ID(), tax);
+            }
+		}
+
+		MTax[] retValue = new MTax[taxes.size()];
+		taxes.values().toArray(retValue);
+
+		return retValue;
+	}//getTaxes()
+
+
 
 
 	/**
