@@ -38,7 +38,6 @@ import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
-import org.compiere.model.MTaxProvider;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -301,28 +300,8 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		taxes.values().toArray(retValue);
 
 		return retValue;
-	}
+	}//getTaxes()
 
-	/**
-	 * Get tax providers
-	 * @return array of tax provider
-	 */
-	public MTaxProvider[] getTaxProviders()//ToDO
-	{
-		Hashtable<Integer, MTaxProvider> providers = new Hashtable<Integer, MTaxProvider>();
-		MEstimationLine[] lines = getLines();
-		for (MEstimationLine line : lines)
-		{
-            MTax tax = new MTax(line.getCtx(), line.getC_Tax_ID(), line.get_TrxName());
-            MTaxProvider provider = providers.get(tax.getC_TaxProvider_ID());
-            if (provider == null)
-            	providers.put(tax.getC_TaxProvider_ID(), new MTaxProvider(tax.getCtx(), tax.getC_TaxProvider_ID(), tax.get_TrxName()));
-		}
-
-		MTaxProvider[] retValue = new MTaxProvider[providers.size()];
-		providers.values().toArray(retValue);
-		return retValue;
-	}
 
 	/**
 	 * 	Approve Document
