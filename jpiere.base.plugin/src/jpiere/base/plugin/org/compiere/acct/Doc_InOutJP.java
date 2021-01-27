@@ -41,7 +41,6 @@ import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
-import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
 *  JPIERE-0363
@@ -570,7 +569,7 @@ public class Doc_InOutJP extends Doc_InOut {
 
 	private MAccount getCOGSAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
-		MRecognitionLine line = (MRecognitionLine)docLine.getPO();
+		MInOutLine line = (MInOutLine)docLine.getPO();
 		//Charge Account
 		if (line.getM_Product_ID() == 0 && line.getC_Charge_ID() != 0)
 		{
