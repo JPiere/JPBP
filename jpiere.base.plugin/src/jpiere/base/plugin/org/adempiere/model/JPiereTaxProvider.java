@@ -231,7 +231,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 			if (!calculateTaxFromOrderLines(line,tax))
 				return false;
-			if (tax.getTaxAmt().signum() != 0) {
+			if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0) {
 				if (!tax.save(line.get_TrxName()))
 					return false;
 			} else {
@@ -464,7 +464,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 	    	if (!calculateTaxFromInvoiceLines(line, tax))
 	    		return false;
-	    	if (tax.getTaxAmt().signum() != 0) {
+	    	if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0) {
 	    		if (!tax.save(tax.get_TrxName()))
 	    			return false;
 	    	} else {
@@ -681,7 +681,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		{
 			if (!calculateTaxFromRMALines(line, tax))
 				return false;
-			if (tax.getTaxAmt().signum() != 0)
+			if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0)
 			{
 				if (!tax.save(tax.get_TrxName()))
 					return false;
@@ -1052,7 +1052,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 			if (!calculateTaxFromEstimationLines(line,tax))
 				return false;
-			if (tax.getTaxAmt().signum() != 0) {
+			if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0) {
 				if (!tax.save(line.get_TrxName()))
 					return false;
 			} else {
@@ -1287,7 +1287,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 			if (!calculateTaxFromRecognitionLines(line,tax))
 				return false;
-			if (tax.getTaxAmt().signum() != 0) {
+			if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0) {
 				if (!tax.save(line.get_TrxName()))
 					return false;
 			} else {

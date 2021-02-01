@@ -65,7 +65,7 @@ public class JPiereBankStatementTaxProvider {
 		if (tax != null) {
 			if (!calculateTaxFromBankStatementLine(line,tax))
 				return false;
-			if (tax.getTaxAmt().signum() != 0) {
+			if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0) {
 				if (!tax.save(line.get_TrxName()))
 					return false;
 			}else {
