@@ -14,9 +14,11 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MPaySelection;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPaySelectionLine;
@@ -62,14 +64,14 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 		}//for
 
 		p_C_PaySelection_ID = getRecord_ID();
-		
+
 	}
 
 	@Override
 	protected String doIt() throws Exception {
-		
+
 		MPaySelection paySelection = new MPaySelection(getCtx(), p_C_PaySelection_ID, get_TrxName());
-		
+
 		if( paySelection.get_ColumnIndex("JP_PaymentBatch_ID") > 0)
 		{
 			int JP_PaymentBatch_ID = paySelection.get_ValueAsInt("JP_PaymentBatch_ID");
@@ -80,9 +82,32 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 		MPaySelectionCheck[] checks = MPaySelectionCheck.get(p_C_PaySelection_ID, p_PaymentRule, get_TrxName());
 		if(checks == null || checks.length == 0)
 		{
-		
+
 			return Msg.getMsg(getCtx(), "FindZeroRecords");//No Records found
 		}
+
+		//Double payment check
+		MPaySelectionLine[] pLines = paySelection.getLines(true);
+		ArrayList <MInvoice> paidInvoiceList = new ArrayList <MInvoice>();
+		MInvoice invoice = null;
+		for(int i = 0; pLines.length > i ; i++)
+		{
+			invoice = new MInvoice(getCtx(), pLines[i].getC_Invoice_ID(), get_TrxName());
+			if(invoice.isPaid())
+			{
+				paidInvoiceList.add(invoice);
+				addBufferLog(getProcessInfo().getAD_Process_ID(), null, null, invoice.getDocumentNo(), MInvoice.Table_ID, invoice.getC_Invoice_ID());
+			}
+		}
+
+		if(paidInvoiceList.size() > 0)
+		{
+			return Msg.getMsg(getCtx(), "Error")
+							+ Msg.getElement(getCtx(), "IsPaid", paySelection.get_ValueAsBoolean("IsReceiptJP"))
+							+ Msg.getElement(getCtx(), "C_Invoice_ID", paySelection.get_ValueAsBoolean("IsReceiptJP"))
+							;
+		}
+
 
 		MPaymentBatch batch = MPaymentBatch.getForPaySelection (getCtx(), getRecord_ID(), get_TrxName());
 		batch.setProcessingDate(paySelection.getPayDate());
@@ -92,8 +117,8 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 		{
 			createAndAllocatePayment(check, batch);
 		}
-		
-		
+
+
 		if( paySelection.get_ColumnIndex("JP_PaymentBatch_ID") > 0)
 		{
 			paySelection.set_ValueNoCheck("JP_PaymentBatch_ID", batch.getC_PaymentBatch_ID());
@@ -115,9 +140,9 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 		MPayment payment = new MPayment(getCtx(), check.getC_Payment_ID(), get_TrxName());
 		//	Existing Payment
 		if (check.getC_Payment_ID() != 0){
-			
+
 			return ;
-			
+
 		}else{//	New Payment
 			payment = new MPayment(check.getCtx(), 0, get_TrxName());
 			payment.setAD_Org_ID(check.getAD_Org_ID());
@@ -144,7 +169,7 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 			payment.setDateAcct(payment.getDateTrx());
 			payment.setC_BPartner_ID(check.getC_BPartner_ID());
 			payment.setC_PaymentBatch_ID(batch.getC_PaymentBatch_ID());
-			
+
 			//	Link to Invoice
 			MPaySelectionLine[] psls = check.getPaySelectionLines(true);
 			if (s_log.isLoggable(Level.FINE)){
