@@ -65,6 +65,10 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 	private int p_C_PaymentTerm_ID = 0;		//JPIERE-0371
 	/** Organization       */					//JPIERE-0371
 	private int p_AD_Org_ID = 0;				//JPIERE-0371
+	/** Currency	      */					//JPIERE-0371
+	private int p_C_Currency_ID = 0;			//JPIERE-0371
+	/** Redo				*/					//JPIERE-0371
+	private boolean p_Redo = false;			//JPIERE-0371
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -99,6 +103,10 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 				p_C_PaymentTerm_ID = para[i].getParameterAsInt();		//JPIERE-0371
 			else if (name.equals("AD_Org_ID"))							//JPIERE-0371
 				p_AD_Org_ID = para[i].getParameterAsInt();				//JPIERE-0371
+			else if (name.equals("C_Currency_ID"))						//JPIERE-0371
+				p_C_Currency_ID = para[i].getParameterAsInt();			//JPIERE-0371
+			else if (name.equals("Redo"))								//JPIERE-0371
+				p_Redo = para[i].getParameterAsBoolean();			    //JPIERE-0371
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -149,15 +157,18 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 		else											//JPIERE-0297
 			sqlWhere.append("i.IsSOTrx='N'");			//JPIERE-0297
 		sqlWhere.append(" AND i.IsPaid='N' AND i.DocStatus IN ('CO','CL')")
-			.append(" AND i.AD_Client_ID=?")				//	##p8
-			//	Existing Payments - Will reselect Invoice if prepared but not paid
-			.append(" AND NOT EXISTS (SELECT * FROM C_PaySelectionLine psl")
-						.append(" INNER JOIN C_PaySelectionCheck psc ON (psl.C_PaySelectionCheck_ID=psc.C_PaySelectionCheck_ID)")
-						.append(" LEFT OUTER JOIN C_Payment pmt ON (pmt.C_Payment_ID=psc.C_Payment_ID)")
-						.append(" WHERE i.C_Invoice_ID=psl.C_Invoice_ID AND psl.IsActive='Y'")
-						.append(" AND (pmt.DocStatus IS NULL OR pmt.DocStatus NOT IN ('VO','RE')) )")
-			//	Don't generate again invoices already on this payment selection
-			.append(" AND i.C_Invoice_ID NOT IN (SELECT psl.C_Invoice_ID FROM C_PaySelectionLine psl WHERE psl.C_PaySelection_ID=?)"); //	##p9
+			.append(" AND i.AD_Client_ID=?");				//	##p8
+		//	Existing Payments - Will reselect Invoice if prepared but not paid
+		if(!p_Redo)
+		{
+			sqlWhere.append(" AND NOT EXISTS (SELECT * FROM C_PaySelectionLine psl")
+							.append(" INNER JOIN C_PaySelectionCheck psc ON (psl.C_PaySelectionCheck_ID=psc.C_PaySelectionCheck_ID)")
+							.append(" LEFT OUTER JOIN C_Payment pmt ON (pmt.C_Payment_ID=psc.C_Payment_ID)")
+							.append(" WHERE i.C_Invoice_ID=psl.C_Invoice_ID AND psl.IsActive='Y'")
+							.append(" AND (pmt.DocStatus IS NULL OR pmt.DocStatus NOT IN ('VO','RE')) )");
+		}
+		//	Don't generate again invoices already on this payment selection
+		sqlWhere.append(" AND i.C_Invoice_ID NOT IN (SELECT psl.C_Invoice_ID FROM C_PaySelectionLine psl WHERE psl.C_PaySelection_ID=?)"); //	##p9
 		//	Disputed
 		if (!p_IncludeInDispute)
 			sqlWhere.append(" AND i.IsInDispute='N'");
@@ -200,7 +211,9 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 		//	Organization												//JPIERE-0371
 		if (p_AD_Org_ID != 0)											//JPIERE-0371
 			sqlWhere.append(" AND i.AD_Org_ID=?");	//	##				//JPIERE-0371
-
+		//	Currency													//JPIERE-0371
+		if (p_C_Currency_ID != 0)										//JPIERE-0371
+			sqlWhere.append(" AND i.C_Currency_ID=?");	//	##			//JPIERE-0371
 
 
 		//	PO Matching Requirement
@@ -272,6 +285,8 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 				pstmt.setInt (index++, p_C_PaymentTerm_ID);		//JPIERE-0371
 			if (p_AD_Org_ID != 0)								//JPIERE-0371
 				pstmt.setInt (index++, p_AD_Org_ID);			//JPIERE-0371
+			if (p_C_Currency_ID != 0)							//JPIERE-0371
+				pstmt.setInt (index++, p_C_Currency_ID);		//JPIERE-0371
 
 			if (p_OnlyPositive) {
 				pstmt.setInt(index++, psel.getAD_Client_ID());
@@ -291,6 +306,8 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 					pstmt.setInt (index++, p_C_PaymentTerm_ID);		//JPIERE-0371
 				if (p_AD_Org_ID != 0)								//JPIERE-0371
 					pstmt.setInt (index++, p_AD_Org_ID);			//JPIERE-0371
+				if (p_C_Currency_ID != 0)							//JPIERE-0371
+					pstmt.setInt (index++, p_C_Currency_ID);		//JPIERE-0371
 			}
 
 
