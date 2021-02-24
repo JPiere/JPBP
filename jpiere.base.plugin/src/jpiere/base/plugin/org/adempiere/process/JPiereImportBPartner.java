@@ -2067,6 +2067,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 */
 	private boolean createNewBPartner(X_I_BPartnerJP importBPartner, MBPartner newBPartner) throws Exception
 	{
+		newBPartner.setAD_Org_ID(importBPartner.getAD_Org_ID());
+
 		if(Util.isEmpty(importBPartner.getValue()))
 		{
 			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
@@ -2404,6 +2406,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, newBPartnerLocation, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(importBPartner, newBPartnerLocation);
+		newBPartnerLocation.setAD_Org_ID(importBPartner.getAD_Org_ID());
 		newBPartnerLocation.setC_BPartner_ID(importBPartner.getC_BPartner_ID());
 		if(!Util.isEmpty(importBPartner.getJP_BPartner_Location_Name()))
 			newBPartnerLocation.setName(importBPartner.getJP_BPartner_Location_Name());
@@ -2547,6 +2550,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	private int createNewUser(X_I_BPartnerJP importBPartner, int C_BPartner_ID)
 	{
 		MUser user = new MUser(getCtx(), 0, get_TrxName());
+		user.setAD_Org_ID(importBPartner.getAD_Org_ID());
 
 		ModelValidationEngine.get().fireImportValidate(this, importBPartner, user, ImportValidator.TIMING_BEFORE_IMPORT);
 
