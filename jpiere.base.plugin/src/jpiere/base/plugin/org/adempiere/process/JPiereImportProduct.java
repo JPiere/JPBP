@@ -1158,6 +1158,8 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 	 */
 	private boolean createNewProduct(X_I_ProductJP importProduct, MProduct newProduct) throws SQLException
 	{
+		newProduct.setAD_Org_ID(importProduct.getAD_Org_ID());
+
 		//Mandatory Check!
 		if(Util.isEmpty(importProduct.getValue()))
 		{
@@ -1389,7 +1391,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, importProduct, newProductPO, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(importProduct, newProductPO);
-
+		newProductPO.setAD_Org_ID(importProduct.getAD_Org_ID());
 		newProductPO.setC_BPartner_ID(importProduct.getC_BPartner_ID());
 		newProductPO.setM_Product_ID(importProduct.getM_Product_ID());
 		newProductPO.setUPC(importProduct.getJP_VendorUPC());
