@@ -16,9 +16,6 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MBankData;
-import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
-
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
@@ -27,8 +24,11 @@ import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.MBankData;
+import jpiere.base.plugin.org.adempiere.model.MBankDataSchema;
+
 /**
- * JPIERE-00302 : Import Bank Data
+ * JPIERE-0302 : Import Bank Data
  *
  *
  *  @author Hideaki Hagiwara
@@ -57,10 +57,10 @@ public class CallBankDataCreateDoc extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		ProcessInfo pi = new ProcessInfo("Title", 0, getTable_ID(), Record_ID);
-		if(Util.isEmpty(m_BankDataSchema.getJP_BankDataImportClass()))
+		if(Util.isEmpty(m_BankDataSchema.getJP_BankDataCreateDocClass()))
 			pi.setClassName("jpiere.base.plugin.org.adempiere.process.DefaultBankDataCreateDoc");
 		else
-			pi.setClassName(m_BankDataSchema.getJP_BankDataImportClass());
+			pi.setClassName(m_BankDataSchema.getJP_BankDataCreateDocClass());
 		pi.setAD_Client_ID(getAD_Client_ID());
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_PInstance_ID(getAD_PInstance_ID());
@@ -76,7 +76,7 @@ public class CallBankDataCreateDoc extends SvrProcess {
 		}else{
 			throw new AdempiereException(pi.getSummary());
 		}
-		
+
 		return "";
 	}
 
