@@ -36,6 +36,7 @@ import org.compiere.model.MCashLine;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MRMA;
@@ -554,6 +555,9 @@ public class Doc_AllocationHdrJP extends Doc
 			}
 		}
 
+		if (getC_Currency_ID() != as.getC_Currency_ID())
+			balanceAccounting(as, fact);
+
 		//	reset line info
 		setC_BPartner_ID(0);
 		//
@@ -674,7 +678,7 @@ public class Doc_AllocationHdrJP extends Doc
 			+ " - Allocation Source=" + allocationSource);
 
 		//	Get Invoice Postings
-		Doc_InvoiceJP docInvoice = (Doc_InvoiceJP)Doc.get(as,
+		Doc_InvoiceJP docInvoice = (Doc_InvoiceJP)Doc.get(as,			//JPIERE
 			MInvoice.Table_ID, invoice.getC_Invoice_ID(), getTrxName());
 		docInvoice.loadDocumentDetails();
 		allocationAccounted = docInvoice.createFactCash(as, fact, BigDecimal.valueOf(percent));
@@ -1764,6 +1768,37 @@ public class Doc_AllocationHdrJP extends Doc
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Balance Accounting
+	 * @param as accounting schema
+	 * @param fact
+	 * @return
+	 */
+	private FactLine balanceAccounting(MAcctSchema as, Fact fact)
+	{
+		FactLine line = null;
+		if (!fact.isAcctBalanced())
+		{
+			MAccount gain = MAccount.get(as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
+			MAccount loss = MAccount.get(as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
+
+			BigDecimal totalAmtAcctDr = Env.ZERO;
+			BigDecimal totalAmtAcctCr = Env.ZERO;
+			for (FactLine factLine : fact.getLines())
+			{
+				totalAmtAcctDr = totalAmtAcctDr.add(factLine.getAmtAcctDr());
+				totalAmtAcctCr = totalAmtAcctCr.add(factLine.getAmtAcctCr());
+			}
+			
+			BigDecimal acctDifference = totalAmtAcctDr.subtract(totalAmtAcctCr);
+			if (as.isCurrencyBalancing() && acctDifference.abs().compareTo(TOLERANCE) < 0)
+				line = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
+			else
+				line = fact.createLine(null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+		}
+		return line;
 	}
 
 	/**
