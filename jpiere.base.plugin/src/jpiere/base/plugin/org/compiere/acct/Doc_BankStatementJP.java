@@ -51,6 +51,8 @@ import org.compiere.util.Env;
  *  @version  $Id: Doc_JPiereBankStatementTax.java,v 1.0 2014/08/20
  *
  *
+ *  JPIERE-0012: Tax of Bank Statement
+ *
  */
 public class Doc_BankStatementJP extends Doc
 {
@@ -306,6 +308,7 @@ public class Doc_BankStatementJP extends Doc
 				}else{
 					fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
 							getC_Currency_ID(), null,line.getDocTax().getAmount());
+					fl.setC_Tax_ID(line.getC_Tax_ID());
 
 					fl = fact.createLine(line,
 							line.getChargeAccount(as, line.getChargeAmt().negate()),
@@ -319,6 +322,8 @@ public class Doc_BankStatementJP extends Doc
 				}else{
 					fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxCredit, as),
 							getC_Currency_ID(), line.getDocTax().getAmount(),  null);
+					fl.setC_Tax_ID(line.getC_Tax_ID());
+
 					fl = fact.createLine(line,
 							line.getChargeAccount(as, line.getChargeAmt().negate()),
 							line.getC_Currency_ID(), line.getTaxBaseAmt(), null);//TODO line.getDocTax().getTaxBaseAmt()
