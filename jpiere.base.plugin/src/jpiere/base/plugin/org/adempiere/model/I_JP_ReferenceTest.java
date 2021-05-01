@@ -131,6 +131,21 @@ public interface I_JP_ReferenceTest
 	  */
 	public String getBroadcastMessage();
 
+    /** Column name C_BP_Group_ID */
+    public static final String COLUMNNAME_C_BP_Group_ID = "C_BP_Group_ID";
+
+	/** Set BPartner Group.
+	  * Business Partner Group
+	  */
+	public void setC_BP_Group_ID (int C_BP_Group_ID);
+
+	/** Get BPartner Group.
+	  * Business Partner Group
+	  */
+	public int getC_BP_Group_ID();
+
+	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException;
+
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
@@ -161,6 +176,21 @@ public interface I_JP_ReferenceTest
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException;
 
+    /** Column name C_Calendar_ID */
+    public static final String COLUMNNAME_C_Calendar_ID = "C_Calendar_ID";
+
+	/** Set Calendar.
+	  * Accounting Calendar Name
+	  */
+	public void setC_Calendar_ID (int C_Calendar_ID);
+
+	/** Get Calendar.
+	  * Accounting Calendar Name
+	  */
+	public int getC_Calendar_ID();
+
+	public org.compiere.model.I_C_Calendar getC_Calendar() throws RuntimeException;
+
     /** Column name C_Currency_ID */
     public static final String COLUMNNAME_C_Currency_ID = "C_Currency_ID";
 
@@ -190,6 +220,49 @@ public interface I_JP_ReferenceTest
 	public int getC_Location_ID();
 
 	public I_C_Location getC_Location() throws RuntimeException;
+
+    /** Column name C_Period_ID */
+    public static final String COLUMNNAME_C_Period_ID = "C_Period_ID";
+
+	/** Set Period.
+	  * Period of the Calendar
+	  */
+	public void setC_Period_ID (int C_Period_ID);
+
+	/** Get Period.
+	  * Period of the Calendar
+	  */
+	public int getC_Period_ID();
+
+	public org.compiere.model.I_C_Period getC_Period() throws RuntimeException;
+
+    /** Column name C_Year_ID */
+    public static final String COLUMNNAME_C_Year_ID = "C_Year_ID";
+
+	/** Set Year.
+	  * Calendar Year
+	  */
+	public void setC_Year_ID (int C_Year_ID);
+
+	/** Get Year.
+	  * Calendar Year
+	  */
+	public int getC_Year_ID();
+
+	public org.compiere.model.I_C_Year getC_Year() throws RuntimeException;
+
+    /** Column name Classification */
+    public static final String COLUMNNAME_Classification = "Classification";
+
+	/** Set Classification.
+	  * Classification for grouping
+	  */
+	public void setClassification (String Classification);
+
+	/** Get Classification.
+	  * Classification for grouping
+	  */
+	public String getClassification();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -547,6 +620,45 @@ public interface I_JP_ReferenceTest
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
+    /** Column name Name */
+    public static final String COLUMNNAME_Name = "Name";
+
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public void setName (String Name);
+
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public String getName();
+
+    /** Column name Name2 */
+    public static final String COLUMNNAME_Name2 = "Name2";
+
+	/** Set Name 2.
+	  * Additional Name
+	  */
+	public void setName2 (String Name2);
+
+	/** Get Name 2.
+	  * Additional Name
+	  */
+	public String getName2();
+
+    /** Column name Note */
+    public static final String COLUMNNAME_Note = "Note";
+
+	/** Set Note.
+	  * Optional additional user defined information
+	  */
+	public void setNote (String Note);
+
+	/** Get Note.
+	  * Optional additional user defined information
+	  */
+	public String getNote();
+
     /** Column name P_Revenue_Acct */
     public static final String COLUMNNAME_P_Revenue_Acct = "P_Revenue_Acct";
 
@@ -609,6 +721,19 @@ public interface I_JP_ReferenceTest
 
 	/** Get Process Now	  */
 	public boolean isProcessing();
+
+    /** Column name PromotionCode */
+    public static final String COLUMNNAME_PromotionCode = "PromotionCode";
+
+	/** Set Promotion Code.
+	  * User entered promotion code at sales time
+	  */
+	public void setPromotionCode (String PromotionCode);
+
+	/** Get Promotion Code.
+	  * User entered promotion code at sales time
+	  */
+	public String getPromotionCode();
 
     /** Column name QtyEntered */
     public static final String COLUMNNAME_QtyEntered = "QtyEntered";

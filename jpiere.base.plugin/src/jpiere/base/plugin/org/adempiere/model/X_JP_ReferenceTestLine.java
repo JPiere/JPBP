@@ -31,7 +31,7 @@ public class X_JP_ReferenceTestLine extends PO implements I_JP_ReferenceTestLine
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210101L;
+	private static final long serialVersionUID = 20210501L;
 
     /** Standard Constructor */
     public X_JP_ReferenceTestLine (Properties ctx, int JP_ReferenceTestLine_ID, String trxName)
