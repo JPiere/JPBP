@@ -264,6 +264,15 @@ public interface I_JP_ReferenceTest
 	  */
 	public String getClassification();
 
+    /** Column name Color */
+    public static final String COLUMNNAME_Color = "Color";
+
+	/** Set Color	  */
+	public void setColor (String Color);
+
+	/** Get Color	  */
+	public String getColor();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 

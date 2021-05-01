@@ -428,6 +428,20 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return (String)get_Value(COLUMNNAME_Classification);
 	}
 
+	/** Set Color.
+		@param Color Color	  */
+	public void setColor (String Color)
+	{
+		set_Value (COLUMNNAME_Color, Color);
+	}
+
+	/** Get Color.
+		@return Color	  */
+	public String getColor () 
+	{
+		return (String)get_Value(COLUMNNAME_Color);
+	}
+
 	/** Set Number.
 		@param CreditCardNumber 
 		Credit Card Number 
