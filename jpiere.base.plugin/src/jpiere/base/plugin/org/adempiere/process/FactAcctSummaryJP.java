@@ -30,12 +30,14 @@
 
 package jpiere.base.plugin.org.adempiere.process;
 
+import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MReportCubeJP;
+import org.compiere.model.Query;
 
 /*
  * Populate Fact_Acct_Summary table with pre-calculated totals of
@@ -76,9 +78,18 @@ public class FactAcctSummaryJP extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		StringBuilder where = new StringBuilder();
+		if ( p_Cube_ID > 0)
+			where = new StringBuilder("PA_ReportCubeJP_ID = ").append(p_Cube_ID);
 
-		MReportCubeJP cube = new MReportCubeJP(getCtx(),p_Cube_ID, get_TrxName());
-		cube.update( p_reset, p_force );
+		List<MReportCubeJP> cubes = new Query(getCtx(), MReportCubeJP.Table_Name, where.toString(), get_TrxName())
+		.setOnlyActiveRecords(true).setClient_ID()
+		.list();
+		
+		for ( MReportCubeJP cube : cubes )
+		{
+			addLog( cube.update( p_reset, p_force ) );
+		}
 
 		return "@OK@";
 	}
