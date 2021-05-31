@@ -252,18 +252,15 @@ public class MReportCubeJP extends X_PA_ReportCubeJP {
 
 	public String updateBS(int C_AcctSchema_ID ,int C_Calendar_ID, int C_Year_ID, MPeriod m_Period, boolean isDeleteDataOnlyJP )
 	{
-		String result = getName() + ": ";
-		Timestamp ts = null;
-		long start;
-		long elapsed;
+		String result = null;
+		long start = System.currentTimeMillis();
 
 		try
 		{
 			// delete
 			String delSQL = "DELETE FROM Fact_Acct_BS_JP WHERE PA_ReportCubeJP_ID = ? AND C_AcctSchema_ID = ? AND C_Period_ID = ?";
 			Object[] deleteParams = new Object[] { getPA_ReportCubeJP_ID(), C_AcctSchema_ID, m_Period.getC_Period_ID() };
-			start = System.currentTimeMillis();
-			int deleted = DB.executeUpdateEx(delSQL, deleteParams, get_TrxName());
+			DB.executeUpdateEx(delSQL, deleteParams, get_TrxName());
 
 			if(isDeleteDataOnlyJP)
 				return "";
@@ -341,13 +338,11 @@ public class MReportCubeJP extends X_PA_ReportCubeJP {
 			String sql = insert.append(select.toString()).append(from).append(groups.toString()).toString();
 			Object[] params = new Object[] { getPA_ReportCubeJP_ID(), m_Period.getC_Period_ID(), m_Period.getStartDate(), C_AcctSchema_ID, getPA_ReportCubeJP_ID(), m_Period.getEndDate() };
 
-			start = System.currentTimeMillis();
 			int rows = DB.executeUpdateEx(sql, params, get_TrxName());
 			long seconds = (System.currentTimeMillis() - start)/1000;
 
-			String insertResult = "Inserted " + rows  + " in " + seconds + " s.";
-			if (log.isLoggable(Level.FINE))log.log(Level.FINE, insertResult);
-			result += insertResult;
+			result = "Inserted " + rows  + " in " + seconds + " seconds.";
+			if (log.isLoggable(Level.FINE))log.log(Level.FINE, result);
 
 
 		}
@@ -367,6 +362,6 @@ public class MReportCubeJP extends X_PA_ReportCubeJP {
 //			DB.executeUpdateEx(unlockSQL, parameters, get_TrxName());
 		}
 
-		return null;
+		return result;
 	}
 }

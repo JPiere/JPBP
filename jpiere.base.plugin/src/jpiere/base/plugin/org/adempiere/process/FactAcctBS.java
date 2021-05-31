@@ -121,10 +121,11 @@ public class FactAcctBS extends SvrProcess {
 			if(processUI!=null)
 				processUI.statusUpdate(m_Period.getName());
 
-			cube.updateBS(p_C_AcctSchema_ID, p_C_Calendar_ID, p_C_Year_ID, m_Period,p_IsDeleteDataOnlyJP);
+			String message = cube.updateBS(p_C_AcctSchema_ID, p_C_Calendar_ID, p_C_Year_ID, m_Period,p_IsDeleteDataOnlyJP);
+			addLog(m_Period.getName() + " : " + message);
 		}
 
-		return "@OK@";
+		return Msg.getMsg(getCtx(), "Success") ;
 	}
 
 
@@ -155,12 +156,13 @@ public class FactAcctBS extends SvrProcess {
 										.setOrderBy(orderClause.toString())
 										.list();
 
+		String message = null;
 		for(MPeriod m_Period : list)
 		{
+			message = cube.updateBS(p_C_AcctSchema_ID, p_C_Calendar_ID, p_C_Year_ID, m_Period, p_IsDeleteDataOnlyJP);
 			if(processUI!=null)
-				processUI.statusUpdate(m_Period.getName());
-
-			cube.updateBS(p_C_AcctSchema_ID, p_C_Calendar_ID, p_C_Year_ID, m_Period, p_IsDeleteDataOnlyJP);
+				processUI.statusUpdate(m_Period.getName() + " : " + message);
+			addLog(m_Period.getName() + " : " + message);
 			commitEx();
 		}
 
