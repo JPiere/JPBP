@@ -225,12 +225,12 @@ public class JPiereLocationUtil {
 
 			}else {
 
-				location.setC_Country_ID(MCountry.getDefault(ctx).getC_Country_ID());
+				location.setC_Country_ID(MCountry.getDefault().getC_Country_ID());
 			}
 
 		}else {
 
-			location.setC_Country_ID(MCountry.getDefault(ctx).getC_Country_ID());
+			location.setC_Country_ID(MCountry.getDefault().getC_Country_ID());
 
 		}
 
@@ -505,12 +505,12 @@ public class JPiereLocationUtil {
 
 			}else {
 
-				location.setC_Country_ID(MCountry.getDefault(ctx).getC_Country_ID());
+				location.setC_Country_ID(MCountry.getDefault().getC_Country_ID());
 			}
 
 		}else {
 
-			location.setC_Country_ID(MCountry.getDefault(ctx).getC_Country_ID());
+			location.setC_Country_ID(MCountry.getDefault().getC_Country_ID());
 
 		}
 

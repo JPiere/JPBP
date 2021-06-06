@@ -210,13 +210,16 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 	private int i_Select = 0;
 	private int i_DateInvoiced = 1;
 	private int i_DocumentNo = 2;
+	@SuppressWarnings("unused")
 	private int i_GrandTotal = 3;
 	private int i_OpenAmt = 4;
 	private int i_Discount = 5;
 	private int i_WriteOff = 6;
 	private int i_AppliedAmt = 7;
 	private int i_OverUnderAmt = 8;
+	@SuppressWarnings("unused")
 	private int i_AD_Org_ID = 9;
+	@SuppressWarnings("unused")
 	private int i_C_BPartner_ID = 10;
 
 

@@ -71,6 +71,7 @@ public class Doc_BankStatementJP extends Doc
 	protected int			m_C_BankAccount_ID = 0;
 
 	/** Contained Optional Tax Lines    */
+	@SuppressWarnings("unused")
 	private DocTax[]        m_taxes = null;
 
 	/**

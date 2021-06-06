@@ -145,6 +145,7 @@ public abstract class JPiereCreateFromRMAInOut extends CreateFrom
 	{
 		int M_RMALine_ID = 0;
 		BigDecimal QtyEntered = Env.ZERO;
+		@SuppressWarnings("unused")
 		int C_UOM_ID = 0;
 
 		public IOLineRMALineSummary(int M_RMALine_ID, BigDecimal QtyEntered, int C_UOM_ID)

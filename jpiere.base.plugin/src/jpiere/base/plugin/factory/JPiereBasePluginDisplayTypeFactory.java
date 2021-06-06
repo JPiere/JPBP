@@ -122,6 +122,7 @@ public class JPiereBasePluginDisplayTypeFactory implements IDisplayTypeFactory {
 	/** Maximum number of fractions */
 	private static final int    MAX_FRACTION = 12;
 	/** Default Amount Precision    */
+	@SuppressWarnings("unused")
 	private static final int    AMOUNT_FRACTION = 2;
 
 	public static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";

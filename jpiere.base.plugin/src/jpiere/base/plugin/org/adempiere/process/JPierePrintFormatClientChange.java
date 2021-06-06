@@ -22,10 +22,10 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 
 /**
- * 
+ *
  * JPIERE-0167:JP_PrintFormat_Change_to_System_Client
  * JPIERE-0168:Client of Print Format Update Org to *
- * 
+ *
  * @author Hideaki Hagiwara
  *
  */
@@ -34,8 +34,8 @@ public class JPierePrintFormatClientChange extends SvrProcess
 	/**	Print Format Parameter		*/
 	private int			p_AD_PrintFormat_ID = -1;
 	private boolean 	p_IsSameClientJP = true;
-	
-	
+
+
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -65,50 +65,52 @@ public class JPierePrintFormatClientChange extends SvrProcess
 	{
 		if (p_AD_PrintFormat_ID < 0)
 			throw new IllegalArgumentException ("Invalid AD_PrintFormat_ID=" + p_AD_PrintFormat_ID);
-			
+
 		String sql = null;
+
+		@SuppressWarnings("unused")
 		int no = 0;
 		if(p_IsSameClientJP)
 		{
-			sql = "UPDATE AD_PrintFormat SET ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID; 
+			sql = "UPDATE AD_PrintFormat SET ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID;
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			
-			sql = "UPDATE AD_PrintFormat_Trl SET ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID; 
+
+			sql = "UPDATE AD_PrintFormat_Trl SET ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID;
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
-	
-			sql = "UPDATE AD_PrintFormatItem SET ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID; 
+
+			sql = "UPDATE AD_PrintFormatItem SET ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID;
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
-		
-	
+
+
 			MPrintFormat pf = MPrintFormat.get(getCtx(), p_AD_PrintFormat_ID, false);
 			MPrintFormatItem[] pfis = pf.getAllItems();
 			for(int i = 0; i < pfis.length; i++)
 			{
-				sql = "UPDATE AD_PrintFormatItem_Trl SET ad_org_id=0 WHERE AD_PrintFormatItem_ID="+pfis[i].getAD_PrintFormatItem_ID(); 
+				sql = "UPDATE AD_PrintFormatItem_Trl SET ad_org_id=0 WHERE AD_PrintFormatItem_ID="+pfis[i].getAD_PrintFormatItem_ID();
 				no = DB.executeUpdate(sql.toString(), get_TrxName());;
 			}
-			
+
 		}else{
-			
-			sql = "UPDATE AD_PrintFormat SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID; 
+
+			sql = "UPDATE AD_PrintFormat SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID;
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
-			
-			sql = "UPDATE AD_PrintFormat_Trl SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID; 
+
+			sql = "UPDATE AD_PrintFormat_Trl SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID;
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
-	
-			sql = "UPDATE AD_PrintFormatItem SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID; 
+
+			sql = "UPDATE AD_PrintFormatItem SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormat_ID="+p_AD_PrintFormat_ID;
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
-		
-	
+
+
 			MPrintFormat pf = MPrintFormat.get(getCtx(), p_AD_PrintFormat_ID, false);
 			MPrintFormatItem[] pfis = pf.getAllItems();
 			for(int i = 0; i < pfis.length; i++)
 			{
-				sql = "UPDATE AD_PrintFormatItem_Trl SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormatItem_ID="+pfis[i].getAD_PrintFormatItem_ID(); 
+				sql = "UPDATE AD_PrintFormatItem_Trl SET ad_client_id=0, ad_org_id=0 WHERE AD_PrintFormatItem_ID="+pfis[i].getAD_PrintFormatItem_ID();
 				no = DB.executeUpdate(sql.toString(), get_TrxName());;
-			}			
+			}
 		}
-		
+
 		return "OK";
 	}	//	doIt
 

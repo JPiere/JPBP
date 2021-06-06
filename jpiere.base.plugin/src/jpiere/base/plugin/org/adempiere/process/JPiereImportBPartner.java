@@ -2779,7 +2779,8 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 * @param importBPartner
 	 * @param m_BPartner
 	 */
-	private void setSalesRep_ID(X_I_BPartnerJP importBPartner, MBPartner m_BPartner) //TODO
+	@SuppressWarnings("unused")
+	private void setSalesRep_ID(X_I_BPartnerJP importBPartner, MBPartner m_BPartner)
 	{
 		String JP_SalesRep_EMail = importBPartner.getJP_SalesRep_EMail();
 		int[] AD_User_IDs = PO.getAllIDs(MUser.Table_Name, "EMail='" + JP_SalesRep_EMail +"'"

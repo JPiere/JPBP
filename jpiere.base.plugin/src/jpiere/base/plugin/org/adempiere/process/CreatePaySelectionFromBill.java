@@ -43,18 +43,18 @@ import jpiere.base.plugin.org.adempiere.model.MBillLine;
 
 /**
  * Create PaySelection from Bill
- * 
+ *
  * JPIERE-0311:Create Pay Selection from Payment Request at Window
  * JPIERE-0312:Create Pay Selection from Payment Request at Info Window
  * JPIERE-0313:Create Pay Selection from Payment Request at Process
- * 
+ *
  * JPIERE-0314:Create Pay Selection from Bill at Window
  * JPIERE-0315:Create Pay Selection from Bill at Info Window
  * JPIERE-0316:Create Pay Selection from Bill at Process
  *
- *  @author Hiroshi Iwama 
- *  
- *  Modified by Hideaki Hagiwara 
+ *  @author Hiroshi Iwama
+ *
+ *  Modified by Hideaki Hagiwara
  *
  */
 public class CreatePaySelectionFromBill extends SvrProcess{
@@ -71,6 +71,7 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 	private boolean p_IsSOTrx = false;
 
 	/**	Target Payment Rule			*/
+	@SuppressWarnings("unused")
 	private String		p_TargetPaymentRule = null;
 
 	/** Target BankAccount */
@@ -93,7 +94,7 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 
 	/** Payments requests searched in the process window */
 	ArrayList<MBill> p_searchedBillList = new ArrayList<MBill>();
-	
+
 	private MBankAccount mBankAccount = null;
 
 	/**
@@ -136,11 +137,11 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 	private boolean 		isAskAnswer = true;
 	private boolean 		isCreatePaySelection = false;
 	private String 			returnMsg = "";
-	
+
 	protected String doIt() throws Exception
 	{
 		processUI = Env.getProcessUI(getCtx());
-		
+
 		if(isCalledFromDocumentWindow)
 		{
 			ProcessInfoParameter[] para = getParameter();
@@ -161,10 +162,10 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 
 			MBill mBill = new MBill(getCtx(), p_JP_Bill_ID, get_TrxName());
 			mBankAccount = new MBankAccount(getCtx(), p_C_BankAccount_ID, get_TrxName());
-			
+
 			if(mBankAccount.getC_Currency_ID() != mBill.getC_Currency_ID())
 				throw new Exception(Msg.getMsg(getCtx(), "JP_DifferentCurrency"));
-			
+
 			MPaySelection psel = new MPaySelection (getCtx(), 0, get_TrxName());
 			psel.setAD_Org_ID(mBankAccount.getAD_Org_ID());
 			psel.setC_BankAccount_ID(p_C_BankAccount_ID);
@@ -173,7 +174,7 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 			psel.setName(dateTime.truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("T", " "));
 			psel.set_ValueNoCheck("IsReceiptJP", mBill.isSOTrx());
 			psel.saveEx(get_TrxName());
-			
+
 			if(processUI != null && mBill.getC_PaySelection_ID() != 0)
 			{
 				isOpenDialog = true;
@@ -193,26 +194,26 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 			        }
 
 				});//FDialog.
-				
+
 			}else{
 				returnMsg = createPaySelectionLine(psel, mBill);
 				isCreatePaySelection = true;
 			}
-			
+
 			while (isOpenDialog && isAskAnswer && !isCreatePaySelection)
 			{
 				Thread.sleep(1000*2);
 			}
-			
+
 			if(isCreatePaySelection)
 				addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_PaySelection_ID", mBill.isSOTrx()) + " : "+ psel.getName() , psel.get_Table_ID(), psel.getC_PaySelection_ID());
-				
+
 			if(mBill.getC_PaySelection_ID() == 0)
 			{
 				mBill.setC_PaySelection_ID(psel.getC_PaySelection_ID());
 				mBill.saveEx(get_TrxName());
 			}
-			
+
 			return returnMsg;
 
 		}else if(isCalledFromInfoWindow){
@@ -241,10 +242,10 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 			if(p_selectedBillList != null && p_selectedBillList.size() > 0)
 			{
 				mBankAccount = new MBankAccount(getCtx(), p_C_BankAccount_ID, get_TrxName());
-				
+
 				if(mBankAccount.getC_Currency_ID() != p_selectedBillList.get(0).getC_Currency_ID())
 					throw new Exception(Msg.getMsg(getCtx(), "JP_DifferentCurrency"));
-				
+
 				MPaySelection psel = new MPaySelection (getCtx(), 0, get_TrxName());
 				psel.setAD_Org_ID(mBankAccount.getAD_Org_ID());
 				psel.setC_BankAccount_ID(p_C_BankAccount_ID);
@@ -253,24 +254,24 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 				psel.setName(dateTime.truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("T", " "));
 				psel.set_ValueNoCheck("IsReceiptJP", p_IsSOTrx);
 				psel.saveEx(get_TrxName());
-				
+
 				for(int i = 0; i < p_selectedBillList.size(); i++)
 				{
 					MBill mBill = new MBill(getCtx(), p_selectedBillList.get(i).getJP_Bill_ID(), get_TrxName());
 					if(mBankAccount.getC_Currency_ID() != mBill.getC_Currency_ID())
 						continue;
-					
+
 					createPaySelectionLine(psel, mBill);
-					
+
 					if(mBill.getC_PaySelection_ID() == 0)
 					{
 						mBill.setC_PaySelection_ID(psel.getC_PaySelection_ID());
 						mBill.saveEx(get_TrxName());
 					}
 				}
-				
+
 				addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_PaySelection_ID", p_IsSOTrx) + " : "+ psel.getName() , psel.get_Table_ID(), psel.getC_PaySelection_ID());
-			
+
 				return returnMsg;
 			}
 
@@ -305,7 +306,7 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 			}
 
 			mBankAccount = new MBankAccount(getCtx(), p_C_BankAccount_ID, get_TrxName());
-			
+
 			//Get the payment requests searched through parameters for the payment requests.
 			StringBuilder sql = new StringBuilder("SELECT * FROM JP_Bill WHERE DocStatus IN ('CO','CL') ");
 			if(p_C_BPartner_ID != 0)
@@ -320,11 +321,11 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 				sql.append(" AND IsSOTrx='Y'");
 			else
 				sql.append(" AND IsSOTrx='N'");
-				
+
 			sql.append( " AND C_Currency_ID = "+ mBankAccount.getC_Currency_ID());
 			sql.append(" AND C_PaySelection_ID is null ");
 			sql.append(" ORDER BY C_BPartner_ID ");
-			
+
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			try{
@@ -343,7 +344,7 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 			}
 
 			if(p_searchedBillList != null && p_searchedBillList.size() > 0)
-			{				
+			{
 				MPaySelection psel = new MPaySelection (getCtx(), 0, get_TrxName());
 				psel.setAD_Org_ID(mBankAccount.getAD_Org_ID());
 				psel.setC_BankAccount_ID(p_C_BankAccount_ID);
@@ -352,21 +353,21 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 				psel.setName(dateTime.truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("T", " "));
 				psel.set_ValueNoCheck("IsReceiptJP", p_IsSOTrx);
 				psel.saveEx(get_TrxName());
-				
+
 				for(int i = 0; i < p_searchedBillList.size(); i++)
 				{
 					createPaySelectionLine(psel, p_searchedBillList.get(i));
 					MBill mBill = new MBill(getCtx(), p_searchedBillList.get(i).getJP_Bill_ID(), get_TrxName());
 					if(mBill.getC_PaySelection_ID() == 0)
 					{
-						
+
 						mBill.setC_PaySelection_ID(psel.getC_PaySelection_ID());
 						mBill.saveEx(get_TrxName());
 					}
 				}
-			
+
 				addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_PaySelection_ID", p_IsSOTrx) + " : "+ psel.getName() , psel.get_Table_ID(), psel.getC_PaySelection_ID());
-				
+
 				return returnMsg;
 
 			}
@@ -385,20 +386,20 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 			MInvoice invoice = new MInvoice(getCtx(), billLines[i].getC_Invoice_ID(), get_TrxName());
 			if(invoice.isPaid())
 				continue;
-			
+
 			if(!(invoice.getDocStatus().equals(DocAction.STATUS_Completed) || invoice.getDocStatus().equals(DocAction.STATUS_Closed)) )
 				continue;
-			
+
 			if(mBankAccount.getC_Currency_ID() != invoice.getC_Currency_ID())
 				continue;
-			
+
 			lines++;
 			BigDecimal openAmt = invoice.getOpenAmt();
 			MPaySelectionLine pselLine = new MPaySelectionLine (paySelection, lines*10, bill.getPaymentRule());
 			pselLine.setInvoice (invoice.getC_Invoice_ID(), invoice.isSOTrx(), openAmt, openAmt, Env.ZERO, Env.ZERO);
 			pselLine.saveEx(get_TrxName());
 		}
-		
+
 		return "";
 	}
 }

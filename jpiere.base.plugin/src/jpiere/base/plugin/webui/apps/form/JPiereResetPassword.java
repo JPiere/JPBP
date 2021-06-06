@@ -52,11 +52,11 @@ import org.zkoss.zul.Columns;
 import org.zkoss.zul.South;
 
 /**
- * 
+ *
  * JPIERE-0310: Reset Password Form
- * 
+ *
  * Copy from org.adempiere.webui.apps.form.WResetPassword
- * 
+ *
  */
 public class JPiereResetPassword implements IFormController, EventListener<Event>, ValueChangeListener {
 
@@ -65,16 +65,20 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 	private CustomForm form;
 	private Grid gridPanel;
     private ConfirmPanel confirmPanel;
-    
+
     private Label lblUser;
 	private Label lblOldPassword;
     private Label lblNewPassword;
     private Label lblRetypeNewPassword;
-    private Label lblNewEMail;
-    private Label lblNewEMailUser;
-    private Label lblNewEMailUserPW;
-    private Label lblRetypeNewEMailPW;
-    
+    @SuppressWarnings("unused")
+	private Label lblNewEMail;
+    @SuppressWarnings("unused")
+	private Label lblNewEMailUser;
+    @SuppressWarnings("unused")
+	private Label lblNewEMailUserPW;
+    @SuppressWarnings("unused")
+	private Label lblRetypeNewEMailPW;
+
     private WSearchEditor fUser;
     private Textbox txtOldPassword;
     private Textbox txtNewPassword;
@@ -84,16 +88,16 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
     private Textbox txtNewEMailUser;
     private Textbox txtNewEMailUserPW;
     private Textbox txtRetypeNewEMailPW;
-    
+
     public JPiereResetPassword()
     {
     	form = new CustomForm();
-    	
+
     	try
 		{
 			dynInit();
 			zkInit();
-			
+
 			Borderlayout contentPane = new Borderlayout();
 			form.appendChild(contentPane);
 			ZKUpdateUtil.setWidth(contentPane, "99%");
@@ -115,7 +119,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 			log.log(Level.SEVERE, "init", ex);
 		}
     }
-	
+
 	private void dynInit() throws Exception
 	{
 		lblUser = new Label(Msg.translate(Env.getCtx(), "AD_User_ID"));
@@ -126,14 +130,14 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
     	lblNewEMailUser = new Label(Msg.getMsg(Env.getCtx(), "New EMail User"));
     	lblNewEMailUserPW = new Label(Msg.getMsg(Env.getCtx(), "New EMail User Password"));
     	lblRetypeNewEMailPW = new Label(Msg.getMsg(Env.getCtx(), "New EMail PW Confirm"));
-    	
+
 		//	AD_User.AD_User_ID
 		MLookup userLkp = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, 212, DisplayType.Search);
 		fUser = new WSearchEditor("AD_User_ID", false, false, true, userLkp);
 		fUser.setReadWrite(false);
 		fUser.setValue(Env.getAD_User_ID(Env.getCtx()));
 		ZKUpdateUtil.setWidth(fUser.getComponent(), "220px");
-		
+
 		txtOldPassword = new Textbox();
         txtOldPassword.setId("txtOldPassword");
         txtOldPassword.setType("password");
@@ -145,7 +149,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
         txtNewPassword.setType("password");
         txtNewPassword.setCols(25);
         ZKUpdateUtil.setWidth(txtNewPassword, "220px");
-        
+
         txtRetypeNewPassword = new Textbox();
         txtRetypeNewPassword.setId("txtRetypeNewPassword");
         txtRetypeNewPassword.setType("password");
@@ -160,42 +164,42 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
         txtNewEMail.setId("txtNewEMail");
         txtNewEMail.setCols(25);
         ZKUpdateUtil.setWidth(txtNewEMail, "220px");
-        
+
         txtNewEMailUser = new Textbox();
         txtNewEMailUser.setId("txtNewEMailUser");
         txtNewEMailUser.setCols(25);
         ZKUpdateUtil.setWidth(txtNewEMailUser, "220px");
-        
+
         txtNewEMailUserPW = new Textbox();
         txtNewEMailUserPW.setId("txtNewEMailUserPW");
         txtNewEMailUserPW.setType("password");
         txtNewEMailUserPW.setCols(25);
         ZKUpdateUtil.setWidth(txtNewEMailUserPW, "220px");
-        
+
         txtRetypeNewEMailPW = new Textbox();
         txtRetypeNewEMailPW.setId("txtRetypeNewEMail");
         txtRetypeNewEMailPW.setType("password");
         txtRetypeNewEMailPW.setCols(25);
         ZKUpdateUtil.setWidth(txtRetypeNewEMailPW, "220px");
-        
+
 		confirmPanel = new ConfirmPanel(true);
 	}
-    
+
     private void zkInit() throws Exception
 	{
     	gridPanel = GridFactory.newGridLayout();
-    	
+
     	Columns columns = new Columns();
     	gridPanel.appendChild(columns);
-    	
+
     	Column column = new Column();
     	columns.appendChild(column);
     	ZKUpdateUtil.setWidth(column, "40%");
-    	
+
     	column = new Column();
     	columns.appendChild(column);
     	ZKUpdateUtil.setWidth(column, "60%");
-    	
+
     	Rows rows = new Rows();
     	gridPanel.appendChild(rows);
 
@@ -204,12 +208,12 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 		row.appendChild(lblUser.rightAlign());
 		row.appendChild(fUser.getComponent());
 		fUser.addValueChangeListener(this);
-		
+
 		row = new Row();
 		rows.appendChild(row);
 		row.appendChild(lblOldPassword.rightAlign());
 		row.appendChild(txtOldPassword);
-		
+
 		row = new Row();
 		rows.appendChild(row);
 		row.appendChild(lblNewPassword.rightAlign());
@@ -219,22 +223,22 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 		rows.appendChild(row);
 		row.appendChild(lblRetypeNewPassword.rightAlign());
 		row.appendChild(txtRetypeNewPassword);
-		
+
 //		row = new Row();
 //		rows.appendChild(row);
 //		row.appendChild(new Label());
 //		row.appendChild(cbForceChangeNextLogin);
-//		
+//
 //		row = new Row();
 //		rows.appendChild(row);
 //		row.appendChild(lblNewEMail.rightAlign());
 //		row.appendChild(txtNewEMail);
-//		
+//
 //		row = new Row();
 //		rows.appendChild(row);
 //		row.appendChild(lblNewEMailUser.rightAlign());
 //		row.appendChild(txtNewEMailUser);
-//		
+//
 //		row = new Row();
 //		rows.appendChild(row);
 //		row.appendChild(lblNewEMailUserPW.rightAlign());
@@ -245,7 +249,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 //		row.appendChild(lblRetypeNewEMailPW.rightAlign());
 //		row.appendChild(txtRetypeNewEMailPW);
 	}
-    
+
 	@Override
 	public void valueChange(ValueChangeEvent e) {
 		log.info(e.getPropertyName() + "=" + e.getNewValue());
@@ -254,7 +258,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 	}
 
 	@Override
-	public void onEvent(Event e) throws Exception 
+	public void onEvent(Event e) throws Exception
 	{
 		if (e.getTarget().getId().equals(ConfirmPanel.A_CANCEL))
 		{
@@ -266,7 +270,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 			validateChangePassword();
 		}
 	}
-		
+
 	private void validateChangePassword()
     {
 		int p_AD_User_ID = -1;
@@ -274,7 +278,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 			p_AD_User_ID = Integer.parseInt(fUser.getValue().toString());
 		if (p_AD_User_ID < 0)
 			throw new IllegalArgumentException(Msg.getMsg(Env.getCtx(), "UserMandatory"));
-		
+
 		String p_OldPassword = txtOldPassword.getValue();
 		String p_NewPassword = txtNewPassword.getValue();
 		String p_NewPasswordConfirm = txtRetypeNewPassword.getValue();
@@ -282,16 +286,16 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 		String p_NewEMailConfirm = txtRetypeNewEMailPW.getValue();
 		String p_NewEMailUser = txtNewEMailUser.getValue();
 		String p_NewEMailUserPW = txtNewEMailUserPW.getValue();
-				
-		MUser user = MUser.get(Env.getCtx(), p_AD_User_ID);		
+
+		MUser user = MUser.get(Env.getCtx(), p_AD_User_ID);
 		if (log.isLoggable(Level.FINE)) log.fine("User=" + user);
-				
+
 		//	Do we need a password ?
 		if (Util.isEmpty(p_OldPassword))		//	Password required
 		{
 			MUser operator = MUser.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
 			if (log.isLoggable(Level.FINE)) log.fine("Operator=" + operator);
-			
+
 			if (p_AD_User_ID == 0			//	change of System
 					|| p_AD_User_ID == 100		//	change of SuperUser
 					|| !operator.isAdministrator())
@@ -313,7 +317,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 	    		}
 	    	}
 		}
-		
+
 		// new password confirm
 		if (!Util.isEmpty(p_NewPassword)) {
 			if (Util.isEmpty(p_NewPasswordConfirm)) {
@@ -321,10 +325,10 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 			} else {
 				if (!p_NewPassword.equals(p_NewPasswordConfirm)) {
 					throw new IllegalArgumentException(Msg.getMsg(Env.getCtx(), "PasswordNotMatch"));
-				} 
+				}
 			}
 		}
-		
+
 		if (!Util.isEmpty(p_NewEMailUserPW)) {
 			if (Util.isEmpty(p_NewEMailConfirm)) {
 				throw new IllegalArgumentException(Msg.getMsg(Env.getCtx(), "NewEmailConfirmMandatory"));
@@ -334,7 +338,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 				}
 			}
 		}
-		
+
 		if (!Util.isEmpty(p_NewPassword))
 			user.set_ValueOfColumn("Password", p_NewPassword); // will be hashed and validate on saveEx
 		if (!Util.isEmpty(p_NewEMail))
@@ -345,7 +349,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 			user.setEMailUserPW(p_NewEMailUserPW);
 		if (cbForceChangeNextLogin.isChecked())
 			user.setIsExpired(true);
-		
+
 		try {
 			user.saveEx();
 		}
@@ -358,7 +362,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 		FDialog.info(form.getWindowNo(), form, "RecordSaved");
 		return;
     }
-	
+
 	private void clearForm()
 	{
 //		fUser.setValue(null);
@@ -372,7 +376,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 	}
 
 	@Override
-	public ADForm getForm() 
+	public ADForm getForm()
 	{
 		return form;
 	}

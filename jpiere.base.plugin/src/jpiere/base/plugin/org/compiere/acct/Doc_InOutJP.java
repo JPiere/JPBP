@@ -58,7 +58,7 @@ public class Doc_InOutJP extends Doc_InOut {
 	private int				m_Reversal_ID = 0;
 	@SuppressWarnings("unused")
 	private String			m_DocStatus = "";
-	private boolean 			m_deferPosting = false;
+//	private boolean 			m_deferPosting = false; //JPIERE comment out
 
 
 	@Override

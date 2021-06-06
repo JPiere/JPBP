@@ -36,7 +36,7 @@ import org.compiere.model.MCashLine;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
-import org.compiere.model.MInvoiceLine;
+//import org.compiere.model.MInvoiceLine; //JPIERE Comment out
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MRMA;
@@ -1769,7 +1769,7 @@ public class Doc_AllocationHdrJP extends Doc
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Balance Accounting
 	 * @param as accounting schema
@@ -1791,7 +1791,7 @@ public class Doc_AllocationHdrJP extends Doc
 				totalAmtAcctDr = totalAmtAcctDr.add(factLine.getAmtAcctDr());
 				totalAmtAcctCr = totalAmtAcctCr.add(factLine.getAmtAcctCr());
 			}
-			
+
 			BigDecimal acctDifference = totalAmtAcctDr.subtract(totalAmtAcctCr);
 			if (as.isCurrencyBalancing() && acctDifference.abs().compareTo(TOLERANCE) < 0)
 				line = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());

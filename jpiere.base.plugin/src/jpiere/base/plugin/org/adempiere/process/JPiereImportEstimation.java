@@ -20,10 +20,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MEstimation;
-import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
-import jpiere.base.plugin.org.adempiere.model.X_I_EstimationJP;
-
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
@@ -37,6 +33,10 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+
+import jpiere.base.plugin.org.adempiere.model.MEstimation;
+import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
+import jpiere.base.plugin.org.adempiere.model.X_I_EstimationJP;
 
 /**
  *  JPIERE-0289
@@ -66,8 +66,10 @@ public class JPiereImportEstimation extends SvrProcess
 
 	private boolean			isMonitoringProcessJP = true;
 
+	@SuppressWarnings("unused")
 	private boolean			isUniqueCheckJP = false;
 
+	@SuppressWarnings("unused")
 	private String[] EstimationTables = new String[] {
 			"JP_Estimation",
 			"JP_EstimationLine"
@@ -579,7 +581,7 @@ public class JPiereImportEstimation extends SvrProcess
 				for(int j = 0; j < indexes.length; j++)
 				{
 					String indexDropSql = indexes[j].getDropDDL();
-					int rvalue = DB.executeUpdateEx(indexDropSql, get_TrxName());
+					DB.executeUpdateEx(indexDropSql, get_TrxName());
 //					addLog(0, null, new BigDecimal(rvalue), indexDropSql.toString());
 				}
 			}
@@ -802,7 +804,7 @@ public class JPiereImportEstimation extends SvrProcess
 						oldDocumentNo = "";
 					//
 					estimation = new MEstimation (getCtx(), 0, get_TrxName());
-					//estimation.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());					
+					//estimation.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
 					PO.copyValues(imp, estimation);
 					estimation.setAD_Org_ID(imp.getAD_Org_ID());
 					estimation.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
