@@ -28,6 +28,7 @@ import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -81,6 +82,28 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 	@Override
 	public String modelChange(PO po, int type) throws Exception
 	{
+
+		//JPIERE-0409:Set Counter Doc Line Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE )
+		{
+			MInvoiceLine invoiceLine = (MInvoiceLine)po;
+			if(invoiceLine.getRef_InvoiceLine_ID() > 0 //Counter Doc
+					&& !invoiceLine.isProcessed()
+					&& invoiceLine.getQtyEntered().compareTo(Env.ZERO) != 0)	//Usually we can update qty to only ZERO in case of counter document.
+			{
+				MInvoiceLine counterInvoiceLine = new MInvoiceLine(po.getCtx(), invoiceLine.getRef_InvoiceLine_ID(), po.get_TrxName());
+				if(!counterInvoiceLine.getParent().getDocStatus().equals(DocAction.STATUS_Voided))
+				{
+					invoiceLine.setQtyEntered(counterInvoiceLine.getQtyEntered());
+					invoiceLine.setC_UOM_ID(counterInvoiceLine.getC_UOM_ID());
+					invoiceLine.setQtyInvoiced(counterInvoiceLine.getQtyInvoiced());
+					invoiceLine.setPriceEntered(counterInvoiceLine.getPriceEntered());
+					invoiceLine.setPriceActual(counterInvoiceLine.getPriceActual());
+					invoiceLine.setLineNetAmt(counterInvoiceLine.getLineNetAmt());
+				}
+			}
+		}//JPIERE-0409:Set Counter Doc Line Info
+
 
 		//JPIERE-0165:Invoice Line Tax
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
@@ -365,20 +388,6 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 		}
 
-		//JPIERE-0409:Set Counter Doc Line Info
-		if( type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE )
-		{
-			MInvoiceLine invoiceLine = (MInvoiceLine)po;
-			if(invoiceLine.getRef_InvoiceLine_ID() > 0) //This is Counter doc Line
-			{
-				MInvoiceLine counterOrderLine = new MInvoiceLine(po.getCtx(), invoiceLine.getRef_InvoiceLine_ID(), po.get_TrxName());
-				invoiceLine.setPriceEntered(counterOrderLine.getPriceEntered());
-				invoiceLine.setC_UOM_ID(counterOrderLine.getC_UOM_ID());
-				invoiceLine.setPriceActual(counterOrderLine.getPriceActual());
-				invoiceLine.setLineNetAmt(counterOrderLine.getLineNetAmt());
-			}
-
-		}//JPIERE-0409:Set Counter Doc Line Info
 
 		return null;
 	}

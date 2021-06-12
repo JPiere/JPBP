@@ -107,6 +107,30 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 	public String modelChange(PO po, int type) throws Exception
 	{
 
+		//JPIERE-0409:Set Counter Doc Line Info
+		if( type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE )
+		{
+			MOrderLine orderLine = (MOrderLine)po;
+			if(orderLine.getRef_OrderLine_ID() > 0  //Counter Doc
+					&& !orderLine.isProcessed()		//
+					&& orderLine.getQtyEntered().compareTo(Env.ZERO) != 0)	//Usually we can update qty to only ZERO in case of counter document.
+			{
+				MOrderLine counterOrderLine = new MOrderLine(po.getCtx(), orderLine.getRef_OrderLine_ID(), po.get_TrxName());
+				if(!counterOrderLine.getParent().getDocStatus().equals(DocAction.STATUS_Voided)
+						&& !counterOrderLine.getParent().getDocStatus().equals(DocAction.STATUS_Reversed)
+						&& !counterOrderLine.getParent().getDocStatus().equals(DocAction.STATUS_Closed))
+				{
+					orderLine.setQtyEntered(counterOrderLine.getQtyEntered());
+					orderLine.setC_UOM_ID(counterOrderLine.getC_UOM_ID());
+					orderLine.setQtyOrdered(counterOrderLine.getQtyOrdered());
+					orderLine.setPriceEntered(counterOrderLine.getPriceEntered());
+					orderLine.setPriceActual(counterOrderLine.getPriceActual());
+					orderLine.setLineNetAmt(counterOrderLine.getLineNetAmt());
+				}
+			}
+		}//JPIERE-0409:Set Counter Doc Line Info
+
+
 		//JPIERE-0165
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				(type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("LineNetAmt")|| po.is_ValueChanged("C_Tax_ID"))))
@@ -449,20 +473,6 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 		}//JPiere-0377
 
-
-		//JPIERE-0409:Set Counter Doc Line Info
-		if( type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE )
-		{
-			MOrderLine orderLine = (MOrderLine)po;
-			if(orderLine.getRef_OrderLine_ID() > 0) //This is Counter doc Line
-			{
-				MOrderLine counterOrderLine = new MOrderLine(po.getCtx(), orderLine.getRef_OrderLine_ID(), po.get_TrxName());
-				orderLine.setPriceEntered(counterOrderLine.getPriceEntered());
-				orderLine.setC_UOM_ID(counterOrderLine.getC_UOM_ID());
-				orderLine.setPriceActual(counterOrderLine.getPriceActual());
-			}//if(orderLine.getRef_OrderLine_ID() > 0)
-
-		}//JPIERE-0409:Set Counter Doc Line Info
 
 		return null;
 	}
