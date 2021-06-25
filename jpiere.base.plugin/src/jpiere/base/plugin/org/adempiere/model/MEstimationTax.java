@@ -17,7 +17,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.model.MCharge;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 public class MEstimationTax extends X_JP_EstimationTax {
 
@@ -113,7 +115,18 @@ public class MEstimationTax extends X_JP_EstimationTax {
 		retValue.setJP_Estimation_ID(line.getJP_Estimation_ID());
 		retValue.setC_Tax_ID(line.getC_Tax_ID());
 		retValue.setPrecision(precision);
-		retValue.setIsTaxIncluded(line.isTaxIncluded());
+		//JPIERE-0369:Start
+		if(line.getC_Charge_ID() != 0)
+		{
+			MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+			if(!charge.isSameTax())
+			{
+				retValue.setIsTaxIncluded(charge.isTaxIncluded());
+			}else {
+				retValue.setIsTaxIncluded(line.getParent().isTaxIncluded());
+			}
+		}
+		//JPiere-0369:finish
 //		if (s_log.isLoggable(Level.FINE)) s_log.fine("(new) " + retValue);
 		return retValue;
 	}	//	get
