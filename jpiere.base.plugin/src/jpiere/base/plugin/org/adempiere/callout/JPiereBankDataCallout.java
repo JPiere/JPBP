@@ -16,14 +16,15 @@ package jpiere.base.plugin.org.adempiere.callout;
 import java.math.BigDecimal;
 import java.util.Properties;
 
-import jpiere.base.plugin.org.adempiere.model.MBill;
-
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
+import org.compiere.util.Env;
+
+import jpiere.base.plugin.org.adempiere.model.MBill;
 
 /**
  *
@@ -41,7 +42,7 @@ public class JPiereBankDataCallout implements IColumnCallout {
 		{
 			updateChargeAmt(mTab);
 		}
-		
+
 		if(mField.getColumnName().equals("C_Invoice_ID"))
 		{
 			Integer C_Invoice_ID = (Integer)value;
@@ -56,7 +57,7 @@ public class JPiereBankDataCallout implements IColumnCallout {
 				updateChargeAmt(mTab);
 			}
 		}
-		
+
 		if(mField.getColumnName().equals("JP_Bill_ID"))
 		{
 			Integer JP_Bill_ID = (Integer)value;
@@ -71,7 +72,7 @@ public class JPiereBankDataCallout implements IColumnCallout {
 				updateChargeAmt(mTab);
 			}
 		}
-		
+
 		if(mField.getColumnName().equals("C_Payment_ID"))
 		{
 			Integer C_Payment_ID = (Integer)value;
@@ -101,16 +102,25 @@ public class JPiereBankDataCallout implements IColumnCallout {
 				updateChargeAmt(mTab);
 			}
 		}
-		
+
 		return null;
 	}
 
-	
+
 	private void updateChargeAmt(GridTab mTab)
 	{
 		BigDecimal stmtAmt = (BigDecimal)mTab.getValue("StmtAmt");
+		if(stmtAmt == null)
+			stmtAmt = Env.ZERO;
+
 		BigDecimal trxAmt = (BigDecimal)mTab.getValue("TrxAmt");
+		if(trxAmt == null)
+			trxAmt = Env.ZERO;
+
 		BigDecimal interestAmt = (BigDecimal)mTab.getValue("InterestAmt");
+		if(interestAmt == null)
+			interestAmt =  Env.ZERO;
+
 		mTab.setValue("ChargeAmt", stmtAmt.subtract(trxAmt).subtract(interestAmt));
 	}
 }
