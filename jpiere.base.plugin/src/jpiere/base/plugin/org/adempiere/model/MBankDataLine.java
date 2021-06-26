@@ -150,36 +150,92 @@ public class MBankDataLine extends X_JP_BankDataLine {
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
 
-		if(is_ValueChanged("StmtAmt") || is_ValueChanged("TrxAmt") || is_ValueChanged("ChargeAmt") || is_ValueChanged("InterestAmt"))
+		if(!success)
+			return false;
+
+		if(newRecord)
+			return updateHeader(true);
+		else
+			return updateHeader(false);
+
+	}
+
+	@Override
+	protected boolean afterDelete(boolean success)
+	{
+		if(!success)
+			return false;
+
+		return updateHeader(true);
+	}
+
+
+	private boolean updateHeader(boolean forced)
+	{
+		if(forced || (is_ValueChanged("StmtAmt") || is_ValueChanged("TrxAmt") || is_ValueChanged("ChargeAmt") || is_ValueChanged("InterestAmt")) )
 		{
 			String sql = "SELECT SUM(StmtAmt), SUM(TrxAmt), SUM(ChargeAmt), SUM(InterestAmt) From JP_BankDataLine WHERE JP_BankData_ID = ?";
+			BigDecimal StmtAmt = Env.ZERO;
+			BigDecimal TrxAmt = Env.ZERO;
+			BigDecimal ChargeAmt = Env.ZERO;
+			BigDecimal InterestAmt = Env.ZERO;
+
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			try
 			{
 				pstmt = DB.prepareStatement (sql, get_TrxName());
-				pstmt.setInt (1, getParent().getJP_BankData_ID());
+				pstmt.setInt (1, getJP_BankData_ID());
 				rs = pstmt.executeQuery();
 				if (rs.next ())
 				{
-					m_BankData.setStmtAmt(rs.getBigDecimal(1));
-					m_BankData.setTrxAmt(rs.getBigDecimal(2));
-					m_BankData.setChargeAmt(rs.getBigDecimal(3));
-					m_BankData.setInterestAmt(rs.getBigDecimal(4));
+					StmtAmt =rs.getBigDecimal(1);
+					TrxAmt = rs.getBigDecimal(2);
+					ChargeAmt = rs.getBigDecimal(3);
+					InterestAmt = rs.getBigDecimal(4);
 				}
-			}
-			catch (Exception e)
-			{
+
+			} catch (Exception e){
+
 				log.log (Level.SEVERE, sql, e);
-			}
-			finally
-			{
+				return false;
+
+			} finally {
+
 				DB.close(rs, pstmt);
 				rs = null;
 				pstmt = null;
 			}
 
-			m_BankData.saveEx(get_TrxName());
+
+			sql = "UPDATE JP_BankData SET StmtAmt=?, TrxAmt=?, ChargeAmt=?, InterestAmt=? WHERE JP_BankData_ID = ?";
+			try
+			{
+				pstmt = DB.prepareStatement (sql, get_TrxName());
+				pstmt.setBigDecimal(1, StmtAmt);
+				pstmt.setBigDecimal(2, TrxAmt);
+				pstmt.setBigDecimal(3, ChargeAmt);
+				pstmt.setBigDecimal(4, InterestAmt);
+				pstmt.setInt(5, getJP_BankData_ID());
+
+				int no = pstmt.executeUpdate();
+				if (no != 1) {
+					log.log (Level.SEVERE, sql);
+					return false;
+				}
+
+			}catch (Exception e) {
+
+				log.log (Level.SEVERE, sql, e);
+				return false;
+
+			}finally {
+
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+
 		}
 
 		return true;
