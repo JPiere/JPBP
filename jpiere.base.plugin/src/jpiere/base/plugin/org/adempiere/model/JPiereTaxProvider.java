@@ -725,8 +725,59 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 				MTax tax = new MTax(rma.getCtx(), taxID, rma.get_TrxName());
 				if (tax.getC_TaxProvider_ID() == 0)
 					continue;
-				MRMATax oTax = MRMATax.get (line, rma.getPrecision(), false, rma.get_TrxName());	//	current Tax
-				oTax.setIsTaxIncluded(rma.isTaxIncluded());
+				MRMATax oTax = MRMATaxJP.get (line, rma.getPrecision(), false, rma.get_TrxName());	//	current Tax
+
+				//JPIERE-0369:Start TODO
+				if(oTax.isTaxIncluded() != rma.isTaxIncluded())
+				{
+					if(line.getC_Charge_ID() != 0)
+					{
+                        MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+                        if(charge.isSameTax())
+                        {
+    						//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+    						log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+    						return false;
+
+                        }else {
+
+                            if(oTax.isTaxIncluded() == charge.isTaxIncluded())
+                            {
+                            	;//No Problem
+                            }else {
+
+                            	//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+        						log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+        						return false;
+                            }
+                        }
+
+					}else {
+
+						//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+						log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+						return false;
+					}
+
+				}else{
+
+					if(line.getC_Charge_ID() != 0)
+					{
+						MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+						if(!charge.isSameTax())
+						{
+							if(oTax.isTaxIncluded() != charge.isTaxIncluded())
+							{
+								//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+								log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+								return false;
+							}
+						}
+					}
+
+				}
+				//JPiere-0369: End
+
 				if (!calculateTaxFromRMALines(line, oTax))
 					return false;
 				if (!oTax.save(rma.get_TrxName()))
@@ -832,9 +883,61 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 
 
 	private boolean updateRMATax(MRMALine line, boolean oldTax){
-		MRMATax tax = MRMATax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
+		MRMATax tax = MRMATaxJP.get (line, line.getPrecision(), oldTax, line.get_TrxName());
 		if (tax != null)
 		{
+			//JPIERE-0369:Start TODO
+			if(tax.isTaxIncluded() != line.getParent().isTaxIncluded())
+			{
+				if(line.getC_Charge_ID() != 0)
+				{
+                    MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+                    if(charge.isSameTax())
+                    {
+						//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+						log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+						return false;
+
+                    }else {
+
+                        if(tax.isTaxIncluded() == charge.isTaxIncluded())
+                        {
+                        	;//No Problem
+                        }else {
+
+                        	//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+    						log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+    						return false;
+                        }
+                    }
+
+				}else {
+
+					//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+					log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+					return false;
+				}
+
+			}else{
+
+				if(line.getC_Charge_ID() != 0)
+				{
+					MCharge charge = MCharge.get(Env.getCtx(), line.getC_Charge_ID());
+					if(!charge.isSameTax())
+					{
+						if(tax.isTaxIncluded() != charge.isTaxIncluded())
+						{
+							//Don't setting common Tax Rate master for tax-included lines and tax-excluded lines
+							log.saveError("Error", Msg.getMsg(Env.getCtx(), "JP_NotSet_Common_TaxRate"));
+							return false;
+						}
+					}
+				}
+
+			}
+			//JPiere-0369: End
+
+
 			if (!calculateTaxFromRMALines(line, tax))
 				return false;
 			if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0)
