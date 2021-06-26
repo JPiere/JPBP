@@ -115,6 +115,7 @@ public class MEstimationTax extends X_JP_EstimationTax {
 		retValue.setJP_Estimation_ID(line.getJP_Estimation_ID());
 		retValue.setC_Tax_ID(line.getC_Tax_ID());
 		retValue.setPrecision(precision);
+		retValue.setIsTaxIncluded(line.getParent().isTaxIncluded());
 		//JPIERE-0369:Start
 		if(line.getC_Charge_ID() != 0)
 		{

@@ -101,6 +101,7 @@ public class MRMATaxJP extends MRMATax {
 			retValue.setM_RMA_ID(line.getM_RMA_ID());
 			retValue.setC_Tax_ID(line.getC_Tax_ID());
 			retValue.setPrecision(precision);
+			retValue.setIsTaxIncluded(line.getParent().isTaxIncluded());
 			//JPIERE-0369:Start
 			if(line.getC_Charge_ID() != 0)
 			{
