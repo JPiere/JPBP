@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Estimation
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_Estimation 
@@ -895,10 +895,10 @@ public interface I_JP_Estimation
     /** Column name JP_Bill_ID */
     public static final String COLUMNNAME_JP_Bill_ID = "JP_Bill_ID";
 
-	/** Set JP Bill	  */
+	/** Set Bill	  */
 	public void setJP_Bill_ID (int JP_Bill_ID);
 
-	/** Get JP Bill	  */
+	/** Get Bill	  */
 	public int getJP_Bill_ID();
 
 	public I_JP_Bill getJP_Bill() throws RuntimeException;
@@ -974,6 +974,19 @@ public interface I_JP_Estimation
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
 
+    /** Column name JP_Remarks */
+    public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
+
+	/** Set Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks);
+
+	/** Get Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks();
+
     /** Column name JP_ScheduledCostTotalLines */
     public static final String COLUMNNAME_JP_ScheduledCostTotalLines = "JP_ScheduledCostTotalLines";
 
@@ -982,6 +995,19 @@ public interface I_JP_Estimation
 
 	/** Get Total Scheduled Cost	  */
 	public BigDecimal getJP_ScheduledCostTotalLines();
+
+    /** Column name JP_Subject */
+    public static final String COLUMNNAME_JP_Subject = "JP_Subject";
+
+	/** Set Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject);
+
+	/** Get Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject();
 
     /** Column name Link_Order_ID */
     public static final String COLUMNNAME_Link_Order_ID = "Link_Order_ID";

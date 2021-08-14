@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPaymentTerm;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -26,6 +27,7 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
 import jpiere.base.plugin.util.JPierePaymentTerms;
@@ -40,6 +42,7 @@ import jpiere.base.plugin.util.JPierePaymentTerms;
 * JPIERE-0223: Restrict Match Inv.
 * JPIERE-0295: Explode BOM
 * JPIERE-0368: Period Closing by Payment Term
+* JPIERE-0490:Copy Subject and Remarks
 *
 * @author h.hagiwara
 *
@@ -114,6 +117,31 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 			MDocType oldDocType = MDocType.get(po.getCtx(), C_DocTypeTarget_ID);
 			if(!invoice.getC_DocTypeTarget().getDocBaseType().equals(oldDocType.getDocBaseType()))
 				return Msg.getMsg(po.getCtx(), "JP_Can_Not_Change_Diff_DocBaseType");//You can not change different Doc Base type.
+		}
+
+		//JPIERE-0490 : Copy Subject and Remarks
+		if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("C_Order_ID"))
+		{
+			MInvoice invoice = (MInvoice)po;
+			if(invoice.getC_Order_ID() > 0)
+			{
+				MOrder order = new MOrder(po.getCtx(),invoice.getC_Order_ID(), po.get_TrxName());
+				if(Util.isEmpty(invoice.get_ValueAsString("JP_Subject")))
+				{
+					invoice.set_ValueNoCheck("JP_Subject", order.get_ValueAsString("JP_Subject"));
+				}
+
+				if(Util.isEmpty(invoice.getDescription()))
+				{
+					invoice.setDescription(order.getDescription());
+				}
+
+				if(Util.isEmpty(invoice.get_ValueAsString("JP_Remarks")))
+				{
+					invoice.set_ValueNoCheck("JP_Remarks", order.get_ValueAsString("JP_Remarks"));
+				}
+
+			}
 		}
 
 		return null;

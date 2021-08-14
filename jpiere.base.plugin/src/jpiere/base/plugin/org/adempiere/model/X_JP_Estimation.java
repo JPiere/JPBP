@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_Estimation
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170920L;
+	private static final long serialVersionUID = 20210814L;
 
     /** Standard Constructor */
     public X_JP_Estimation (Properties ctx, int JP_Estimation_ID, String trxName)
@@ -131,7 +131,7 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Estimation[")
+      StringBuilder sb = new StringBuilder ("X_JP_Estimation[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -907,8 +907,8 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 
 	/** DeliveryRule AD_Reference_ID=151 */
 	public static final int DELIVERYRULE_AD_Reference_ID=151;
-	/** After Receipt = R */
-	public static final String DELIVERYRULE_AfterReceipt = "R";
+	/** After Payment = R */
+	public static final String DELIVERYRULE_AfterPayment = "R";
 	/** Availability = A */
 	public static final String DELIVERYRULE_Availability = "A";
 	/** Complete Line = L */
@@ -1651,8 +1651,8 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return (I_JP_Bill)MTable.get(getCtx(), I_JP_Bill.Table_Name)
 			.getPO(getJP_Bill_ID(), get_TrxName());	}
 
-	/** Set JP Bill.
-		@param JP_Bill_ID JP Bill	  */
+	/** Set Bill.
+		@param JP_Bill_ID Bill	  */
 	public void setJP_Bill_ID (int JP_Bill_ID)
 	{
 		if (JP_Bill_ID < 1) 
@@ -1661,8 +1661,8 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 			set_Value (COLUMNNAME_JP_Bill_ID, Integer.valueOf(JP_Bill_ID));
 	}
 
-	/** Get JP Bill.
-		@return JP Bill	  */
+	/** Get Bill.
+		@return Bill	  */
 	public int getJP_Bill_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Bill_ID);
@@ -1819,6 +1819,23 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Remarks.
+		@param JP_Remarks 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks)
+	{
+		set_Value (COLUMNNAME_JP_Remarks, JP_Remarks);
+	}
+
+	/** Get Remarks.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Remarks);
+	}
+
 	/** Set Total Scheduled Cost.
 		@param JP_ScheduledCostTotalLines Total Scheduled Cost	  */
 	public void setJP_ScheduledCostTotalLines (BigDecimal JP_ScheduledCostTotalLines)
@@ -1834,6 +1851,23 @@ public class X_JP_Estimation extends PO implements I_JP_Estimation, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Subject.
+		@param JP_Subject 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject)
+	{
+		set_Value (COLUMNNAME_JP_Subject, JP_Subject);
+	}
+
+	/** Get Subject.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Subject);
 	}
 
 	public org.compiere.model.I_C_Order getLink_Order() throws RuntimeException

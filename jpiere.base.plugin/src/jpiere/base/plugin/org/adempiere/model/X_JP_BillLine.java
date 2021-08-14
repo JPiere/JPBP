@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_BillLine
  *  @author iDempiere (generated) 
- *  @version Release 2.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150816L;
+	private static final long serialVersionUID = 20210814L;
 
     /** Standard Constructor */
     public X_JP_BillLine (Properties ctx, int JP_BillLine_ID, String trxName)
@@ -86,7 +86,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_BillLine[")
+      StringBuilder sb = new StringBuilder ("X_JP_BillLine[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -420,8 +420,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 		return (I_JP_Bill)MTable.get(getCtx(), I_JP_Bill.Table_Name)
 			.getPO(getJP_Bill_ID(), get_TrxName());	}
 
-	/** Set JP Bill.
-		@param JP_Bill_ID JP Bill	  */
+	/** Set Bill.
+		@param JP_Bill_ID Bill	  */
 	public void setJP_Bill_ID (int JP_Bill_ID)
 	{
 		if (JP_Bill_ID < 1) 
@@ -430,14 +430,48 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 			set_ValueNoCheck (COLUMNNAME_JP_Bill_ID, Integer.valueOf(JP_Bill_ID));
 	}
 
-	/** Get JP Bill.
-		@return JP Bill	  */
+	/** Get Bill.
+		@return Bill	  */
 	public int getJP_Bill_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Bill_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Remarks.
+		@param JP_Remarks 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks)
+	{
+		set_Value (COLUMNNAME_JP_Remarks, JP_Remarks);
+	}
+
+	/** Get Remarks.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Remarks);
+	}
+
+	/** Set Subject.
+		@param JP_Subject 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject)
+	{
+		set_Value (COLUMNNAME_JP_Subject, JP_Subject);
+	}
+
+	/** Get Subject.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Subject);
 	}
 
 	/** Set Line No.
@@ -587,7 +621,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
 			.getPO(getSalesRep_ID(), get_TrxName());	}
 
-	/** Set Sales Representative.
+	/** Set Sales Rep.
 		@param SalesRep_ID 
 		Sales Representative or Company Agent
 	  */
@@ -599,7 +633,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
 	}
 
-	/** Get Sales Representative.
+	/** Get Sales Rep.
 		@return Sales Representative or Company Agent
 	  */
 	public int getSalesRep_ID () 

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Bill
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_Bill 
@@ -411,10 +411,10 @@ public interface I_JP_Bill
     /** Column name JP_Bill_ID */
     public static final String COLUMNNAME_JP_Bill_ID = "JP_Bill_ID";
 
-	/** Set JP Bill	  */
+	/** Set Bill	  */
 	public void setJP_Bill_ID (int JP_Bill_ID);
 
-	/** Get JP Bill	  */
+	/** Get Bill	  */
 	public int getJP_Bill_ID();
 
     /** Column name JP_Bill_UU */
@@ -445,6 +445,32 @@ public interface I_JP_Bill
 
 	/** Get Promised Payment Date	  */
 	public Timestamp getJP_PromisedPayDate();
+
+    /** Column name JP_Remarks */
+    public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
+
+	/** Set Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks);
+
+	/** Get Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks();
+
+    /** Column name JP_Subject */
+    public static final String COLUMNNAME_JP_Subject = "JP_Subject";
+
+	/** Set Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject);
+
+	/** Get Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject();
 
     /** Column name JP_User_ID */
     public static final String COLUMNNAME_JP_User_ID = "JP_User_ID";
@@ -560,12 +586,12 @@ public interface I_JP_Bill
     /** Column name SalesRep_ID */
     public static final String COLUMNNAME_SalesRep_ID = "SalesRep_ID";
 
-	/** Set Sales Representative.
+	/** Set Sales Rep.
 	  * Sales Representative or Company Agent
 	  */
 	public void setSalesRep_ID (int SalesRep_ID);
 
-	/** Get Sales Representative.
+	/** Get Sales Rep.
 	  * Sales Representative or Company Agent
 	  */
 	public int getSalesRep_ID();

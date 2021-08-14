@@ -37,6 +37,7 @@ import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MDeliveryDays;
 import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
@@ -49,6 +50,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
  * JPIERE-0229:Inspection basis
  * JPIERE-0295:Explode BOM
  * JPIERE-0317:Physical Warehouse - check same physical warehouse between locator and document.
+ * JPIERE-0490:Copy Subject and Remarks
  *
  * @author h.hagiwara
  *
@@ -124,6 +126,32 @@ public class JPiereInOutModelValidator implements ModelValidator {
 			}//if(type == ModelValidator.TYPE_BEFORE_NEW)
 
 		}//JPiere-0229
+
+		//JPIERE-0490 : Copy Subject and Remarks
+		if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("C_Order_ID"))
+		{
+			MInOut io = (MInOut)po;
+			if(io.getC_Order_ID() > 0)
+			{
+				MOrder order = new MOrder(po.getCtx(),io.getC_Order_ID(), po.get_TrxName());
+				if(Util.isEmpty(io.get_ValueAsString("JP_Subject")))
+				{
+					io.set_ValueNoCheck("JP_Subject", order.get_ValueAsString("JP_Subject"));
+				}
+
+				if(Util.isEmpty(io.getDescription()))
+				{
+					io.setDescription(order.getDescription());
+				}
+
+				if(Util.isEmpty(io.get_ValueAsString("JP_Remarks")))
+				{
+					io.set_ValueNoCheck("JP_Remarks", order.get_ValueAsString("JP_Remarks"));
+				}
+
+			}
+		}
+
 
 		return null;
 	}

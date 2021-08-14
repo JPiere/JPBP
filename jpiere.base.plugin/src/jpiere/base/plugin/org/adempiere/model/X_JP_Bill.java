@@ -26,14 +26,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_Bill
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170406L;
+	private static final long serialVersionUID = 20210814L;
 
     /** Standard Constructor */
     public X_JP_Bill (Properties ctx, int JP_Bill_ID, String trxName)
@@ -115,7 +115,7 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Bill[")
+      StringBuilder sb = new StringBuilder ("X_JP_Bill[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -716,8 +716,8 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 		return bd;
 	}
 
-	/** Set JP Bill.
-		@param JP_Bill_ID JP Bill	  */
+	/** Set Bill.
+		@param JP_Bill_ID Bill	  */
 	public void setJP_Bill_ID (int JP_Bill_ID)
 	{
 		if (JP_Bill_ID < 1) 
@@ -726,8 +726,8 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 			set_ValueNoCheck (COLUMNNAME_JP_Bill_ID, Integer.valueOf(JP_Bill_ID));
 	}
 
-	/** Get JP Bill.
-		@return JP Bill	  */
+	/** Get Bill.
+		@return Bill	  */
 	public int getJP_Bill_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Bill_ID);
@@ -787,6 +787,40 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	public Timestamp getJP_PromisedPayDate () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_PromisedPayDate);
+	}
+
+	/** Set Remarks.
+		@param JP_Remarks 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks)
+	{
+		set_Value (COLUMNNAME_JP_Remarks, JP_Remarks);
+	}
+
+	/** Get Remarks.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Remarks);
+	}
+
+	/** Set Subject.
+		@param JP_Subject 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject)
+	{
+		set_Value (COLUMNNAME_JP_Subject, JP_Subject);
+	}
+
+	/** Get Subject.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Subject);
 	}
 
 	public org.compiere.model.I_AD_User getJP_User() throws RuntimeException
@@ -1002,7 +1036,7 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
 			.getPO(getSalesRep_ID(), get_TrxName());	}
 
-	/** Set Sales Representative.
+	/** Set Sales Rep.
 		@param SalesRep_ID 
 		Sales Representative or Company Agent
 	  */
@@ -1014,7 +1048,7 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
 	}
 
-	/** Get Sales Representative.
+	/** Get Sales Rep.
 		@return Sales Representative or Company Agent
 	  */
 	public int getSalesRep_ID () 

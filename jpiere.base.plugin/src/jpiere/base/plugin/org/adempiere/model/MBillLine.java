@@ -58,8 +58,8 @@ public class MBillLine extends X_JP_BillLine {
 			}
 
 			invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
-			
-			if(invoice.getDocStatus().equals(DocAction.STATUS_Completed) 
+
+			if(invoice.getDocStatus().equals(DocAction.STATUS_Completed)
 					|| invoice.getDocStatus().equals(DocAction.STATUS_Closed))
 			{
 				;//noting to do;
@@ -74,8 +74,14 @@ public class MBillLine extends X_JP_BillLine {
 				return false;
 			}
 
+			if(getJP_Subject()== null || getJP_Subject().isEmpty())
+				set_ValueNoCheck("JP_Subject", invoice.get_ValueAsString("JP_Subject"));
+
 			if(getDescription()==null || getDescription().isEmpty())
 				setDescription(invoice.getDescription());
+
+			if(getJP_Remarks()== null || getJP_Remarks().isEmpty())
+				set_ValueNoCheck("JP_Remarks", invoice.get_ValueAsString("JP_Remarks"));
 
 			setC_DocType_ID(invoice.getC_DocType_ID());
 			setDateInvoiced(invoice.getDateInvoiced());
