@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_Recognition
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171008L;
+	private static final long serialVersionUID = 20210815L;
 
     /** Standard Constructor */
     public X_JP_Recognition (Properties ctx, int JP_Recognition_ID, String trxName)
@@ -104,7 +104,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Recognition[")
+      StringBuilder sb = new StringBuilder ("X_JP_Recognition[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -1092,6 +1092,40 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	public String getJP_Recognition_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Recognition_UU);
+	}
+
+	/** Set Remarks.
+		@param JP_Remarks 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks)
+	{
+		set_Value (COLUMNNAME_JP_Remarks, JP_Remarks);
+	}
+
+	/** Get Remarks.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Remarks);
+	}
+
+	/** Set Subject.
+		@param JP_Subject 
+		JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject)
+	{
+		set_Value (COLUMNNAME_JP_Subject, JP_Subject);
+	}
+
+	/** Get Subject.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Subject);
 	}
 
 	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException

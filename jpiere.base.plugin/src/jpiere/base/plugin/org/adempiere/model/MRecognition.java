@@ -782,6 +782,15 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 
 			}
 
+			if(getJP_Subject()== null || getJP_Subject().isEmpty())
+				setJP_Subject(io.get_ValueAsString("JP_Subject"));
+
+			if(getDescription()==null || getDescription().isEmpty())
+				setDescription(io.getDescription());
+
+			if(getJP_Remarks()== null || getJP_Remarks().isEmpty())
+				setJP_Remarks(io.get_ValueAsString("JP_Remarks"));
+
 			//Should be Comment out Because Recognitiond document can not create from InOut when DocAciton Complete
 //			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)
 //					&& !getM_InOut().getDocStatus().equals(DocAction.STATUS_Closed))
