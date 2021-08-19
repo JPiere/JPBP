@@ -488,7 +488,7 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 
 	private boolean updateOrgInfo(X_I_OrgJP importOrg, MOrg org)
 	{
-		MOrgInfo orgInfo = MOrgInfo.get(getCtx(), org.getAD_Org_ID(), get_TrxName());
+		MOrgInfo orgInfo = MOrgInfo.getCopy(getCtx(), org.getAD_Org_ID(), get_TrxName());
 
 		ModelValidationEngine.get().fireImportValidate(this, importOrg, orgInfo, ImportValidator.TIMING_BEFORE_IMPORT);
 
