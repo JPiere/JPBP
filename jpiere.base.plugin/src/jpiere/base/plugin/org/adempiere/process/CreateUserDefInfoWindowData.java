@@ -28,7 +28,7 @@ import org.compiere.util.Env;
 
 /**
  *
- * JPIERE-0497  Create User Definition Info WindowData Data at Info Window
+ * JPIERE-0497  Create User Definition Info Window Data at Info Window
  *
  *
  * @author h.hagiwara
