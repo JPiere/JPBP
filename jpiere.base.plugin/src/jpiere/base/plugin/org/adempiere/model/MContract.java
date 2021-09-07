@@ -442,7 +442,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		if (m_processMsg != null)
 			return false;
 
-		MFactAcct.deleteEx(MEstimation.Table_ID, getJP_Contract_ID(), get_TrxName());
+		MFactAcct.deleteEx(MContract.Table_ID, getJP_Contract_ID(), get_TrxName());
 		setPosted(false);
 
 		// After reActivate
