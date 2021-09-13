@@ -44,8 +44,10 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 		else
 			setIsEndProduct(false);
 
-		if ( !isEndProduct() )
+		if (isEndProduct())
 		{
+			;
+		}else {
 			setMovementQty(getQtyUsed().negate());
 		}
 

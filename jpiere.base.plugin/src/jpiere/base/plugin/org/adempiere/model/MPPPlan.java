@@ -62,6 +62,20 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	}
 
 
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		//TODO 品目マスタと数量単位のチェック
+		return true;
+	}
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		//TODO ヘッダーの生産数量と明細の生産数量の同期
+		return true;
+	}
+
 	/**
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
@@ -587,7 +601,8 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		{
 			if(ppPLine.isEndProduct())
 			{
-				factQty = ppPLine.getPPPlanLineFactQty(trxName);;
+				factQty = ppPLine.getPPPlanLineFactQty(trxName);
+				break;
 			}
 		}
 
@@ -637,11 +652,11 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			{
 				plannedQty = ppPLine.getPlannedQty().subtract(factQty.getMovementQty());
 				qtyUsed = null;
-				movementQty = ppPLine.getMovementQty().subtract(factQty.getMovementQty());
+				movementQty = plannedQty;
 			}else {
 				plannedQty = ppPLine.getPlannedQty().add(factQty.getMovementQty());
-				qtyUsed = ppPLine.getQtyUsed().subtract(factQty.getQtyUsed());
-				movementQty = ppPLine.getMovementQty().add(factQty.getMovementQty().negate());
+				qtyUsed = plannedQty;
+				movementQty = plannedQty.negate();
 			}
 
 			ppFLine.setPlannedQty(plannedQty);

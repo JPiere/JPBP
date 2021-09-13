@@ -25,6 +25,7 @@ import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereUserError;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -37,7 +38,10 @@ import jpiere.base.plugin.org.adempiere.model.MPPPlanLineT;
 import jpiere.base.plugin.org.adempiere.model.MPPPlanT;
 
 /**
- * JPIERE-0501: JPiere PP Doc
+ * JPIERE-0501: JPiere PP Doc - Create Line From Bom
+ *
+ * This Class is called from JP_PP_PlanT, JP_PP_Plan, JP_PP_Fact tables.
+ *
  *
  * @author Hideaki Hagiwara
  *
@@ -117,14 +121,27 @@ public class PPCreateLineFromBom extends SvrProcess {
 			poLine.saveEx(get_TrxName());
 		}
 
+		//Update ProductionQty & IsCreated
+		String sql = "UPDATE "+ m_Table.getTableName() + " SET ProductionQty=?, IsCreated=? "
+							+ " WHERE "+ m_Table.getTableName()+"_ID=?";
 
-		po.set_ValueNoCheck("ProductionQty", p_ProductionQty);
-		po.set_ValueNoCheck("IsCreated", "Y");
-		po.saveEx(get_TrxName());
+		int no = DB.executeUpdate(sql
+					, new Object[]{p_ProductionQty, "Y", po.get_ID()}
+					, false, get_TrxName(), 0);
+		if (no != 1)
+		{
+			throw new Exception(Msg.getMsg(getCtx(), "DBExecuteError") + " : " + sql);
+		}
 
-		return "@OK@";
+		return "@Success@";
 	}
 
+	/**
+	 * Delete Line
+	 *
+	 * @param po
+	 * @return
+	 */
 	private String deleteLine(PO po)
 	{
 
@@ -152,6 +169,13 @@ public class PPCreateLineFromBom extends SvrProcess {
 		return "";
 	}
 
+
+	/**
+	 * Create Line
+	 *
+	 * @param po
+	 * @return
+	 */
 	private PO createLine(PO po)
 	{
 		PO poLine = null;

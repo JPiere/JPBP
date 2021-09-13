@@ -51,8 +51,12 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 		else
 			setIsEndProduct(false);
 
-		if ( !isEndProduct() )
+		if (isEndProduct())
 		{
+			setQtyUsed(null);
+			setMovementQty(getQtyUsed());
+		}else {
+			setQtyUsed(getPlannedQty());
 			setMovementQty(getQtyUsed().negate());
 		}
 
