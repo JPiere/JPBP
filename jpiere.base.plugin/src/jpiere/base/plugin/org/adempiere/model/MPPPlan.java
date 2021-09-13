@@ -40,6 +40,8 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.MPPPlanLine.PPPlanLineFactQty;
+
 /**
  * JPIERE-0501:JPiere PP Plan
  *
@@ -565,7 +567,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	 *
 	 * @return
 	 */
-	public String createFact()
+	public String createFact(String trxName)
 	{
 
 		MPPFact[] ppFacts = getPPFacts(true, null);
@@ -575,11 +577,25 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 				|| ppFact.getJP_PP_Status().equals(MPPFact.JP_PP_STATUS_NotYetStarted))
 			{
 				//You cannot create a new PP Fact if you have a PP Fact that has not been complete.
-				return Msg.getMsg(getCtx(), "JP_PP_CannotCreateFact");//TODO 多言語化
+				return Msg.getMsg(getCtx(), "JP_PP_CannotCreateFact");
 			}
 		}
 
 		MPPPlanLine[] ppPLines = getPPPlanLines(true, null);
+		PPPlanLineFactQty factQty = null;
+		for(MPPPlanLine ppPLine : ppPLines)
+		{
+			if(ppPLine.isEndProduct())
+			{
+				factQty = ppPLine.getPPPlanLineFactQty(trxName);;
+			}
+		}
+
+		if(factQty.getMovementQty().compareTo(getProductionQty()) >= 0)
+		{
+			//TODO 多言語化
+			return "既に生産数量に達しています";
+		}
 
 		MPPFact ppFact = new MPPFact(getCtx(), 0, get_TrxName());
 		PO.copyValues(this, ppFact);
@@ -598,17 +614,40 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		ppFact.setMovementDate(getDateAcct());
 		if(ppPLines.length > 0)
 			ppFact.setIsCreated("Y");
+		ppFact.setProductionQty(getProductionQty().subtract(factQty.getMovementQty()));
 		ppFact.saveEx(get_TrxName());
 
 		MPPFactLine ppFLine = null;
+
+		BigDecimal plannedQty = Env.ZERO;
+		BigDecimal qtyUsed = Env.ZERO;
+		BigDecimal movementQty = Env.ZERO;
 		for(MPPPlanLine ppPLine : ppPLines)
 		{
+			factQty = ppPLine.getPPPlanLineFactQty(trxName);
+
 			ppFLine = new MPPFactLine(getCtx(), 0 , get_TrxName());
 			PO.copyValues(ppPLine, ppFLine);
 			ppFLine.setJP_PP_Fact_ID(ppFact.getJP_PP_Fact_ID());
 			ppFLine.setJP_PP_PlanLine_ID(ppPLine.getJP_PP_PlanLine_ID());
 			ppFLine.setLine(ppPLine.getLine());
 			ppFLine.setAD_Org_ID(ppFact.getAD_Org_ID());
+			ppFLine.setIsEndProduct(ppPLine.isEndProduct());
+			if(ppPLine.isEndProduct())
+			{
+				plannedQty = ppPLine.getPlannedQty().subtract(factQty.getMovementQty());
+				qtyUsed = null;
+				movementQty = ppPLine.getMovementQty().subtract(factQty.getMovementQty());
+			}else {
+				plannedQty = ppPLine.getPlannedQty().add(factQty.getMovementQty());
+				qtyUsed = ppPLine.getQtyUsed().subtract(factQty.getQtyUsed());
+				movementQty = ppPLine.getMovementQty().add(factQty.getMovementQty().negate());
+			}
+
+			ppFLine.setPlannedQty(plannedQty);
+			ppFLine.setQtyUsed(qtyUsed);
+			ppFLine.setMovementQty(movementQty);
+
 			ppFLine.saveEx(get_TrxName());
 		}
 

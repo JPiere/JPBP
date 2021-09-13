@@ -130,7 +130,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 
 			if(ppPlanT.isCreatePPFactJP())
 			{
-				ppPlan.createFact();
+				ppPlan.createFact(get_TrxName());
 			}
 
 		}

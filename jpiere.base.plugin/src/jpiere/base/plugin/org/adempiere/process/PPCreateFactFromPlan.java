@@ -41,7 +41,7 @@ public class PPCreateFactFromPlan extends SvrProcess {
 	{
 		MPPPlan ppPLan = new MPPPlan(getCtx(),p_JP_PP_Plan_ID, get_TrxName());
 
-		String msg = ppPLan.createFact();
+		String msg = ppPLan.createFact(get_TrxName());
 
 		if(!Util.isEmpty(msg))
 			throw new Exception(msg);

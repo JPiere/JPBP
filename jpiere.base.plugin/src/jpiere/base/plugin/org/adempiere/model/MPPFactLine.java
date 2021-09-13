@@ -35,4 +35,20 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 		super(ctx, rs, trxName);
 	}
 
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		MPPFact fact =  new MPPFact(getCtx(), getJP_PP_Fact_ID(), get_TrxName());
+		if (fact.getM_Product_ID() == getM_Product_ID() && fact.getProductionQty().signum() == getMovementQty().signum())
+			setIsEndProduct(true);
+		else
+			setIsEndProduct(false);
+
+		if ( !isEndProduct() )
+		{
+			setMovementQty(getQtyUsed().negate());
+		}
+
+		return true;
+	}
 }

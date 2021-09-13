@@ -248,7 +248,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			if( line.getM_Product_ID() == getM_Product_ID()
 					&& line.isEndProduct())
 			{
-				productionQty = line.getMovementQty().negate();
+				productionQty = line.getMovementQty();
 				break;
 			}
 		}
