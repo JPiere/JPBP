@@ -15,6 +15,8 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
@@ -23,7 +25,9 @@ import java.util.logging.Level;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MProduct;
 import org.compiere.model.MQuery;
+import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -39,8 +43,6 @@ import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
-
-import jpiere.base.plugin.org.adempiere.model.MPPPlanLine.PPPlanLineFactQty;
 
 /**
  * JPIERE-0501:JPiere PP Plan
@@ -65,14 +67,57 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
-		//TODO 品目マスタと数量単位のチェック
+		//Set C_UOM_ID
+		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0)
+		{
+			MProduct product = MProduct.get(getM_Product_ID());
+			if(product.getC_UOM_ID() != getC_UOM_ID())
+			{
+				setC_UOM_ID(product.getC_UOM_ID());
+			}
+		}
+
+		//Rounding Production Qty
+		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
+		{
+			MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+			setProductionQty(getProductionQty().round(mc));
+		}
+
 		return true;
 	}
 
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
-		//TODO ヘッダーの生産数量と明細の生産数量の同期
+		//Update Line Qty
+		if(!newRecord && is_ValueChanged(MPPFact.COLUMNNAME_ProductionQty))
+		{
+			MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+			BigDecimal newQty = getProductionQty();
+			BigDecimal oldQty = (BigDecimal)get_ValueOld(MPPPlan.COLUMNNAME_ProductionQty) ;
+			BigDecimal rate = newQty.divide(oldQty, mc);
+
+			MPPPlanLine[] lines = getPPPlanLines(true, null);
+			for(MPPPlanLine line : lines)
+			{
+				mc = new MathContext(MUOM.get(line.getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+				oldQty = line.getPlannedQty();
+				newQty = oldQty.multiply(rate);
+				line.setPlannedQty(newQty.round(mc));
+				if(line.isEndProduct())
+				{
+					line.setQtyUsed(null);
+					line.setMovementQty(getProductionQty());
+				}else {
+
+					line.setQtyUsed(getProductionQty());
+					line.setMovementQty(getProductionQty().negate());
+				}
+				line.saveEx(get_TrxName());
+			}
+		}
+
 		return true;
 	}
 
@@ -596,22 +641,6 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		}
 
 		MPPPlanLine[] ppPLines = getPPPlanLines(true, null);
-		PPPlanLineFactQty factQty = null;
-		for(MPPPlanLine ppPLine : ppPLines)
-		{
-			if(ppPLine.isEndProduct())
-			{
-				factQty = ppPLine.getPPPlanLineFactQty(trxName);
-				break;
-			}
-		}
-
-		if(factQty.getMovementQty().compareTo(getProductionQty()) >= 0)
-		{
-			//TODO 多言語化
-			return "既に生産数量に達しています";
-		}
-
 		MPPFact ppFact = new MPPFact(getCtx(), 0, get_TrxName());
 		PO.copyValues(this, ppFact);
 		ppFact.setDocumentNo(null);
@@ -629,42 +658,10 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		ppFact.setMovementDate(getDateAcct());
 		if(ppPLines.length > 0)
 			ppFact.setIsCreated("Y");
-		ppFact.setProductionQty(getProductionQty().subtract(factQty.getMovementQty()));
+		ppFact.setProductionQty(Env.ZERO);
 		ppFact.saveEx(get_TrxName());
 
-		MPPFactLine ppFLine = null;
-
-		BigDecimal plannedQty = Env.ZERO;
-		BigDecimal qtyUsed = Env.ZERO;
-		BigDecimal movementQty = Env.ZERO;
-		for(MPPPlanLine ppPLine : ppPLines)
-		{
-			factQty = ppPLine.getPPPlanLineFactQty(trxName);
-
-			ppFLine = new MPPFactLine(getCtx(), 0 , get_TrxName());
-			PO.copyValues(ppPLine, ppFLine);
-			ppFLine.setJP_PP_Fact_ID(ppFact.getJP_PP_Fact_ID());
-			ppFLine.setJP_PP_PlanLine_ID(ppPLine.getJP_PP_PlanLine_ID());
-			ppFLine.setLine(ppPLine.getLine());
-			ppFLine.setAD_Org_ID(ppFact.getAD_Org_ID());
-			ppFLine.setIsEndProduct(ppPLine.isEndProduct());
-			if(ppPLine.isEndProduct())
-			{
-				plannedQty = ppPLine.getPlannedQty().subtract(factQty.getMovementQty());
-				qtyUsed = null;
-				movementQty = plannedQty;
-			}else {
-				plannedQty = ppPLine.getPlannedQty().add(factQty.getMovementQty());
-				qtyUsed = plannedQty;
-				movementQty = plannedQty.negate();
-			}
-
-			ppFLine.setPlannedQty(plannedQty);
-			ppFLine.setQtyUsed(qtyUsed);
-			ppFLine.setMovementQty(movementQty);
-
-			ppFLine.saveEx(get_TrxName());
-		}
+		ppFact.createFactLineFromPlanLine(trxName);
 
 		return null;
 	}

@@ -438,6 +438,15 @@ public interface I_JP_PP_Plan
 	/** Get Production Status	  */
 	public String getJP_PP_Status();
 
+    /** Column name JP_Processing1 */
+    public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
+
+	/** Set Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1);
+
+	/** Get Process Now	  */
+	public String getJP_Processing1();
+
     /** Column name JP_Remarks */
     public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
 

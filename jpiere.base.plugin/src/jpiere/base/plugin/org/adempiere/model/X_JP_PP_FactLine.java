@@ -32,7 +32,7 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210913L;
+	private static final long serialVersionUID = 20210914L;
 
     /** Standard Constructor */
     public X_JP_PP_FactLine (Properties ctx, int JP_PP_FactLine_ID, String trxName)
@@ -82,6 +82,34 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getC_UOM_ID(), get_TrxName());	}
+
+	/** Set UOM.
+		@param C_UOM_ID 
+		Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID)
+	{
+		if (C_UOM_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
+	}
+
+	/** Get UOM.
+		@return Unit of Measure
+	  */
+	public int getC_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	/** Set Description.
 		@param Description 
@@ -230,9 +258,9 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 	public void setJP_PP_PlanLine_ID (int JP_PP_PlanLine_ID)
 	{
 		if (JP_PP_PlanLine_ID < 1) 
-			set_Value (COLUMNNAME_JP_PP_PlanLine_ID, null);
+			set_ValueNoCheck (COLUMNNAME_JP_PP_PlanLine_ID, null);
 		else 
-			set_Value (COLUMNNAME_JP_PP_PlanLine_ID, Integer.valueOf(JP_PP_PlanLine_ID));
+			set_ValueNoCheck (COLUMNNAME_JP_PP_PlanLine_ID, Integer.valueOf(JP_PP_PlanLine_ID));
 	}
 
 	/** Get PP Plan Line.

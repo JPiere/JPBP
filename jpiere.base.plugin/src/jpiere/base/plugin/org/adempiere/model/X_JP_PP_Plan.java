@@ -34,7 +34,7 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210913L;
+	private static final long serialVersionUID = 20210914L;
 
     /** Standard Constructor */
     public X_JP_PP_Plan (Properties ctx, int JP_PP_Plan_ID, String trxName)
@@ -64,6 +64,8 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 			setJP_PP_Plan_ID (0);
 			setJP_PP_Status (null);
 // NY
+			setJP_Processing1 (null);
+// N
 			setM_Locator_ID (0);
 			setM_Product_ID (0);
 			setName (null);
@@ -600,7 +602,7 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 	  */
 	public void setIsSummary (boolean IsSummary)
 	{
-		set_ValueNoCheck (COLUMNNAME_IsSummary, Boolean.valueOf(IsSummary));
+		set_Value (COLUMNNAME_IsSummary, Boolean.valueOf(IsSummary));
 	}
 
 	/** Get Summary Level.
@@ -760,6 +762,20 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 	public String getJP_PP_Status () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_PP_Status);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
 	}
 
 	/** Set Remarks.

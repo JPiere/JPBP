@@ -14,13 +14,18 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MProduct;
+import org.compiere.model.MUOM;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 
 /**
@@ -42,25 +47,101 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 	}
 
 
+	protected MPPPlan parent = null;
+
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
-		MPPPlan plan =  new MPPPlan(getCtx(), getJP_PP_Plan_ID(), get_TrxName());
-		if (plan.getM_Product_ID() == getM_Product_ID() && plan.getProductionQty().signum() == getMovementQty().signum())
-			setIsEndProduct(true);
-		else
-			setIsEndProduct(false);
+		//Set C_UOM_ID
+		if(newRecord || is_ValueChanged(MPPFact.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0 )
+		{
+			MProduct product = MProduct.get(getM_Product_ID());
+			if(product.getC_UOM_ID() != getC_UOM_ID())
+			{
+				setC_UOM_ID(product.getC_UOM_ID());
+			}
+		}
 
+		//Check IsEndProduct
+		if(newRecord || is_ValueChanged(COLUMNNAME_IsEndProduct))
+		{
+			MPPPlan parent =  getParent();
+			if (parent.getM_Product_ID() == getM_Product_ID())
+				setIsEndProduct(true);
+			else
+				setIsEndProduct(false);
+		}
+
+		//Convert Qty & Rounding Qty
 		if (isEndProduct())
 		{
-			setQtyUsed(null);
-			setMovementQty(getQtyUsed());
+			if(newRecord || is_ValueChanged(COLUMNNAME_PlannedQty))
+			{
+				MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+				setPlannedQty(getPlannedQty().round(mc));
+				setQtyUsed(null);
+				setPlannedQty(getPlannedQty());
+			}
 		}else {
-			setQtyUsed(getPlannedQty());
-			setMovementQty(getQtyUsed().negate());
+
+			if(newRecord || is_ValueChanged(COLUMNNAME_QtyUsed))
+			{
+				MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+				setPlannedQty(getPlannedQty().round(mc));
+				setQtyUsed(getPlannedQty().round(mc));
+				setMovementQty(getQtyUsed().negate());
+			}
 		}
 
 		return true;
+	}
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		MPPPlan parent = getParent();
+
+		//Check End Product
+		if(isEndProduct())
+		{
+			MPPPlanLine[] lines = parent.getPPPlanLines(" AND IsEndProduct = 'Y' ", "");
+			if(lines.length != 1)
+			{
+				log.saveError("Error", Msg.getElement(getCtx(), COLUMNNAME_IsEndProduct) +" - " + Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
+				return false;
+			}
+		}
+
+		//Update parent ProductionQty
+		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_PlannedQty)) )
+		{
+			if(parent.getProductionQty().compareTo(getPlannedQty()) != 0)
+			{
+				String sql = "UPDATE JP_PP_Plan SET ProductionQty=? "
+						+ " WHERE JP_PP_Plan_ID=?";
+
+				int no = DB.executeUpdate(sql
+							, new Object[]{getPlannedQty(), getJP_PP_Plan_ID()}
+							, false, get_TrxName(), 0);
+				if (no != 1)
+				{
+					log.saveError("DBExecuteError", sql);
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	public MPPPlan getParent()
+	{
+		if(parent==null)
+			parent = new MPPPlan(getCtx(),getJP_PP_Plan_ID(), get_TrxName());
+		else
+			parent.set_TrxName(get_TrxName());
+
+		return parent;
 	}
 
 	public PPPlanLineFactQty getPPPlanLineFactQty(String trxName)

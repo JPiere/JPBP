@@ -32,7 +32,7 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210913L;
+	private static final long serialVersionUID = 20210914L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanLineT (Properties ctx, int JP_PP_PlanLineT_ID, String trxName)
@@ -80,6 +80,34 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getC_UOM_ID(), get_TrxName());	}
+
+	/** Set UOM.
+		@param C_UOM_ID 
+		Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID)
+	{
+		if (C_UOM_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
+	}
+
+	/** Get UOM.
+		@return Unit of Measure
+	  */
+	public int getC_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	/** Set Description.
 		@param Description 
