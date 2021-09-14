@@ -28,6 +28,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MProduction;
 import org.compiere.model.MProductionLine;
 import org.compiere.model.MQuery;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -65,6 +66,8 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		super(ctx, rs, trxName);
 	}
 
+
+
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
@@ -81,11 +84,15 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		//Rounding Production Qty
 		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
 		{
-			setProductionQty(getProductionQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = MUOM.get(getC_UOM_ID());
+			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
 		return true;
 	}
+
+
 
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
@@ -93,11 +100,13 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		//Update Line Qty
 		if(!newRecord && is_ValueChanged(MPPFact.COLUMNNAME_ProductionQty))
 		{
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = null;
 			BigDecimal newQty = getProductionQty();
 			BigDecimal oldQty = (BigDecimal)get_ValueOld(MPPFact.COLUMNNAME_ProductionQty) ;
 			BigDecimal rate = Env.ONE;
 			if(oldQty != null && oldQty.compareTo(Env.ZERO) != 0)
-				rate = newQty.divide(oldQty, MUOM.get(getC_UOM_ID()).getCostingPrecision(),RoundingMode.HALF_UP);
+				rate = newQty.divide(oldQty, 4, RoundingMode.HALF_UP);
 
 			MPPFactLine[] lines = getPPFactLines(true, null);
 			for(MPPFactLine line : lines)
@@ -106,8 +115,9 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 				{
 					line.setMovementQty(newQty);
 				}else {
+					uom = MUOM.get(line.getC_UOM_ID());
 					oldQty = line.getQtyUsed();
-					newQty = oldQty.multiply(rate).setScale(MUOM.get(line.getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+					newQty = oldQty.multiply(rate).setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 					line.setQtyUsed(newQty);
 				}
 				line.saveEx(get_TrxName());

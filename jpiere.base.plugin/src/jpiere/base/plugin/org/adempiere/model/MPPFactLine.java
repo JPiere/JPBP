@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 import org.compiere.model.MProduct;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
@@ -73,16 +74,20 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 		{
 			if(newRecord || is_ValueChanged(COLUMNNAME_MovementQty))
 			{
-				setPlannedQty(getPlannedQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
+				boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+				MUOM uom = MUOM.get(getC_UOM_ID());
+				setPlannedQty(getPlannedQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 				setQtyUsed(null);
-				setMovementQty(getMovementQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
+				setMovementQty(getMovementQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 			}
 		}else {
 
 			if(newRecord || is_ValueChanged(COLUMNNAME_QtyUsed))
 			{
-				setPlannedQty(getPlannedQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
-				setQtyUsed(getQtyUsed().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
+				boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+				MUOM uom = MUOM.get(getC_UOM_ID());
+				setPlannedQty(getPlannedQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
+				setQtyUsed(getQtyUsed().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 				setMovementQty(getQtyUsed().negate());
 			}
 		}

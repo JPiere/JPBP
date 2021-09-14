@@ -26,6 +26,7 @@ import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MProduct;
 import org.compiere.model.MQuery;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -79,7 +80,9 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		//Rounding Production Qty
 		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
 		{
-			setProductionQty(getProductionQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = MUOM.get(getC_UOM_ID());
+			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
 		return true;
@@ -91,11 +94,14 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		//Update Line Qty
 		if(!newRecord && is_ValueChanged(MPPFact.COLUMNNAME_ProductionQty))
 		{
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = null;
+
 			BigDecimal newQty = getProductionQty();
 			BigDecimal oldQty = (BigDecimal)get_ValueOld(MPPPlan.COLUMNNAME_ProductionQty) ;
 			BigDecimal rate = Env.ONE;
 			if(oldQty != null && oldQty.compareTo(Env.ZERO) != 0)
-				rate = newQty.divide(oldQty, MUOM.get(getC_UOM_ID()).getCostingPrecision(),RoundingMode.HALF_UP);
+				rate = newQty.divide(oldQty, 4, RoundingMode.HALF_UP);
 
 			MPPPlanLine[] lines = getPPPlanLines(true, null);
 			for(MPPPlanLine line : lines)
@@ -107,9 +113,9 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 					line.setMovementQty(getProductionQty());
 
 				}else {
-
+					uom = MUOM.get(line.getC_UOM_ID());
 					oldQty = line.getPlannedQty();
-					newQty = oldQty.multiply(rate).setScale(MUOM.get(line.getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+					newQty = oldQty.multiply(rate).setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 					line.setPlannedQty(newQty);
 					line.setQtyUsed(newQty);
 					line.setMovementQty(newQty.negate());

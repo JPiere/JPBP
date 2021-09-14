@@ -15,6 +15,7 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -26,6 +27,8 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MQuery;
+import org.compiere.model.MSysConfig;
+import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PrintInfo;
@@ -49,6 +52,8 @@ import org.compiere.util.Util;
 public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 {
 
+	public static final String JP_PP_UOM_STDPRECISION = "JP_PP_UOM_STDPRECISION";
+
 	public MPPDoc(Properties ctx, int JP_PP_Doc_ID, String trxName)
 	{
 		super(ctx, JP_PP_Doc_ID, trxName);
@@ -59,6 +64,26 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		super(ctx, rs, trxName);
 	}
 
+
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		//Rounding Production Qty
+		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
+		{
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = MUOM.get(getC_UOM_ID());
+			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
+		}
+
+		return true;
+	}
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		return true;
+	}
 
 	/**
 	 * 	Get Document Info
