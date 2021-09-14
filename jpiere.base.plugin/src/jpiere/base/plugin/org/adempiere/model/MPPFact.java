@@ -15,7 +15,6 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.List;
@@ -82,8 +81,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		//Rounding Production Qty
 		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
 		{
-			MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
-			setProductionQty(getProductionQty().round(mc));
+			setProductionQty(getProductionQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
 		return true;
@@ -95,24 +93,22 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		//Update Line Qty
 		if(!newRecord && is_ValueChanged(MPPFact.COLUMNNAME_ProductionQty))
 		{
-			MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
 			BigDecimal newQty = getProductionQty();
 			BigDecimal oldQty = (BigDecimal)get_ValueOld(MPPFact.COLUMNNAME_ProductionQty) ;
-			BigDecimal rate = newQty.divide(oldQty, mc);
+			BigDecimal rate = Env.ONE;
+			if(oldQty != null && oldQty.compareTo(Env.ZERO) != 0)
+				rate = newQty.divide(oldQty, MUOM.get(getC_UOM_ID()).getCostingPrecision(),RoundingMode.HALF_UP);
 
 			MPPFactLine[] lines = getPPFactLines(true, null);
 			for(MPPFactLine line : lines)
 			{
-				mc = new MathContext(MUOM.get(line.getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
 				if(line.isEndProduct())
 				{
-					oldQty = line.getMovementQty();
-					newQty = oldQty.multiply(rate);
-					line.setMovementQty(newQty.round(mc));
+					line.setMovementQty(newQty);
 				}else {
 					oldQty = line.getQtyUsed();
-					newQty = oldQty.multiply(rate);
-					line.setQtyUsed(newQty.round(mc));
+					newQty = oldQty.multiply(rate).setScale(MUOM.get(line.getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+					line.setQtyUsed(newQty);
 				}
 				line.saveEx(get_TrxName());
 			}

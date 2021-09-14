@@ -15,7 +15,6 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.List;
@@ -80,8 +79,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		//Rounding Production Qty
 		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
 		{
-			MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
-			setProductionQty(getProductionQty().round(mc));
+			setProductionQty(getProductionQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
 		return true;
@@ -93,26 +91,28 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		//Update Line Qty
 		if(!newRecord && is_ValueChanged(MPPFact.COLUMNNAME_ProductionQty))
 		{
-			MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
 			BigDecimal newQty = getProductionQty();
 			BigDecimal oldQty = (BigDecimal)get_ValueOld(MPPPlan.COLUMNNAME_ProductionQty) ;
-			BigDecimal rate = newQty.divide(oldQty, mc);
+			BigDecimal rate = Env.ONE;
+			if(oldQty != null && oldQty.compareTo(Env.ZERO) != 0)
+				rate = newQty.divide(oldQty, MUOM.get(getC_UOM_ID()).getCostingPrecision(),RoundingMode.HALF_UP);
 
 			MPPPlanLine[] lines = getPPPlanLines(true, null);
 			for(MPPPlanLine line : lines)
 			{
-				mc = new MathContext(MUOM.get(line.getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
-				oldQty = line.getPlannedQty();
-				newQty = oldQty.multiply(rate);
-				line.setPlannedQty(newQty.round(mc));
 				if(line.isEndProduct())
 				{
+					line.setPlannedQty(getProductionQty());
 					line.setQtyUsed(null);
 					line.setMovementQty(getProductionQty());
+
 				}else {
 
-					line.setQtyUsed(getProductionQty());
-					line.setMovementQty(getProductionQty().negate());
+					oldQty = line.getPlannedQty();
+					newQty = oldQty.multiply(rate).setScale(MUOM.get(line.getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
+					line.setPlannedQty(newQty);
+					line.setQtyUsed(newQty);
+					line.setMovementQty(newQty.negate());
 				}
 				line.saveEx(get_TrxName());
 			}

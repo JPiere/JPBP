@@ -13,7 +13,6 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.model;
 
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.Properties;
@@ -74,18 +73,16 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 		{
 			if(newRecord || is_ValueChanged(COLUMNNAME_MovementQty))
 			{
-				MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
-				setPlannedQty(getPlannedQty().round(mc));
+				setPlannedQty(getPlannedQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
 				setQtyUsed(null);
-				setMovementQty(getMovementQty().round(mc));
+				setMovementQty(getMovementQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
 			}
 		}else {
 
 			if(newRecord || is_ValueChanged(COLUMNNAME_QtyUsed))
 			{
-				MathContext mc = new MathContext(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP);
-				setPlannedQty(getPlannedQty().round(mc));
-				setQtyUsed(getQtyUsed().round(mc));
+				setPlannedQty(getPlannedQty().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
+				setQtyUsed(getQtyUsed().setScale(MUOM.get(getC_UOM_ID()).getCostingPrecision(), RoundingMode.HALF_UP));
 				setMovementQty(getQtyUsed().negate());
 			}
 		}
