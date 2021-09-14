@@ -340,6 +340,8 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		if(!getJP_PP_Status().equals(JP_PP_STATUS_Completed))
 			setJP_PP_Status(JP_PP_STATUS_Void);
 
+		closeIt();
+
 		// After Void
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
 		if (m_processMsg != null)
@@ -394,7 +396,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("reverseCorrectIt - " + toString());
-		return false;
+		return reverse(DocAction.ACTION_Reverse_Correct);
 	}	//	reverseCorrectionIt
 
 	/**
@@ -404,8 +406,43 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("reverseAccrualIt - " + toString());
-		return false;
+		return reverse(DocAction.ACTION_Reverse_Accrual);
 	}	//	reverseAccrualIt
+
+	private boolean reverse(String docAction)
+	{
+		MPPPlan[] ppPlans = getPPPlans(true, null);
+		MPPFact[] ppFacts = null;
+		for(MPPPlan ppPlan : ppPlans )
+		{
+			ppFacts = ppPlan.getPPFacts(true, null);
+			for(MPPFact ppFact : ppFacts)
+			{
+				if(ppFact.isProcessed() && ppFact.getDocStatus().equals(DocAction.STATUS_Completed))
+				{
+					ppFact.processIt(docAction);
+					ppFact.saveEx(get_TrxName());
+				}else {
+					ppFact.processIt(DocAction.ACTION_Void);
+					ppFact.saveEx(get_TrxName());
+				}
+			}
+
+			if(ppPlan.isProcessed() && ppPlan.getDocStatus().equals(DocAction.STATUS_Completed))
+			{
+				ppPlan.processIt(docAction);
+				ppPlan.saveEx(get_TrxName());
+			}else {
+				ppPlan.processIt(DocAction.ACTION_Void);
+				ppPlan.saveEx(get_TrxName());
+			}
+		}
+
+		if(!getJP_PP_Status().equals(JP_PP_STATUS_Completed))
+			setJP_PP_Status(JP_PP_STATUS_Void);
+
+		return true;
+	}
 
 	/**
 	 * 	Re-activate
@@ -493,6 +530,8 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		{
 			index = 0;
 			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
+			options[index++] = DocumentEngine.ACTION_Reverse_Correct;
 			options[index++] = DocumentEngine.ACTION_Prepare;
 			options[index++] = DocumentEngine.ACTION_Complete;
 
@@ -502,6 +541,8 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 
 			index = 0;
 			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
+			options[index++] = DocumentEngine.ACTION_Reverse_Correct;
 			options[index++] = DocumentEngine.ACTION_Close;
 			options[index++] = DocumentEngine.ACTION_ReActivate;
 
