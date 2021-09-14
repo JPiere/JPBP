@@ -44,7 +44,6 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
         {
 			setC_DocTypeTarget_ID (0);
 			setC_DocType_ID (0);
-			setC_UOM_ID (0);
 			setIsCreatePPFactJP (false);
 // N
 			setIsCreated (null);
@@ -55,6 +54,10 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 // 0
 			setJP_PP_DocT_ID (0);
 			setJP_PP_PlanT_ID (0);
+			setJP_PP_Workload_Plan (Env.ZERO);
+// 0
+			setJP_PP_Workload_UOM_ID (0);
+// 101
 			setJP_ProductionDays (0);
 // 1
 			setM_Locator_ID (0);
@@ -569,6 +572,48 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 	public Timestamp getJP_PP_ScheduledStartTime () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_PP_ScheduledStartTime);
+	}
+
+	/** Set Workload(Plan).
+		@param JP_PP_Workload_Plan Workload(Plan)	  */
+	public void setJP_PP_Workload_Plan (BigDecimal JP_PP_Workload_Plan)
+	{
+		set_Value (COLUMNNAME_JP_PP_Workload_Plan, JP_PP_Workload_Plan);
+	}
+
+	/** Get Workload(Plan).
+		@return Workload(Plan)	  */
+	public BigDecimal getJP_PP_Workload_Plan () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_PP_Workload_Plan);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public org.compiere.model.I_C_UOM getJP_PP_Workload_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getJP_PP_Workload_UOM_ID(), get_TrxName());	}
+
+	/** Set Workload UOM.
+		@param JP_PP_Workload_UOM_ID Workload UOM	  */
+	public void setJP_PP_Workload_UOM_ID (int JP_PP_Workload_UOM_ID)
+	{
+		if (JP_PP_Workload_UOM_ID < 1) 
+			set_Value (COLUMNNAME_JP_PP_Workload_UOM_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_PP_Workload_UOM_ID, Integer.valueOf(JP_PP_Workload_UOM_ID));
+	}
+
+	/** Get Workload UOM.
+		@return Workload UOM	  */
+	public int getJP_PP_Workload_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_PP_Workload_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Production Days .

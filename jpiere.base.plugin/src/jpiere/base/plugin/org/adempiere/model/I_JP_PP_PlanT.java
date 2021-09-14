@@ -360,6 +360,26 @@ public interface I_JP_PP_PlanT
 	/** Get Scheduled Start Time	  */
 	public Timestamp getJP_PP_ScheduledStartTime();
 
+    /** Column name JP_PP_Workload_Plan */
+    public static final String COLUMNNAME_JP_PP_Workload_Plan = "JP_PP_Workload_Plan";
+
+	/** Set Workload(Plan)	  */
+	public void setJP_PP_Workload_Plan (BigDecimal JP_PP_Workload_Plan);
+
+	/** Get Workload(Plan)	  */
+	public BigDecimal getJP_PP_Workload_Plan();
+
+    /** Column name JP_PP_Workload_UOM_ID */
+    public static final String COLUMNNAME_JP_PP_Workload_UOM_ID = "JP_PP_Workload_UOM_ID";
+
+	/** Set Workload UOM	  */
+	public void setJP_PP_Workload_UOM_ID (int JP_PP_Workload_UOM_ID);
+
+	/** Get Workload UOM	  */
+	public int getJP_PP_Workload_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getJP_PP_Workload_UOM() throws RuntimeException;
+
     /** Column name JP_ProductionDays */
     public static final String COLUMNNAME_JP_ProductionDays = "JP_ProductionDays";
 

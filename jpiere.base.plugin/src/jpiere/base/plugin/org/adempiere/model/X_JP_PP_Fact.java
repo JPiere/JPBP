@@ -43,7 +43,6 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
       /** if (JP_PP_Fact_ID == 0)
         {
 			setC_DocType_ID (0);
-			setC_UOM_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
 // @DateAcct@
 			setDocAction (null);
@@ -69,6 +68,10 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
 // N
 			setJP_PP_Status (null);
 // NY
+			setJP_PP_Workload_Fact (Env.ZERO);
+// 0
+			setJP_PP_Workload_UOM_ID (0);
+// @JP_PP_Workload_UOM_ID@
 			setM_Locator_ID (0);
 			setM_Product_ID (0);
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
@@ -769,6 +772,48 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
 	public String getJP_PP_Status () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_PP_Status);
+	}
+
+	/** Set Workload(Fact).
+		@param JP_PP_Workload_Fact Workload(Fact)	  */
+	public void setJP_PP_Workload_Fact (BigDecimal JP_PP_Workload_Fact)
+	{
+		set_Value (COLUMNNAME_JP_PP_Workload_Fact, JP_PP_Workload_Fact);
+	}
+
+	/** Get Workload(Fact).
+		@return Workload(Fact)	  */
+	public BigDecimal getJP_PP_Workload_Fact () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_PP_Workload_Fact);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public org.compiere.model.I_C_UOM getJP_PP_Workload_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getJP_PP_Workload_UOM_ID(), get_TrxName());	}
+
+	/** Set Workload UOM.
+		@param JP_PP_Workload_UOM_ID Workload UOM	  */
+	public void setJP_PP_Workload_UOM_ID (int JP_PP_Workload_UOM_ID)
+	{
+		if (JP_PP_Workload_UOM_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_PP_Workload_UOM_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_PP_Workload_UOM_ID, Integer.valueOf(JP_PP_Workload_UOM_ID));
+	}
+
+	/** Get Workload UOM.
+		@return Workload UOM	  */
+	public int getJP_PP_Workload_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_PP_Workload_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Remarks.

@@ -43,6 +43,7 @@ import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MPPPlanLine.PPPlanLineFactQty;
@@ -66,11 +67,33 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		super(ctx, rs, trxName);
 	}
 
+	private MPPPlan m_PPPlan = null;
+
+	public MPPPlan getParent()
+	{
+		if(m_PPPlan == null)
+			m_PPPlan = new MPPPlan(getCtx(), getJP_PP_Doc_ID(), get_TrxName());
+		else
+			m_PPPlan.set_TrxName(get_TrxName());
+
+		return m_PPPlan;
+	}
 
 
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Check Parent processed
+		if(newRecord)
+		{
+			MPPPlan ppPlan = getParent();
+			if(ppPlan.isProcessed())
+			{
+				log.saveError("Error", Msg.getElement(getCtx(), MPPFact.COLUMNNAME_Processed));
+				return false;
+			}
+		}
+
 		//Set C_UOM_ID
 		if(newRecord || is_ValueChanged(MPPFact.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0)
 		{

@@ -443,6 +443,26 @@ public interface I_JP_PP_Fact
 	/** Get Production Status	  */
 	public String getJP_PP_Status();
 
+    /** Column name JP_PP_Workload_Fact */
+    public static final String COLUMNNAME_JP_PP_Workload_Fact = "JP_PP_Workload_Fact";
+
+	/** Set Workload(Fact)	  */
+	public void setJP_PP_Workload_Fact (BigDecimal JP_PP_Workload_Fact);
+
+	/** Get Workload(Fact)	  */
+	public BigDecimal getJP_PP_Workload_Fact();
+
+    /** Column name JP_PP_Workload_UOM_ID */
+    public static final String COLUMNNAME_JP_PP_Workload_UOM_ID = "JP_PP_Workload_UOM_ID";
+
+	/** Set Workload UOM	  */
+	public void setJP_PP_Workload_UOM_ID (int JP_PP_Workload_UOM_ID);
+
+	/** Get Workload UOM	  */
+	public int getJP_PP_Workload_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getJP_PP_Workload_UOM() throws RuntimeException;
+
     /** Column name JP_Remarks */
     public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
 

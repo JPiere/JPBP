@@ -374,6 +374,15 @@ public interface I_JP_PP_Plan
 
 	public I_JP_PP_Doc getJP_PP_Doc() throws RuntimeException;
 
+    /** Column name JP_PP_End */
+    public static final String COLUMNNAME_JP_PP_End = "JP_PP_End";
+
+	/** Set End date and time	  */
+	public void setJP_PP_End (Timestamp JP_PP_End);
+
+	/** Get End date and time	  */
+	public Timestamp getJP_PP_End();
+
     /** Column name JP_PP_PlanT_ID */
     public static final String COLUMNNAME_JP_PP_PlanT_ID = "JP_PP_PlanT_ID";
 
@@ -429,6 +438,15 @@ public interface I_JP_PP_Plan
 	/** Get Scheduled to Start	  */
 	public Timestamp getJP_PP_ScheduledStart();
 
+    /** Column name JP_PP_Start */
+    public static final String COLUMNNAME_JP_PP_Start = "JP_PP_Start";
+
+	/** Set Start date and time	  */
+	public void setJP_PP_Start (Timestamp JP_PP_Start);
+
+	/** Get Start date and time	  */
+	public Timestamp getJP_PP_Start();
+
     /** Column name JP_PP_Status */
     public static final String COLUMNNAME_JP_PP_Status = "JP_PP_Status";
 
@@ -438,6 +456,35 @@ public interface I_JP_PP_Plan
 	/** Get Production Status	  */
 	public String getJP_PP_Status();
 
+    /** Column name JP_PP_Workload_Fact */
+    public static final String COLUMNNAME_JP_PP_Workload_Fact = "JP_PP_Workload_Fact";
+
+	/** Set Workload(Fact)	  */
+	public void setJP_PP_Workload_Fact (BigDecimal JP_PP_Workload_Fact);
+
+	/** Get Workload(Fact)	  */
+	public BigDecimal getJP_PP_Workload_Fact();
+
+    /** Column name JP_PP_Workload_Plan */
+    public static final String COLUMNNAME_JP_PP_Workload_Plan = "JP_PP_Workload_Plan";
+
+	/** Set Workload(Plan)	  */
+	public void setJP_PP_Workload_Plan (BigDecimal JP_PP_Workload_Plan);
+
+	/** Get Workload(Plan)	  */
+	public BigDecimal getJP_PP_Workload_Plan();
+
+    /** Column name JP_PP_Workload_UOM_ID */
+    public static final String COLUMNNAME_JP_PP_Workload_UOM_ID = "JP_PP_Workload_UOM_ID";
+
+	/** Set Workload UOM	  */
+	public void setJP_PP_Workload_UOM_ID (int JP_PP_Workload_UOM_ID);
+
+	/** Get Workload UOM	  */
+	public int getJP_PP_Workload_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getJP_PP_Workload_UOM() throws RuntimeException;
+
     /** Column name JP_Processing1 */
     public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
 
@@ -446,6 +493,15 @@ public interface I_JP_PP_Plan
 
 	/** Get Process Now	  */
 	public String getJP_Processing1();
+
+    /** Column name JP_ProductionQtyFact */
+    public static final String COLUMNNAME_JP_ProductionQtyFact = "JP_ProductionQtyFact";
+
+	/** Set Production Qty(Actual)	  */
+	public void setJP_ProductionQtyFact (BigDecimal JP_ProductionQtyFact);
+
+	/** Get Production Qty(Actual)	  */
+	public BigDecimal getJP_ProductionQtyFact();
 
     /** Column name JP_Remarks */
     public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";

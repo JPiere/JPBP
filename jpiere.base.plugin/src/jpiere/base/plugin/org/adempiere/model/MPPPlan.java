@@ -63,10 +63,32 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		super(ctx, rs, trxName);
 	}
 
+	private MPPDoc m_PPDoc = null;
+
+	public MPPDoc getParent()
+	{
+		if(m_PPDoc == null)
+			m_PPDoc = new MPPDoc(getCtx(), getJP_PP_Doc_ID(), get_TrxName());
+		else
+			m_PPDoc.set_TrxName(get_TrxName());
+
+		return m_PPDoc;
+	}
 
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Check Parent processed
+		if(newRecord)
+		{
+			MPPDoc ppDoc = getParent();
+			if(ppDoc.isProcessed())
+			{
+				log.saveError("Error", Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_Processed));
+				return false;
+			}
+		}
+
 		//Set C_UOM_ID
 		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0)
 		{

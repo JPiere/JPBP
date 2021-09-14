@@ -43,7 +43,6 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
       /** if (JP_PP_Plan_ID == 0)
         {
 			setC_DocType_ID (0);
-			setC_UOM_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
 // @DateAcct@
 			setDocAction (null);
@@ -64,8 +63,16 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 			setJP_PP_Plan_ID (0);
 			setJP_PP_Status (null);
 // NY
+			setJP_PP_Workload_Fact (Env.ZERO);
+// 0
+			setJP_PP_Workload_Plan (Env.ZERO);
+// 0
+			setJP_PP_Workload_UOM_ID (0);
+// 101
 			setJP_Processing1 (null);
 // N
+			setJP_ProductionQtyFact (Env.ZERO);
+// 0
 			setM_Locator_ID (0);
 			setM_Product_ID (0);
 			setName (null);
@@ -648,6 +655,20 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set End date and time.
+		@param JP_PP_End End date and time	  */
+	public void setJP_PP_End (Timestamp JP_PP_End)
+	{
+		set_Value (COLUMNNAME_JP_PP_End, JP_PP_End);
+	}
+
+	/** Get End date and time.
+		@return End date and time	  */
+	public Timestamp getJP_PP_End () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_PP_End);
+	}
+
 	public I_JP_PP_PlanT getJP_PP_PlanT() throws RuntimeException
     {
 		return (I_JP_PP_PlanT)MTable.get(getCtx(), I_JP_PP_PlanT.Table_Name)
@@ -741,6 +762,20 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_JP_PP_ScheduledStart);
 	}
 
+	/** Set Start date and time.
+		@param JP_PP_Start Start date and time	  */
+	public void setJP_PP_Start (Timestamp JP_PP_Start)
+	{
+		set_Value (COLUMNNAME_JP_PP_Start, JP_PP_Start);
+	}
+
+	/** Get Start date and time.
+		@return Start date and time	  */
+	public Timestamp getJP_PP_Start () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_PP_Start);
+	}
+
 	/** Not yet started = NY */
 	public static final String JP_PP_STATUS_NotYetStarted = "NY";
 	/** Work in progress = WP */
@@ -764,6 +799,65 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_PP_Status);
 	}
 
+	/** Set Workload(Fact).
+		@param JP_PP_Workload_Fact Workload(Fact)	  */
+	public void setJP_PP_Workload_Fact (BigDecimal JP_PP_Workload_Fact)
+	{
+		set_Value (COLUMNNAME_JP_PP_Workload_Fact, JP_PP_Workload_Fact);
+	}
+
+	/** Get Workload(Fact).
+		@return Workload(Fact)	  */
+	public BigDecimal getJP_PP_Workload_Fact () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_PP_Workload_Fact);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Workload(Plan).
+		@param JP_PP_Workload_Plan Workload(Plan)	  */
+	public void setJP_PP_Workload_Plan (BigDecimal JP_PP_Workload_Plan)
+	{
+		set_Value (COLUMNNAME_JP_PP_Workload_Plan, JP_PP_Workload_Plan);
+	}
+
+	/** Get Workload(Plan).
+		@return Workload(Plan)	  */
+	public BigDecimal getJP_PP_Workload_Plan () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_PP_Workload_Plan);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public org.compiere.model.I_C_UOM getJP_PP_Workload_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getJP_PP_Workload_UOM_ID(), get_TrxName());	}
+
+	/** Set Workload UOM.
+		@param JP_PP_Workload_UOM_ID Workload UOM	  */
+	public void setJP_PP_Workload_UOM_ID (int JP_PP_Workload_UOM_ID)
+	{
+		if (JP_PP_Workload_UOM_ID < 1) 
+			set_Value (COLUMNNAME_JP_PP_Workload_UOM_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_PP_Workload_UOM_ID, Integer.valueOf(JP_PP_Workload_UOM_ID));
+	}
+
+	/** Get Workload UOM.
+		@return Workload UOM	  */
+	public int getJP_PP_Workload_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_PP_Workload_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Process Now.
 		@param JP_Processing1 Process Now	  */
 	public void setJP_Processing1 (String JP_Processing1)
@@ -776,6 +870,23 @@ public class X_JP_PP_Plan extends PO implements I_JP_PP_Plan, I_Persistent
 	public String getJP_Processing1 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Production Qty(Actual).
+		@param JP_ProductionQtyFact Production Qty(Actual)	  */
+	public void setJP_ProductionQtyFact (BigDecimal JP_ProductionQtyFact)
+	{
+		set_Value (COLUMNNAME_JP_ProductionQtyFact, JP_ProductionQtyFact);
+	}
+
+	/** Get Production Qty(Actual).
+		@return Production Qty(Actual)	  */
+	public BigDecimal getJP_ProductionQtyFact () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_ProductionQtyFact);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Remarks.

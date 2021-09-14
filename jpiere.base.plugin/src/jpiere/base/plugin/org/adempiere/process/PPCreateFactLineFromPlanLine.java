@@ -70,6 +70,8 @@ public class PPCreateFactLineFromPlanLine extends SvrProcess {
 
 		MPPFact ppFact = new MPPFact(getCtx(), getRecord_ID(), get_TrxName());
 		ppFact.createFactLineFromPlanLine(get_TrxName());
+		ppFact.setIsCreated("Y");
+		ppFact.saveEx(get_TrxName());
 
 		return "@Success@";
 	}

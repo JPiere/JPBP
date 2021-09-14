@@ -52,6 +52,17 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Check Parent processed
+		if(newRecord)
+		{
+			MPPPlan ppPlan = getParent();
+			if(ppPlan.isProcessed())
+			{
+				log.saveError("Error", Msg.getElement(getCtx(), MPPPlan.COLUMNNAME_Processed));
+				return false;
+			}
+		}
+
 		//Set C_UOM_ID
 		if(newRecord || is_ValueChanged(MPPFact.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0 )
 		{

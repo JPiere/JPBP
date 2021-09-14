@@ -337,7 +337,8 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		MFactAcct.deleteEx(MPPDoc.Table_ID, getJP_PP_Doc_ID(), get_TrxName());
 		setPosted(true);
 
-		setJP_PP_Status(JP_PP_STATUS_Void);
+		if(!getJP_PP_Status().equals(JP_PP_STATUS_Completed))
+			setJP_PP_Status(JP_PP_STATUS_Void);
 
 		// After Void
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
@@ -361,6 +362,27 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 
 		setProcessed(true);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
 		setDocAction(DOCACTION_None);
+
+		MPPPlan[] ppPlans = getPPPlans(true, null);
+		MPPFact[] ppFacts = null;
+		for(MPPPlan ppPlan : ppPlans )
+		{
+			ppFacts = ppPlan.getPPFacts(true, null);
+			for(MPPFact ppFact : ppFacts)
+			{
+				if(!ppFact.isProcessed())
+				{
+					ppFact.processIt(DocAction.ACTION_Void);
+					ppFact.saveEx(get_TrxName());
+				}
+			}
+
+			if(!ppPlan.isProcessed())
+			{
+				ppPlan.processIt(DocAction.ACTION_Void);
+				ppPlan.saveEx(get_TrxName());
+			}
+		}
 
 		return true;
 	}	//	closeIt
@@ -400,6 +422,9 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		MFactAcct.deleteEx(MPPDoc.Table_ID, getJP_PP_Doc_ID(), get_TrxName());
 		setPosted(false);
 		setIsApproved(false);
+		setJP_PP_Status(JP_PP_STATUS_WorkInProgress);
+		setJP_PP_End(null);
+		setJP_PP_EndProcess("N");
 
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
