@@ -27,6 +27,7 @@ import org.compiere.model.MPeriod;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProduction;
 import org.compiere.model.MProductionLine;
+import org.compiere.model.MProductionLineMA;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
@@ -67,7 +68,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 	public MPPPlan getParent()
 	{
 		if(m_PPPlan == null)
-			m_PPPlan = new MPPPlan(getCtx(), getJP_PP_Doc_ID(), get_TrxName());
+			m_PPPlan = new MPPPlan(getCtx(), getJP_PP_Plan_ID(), get_TrxName());
 		else
 			m_PPPlan.set_TrxName(get_TrxName());
 
@@ -322,14 +323,15 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
 
-		MPPFactLine[] ppFLines = getPPFactLines(true, null);
+		MPPFactLine[] ppFactLines = getPPFactLines(true, null);
+		MPPFactLineMA[] ppFactLineMAs = null;
 		BigDecimal productionQty = getProductionQty();
-		for(MPPFactLine line : ppFLines)
+		for(MPPFactLine ppFactLine : ppFactLines)
 		{
-			if( line.getM_Product_ID() == getM_Product_ID()
-					&& line.isEndProduct())
+			if( ppFactLine.getM_Product_ID() == getM_Product_ID()
+					&& ppFactLine.isEndProduct())
 			{
-				productionQty = line.getMovementQty();
+				productionQty = ppFactLine.getMovementQty();
 				break;
 			}
 		}
@@ -338,7 +340,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 		if(getM_Production_ID() == 0)
 		{
-			if(ppFLines.length > 0)
+			if(ppFactLines.length > 0)
 			{
 				MProduction pp = new MProduction(getCtx(), 0 , get_TrxName());
 				PO.copyValues(this, pp);
@@ -358,13 +360,25 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 				setM_Production_ID(pp.getM_Production_ID());
 				setJP_PP_Status(MPPFact.JP_PP_STATUS_Completed);
 
-				for(MPPFactLine ppFLine : ppFLines)
+				for(MPPFactLine ppFactLine : ppFactLines)
 				{
 					MProductionLine ppLine = new MProductionLine(getCtx(), 0 , get_TrxName());
-					PO.copyValues(ppFLine, ppLine);
+					PO.copyValues(ppFactLine, ppLine);
 					ppLine.setM_Production_ID(pp.getM_Production_ID());
 					ppLine.setAD_Org_ID(pp.getAD_Org_ID());
-					ppLine.saveEx(get_TrxName());;
+					ppLine.saveEx(get_TrxName());
+
+					ppFactLineMAs = ppFactLine.getPPFactLineMAs();
+					for(MPPFactLineMA ppFactLineMA : ppFactLineMAs)
+					{
+						MProductionLineMA ppLineMA = new MProductionLineMA(getCtx(), 0 ,get_TrxName());
+						PO.copyValues(ppFactLineMA, ppLineMA);
+						ppLineMA.setM_ProductionLine_ID(ppLine.getM_ProductionLine_ID());
+						ppLineMA.setM_AttributeSetInstance_ID(ppFactLineMA.getM_AttributeSetInstance_ID());
+						ppLineMA.setDateMaterialPolicy(ppFactLineMA.getDateMaterialPolicy());
+						ppLineMA.setMovementQty(ppFactLineMA.getMovementQty());
+						ppLineMA.saveEx(get_TrxName());
+					}
 				}
 
 				pp.processIt(DocAction.ACTION_Complete);
@@ -440,13 +454,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		MPPFactLine[] lines = getPPFactLines();
 		for(MPPFactLine line : lines)
 		{
-			line.setPlannedQty(Env.ZERO);
-			if(line.isEndProduct())
-				line.setQtyUsed(null);
-			else
-				line.setQtyUsed(Env.ZERO);
-			line.setMovementQty(Env.ZERO);
-			line.saveEx(get_TrxName());
+			;//TODO Processedフラグをつける
 		}
 
 		setJP_PP_Status(JP_PP_STATUS_Void);

@@ -15,11 +15,13 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.RoundingMode;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 
 import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
+import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
 
@@ -51,8 +53,7 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 		//Check Parent processed
 		if(newRecord)
 		{
-			MPPFact ppPlan = getParent();
-			if(ppPlan.isProcessed())
+			if(getParent().isProcessed())
 			{
 				log.saveError("Error", Msg.getElement(getCtx(), MPPFact.COLUMNNAME_Processed));
 				return false;
@@ -71,14 +72,11 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 
 
 		//Check IsEndProduct
-		if(newRecord || is_ValueChanged(COLUMNNAME_IsEndProduct))
-		{
-			MPPFact parent =  getParent();
-			if (parent.getM_Product_ID() == getM_Product_ID())
-				setIsEndProduct(true);
-			else
-				setIsEndProduct(false);
-		}
+		if (getParent().getM_Product_ID() == getM_Product_ID() && getParent().getProductionQty().signum() == getMovementQty().signum())
+			setIsEndProduct(true);
+		else
+			setIsEndProduct(false);
+
 
 		//Convert Qty & Rounding Qty
 		if (isEndProduct())
@@ -109,36 +107,22 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
-		MPPFact parent = getParent();
-
-		//Check End Product
-		if(isEndProduct())
-		{
-			MPPFactLine[] lines = parent.getPPFactLines(" AND IsEndProduct = 'Y' ", "");
-			if(lines.length != 1)
-			{
-				log.saveError("Error", Msg.getElement(getCtx(), COLUMNNAME_IsEndProduct) +" - " + Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
-				return false;
-			}
-		}
-
 		//Update ProductionQty
 		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_MovementQty)) )
 		{
-			if(parent.getProductionQty().compareTo(getMovementQty()) != 0)
-			{
-				String sql = "UPDATE JP_PP_Fact SET ProductionQty=? "
-						+ " WHERE JP_PP_Fact_ID=?";
 
-				int no = DB.executeUpdate(sql
-							, new Object[]{getMovementQty(), getJP_PP_Fact_ID()}
-							, false, get_TrxName(), 0);
-				if (no != 1)
-				{
-					log.saveError("DBExecuteError", sql);
-					return false;
-				}
+			String sql = "UPDATE JP_PP_Fact SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_FactLine WHERE JP_PP_Fact_ID=? AND IsEndProduct='Y') "
+					+ " WHERE JP_PP_Fact_ID=?";
+
+			int no = DB.executeUpdate(sql
+						, new Object[]{getJP_PP_Fact_ID(), getJP_PP_Fact_ID()}
+						, false, get_TrxName(), 0);
+			if (no != 1)
+			{
+				log.saveError("DBExecuteError", sql);
+				return false;
 			}
+
 
 		}
 
@@ -153,5 +137,19 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 			parent.set_TrxName(get_TrxName());
 
 		return parent;
+	}
+
+	public MPPFactLineMA[] getPPFactLineMAs ()
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MPPFactLineMA.COLUMNNAME_JP_PP_FactLine_ID+"=? ");
+		StringBuilder orderClause = new StringBuilder(MPPFactLineMA.COLUMNNAME_JP_PP_FactLineMA_ID);
+		//
+		List<MPPFactLineMA> list = new Query(getCtx(), MPPFactLineMA.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause.toString())
+										.list();
+
+		return list.toArray(new MPPFactLineMA[list.size()]);
+
 	}
 }

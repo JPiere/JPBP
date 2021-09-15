@@ -125,4 +125,5 @@ public class MPPFactLineMA extends X_JP_PP_FactLineMA {
 		}
 		return true;
 	}
+
 }

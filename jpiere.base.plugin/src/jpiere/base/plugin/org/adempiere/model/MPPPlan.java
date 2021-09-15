@@ -381,6 +381,8 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			}
 		}
 
+		//TODO Plan Line をProcessedにする? 要検討
+
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
 		if (m_processMsg != null)
 			return false;
@@ -766,7 +768,13 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		ppFact.setMovementDate(getDateAcct());
 		if(ppPLines.length > 0)
 			ppFact.setIsCreated("Y");
-		ppFact.setProductionQty(Env.ZERO);
+		ppFact.setProductionQty(getProductionQty());
+		ppFact.setM_Product_ID(getM_Product_ID());
+		ppFact.setC_UOM_ID(getC_UOM_ID());
+		ppFact.setJP_PP_Workload_UOM_ID(getJP_PP_Workload_UOM_ID());
+		ppFact.setJP_PP_Workload_Fact(Env.ZERO);
+		ppFact.setJP_PP_Start(null);
+		ppFact.setJP_PP_End(null);
 		ppFact.saveEx(get_TrxName());
 
 		ppFact.createFactLineFromPlanLine(trxName);

@@ -55,8 +55,7 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 		//Check Parent processed
 		if(newRecord)
 		{
-			MPPPlan ppPlan = getParent();
-			if(ppPlan.isProcessed())
+			if(getParent().isProcessed())
 			{
 				log.saveError("Error", Msg.getElement(getCtx(), MPPPlan.COLUMNNAME_Processed));
 				return false;
@@ -74,14 +73,10 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 		}
 
 		//Check IsEndProduct
-		if(newRecord || is_ValueChanged(COLUMNNAME_IsEndProduct))
-		{
-			MPPPlan parent =  getParent();
-			if (parent.getM_Product_ID() == getM_Product_ID())
-				setIsEndProduct(true);
-			else
-				setIsEndProduct(false);
-		}
+		if (getParent().getM_Product_ID() == getM_Product_ID() && getParent().getProductionQty().signum() == getPlannedQty().signum())
+			setIsEndProduct(true);
+		else
+			setIsEndProduct(false);
 
 		//Convert Qty & Rounding Qty
 		if (isEndProduct())
@@ -112,36 +107,22 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
-		MPPPlan parent = getParent();
-
-		//Check End Product
-		if(isEndProduct())
-		{
-			MPPPlanLine[] lines = parent.getPPPlanLines(" AND IsEndProduct = 'Y' ", "");
-			if(lines.length != 1)
-			{
-				log.saveError("Error", Msg.getElement(getCtx(), COLUMNNAME_IsEndProduct) +" - " + Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
-				return false;
-			}
-		}
-
 		//Update parent ProductionQty
 		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_PlannedQty)) )
 		{
-			if(parent.getProductionQty().compareTo(getPlannedQty()) != 0)
-			{
-				String sql = "UPDATE JP_PP_Plan SET ProductionQty=? "
-						+ " WHERE JP_PP_Plan_ID=?";
 
-				int no = DB.executeUpdate(sql
-							, new Object[]{getPlannedQty(), getJP_PP_Plan_ID()}
-							, false, get_TrxName(), 0);
-				if (no != 1)
-				{
-					log.saveError("DBExecuteError", sql);
-					return false;
-				}
+			String sql = "UPDATE JP_PP_Plan SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLine WHERE JP_PP_Plan_ID=? AND IsEndProduct='Y') "
+					+ " WHERE JP_PP_Plan_ID=?";
+
+			int no = DB.executeUpdate(sql
+						, new Object[]{getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
+						, false, get_TrxName(), 0);
+			if (no != 1)
+			{
+				log.saveError("DBExecuteError", sql);
+				return false;
 			}
+
 		}
 
 		return true;
