@@ -26,20 +26,14 @@ import java.util.logging.Level;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
-import org.compiere.model.MQuery;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
-import org.compiere.model.PrintInfo;
 import org.compiere.model.Query;
-import org.compiere.print.MPrintFormat;
-import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
-import org.compiere.process.ProcessInfo;
-import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
@@ -92,7 +86,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	public String getDocumentInfo()
 	{
 		return getValue() + "_" + getName();
-	}	//	getDocumentInfo
+	}
 
 	/**
 	 * 	Create PDF
@@ -100,17 +94,8 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public File createPDF ()
 	{
-		try
-		{
-			File temp = File.createTempFile(get_TableName()+get_ID()+"_", ".pdf");
-			return createPDF (temp);
-		}
-		catch (Exception e)
-		{
-			log.severe("Could not create PDF - " + e.getMessage());
-		}
 		return null;
-	}	//	getPDF
+	}
 
 	/**
 	 * 	Create PDF file
@@ -119,30 +104,8 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public File createPDF (File file)
 	{
-		int JP_PP_Doc_ID = getJP_PP_Doc_ID();
-		MQuery query = new MQuery(Table_Name);
-		query.addRestriction( COLUMNNAME_JP_PP_Doc_ID, MQuery.EQUAL, Integer.valueOf(JP_PP_Doc_ID));
-
-		int AD_PrintFormat_ID = getC_DocType().getAD_PrintFormat_ID();
-		MPrintFormat pf = new  MPrintFormat(getCtx(), AD_PrintFormat_ID, get_TrxName());
-
-		PrintInfo info = new PrintInfo("0", 0, 0, 0);
-		ReportEngine re = new ReportEngine(getCtx(), pf, query, info);
-
-		if(pf.getJasperProcess_ID() > 0)
-		{
-			ProcessInfo pi = new ProcessInfo ("", pf.getJasperProcess_ID());
-			pi.setRecord_ID ( getJP_PP_Doc_ID() );
-			pi.setIsBatch(true);
-
-			ServerProcessCtl.process(pi, null);
-
-			return pi.getPDFReport();
-
-		}
-
-		return re.getPDF(file);
-	}	//	createPDF
+		return null;
+	}
 
 
 	/**************************************************************************
@@ -155,7 +118,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		m_processMsg = null;
 		DocumentEngine engine = new DocumentEngine (this, getDocStatus());
 		return engine.processIt (processAction, getDocAction());
-	}	//	processIt
+	}
 
 	/**	Process Message 			*/
 	private String		m_processMsg = null;
@@ -168,10 +131,9 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean unlockIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
 		setProcessing(false);
 		return true;
-	}	//	unlockIt
+	}
 
 	/**
 	 * 	Invalidate Document
@@ -179,10 +141,9 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean invalidateIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("invalidateIt - " + toString());
 		setDocAction(DOCACTION_Prepare);
 		return true;
-	}	//	invalidateIt
+	}
 
 	/**
 	 *	Prepare Document
@@ -190,7 +151,6 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public String prepareIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info(toString());
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -205,15 +165,15 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 
-		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
+
 		m_justPrepared = true;
 		if (!DOCACTION_Complete.equals(getDocAction()))
 			setDocAction(DOCACTION_Complete);
 		return DocAction.STATUS_InProgress;
-	}	//	prepareIt
+	}
 
 	/**
 	 * 	Approve Document
@@ -221,10 +181,9 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean  approveIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("approveIt - " + toString());
 		setIsApproved(true);
 		return true;
-	}	//	approveIt
+	}
 
 	/**
 	 * 	Reject Approval
@@ -232,10 +191,9 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean rejectIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("rejectIt - " + toString());
 		setIsApproved(false);
 		return true;
-	}	//	rejectIt
+	}
 
 	/**
 	 * 	Complete Document
@@ -292,7 +250,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
-	}	//	completeIt
+	}
 
 	/**
 	 * 	Set the definite document number after completed
@@ -328,8 +286,6 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean voidIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("voidIt - " + toString());
-		// Before Void
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
 		if (m_processMsg != null)
 			return false;
@@ -340,7 +296,15 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		if(!getJP_PP_Status().equals(JP_PP_STATUS_Completed))
 			setJP_PP_Status(JP_PP_STATUS_Void);
 
-		closeIt();
+		MPPPlan[] ppPlans = getPPPlans(true, null);
+		for(MPPPlan ppPlan : ppPlans )
+		{
+			if(!ppPlan.isProcessed())
+			{
+				ppPlan.processIt(DocAction.ACTION_Void);
+				ppPlan.saveEx(get_TrxName());
+			}
+		}
 
 		// After Void
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
@@ -351,7 +315,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		setDocAction(DOCACTION_None);
 
 		return true;
-	}	//	voidIt
+	}
 
 	/**
 	 * 	Close Document.
@@ -360,25 +324,13 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean closeIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
-
-		setProcessed(true);//Special specification For Contract Document to update Field in case of DocStatus == 'CO'
-		setDocAction(DOCACTION_None);
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_CLOSE);
+		if (m_processMsg != null)
+			return false;
 
 		MPPPlan[] ppPlans = getPPPlans(true, null);
-		MPPFact[] ppFacts = null;
 		for(MPPPlan ppPlan : ppPlans )
 		{
-			ppFacts = ppPlan.getPPFacts(true, null);
-			for(MPPFact ppFact : ppFacts)
-			{
-				if(!ppFact.isProcessed())
-				{
-					ppFact.processIt(DocAction.ACTION_Void);
-					ppFact.saveEx(get_TrxName());
-				}
-			}
-
 			if(!ppPlan.isProcessed())
 			{
 				ppPlan.processIt(DocAction.ACTION_Void);
@@ -386,8 +338,16 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			}
 		}
 
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_CLOSE);
+		if (m_processMsg != null)
+			return false;
+
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+
 		return true;
-	}	//	closeIt
+	}
+
 
 	/**
 	 * 	Reverse Correction
@@ -395,9 +355,22 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean reverseCorrectIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("reverseCorrectIt - " + toString());
-		return reverse(DocAction.ACTION_Reverse_Correct);
-	}	//	reverseCorrectionIt
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+
+		if(!reverse(DocAction.ACTION_Reverse_Correct))
+		{
+			return false;
+		}
+
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+
+		return true;
+	}
+
 
 	/**
 	 * 	Reverse Accrual - none
@@ -405,29 +378,27 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean reverseAccrualIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("reverseAccrualIt - " + toString());
-		return reverse(DocAction.ACTION_Reverse_Accrual);
-	}	//	reverseAccrualIt
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+
+		if(!reverse(DocAction.ACTION_Reverse_Accrual))
+		{
+			return false;
+		}
+
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+
+		return true;
+	}
 
 	private boolean reverse(String docAction)
 	{
 		MPPPlan[] ppPlans = getPPPlans(true, null);
-		MPPFact[] ppFacts = null;
 		for(MPPPlan ppPlan : ppPlans )
 		{
-			ppFacts = ppPlan.getPPFacts(true, null);
-			for(MPPFact ppFact : ppFacts)
-			{
-				if(ppFact.isProcessed() && ppFact.getDocStatus().equals(DocAction.STATUS_Completed))
-				{
-					ppFact.processIt(docAction);
-					ppFact.saveEx(get_TrxName());
-				}else {
-					ppFact.processIt(DocAction.ACTION_Void);
-					ppFact.saveEx(get_TrxName());
-				}
-			}
-
 			if(ppPlan.isProcessed() && ppPlan.getDocStatus().equals(DocAction.STATUS_Completed))
 			{
 				ppPlan.processIt(docAction);
@@ -441,6 +412,9 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		if(!getJP_PP_Status().equals(JP_PP_STATUS_Completed))
 			setJP_PP_Status(JP_PP_STATUS_Void);
 
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+
 		return true;
 	}
 
@@ -450,8 +424,6 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public boolean reActivateIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info(toString());
-		// Before reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
 		if (m_processMsg != null)
 			return false;
@@ -463,7 +435,6 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		setJP_PP_End(null);
 		setJP_PP_EndProcess("N");
 
-		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
 		if (m_processMsg != null)
 			return false;
@@ -472,7 +443,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		setProcessed(false);
 
 		return true;
-	}	//	reActivateIt
+	}
 
 
 	/*************************************************************************
@@ -482,7 +453,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	public String getSummary()
 	{
 		return getValue()+"_"+getName();
-	}	//	getSummary
+	}
 
 
 	/**
@@ -492,7 +463,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	public String getProcessMsg()
 	{
 		return m_processMsg;
-	}	//	getProcessMsg
+	}
 
 	/**
 	 * 	Get Document Owner (Responsible)
@@ -501,7 +472,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	public int getDoc_User_ID()
 	{
 		return getSalesRep_ID();
-	}	//	getDoc_User_ID
+	}
 
 	/**
 	 * 	Get Document Approval Amount
@@ -510,7 +481,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	public BigDecimal getApprovalAmt()
 	{
 		return Env.ZERO;
-	}	//	getApprovalAmt
+	}
 
 
 	/**
@@ -535,8 +506,6 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			options[index++] = DocumentEngine.ACTION_Prepare;
 			options[index++] = DocumentEngine.ACTION_Complete;
 
-			return index;
-
 		}else if(docStatus.equals(DocumentEngine.STATUS_Completed)) {
 
 			index = 0;
@@ -546,7 +515,6 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			options[index++] = DocumentEngine.ACTION_Close;
 			options[index++] = DocumentEngine.ACTION_ReActivate;
 
-			return index;
 		}
 
 

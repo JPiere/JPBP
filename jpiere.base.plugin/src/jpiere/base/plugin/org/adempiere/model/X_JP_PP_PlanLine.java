@@ -32,7 +32,7 @@ public class X_JP_PP_PlanLine extends PO implements I_JP_PP_PlanLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210914L;
+	private static final long serialVersionUID = 20210915L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanLine (Properties ctx, int JP_PP_PlanLine_ID, String trxName)

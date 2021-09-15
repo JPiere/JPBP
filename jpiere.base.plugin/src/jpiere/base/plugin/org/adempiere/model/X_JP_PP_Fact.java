@@ -34,7 +34,7 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210914L;
+	private static final long serialVersionUID = 20210915L;
 
     /** Standard Constructor */
     public X_JP_PP_Fact (Properties ctx, int JP_PP_Fact_ID, String trxName)
@@ -71,9 +71,10 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
 			setJP_PP_Workload_Fact (Env.ZERO);
 // 0
 			setJP_PP_Workload_UOM_ID (0);
-// @JP_PP_Workload_UOM_ID@
+// @JP_PP_Workload_UOM_ID:101@
 			setM_Locator_ID (0);
 			setM_Product_ID (0);
+// @M_Product_ID@
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
 // @DateAcct@
 			setName (null);
