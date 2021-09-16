@@ -24,6 +24,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MPPFact;
 import jpiere.base.plugin.org.adempiere.model.MPPPlan;
@@ -68,6 +69,8 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 					{
 						//You cannot be completed PP Plan because there is an unprocessed PP Fact.
 						msg = Msg.getMsg(getCtx(), "JP_PP_NotCompletePPPlanForUnprocessedPPFact");
+						addLog(msg);
+
 						return msg;
 					}
 				}
@@ -81,11 +84,18 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 					pInfo.setTable_ID(MPPPlan.Table_ID);
 					MColumn docActionColumn = MColumn.get(getCtx(), MPPPlan.Table_Name, MPPPlan.COLUMNNAME_DocAction);
 					MProcess process = MProcess.get(docActionColumn.getAD_Process_ID());
-					ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
+					MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
+					if(!Util.isEmpty(wfProcess.getProcessMsg()))
+						addLog(wfProcess.getProcessMsg());
+
+					return msg;
 
 				}else {
 
+					//Active Workflow for this Record exists (complete first):
 					msg = Msg.getMsg(getCtx(), "WFActiveForRecord");
+					addLog(msg);
+
 					return msg;
 				}
 
@@ -95,6 +105,9 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 
 			if(parent.isSplitWhenDifferenceJP())
 			{
+				msg = parent.createFact(get_TrxName());
+				if(!Util.isEmpty(msg))
+					addLog(msg);
 
 			}
 

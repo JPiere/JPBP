@@ -13,7 +13,19 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MColumn;
+import org.compiere.model.MProcess;
+import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
+import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDoc;
 import jpiere.base.plugin.org.adempiere.model.MPPPlan;
@@ -42,7 +54,60 @@ public class PPPlanProcessAfterComplete extends SvrProcess {
 
 		MPPPlan ppPlan = new MPPPlan(getCtx(), p_JP_PP_Plan_ID, get_TrxName());
 		MPPDoc parent = ppPlan.getParent();
+		if(parent.isCompleteAutoJP())
+		{
+			MPPPlan[] ppPlans = parent.getPPPlans(true, null);
+			boolean isAllProcessed = true;
+			for(MPPPlan plan : ppPlans)
+			{
+				if(!plan.isProcessed())
+				{
+					isAllProcessed = false;
+					break;
+				}
+			}
 
+			if(isAllProcessed)
+			{
+				Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+				if(parent.getJP_PP_Start() == null)
+				{
+					parent.setJP_PP_Start(now);
+					parent.setJP_PP_StartProcess("Y");
+				}
+
+
+				if(parent.getJP_PP_End() == null)
+				{
+					parent.setJP_PP_End(now);
+					parent.setJP_PP_EndProcess("Y");
+				}
+
+				String wfStatus = MWFActivity.getActiveInfo(Env.getCtx(), MPPDoc.Table_ID, parent.getJP_PP_Doc_ID());
+				if (Util.isEmpty(wfStatus))
+				{
+					ProcessInfo pInfo = getProcessInfo();
+					pInfo.setPO(parent);
+					pInfo.setRecord_ID(parent.getJP_PP_Doc_ID());
+					pInfo.setTable_ID(MPPDoc.Table_ID);
+					MColumn docActionColumn = MColumn.get(getCtx(), MPPDoc.Table_Name, MPPDoc.COLUMNNAME_DocAction);
+					MProcess process = MProcess.get(docActionColumn.getAD_Process_ID());
+					MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
+					if(!Util.isEmpty(wfProcess.getProcessMsg()))
+						addLog(wfProcess.getProcessMsg());
+
+					return msg;
+
+				}else {
+
+					//Active Workflow for this Record exists (complete first):
+					msg = Msg.getMsg(getCtx(), "WFActiveForRecord");
+					addLog(msg);
+
+					return msg;
+				}
+			}
+		}
 
 		return msg;
 	}

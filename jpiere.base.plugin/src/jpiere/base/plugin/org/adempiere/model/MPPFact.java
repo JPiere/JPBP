@@ -45,8 +45,6 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
-import jpiere.base.plugin.org.adempiere.model.MPPPlanLine.PPPlanLineFactQty;
-
 /**
  * JPIERE-0501:JPiere PP Fact
  *
@@ -858,13 +856,11 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		MPPPlanLine[] ppPLines = ppPlan.getPPPlanLines();
 		MPPFactLine ppFLine = null;
 
-		PPPlanLineFactQty factQty = null;
 		BigDecimal plannedQty = Env.ZERO;
 		BigDecimal qtyUsed = Env.ZERO;
 		BigDecimal movementQty = Env.ZERO;
 		for(MPPPlanLine ppPLine : ppPLines)
 		{
-			factQty = ppPLine.getPPPlanLineFactQty(get_TrxName());
 
 			ppFLine = new MPPFactLine(getCtx(), 0 , get_TrxName());
 			PO.copyValues(ppPLine, ppFLine);
@@ -875,13 +871,13 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			ppFLine.setIsEndProduct(ppPLine.isEndProduct());
 			if(ppPLine.isEndProduct())
 			{
-				plannedQty = ppPLine.getPlannedQty().subtract(factQty.getMovementQty());
+				plannedQty = ppPLine.getPlannedQty().subtract(ppPLine.getJP_MovementQtyFact());
 				if(plannedQty.signum() == 0)
 					plannedQty = Env.ZERO;
 				qtyUsed = null;
 				movementQty = plannedQty;
 			}else {
-				plannedQty = ppPLine.getPlannedQty().add(factQty.getMovementQty());
+				plannedQty = ppPLine.getPlannedQty().add(ppPLine.getJP_MovementQtyFact());
 				if(plannedQty.signum() == 0)
 				{
 					plannedQty = Env.ZERO;
