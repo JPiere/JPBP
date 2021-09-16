@@ -46,6 +46,8 @@ public class X_JP_PP_DocT extends PO implements I_JP_PP_DocT, I_Persistent
 // @#C_UOM_ID@
 			setIsCompleteAutoByEndProcessJP (true);
 // Y
+			setIsCompleteAutoJP (true);
+// Y
 			setJP_PP_DocT_ID (0);
 			setJP_ProductionDays (0);
 // 1
@@ -396,6 +398,27 @@ public class X_JP_PP_DocT extends PO implements I_JP_PP_DocT, I_Persistent
 	public boolean isCompleteAutoByEndProcessJP () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsCompleteAutoByEndProcessJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Auto Complete.
+		@param IsCompleteAutoJP Auto Complete	  */
+	public void setIsCompleteAutoJP (boolean IsCompleteAutoJP)
+	{
+		set_Value (COLUMNNAME_IsCompleteAutoJP, Boolean.valueOf(IsCompleteAutoJP));
+	}
+
+	/** Get Auto Complete.
+		@return Auto Complete	  */
+	public boolean isCompleteAutoJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCompleteAutoJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

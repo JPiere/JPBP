@@ -90,6 +90,7 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 				MUOM uom = MUOM.get(getC_UOM_ID());
 				setPlannedQty(getPlannedQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 				setQtyUsed(null);
+				setJP_QtyUsedFact(null);
 				setMovementQty(getPlannedQty());
 			}
 		}else {
@@ -101,6 +102,9 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 				setPlannedQty(getPlannedQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 				setQtyUsed(getPlannedQty());
 				setMovementQty(getQtyUsed().negate());
+
+				if(newRecord)
+					setJP_QtyUsedFact(Env.ZERO);
 			}
 		}
 
@@ -114,21 +118,40 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_PlannedQty)) )
 		{
 
-			String sql = "UPDATE JP_PP_Plan SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLine WHERE JP_PP_Plan_ID=? AND IsEndProduct='Y') "
-					+ " WHERE JP_PP_Plan_ID=?";
-
-			int no = DB.executeUpdate(sql
-						, new Object[]{getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
-						, false, get_TrxName(), 0);
+			int no = updateParentProductionQty(get_TrxName());
 			if (no != 1)
 			{
-				log.saveError("DBExecuteError", sql);
+				log.saveError("DBExecuteError", "MPPPlanLine#afterSave() -> updateParentProductionQty()");
 				return false;
 			}
 
 		}
 
 		return true;
+	}
+
+	@Override
+	protected boolean afterDelete(boolean success)
+	{
+		int no = updateParentProductionQty(get_TrxName());
+		if (no != 1)
+		{
+			log.saveError("DBExecuteError", "MPPPlanLine#afterDelete() -> updateParentProductionQty()");
+			return false;
+		}
+
+		return true;
+	}
+
+	private int updateParentProductionQty(String trxName)
+	{
+		String sql = "UPDATE JP_PP_Plan SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLine WHERE JP_PP_Plan_ID=? AND IsEndProduct='Y') "
+				+ " WHERE JP_PP_Plan_ID=?";
+
+		int no = DB.executeUpdate(sql
+					, new Object[]{getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
+					, false, trxName, 0);
+		return no;
 	}
 
 	public MPPPlan getParent()
@@ -149,7 +172,7 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 
 		String sql = "SELECT COALESCE(SUM(fl.plannedQty),0),COALESCE(SUM(fl.qtyUsed),0), COALESCE(SUM(fl.movementQty),0) "
 						+"FROM JP_PP_FactLine fl INNER JOIN JP_PP_Fact f ON (fl.JP_PP_Fact_ID = f.JP_PP_Fact_ID) "
-						+"WHERE  f.JP_PP_Plan_ID = ? AND fl.JP_PP_PlanLine_ID = ? AND f.JP_PP_Status = 'CO' ";
+						+"WHERE  f.JP_PP_Plan_ID = ? AND fl.JP_PP_PlanLine_ID = ? AND f.JP_PP_Status in('CO','CL') ";
 
 
 		PreparedStatement pstmt = null;

@@ -16,7 +16,10 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -156,24 +159,98 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			}
 		}
 
+		//Update PP Plan JP_PP_Workload_Fact
 		if(newRecord || is_ValueChanged(MPPFact.COLUMNNAME_JP_PP_Workload_Fact))
 		{
 
-			String sql = "UPDATE JP_PP_Plan SET JP_PP_Workload_Fact=(SELECT SUM(JP_PP_Workload_Fact) FROM JP_PP_Fact WHERE JP_PP_Plan_ID =?) "
-								+ " WHERE JP_PP_Plan_ID=?";
-
-			int no = DB.executeUpdate(sql
-										, new Object[]{ getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
-										, false, get_TrxName(), 0);
+			int no = updateParentWorkloadFact(get_TrxName());
 
 			if (no != 1)
 			{
-					log.saveError("DBExecuteError", sql);
+					log.saveError("DBExecuteError", "MPPFact#afterSave() -> updateParentWorkloadFact()");
 					return false;
 			}
 		}
 
+		//Update PP Plan JP_ProductionQtyFact
+		if(is_ValueChanged(COLUMNNAME_DocStatus))
+		{
+			int no = updateParentProductionQtyFact(get_TrxName());
+			if (no != 1)
+			{
+					m_processMsg = Msg.getMsg(getCtx(), "DBExecuteError") + " : " +"MPPFact#afterSave() -> updateParentProductionQtyFact()";
+					return false;
+			}
+
+			//Update PP Plan Line Fact Qty
+			updatePlanLineQtyFact(get_TrxName());
+		}
 		return true;
+	}
+
+
+
+	@Override
+	protected boolean afterDelete(boolean success)
+	{
+		int no = updateParentWorkloadFact(get_TrxName());
+		if (no != 1)
+		{
+			log.saveError("DBExecuteError", "MPPFact#afterDelete() -> updateParentWorkloadFact()");
+			return false;
+		}
+
+		return true;
+	}
+
+	private int updateParentWorkloadFact(String trxName)
+	{
+		String sql = "UPDATE JP_PP_Plan SET JP_PP_Workload_Fact=(SELECT COALESCE(SUM(JP_PP_Workload_Fact),0) FROM JP_PP_Fact WHERE JP_PP_Plan_ID =?) "
+				+ " WHERE JP_PP_Plan_ID=?";
+
+		int no = DB.executeUpdate(sql
+						, new Object[]{ getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
+						, false, trxName, 0);
+
+		return no;
+	}
+
+	private int updateParentProductionQtyFact(String trxName)
+	{
+		String sql = "UPDATE JP_PP_Plan SET JP_ProductionQtyFact = (SELECT COALESCE(SUM(fl.MovementQty),0) "
+				+ " FROM JP_PP_FactLine fl INNER JOIN JP_PP_Fact f ON (fl.JP_PP_Fact_ID=f.JP_PP_Fact_ID) "
+				+ " WHERE f.JP_PP_Plan_ID =? AND f.DocStatus in ('CO','CL') AND fl.IsEndProduct='Y' ) "
+				+ " WHERE JP_PP_Plan_ID=?" ;
+
+		int no = DB.executeUpdate(sql
+						, new Object[]{ getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
+						, false, trxName, 0);
+
+		return no;
+	}
+
+	private int updatePlanLineQtyFact(String trxName)
+	{
+		String sql = "UPDATE JP_PP_PlanLine pl "
+				+ " SET JP_QtyUsedFact = (SELECT COALESCE(SUM(fl.QtyUsed),0) "
+				+ " FROM JP_PP_FactLine fl INNER JOIN JP_PP_Fact f ON (fl.JP_PP_Fact_ID=f.JP_PP_Fact_ID) "
+				+ " WHERE f.JP_PP_Plan_ID =? AND f.DocStatus in ('CO','CL') AND fl.JP_PP_PlanLine_ID=pl.JP_PP_PlanLine_ID AND fl.IsEndProduct='N') "
+				+ " WHERE pl.JP_PP_Plan_ID= ? AND pl.IsEndProduct='N' " ;
+
+		int no = DB.executeUpdate(sql
+						, new Object[]{ getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
+						, false, trxName, 0);
+
+		sql = "UPDATE JP_PP_PlanLine pl "
+				+ " SET JP_MovementQtyFact = (SELECT COALESCE(SUM(fl.MovementQty),0) "
+				+ " FROM JP_PP_FactLine fl INNER JOIN JP_PP_Fact f ON (fl.JP_PP_Fact_ID=f.JP_PP_Fact_ID) "
+				+ " WHERE f.JP_PP_Plan_ID =? AND f.DocStatus in ('CO','CL') AND fl.JP_PP_PlanLine_ID=pl.JP_PP_PlanLine_ID) "
+				+ " WHERE pl.JP_PP_Plan_ID= ? " ;
+
+		no = DB.executeUpdate(sql
+						, new Object[]{ getJP_PP_Plan_ID(), getJP_PP_Plan_ID()}
+						, false, trxName, 0);
+		return no;
 	}
 
 	/**
@@ -325,17 +402,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 		MPPFactLine[] ppFactLines = getPPFactLines(true, null);
 		MPPFactLineMA[] ppFactLineMAs = null;
-		BigDecimal productionQty = getProductionQty();
-		for(MPPFactLine ppFactLine : ppFactLines)
-		{
-			if( ppFactLine.getM_Product_ID() == getM_Product_ID()
-					&& ppFactLine.isEndProduct())
-			{
-				productionQty = ppFactLine.getMovementQty();
-				break;
-			}
-		}
-
+		BigDecimal productionQty = getEndProductMovementQty(get_TrxName());
 		setProductionQty(productionQty);
 
 		if(getM_Production_ID() == 0)
@@ -389,6 +456,21 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 				pp.processIt(DocAction.ACTION_Complete);
 
 			}
+		}
+
+
+		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+		if(getJP_PP_Start() == null)
+		{
+			setJP_PP_Start(now);
+			setJP_PP_StartProcess("Y");
+		}
+
+
+		if(getJP_PP_End() == null)
+		{
+			setJP_PP_End(now);
+			setJP_PP_EndProcess("Y");
 		}
 
 		setJP_PP_Status(JP_PP_STATUS_Completed);
@@ -819,5 +901,38 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		}
 
 		return null;
+	}
+
+	public BigDecimal getEndProductMovementQty(String trxName)
+	{
+		BigDecimal productionQty = Env.ZERO;
+
+		String sql = "SELECT COALESCE(SUM(fl.MovementQty),0) FROM JP_PP_FactLine fl "
+								+ " WHERE fl.IsEndProduct='Y' AND JP_PP_Fact_ID = ? ";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, getJP_PP_Fact_ID());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				productionQty = rs.getBigDecimal(1);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		return productionQty;
 	}
 }	//	MPPDoc

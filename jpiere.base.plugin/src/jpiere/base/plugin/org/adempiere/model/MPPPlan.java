@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -291,26 +292,18 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 
 
 		MPPFact[] ppFacts = getPPFacts(true, null);
-		BigDecimal JP_ProductionQtyFact = Env.ZERO;
 		BigDecimal JP_PP_Workload_Fact =Env.ZERO;
 		for(MPPFact ppFact : ppFacts)
 		{
 			if(!ppFact.isProcessed())
 			{
-				//You cannot be completed because there is an unprocessed PP Fact.
-				m_processMsg = Msg.getMsg(getCtx(), "JP_PP_UnprocessedFact");
+				//You cannot be completed PP Plan because there is an unprocessed PP Fact.
+				m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NotCompletePPPlanForUnprocessedPPFact");
 				return DocAction.STATUS_Invalid;
 			}
-
-			if(ppFact.getDocStatus().equals(DocAction.ACTION_Complete)
-					|| ppFact.getDocStatus().equals(DocAction.ACTION_Close))
-			{
-				JP_ProductionQtyFact = JP_ProductionQtyFact.add(ppFact.getProductionQty());
-			}
-			JP_PP_Workload_Fact = JP_PP_Workload_Fact.add(ppFact.getJP_PP_Workload_Fact());
 		}
 
-		setJP_ProductionQtyFact(JP_ProductionQtyFact);
+		setJP_ProductionQtyFact(getProductionFactQty(get_TrxName()));
 		setJP_PP_Workload_Fact(JP_PP_Workload_Fact);
 		setJP_PP_Status(JP_PP_STATUS_Completed);
 		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
@@ -815,13 +808,15 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		ppFact.setMovementDate(getDateAcct());
 		if(ppPLines.length > 0)
 			ppFact.setIsCreated("Y");
-		ppFact.setProductionQty(getProductionQty());
+		ppFact.setProductionQty(getProductionQty().subtract(getJP_ProductionQtyFact()));
 		ppFact.setM_Product_ID(getM_Product_ID());
 		ppFact.setC_UOM_ID(getC_UOM_ID());
 		ppFact.setJP_PP_Workload_UOM_ID(getJP_PP_Workload_UOM_ID());
 		ppFact.setJP_PP_Workload_Fact(Env.ZERO);
 		ppFact.setJP_PP_Start(null);
 		ppFact.setJP_PP_End(null);
+		ppFact.setDocStatus(STATUS_Drafted);
+		ppFact.setDocAction(ACTION_Complete);
 		ppFact.saveEx(get_TrxName());
 
 		ppFact.createFactLineFromPlanLine(trxName);
@@ -829,4 +824,38 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		return null;
 	}
 
-}	//	MPPDoc
+	public BigDecimal getProductionFactQty(String trxName)
+	{
+		BigDecimal productionQty = Env.ZERO;
+
+		String sql = "SELECT COALESCE(SUM(fl.MovementQty),0) FROM JP_PP_FactLine fl "
+				+ " INNER JOIN JP_PP_Fact f ON (fl.JP_PP_Fact_ID =f.JP_PP_Fact_ID)   "
+				+ " WHERE fl.IsEndProduct='Y' AND JP_PP_Plan_ID = ? AND f.DocStatus in ('CO','CL')";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, getJP_PP_Plan_ID());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				productionQty = rs.getBigDecimal(1);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		return productionQty;
+	}
+
+}

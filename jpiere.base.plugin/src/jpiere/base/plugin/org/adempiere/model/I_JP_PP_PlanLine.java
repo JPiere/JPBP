@@ -160,6 +160,19 @@ public interface I_JP_PP_PlanLine
 	  */
 	public boolean isEndProduct();
 
+    /** Column name JP_MovementQtyFact */
+    public static final String COLUMNNAME_JP_MovementQtyFact = "JP_MovementQtyFact";
+
+	/** Set Movement Quantity(Fact).
+	  * Quantity of a product moved.
+	  */
+	public void setJP_MovementQtyFact (BigDecimal JP_MovementQtyFact);
+
+	/** Get Movement Quantity(Fact).
+	  * Quantity of a product moved.
+	  */
+	public BigDecimal getJP_MovementQtyFact();
+
     /** Column name JP_PP_PlanLineT_ID */
     public static final String COLUMNNAME_JP_PP_PlanLineT_ID = "JP_PP_PlanLineT_ID";
 
@@ -207,6 +220,15 @@ public interface I_JP_PP_PlanLine
 	public int getJP_PP_Plan_ID();
 
 	public I_JP_PP_Plan getJP_PP_Plan() throws RuntimeException;
+
+    /** Column name JP_QtyUsedFact */
+    public static final String COLUMNNAME_JP_QtyUsedFact = "JP_QtyUsedFact";
+
+	/** Set Quantity Used(Fact)	  */
+	public void setJP_QtyUsedFact (BigDecimal JP_QtyUsedFact);
+
+	/** Get Quantity Used(Fact)	  */
+	public BigDecimal getJP_QtyUsedFact();
 
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";

@@ -44,9 +44,13 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
         {
 			setC_DocTypeTarget_ID (0);
 			setC_DocType_ID (0);
+			setIsCompleteAutoJP (true);
+// Y
 			setIsCreatePPFactJP (false);
 // N
 			setIsCreated (null);
+// N
+			setIsSplitWhenDifferenceJP (false);
 // N
 			setIsSummary (true);
 // Y
@@ -398,6 +402,27 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 		return (String)get_Value(COLUMNNAME_Help);
 	}
 
+	/** Set Auto Complete.
+		@param IsCompleteAutoJP Auto Complete	  */
+	public void setIsCompleteAutoJP (boolean IsCompleteAutoJP)
+	{
+		set_Value (COLUMNNAME_IsCompleteAutoJP, Boolean.valueOf(IsCompleteAutoJP));
+	}
+
+	/** Get Auto Complete.
+		@return Auto Complete	  */
+	public boolean isCompleteAutoJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCompleteAutoJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Create PP Fact.
 		@param IsCreatePPFactJP Create PP Fact	  */
 	public void setIsCreatePPFactJP (boolean IsCreatePPFactJP)
@@ -438,6 +463,30 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 	public String getIsCreated () 
 	{
 		return (String)get_Value(COLUMNNAME_IsCreated);
+	}
+
+	/** Set Split when Difference.
+		@param IsSplitWhenDifferenceJP 
+		Split document when there is a difference
+	  */
+	public void setIsSplitWhenDifferenceJP (boolean IsSplitWhenDifferenceJP)
+	{
+		set_Value (COLUMNNAME_IsSplitWhenDifferenceJP, Boolean.valueOf(IsSplitWhenDifferenceJP));
+	}
+
+	/** Get Split when Difference.
+		@return Split document when there is a difference
+	  */
+	public boolean isSplitWhenDifferenceJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSplitWhenDifferenceJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Summary Level.

@@ -274,6 +274,15 @@ public interface I_JP_PP_DocT
 	/** Get Doc Complete by End Process	  */
 	public boolean isCompleteAutoByEndProcessJP();
 
+    /** Column name IsCompleteAutoJP */
+    public static final String COLUMNNAME_IsCompleteAutoJP = "IsCompleteAutoJP";
+
+	/** Set Auto Complete	  */
+	public void setIsCompleteAutoJP (boolean IsCompleteAutoJP);
+
+	/** Get Auto Complete	  */
+	public boolean isCompleteAutoJP();
+
     /** Column name JP_NonBusinessDayCalendar_ID */
     public static final String COLUMNNAME_JP_NonBusinessDayCalendar_ID = "JP_NonBusinessDayCalendar_ID";
 

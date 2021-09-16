@@ -265,6 +265,15 @@ public interface I_JP_PP_PlanT
 	  */
 	public boolean isActive();
 
+    /** Column name IsCompleteAutoJP */
+    public static final String COLUMNNAME_IsCompleteAutoJP = "IsCompleteAutoJP";
+
+	/** Set Auto Complete	  */
+	public void setIsCompleteAutoJP (boolean IsCompleteAutoJP);
+
+	/** Get Auto Complete	  */
+	public boolean isCompleteAutoJP();
+
     /** Column name IsCreatePPFactJP */
     public static final String COLUMNNAME_IsCreatePPFactJP = "IsCreatePPFactJP";
 
@@ -282,6 +291,19 @@ public interface I_JP_PP_PlanT
 
 	/** Get Records created	  */
 	public String getIsCreated();
+
+    /** Column name IsSplitWhenDifferenceJP */
+    public static final String COLUMNNAME_IsSplitWhenDifferenceJP = "IsSplitWhenDifferenceJP";
+
+	/** Set Split when Difference.
+	  * Split document when there is a difference
+	  */
+	public void setIsSplitWhenDifferenceJP (boolean IsSplitWhenDifferenceJP);
+
+	/** Get Split when Difference.
+	  * Split document when there is a difference
+	  */
+	public boolean isSplitWhenDifferenceJP();
 
     /** Column name IsSummary */
     public static final String COLUMNNAME_IsSummary = "IsSummary";

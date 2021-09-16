@@ -42,6 +42,8 @@ public class X_JP_PP_PlanLine extends PO implements I_JP_PP_PlanLine, I_Persiste
         {
 			setIsEndProduct (false);
 // N
+			setJP_MovementQtyFact (Env.ZERO);
+// 0
 			setJP_PP_PlanLine_ID (0);
 			setJP_PP_Plan_ID (0);
 			setLine (0);
@@ -186,6 +188,26 @@ public class X_JP_PP_PlanLine extends PO implements I_JP_PP_PlanLine, I_Persiste
 		return false;
 	}
 
+	/** Set Movement Quantity(Fact).
+		@param JP_MovementQtyFact 
+		Quantity of a product moved.
+	  */
+	public void setJP_MovementQtyFact (BigDecimal JP_MovementQtyFact)
+	{
+		set_ValueNoCheck (COLUMNNAME_JP_MovementQtyFact, JP_MovementQtyFact);
+	}
+
+	/** Get Movement Quantity(Fact).
+		@return Quantity of a product moved.
+	  */
+	public BigDecimal getJP_MovementQtyFact () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_MovementQtyFact);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	public I_JP_PP_PlanLineT getJP_PP_PlanLineT() throws RuntimeException
     {
 		return (I_JP_PP_PlanLineT)MTable.get(getCtx(), I_JP_PP_PlanLineT.Table_Name)
@@ -274,6 +296,23 @@ public class X_JP_PP_PlanLine extends PO implements I_JP_PP_PlanLine, I_Persiste
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Quantity Used(Fact).
+		@param JP_QtyUsedFact Quantity Used(Fact)	  */
+	public void setJP_QtyUsedFact (BigDecimal JP_QtyUsedFact)
+	{
+		set_Value (COLUMNNAME_JP_QtyUsedFact, JP_QtyUsedFact);
+	}
+
+	/** Get Quantity Used(Fact).
+		@return Quantity Used(Fact)	  */
+	public BigDecimal getJP_QtyUsedFact () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_QtyUsedFact);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Line No.

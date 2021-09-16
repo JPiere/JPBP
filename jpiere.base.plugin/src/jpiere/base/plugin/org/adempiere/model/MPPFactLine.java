@@ -111,26 +111,49 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
-		//Update ProductionQty
+		//Update Parent ProductionQty
 		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_MovementQty)) )
 		{
 
-			String sql = "UPDATE JP_PP_Fact SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_FactLine WHERE JP_PP_Fact_ID=? AND IsEndProduct='Y') "
-					+ " WHERE JP_PP_Fact_ID=?";
-
-			int no = DB.executeUpdate(sql
-						, new Object[]{getJP_PP_Fact_ID(), getJP_PP_Fact_ID()}
-						, false, get_TrxName(), 0);
+			int no = updateParentProductionQty(get_TrxName());
 			if (no != 1)
 			{
-				log.saveError("DBExecuteError", sql);
+				log.saveError("DBExecuteError", "MPPFactLine#afterSave() -> updateParentProductionQty()");
 				return false;
 			}
-
-
 		}
 
 		return true;
+	}
+
+
+	@Override
+	protected boolean afterDelete(boolean success)
+	{
+		//Update Parent ProductionQty
+		if(isEndProduct())
+		{
+			int no = updateParentProductionQty(get_TrxName());
+			if (no != 1)
+			{
+				log.saveError("DBExecuteError", "MPPFactLine#afterDelete() -> updateParentProductionQty()");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	private int updateParentProductionQty(String trxName)
+	{
+		String sql = "UPDATE JP_PP_Fact SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_FactLine WHERE JP_PP_Fact_ID=? AND IsEndProduct='Y') "
+				+ " WHERE JP_PP_Fact_ID=?";
+
+		int no = DB.executeUpdate(sql
+					, new Object[]{getJP_PP_Fact_ID(), getJP_PP_Fact_ID()}
+					, false, trxName, 0);
+		return no;
 	}
 
 	public MPPFact getParent()
