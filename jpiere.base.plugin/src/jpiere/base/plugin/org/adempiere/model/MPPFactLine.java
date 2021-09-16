@@ -23,6 +23,7 @@ import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 
@@ -72,10 +73,13 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 
 
 		//Check IsEndProduct
-		if (getParent().getM_Product_ID() == getM_Product_ID() && getParent().getProductionQty().signum() == getMovementQty().signum())
+		if (getParent().getM_Product_ID() == getM_Product_ID() &&
+				(getParent().getProductionQty().signum() == getMovementQty().signum() || getParent().getProductionQty().compareTo(Env.ZERO)==0 ))
+		{
 			setIsEndProduct(true);
-		else
+		}else {
 			setIsEndProduct(false);
+		}
 
 
 		//Convert Qty & Rounding Qty

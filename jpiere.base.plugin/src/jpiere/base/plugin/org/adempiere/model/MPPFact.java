@@ -366,6 +366,11 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 					PO.copyValues(ppFactLine, ppLine);
 					ppLine.setM_Production_ID(pp.getM_Production_ID());
 					ppLine.setAD_Org_ID(pp.getAD_Org_ID());
+					ppLine.setLine(ppFactLine.getLine());
+					ppLine.setM_Product_ID(ppFactLine.getM_Product_ID());
+					ppLine.setPlannedQty(ppFactLine.getPlannedQty());
+					ppLine.setQtyUsed(ppFactLine.getQtyUsed());
+					ppLine.setMovementQty(ppFactLine.getMovementQty());
 					ppLine.saveEx(get_TrxName());
 
 					ppFactLineMAs = ppFactLine.getPPFactLineMAs();
@@ -441,7 +446,8 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 		if (DOCSTATUS_Closed.equals(getDocStatus())
 				|| DOCSTATUS_Reversed.equals(getDocStatus())
-				|| DOCSTATUS_Voided.equals(getDocStatus()))
+				|| DOCSTATUS_Voided.equals(getDocStatus())
+				|| DOCSTATUS_Completed.equals(getDocStatus()))
 		{
 			m_processMsg = "Document Closed: " + getDocStatus();
 			setDocAction(DOCACTION_None);
@@ -479,8 +485,13 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			MProduction pp = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
 			if(pp.getDocStatus().equals(DocAction.STATUS_Completed))
 			{
-				pp.processIt(DocAction.ACTION_Close);
-				pp.saveEx(get_TrxName());
+				if(pp.processIt(DocAction.ACTION_Close))
+				{
+					pp.saveEx(get_TrxName());
+				}else {
+					m_processMsg = pp.getProcessMsg();
+					return false;
+				}
 			}
 		}
 
@@ -504,6 +515,12 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSECORRECT);
 		if (m_processMsg != null)
 			return false;
+
+
+		if(!getDocStatus().equals(DocAction.STATUS_Completed))
+		{
+			return voidIt();
+		}
 
 		if(getM_Production_ID() != 0)
 		{
@@ -536,12 +553,17 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		if (m_processMsg != null)
 			return false;
 
+		if(!getDocStatus().equals(STATUS_Completed))
+		{
+			return voidIt();
+		}
+
 		if(getM_Production_ID() != 0)
 		{
 			MProduction pp = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
-			if(pp.getDocStatus().equals(DocAction.STATUS_Completed))
+			if(pp.getDocStatus().equals(STATUS_Completed))
 			{
-				pp.processIt(DocAction.ACTION_Reverse_Accrual);
+				pp.processIt(ACTION_Reverse_Accrual);
 				pp.saveEx(get_TrxName());
 			}
 		}

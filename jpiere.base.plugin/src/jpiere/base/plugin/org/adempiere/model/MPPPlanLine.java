@@ -73,10 +73,13 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 		}
 
 		//Check IsEndProduct
-		if (getParent().getM_Product_ID() == getM_Product_ID() && getParent().getProductionQty().signum() == getPlannedQty().signum())
+		if (getParent().getM_Product_ID() == getM_Product_ID() &&
+				(getParent().getProductionQty().signum() == getPlannedQty().signum() || getParent().getProductionQty().compareTo(Env.ZERO) == 0 ))
+		{
 			setIsEndProduct(true);
-		else
+		}else {
 			setIsEndProduct(false);
+		}
 
 		//Convert Qty & Rounding Qty
 		if (isEndProduct())

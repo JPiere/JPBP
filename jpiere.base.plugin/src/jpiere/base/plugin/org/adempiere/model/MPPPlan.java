@@ -382,8 +382,13 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		{
 			if(!ppFact.isProcessed())
 			{
-				ppFact.processIt(DocAction.ACTION_Void);
-				ppFact.saveEx(get_TrxName());
+				if(ppFact.processIt(ACTION_Void))
+				{
+					ppFact.saveEx(get_TrxName());
+				}else {
+					m_processMsg = ppFact.getProcessMsg();
+					return false;
+				}
 			}
 		}
 
@@ -410,12 +415,23 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			return false;
 
 		MPPFact[] ppFacts = getPPFacts(true, null);
+		boolean isOK = true;
 		for(MPPFact ppFact : ppFacts)
 		{
-			if(!ppFact.isProcessed())
+			if(ppFact.isProcessed())
 			{
-				ppFact.processIt(DocAction.ACTION_Void);
+				;//Noting to do;
+
+			}else{
+				isOK = ppFact.processIt(ACTION_Void);
+			}
+
+			if(isOK)
+			{
 				ppFact.saveEx(get_TrxName());
+			}else {
+				m_processMsg = ppFact.getProcessMsg();
+				return false;
 			}
 		}
 
@@ -441,9 +457,8 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			return false;
 
 		if(!reverse(DocAction.ACTION_Reverse_Correct))
-		{
 			return false;
-		}
+
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
 		if (m_processMsg != null)
@@ -464,9 +479,8 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			return false;
 
 		if(!reverse(DocAction.ACTION_Reverse_Accrual))
-		{
 			return false;
-		}
+
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
 		if (m_processMsg != null)
@@ -479,15 +493,25 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	private boolean reverse(String docAction)
 	{
 		MPPFact[] ppFacts = getPPFacts(true, null);
+		boolean isOK = true;
 		for(MPPFact ppFact : ppFacts)
 		{
-			if(ppFact.isProcessed() && ppFact.getDocStatus().equals(DocAction.STATUS_Completed))
+			if(ppFact.isProcessed())
 			{
-				ppFact.processIt(docAction);
+				if(ppFact.getDocStatus().equals(ACTION_Complete))
+					isOK = ppFact.processIt(docAction);
+
+			}else {
+
+				isOK = ppFact.processIt(ACTION_Void);
+			}
+
+			if(isOK)
+			{
 				ppFact.saveEx(get_TrxName());
 			}else {
-				ppFact.processIt(DocAction.ACTION_Void);
-				ppFact.saveEx(get_TrxName());
+				m_processMsg = ppFact.getProcessMsg();
+				return false;
 			}
 		}
 
@@ -495,6 +519,8 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			setJP_PP_Status(JP_PP_STATUS_Void);
 
 		setProcessed(true);
+		setPosted(true);
+		setDocStatus(STATUS_Reversed);
 		setDocAction(DOCACTION_None);
 
 		return true;

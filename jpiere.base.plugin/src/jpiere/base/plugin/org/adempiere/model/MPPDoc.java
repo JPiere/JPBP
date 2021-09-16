@@ -35,6 +35,7 @@ import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
@@ -301,8 +302,13 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		{
 			if(!ppPlan.isProcessed())
 			{
-				ppPlan.processIt(DocAction.ACTION_Void);
-				ppPlan.saveEx(get_TrxName());
+				if(ppPlan.processIt(ACTION_Void))
+				{
+					ppPlan.saveEx(get_TrxName());
+				}else {
+					m_processMsg = ppPlan.getProcessMsg();
+					return false;
+				}
 			}
 		}
 
@@ -331,10 +337,13 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		MPPPlan[] ppPlans = getPPPlans(true, null);
 		for(MPPPlan ppPlan : ppPlans )
 		{
-			if(!ppPlan.isProcessed())
+			if(ppPlan.closeIt())
 			{
-				ppPlan.processIt(DocAction.ACTION_Void);
 				ppPlan.saveEx(get_TrxName());
+			}else {
+
+				m_processMsg = ppPlan.getProcessMsg();
+				return false;
 			}
 		}
 
@@ -359,7 +368,14 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		if (m_processMsg != null)
 			return false;
 
-		if(!reverse(DocAction.ACTION_Reverse_Correct))
+		if(!getDocStatus().equals(STATUS_Completed))
+		{
+			//You cannot reverse, because Document status is not completed.
+			m_processMsg = Msg.getMsg(getCtx(), "JP_CannotReverseForDocStatus");
+			return false;
+		}
+
+		if(!reverse(ACTION_Reverse_Correct))
 		{
 			return false;
 		}
@@ -382,7 +398,14 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		if (m_processMsg != null)
 			return false;
 
-		if(!reverse(DocAction.ACTION_Reverse_Accrual))
+		if(!getDocStatus().equals(STATUS_Completed))
+		{
+			//You cannot reverse, because Document status is not completed.
+			m_processMsg = Msg.getMsg(getCtx(), "JP_CannotReverseForDocStatus");
+			return false;
+		}
+
+		if(!reverse(ACTION_Reverse_Accrual))
 		{
 			return false;
 		}
@@ -397,15 +420,33 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	private boolean reverse(String docAction)
 	{
 		MPPPlan[] ppPlans = getPPPlans(true, null);
+		boolean isOK = true;
 		for(MPPPlan ppPlan : ppPlans )
 		{
-			if(ppPlan.isProcessed() && ppPlan.getDocStatus().equals(DocAction.STATUS_Completed))
+			if(ppPlan.getDocStatus().equals(STATUS_Closed)
+					|| ppPlan.getDocStatus().equals(STATUS_Voided)
+					|| ppPlan.getDocStatus().equals(STATUS_Reversed))
 			{
-				ppPlan.processIt(docAction);
+				continue;
+			}
+
+			if(ACTION_Reverse_Accrual.equals(docAction))
+			{
+				if(!ppPlan.reverseCorrectIt())
+					isOK = false;
+
+			}else if(ACTION_Reverse_Correct.equals(docAction)) {
+
+				if(!ppPlan.reverseAccrualIt())
+					isOK = false;
+			}
+
+			if(isOK)
+			{
 				ppPlan.saveEx(get_TrxName());
-			}else {
-				ppPlan.processIt(DocAction.ACTION_Void);
-				ppPlan.saveEx(get_TrxName());
+			}else{
+				m_processMsg = ppPlan.getProcessMsg();
+				return false;
 			}
 		}
 
