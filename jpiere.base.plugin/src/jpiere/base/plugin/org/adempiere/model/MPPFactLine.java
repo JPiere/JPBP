@@ -74,7 +74,9 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 
 		//Check IsEndProduct
 		if (getParent().getM_Product_ID() == getM_Product_ID() &&
-				(getParent().getProductionQty().signum() == getMovementQty().signum() || getParent().getProductionQty().compareTo(Env.ZERO)==0 ))
+				(getParent().getProductionQty().signum() == getMovementQty().signum()
+				|| getParent().getProductionQty().compareTo(Env.ZERO)==0
+				|| getMovementQty().compareTo(Env.ZERO)==0 ))
 		{
 			setIsEndProduct(true);
 		}else {

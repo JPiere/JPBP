@@ -67,7 +67,10 @@ public class PPStartProcess extends SvrProcess {
 					|| doc.getDocStatus().equals(DocAction.STATUS_Invalid)
 					|| doc.getDocStatus().equals(DocAction.STATUS_InProgress))
 			{
-				doc.processIt(DocAction.ACTION_Prepare);
+				if(!doc.processIt(DocAction.ACTION_Prepare))
+				{
+					throw new Exception(doc.getProcessMsg());
+				}
 			}else {
 				;
 			}

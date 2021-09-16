@@ -60,7 +60,7 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 		}
 
 		//Set C_UOM_ID
-		if(newRecord || is_ValueChanged(MPPFact.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0 )
+		if(newRecord || is_ValueChanged(MPPPlanLine.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0 )
 		{
 			MProduct product = MProduct.get(getM_Product_ID());
 			if(product.getC_UOM_ID() != getC_UOM_ID())
@@ -71,7 +71,9 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 
 		//Check IsEndProduct
 		if (getParent().getM_Product_ID() == getM_Product_ID() &&
-				(getParent().getProductionQty().signum() == getPlannedQty().signum() || getParent().getProductionQty().compareTo(Env.ZERO) == 0 ))
+				(getParent().getProductionQty().signum() == getPlannedQty().signum()
+				|| getParent().getProductionQty().compareTo(Env.ZERO) == 0
+				|| getPlannedQty().compareTo(Env.ZERO) == 0 ))
 		{
 			setIsEndProduct(true);
 		}else {
@@ -89,6 +91,10 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 				setQtyUsed(null);
 				setJP_QtyUsedFact(null);
 				setMovementQty(getPlannedQty());
+				if(newRecord)
+				{
+					setJP_MovementQtyFact(Env.ZERO);
+				}
 			}
 		}else {
 
@@ -99,9 +105,11 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 				setPlannedQty(getPlannedQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 				setQtyUsed(getPlannedQty());
 				setMovementQty(getQtyUsed().negate());
-
 				if(newRecord)
+				{
 					setJP_QtyUsedFact(Env.ZERO);
+					setJP_MovementQtyFact(Env.ZERO);
+				}
 			}
 		}
 

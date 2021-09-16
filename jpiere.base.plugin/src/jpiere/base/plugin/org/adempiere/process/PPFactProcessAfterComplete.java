@@ -85,8 +85,11 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 					MColumn docActionColumn = MColumn.get(getCtx(), MPPPlan.Table_Name, MPPPlan.COLUMNNAME_DocAction);
 					MProcess process = MProcess.get(docActionColumn.getAD_Process_ID());
 					MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
-					if(!Util.isEmpty(wfProcess.getProcessMsg()))
-						addLog(wfProcess.getProcessMsg());
+					if(wfProcess.getWFState().equals(MWFProcess.WFSTATE_Terminated))
+					{
+						msg = wfProcess.getTextMsg();
+						addLog(msg);
+					}
 
 					return msg;
 

@@ -166,6 +166,13 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 
+		MPPPlan[] ppPlans = getPPPlans(true, null);
+		if(ppPlans.length == 0)
+		{
+			m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NoPPPlan");
+			return DocAction.STATUS_Invalid;
+		}
+
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -222,6 +229,17 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
+
+		MPPPlan[] ppPlans = getPPPlans(true, null);
+		for(MPPPlan ppPlan : ppPlans)
+		{
+			if(!ppPlan.isProcessed())
+			{
+				//You cannot be completed PP Doc because there is an unprocessed PP Plan.
+				m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NotCompletePPDocForUnprocessedPPPlan");
+				return DocAction.STATUS_Invalid;
+			}
+		}
 
 		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
 		if(getJP_PP_Start() == null)

@@ -112,7 +112,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
 		//Update Line Qty
-		if(!newRecord && is_ValueChanged(MPPFact.COLUMNNAME_ProductionQty))
+		if(!newRecord && is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
 		{
 			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
 			MUOM uom = null;

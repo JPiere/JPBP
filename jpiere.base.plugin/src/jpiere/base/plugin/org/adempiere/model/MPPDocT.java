@@ -21,7 +21,7 @@ import org.compiere.model.Query;
 import org.compiere.util.Util;
 
 /**
- * JPIERE-0501: JPiere PP Doc Template
+ * JPIERE-0502: JPiere PP Doc Template
  *
  * @author Hideaki Hagiwara
  *

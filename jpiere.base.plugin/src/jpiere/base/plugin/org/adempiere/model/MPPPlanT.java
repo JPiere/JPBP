@@ -14,15 +14,21 @@
 
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MProduct;
+import org.compiere.model.MSysConfig;
+import org.compiere.model.MUOM;
 import org.compiere.model.Query;
+import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 /**
- * JPIERE-0501: JPiere PP Doc Template
+ * JPIERE-0502: JPiere PP Doc Template
  *
  * @author Hideaki Hagiwara
  *
@@ -42,6 +48,63 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Set C_UOM_ID
+		if(newRecord || is_ValueChanged(MPPPlanT.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0)
+		{
+			MProduct product = MProduct.get(getM_Product_ID());
+			if(product.getC_UOM_ID() != getC_UOM_ID())
+			{
+				setC_UOM_ID(product.getC_UOM_ID());
+			}
+		}
+
+		//Rounding Production Qty
+		if(newRecord || is_ValueChanged(MPPPlanT.COLUMNNAME_ProductionQty))
+		{
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = MUOM.get(getC_UOM_ID());
+			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
+		}
+
+		return true;
+	}
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		//Update Line Qty
+		if(!newRecord && is_ValueChanged(MPPPlanT.COLUMNNAME_ProductionQty))
+		{
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = null;
+
+			BigDecimal newQty = getProductionQty();
+			BigDecimal oldQty = (BigDecimal)get_ValueOld(MPPPlanT.COLUMNNAME_ProductionQty) ;
+			BigDecimal rate = Env.ONE;
+			if(oldQty != null && oldQty.compareTo(Env.ZERO) != 0)
+				rate = newQty.divide(oldQty, 4, RoundingMode.HALF_UP);
+
+			MPPPlanLineT[] lines = getPPPlanLineTs(true, null);
+			for(MPPPlanLineT line : lines)
+			{
+				if(line.isEndProduct())
+				{
+					line.setPlannedQty(getProductionQty());
+					line.setQtyUsed(null);
+					line.setMovementQty(getProductionQty());
+
+				}else {
+					uom = MUOM.get(line.getC_UOM_ID());
+					oldQty = line.getPlannedQty();
+					newQty = oldQty.multiply(rate).setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
+					line.setPlannedQty(newQty);
+					line.setQtyUsed(newQty);
+					line.setMovementQty(newQty.negate());
+				}
+				line.saveEx(get_TrxName());
+			}
+		}
+
 		return true;
 	}
 

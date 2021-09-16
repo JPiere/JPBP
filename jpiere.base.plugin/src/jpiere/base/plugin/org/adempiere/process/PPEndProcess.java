@@ -28,6 +28,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDoc;
 
@@ -86,7 +87,11 @@ public class PPEndProcess extends SvrProcess {
 					pInfo.setPO(po);
 					MColumn docActionColumn = MColumn.get(getCtx(), m_Table.getTableName(), MPPDoc.COLUMNNAME_DocAction);
 					MProcess process = MProcess.get(docActionColumn.getAD_Process_ID());
-					ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
+					MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
+					if(wfProcess.getWFState().equals(MWFProcess.WFSTATE_Terminated))
+					{
+						throw new Exception(wfProcess.getTextMsg());
+					}
 
 				}else {
 
