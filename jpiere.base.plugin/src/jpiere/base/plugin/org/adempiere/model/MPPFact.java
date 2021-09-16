@@ -451,12 +451,6 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		MFactAcct.deleteEx(MPPFact.Table_ID, getJP_PP_Fact_ID(), get_TrxName());
 		setPosted(true);
 
-		MPPFactLine[] lines = getPPFactLines();
-		for(MPPFactLine line : lines)
-		{
-			;//TODO Processedフラグをつける
-		}
-
 		setJP_PP_Status(JP_PP_STATUS_Void);
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
@@ -633,6 +627,23 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 	public int getC_Currency_ID()
 	{
 		return 0;
+	}
+
+	/**
+	 * 	Set Processed.
+	 *
+	 *	@param processed processed
+	 */
+	public void setProcessed (boolean processed)
+	{
+		super.setProcessed (processed);
+		if (get_ID() == 0)
+			return;
+		String set = "SET Processed='"
+			+ (processed ? "Y" : "N")
+			+ "' WHERE JP_PP_Fact_ID=" + getJP_PP_Fact_ID();
+		DB.executeUpdateEx("UPDATE JP_PP_FactLine " + set, get_TrxName());
+		m_PPFactLines = null;
 	}
 
 	@Override

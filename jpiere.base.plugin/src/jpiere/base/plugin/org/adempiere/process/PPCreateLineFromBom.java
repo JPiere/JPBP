@@ -88,7 +88,20 @@ public class PPCreateLineFromBom extends SvrProcess {
 				return msg;
 		}
 
+		//Update ProductionQty & IsCreated
+		String sql = "UPDATE "+ m_Table.getTableName() + " SET ProductionQty=?, IsCreated=? "
+							+ " WHERE "+ m_Table.getTableName()+"_ID=?";
 
+		int no = DB.executeUpdate(sql
+					, new Object[]{p_ProductionQty, "Y", po.get_ID()}
+					, false, get_TrxName(), 0);
+		if (no != 1)
+		{
+			throw new Exception(Msg.getMsg(getCtx(), "DBExecuteError") + " : " + sql);
+		}
+
+
+		//Create Line
 		PO poLine = createLine(po);
 
 		//line of End Product
@@ -119,18 +132,6 @@ public class PPCreateLineFromBom extends SvrProcess {
 			poLine.set_ValueNoCheck("QtyUsed", p_ProductionQty.multiply(bom.getBOMQty()));
 			poLine.set_ValueNoCheck("MovementQty",p_ProductionQty.multiply(bom.getBOMQty()).negate());
 			poLine.saveEx(get_TrxName());
-		}
-
-		//Update ProductionQty & IsCreated
-		String sql = "UPDATE "+ m_Table.getTableName() + " SET ProductionQty=?, IsCreated=? "
-							+ " WHERE "+ m_Table.getTableName()+"_ID=?";
-
-		int no = DB.executeUpdate(sql
-					, new Object[]{p_ProductionQty, "Y", po.get_ID()}
-					, false, get_TrxName(), 0);
-		if (no != 1)
-		{
-			throw new Exception(Msg.getMsg(getCtx(), "DBExecuteError") + " : " + sql);
 		}
 
 		return "@Success@";

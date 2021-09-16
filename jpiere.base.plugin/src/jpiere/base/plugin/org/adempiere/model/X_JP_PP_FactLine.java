@@ -32,7 +32,7 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210915L;
+	private static final long serialVersionUID = 20210916L;
 
     /** Standard Constructor */
     public X_JP_PP_FactLine (Properties ctx, int JP_PP_FactLine_ID, String trxName)
@@ -52,6 +52,8 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 // @M_Locator_ID@
 			setM_Product_ID (0);
 			setMovementQty (Env.ZERO);
+			setProcessed (false);
+// N
         } */
     }
 
@@ -415,6 +417,30 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Processed.
+		@param Processed 
+		The document has been processed
+	  */
+	public void setProcessed (boolean Processed)
+	{
+		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
+	}
+
+	/** Get Processed.
+		@return The document has been processed
+	  */
+	public boolean isProcessed () 
+	{
+		Object oo = get_Value(COLUMNNAME_Processed);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Quantity Used.

@@ -34,7 +34,7 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210915L;
+	private static final long serialVersionUID = 20210916L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanT (Properties ctx, int JP_PP_PlanT_ID, String trxName)

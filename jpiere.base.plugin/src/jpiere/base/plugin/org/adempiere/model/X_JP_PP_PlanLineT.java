@@ -32,7 +32,7 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210915L;
+	private static final long serialVersionUID = 20210916L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanLineT (Properties ctx, int JP_PP_PlanLineT_ID, String trxName)

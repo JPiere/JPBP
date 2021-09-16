@@ -51,8 +51,7 @@ public class PPStartProcess extends SvrProcess {
 		String msg = "@OK@";
 
 		PO po = m_Table.getPO(record_ID, get_TrxName());
-		if(po.get_ValueAsBoolean(MPPDoc.COLUMNNAME_Processed)
-				|| po.get_ValueAsString(MPPDoc.COLUMNNAME_JP_PP_StartProcess).equals("Y") )
+		if(po.get_ValueAsBoolean(MPPDoc.COLUMNNAME_Processed))
 		{
 			msg = Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_Processed);
 			return msg;

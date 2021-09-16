@@ -36,6 +36,7 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -297,7 +298,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			if(!ppFact.isProcessed())
 			{
 				//You cannot be completed because there is an unprocessed PP Fact.
-				m_processMsg = Msg.getElement(getCtx(), "JP_PP_UnprocessedFact");
+				m_processMsg = Msg.getMsg(getCtx(), "JP_PP_UnprocessedFact");
 				return DocAction.STATUS_Invalid;
 			}
 
@@ -312,7 +313,12 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		setJP_ProductionQtyFact(JP_ProductionQtyFact);
 		setJP_PP_Workload_Fact(JP_PP_Workload_Fact);
 		setJP_PP_Status(JP_PP_STATUS_Completed);
-		setJP_PP_End(Timestamp.valueOf(LocalDateTime.now()));
+		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+		if(getJP_PP_Start() == null)
+		{
+			setJP_PP_Start(now);
+		}
+		setJP_PP_End(now);
 
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
@@ -380,8 +386,6 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 				ppFact.saveEx(get_TrxName());
 			}
 		}
-
-		//TODO Plan Line をProcessedにする? 要検討
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
 		if (m_processMsg != null)
@@ -519,7 +523,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		setDocAction(DOCACTION_Complete);
 		setProcessed(false);
 
-		return false;
+		return true;
 	}	//	reActivateIt
 
 
@@ -568,6 +572,23 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	public int getC_Currency_ID()
 	{
 		return 0;
+	}
+
+	/**
+	 * 	Set Processed.
+	 *
+	 *	@param processed processed
+	 */
+	public void setProcessed (boolean processed)
+	{
+		super.setProcessed (processed);
+		if (get_ID() == 0)
+			return;
+		String set = "SET Processed='"
+			+ (processed ? "Y" : "N")
+			+ "' WHERE JP_PP_Plan_ID=" + getJP_PP_Plan_ID();
+		DB.executeUpdateEx("UPDATE JP_PP_PlanLine " + set, get_TrxName());
+		m_PPPlanLines = null;
 	}
 
 	@Override

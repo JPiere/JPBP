@@ -501,15 +501,12 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		{
 			index = 0;
 			options[index++] = DocumentEngine.ACTION_Void;
-			options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
-			options[index++] = DocumentEngine.ACTION_Reverse_Correct;
 			options[index++] = DocumentEngine.ACTION_Prepare;
 			options[index++] = DocumentEngine.ACTION_Complete;
 
 		}else if(docStatus.equals(DocumentEngine.STATUS_Completed)) {
 
 			index = 0;
-			options[index++] = DocumentEngine.ACTION_Void;
 			options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
 			options[index++] = DocumentEngine.ACTION_Reverse_Correct;
 			options[index++] = DocumentEngine.ACTION_Close;

@@ -59,9 +59,9 @@ public class PPEndProcess extends SvrProcess {
 
 		if(!po.get_ValueAsString(MPPDoc.COLUMNNAME_JP_PP_StartProcess).equals("Y"))
 		{
-			msg = "先に開始プロセスを実行して下さい。";//TODO 先に開始プロセスを実行して下さい。
+			//Please perform PP Start Process before PP End process.
+			msg = Msg.getMsg(getCtx(), "JP_PP_RunEndProcessStartCheck");
 			throw new Exception(msg);
-			//return msg;
 		}
 
 		if(po.get_ValueAsBoolean(MPPDoc.COLUMNNAME_Processed)
