@@ -45,11 +45,20 @@ public class MPPDocT extends X_JP_PP_DocT {
 	protected boolean beforeSave(boolean newRecord)
 	{
 		//Rounding Production Qty
-		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
+		if(newRecord || is_ValueChanged(MPPDocT.COLUMNNAME_ProductionQty))
 		{
 			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
 			MUOM uom = MUOM.get(getC_UOM_ID());
 			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
+		}
+
+		if(newRecord || is_ValueChanged(MPPDocT.COLUMNNAME_JP_ProductionDays))
+		{
+			if(getJP_ProductionDays() < 0)
+			{
+				log.saveError("Error", "0以上を入れて下さい");//TODO 多言語化
+				return false;
+			}
 		}
 
 		return true;

@@ -203,9 +203,9 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 				if(ppPlanT_Tos[i].getSeqNo() == ppPlanT_Froms[j].getSeqNo()
 						&& ppPlanT_Tos[i].getM_Product_ID() == ppPlanT_Froms[j].getM_Product_ID()
 						&& ppPlanT_Tos[i].getValue().equals(ppPlanT_Froms[j].getValue())
-						&& ppPlanT_Tos[i].getName().equals(ppPlanT_Froms[j].getName())
 						)
 				{
+					//Get NodeFrom
 					nodeFrom = MTree_Node.get(treeFrom, ppPlanT_Froms[j].getJP_PP_PlanT_ID());
 
 					if(nodeFrom.getParent_ID() == 0)
@@ -217,18 +217,20 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 
 					}else{
 
+						//Get Parent of NodeFrom
 						boolean isOK = false;
 						for(int k = 0; j < ppPlanT_Froms.length ; k++)
 						{
 							if(nodeFrom.getParent_ID() == ppPlanT_Froms[k].getJP_PP_PlanT_ID())
 							{
+
+								//Get Parent of NodeTo
 								isOK = true;
 								for(int m = 0;  m < ppPlanT_Tos.length ; m++)
 								{
 									if(ppPlanT_Tos[m].getSeqNo() == ppPlanT_Froms[k].getSeqNo()
 											&& ppPlanT_Tos[m].getM_Product_ID() == ppPlanT_Froms[k].getM_Product_ID()
 											&& ppPlanT_Tos[m].getValue().equals(ppPlanT_Froms[k].getValue())
-											&& ppPlanT_Tos[m].getName().equals(ppPlanT_Froms[k].getName())
 											)
 									{
 										nodeTo.setParent_ID(ppPlanT_Tos[m].getJP_PP_PlanT_ID());

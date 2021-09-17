@@ -84,6 +84,24 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
+		if(newRecord || is_ValueChanged(MPPPlanT.COLUMNNAME_JP_ProductionDays))
+		{
+			if(getJP_ProductionDays() < 0)
+			{
+				log.saveError("Error", "0以上を入れて下さい");//TODO 多言語化
+				return false;
+			}
+		}
+
+		if(newRecord || is_ValueChanged(MPPPlanT.COLUMNNAME_JP_DayOffset))
+		{
+			if(getJP_DayOffset() < 0)
+			{
+				log.saveError("Error", "0以上を入れて下さい");//TODO 多言語化
+				return false;
+			}
+		}
+
 		return true;
 	}
 

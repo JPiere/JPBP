@@ -16,8 +16,14 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
+import org.compiere.model.I_C_NonBusinessDay;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MTable;
@@ -25,6 +31,8 @@ import org.compiere.model.MTree;
 import org.compiere.model.MTree_Node;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
+import org.compiere.model.Query;
+import org.compiere.model.X_C_NonBusinessDay;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -119,7 +127,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				throw new Exception(Msg.getMsg(getCtx(), "NotFound")+ " " + Msg.getElement(getCtx(), MPPPlan.COLUMNNAME_JP_PP_PlanT_ID) );
 			}
 
-			if(ppDoc.getProductionQty().compareTo(Env.ZERO)==0)
+			if(ppPlan.getProductionQty().compareTo(Env.ZERO)==0)
 			{
 				throw new Exception(Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_ProductionQty) + " = 0" );
 			}
@@ -139,6 +147,9 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		return "@OK@";
 	}
 
+	private LocalDateTime JP_PP_ScheduledStart = null;
+
+
 	private MPPDoc createPPDoc()
 	{
 		ppDoc = new  MPPDoc(getCtx(), 0, get_TrxName());
@@ -154,9 +165,28 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		ppDoc.setC_UOM_ID(ppDocT.getC_UOM_ID());
 		ppDoc.setProductionQty(p_CoefficientQty.multiply(ppDocT.getProductionQty()));
 		ppDoc.setC_DocType_ID(ppDocT.getC_DocType_ID());
-		ppDoc.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
-		ppDoc.setJP_PP_ScheduledEnd(p_JP_PP_ScheduledStart);//TODO - ロジック適用
-		ppDoc.setDateAcct(p_JP_PP_ScheduledStart);//TODO - ロジック適用
+
+		LocalDateTime toDay = p_JP_PP_ScheduledStart.toLocalDateTime();
+
+		//TODO 日次調整のテスト
+		while (isNonBusinessDay(toDay))
+		{
+			toDay = toDay.plusDays(1);
+		}
+		JP_PP_ScheduledStart = toDay;
+		ppDoc.setJP_PP_ScheduledStart(Timestamp.valueOf(JP_PP_ScheduledStart));
+
+		int JP_ProductionDays = ppDocT.getJP_ProductionDays();
+		while (JP_ProductionDays > 1 )
+		{
+			toDay = toDay.plusDays(1);
+			if(isBusinessDay(toDay))
+				JP_ProductionDays--;
+		}
+
+		ppDoc.setJP_PP_ScheduledEnd(Timestamp.valueOf(toDay));
+		ppDoc.setDateAcct(Timestamp.valueOf(toDay));
+
 		ppDoc.setValue(ppDocT.getValue());
 		ppDoc.setName(ppDocT.getName());
 		ppDoc.setDocStatus(DocAction.STATUS_Drafted);
@@ -216,10 +246,39 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			ppPlan.setJP_PP_Workload_Plan(ppPlanT.getJP_PP_Workload_Plan());
 			ppPlan.setJP_PP_Workload_UOM_ID(ppPlanT.getJP_PP_Workload_UOM_ID());
 
-			ppPlan.setDateAcct(p_JP_PP_ScheduledStart);//TODO - ロジック適用
-			ppPlan.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
-			ppPlan.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
+			int offset = ppPlanT.getJP_DayOffset();
 
+			LocalDateTime startDay = JP_PP_ScheduledStart;
+
+			//TODO 日次調整のテスト
+			while (offset >= 0 )
+			{
+				if(isBusinessDay(startDay))
+				{
+					if(offset == 0)
+					{
+						;//Noting to do;
+					}else {
+						startDay = startDay.plusDays(1);
+					}
+					offset--;
+				}else {
+					startDay = startDay.plusDays(1);
+				}
+			}
+
+			ppPlan.setJP_PP_ScheduledStart(Timestamp.valueOf(startDay));
+
+			int JP_ProductionDays = ppPlanT.getJP_ProductionDays();
+			while (JP_ProductionDays > 1 )
+			{
+				startDay = startDay.plusDays(1);
+				if(isBusinessDay(startDay))
+					JP_ProductionDays--;
+			}
+
+			ppPlan.setJP_PP_ScheduledEnd(Timestamp.valueOf(startDay));
+			ppPlan.setDateAcct(Timestamp.valueOf(startDay));
 
 			ppPlan.setDocStatus(DocAction.STATUS_Drafted);
 			ppPlan.setDocAction(DocAction.ACTION_Complete);
@@ -364,5 +423,76 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		}//for i
 
 		return true;
+	}
+
+	int p_C_Country_ID = 0;//TODO 国の判定が必要だな!
+
+	private TreeSet<Timestamp> nonBusinessDays = null;
+	private boolean isNonBusinessDay(LocalDateTime toDay)
+	{
+		getNonBusinessDays(toDay);
+		return nonBusinessDays.contains(toDay);
+
+	}
+
+	private boolean isBusinessDay(LocalDateTime toDay)
+	{
+		getNonBusinessDays(toDay);
+		return !nonBusinessDays.contains(toDay);
+	}
+
+	private TreeSet<Timestamp> getNonBusinessDays(LocalDateTime toDay)
+	{
+		if(nonBusinessDays == null)
+		{
+			List<X_C_NonBusinessDay> list_NonBusinessDays = null;
+
+			nonBusinessDays = new TreeSet<Timestamp>();
+			StringBuilder whereClause = null;
+			StringBuilder orderClause = null;
+			ArrayList<Object> list_parameters  = new ArrayList<Object>();
+			Object[] parameters = null;
+
+			LocalDateTime toDayMin = LocalDateTime.of(toDay.toLocalDate(), LocalTime.MIN);
+
+			whereClause = new StringBuilder(" AD_Client_ID=? ");
+			list_parameters.add(Env.getAD_Client_ID(getCtx()));
+
+			//C_Calendar_ID
+			whereClause = whereClause.append(" AND C_Calendar_ID = ? ");
+			list_parameters.add(ppDocT.getJP_NonBusinessDayCalendar_ID());
+
+			//Date1
+			whereClause = whereClause.append(" AND Date1 >= ? AND IsActive='Y' ");
+			list_parameters.add(Timestamp.valueOf(toDayMin));
+
+			//C_Country_ID
+			if(p_C_Country_ID == 0)
+			{
+				whereClause = whereClause.append(" AND C_Country_ID IS NULL ");
+
+			}else {
+				whereClause = whereClause.append(" AND ( C_Country_ID IS NULL OR C_Country_ID = ? ) ");
+				list_parameters.add(p_C_Country_ID);
+			}
+
+			parameters = list_parameters.toArray(new Object[list_parameters.size()]);
+			orderClause = new StringBuilder("Date1");
+
+
+			list_NonBusinessDays = new Query(Env.getCtx(), I_C_NonBusinessDay.Table_Name, whereClause.toString(), null)
+												.setParameters(parameters)
+												.setOrderBy(orderClause.toString())
+												.list();
+
+			LocalDateTime nonBusinessDayMin = null;
+			for(X_C_NonBusinessDay m_NonBusinessDays : list_NonBusinessDays )
+			{
+				nonBusinessDayMin = LocalDateTime.of(m_NonBusinessDays.getDate1().toLocalDateTime().toLocalDate(), LocalTime.MIN);
+				nonBusinessDays.add(Timestamp.valueOf(nonBusinessDayMin));
+			}
+		}
+
+		return nonBusinessDays;
 	}
 }
