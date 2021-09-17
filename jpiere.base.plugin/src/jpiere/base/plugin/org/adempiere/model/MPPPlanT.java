@@ -158,7 +158,7 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 		else
 			orderClause += MPPPlanLineT.COLUMNNAME_Line;
 
-		m_PPPlanLineTs = getPPPlanLineTs(null, orderClause);
+		m_PPPlanLineTs = getPPPlanLineTs(" AND IsActive='Y' ", orderClause);
 		return m_PPPlanLineTs;
 	}
 

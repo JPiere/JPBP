@@ -86,7 +86,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	 */
 	public String getDocumentInfo()
 	{
-		return getValue() + "_" + getName();
+		return getDocumentNo() + "_" + getValue() + "_" + getName();
 	}
 
 	/**

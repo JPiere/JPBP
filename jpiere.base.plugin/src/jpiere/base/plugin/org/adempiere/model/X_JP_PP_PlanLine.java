@@ -32,7 +32,7 @@ public class X_JP_PP_PlanLine extends PO implements I_JP_PP_PlanLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210916L;
+	private static final long serialVersionUID = 20210917L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanLine (Properties ctx, int JP_PP_PlanLine_ID, String trxName)
@@ -46,6 +46,12 @@ public class X_JP_PP_PlanLine extends PO implements I_JP_PP_PlanLine, I_Persiste
 // 0
 			setJP_PP_PlanLine_ID (0);
 			setJP_PP_Plan_ID (0);
+			setJP_Processing1 (null);
+// N
+			setJP_Processing2 (null);
+// N
+			setJP_Processing3 (null);
+// N
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM JP_PP_PlanLine WHERE JP_PP_Plan_ID=@JP_PP_Plan_ID@
 			setM_Locator_ID (0);
@@ -296,6 +302,48 @@ public class X_JP_PP_PlanLine extends PO implements I_JP_PP_PlanLine, I_Persiste
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing3 Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3)
+	{
+		set_Value (COLUMNNAME_JP_Processing3, JP_Processing3);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing3 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing3);
 	}
 
 	/** Set Quantity Used(Fact).

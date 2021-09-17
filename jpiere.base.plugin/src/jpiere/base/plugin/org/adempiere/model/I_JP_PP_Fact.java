@@ -463,6 +463,60 @@ public interface I_JP_PP_Fact
 
 	public org.compiere.model.I_C_UOM getJP_PP_Workload_UOM() throws RuntimeException;
 
+    /** Column name JP_Processing1 */
+    public static final String COLUMNNAME_JP_Processing1 = "JP_Processing1";
+
+	/** Set Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1);
+
+	/** Get Process Now	  */
+	public String getJP_Processing1();
+
+    /** Column name JP_Processing2 */
+    public static final String COLUMNNAME_JP_Processing2 = "JP_Processing2";
+
+	/** Set Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2);
+
+	/** Get Process Now	  */
+	public String getJP_Processing2();
+
+    /** Column name JP_Processing3 */
+    public static final String COLUMNNAME_JP_Processing3 = "JP_Processing3";
+
+	/** Set Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3);
+
+	/** Get Process Now	  */
+	public String getJP_Processing3();
+
+    /** Column name JP_Processing4 */
+    public static final String COLUMNNAME_JP_Processing4 = "JP_Processing4";
+
+	/** Set Process Now	  */
+	public void setJP_Processing4 (String JP_Processing4);
+
+	/** Get Process Now	  */
+	public String getJP_Processing4();
+
+    /** Column name JP_Processing5 */
+    public static final String COLUMNNAME_JP_Processing5 = "JP_Processing5";
+
+	/** Set Process Now	  */
+	public void setJP_Processing5 (String JP_Processing5);
+
+	/** Get Process Now	  */
+	public String getJP_Processing5();
+
+    /** Column name JP_Processing6 */
+    public static final String COLUMNNAME_JP_Processing6 = "JP_Processing6";
+
+	/** Set Process Now	  */
+	public void setJP_Processing6 (String JP_Processing6);
+
+	/** Get Process Now	  */
+	public String getJP_Processing6();
+
     /** Column name JP_Remarks */
     public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
 

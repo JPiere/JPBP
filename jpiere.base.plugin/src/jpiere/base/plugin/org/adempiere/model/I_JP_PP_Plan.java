@@ -414,10 +414,10 @@ public interface I_JP_PP_Plan
     /** Column name JP_PP_Plan_UU */
     public static final String COLUMNNAME_JP_PP_Plan_UU = "JP_PP_Plan_UU";
 
-	/** Set PP Doc Plan(UU)	  */
+	/** Set PP Plan(UU)	  */
 	public void setJP_PP_Plan_UU (String JP_PP_Plan_UU);
 
-	/** Get PP Doc Plan(UU)	  */
+	/** Get PP Plan(UU)	  */
 	public String getJP_PP_Plan_UU();
 
     /** Column name JP_PP_ScheduledEnd */
@@ -493,6 +493,51 @@ public interface I_JP_PP_Plan
 
 	/** Get Process Now	  */
 	public String getJP_Processing1();
+
+    /** Column name JP_Processing2 */
+    public static final String COLUMNNAME_JP_Processing2 = "JP_Processing2";
+
+	/** Set Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2);
+
+	/** Get Process Now	  */
+	public String getJP_Processing2();
+
+    /** Column name JP_Processing3 */
+    public static final String COLUMNNAME_JP_Processing3 = "JP_Processing3";
+
+	/** Set Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3);
+
+	/** Get Process Now	  */
+	public String getJP_Processing3();
+
+    /** Column name JP_Processing4 */
+    public static final String COLUMNNAME_JP_Processing4 = "JP_Processing4";
+
+	/** Set Process Now	  */
+	public void setJP_Processing4 (String JP_Processing4);
+
+	/** Get Process Now	  */
+	public String getJP_Processing4();
+
+    /** Column name JP_Processing5 */
+    public static final String COLUMNNAME_JP_Processing5 = "JP_Processing5";
+
+	/** Set Process Now	  */
+	public void setJP_Processing5 (String JP_Processing5);
+
+	/** Get Process Now	  */
+	public String getJP_Processing5();
+
+    /** Column name JP_Processing6 */
+    public static final String COLUMNNAME_JP_Processing6 = "JP_Processing6";
+
+	/** Set Process Now	  */
+	public void setJP_Processing6 (String JP_Processing6);
+
+	/** Get Process Now	  */
+	public String getJP_Processing6();
 
     /** Column name JP_ProductionQtyFact */
     public static final String COLUMNNAME_JP_ProductionQtyFact = "JP_ProductionQtyFact";

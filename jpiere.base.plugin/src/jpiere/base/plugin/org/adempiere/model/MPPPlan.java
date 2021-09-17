@@ -822,6 +822,12 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		ppFact.setDocStatus(STATUS_Drafted);
 		ppFact.setDocAction(ACTION_Complete);
 		ppFact.setJP_PP_Status(JP_PP_STATUS_NotYetStarted);
+		ppFact.setJP_Processing1("N");
+		ppFact.setJP_Processing2("N");
+		ppFact.setJP_Processing3("N");
+		ppFact.setJP_Processing4("N");
+		ppFact.setJP_Processing5("N");
+		ppFact.setJP_Processing6("N");
 		ppFact.saveEx(get_TrxName());
 
 		ppFact.createFactLineFromPlanLine(trxName);

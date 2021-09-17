@@ -62,6 +62,11 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		if(p_JP_PP_DocT_From_ID == p_JP_PP_DocT_To_ID)
+		{
+			throw new Exception("コピー元とコピー先が同じです。");
+		}
+
 		MPPDocT m_PPDocT_From = new MPPDocT(getCtx(),p_JP_PP_DocT_From_ID, get_TrxName());
 		MPPDocT m_PPDocT_To = new MPPDocT(getCtx(),p_JP_PP_DocT_To_ID, get_TrxName());
 
@@ -137,6 +142,12 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 			ppPlanT_To.setJP_DayOffset(ppPlanT_From.getJP_DayOffset());
 			ppPlanT_To.setJP_PP_Workload_Plan(ppPlanT_From.getJP_PP_Workload_Plan());
 			ppPlanT_To.setJP_PP_Workload_UOM_ID(ppPlanT_From.getJP_PP_Workload_UOM_ID());
+			ppPlanT_To.setJP_Processing1("N");
+			ppPlanT_To.setJP_Processing2("N");
+			ppPlanT_To.setJP_Processing3("N");
+			ppPlanT_To.setJP_Processing4("N");
+			ppPlanT_To.setJP_Processing5("N");
+			ppPlanT_To.setJP_Processing6("N");
 			ppPlanT_To.saveEx(get_TrxName());
 			ppPlanLineT_Froms = ppPlanT_From.getPPPlanLineTs();
 
@@ -164,6 +175,10 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 				}else {
 					ppPlanLineT_To.setM_Locator_ID(M_Locator_ID);
 				}
+
+				ppPlanLineT_To.setJP_Processing1("N");
+				ppPlanLineT_To.setJP_Processing2("N");
+				ppPlanLineT_To.setJP_Processing3("N");
 				ppPlanLineT_To.saveEx(get_TrxName());
 			}
 
@@ -174,30 +189,62 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 		int p_AD_TreeTo_ID = MTree.getDefaultAD_Tree_ID(getAD_Client_ID(), "JP_PP_PlanT_ID");
 		MTree treeFrom =  new MTree(getCtx(), p_AD_TreeFrom_ID, get_TrxName());
 		MTree treeTo =  new MTree(getCtx(), p_AD_TreeTo_ID, get_TrxName());
+		MTree_Node nodeTo = null;
+		MTree_Node nodeFrom = null;
 
-		MPPPlanT[] ppPlans = m_PPDocT_To.getPPPlanTs(true, null);
-		for(int i = 0;  i < ppPlans.length ; i++)
+		MPPPlanT[] ppPlanT_Tos = m_PPDocT_To.getPPPlanTs(true, null);
+		for(int i = 0;  i < ppPlanT_Tos.length ; i++)
 		{
-			MTree_Node nodeTo = MTree_Node.get(treeTo, ppPlans[i].getJP_PP_PlanT_ID());
-			MTree_Node nodeFrom = MTree_Node.get(treeFrom, ppPlans[i].getJP_PP_PlanT_ID());
+			nodeTo = MTree_Node.get(treeTo, ppPlanT_Tos[i].getJP_PP_PlanT_ID());
 
-			for(int j = 0; j < ppPlans.length ; j++)
+			for(int j = 0; j < ppPlanT_Froms.length ; j++)
 			{
-				if(nodeFrom.getParent_ID() == 0)
+
+				if(ppPlanT_Tos[i].getSeqNo() == ppPlanT_Froms[j].getSeqNo()
+						&& ppPlanT_Tos[i].getM_Product_ID() == ppPlanT_Froms[j].getM_Product_ID()
+						&& ppPlanT_Tos[i].getValue().equals(ppPlanT_Froms[j].getValue())
+						&& ppPlanT_Tos[i].getName().equals(ppPlanT_Froms[j].getName())
+						)
 				{
-					nodeTo.setParent_ID(0);
-					nodeTo.setSeqNo(nodeFrom.getSeqNo());
-					nodeTo.save(get_TrxName());
-					break;
+					nodeFrom = MTree_Node.get(treeFrom, ppPlanT_Froms[j].getJP_PP_PlanT_ID());
 
-				}else if(nodeFrom.getParent_ID() == ppPlans[j].getJP_PP_PlanT_ID()){
+					if(nodeFrom.getParent_ID() == 0)
+					{
+						nodeTo.setParent_ID(0);
+						nodeTo.setSeqNo(nodeFrom.getSeqNo());
+						nodeTo.save(get_TrxName());
+						break;
 
-					nodeTo.setParent_ID(ppPlans[j].getJP_PP_PlanT_ID());
-					nodeTo.setSeqNo(nodeFrom.getSeqNo());
-					nodeTo.save(get_TrxName());
-					break;
-				}
+					}else{
 
+						boolean isOK = false;
+						for(int k = 0; j < ppPlanT_Froms.length ; k++)
+						{
+							if(nodeFrom.getParent_ID() == ppPlanT_Froms[k].getJP_PP_PlanT_ID())
+							{
+								isOK = true;
+								for(int m = 0;  m < ppPlanT_Tos.length ; m++)
+								{
+									if(ppPlanT_Tos[m].getSeqNo() == ppPlanT_Froms[k].getSeqNo()
+											&& ppPlanT_Tos[m].getM_Product_ID() == ppPlanT_Froms[k].getM_Product_ID()
+											&& ppPlanT_Tos[m].getValue().equals(ppPlanT_Froms[k].getValue())
+											&& ppPlanT_Tos[m].getName().equals(ppPlanT_Froms[k].getName())
+											)
+									{
+										nodeTo.setParent_ID(ppPlanT_Tos[m].getJP_PP_PlanT_ID());
+										nodeTo.setSeqNo(nodeFrom.getSeqNo());
+										nodeTo.save(get_TrxName());
+										break;
+									}
+
+								}//for m
+
+								if(isOK)
+									break;
+							}
+						}//for k
+					}//if
+				}//if
 			}//for j
 		}//for i
 

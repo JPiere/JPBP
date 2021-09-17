@@ -901,6 +901,9 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			ppFLine.setPlannedQty(plannedQty);
 			ppFLine.setQtyUsed(qtyUsed);
 			ppFLine.setMovementQty(movementQty);
+			ppFLine.setJP_Processing1("N");
+			ppFLine.setJP_Processing2("N");
+			ppFLine.setJP_Processing3("N");
 
 			ppFLine.saveEx(get_TrxName());
 		}

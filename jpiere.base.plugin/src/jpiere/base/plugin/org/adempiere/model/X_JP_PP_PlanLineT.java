@@ -32,7 +32,7 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210916L;
+	private static final long serialVersionUID = 20210917L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanLineT (Properties ctx, int JP_PP_PlanLineT_ID, String trxName)
@@ -44,12 +44,21 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 // N
 			setJP_PP_PlanLineT_ID (0);
 			setJP_PP_PlanT_ID (0);
+			setJP_Processing1 (null);
+// N
+			setJP_Processing2 (null);
+// N
+			setJP_Processing3 (null);
+// N
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM JP_PP_PlanLineT WHERE JP_PP_PlanT_ID=@JP_PP_PlanT_ID@
 			setM_Locator_ID (0);
 // @M_Locator_ID@
 			setM_Product_ID (0);
 			setMovementQty (Env.ZERO);
+// 0
+			setPlannedQty (Env.ZERO);
+// 0
         } */
     }
 
@@ -249,6 +258,48 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing3 Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3)
+	{
+		set_Value (COLUMNNAME_JP_Processing3, JP_Processing3);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing3 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing3);
+	}
+
 	/** Set Line No.
 		@param Line 
 		Unique line for this document
@@ -351,7 +402,7 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 	  */
 	public void setPlannedQty (BigDecimal PlannedQty)
 	{
-		set_ValueNoCheck (COLUMNNAME_PlannedQty, PlannedQty);
+		set_Value (COLUMNNAME_PlannedQty, PlannedQty);
 	}
 
 	/** Get Planned Quantity.

@@ -33,7 +33,7 @@ public class X_JP_PP_FactLineMA extends PO implements I_JP_PP_FactLineMA, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210916L;
+	private static final long serialVersionUID = 20210917L;
 
     /** Standard Constructor */
     public X_JP_PP_FactLineMA (Properties ctx, int JP_PP_FactLineMA_ID, String trxName)

@@ -34,7 +34,7 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210916L;
+	private static final long serialVersionUID = 20210917L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanT (Properties ctx, int JP_PP_PlanT_ID, String trxName)
@@ -62,6 +62,18 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 // 0
 			setJP_PP_Workload_UOM_ID (0);
 // 101
+			setJP_Processing1 (null);
+// N
+			setJP_Processing2 (null);
+// N
+			setJP_Processing3 (null);
+// N
+			setJP_Processing4 (null);
+// N
+			setJP_Processing5 (null);
+// N
+			setJP_Processing6 (null);
+// N
 			setJP_ProductionDays (0);
 // 1
 			setM_Locator_ID (0);
@@ -663,6 +675,90 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Process Now.
+		@param JP_Processing1 Process Now	  */
+	public void setJP_Processing1 (String JP_Processing1)
+	{
+		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing1 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing1);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing2 Process Now	  */
+	public void setJP_Processing2 (String JP_Processing2)
+	{
+		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing2 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing3 Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3)
+	{
+		set_Value (COLUMNNAME_JP_Processing3, JP_Processing3);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing3 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing3);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing4 Process Now	  */
+	public void setJP_Processing4 (String JP_Processing4)
+	{
+		set_Value (COLUMNNAME_JP_Processing4, JP_Processing4);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing4 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing4);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing5 Process Now	  */
+	public void setJP_Processing5 (String JP_Processing5)
+	{
+		set_Value (COLUMNNAME_JP_Processing5, JP_Processing5);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing5 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing5);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing6 Process Now	  */
+	public void setJP_Processing6 (String JP_Processing6)
+	{
+		set_Value (COLUMNNAME_JP_Processing6, JP_Processing6);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing6 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing6);
 	}
 
 	/** Set Production Days .

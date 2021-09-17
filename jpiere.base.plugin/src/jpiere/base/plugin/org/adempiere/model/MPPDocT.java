@@ -59,7 +59,7 @@ public class MPPDocT extends X_JP_PP_DocT {
 
 	public MPPPlanT[] getPPPlanTs (String whereClause, String orderClause)
 	{
-		StringBuilder whereClauseFinal = new StringBuilder(MPPPlanT.COLUMNNAME_JP_PP_DocT_ID+"=? ");
+		StringBuilder whereClauseFinal = new StringBuilder(MPPPlanT.COLUMNNAME_JP_PP_DocT_ID+"=?");
 		if (!Util.isEmpty(whereClause, true))
 			whereClauseFinal.append(whereClause);
 		if (orderClause.length() == 0)
@@ -87,7 +87,7 @@ public class MPPDocT extends X_JP_PP_DocT {
 		else
 			orderClause += MPPPlanT.COLUMNNAME_SeqNo;
 
-		m_PPPlanTs = getPPPlanTs(null, orderClause);
+		m_PPPlanTs = getPPPlanTs(" AND IsActive='Y' ", orderClause);
 		return m_PPPlanTs;
 	}
 
