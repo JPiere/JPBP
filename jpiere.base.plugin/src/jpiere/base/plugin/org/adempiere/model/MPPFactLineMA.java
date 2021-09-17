@@ -116,6 +116,12 @@ public class MPPFactLineMA extends X_JP_PP_FactLineMA {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//SetAD_Org_ID
+		if(newRecord)
+		{
+			setAD_Org_ID(getParent().getAD_Org_ID());
+		}
+
 		MPPFactLine parentLine = new MPPFactLine(getCtx(), getJP_PP_FactLine_ID(), get_TrxName());
 		MPPFact prodParent = new MPPFact(getCtx(), parentLine.getJP_PP_Fact_ID(), get_TrxName());
 
@@ -124,6 +130,18 @@ public class MPPFactLineMA extends X_JP_PP_FactLineMA {
 			return false;
 		}
 		return true;
+	}
+
+	private MPPFactLine m_PPFactLine = null;
+
+	public MPPFactLine getParent()
+	{
+		if(m_PPFactLine == null)
+			m_PPFactLine = new MPPFactLine(getCtx(), getJP_PP_FactLine_ID(), get_TrxName());
+		else
+			m_PPFactLine.set_TrxName(get_TrxName());
+
+		return m_PPFactLine;
 	}
 
 }

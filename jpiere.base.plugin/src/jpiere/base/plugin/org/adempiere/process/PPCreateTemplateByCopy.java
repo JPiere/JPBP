@@ -13,7 +13,22 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
+import java.math.BigDecimal;
+import java.util.logging.Level;
+
+import org.compiere.model.MLocator;
+import org.compiere.model.MOrgInfo;
+import org.compiere.model.MTree;
+import org.compiere.model.MTree_Node;
+import org.compiere.model.MWarehouse;
+import org.compiere.model.PO;
+import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.model.MPPDocT;
+import jpiere.base.plugin.org.adempiere.model.MPPPlanLineT;
+import jpiere.base.plugin.org.adempiere.model.MPPPlanT;
 
 
 /**
@@ -24,15 +39,169 @@ import org.compiere.process.SvrProcess;
  */
 public class PPCreateTemplateByCopy extends SvrProcess {
 
+	private int p_JP_PP_DocT_From_ID = 0;
+	private int p_JP_PP_DocT_To_ID = 0;
+
 	@Override
 	protected void prepare()
 	{
-		;
+		ProcessInfoParameter[] para = getParameter();
+		for (int i = 0; i < para.length; i++)
+		{
+			String name = para[i].getParameterName();
+			if (para[i].getParameter() == null && para[i].getParameter_To() == null)
+				;
+			else if (name.equals("JP_PP_DocT_ID"))
+				p_JP_PP_DocT_From_ID = ((BigDecimal)para[i].getParameter()).intValue();
+			else
+				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+		}
+		p_JP_PP_DocT_To_ID = getRecord_ID();
 	}
 
 	@Override
 	protected String doIt() throws Exception
 	{
+		MPPDocT m_PPDocT_From = new MPPDocT(getCtx(),p_JP_PP_DocT_From_ID, get_TrxName());
+		MPPDocT m_PPDocT_To = new MPPDocT(getCtx(),p_JP_PP_DocT_To_ID, get_TrxName());
+
+		MPPPlanT[] ppPlanT_Froms = m_PPDocT_From.getPPPlanTs();
+		MPPPlanLineT[] ppPlanLineT_Froms = null;
+		MPPPlanT ppPlanT_To = null;
+		MPPPlanLineT ppPlanLineT_To = null;
+
+		int M_Locator_ID = 0;
+		for(MPPPlanT ppPlanT_From : ppPlanT_Froms)
+		{
+			ppPlanT_To = new MPPPlanT(getCtx(), 0, get_TrxName());
+			PO.copyValues(m_PPDocT_From, m_PPDocT_To);
+
+			//Copy mandatory column to make sure
+			ppPlanT_To.setJP_PP_DocT_ID(m_PPDocT_To.getJP_PP_DocT_ID());
+			ppPlanT_To.setAD_Org_ID(m_PPDocT_To.getAD_Org_ID());
+			ppPlanT_To.setSeqNo(ppPlanT_From.getSeqNo());
+			ppPlanT_To.setIsActive(true);
+			ppPlanT_To.setIsSummary(ppPlanT_From.isSummary());
+			ppPlanT_To.setM_Product_ID(ppPlanT_From.getM_Product_ID());
+			if(m_PPDocT_To.getAD_Org_ID() == ppPlanT_From.getAD_Org_ID())
+			{
+				ppPlanT_To.setM_Locator_ID(ppPlanT_From.getM_Locator_ID());
+			}else {
+
+				MOrgInfo oInfo = MOrgInfo.get(m_PPDocT_To.getAD_Org_ID());
+				if(oInfo.getM_Warehouse_ID() > 0)
+				{
+					MWarehouse wh = MWarehouse.get(oInfo.getM_Warehouse_ID());
+					MLocator[] locs = wh.getLocators(false);
+					boolean isOK = false;
+
+					for(MLocator loc : locs)
+					{
+						if(loc.isDefault())
+						{
+							M_Locator_ID =loc.getM_Locator_ID();
+							ppPlanT_To.setM_Locator_ID(M_Locator_ID);
+							isOK = true;
+							break;
+						}
+					}
+
+					if(!isOK)
+					{
+						//set First locator
+						for(MLocator loc : locs)
+						{
+							M_Locator_ID =loc.getM_Locator_ID();
+							ppPlanT_To.setM_Locator_ID(M_Locator_ID);
+							isOK = true;
+							break;
+						}
+					}
+
+					if(!isOK)
+					{
+						//Different Organization of PP Doc Template, So could not find locator.
+						throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotFoundLocatorCopyTemplate"));
+					}
+				}else {
+
+					throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotFoundLocatorCopyTemplate"));
+				}
+			}// set Locator
+			ppPlanT_To.setC_DocType_ID(ppPlanT_From.getC_DocType_ID());
+			ppPlanT_To.setC_DocTypeTarget_ID(ppPlanT_From.getC_DocTypeTarget_ID());
+			ppPlanT_To.setValue(ppPlanT_From.getValue());
+			ppPlanT_To.setName(ppPlanT_From.getName());
+			ppPlanT_To.setProductionQty(ppPlanT_From.getProductionQty());
+			ppPlanT_To.setJP_ProductionDays(ppPlanT_From.getJP_ProductionDays());
+			ppPlanT_To.setJP_DayOffset(ppPlanT_From.getJP_DayOffset());
+			ppPlanT_To.setJP_PP_Workload_Plan(ppPlanT_From.getJP_PP_Workload_Plan());
+			ppPlanT_To.setJP_PP_Workload_UOM_ID(ppPlanT_From.getJP_PP_Workload_UOM_ID());
+			ppPlanT_To.saveEx(get_TrxName());
+			ppPlanLineT_Froms = ppPlanT_From.getPPPlanLineTs();
+
+			for(MPPPlanLineT ppPlanLineT_From : ppPlanLineT_Froms)
+			{
+				ppPlanLineT_To = new MPPPlanLineT(getCtx(), 0, get_TrxName());
+				PO.copyValues(ppPlanLineT_From, ppPlanLineT_To);
+
+				//Copy mandatory column to make sure
+				ppPlanLineT_To.setJP_PP_PlanT_ID(ppPlanT_To.getJP_PP_PlanT_ID()) ;
+				ppPlanLineT_To.setAD_Org_ID(m_PPDocT_To.getAD_Org_ID());
+				ppPlanLineT_To.setLine(ppPlanLineT_From.getLine());
+				ppPlanLineT_To.setM_Product_ID(ppPlanLineT_From.getM_Product_ID());
+				ppPlanLineT_To.setC_UOM_ID(ppPlanLineT_From.getC_UOM_ID());
+				ppPlanLineT_To.setIsEndProduct(ppPlanLineT_From.isEndProduct());
+				ppPlanLineT_To.setPlannedQty(ppPlanLineT_From.getPlannedQty());
+				if(ppPlanLineT_To.isEndProduct())
+					ppPlanLineT_To.setQtyUsed(null);
+				else
+					ppPlanLineT_To.setQtyUsed(ppPlanLineT_From.getQtyUsed());
+				ppPlanLineT_To.setMovementQty(ppPlanLineT_From.getMovementQty());
+				if(m_PPDocT_To.getAD_Org_ID() == ppPlanT_From.getAD_Org_ID())
+				{
+					ppPlanLineT_To.setM_Locator_ID(ppPlanLineT_From.getM_Locator_ID());
+				}else {
+					ppPlanLineT_To.setM_Locator_ID(M_Locator_ID);
+				}
+				ppPlanLineT_To.saveEx(get_TrxName());
+			}
+
+		}
+
+		//Update Tree
+		int p_AD_TreeFrom_ID = MTree.getDefaultAD_Tree_ID(getAD_Client_ID(), "JP_PP_PlanT_ID");
+		int p_AD_TreeTo_ID = MTree.getDefaultAD_Tree_ID(getAD_Client_ID(), "JP_PP_PlanT_ID");
+		MTree treeFrom =  new MTree(getCtx(), p_AD_TreeFrom_ID, get_TrxName());
+		MTree treeTo =  new MTree(getCtx(), p_AD_TreeTo_ID, get_TrxName());
+
+		MPPPlanT[] ppPlans = m_PPDocT_To.getPPPlanTs(true, null);
+		for(int i = 0;  i < ppPlans.length ; i++)
+		{
+			MTree_Node nodeTo = MTree_Node.get(treeTo, ppPlans[i].getJP_PP_PlanT_ID());
+			MTree_Node nodeFrom = MTree_Node.get(treeFrom, ppPlans[i].getJP_PP_PlanT_ID());
+
+			for(int j = 0; j < ppPlans.length ; j++)
+			{
+				if(nodeFrom.getParent_ID() == 0)
+				{
+					nodeTo.setParent_ID(0);
+					nodeTo.setSeqNo(nodeFrom.getSeqNo());
+					nodeTo.save(get_TrxName());
+					break;
+
+				}else if(nodeFrom.getParent_ID() == ppPlans[j].getJP_PP_PlanT_ID()){
+
+					nodeTo.setParent_ID(ppPlans[j].getJP_PP_PlanT_ID());
+					nodeTo.setSeqNo(nodeFrom.getSeqNo());
+					nodeTo.save(get_TrxName());
+					break;
+				}
+
+			}//for j
+		}//for i
+
+
 		return null;
 	}
 

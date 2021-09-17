@@ -80,6 +80,12 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//SetAD_Org_ID
+		if(newRecord)
+		{
+			setAD_Org_ID(getParent().getAD_Org_ID());
+		}
+
 		//Check Parent processed
 		if(newRecord)
 		{
@@ -861,14 +867,17 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		BigDecimal movementQty = Env.ZERO;
 		for(MPPPlanLine ppPLine : ppPLines)
 		{
-
 			ppFLine = new MPPFactLine(getCtx(), 0 , get_TrxName());
 			PO.copyValues(ppPLine, ppFLine);
+
+			//Copy mandatory column to make sure
 			ppFLine.setJP_PP_Fact_ID(getJP_PP_Fact_ID());
 			ppFLine.setJP_PP_PlanLine_ID(ppPLine.getJP_PP_PlanLine_ID());
 			ppFLine.setLine(ppPLine.getLine());
 			ppFLine.setAD_Org_ID(getAD_Org_ID());
+			ppFLine.setM_Product_ID(ppPLine.getM_Product_ID());
 			ppFLine.setIsEndProduct(ppPLine.isEndProduct());
+			ppFLine.setC_UOM_ID(ppPLine.getC_UOM_ID());
 			if(ppPLine.isEndProduct())
 			{
 				plannedQty = ppPLine.getPlannedQty().subtract(ppPLine.getJP_MovementQtyFact());

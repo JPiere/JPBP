@@ -43,6 +43,12 @@ public class MPPPlanLineT extends X_JP_PP_PlanLineT {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//SetAD_Org_ID
+		if(newRecord)
+		{
+			setAD_Org_ID(getParent().getAD_Org_ID());
+		}
+
 		//Set C_UOM_ID
 		if(newRecord || is_ValueChanged(MPPPlanLine.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0 )
 		{

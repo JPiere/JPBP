@@ -16,7 +16,6 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -76,6 +75,12 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//SetAD_Org_ID
+		if(newRecord)
+		{
+			setAD_Org_ID(getParent().getAD_Org_ID());
+		}
+
 		//Check Parent processed
 		if(newRecord)
 		{
@@ -292,7 +297,6 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 
 
 		MPPFact[] ppFacts = getPPFacts(true, null);
-		BigDecimal JP_PP_Workload_Fact =Env.ZERO;
 		for(MPPFact ppFact : ppFacts)
 		{
 			if(!ppFact.isProcessed())
@@ -303,8 +307,6 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			}
 		}
 
-		setJP_ProductionQtyFact(getProductionFactQty(get_TrxName()));
-		setJP_PP_Workload_Fact(JP_PP_Workload_Fact);
 		setJP_PP_Status(JP_PP_STATUS_Completed);
 		Timestamp now = Timestamp.valueOf(LocalDateTime.now());
 		if(getJP_PP_Start() == null)
@@ -793,6 +795,8 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		MPPPlanLine[] ppPLines = getPPPlanLines(true, null);
 		MPPFact ppFact = new MPPFact(getCtx(), 0, get_TrxName());
 		PO.copyValues(this, ppFact);
+
+		//Copy mandatory column to make sure
 		ppFact.setDocumentNo(null);
 		ppFact.setJP_PP_Doc_ID(getJP_PP_Doc_ID());
 		ppFact.setJP_PP_Plan_ID(getJP_PP_Plan_ID());
@@ -817,45 +821,12 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		ppFact.setJP_PP_End(null);
 		ppFact.setDocStatus(STATUS_Drafted);
 		ppFact.setDocAction(ACTION_Complete);
+		ppFact.setJP_PP_Status(JP_PP_STATUS_NotYetStarted);
 		ppFact.saveEx(get_TrxName());
 
 		ppFact.createFactLineFromPlanLine(trxName);
 
 		return null;
-	}
-
-	public BigDecimal getProductionFactQty(String trxName)
-	{
-		BigDecimal productionQty = Env.ZERO;
-
-		String sql = "SELECT COALESCE(SUM(fl.MovementQty),0) FROM JP_PP_FactLine fl "
-				+ " INNER JOIN JP_PP_Fact f ON (fl.JP_PP_Fact_ID =f.JP_PP_Fact_ID)   "
-				+ " WHERE fl.IsEndProduct='Y' AND JP_PP_Plan_ID = ? AND f.DocStatus in ('CO','CL')";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, trxName);
-			pstmt.setInt(1, getJP_PP_Plan_ID());
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				productionQty = rs.getBigDecimal(1);
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-
-		return productionQty;
 	}
 
 }

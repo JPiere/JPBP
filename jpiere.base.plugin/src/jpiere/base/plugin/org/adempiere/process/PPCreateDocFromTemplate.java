@@ -17,13 +17,17 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
+import org.compiere.model.MLocator;
+import org.compiere.model.MOrgInfo;
 import org.compiere.model.MTree;
 import org.compiere.model.MTree_Node;
+import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDoc;
 import jpiere.base.plugin.org.adempiere.model.MPPDocT;
@@ -71,21 +75,28 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		int M_Locator_ID = 0;
 
 		MPPDocT ppDocT = new MPPDocT(getCtx(), p_JP_PP_DocT_ID, get_TrxName());
 		MPPDoc ppDoc = new  MPPDoc(getCtx(), 0, get_TrxName());
 
 		PO.copyValues(ppDocT, ppDoc);
+
+		//Copy mandatory column to make sure
 		ppDoc.setJP_PP_DocT_ID(p_JP_PP_DocT_ID);
-		ppDoc.setValue(ppDocT.getValue());
 		ppDoc.setAD_Org_ID(ppDocT.getAD_Org_ID());
+		ppDoc.setM_Product_ID(ppDocT.getM_Product_ID());
 		ppDoc.setQtyEntered(p_QtyEntered);
 		ppDoc.setC_UOM_ID(ppDocT.getC_UOM_ID());
 		ppDoc.setProductionQty(p_QtyEntered.multiply(ppDocT.getProductionQty()));
+		ppDoc.setC_DocType_ID(ppDocT.getC_DocType_ID());
 		ppDoc.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
 		ppDoc.setJP_PP_ScheduledEnd(p_JP_PP_ScheduledStart);//TODO - ロジック適用
 		ppDoc.setDateAcct(p_JP_PP_ScheduledStart);//TODO - ロジック適用
+		ppDoc.setValue(ppDocT.getValue());
+		ppDoc.setName(ppDocT.getName());
 		ppDoc.setDocStatus(DocAction.STATUS_Drafted);
+		ppDoc.setDocAction(DocAction.ACTION_Complete);
 		ppDoc.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
 		ppDoc.saveEx(get_TrxName());
 
@@ -97,16 +108,75 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		{
 			ppPlan = new  MPPPlan(getCtx(), 0, get_TrxName());
 			PO.copyValues(ppPlanT, ppPlan);
+
+			//Copy mandatory column to make sure
 			ppPlan.setJP_PP_Doc_ID(ppDoc.getJP_PP_Doc_ID());
+			ppPlan.setAD_Org_ID(ppDoc.getAD_Org_ID());
 			ppPlan.setJP_PP_PlanT_ID(ppPlanT.getJP_PP_PlanT_ID());
-			ppPlan.setValue(ppPlanT.getValue());
-			ppPlan.setAD_Org_ID(ppPlanT.getAD_Org_ID());
 			ppPlan.setSeqNo(ppPlanT.getSeqNo());
+			ppPlan.setIsSummary(ppPlanT.isSummary());
+			ppPlan.setM_Product_ID(ppPlanT.getM_Product_ID());
+			if(ppPlan.getAD_Org_ID() == ppPlanT.getAD_Org_ID())
+			{
+				ppPlan.setM_Locator_ID(ppPlanT.getM_Locator_ID());
+			}else {
+
+				MOrgInfo oInfo = MOrgInfo.get(ppPlan.getAD_Org_ID());
+				if(oInfo.getM_Warehouse_ID() > 0)
+				{
+					MWarehouse wh = MWarehouse.get(oInfo.getM_Warehouse_ID());
+					MLocator[] locs = wh.getLocators(false);
+					boolean isOK = false;
+
+					for(MLocator loc : locs)
+					{
+						if(loc.isDefault())
+						{
+							M_Locator_ID =loc.getM_Locator_ID();
+							ppPlan.setM_Locator_ID(M_Locator_ID);
+							isOK = true;
+							break;
+						}
+					}
+
+					if(!isOK)
+					{
+						//set First locator
+						for(MLocator loc : locs)
+						{
+							M_Locator_ID =loc.getM_Locator_ID();
+							ppPlan.setM_Locator_ID(M_Locator_ID);
+							isOK = true;
+							break;
+						}
+					}
+
+					if(!isOK)
+					{
+						//Different Organization of PP Doc Template, So could not find locator.
+						throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotFoundLocatorCopyTemplate"));
+					}
+				}else {
+
+					throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotFoundLocatorCopyTemplate"));
+				}
+			}// set Locator
+
+			ppPlan.setC_DocType_ID(ppPlanT.getC_DocType_ID());
+			ppPlan.setValue(ppPlanT.getValue());
+			ppPlan.setName(ppPlanT.getName());
 			ppPlan.setProductionQty(p_QtyEntered.multiply(ppPlanT.getProductionQty()));
-			ppPlan.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
-			ppPlan.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
+			ppPlan.setC_UOM_ID(ppPlanT.getC_UOM_ID());
+			ppPlan.setJP_PP_Workload_Plan(ppPlanT.getJP_PP_Workload_Plan());
+			ppPlan.setJP_PP_Workload_UOM_ID(ppPlanT.getJP_PP_Workload_UOM_ID());
+
 			ppPlan.setDateAcct(p_JP_PP_ScheduledStart);//TODO - ロジック適用
+			ppPlan.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
+			ppPlan.setJP_PP_ScheduledStart(p_JP_PP_ScheduledStart);//TODO - ロジック適用
+
+
 			ppPlan.setDocStatus(DocAction.STATUS_Drafted);
+			ppPlan.setDocAction(DocAction.ACTION_Complete);
 			ppPlan.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
 			ppPlan.saveEx(get_TrxName());
 
@@ -115,14 +185,29 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			{
 				ppPlanLine = new  MPPPlanLine(getCtx(), 0, get_TrxName());
 				PO.copyValues(ppPlanLineT, ppPlanLine);
+
+				//Copy mandatory column to make sure
+				ppPlanLine.setAD_Org_ID(ppPlan.getAD_Org_ID());
 				ppPlanLine.setJP_PP_Plan_ID(ppPlan.getJP_PP_Plan_ID());
 				ppPlanLine.setJP_PP_PlanLineT_ID(ppPlanLineT.getJP_PP_PlanLineT_ID());
-				ppPlanLine.setAD_Org_ID(ppPlanLineT.getAD_Org_ID());
 				ppPlanLine.setLine(ppPlanLineT.getLine());
+				ppPlanLine.setM_Product_ID(ppPlanLineT.getM_Product_ID());
+				ppPlanLine.setIsEndProduct(ppPlanLineT.isEndProduct());
 				ppPlanLine.setPlannedQty(p_QtyEntered.multiply(ppPlanLineT.getPlannedQty()));
-				if(!ppPlanLineT.isEndProduct())
+				ppPlanLine.setC_UOM_ID(ppPlanLineT.getC_UOM_ID());
+				if(ppPlanLineT.isEndProduct())
+					ppPlanLine.setQtyUsed(null);
+				else
 					ppPlanLine.setQtyUsed(p_QtyEntered.multiply(ppPlanLineT.getQtyUsed()));
 				ppPlanLine.setMovementQty(p_QtyEntered.multiply(ppPlanLineT.getMovementQty()));
+
+				if(ppPlanLine.getAD_Org_ID() == ppPlanLineT.getAD_Org_ID())
+				{
+					ppPlanLine.setM_Locator_ID(ppPlanLineT.getM_Locator_ID());
+				}else {
+					ppPlanLine.setM_Locator_ID(M_Locator_ID);
+				}
+
 				ppPlanLine.saveEx(get_TrxName());
 
 			}

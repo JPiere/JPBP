@@ -45,9 +45,27 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 		super(ctx, rs, trxName);
 	}
 
+	private MPPDocT m_PPDocT = null;
+
+	public MPPDocT getParent()
+	{
+		if(m_PPDocT == null)
+			m_PPDocT = new MPPDocT(getCtx(), getJP_PP_DocT_ID(), get_TrxName());
+		else
+			m_PPDocT.set_TrxName(get_TrxName());
+
+		return m_PPDocT;
+	}
+
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//SetAD_Org_ID
+		if(newRecord)
+		{
+			setAD_Org_ID(getParent().getAD_Org_ID());
+		}
+
 		//Set C_UOM_ID
 		if(newRecord || is_ValueChanged(MPPPlanT.COLUMNNAME_C_UOM_ID) || getC_UOM_ID() == 0)
 		{

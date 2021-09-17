@@ -51,6 +51,12 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//SetAD_Org_ID
+		if(newRecord)
+		{
+			setAD_Org_ID(getParent().getAD_Org_ID());
+		}
+
 		//Check Parent processed
 		if(newRecord)
 		{

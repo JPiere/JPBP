@@ -13,8 +13,6 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.math.BigDecimal;
-
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MColumn;
 import org.compiere.model.MProcess;
@@ -54,11 +52,7 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 		MPPFact ppFact = new MPPFact(getCtx(), p_JP_PP_Fact_ID, get_TrxName());
 		MPPPlan parent = ppFact.getParent();
 
-		BigDecimal  productionFactQty = parent.getProductionFactQty(get_TrxName());
-		parent.setJP_ProductionQtyFact(productionFactQty);
-		parent.saveEx(get_TrxName());
-
-		if(productionFactQty.compareTo(parent.getProductionQty()) >= 0 )
+		if(parent.getJP_ProductionQtyFact().compareTo(parent.getProductionQty()) >= 0 )
 		{
 			if(parent.isCompleteAutoJP())
 			{
@@ -102,6 +96,9 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 					return msg;
 				}
 
+			}else {
+
+				;//Noting to do
 			}
 
 		}else {
@@ -112,6 +109,9 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 				if(!Util.isEmpty(msg))
 					addLog(msg);
 
+			}else {
+
+				;//Noting to do
 			}
 
 		}

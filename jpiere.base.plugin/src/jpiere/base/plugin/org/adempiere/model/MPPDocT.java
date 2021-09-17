@@ -13,10 +13,13 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MSysConfig;
+import org.compiere.model.MUOM;
 import org.compiere.model.Query;
 import org.compiere.util.Util;
 
@@ -41,6 +44,14 @@ public class MPPDocT extends X_JP_PP_DocT {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Rounding Production Qty
+		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
+		{
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = MUOM.get(getC_UOM_ID());
+			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
+		}
+
 		return true;
 	}
 
