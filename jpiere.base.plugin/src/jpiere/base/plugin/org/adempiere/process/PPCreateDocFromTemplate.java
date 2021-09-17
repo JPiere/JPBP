@@ -60,6 +60,12 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 	private Timestamp p_JP_PP_ScheduledStart = null;
 	private MTable m_Table = null;
 
+	private int default_M_Locator_ID = 0;
+	private MPPDoc m_PPDoc = null;
+	private MPPDocT m_PPDocT = null;
+
+	private LocalDateTime local_ScheduledStart = null;
+
 
 	@Override
 	protected void prepare()
@@ -84,9 +90,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		m_Table = MTable.get(getTable_ID());
 	}
 
-	private int M_Locator_ID = 0;
-	private MPPDoc ppDoc = null;
-	private MPPDocT ppDocT = null;
+
 
 	@Override
 	protected String doIt() throws Exception
@@ -96,24 +100,24 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			createPPDoc();
 			createPlan();
 			updateTree();
-			addBufferLog(0, null, null, ppDoc.getDocumentInfo(), MPPDoc.Table_ID, ppDoc.getJP_PP_Doc_ID());
+			addBufferLog(0, null, null, m_PPDoc.getDocumentInfo(), MPPDoc.Table_ID, m_PPDoc.getJP_PP_Doc_ID());
 
 		}else if(m_Table.getTableName().equals(MPPDoc.Table_Name)) {
 
-			ppDoc = new MPPDoc(getCtx(), p_Record_ID, get_TrxName());
-			if(ppDoc.getJP_PP_DocT_ID() == 0)
+			m_PPDoc = new MPPDoc(getCtx(), p_Record_ID, get_TrxName());
+			if(m_PPDoc.getJP_PP_DocT_ID() == 0)
 			{
 				throw new Exception(Msg.getMsg(getCtx(), "NotFound")+ " " + Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_JP_PP_DocT_ID) );
 			}
 
-			if(ppDoc.getProductionQty().compareTo(Env.ZERO)==0)
+			if(m_PPDoc.getProductionQty().compareTo(Env.ZERO)==0)
 			{
 				throw new Exception(Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_ProductionQty) + " = 0" );
 			}
 
-			p_CoefficientQty = ppDoc.getProductionQty();
+			p_CoefficientQty = m_PPDoc.getProductionQty();
 
-			ppDocT = new MPPDocT(getCtx(), ppDoc.getJP_PP_DocT_ID(), get_TrxName());
+			m_PPDocT = new MPPDocT(getCtx(), m_PPDoc.getJP_PP_DocT_ID(), get_TrxName());
 
 
 			createPlan();
@@ -147,65 +151,61 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		return "@OK@";
 	}
 
-	private LocalDateTime JP_PP_ScheduledStart = null;
-
-
 	private MPPDoc createPPDoc()
 	{
-		ppDoc = new  MPPDoc(getCtx(), 0, get_TrxName());
-		ppDocT = new MPPDocT(getCtx(), p_Record_ID, get_TrxName());
+		m_PPDoc = new  MPPDoc(getCtx(), 0, get_TrxName());
+		m_PPDocT = new MPPDocT(getCtx(), p_Record_ID, get_TrxName());
 
-		PO.copyValues(ppDocT, ppDoc);
+		PO.copyValues(m_PPDocT, m_PPDoc);
 
 		//Copy mandatory column to make sure
-		ppDoc.setJP_PP_DocT_ID(p_Record_ID);
-		ppDoc.setAD_Org_ID(ppDocT.getAD_Org_ID());
-		ppDoc.setM_Product_ID(ppDocT.getM_Product_ID());
-		ppDoc.setQtyEntered(p_CoefficientQty);
-		ppDoc.setC_UOM_ID(ppDocT.getC_UOM_ID());
-		ppDoc.setProductionQty(p_CoefficientQty.multiply(ppDocT.getProductionQty()));
-		ppDoc.setC_DocType_ID(ppDocT.getC_DocType_ID());
+		m_PPDoc.setJP_PP_DocT_ID(p_Record_ID);
+		m_PPDoc.setAD_Org_ID(m_PPDocT.getAD_Org_ID());
+		m_PPDoc.setM_Product_ID(m_PPDocT.getM_Product_ID());
+		m_PPDoc.setQtyEntered(p_CoefficientQty);
+		m_PPDoc.setC_UOM_ID(m_PPDocT.getC_UOM_ID());
+		m_PPDoc.setProductionQty(p_CoefficientQty.multiply(m_PPDocT.getProductionQty()));
+		m_PPDoc.setC_DocType_ID(m_PPDocT.getC_DocType_ID());
+		m_PPDoc.setValue(m_PPDocT.getValue());
+		m_PPDoc.setName(m_PPDocT.getName());
+		m_PPDoc.setDocStatus(DocAction.STATUS_Drafted);
+		m_PPDoc.setDocAction(DocAction.ACTION_Complete);
+		m_PPDoc.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
+		m_PPDoc.setJP_Processing1("N");
+		m_PPDoc.setJP_Processing2("N");
+		m_PPDoc.setJP_Processing3("N");
+		m_PPDoc.setJP_Processing4("N");
+		m_PPDoc.setJP_Processing5("N");
+		m_PPDoc.setJP_Processing6("N");
 
+		//Set JP_PP_ScheduledStart
 		LocalDateTime toDay = p_JP_PP_ScheduledStart.toLocalDateTime();
-
-		//TODO 日次調整のテスト
 		while (isNonBusinessDay(toDay))
 		{
 			toDay = toDay.plusDays(1);
 		}
-		JP_PP_ScheduledStart = toDay;
-		ppDoc.setJP_PP_ScheduledStart(Timestamp.valueOf(JP_PP_ScheduledStart));
+		local_ScheduledStart = toDay;
+		m_PPDoc.setJP_PP_ScheduledStart(Timestamp.valueOf(local_ScheduledStart));
 
-		int JP_ProductionDays = ppDocT.getJP_ProductionDays();
+		//Set JP_PP_ScheduledEnd
+		int JP_ProductionDays = m_PPDocT.getJP_ProductionDays();
 		while (JP_ProductionDays > 1 )
 		{
 			toDay = toDay.plusDays(1);
 			if(isBusinessDay(toDay))
 				JP_ProductionDays--;
 		}
+		m_PPDoc.setJP_PP_ScheduledEnd(Timestamp.valueOf(toDay));
+		m_PPDoc.setDateAcct(Timestamp.valueOf(toDay));
 
-		ppDoc.setJP_PP_ScheduledEnd(Timestamp.valueOf(toDay));
-		ppDoc.setDateAcct(Timestamp.valueOf(toDay));
+		m_PPDoc.saveEx(get_TrxName());
 
-		ppDoc.setValue(ppDocT.getValue());
-		ppDoc.setName(ppDocT.getName());
-		ppDoc.setDocStatus(DocAction.STATUS_Drafted);
-		ppDoc.setDocAction(DocAction.ACTION_Complete);
-		ppDoc.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
-		ppDoc.setJP_Processing1("N");
-		ppDoc.setJP_Processing2("N");
-		ppDoc.setJP_Processing3("N");
-		ppDoc.setJP_Processing4("N");
-		ppDoc.setJP_Processing5("N");
-		ppDoc.setJP_Processing6("N");
-		ppDoc.saveEx(get_TrxName());
-
-		return ppDoc;
+		return m_PPDoc;
 	}
 
 	private MPPPlan createPlan() throws Exception
 	{
-		MPPPlanT[] ppPlanTs = ppDocT.getPPPlanTs(true, null);
+		MPPPlanT[] ppPlanTs = m_PPDocT.getPPPlanTs(true, null);
 		MPPPlan ppPlan = null;
 		for(MPPPlanT ppPlanT : ppPlanTs)
 		{
@@ -213,31 +213,12 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			PO.copyValues(ppPlanT, ppPlan);
 
 			//Copy mandatory column to make sure
-			ppPlan.setJP_PP_Doc_ID(ppDoc.getJP_PP_Doc_ID());
-			ppPlan.setAD_Org_ID(ppDoc.getAD_Org_ID());
+			ppPlan.setJP_PP_Doc_ID(m_PPDoc.getJP_PP_Doc_ID());
+			ppPlan.setAD_Org_ID(m_PPDoc.getAD_Org_ID());
 			ppPlan.setJP_PP_PlanT_ID(ppPlanT.getJP_PP_PlanT_ID());
 			ppPlan.setSeqNo(ppPlanT.getSeqNo());
 			ppPlan.setIsSummary(ppPlanT.isSummary());
 			ppPlan.setM_Product_ID(ppPlanT.getM_Product_ID());
-			if(ppPlan.getAD_Org_ID() == ppPlanT.getAD_Org_ID())
-			{
-				ppPlan.setM_Locator_ID(ppPlanT.getM_Locator_ID());
-
-			}else if (M_Locator_ID != 0){
-
-				ppPlan.setM_Locator_ID(M_Locator_ID);
-
-			}else {
-
-				M_Locator_ID = searchLocator(ppPlan.getAD_Org_ID());
-				if(M_Locator_ID > 0)
-				{
-					ppPlan.setM_Locator_ID(M_Locator_ID);
-				}else {
-					throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotFoundLocatorCopyTemplate"));
-				}
-			}// set Locator
-
 			ppPlan.setC_DocType_ID(ppPlanT.getC_DocType_ID());
 			ppPlan.setValue(ppPlanT.getValue());
 			ppPlan.setName(ppPlanT.getName());
@@ -245,12 +226,39 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			ppPlan.setC_UOM_ID(ppPlanT.getC_UOM_ID());
 			ppPlan.setJP_PP_Workload_Plan(ppPlanT.getJP_PP_Workload_Plan());
 			ppPlan.setJP_PP_Workload_UOM_ID(ppPlanT.getJP_PP_Workload_UOM_ID());
+			ppPlan.setDocStatus(DocAction.STATUS_Drafted);
+			ppPlan.setDocAction(DocAction.ACTION_Complete);
+			ppPlan.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
+			ppPlan.setJP_Processing1("N");
+			ppPlan.setJP_Processing2("N");
+			ppPlan.setJP_Processing3("N");
+			ppPlan.setJP_Processing4("N");
+			ppPlan.setJP_Processing5("N");
+			ppPlan.setJP_Processing6("N");
 
+			//Set Locator
+			if(ppPlan.getAD_Org_ID() == ppPlanT.getAD_Org_ID())
+			{
+				ppPlan.setM_Locator_ID(ppPlanT.getM_Locator_ID());
+
+			}else if (default_M_Locator_ID != 0){
+
+				ppPlan.setM_Locator_ID(default_M_Locator_ID);
+
+			}else {
+
+				default_M_Locator_ID = searchLocator(ppPlan.getAD_Org_ID());
+				if(default_M_Locator_ID > 0)
+				{
+					ppPlan.setM_Locator_ID(default_M_Locator_ID);
+				}else {
+					throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotFoundLocatorCopyTemplate"));
+				}
+			}
+
+			//Set JP_PP_ScheduledStart
 			int offset = ppPlanT.getJP_DayOffset();
-
-			LocalDateTime startDay = JP_PP_ScheduledStart;
-
-			//TODO 日次調整のテスト
+			LocalDateTime startDay = local_ScheduledStart;
 			while (offset >= 0 )
 			{
 				if(isBusinessDay(startDay))
@@ -267,8 +275,17 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				}
 			}
 
-			ppPlan.setJP_PP_ScheduledStart(Timestamp.valueOf(startDay));
+			if(ppPlanT.getJP_PP_ScheduledStartTime() == null)
+			{
+				ppPlan.setJP_PP_ScheduledStart(Timestamp.valueOf(startDay));
+			}else {
 
+				LocalTime localTime = ppPlanT.getJP_PP_ScheduledStartTime().toLocalDateTime().toLocalTime();
+				LocalDateTime localDateTime = LocalDateTime.of(startDay.toLocalDate(), localTime);
+				ppPlan.setJP_PP_ScheduledStart(Timestamp.valueOf(localDateTime));
+			}
+
+			//Set JP_PP_ScheduledEnd
 			int JP_ProductionDays = ppPlanT.getJP_ProductionDays();
 			while (JP_ProductionDays > 1 )
 			{
@@ -276,19 +293,18 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				if(isBusinessDay(startDay))
 					JP_ProductionDays--;
 			}
+			if(ppPlanT.getJP_PP_ScheduledEndTime() == null)
+			{
+				ppPlan.setJP_PP_ScheduledEnd(Timestamp.valueOf(startDay));
+				ppPlan.setDateAcct(Timestamp.valueOf(startDay));
+			}else {
+				ppPlan.setDateAcct(Timestamp.valueOf(startDay));
+				LocalTime localTime = ppPlanT.getJP_PP_ScheduledEndTime().toLocalDateTime().toLocalTime();
+				LocalDateTime localDateTime = LocalDateTime.of(startDay.toLocalDate(), localTime);
+				ppPlan.setJP_PP_ScheduledEnd(Timestamp.valueOf(localDateTime));
+			}
 
-			ppPlan.setJP_PP_ScheduledEnd(Timestamp.valueOf(startDay));
-			ppPlan.setDateAcct(Timestamp.valueOf(startDay));
 
-			ppPlan.setDocStatus(DocAction.STATUS_Drafted);
-			ppPlan.setDocAction(DocAction.ACTION_Complete);
-			ppPlan.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
-			ppPlan.setJP_Processing1("N");
-			ppPlan.setJP_Processing2("N");
-			ppPlan.setJP_Processing3("N");
-			ppPlan.setJP_Processing4("N");
-			ppPlan.setJP_Processing5("N");
-			ppPlan.setJP_Processing6("N");
 			ppPlan.saveEx(get_TrxName());
 
 			createPlanLine(ppPlan, ppPlanT);
@@ -311,8 +327,8 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			{
 				if(loc.isDefault())
 				{
-					M_Locator_ID =loc.getM_Locator_ID();
-					return M_Locator_ID;
+					default_M_Locator_ID =loc.getM_Locator_ID();
+					return default_M_Locator_ID;
 				}
 			}
 
@@ -321,8 +337,8 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				//set First locator
 				for(MLocator loc : locs)
 				{
-					M_Locator_ID =loc.getM_Locator_ID();
-					return M_Locator_ID;
+					default_M_Locator_ID =loc.getM_Locator_ID();
+					return default_M_Locator_ID;
 				}
 			}
 
@@ -350,32 +366,37 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			ppPlanLine.setPlannedQty(p_CoefficientQty.multiply(ppPlanLineT.getPlannedQty()));
 			ppPlanLine.setC_UOM_ID(ppPlanLineT.getC_UOM_ID());
 			if(ppPlanLineT.isEndProduct())
+			{
 				ppPlanLine.setQtyUsed(null);
-			else
+				ppPlanLine.setJP_QtyUsedFact(null);
+			}else {
 				ppPlanLine.setQtyUsed(p_CoefficientQty.multiply(ppPlanLineT.getQtyUsed()));
+				ppPlanLine.setJP_QtyUsedFact(Env.ZERO);
+			}
 			ppPlanLine.setMovementQty(p_CoefficientQty.multiply(ppPlanLineT.getMovementQty()));
+			ppPlanLine.setJP_Processing1("N");
+			ppPlanLine.setJP_Processing2("N");
+			ppPlanLine.setJP_Processing3("N");
 
+			//Set Locator
 			if(ppPlanLine.getAD_Org_ID() == ppPlanLineT.getAD_Org_ID())
 			{
 				ppPlanLine.setM_Locator_ID(ppPlanLineT.getM_Locator_ID());
-			}else if (M_Locator_ID != 0){
+			}else if (default_M_Locator_ID != 0){
 
-				ppPlanLine.setM_Locator_ID(M_Locator_ID);
+				ppPlanLine.setM_Locator_ID(default_M_Locator_ID);
 
 			}else {
 
-				M_Locator_ID = searchLocator(ppPlanLine.getAD_Org_ID());
-				if(M_Locator_ID > 0)
+				default_M_Locator_ID = searchLocator(ppPlanLine.getAD_Org_ID());
+				if(default_M_Locator_ID > 0)
 				{
-					ppPlanLine.setM_Locator_ID(M_Locator_ID);
+					ppPlanLine.setM_Locator_ID(default_M_Locator_ID);
 				}else {
 					throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotFoundLocatorCopyTemplate"));
 				}
 			}
 
-			ppPlanLine.setJP_Processing1("N");
-			ppPlanLine.setJP_Processing2("N");
-			ppPlanLine.setJP_Processing3("N");
 			ppPlanLine.saveEx(get_TrxName());
 
 		}
@@ -396,7 +417,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		MTree treeFrom =  new MTree(getCtx(), p_AD_TreeFrom_ID, get_TrxName());
 		MTree treeTo =  new MTree(getCtx(), p_AD_TreeTo_ID, get_TrxName());
 
-		MPPPlan[] ppPlans = ppDoc.getPPPlans(true, null);
+		MPPPlan[] ppPlans = m_PPDoc.getPPPlans(true, null);
 		for(int i = 0;  i < ppPlans.length ; i++)
 		{
 			MTree_Node nodeTo = MTree_Node.get(treeTo, ppPlans[i].getJP_PP_Plan_ID());
@@ -425,74 +446,75 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		return true;
 	}
 
-	int p_C_Country_ID = 0;//TODO 国の判定が必要だな!
-
-	private TreeSet<Timestamp> nonBusinessDays = null;
+	private TreeSet<Timestamp> nonBusinessDaysSet = null;
 	private boolean isNonBusinessDay(LocalDateTime toDay)
 	{
 		getNonBusinessDays(toDay);
-		return nonBusinessDays.contains(toDay);
+		return nonBusinessDaysSet.contains(Timestamp.valueOf(toDay));
 
 	}
 
 	private boolean isBusinessDay(LocalDateTime toDay)
 	{
 		getNonBusinessDays(toDay);
-		return !nonBusinessDays.contains(toDay);
+		return !nonBusinessDaysSet.contains(Timestamp.valueOf(toDay));
 	}
 
 	private TreeSet<Timestamp> getNonBusinessDays(LocalDateTime toDay)
 	{
-		if(nonBusinessDays == null)
+		if(nonBusinessDaysSet == null)
 		{
-			List<X_C_NonBusinessDay> list_NonBusinessDays = null;
+			nonBusinessDaysSet = new TreeSet<Timestamp>();
 
-			nonBusinessDays = new TreeSet<Timestamp>();
-			StringBuilder whereClause = null;
-			StringBuilder orderClause = null;
-			ArrayList<Object> list_parameters  = new ArrayList<Object>();
-			Object[] parameters = null;
-
-			LocalDateTime toDayMin = LocalDateTime.of(toDay.toLocalDate(), LocalTime.MIN);
-
-			whereClause = new StringBuilder(" AD_Client_ID=? ");
-			list_parameters.add(Env.getAD_Client_ID(getCtx()));
-
-			//C_Calendar_ID
-			whereClause = whereClause.append(" AND C_Calendar_ID = ? ");
-			list_parameters.add(ppDocT.getJP_NonBusinessDayCalendar_ID());
-
-			//Date1
-			whereClause = whereClause.append(" AND Date1 >= ? AND IsActive='Y' ");
-			list_parameters.add(Timestamp.valueOf(toDayMin));
-
-			//C_Country_ID
-			if(p_C_Country_ID == 0)
+			if(m_PPDocT.getJP_NonBusinessDayCalendar_ID() > 0)
 			{
-				whereClause = whereClause.append(" AND C_Country_ID IS NULL ");
+				List<X_C_NonBusinessDay> list_NonBusinessDays = null;
+				StringBuilder whereClause = null;
+				StringBuilder orderClause = null;
+				ArrayList<Object> list_parameters  = new ArrayList<Object>();
+				Object[] parameters = null;
 
-			}else {
-				whereClause = whereClause.append(" AND ( C_Country_ID IS NULL OR C_Country_ID = ? ) ");
-				list_parameters.add(p_C_Country_ID);
-			}
+				LocalDateTime toDayMin = LocalDateTime.of(toDay.toLocalDate(), LocalTime.MIN);
 
-			parameters = list_parameters.toArray(new Object[list_parameters.size()]);
-			orderClause = new StringBuilder("Date1");
+				whereClause = new StringBuilder(" AD_Client_ID=? ");
+				list_parameters.add(Env.getAD_Client_ID(getCtx()));
+
+				//C_Calendar_ID
+				whereClause = whereClause.append(" AND C_Calendar_ID = ? ");
+				list_parameters.add(m_PPDocT.getJP_NonBusinessDayCalendar_ID());
+
+				//Date1
+				whereClause = whereClause.append(" AND Date1 >= ? AND IsActive='Y' ");
+				list_parameters.add(Timestamp.valueOf(toDayMin));
+
+				//C_Country_ID
+				if(m_PPDocT.getC_Country_ID() == 0)
+				{
+					whereClause = whereClause.append(" AND C_Country_ID IS NULL ");
+
+				}else {
+					whereClause = whereClause.append(" AND ( C_Country_ID IS NULL OR C_Country_ID = ? ) ");
+					list_parameters.add(m_PPDocT.getC_Country_ID());
+				}
+
+				parameters = list_parameters.toArray(new Object[list_parameters.size()]);
+				orderClause = new StringBuilder("Date1");
 
 
-			list_NonBusinessDays = new Query(Env.getCtx(), I_C_NonBusinessDay.Table_Name, whereClause.toString(), null)
-												.setParameters(parameters)
-												.setOrderBy(orderClause.toString())
-												.list();
+				list_NonBusinessDays = new Query(Env.getCtx(), I_C_NonBusinessDay.Table_Name, whereClause.toString(), null)
+													.setParameters(parameters)
+													.setOrderBy(orderClause.toString())
+													.list();
 
-			LocalDateTime nonBusinessDayMin = null;
-			for(X_C_NonBusinessDay m_NonBusinessDays : list_NonBusinessDays )
-			{
-				nonBusinessDayMin = LocalDateTime.of(m_NonBusinessDays.getDate1().toLocalDateTime().toLocalDate(), LocalTime.MIN);
-				nonBusinessDays.add(Timestamp.valueOf(nonBusinessDayMin));
+				LocalDateTime nonBusinessDayMin = null;
+				for(X_C_NonBusinessDay m_NonBusinessDays : list_NonBusinessDays )
+				{
+					nonBusinessDayMin = LocalDateTime.of(m_NonBusinessDays.getDate1().toLocalDateTime().toLocalDate(), LocalTime.MIN);
+					nonBusinessDaysSet.add(Timestamp.valueOf(nonBusinessDayMin));
+				}
 			}
 		}
 
-		return nonBusinessDays;
+		return nonBusinessDaysSet;
 	}
 }

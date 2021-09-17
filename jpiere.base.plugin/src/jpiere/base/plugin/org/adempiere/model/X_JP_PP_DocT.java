@@ -33,7 +33,7 @@ public class X_JP_PP_DocT extends PO implements I_JP_PP_DocT, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210917L;
+	private static final long serialVersionUID = 20210918L;
 
     /** Standard Constructor */
     public X_JP_PP_DocT (Properties ctx, int JP_PP_DocT_ID, String trxName)
@@ -202,6 +202,34 @@ public class X_JP_PP_DocT extends PO implements I_JP_PP_DocT, I_Persistent
 	public int getC_Campaign_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Campaign_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Country getC_Country() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Country)MTable.get(getCtx(), org.compiere.model.I_C_Country.Table_Name)
+			.getPO(getC_Country_ID(), get_TrxName());	}
+
+	/** Set Country.
+		@param C_Country_ID 
+		Country 
+	  */
+	public void setC_Country_ID (int C_Country_ID)
+	{
+		if (C_Country_ID < 1) 
+			set_Value (COLUMNNAME_C_Country_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Country_ID, Integer.valueOf(C_Country_ID));
+	}
+
+	/** Get Country.
+		@return Country 
+	  */
+	public int getC_Country_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Country_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
