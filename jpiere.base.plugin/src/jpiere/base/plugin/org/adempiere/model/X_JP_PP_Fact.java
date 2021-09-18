@@ -34,7 +34,7 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210917L;
+	private static final long serialVersionUID = 20210918L;
 
     /** Standard Constructor */
     public X_JP_PP_Fact (Properties ctx, int JP_PP_Fact_ID, String trxName)
@@ -480,7 +480,7 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
 	  */
 	public void setDocumentNo (String DocumentNo)
 	{
-		set_Value (COLUMNNAME_DocumentNo, DocumentNo);
+		set_ValueNoCheck (COLUMNNAME_DocumentNo, DocumentNo);
 	}
 
 	/** Get Document No.
@@ -1200,6 +1200,23 @@ public class X_JP_PP_Fact extends PO implements I_JP_PP_Fact, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set UPC/EAN.
+		@param UPC 
+		Bar Code (Universal Product Code or its superset European Article Number)
+	  */
+	public void setUPC (String UPC)
+	{
+		set_Value (COLUMNNAME_UPC, UPC);
+	}
+
+	/** Get UPC/EAN.
+		@return Bar Code (Universal Product Code or its superset European Article Number)
+	  */
+	public String getUPC () 
+	{
+		return (String)get_Value(COLUMNNAME_UPC);
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException

@@ -38,6 +38,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDoc;
 import jpiere.base.plugin.org.adempiere.model.MPPDocT;
@@ -59,6 +60,8 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 	private int p_JP_PP_DocT_ID = 0;
 	private BigDecimal p_CoefficientQty = Env.ZERO;
 	private Timestamp p_JP_PP_ScheduledStart = null;
+	private String p_Value = null;
+	private String p_Name = null;
 	private MTable m_Table = null;
 
 	private int default_M_Locator_ID = 0;
@@ -81,6 +84,10 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				p_CoefficientQty = para[i].getParameterAsBigDecimal();
 			else if ("JP_PP_ScheduledStart".equals(name))
 				p_JP_PP_ScheduledStart  =  para[i].getParameterAsTimestamp();
+			else if ("Value".equals(name))
+				p_Value  =  para[i].getParameterAsString();
+			else if ("Name".equals(name))
+				p_Name  =  para[i].getParameterAsString();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -98,6 +105,19 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		if(m_Table.getTableName().equals(MPPDocT.Table_Name))
 		{
 			p_JP_PP_DocT_ID = p_Record_ID;
+
+			if(Util.isEmpty(p_Value))
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "Value"));
+			}else {
+
+				MPPDoc ppd = MPPDoc.get(getCtx(), p_Value, p_Name);
+				if(ppd != null)
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "JP_Unique_Constraint_Value"));
+				}
+			}
+
 			createPPDoc();
 			createPlan();
 			updateTree();
@@ -190,8 +210,8 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		m_PPDoc.setC_UOM_ID(m_PPDocT.getC_UOM_ID());
 		m_PPDoc.setProductionQty(p_CoefficientQty.multiply(m_PPDocT.getProductionQty()));
 		m_PPDoc.setC_DocType_ID(m_PPDocT.getC_DocType_ID());
-		m_PPDoc.setValue(m_PPDocT.getValue());
-		m_PPDoc.setName(m_PPDocT.getName());
+		m_PPDoc.setValue(p_Value);
+		m_PPDoc.setName(p_Name);
 		m_PPDoc.setDocStatus(DocAction.STATUS_Drafted);
 		m_PPDoc.setDocAction(DocAction.ACTION_Complete);
 		m_PPDoc.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
@@ -260,6 +280,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			ppPlan.setDocStatus(DocAction.STATUS_Drafted);
 			ppPlan.setDocAction(DocAction.ACTION_Complete);
 			ppPlan.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
+			ppPlan.setIsCreated("true");
 			ppPlan.setJP_Processing1("N");
 			ppPlan.setJP_Processing2("N");
 			ppPlan.setJP_Processing3("N");

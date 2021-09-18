@@ -21,6 +21,7 @@ import java.util.Properties;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.Query;
+import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 /**
@@ -121,4 +122,14 @@ public class MPPDocT extends X_JP_PP_DocT {
 		return null;
 	}
 
+	public static MPPDocT get (Properties ctx, String Value, String trxName)
+	{
+		if (Value == null || Value.length() == 0)
+			return null;
+		final String whereClause = "Value=? AND AD_Client_ID=?";
+		MPPDocT retValue = new Query(ctx, MPPDocT.Table_Name, whereClause, trxName)
+		.setParameters(Value,Env.getAD_Client_ID(ctx))
+		.firstOnly();
+		return retValue;
+	}
 }

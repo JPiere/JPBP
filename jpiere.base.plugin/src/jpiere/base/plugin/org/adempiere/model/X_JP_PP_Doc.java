@@ -33,7 +33,7 @@ public class X_JP_PP_Doc extends PO implements I_JP_PP_Doc, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210917L;
+	private static final long serialVersionUID = 20210918L;
 
     /** Standard Constructor */
     public X_JP_PP_Doc (Properties ctx, int JP_PP_Doc_ID, String trxName)
@@ -668,9 +668,9 @@ public class X_JP_PP_Doc extends PO implements I_JP_PP_Doc, I_Persistent
 	public void setJP_PP_DocT_ID (int JP_PP_DocT_ID)
 	{
 		if (JP_PP_DocT_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_JP_PP_DocT_ID, null);
+			set_Value (COLUMNNAME_JP_PP_DocT_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_JP_PP_DocT_ID, Integer.valueOf(JP_PP_DocT_ID));
+			set_Value (COLUMNNAME_JP_PP_DocT_ID, Integer.valueOf(JP_PP_DocT_ID));
 	}
 
 	/** Get PP Doc Template.
@@ -1163,6 +1163,23 @@ public class X_JP_PP_Doc extends PO implements I_JP_PP_Doc, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set UPC/EAN.
+		@param UPC 
+		Bar Code (Universal Product Code or its superset European Article Number)
+	  */
+	public void setUPC (String UPC)
+	{
+		set_Value (COLUMNNAME_UPC, UPC);
+	}
+
+	/** Get UPC/EAN.
+		@return Bar Code (Universal Product Code or its superset European Article Number)
+	  */
+	public String getUPC () 
+	{
+		return (String)get_Value(COLUMNNAME_UPC);
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException

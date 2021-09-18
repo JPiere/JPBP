@@ -634,4 +634,15 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		return null;
 	}
 
+	public static MPPDoc get (Properties ctx, String Value, String trxName)
+	{
+		if (Value == null || Value.length() == 0)
+			return null;
+		final String whereClause = "Value=? AND AD_Client_ID=?";
+		MPPDoc retValue = new Query(ctx, MPPDoc.Table_Name, whereClause, trxName)
+		.setParameters(Value,Env.getAD_Client_ID(ctx))
+		.firstOnly();
+		return retValue;
+	}
+
 }	//	MPPDoc
