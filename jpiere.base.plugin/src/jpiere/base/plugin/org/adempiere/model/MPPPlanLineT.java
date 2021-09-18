@@ -20,6 +20,7 @@ import java.util.Properties;
 import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
@@ -94,6 +95,67 @@ public class MPPPlanLineT extends X_JP_PP_PlanLineT {
 		}
 
 		return true;
+	}
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		//Update parent ProductionQty
+		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_PlannedQty)) )
+		{
+
+			int no = updateParentProductionQty(get_TrxName());
+			if (no != 1)
+			{
+				log.saveError("DBExecuteError", "MPPPlanLineT#afterSave() -> updateParentProductionQty()");
+				return false;
+			}
+
+		}
+
+		return true;
+	}
+
+
+	@Override
+	protected boolean afterDelete(boolean success)
+	{
+
+		int no = updateParentProductionQty(get_TrxName());
+		if (no != 1)
+		{
+			log.saveError("DBExecuteError", "MPPPlanLineT#afterDelete() -> updateParentProductionQty()");
+			return false;
+		}
+
+		MPPPlanLineT[] lines = getParent().getPPPlanLineTs(true, null);
+		if(lines.length == 0)
+		{
+			String sql = "UPDATE JP_PP_PlanT SET IsCreated='N' WHERE JP_PP_PlanT_ID=? ";
+
+			no = DB.executeUpdate(sql
+						, new Object[]{getJP_PP_PlanT_ID()}
+						, false, get_TrxName(), 0);
+
+			if (no != 1)
+			{
+				log.saveError("DBExecuteError", "MPPPlanLineT#afterDelete()");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private int updateParentProductionQty(String trxName)
+	{
+		String sql = "UPDATE JP_PP_PlanT SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLineT WHERE JP_PP_PlanT_ID=? AND IsEndProduct='Y') "
+				+ " WHERE JP_PP_PlanT_ID=?";
+
+		int no = DB.executeUpdate(sql
+					, new Object[]{getJP_PP_PlanT_ID(), getJP_PP_PlanT_ID()}
+					, false, trxName, 0);
+		return no;
 	}
 
 	protected MPPPlanT parent = null;

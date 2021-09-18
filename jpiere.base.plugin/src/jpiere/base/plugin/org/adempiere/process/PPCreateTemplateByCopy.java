@@ -156,8 +156,13 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 			ppPlanT_To.setJP_Processing4("N");
 			ppPlanT_To.setJP_Processing5("N");
 			ppPlanT_To.setJP_Processing6("N");
-			ppPlanT_To.saveEx(get_TrxName());
+
 			ppPlanLineT_Froms = ppPlanT_From.getPPPlanLineTs();
+			if(ppPlanLineT_Froms.length > 0)
+				ppPlanT_To.setIsCreated("Y");
+			else
+				ppPlanT_To.setIsCreated("N");
+			ppPlanT_To.saveEx(get_TrxName());
 
 			for(MPPPlanLineT ppPlanLineT_From : ppPlanLineT_Froms)
 			{

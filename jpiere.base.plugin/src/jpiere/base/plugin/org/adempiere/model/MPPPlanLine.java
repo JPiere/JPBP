@@ -151,6 +151,22 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 			return false;
 		}
 
+		MPPPlanLine[] lines = getParent().getPPPlanLines(true, null);
+		if(lines.length == 0)
+		{
+			String sql = "UPDATE JP_PP_Plan SET IsCreated='N' WHERE JP_PP_Plan_ID=? ";
+
+			no = DB.executeUpdate(sql
+						, new Object[]{getJP_PP_Plan_ID()}
+						, false, get_TrxName(), 0);
+
+			if (no != 1)
+			{
+				log.saveError("DBExecuteError", "MPPPlanLine#afterDelete()");
+				return false;
+			}
+		}
+
 		return true;
 	}
 

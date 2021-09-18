@@ -149,6 +149,22 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 			}
 		}
 
+		MPPFactLine[] lines = getParent().getPPFactLines(true, null);
+		if(lines.length == 0)
+		{
+			String sql = "UPDATE JP_PP_Fact SET IsCreated='N' WHERE JP_PP_Fact_ID=? ";
+
+			int no = DB.executeUpdate(sql
+						, new Object[]{getJP_PP_Fact_ID()}
+						, false, get_TrxName(), 0);
+
+			if (no != 1)
+			{
+				log.saveError("DBExecuteError", "MPPFactLine#afterDelete()");
+				return false;
+			}
+		}
+
 		return true;
 	}
 

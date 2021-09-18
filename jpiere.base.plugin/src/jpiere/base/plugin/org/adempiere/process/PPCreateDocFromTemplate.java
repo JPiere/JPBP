@@ -280,7 +280,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			ppPlan.setDocStatus(DocAction.STATUS_Drafted);
 			ppPlan.setDocAction(DocAction.ACTION_Complete);
 			ppPlan.setJP_PP_Status(MPPDoc.JP_PP_STATUS_NotYetStarted);
-			ppPlan.setIsCreated("true");
+			ppPlan.setIsCreated("Y");
 			ppPlan.setJP_Processing1("N");
 			ppPlan.setJP_Processing2("N");
 			ppPlan.setJP_Processing3("N");
