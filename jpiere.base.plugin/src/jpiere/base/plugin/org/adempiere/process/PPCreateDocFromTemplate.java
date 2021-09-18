@@ -209,6 +209,13 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		MPPPlan ppPlan = null;
 		for(MPPPlanT ppPlanT : ppPlanTs)
 		{
+			ppPlan = m_PPDoc.getPPPlan(ppPlanT.getSeqNo(), ppPlanT.getM_Product_ID(), ppPlanT.getValue());
+			if(ppPlan != null)
+			{
+				//The SeqNo, Product, Search Key has already been registered
+				throw new Exception(Msg.getMsg(getCtx(),"JP_Unique_Constraint_PPPlan"));
+			}
+
 			ppPlan = new  MPPPlan(getCtx(), 0, get_TrxName());
 			PO.copyValues(ppPlanT, ppPlan);
 
@@ -258,6 +265,9 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 
 			//Set JP_PP_ScheduledStart
 			int offset = ppPlanT.getJP_DayOffset();
+
+			if(local_ScheduledStart == null)
+				local_ScheduledStart = m_PPDoc.getJP_PP_ScheduledStart().toLocalDateTime();
 			LocalDateTime startDay = local_ScheduledStart;
 			while (offset >= 0 )
 			{

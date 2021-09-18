@@ -105,4 +105,20 @@ public class MPPDocT extends X_JP_PP_DocT {
 		return getPPPlanTs(false, null);
 	}
 
+	public MPPPlanT getPPPlanT(int seqNo, int M_Product_ID, String value)
+	{
+		getPPPlanTs();
+		for(MPPPlanT ppPlanT : m_PPPlanTs)
+		{
+			if(ppPlanT.getSeqNo() == seqNo
+					&& ppPlanT.getM_Product_ID() == M_Product_ID
+					&& ppPlanT.getValue().equals(value))
+			{
+				return ppPlanT;
+			}
+		}
+
+		return null;
+	}
+
 }

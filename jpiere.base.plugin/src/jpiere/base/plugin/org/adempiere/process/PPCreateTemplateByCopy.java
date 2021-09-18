@@ -64,7 +64,7 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 	{
 		if(p_JP_PP_DocT_From_ID == p_JP_PP_DocT_To_ID)
 		{
-			throw new Exception("コピー元とコピー先が同じです。");
+			throw new Exception("コピー元とコピー先が同じです。");//TODO 多言語化
 		}
 
 		MPPDocT m_PPDocT_From = new MPPDocT(getCtx(),p_JP_PP_DocT_From_ID, get_TrxName());
@@ -78,6 +78,13 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 		int M_Locator_ID = 0;
 		for(MPPPlanT ppPlanT_From : ppPlanT_Froms)
 		{
+			ppPlanT_To = m_PPDocT_To.getPPPlanT(ppPlanT_From.getSeqNo(), ppPlanT_From.getM_Product_ID(), ppPlanT_From.getValue());
+			if(ppPlanT_To != null)
+			{
+				//The SeqNo, Product, Search Key has already been registered
+				throw new Exception(Msg.getMsg(getCtx(),"JP_Unique_Constraint_PPPlan"));
+			}
+
 			ppPlanT_To = new MPPPlanT(getCtx(), 0, get_TrxName());
 			PO.copyValues(m_PPDocT_From, m_PPDocT_To);
 

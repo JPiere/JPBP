@@ -613,9 +613,25 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		return m_PPPlans;
 	}
 
-	public MPPPlan[] getPPPlanTs()
+	public MPPPlan[] getPPPlans()
 	{
 		return getPPPlans(false, null);
+	}
+
+	public MPPPlan getPPPlan(int seqNo, int M_Product_ID, String value)
+	{
+		getPPPlans();
+		for(MPPPlan ppPlan : m_PPPlans)
+		{
+			if(ppPlan.getSeqNo() == seqNo
+					&& ppPlan.getM_Product_ID() == M_Product_ID
+					&& ppPlan.getValue().equals(value))
+			{
+				return ppPlan;
+			}
+		}
+
+		return null;
 	}
 
 }	//	MPPDoc
