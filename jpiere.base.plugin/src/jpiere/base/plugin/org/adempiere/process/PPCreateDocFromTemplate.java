@@ -56,6 +56,7 @@ import jpiere.base.plugin.org.adempiere.model.MPPPlanT;
 public class PPCreateDocFromTemplate extends SvrProcess {
 
 	private int p_Record_ID = 0;
+	private int p_JP_PP_DocT_ID = 0;
 	private BigDecimal p_CoefficientQty = Env.ZERO;
 	private Timestamp p_JP_PP_ScheduledStart = null;
 	private MTable m_Table = null;
@@ -75,7 +76,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		{
 			String name = para[i].getParameterName();
 			if ("JP_PP_DocT_ID".equals(name))
-				p_Record_ID = para[i].getParameterAsInt();
+				p_JP_PP_DocT_ID = para[i].getParameterAsInt();
 			else if ("QtyEntered".equals(name))
 				p_CoefficientQty = para[i].getParameterAsBigDecimal();
 			else if ("JP_PP_ScheduledStart".equals(name))
@@ -84,8 +85,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
 
-		if(p_Record_ID == 0)
-			p_Record_ID = getRecord_ID();
+		p_Record_ID = getRecord_ID();
 
 		m_Table = MTable.get(getTable_ID());
 	}
@@ -97,6 +97,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 	{
 		if(m_Table.getTableName().equals(MPPDocT.Table_Name))
 		{
+			p_JP_PP_DocT_ID = p_Record_ID;
 			createPPDoc();
 			createPlan();
 			updateTree();
@@ -116,9 +117,20 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			}
 
 			p_CoefficientQty = m_PPDoc.getProductionQty();
+			p_JP_PP_ScheduledStart = m_PPDoc.getJP_PP_ScheduledStart();
+			if(p_JP_PP_DocT_ID == 0)
+			{
+				p_JP_PP_DocT_ID = m_PPDoc.getJP_PP_DocT_ID();
+			}else {
 
-			m_PPDocT = new MPPDocT(getCtx(), m_PPDoc.getJP_PP_DocT_ID(), get_TrxName());
+				if(p_JP_PP_DocT_ID !=  m_PPDoc.getJP_PP_DocT_ID())
+				{
+					m_PPDoc.setJP_PP_DocT_ID(p_JP_PP_DocT_ID);
+					m_PPDoc.saveEx(get_TrxName());
+				}
+			}
 
+			m_PPDocT = new MPPDocT(getCtx(), p_JP_PP_DocT_ID, get_TrxName());
 
 			createPlan();
 			updateTree();
@@ -136,7 +148,19 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				throw new Exception(Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_ProductionQty) + " = 0" );
 			}
 
+			if(ppPlan.getPPPlanLines().length > 0 )
+			{
+				// There are PP Lines already.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_PP_LinesThere"));
+			}
+
 			MPPPlanT ppPlanT = new MPPPlanT(getCtx(), ppPlan.getJP_PP_PlanT_ID(), get_TrxName());
+
+			if(ppPlanT.getPPPlanLineTs().length == 0)
+			{
+				//There are not PP Plan Line Templates at PP Plan Template.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_PP_LineT_NotThere"));//TODO 予定製造指図伝票テンプレートに予定伝票明細テンプレートがありません。
+			}
 
 			BigDecimal planQty = ppPlan.getProductionQty();
 			BigDecimal templateQty = ppPlanT.getProductionQty();;
@@ -154,7 +178,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 	private MPPDoc createPPDoc()
 	{
 		m_PPDoc = new  MPPDoc(getCtx(), 0, get_TrxName());
-		m_PPDocT = new MPPDocT(getCtx(), p_Record_ID, get_TrxName());
+		m_PPDocT = new MPPDocT(getCtx(), p_JP_PP_DocT_ID, get_TrxName());
 
 		PO.copyValues(m_PPDocT, m_PPDoc);
 

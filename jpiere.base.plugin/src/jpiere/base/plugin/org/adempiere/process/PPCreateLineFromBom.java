@@ -88,6 +88,35 @@ public class PPCreateLineFromBom extends SvrProcess {
 				return msg;
 		}
 
+		if(po instanceof MPPPlan)
+		{
+			MPPPlan doc = (MPPPlan)po;
+			if(doc.getPPPlanLines().length > 0)
+			{
+				// There are PP Lines already.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_PP_LinesThere"));
+			}
+
+		}else if(po instanceof MPPPlanT) {
+
+			MPPPlanT doc = (MPPPlanT)po;
+			if(doc.getPPPlanLineTs().length > 0)
+			{
+				// There are PP Lines already.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_PP_LinesThere"));
+			}
+
+		}else if(po instanceof MPPFact) {
+
+			MPPFact doc = (MPPFact)po;
+			if(doc.getPPFactLines().length > 0)
+			{
+				// There are PP Lines already.
+				throw new Exception(Msg.getMsg(getCtx(), "JP_PP_LinesThere"));
+			}
+
+		}
+
 		//Update ProductionQty & IsCreated
 		String sql = "UPDATE "+ m_Table.getTableName() + " SET ProductionQty=?, IsCreated=? "
 							+ " WHERE "+ m_Table.getTableName()+"_ID=?";

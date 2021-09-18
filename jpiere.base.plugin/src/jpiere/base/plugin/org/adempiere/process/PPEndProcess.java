@@ -31,6 +31,7 @@ import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDoc;
+import jpiere.base.plugin.org.adempiere.model.MPPPlan;
 
 
 /**
@@ -80,6 +81,21 @@ public class PPEndProcess extends SvrProcess {
 
 			if(po instanceof DocAction)
 			{
+				if(po instanceof MPPDoc)
+				{
+					MPPDoc ppDoc = (MPPDoc)po;
+					MPPPlan[] ppPlans = ppDoc.getPPPlans(true, null);
+					for(MPPPlan ppPlan : ppPlans)
+					{
+						if(!ppPlan.isProcessed())
+						{
+							//You cannot be completed PP Doc because there is an unprocessed PP Plan.
+							throw new Exception(Msg.getMsg(getCtx(), "JP_PP_NotCompletePPDocForUnprocessedPPPlan"));
+						}
+					}
+				}
+
+
 				String wfStatus = MWFActivity.getActiveInfo(Env.getCtx(), m_Table.getAD_Table_ID(), record_ID);
 				if (Util.isEmpty(wfStatus))
 				{

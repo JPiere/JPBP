@@ -64,7 +64,8 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 	{
 		if(p_JP_PP_DocT_From_ID == p_JP_PP_DocT_To_ID)
 		{
-			throw new Exception("コピー元とコピー先が同じです。");//TODO 多言語化
+			//Same PP Template
+			throw new Exception(Msg.getMsg(getCtx(), "JP_PP_SameTemplate"));
 		}
 
 		MPPDocT m_PPDocT_From = new MPPDocT(getCtx(),p_JP_PP_DocT_From_ID, get_TrxName());

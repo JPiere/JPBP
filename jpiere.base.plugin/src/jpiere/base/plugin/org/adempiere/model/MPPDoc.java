@@ -237,7 +237,7 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			{
 				//You cannot be completed PP Doc because there is an unprocessed PP Plan.
 				m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NotCompletePPDocForUnprocessedPPPlan");
-				return DocAction.STATUS_Invalid;
+				return DocAction.STATUS_InProgress;
 			}
 		}
 
