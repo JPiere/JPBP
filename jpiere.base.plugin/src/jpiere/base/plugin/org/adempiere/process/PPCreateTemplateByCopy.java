@@ -24,6 +24,7 @@ import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDocT;
@@ -42,6 +43,8 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 	private int p_JP_PP_DocT_From_ID = 0;
 	private int p_JP_PP_DocT_To_ID = 0;
 
+	private BigDecimal p_CoefficientQty = Env.ZERO;
+
 	@Override
 	protected void prepare()
 	{
@@ -53,6 +56,8 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 				;
 			else if (name.equals("JP_PP_DocT_ID"))
 				p_JP_PP_DocT_From_ID = ((BigDecimal)para[i].getParameter()).intValue();
+			else if ("QtyEntered".equals(name))
+				p_CoefficientQty = para[i].getParameterAsBigDecimal();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -67,6 +72,9 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 			//Same PP Template
 			throw new Exception(Msg.getMsg(getCtx(), "JP_PP_SameTemplate"));
 		}
+
+		if(p_CoefficientQty==null)
+			p_CoefficientQty = Env.ZERO;
 
 		MPPDocT m_PPDocT_From = new MPPDocT(getCtx(),p_JP_PP_DocT_From_ID, get_TrxName());
 		MPPDocT m_PPDocT_To = new MPPDocT(getCtx(),p_JP_PP_DocT_To_ID, get_TrxName());
@@ -145,7 +153,10 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 			ppPlanT_To.setC_DocTypeTarget_ID(ppPlanT_From.getC_DocTypeTarget_ID());
 			ppPlanT_To.setValue(ppPlanT_From.getValue());
 			ppPlanT_To.setName(ppPlanT_From.getName());
-			ppPlanT_To.setProductionQty(ppPlanT_From.getProductionQty());
+			ppPlanT_To.setIsSplitWhenDifferenceJP(ppPlanT_From.isSplitWhenDifferenceJP());
+			ppPlanT_To.setIsCompleteAutoJP(ppPlanT_From.isCompleteAutoJP());
+			ppPlanT_To.setIsCreatePPFactJP(ppPlanT_From.isCreatePPFactJP());
+			ppPlanT_To.setProductionQty(p_CoefficientQty.multiply(ppPlanT_From.getProductionQty()));
 			ppPlanT_To.setJP_ProductionDays(ppPlanT_From.getJP_ProductionDays());
 			ppPlanT_To.setJP_DayOffset(ppPlanT_From.getJP_DayOffset());
 			ppPlanT_To.setJP_PP_Workload_Plan(ppPlanT_From.getJP_PP_Workload_Plan());
@@ -176,12 +187,12 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 				ppPlanLineT_To.setM_Product_ID(ppPlanLineT_From.getM_Product_ID());
 				ppPlanLineT_To.setC_UOM_ID(ppPlanLineT_From.getC_UOM_ID());
 				ppPlanLineT_To.setIsEndProduct(ppPlanLineT_From.isEndProduct());
-				ppPlanLineT_To.setPlannedQty(ppPlanLineT_From.getPlannedQty());
+				ppPlanLineT_To.setPlannedQty(p_CoefficientQty.multiply(ppPlanLineT_From.getPlannedQty()));
 				if(ppPlanLineT_To.isEndProduct())
 					ppPlanLineT_To.setQtyUsed(null);
 				else
-					ppPlanLineT_To.setQtyUsed(ppPlanLineT_From.getQtyUsed());
-				ppPlanLineT_To.setMovementQty(ppPlanLineT_From.getMovementQty());
+					ppPlanLineT_To.setQtyUsed(p_CoefficientQty.multiply(ppPlanLineT_From.getQtyUsed()));
+				ppPlanLineT_To.setMovementQty(p_CoefficientQty.multiply(ppPlanLineT_From.getMovementQty()));
 				if(m_PPDocT_To.getAD_Org_ID() == ppPlanT_From.getAD_Org_ID())
 				{
 					ppPlanLineT_To.setM_Locator_ID(ppPlanLineT_From.getM_Locator_ID());

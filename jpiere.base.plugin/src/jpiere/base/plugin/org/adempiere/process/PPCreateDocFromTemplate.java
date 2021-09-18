@@ -179,7 +179,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			if(ppPlanT.getPPPlanLineTs().length == 0)
 			{
 				//There are not PP Plan Line Templates at PP Plan Template.
-				throw new Exception(Msg.getMsg(getCtx(), "JP_PP_LineT_NotThere"));//TODO 予定製造指図伝票テンプレートに予定伝票明細テンプレートがありません。
+				throw new Exception(Msg.getMsg(getCtx(), "JP_PP_LineT_NotThere"));
 			}
 
 			BigDecimal planQty = ppPlan.getProductionQty();
@@ -489,10 +489,10 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 
 				}else if(nodeFrom.getParent_ID() == ppPlans[j].getJP_PP_PlanT_ID()){
 
-					nodeTo.setParent_ID(ppPlans[j].getJP_PP_Plan_ID());
-					nodeTo.setSeqNo(nodeFrom.getSeqNo());
-					nodeTo.save(get_TrxName());
-					break;
+						nodeTo.setParent_ID(ppPlans[j].getJP_PP_Plan_ID());
+						nodeTo.setSeqNo(nodeFrom.getSeqNo());
+						nodeTo.save(get_TrxName());
+						break;
 				}
 
 			}//for j
