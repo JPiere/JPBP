@@ -72,10 +72,10 @@ public class PPFactModelValidator implements ModelValidator {
 			if(po instanceof I_JP_PP_Fact)
 			{
 				I_JP_PP_Fact i_PO = (I_JP_PP_Fact)po;
-				String sql = "UPDATE JP_PP_Plan p SET NAME = p.JP_NAME || '[' || ? || '/' || "				//param1
+				String sql = "UPDATE JP_PP_Plan p SET NAME = p.JP_NAME || ' [' ||"
 						+ " (SELECT COALESCE(SUM(fl.MovementQty),0) FROM JP_PP_FactLine fl "
 											+ " INNER JOIN JP_PP_Fact f ON (fl.JP_PP_Fact_ID = f.JP_PP_Fact_ID) "
-											+ "  WHERE f.JP_PP_Plan_ID=? AND f.DocStatus in ('CO','CL') AND fl.IsEndProduct='Y') || ']' "	//param2
+											+ "  WHERE f.JP_PP_Plan_ID=? AND f.DocStatus in ('CO','CL') AND fl.IsEndProduct='Y')  || '/' || ? || ']' "	//param1,2
 						+ " WHERE p.JP_PP_Plan_ID=?";	//param3
 
 				BigDecimal factQty = i_PO.getProductionQty();
@@ -84,7 +84,7 @@ public class PPFactModelValidator implements ModelValidator {
 				factQty = factQty.setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 
 				int no = DB.executeUpdate(sql
-							, new Object[]{factQty, i_PO.getJP_PP_Plan_ID(), i_PO.getJP_PP_Plan_ID()}
+							, new Object[]{i_PO.getJP_PP_Plan_ID(), factQty, i_PO.getJP_PP_Plan_ID()}
 							, false, po.get_TrxName(), 0);
 
 				if (no != 1)

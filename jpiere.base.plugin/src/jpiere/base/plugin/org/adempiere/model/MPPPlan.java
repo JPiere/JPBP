@@ -117,6 +117,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			setJP_ProductionQtyFact(getJP_ProductionQtyFact().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
+		//For Tree
 		setName(getJP_Name());
 
 		return true;
@@ -818,6 +819,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			ppFact.setC_DocType_ID(getJP_PP_PlanT().getC_DocTypeTarget_ID());
 		}
 		ppFact.setDocumentNo(null);
+		ppFact.setName(getJP_Name());
 		ppFact.setMovementDate(getDateAcct());
 		if(ppPLines.length > 0)
 			ppFact.setIsCreated("Y");

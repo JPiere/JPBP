@@ -103,6 +103,7 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 			}
 		}
 
+		//For Tree
 		setName(getJP_Name());
 
 		return true;
