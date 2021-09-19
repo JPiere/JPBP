@@ -343,6 +343,12 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 
+		if(!isHaveEndProduct())
+		{
+			//PP Lines does not contain End Product
+			m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NotContainEndProduct");
+			return DocAction.STATUS_Invalid;
+		}
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -403,6 +409,14 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
+
+		if(!isHaveEndProduct())
+		{
+			//PP Lines does not contain End Product
+			m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NotContainEndProduct");
+			return DocAction.STATUS_Invalid;
+		}
+
 
 		MPPFactLine[] ppFactLines = getPPFactLines(true, null);
 		MPPFactLineMA[] ppFactLineMAs = null;
@@ -603,19 +617,18 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			return false;
 
 
-		if(!getDocStatus().equals(DocAction.STATUS_Completed))
+		if(getDocStatus().equals(DocAction.STATUS_Completed))
 		{
-			return voidIt();
-		}
 
-		if(getM_Production_ID() != 0)
-		{
-			MProduction pp = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
-			if(pp.getDocStatus().equals(DocAction.STATUS_Completed))
-			{
-				pp.processIt(DocAction.ACTION_Reverse_Correct);
-				pp.saveEx(get_TrxName());
-			}
+			reverse(ACTION_Reverse_Correct);
+
+		}else if(getDocStatus().equals(DocAction.STATUS_Closed)) {
+
+			;//Noting to do;
+
+		}else {
+
+			return voidIt();
 		}
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
@@ -639,19 +652,19 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		if (m_processMsg != null)
 			return false;
 
-		if(!getDocStatus().equals(STATUS_Completed))
+		if(getDocStatus().equals(STATUS_Completed))
 		{
-			return voidIt();
-		}
 
-		if(getM_Production_ID() != 0)
-		{
-			MProduction pp = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
-			if(pp.getDocStatus().equals(STATUS_Completed))
-			{
-				pp.processIt(ACTION_Reverse_Accrual);
-				pp.saveEx(get_TrxName());
-			}
+			reverse(ACTION_Reverse_Accrual);
+
+		}else if(getDocStatus().equals(DocAction.STATUS_Closed)) {
+
+			;//Noting to do;
+
+		}else {
+
+			return voidIt();
+
 		}
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
@@ -660,6 +673,29 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 		setProcessed(true);
 		setDocAction(DOCACTION_None);
+
+		return true;
+	}
+
+
+	private boolean reverse(String DocAction)
+	{
+		if(getM_Production_ID() == 0)
+		{
+			return true;
+		}
+
+		MProduction pp = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
+		if(pp.getDocStatus().equals(STATUS_Completed))
+		{
+			pp.processIt(DocAction);
+			pp.saveEx(get_TrxName());
+
+			int reversal_ID = pp.getReversal_ID();
+			MProduction reversalPP = new MProduction(getCtx(), reversal_ID, get_TrxName());
+			reversalPP.set_ValueNoCheck(COLUMNNAME_JP_PP_Fact_ID, getJP_PP_Fact_ID());
+			reversalPP.saveEx(get_TrxName());
+		}
 
 		return true;
 	}
@@ -943,5 +979,17 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		}
 
 		return productionQty;
+	}
+
+	public boolean isHaveEndProduct()
+	{
+		MPPFactLine[] lines = getPPFactLines();
+
+		for(MPPFactLine line : lines) {
+			if(line.isEndProduct())
+				return true;
+		}
+
+		return false;
 	}
 }	//	MPPDoc
