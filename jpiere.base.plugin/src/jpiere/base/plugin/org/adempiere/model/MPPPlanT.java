@@ -103,7 +103,7 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 			}
 		}
 
-		setName(getJP_Name() + " [" + getProductionQty()+"]" );
+		setName(getJP_Name());
 
 		return true;
 	}

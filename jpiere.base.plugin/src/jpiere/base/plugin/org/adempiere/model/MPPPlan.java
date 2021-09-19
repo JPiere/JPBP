@@ -117,7 +117,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			setJP_ProductionQtyFact(getJP_ProductionQtyFact().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
-		setName(getJP_Name() + " [" +getJP_ProductionQtyFact() + "/" + getProductionQty()+"]");
+		setName(getJP_Name());
 
 		return true;
 	}

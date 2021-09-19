@@ -143,23 +143,44 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 		}
 
 
-		if (newRecord && isEndProduct() && getJP_PP_PlanLineT_ID() != 0 && !getIsCreated().equals("Y"))
+		if (newRecord && isEndProduct() && !getIsCreated().equals("Y"))
 		{
-			MPPPlanLineT ppPlanLineT = new MPPPlanLineT(getCtx(), getJP_PP_PlanLineT_ID(), get_TrxName());
-			MPPPlanLineTQT[] qts_From = ppPlanLineT.getPPPlanLineTQTs();
-			MPPPlanLineQT qt_To = null;
-			for(MPPPlanLineTQT qt_From: qts_From)
+			if(getJP_PP_PlanLineT_ID() != 0 )
 			{
-				qt_To = new MPPPlanLineQT(getCtx(), 0, get_TrxName());
-				PO.copyValues(qt_From, qt_To);
-				qt_To.setJP_PP_PlanLine_ID(getJP_PP_PlanLine_ID());
-				qt_To.setJP_PP_PlanLineTQT_ID(qt_From.getJP_PP_PlanLineTQT_ID());
-				qt_To.setAD_Org_ID(getAD_Org_ID());
-				qt_To.setSeqNo(qt_From.getSeqNo());
-				qt_To.setM_QualityTest_ID(qt_From.getM_QualityTest_ID());
-				qt_To.setExpectedResult(qt_From.getExpectedResult());
-				qt_To.setIsActive(true);
-				qt_To.save(get_TrxName());
+				MPPPlanLineT ppPlanLineT = new MPPPlanLineT(getCtx(), getJP_PP_PlanLineT_ID(), get_TrxName());
+				MPPPlanLineTQT[] qts_From = ppPlanLineT.getPPPlanLineTQTs();
+				MPPPlanLineQT qt_To = null;
+				for(MPPPlanLineTQT qt_From: qts_From)
+				{
+					qt_To = new MPPPlanLineQT(getCtx(), 0, get_TrxName());
+					PO.copyValues(qt_From, qt_To);
+					qt_To.setJP_PP_PlanLine_ID(getJP_PP_PlanLine_ID());
+					qt_To.setJP_PP_PlanLineTQT_ID(qt_From.getJP_PP_PlanLineTQT_ID());
+					qt_To.setAD_Org_ID(getAD_Org_ID());
+					qt_To.setSeqNo(qt_From.getSeqNo());
+					qt_To.setM_QualityTest_ID(qt_From.getM_QualityTest_ID());
+					qt_To.setExpectedResult(qt_From.getExpectedResult());
+					qt_To.setIsActive(true);
+					qt_To.save(get_TrxName());
+				}
+			}else {
+
+				MPPPlanLineQT ppPlanLineQT = null;
+				PO[]  productQTs = getProductQualityTest();
+				int seqNo = 0;
+				for(PO productQT : productQTs)
+				{
+					seqNo = seqNo + 10;
+					ppPlanLineQT = new MPPPlanLineQT(getCtx(), 0, get_TrxName());
+					PO.copyValues(productQT, ppPlanLineQT);
+					ppPlanLineQT.setJP_PP_PlanLine_ID(getJP_PP_PlanLine_ID());
+					ppPlanLineQT.setAD_Org_ID(getAD_Org_ID());
+					ppPlanLineQT.setSeqNo(seqNo);
+					ppPlanLineQT.setM_QualityTest_ID(productQT.get_ValueAsInt("M_QualityTest_ID"));
+					ppPlanLineQT.setExpectedResult(productQT.get_ValueAsString("ExpectedResult"));
+					ppPlanLineQT.setIsActive(true);
+					ppPlanLineQT.save(get_TrxName());
+				}
 			}
 		}
 
@@ -258,6 +279,18 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 	public MPPPlanLineQT[] getPPPlanLineQTs()
 	{
 		return getPPPlanLineQTs(false, null);
+	}
+
+	public PO[] getProductQualityTest()
+	{
+		String where = " M_Product_ID = ? AND IsActive='Y' " ;
+
+		List<PO> list = new Query(getCtx(), "M_Product_QualityTest", where, get_TrxName())
+								.setOnlyActiveRecords(true)
+								.setParameters(getM_Product_ID())
+								.list();
+
+		return list.toArray(new PO[list.size()]);
 	}
 
 }

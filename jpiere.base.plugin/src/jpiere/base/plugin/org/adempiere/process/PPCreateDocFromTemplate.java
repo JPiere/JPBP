@@ -449,6 +449,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			ppPlanLine.setJP_Processing1("N");
 			ppPlanLine.setJP_Processing2("N");
 			ppPlanLine.setJP_Processing3("N");
+			ppPlanLine.setIsCreated("N");
 
 			//Set Locator
 			if(ppPlanLine.getAD_Org_ID() == ppPlanLineT.getAD_Org_ID())
