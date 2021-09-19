@@ -77,7 +77,7 @@ public class PPPlanLineModelValidator implements ModelValidator {
 				}else {
 
 					I_JP_PP_PlanLine i_PO = (I_JP_PP_PlanLine)po;
-					String sql = "UPDATE JP_PP_Plan SET NAME = JP_NAME || '[' || ? || '/' || "
+					String sql = "UPDATE JP_PP_Plan SET NAME = JP_NAME || ' [' || ? || '/' || "
 							+ " (SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLine WHERE JP_PP_Plan_ID=? AND IsEndProduct='Y') || ']' "
 							+ " WHERE JP_PP_Plan_ID=?";
 

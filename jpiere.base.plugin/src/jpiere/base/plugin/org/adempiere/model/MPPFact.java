@@ -116,7 +116,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		//Set JP_PP_Workload_UOM_ID
 		if(newRecord || is_ValueChanged(MPPFact.COLUMNNAME_JP_PP_Workload_UOM_ID) || getJP_PP_Workload_UOM_ID() == 0)
 		{
-			setC_UOM_ID(getParent().getJP_PP_Workload_UOM_ID());
+			setJP_PP_Workload_UOM_ID(getParent().getJP_PP_Workload_UOM_ID());
 		}
 
 

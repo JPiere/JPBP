@@ -64,7 +64,7 @@ public class PPPlanTemplateModelValidator implements ModelValidator {
 			if(po instanceof I_JP_PP_PlanT)
 			{
 				I_JP_PP_PlanT i_PO = (I_JP_PP_PlanT)po;
-				i_PO.setName(i_PO.getJP_Name() + "[" + i_PO.getProductionQty()+"]");
+				i_PO.setName(i_PO.getJP_Name() + " [" + i_PO.getProductionQty()+"]");
 			}
 		}
 
