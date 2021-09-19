@@ -160,6 +160,7 @@ public class PPCreateLineFromBom extends SvrProcess {
 			poLine.set_ValueNoCheck("PlannedQty", p_ProductionQty.multiply(bom.getBOMQty()));
 			poLine.set_ValueNoCheck("QtyUsed", p_ProductionQty.multiply(bom.getBOMQty()));
 			poLine.set_ValueNoCheck("MovementQty",p_ProductionQty.multiply(bom.getBOMQty()).negate());
+			poLine.set_ValueNoCheck("IsCreated", "N");
 			poLine.saveEx(get_TrxName());
 		}
 

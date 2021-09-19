@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_PP_PlanLineT
  *  @author iDempiere (generated) 
@@ -32,7 +33,7 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210918L;
+	private static final long serialVersionUID = 20210919L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanLineT (Properties ctx, int JP_PP_PlanLineT_ID, String trxName)
@@ -40,6 +41,8 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
       super (ctx, JP_PP_PlanLineT_ID, trxName);
       /** if (JP_PP_PlanLineT_ID == 0)
         {
+			setIsCreated (null);
+// N
 			setIsEndProduct (false);
 // N
 			setJP_PP_PlanLineT_ID (0);
@@ -169,6 +172,27 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 		return (String)get_Value(COLUMNNAME_Help);
 	}
 
+	/** IsCreated AD_Reference_ID=319 */
+	public static final int ISCREATED_AD_Reference_ID=319;
+	/** Yes = Y */
+	public static final String ISCREATED_Yes = "Y";
+	/** No = N */
+	public static final String ISCREATED_No = "N";
+	/** Set Records created.
+		@param IsCreated Records created	  */
+	public void setIsCreated (String IsCreated)
+	{
+
+		set_Value (COLUMNNAME_IsCreated, IsCreated);
+	}
+
+	/** Get Records created.
+		@return Records created	  */
+	public String getIsCreated () 
+	{
+		return (String)get_Value(COLUMNNAME_IsCreated);
+	}
+
 	/** Set End Product.
 		@param IsEndProduct 
 		End Product of production
@@ -257,6 +281,14 @@ public class X_JP_PP_PlanLineT extends PO implements I_JP_PP_PlanLineT, I_Persis
 			 return 0;
 		return ii.intValue();
 	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair() 
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getJP_PP_PlanT_ID()));
+    }
 
 	/** Set Process Now.
 		@param JP_Processing1 Process Now	  */

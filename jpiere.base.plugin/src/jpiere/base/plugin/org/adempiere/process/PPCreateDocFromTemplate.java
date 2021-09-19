@@ -152,6 +152,20 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 
 			m_PPDocT = new MPPDocT(getCtx(), p_JP_PP_DocT_ID, get_TrxName());
 
+			MPPPlanT[] ppPlanTs = m_PPDocT.getPPPlanTs();
+			MPPPlan[] ppPlans = m_PPDoc.getPPPlans();
+			for(MPPPlanT ppPlanT :  ppPlanTs )
+			{
+				for(MPPPlan ppPlan :  ppPlans )
+				{
+					if(ppPlanT.getJP_PP_PlanT_ID() == ppPlan.getJP_PP_PlanT_ID() )
+					{
+						//The PP Template is already in use.
+						throw new Exception(Msg.getMsg(getCtx(), "JP_PP_TemplateInUse"));
+					}
+				}
+			}
+
 			createPlan();
 			updateTree();
 
@@ -266,14 +280,17 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			//Copy mandatory column to make sure
 			ppPlan.setJP_PP_Doc_ID(m_PPDoc.getJP_PP_Doc_ID());
 			ppPlan.setAD_Org_ID(m_PPDoc.getAD_Org_ID());
+			ppPlan.setDocumentNo(null);
 			ppPlan.setJP_PP_PlanT_ID(ppPlanT.getJP_PP_PlanT_ID());
 			ppPlan.setSeqNo(ppPlanT.getSeqNo());
 			ppPlan.setIsSummary(ppPlanT.isSummary());
 			ppPlan.setM_Product_ID(ppPlanT.getM_Product_ID());
 			ppPlan.setC_DocType_ID(ppPlanT.getC_DocType_ID());
 			ppPlan.setValue(ppPlanT.getValue());
-			ppPlan.setName(ppPlanT.getName());
+			ppPlan.setJP_Name(ppPlanT.getJP_Name());
+			ppPlan.setName(ppPlanT.getJP_Name());
 			ppPlan.setProductionQty(p_CoefficientQty.multiply(ppPlanT.getProductionQty()));
+			ppPlan.setJP_ProductionQtyFact(Env.ZERO);
 			ppPlan.setC_UOM_ID(ppPlanT.getC_UOM_ID());
 			ppPlan.setJP_PP_Workload_Plan(ppPlanT.getJP_PP_Workload_Plan());
 			ppPlan.setJP_PP_Workload_UOM_ID(ppPlanT.getJP_PP_Workload_UOM_ID());

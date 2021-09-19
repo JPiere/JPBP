@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
@@ -63,8 +64,25 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		//Set Value
+		if(newRecord)
+		{
+			if(Util.isEmpty(getValue()))
+			{
+				MProduct product = MProduct.get(getM_Product_ID());
+				String value = product.getValue() + "_" + LocalDateTime.now().toString().substring(0, 10);
+				setValue(value);
+
+				if(MPPDoc.get(getCtx(), value, get_TrxName()) != null)
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") +" "+ Msg.getElement(getCtx(), MPPDocT.COLUMNNAME_Value)) ;
+					return false;
+				}
+			}
+		}
+
 		//Rounding Production Qty
-		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
+		if(newRecord || is_ValueChanged(MPPDoc.COLUMNNAME_ProductionQty))
 		{
 			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
 			MUOM uom = MUOM.get(getC_UOM_ID());

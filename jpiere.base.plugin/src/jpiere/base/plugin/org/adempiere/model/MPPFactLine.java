@@ -21,10 +21,12 @@ import java.util.Properties;
 import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
+import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 
 /**
@@ -131,6 +133,27 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 			}
 		}
 
+		if (newRecord && isEndProduct() && getJP_PP_PlanLine_ID() != 0 && !getIsCreated().equals("Y"))
+		{
+			MPPPlanLine ppPlanLine = new MPPPlanLine(getCtx(), getJP_PP_PlanLine_ID(), get_TrxName());
+			MPPPlanLineQT[] qts_From = ppPlanLine.getPPPlanLineQTs();
+			MPPFactLineQT qt_To = null;
+			for(MPPPlanLineQT qt_From: qts_From)
+			{
+				qt_To = new MPPFactLineQT(getCtx(), 0, get_TrxName());
+				PO.copyValues(qt_From, qt_To);
+				qt_To.setJP_PP_FactLine_ID(getJP_PP_FactLine_ID());
+				qt_To.setJP_PP_PlanLineQT_ID(qt_From.getJP_PP_PlanLineQT_ID());
+				qt_To.setAD_Org_ID(getAD_Org_ID());
+				qt_To.setSeqNo(qt_From.getSeqNo());
+				qt_To.setM_QualityTest_ID(qt_From.getM_QualityTest_ID());
+				qt_To.setExpectedResult(qt_From.getExpectedResult());
+				qt_To.setIsActive(true);
+				qt_To.setProcessed(false);
+				qt_To.save(get_TrxName());
+			}
+		}
+
 		return true;
 	}
 
@@ -202,5 +225,46 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 
 		return list.toArray(new MPPFactLineMA[list.size()]);
 
+	}
+
+	private MPPFactLineQT[] m_PPFactLineQTs = null;
+
+	public MPPFactLineQT[] getPPFactLineQTs (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MPPFactLineQT.COLUMNNAME_JP_PP_FactLine_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MPPFactLineQT.COLUMNNAME_SeqNo;
+		//
+		List<MPPFactLineQT> list = new Query(getCtx(), MPPPlanLineQT.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		return list.toArray(new MPPFactLineQT[list.size()]);
+
+	}
+
+	public MPPFactLineQT[] getPPFactLineQTs(boolean requery, String orderBy)
+	{
+		if (m_PPFactLineQTs != null && !requery) {
+			set_TrxName(m_PPFactLineQTs, get_TrxName());
+			return m_PPFactLineQTs;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += MPPFactLineQT.COLUMNNAME_SeqNo;
+
+		m_PPFactLineQTs = getPPFactLineQTs(" AND IsActive='Y' ", orderClause);
+		return m_PPFactLineQTs;
+	}
+
+	public MPPFactLineQT[] getPPFactLineQTs()
+	{
+		return getPPFactLineQTs(false, null);
 	}
 }

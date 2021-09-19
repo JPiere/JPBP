@@ -33,7 +33,7 @@ public class X_JP_PP_DocT extends PO implements I_JP_PP_DocT, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210918L;
+	private static final long serialVersionUID = 20210919L;
 
     /** Standard Constructor */
     public X_JP_PP_DocT (Properties ctx, int JP_PP_DocT_ID, String trxName)

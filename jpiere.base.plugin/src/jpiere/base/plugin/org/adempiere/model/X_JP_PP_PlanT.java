@@ -34,7 +34,7 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210918L;
+	private static final long serialVersionUID = 20210919L;
 
     /** Standard Constructor */
     public X_JP_PP_PlanT (Properties ctx, int JP_PP_PlanT_ID, String trxName)
@@ -56,6 +56,7 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 // Y
 			setJP_DayOffset (0);
 // 0
+			setJP_Name (null);
 			setJP_PP_DocT_ID (0);
 			setJP_PP_PlanT_ID (0);
 			setJP_PP_Workload_Plan (Env.ZERO);
@@ -540,6 +541,23 @@ public class X_JP_PP_PlanT extends PO implements I_JP_PP_PlanT, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Name.
+		@param JP_Name 
+		Alphanumeric identifier of the entity
+	  */
+	public void setJP_Name (String JP_Name)
+	{
+		set_Value (COLUMNNAME_JP_Name, JP_Name);
+	}
+
+	/** Get Name.
+		@return Alphanumeric identifier of the entity
+	  */
+	public String getJP_Name () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Name);
 	}
 
 	public I_JP_PP_DocT getJP_PP_DocT() throws RuntimeException

@@ -15,14 +15,18 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.RoundingMode;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 
 import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
+import org.compiere.model.PO;
+import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 
 /**
@@ -138,6 +142,28 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 
 		}
 
+
+		if (newRecord && isEndProduct() && getJP_PP_PlanLineT_ID() != 0 && !getIsCreated().equals("Y"))
+		{
+			MPPPlanLineT ppPlanLineT = new MPPPlanLineT(getCtx(), getJP_PP_PlanLineT_ID(), get_TrxName());
+			MPPPlanLineTQT[] qts_From = ppPlanLineT.getPPPlanLineTQTs();
+			MPPPlanLineQT qt_To = null;
+			for(MPPPlanLineTQT qt_From: qts_From)
+			{
+				qt_To = new MPPPlanLineQT(getCtx(), 0, get_TrxName());
+				PO.copyValues(qt_From, qt_To);
+				qt_To.setJP_PP_PlanLine_ID(getJP_PP_PlanLine_ID());
+				qt_To.setJP_PP_PlanLineTQT_ID(qt_From.getJP_PP_PlanLineTQT_ID());
+				qt_To.setAD_Org_ID(getAD_Org_ID());
+				qt_To.setSeqNo(qt_From.getSeqNo());
+				qt_To.setM_QualityTest_ID(qt_From.getM_QualityTest_ID());
+				qt_To.setExpectedResult(qt_From.getExpectedResult());
+				qt_To.setIsActive(true);
+				qt_To.save(get_TrxName());
+			}
+		}
+
+
 		return true;
 	}
 
@@ -189,6 +215,49 @@ public class MPPPlanLine extends X_JP_PP_PlanLine {
 			parent.set_TrxName(get_TrxName());
 
 		return parent;
+	}
+
+
+
+	private MPPPlanLineQT[] m_PPPlanLineQTs = null;
+
+	public MPPPlanLineQT[] getPPPlanLineQTs (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MPPPlanLineQT.COLUMNNAME_JP_PP_PlanLine_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MPPPlanLineQT.COLUMNNAME_SeqNo;
+		//
+		List<MPPPlanLineQT> list = new Query(getCtx(), MPPPlanLineQT.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		return list.toArray(new MPPPlanLineQT[list.size()]);
+
+	}
+
+	public MPPPlanLineQT[] getPPPlanLineQTs(boolean requery, String orderBy)
+	{
+		if (m_PPPlanLineQTs != null && !requery) {
+			set_TrxName(m_PPPlanLineQTs, get_TrxName());
+			return m_PPPlanLineQTs;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += MPPPlanLineQT.COLUMNNAME_SeqNo;
+
+		m_PPPlanLineQTs = getPPPlanLineQTs(" AND IsActive='Y' ", orderClause);
+		return m_PPPlanLineQTs;
+	}
+
+	public MPPPlanLineQT[] getPPPlanLineQTs()
+	{
+		return getPPPlanLineQTs(false, null);
 	}
 
 }

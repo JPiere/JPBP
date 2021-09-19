@@ -110,6 +110,15 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			setProductionQty(getProductionQty().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
 		}
 
+		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_JP_ProductionQtyFact))
+		{
+			boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, getAD_Client_ID(), getAD_Org_ID());
+			MUOM uom = MUOM.get(getC_UOM_ID());
+			setJP_ProductionQtyFact(getJP_ProductionQtyFact().setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP));
+		}
+
+		setName(getJP_Name() + " [" +getJP_ProductionQtyFact() + "/" + getProductionQty()+"]");
+
 		return true;
 	}
 

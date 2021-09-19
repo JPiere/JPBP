@@ -29,6 +29,7 @@ import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDocT;
 import jpiere.base.plugin.org.adempiere.model.MPPPlanLineT;
+import jpiere.base.plugin.org.adempiere.model.MPPPlanLineTQT;
 import jpiere.base.plugin.org.adempiere.model.MPPPlanT;
 
 
@@ -152,7 +153,8 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 			ppPlanT_To.setC_DocType_ID(ppPlanT_From.getC_DocType_ID());
 			ppPlanT_To.setC_DocTypeTarget_ID(ppPlanT_From.getC_DocTypeTarget_ID());
 			ppPlanT_To.setValue(ppPlanT_From.getValue());
-			ppPlanT_To.setName(ppPlanT_From.getName());
+			ppPlanT_To.setJP_Name(ppPlanT_From.getJP_Name());
+			ppPlanT_To.setName(ppPlanT_From.getJP_Name());
 			ppPlanT_To.setIsSplitWhenDifferenceJP(ppPlanT_From.isSplitWhenDifferenceJP());
 			ppPlanT_To.setIsCompleteAutoJP(ppPlanT_From.isCompleteAutoJP());
 			ppPlanT_To.setIsCreatePPFactJP(ppPlanT_From.isCreatePPFactJP());
@@ -204,6 +206,25 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 				ppPlanLineT_To.setJP_Processing2("N");
 				ppPlanLineT_To.setJP_Processing3("N");
 				ppPlanLineT_To.saveEx(get_TrxName());
+
+				//QT
+				if(ppPlanLineT_To.isEndProduct())
+				{
+					MPPPlanLineTQT[] qts_From = ppPlanLineT_From.getPPPlanLineTQTs(true, null);
+					MPPPlanLineTQT qt_To = null;
+					for(MPPPlanLineTQT qt_From :qts_From)
+					{
+						qt_To = new MPPPlanLineTQT(getCtx(), 0 , get_TrxName());
+						PO.copyValues(qt_From, qt_To);
+						qt_To.setJP_PP_PlanLineT_ID(ppPlanLineT_To.getJP_PP_PlanLineT_ID());
+						qt_To.setAD_Org_ID(ppPlanLineT_To.getAD_Org_ID());
+						qt_To.setSeqNo(qt_From.getSeqNo());
+						qt_To.setM_QualityTest_ID(qt_From.getM_QualityTest_ID());
+						qt_To.setExpectedResult(qt_From.getExpectedResult());
+						qt_To.setIsActive(true);
+						qt_To.saveEx(get_TrxName());
+					}
+				}
 			}
 
 		}

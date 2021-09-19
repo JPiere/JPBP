@@ -147,6 +147,15 @@ public interface I_JP_PP_FactLine
 	  */
 	public boolean isActive();
 
+    /** Column name IsCreated */
+    public static final String COLUMNNAME_IsCreated = "IsCreated";
+
+	/** Set Records created	  */
+	public void setIsCreated (String IsCreated);
+
+	/** Get Records created	  */
+	public String getIsCreated();
+
     /** Column name IsEndProduct */
     public static final String COLUMNNAME_IsEndProduct = "IsEndProduct";
 

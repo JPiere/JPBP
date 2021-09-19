@@ -25,6 +25,7 @@ import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
 import org.compiere.model.Query;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
@@ -88,7 +89,7 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 		{
 			if(getJP_ProductionDays() < 0)
 			{
-				log.saveError("Error", "0以上を入れて下さい");//TODO 多言語化
+				log.saveError("Error", Msg.getElement(getCtx(), MPPPlanT.COLUMNNAME_JP_ProductionDays) + " - "  + Msg.getMsg(getCtx(), "Minus"));
 				return false;
 			}
 		}
@@ -97,10 +98,12 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 		{
 			if(getJP_DayOffset() < 0)
 			{
-				log.saveError("Error", "0以上を入れて下さい");//TODO 多言語化
+				log.saveError("Error", Msg.getElement(getCtx(), MPPPlanT.COLUMNNAME_JP_DayOffset) + " - "  + Msg.getMsg(getCtx(), "Minus"));
 				return false;
 			}
 		}
+
+		setName(getJP_Name() + " [" + getProductionQty()+"]" );
 
 		return true;
 	}

@@ -359,6 +359,19 @@ public interface I_JP_PP_Plan
 	  */
 	public boolean isSummary();
 
+    /** Column name JP_Name */
+    public static final String COLUMNNAME_JP_Name = "JP_Name";
+
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public void setJP_Name (String JP_Name);
+
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
+	  */
+	public String getJP_Name();
+
     /** Column name JP_PP_Doc_ID */
     public static final String COLUMNNAME_JP_PP_Doc_ID = "JP_PP_Doc_ID";
 

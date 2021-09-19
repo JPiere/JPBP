@@ -32,7 +32,7 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210918L;
+	private static final long serialVersionUID = 20210919L;
 
     /** Standard Constructor */
     public X_JP_PP_FactLine (Properties ctx, int JP_PP_FactLine_ID, String trxName)
@@ -40,6 +40,8 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
       super (ctx, JP_PP_FactLine_ID, trxName);
       /** if (JP_PP_FactLine_ID == 0)
         {
+			setIsCreated (null);
+// N
 			setIsEndProduct (false);
 // N
 			setJP_PP_FactLine_ID (0);
@@ -168,6 +170,27 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 	public String getHelp () 
 	{
 		return (String)get_Value(COLUMNNAME_Help);
+	}
+
+	/** IsCreated AD_Reference_ID=319 */
+	public static final int ISCREATED_AD_Reference_ID=319;
+	/** Yes = Y */
+	public static final String ISCREATED_Yes = "Y";
+	/** No = N */
+	public static final String ISCREATED_No = "N";
+	/** Set Records created.
+		@param IsCreated Records created	  */
+	public void setIsCreated (String IsCreated)
+	{
+
+		set_Value (COLUMNNAME_IsCreated, IsCreated);
+	}
+
+	/** Get Records created.
+		@return Records created	  */
+	public String getIsCreated () 
+	{
+		return (String)get_Value(COLUMNNAME_IsCreated);
 	}
 
 	/** Set End Product.

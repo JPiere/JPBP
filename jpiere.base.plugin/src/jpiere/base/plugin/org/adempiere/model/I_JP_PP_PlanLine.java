@@ -147,6 +147,15 @@ public interface I_JP_PP_PlanLine
 	  */
 	public boolean isActive();
 
+    /** Column name IsCreated */
+    public static final String COLUMNNAME_IsCreated = "IsCreated";
+
+	/** Set Records created	  */
+	public void setIsCreated (String IsCreated);
+
+	/** Get Records created	  */
+	public String getIsCreated();
+
     /** Column name IsEndProduct */
     public static final String COLUMNNAME_IsEndProduct = "IsEndProduct";
 
@@ -338,6 +347,19 @@ public interface I_JP_PP_PlanLine
 	  * The document has been processed
 	  */
 	public boolean isProcessed();
+
+    /** Column name QtyAvailable */
+    public static final String COLUMNNAME_QtyAvailable = "QtyAvailable";
+
+	/** Set Available Quantity.
+	  * Available Quantity (On Hand - Reserved)
+	  */
+	public void setQtyAvailable (BigDecimal QtyAvailable);
+
+	/** Get Available Quantity.
+	  * Available Quantity (On Hand - Reserved)
+	  */
+	public BigDecimal getQtyAvailable();
 
     /** Column name QtyUsed */
     public static final String COLUMNNAME_QtyUsed = "QtyUsed";

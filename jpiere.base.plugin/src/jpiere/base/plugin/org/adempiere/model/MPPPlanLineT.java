@@ -15,13 +15,17 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.RoundingMode;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 
 import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOM;
+import org.compiere.model.PO;
+import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * JPIERE-0502: JPiere PP Doc Template
@@ -113,6 +117,26 @@ public class MPPPlanLineT extends X_JP_PP_PlanLineT {
 
 		}
 
+		if (newRecord && isEndProduct() && !getIsCreated().equals("Y"))
+		{
+			MPPPlanLineTQT ppPlanLineQT = null;
+			PO[]  productQTs = getProductQualityTest();
+			int seqNo = 0;
+			for(PO productQT : productQTs)
+			{
+				seqNo = seqNo + 10;
+				ppPlanLineQT = new MPPPlanLineTQT(getCtx(), 0, get_TrxName());
+				PO.copyValues(productQT, ppPlanLineQT);
+				ppPlanLineQT.setJP_PP_PlanLineT_ID(getJP_PP_PlanLineT_ID());
+				ppPlanLineQT.setAD_Org_ID(getAD_Org_ID());
+				ppPlanLineQT.setSeqNo(seqNo);
+				ppPlanLineQT.setM_QualityTest_ID(productQT.get_ValueAsInt("M_QualityTest_ID"));
+				ppPlanLineQT.setExpectedResult(productQT.get_ValueAsString("ExpectedResult"));
+				ppPlanLineQT.setIsActive(true);
+				ppPlanLineQT.save(get_TrxName());
+			}
+		}
+
 		return true;
 	}
 
@@ -170,4 +194,56 @@ public class MPPPlanLineT extends X_JP_PP_PlanLineT {
 		return parent;
 	}
 
+	private MPPPlanLineTQT[] m_PPPlanLineTQTs = null;
+
+	public MPPPlanLineTQT[] getPPPlanLineTQTs (String whereClause, String orderClause)
+	{
+		StringBuilder whereClauseFinal = new StringBuilder(MPPPlanLineTQT.COLUMNNAME_JP_PP_PlanLineT_ID+"=? ");
+		if (!Util.isEmpty(whereClause, true))
+			whereClauseFinal.append(whereClause);
+		if (orderClause.length() == 0)
+			orderClause = MPPPlanLineTQT.COLUMNNAME_SeqNo;
+		//
+		List<MPPPlanLineTQT> list = new Query(getCtx(), MPPPlanLineTQT.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(get_ID())
+										.setOrderBy(orderClause)
+										.list();
+
+		return list.toArray(new MPPPlanLineTQT[list.size()]);
+
+	}
+
+	public MPPPlanLineTQT[] getPPPlanLineTQTs(boolean requery, String orderBy)
+	{
+		if (m_PPPlanLineTQTs != null && !requery) {
+			set_TrxName(m_PPPlanLineTQTs, get_TrxName());
+			return m_PPPlanLineTQTs;
+		}
+		//
+		String orderClause = "";
+		if (orderBy != null && orderBy.length() > 0)
+			orderClause += orderBy;
+		else
+			orderClause += MPPPlanLineTQT.COLUMNNAME_SeqNo;
+
+		m_PPPlanLineTQTs = getPPPlanLineTQTs(" AND IsActive='Y' ", orderClause);
+		return m_PPPlanLineTQTs;
+	}
+
+	public MPPPlanLineTQT[] getPPPlanLineTQTs()
+	{
+		return getPPPlanLineTQTs(false, null);
+	}
+
+	public PO[] getProductQualityTest()
+	{
+		String where = " M_Product_ID = ? AND IsActive='Y' " ;
+
+		List<PO> list = new Query(getCtx(), "M_Product_QualityTest", where, get_TrxName())
+								.setOnlyActiveRecords(true)
+								.setParameters(getM_Product_ID())
+								.list();
+
+		return list.toArray(new PO[list.size()]);
+	}
 }
