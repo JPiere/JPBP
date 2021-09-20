@@ -857,7 +857,11 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		if(getDocStatus().equals(DocAction.STATUS_Completed))
 		{
 
-			reverse(ACTION_Reverse_Correct);
+			boolean isOk = reverse(ACTION_Reverse_Correct);
+		 	if(!isOk)
+		 	{
+		 		return false;
+		 	}
 
 		}else if(getDocStatus().equals(DocAction.STATUS_Closed)) {
 
@@ -892,7 +896,11 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		if(getDocStatus().equals(STATUS_Completed))
 		{
 
-			reverse(ACTION_Reverse_Accrual);
+		 	boolean isOk = reverse(ACTION_Reverse_Accrual);
+		 	if(!isOk)
+		 	{
+		 		return false;
+		 	}
 
 		}else if(getDocStatus().equals(DocAction.STATUS_Closed)) {
 
@@ -922,14 +930,25 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			return true;
 		}
 
-		MProduction pp = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
+		MTable m_table_Production = MTable.get(getCtx(), I_M_Production.Table_Name);
+		PO po = m_table_Production.getPO(getM_Production_ID(), get_TrxName());
+
+		DocAction pp = (DocAction)po;
 		if(pp.getDocStatus().equals(STATUS_Completed))
 		{
-			pp.processIt(DocAction);
-			pp.saveEx(get_TrxName());
+			try
+			{
+				pp.processIt(DocAction);
 
-			int reversal_ID = pp.getReversal_ID();
-			MProduction reversalPP = new MProduction(getCtx(), reversal_ID, get_TrxName());
+			} catch (Exception e) {
+
+				m_processMsg = pp.getProcessMsg();
+				return false;
+			}
+			po.saveEx(get_TrxName());
+
+			int reversal_ID = po.get_ValueAsInt("Reversal_ID");
+			PO reversalPP = m_table_Production.getPO(reversal_ID, get_TrxName());
 			reversalPP.set_ValueNoCheck(COLUMNNAME_JP_PP_Fact_ID, getJP_PP_Fact_ID());
 			reversalPP.saveEx(get_TrxName());
 		}
