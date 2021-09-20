@@ -191,6 +191,16 @@ public class MPPFactLineMA extends X_JP_PP_FactLineMA {
 			setAD_Org_ID(getParent().getAD_Org_ID());
 		}
 
+		//Check Parent processed
+		if(newRecord)
+		{
+			if(getParent().isProcessed())
+			{
+				log.saveError("Error", Msg.getElement(getCtx(), MPPFact.COLUMNNAME_Processed));
+				return false;
+			}
+		}
+
 		MPPFactLine parentLine = new MPPFactLine(getCtx(), getJP_PP_FactLine_ID(), get_TrxName());
 		MPPFact prodParent = new MPPFact(getCtx(), parentLine.getJP_PP_Fact_ID(), get_TrxName());
 

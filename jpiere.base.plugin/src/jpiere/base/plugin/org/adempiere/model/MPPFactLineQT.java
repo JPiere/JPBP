@@ -16,6 +16,8 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.Msg;
+
 
 
 /**
@@ -36,4 +38,37 @@ public class MPPFactLineQT extends X_JP_PP_FactLineQT {
 		super(ctx, rs, trxName);
 	}
 
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		//SetAD_Org_ID
+		if(newRecord)
+		{
+			setAD_Org_ID(getParent().getAD_Org_ID());
+		}
+
+		//Check Parent processed
+		if(newRecord)
+		{
+			if(getParent().isProcessed())
+			{
+				log.saveError("Error", Msg.getElement(getCtx(), MPPFact.COLUMNNAME_Processed));
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private MPPFactLine m_PPFactLine = null;
+
+	public MPPFactLine getParent()
+	{
+		if(m_PPFactLine == null)
+			m_PPFactLine = new MPPFactLine(getCtx(), getJP_PP_FactLine_ID(), get_TrxName());
+		else
+			m_PPFactLine.set_TrxName(get_TrxName());
+
+		return m_PPFactLine;
+	}
 }

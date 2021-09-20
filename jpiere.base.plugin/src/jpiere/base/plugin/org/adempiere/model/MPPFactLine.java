@@ -206,7 +206,7 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 	public MPPFact getParent()
 	{
 		if(parent==null)
-			parent = new MPPFact(getCtx(),getJP_PP_Fact_ID(), get_TrxName());
+			parent = new MPPFact(getCtx(), getJP_PP_Fact_ID(), get_TrxName());
 		else
 			parent.set_TrxName(get_TrxName());
 

@@ -19,12 +19,16 @@ import java.util.List;
 import org.adempiere.base.IColumnCallout;
 import org.adempiere.base.IColumnCalloutFactory;
 import org.compiere.model.MInOut;
+import org.compiere.model.MInOutLineMA;
+import org.compiere.model.MInventoryLineMA;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocation;
+import org.compiere.model.MMovementLineMA;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MProductionLineMA;
 
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankDataCallout;
@@ -51,6 +55,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRecognitionCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereReferenceTestCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
+import jpiere.base.plugin.org.adempiere.callout.SetDateMaterialPolicyColumnCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -67,6 +72,7 @@ import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
 import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
+import jpiere.base.plugin.org.adempiere.model.MPPFactLineMA;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
 
@@ -317,8 +323,19 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 					list.add(new JPiereInvoiceLineCallout());
 				}
-
 			}
+		}
+
+		//JPIERE-0503 : Support to enter DateMaterialPolicy
+		if((tableName.equals(MPPFactLineMA.Table_Name)
+				|| tableName.equals(MInOutLineMA.Table_Name)
+				|| tableName.equals(MProductionLineMA.Table_Name)
+				|| tableName.equals(MMovementLineMA.Table_Name)
+				|| tableName.equals(MInventoryLineMA.Table_Name))
+				&& columnName.equals("M_AttributeSetInstance_ID")
+				)
+		{
+			list.add(new SetDateMaterialPolicyColumnCallout());
 		}
 
 		return list != null ? list.toArray(new IColumnCallout[0]) : new IColumnCallout[0];
