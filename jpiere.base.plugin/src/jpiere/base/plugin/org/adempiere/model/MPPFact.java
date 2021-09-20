@@ -26,6 +26,9 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.NegativeInventoryDisallowedException;
 import org.compiere.model.I_M_AttributeSet;
+import org.compiere.model.I_M_Production;
+import org.compiere.model.I_M_ProductionLine;
+import org.compiere.model.I_M_ProductionLineMA;
 import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
@@ -33,9 +36,9 @@ import org.compiere.model.MPeriod;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProduction;
 import org.compiere.model.MProductionLine;
-import org.compiere.model.MProductionLineMA;
 import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -597,67 +600,99 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		{
 			if(ppFactLines.length > 0)
 			{
-				MProduction pp = new MProduction(getCtx(), 0 , get_TrxName());
+				MTable m_table_Production = MTable.get(getCtx(), I_M_Production.Table_Name);
+				MTable m_table_ProductionLine = MTable.get(getCtx(), I_M_ProductionLine.Table_Name);
+				MTable m_table_ProductionLineMA = MTable.get(getCtx(), I_M_ProductionLineMA.Table_Name);
+
+				PO pp = m_table_Production.getPO(0, get_TrxName());
 				PO.copyValues(this, pp);
 				pp.setAD_Org_ID(getAD_Org_ID());
 				pp.set_ValueNoCheck(MPPFact.COLUMNNAME_JP_PP_Fact_ID, getJP_PP_Fact_ID());
-				pp.setDocumentNo(null);
-				pp.setDatePromised(getMovementDate());
-				pp.setMovementDate(getMovementDate());
-				pp.setProductionQty(productionQty);
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_DocumentNo,null);
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_DatePromised, getMovementDate());
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_MovementDate ,getMovementDate());
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_M_Product_ID, getM_Product_ID());
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_M_Locator_ID, getM_Locator_ID());
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_ProductionQty, productionQty);
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_Name, getName());
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_Description, getDescription());
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_IsCreated,"Y");
 				pp.setIsActive(true);
-				pp.setProcessed(false);
-				pp.setPosted(false);
-				pp.setDocStatus(DocAction.STATUS_Drafted);
-				pp.setDocAction(DocAction.ACTION_Complete);
-				pp.setIsCreated("Y");
+
+				pp.set_ValueNoCheck("Processed", "N");
+				pp.set_ValueNoCheck("Posted","N");
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_DocStatus , DocAction.STATUS_Drafted);
+				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_DocAction, DocAction.ACTION_Complete);
+
 				pp.saveEx(get_TrxName());
-				setM_Production_ID(pp.getM_Production_ID());
+				setM_Production_ID(pp.get_ID());
 				setJP_PP_Status(MPPFact.JP_PP_STATUS_Completed);
+
 
 				for(MPPFactLine ppFactLine : ppFactLines)
 				{
-					MProductionLine ppLine = new MProductionLine(getCtx(), 0 , get_TrxName());
+					PO ppLine = m_table_ProductionLine.getPO(0, get_TrxName());
 					PO.copyValues(ppFactLine, ppLine);
-					ppLine.setM_Production_ID(pp.getM_Production_ID());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_M_Production_ID, pp.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_M_Production_ID));
 					ppLine.setAD_Org_ID(pp.getAD_Org_ID());
-					ppLine.setLine(ppFactLine.getLine());
-					ppLine.setM_Product_ID(ppFactLine.getM_Product_ID());
-					ppLine.setPlannedQty(ppFactLine.getPlannedQty());
-					ppLine.setQtyUsed(ppFactLine.getQtyUsed());
-					ppLine.setMovementQty(ppFactLine.getMovementQty());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_Line, ppFactLine.getLine());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_M_Product_ID, ppFactLine.getM_Product_ID());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_M_AttributeSetInstance_ID, ppFactLine.getM_AttributeSetInstance_ID());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_IsEndProduct, ppFactLine.isEndProduct()? "Y" : "N");
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_PlannedQty, ppFactLine.getPlannedQty());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_QtyUsed, ppFactLine.getQtyUsed());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_MovementQty, ppFactLine.getMovementQty());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_M_Locator_ID, ppFactLine.getM_Locator_ID());
+					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_Description, ppFactLine.getDescription());
 					ppLine.set_ValueNoCheck(MPPFactLine.COLUMNNAME_JP_PP_FactLine_ID, ppFactLine.getJP_PP_FactLine_ID());
 					ppLine.saveEx(get_TrxName());
 
 					ppFactLineMAs = ppFactLine.getPPFactLineMAs();
 					for(MPPFactLineMA ppFactLineMA : ppFactLineMAs)
 					{
-						MProductionLineMA ppLineMA = new MProductionLineMA(getCtx(), 0 ,get_TrxName());
+						PO ppLineMA = m_table_ProductionLineMA.getPO(0, get_TrxName());
 						PO.copyValues(ppFactLineMA, ppLineMA);
 						ppLineMA.setAD_Org_ID(ppLine.getAD_Org_ID());
-						ppLineMA.setM_ProductionLine_ID(ppLine.getM_ProductionLine_ID());
-						ppLineMA.setM_AttributeSetInstance_ID(ppFactLineMA.getM_AttributeSetInstance_ID());
-						ppLineMA.setDateMaterialPolicy(ppFactLineMA.getDateMaterialPolicy());
-						ppLineMA.setMovementQty(ppFactLineMA.getMovementQty());
+						ppLineMA.set_ValueNoCheck(I_M_ProductionLineMA.COLUMNNAME_M_ProductionLine_ID, ppLine.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_M_ProductionLine_ID));
+						ppLineMA.set_ValueNoCheck(I_M_ProductionLineMA.COLUMNNAME_M_AttributeSetInstance_ID, ppFactLineMA.getM_AttributeSetInstance_ID());
+						ppLineMA.set_ValueNoCheck(I_M_ProductionLineMA.COLUMNNAME_DateMaterialPolicy,ppFactLineMA.getDateMaterialPolicy());
+						ppLineMA.set_ValueNoCheck(I_M_ProductionLineMA.COLUMNNAME_MovementQty, ppFactLineMA.getMovementQty());
 						ppLineMA.saveEx(get_TrxName());
 					}
 				}
 
-				if(!pp.processIt(DocAction.ACTION_Complete))
+				DocAction doc = (DocAction)pp;
+				try
 				{
+					if(!doc.processIt(DocAction.ACTION_Complete))
+					{
+						m_processMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate")+ " : " + Msg.getElement(getCtx(), COLUMNNAME_M_Production_ID)
+													+ " - "+  doc.getProcessMsg();
+						return DocAction.STATUS_Invalid;
+					}
+				} catch (Exception e) {
+
 					m_processMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate")+ " : " + Msg.getElement(getCtx(), COLUMNNAME_M_Production_ID)
-												+ " - "+  pp.getProcessMsg();
-					return DocAction.STATUS_Invalid;
+										+ " - "+  doc.getProcessMsg() + " - " + e.getMessage();
+						return DocAction.STATUS_Invalid;
 				}
 
-				MProductionLine[] productionLines = pp.getLines();
-				for(MProductionLine productionLine : productionLines)
+
+				String whereClauseFinal = I_M_ProductionLine.COLUMNNAME_M_Production_ID + "=? ";
+				String orderClause = I_M_ProductionLine.COLUMNNAME_Line;
+				//
+				List<PO> list = new Query(getCtx(), I_M_ProductionLine.Table_Name, whereClauseFinal, get_TrxName())
+												.setParameters(pp.get_ID())
+												.setOrderBy(orderClause)
+												.list();
+
+				for(PO productionLine : list)
 				{
 					for(MPPFactLine ppFactLine : ppFactLines)
 					{
 						if(productionLine.get_ValueAsInt(MPPFactLine.COLUMNNAME_JP_PP_FactLine_ID) == ppFactLine.getJP_PP_FactLine_ID())
 						{
-							ppFactLine.setM_ProductionLine_ID(productionLine.getM_ProductionLine_ID());
+							ppFactLine.setM_ProductionLine_ID(productionLine.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_M_ProductionLine_ID));
 							if(ppFactLine.isEndProduct())
 							{
 								I_M_AttributeSet attributeset = MProduct.get(ppFactLine.getM_Product_ID()).getM_AttributeSet();
@@ -666,7 +701,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 									isAutoGenerateLot = attributeset.isAutoGenerateLot();
 
 								if(isAutoGenerateLot)
-									ppFactLine.setM_AttributeSetInstance_ID(productionLine.getM_AttributeSetInstance_ID());
+									ppFactLine.setM_AttributeSetInstance_ID(productionLine.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_M_AttributeSetInstance_ID));
 							}
 							ppFactLine.saveEx(get_TrxName());
 							break;
