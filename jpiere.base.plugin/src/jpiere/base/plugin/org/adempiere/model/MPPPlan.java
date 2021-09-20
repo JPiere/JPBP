@@ -701,7 +701,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		else
 			orderClause += MPPPlanLine.COLUMNNAME_Line;
 
-		m_PPPlanLines = getPPPlanLines(null, orderClause);
+		m_PPPlanLines = getPPPlanLines(" AND IsActive='Y' ", orderClause);
 		return m_PPPlanLines;
 	}
 

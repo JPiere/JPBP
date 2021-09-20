@@ -20,6 +20,7 @@ import java.util.Properties;
 import org.adempiere.base.IColumnCallout;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
@@ -32,6 +33,7 @@ import org.compiere.model.MProduction;
 import org.compiere.model.MProductionLine;
 import org.compiere.model.MProductionLineMA;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MPPFactLine;
@@ -83,6 +85,8 @@ public class SetDateMaterialPolicyColumnCallout implements IColumnCallout {
 			{
 				mTab.setValue(MPPFactLineMA.COLUMNNAME_DateMaterialPolicy, line.getParent().getMovementDate());
 				mTab.setValue(MPPFactLineMA.COLUMNNAME_MovementQty, line.getMovementQty());
+				MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+				return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription() + " : " +  Msg.getElement(ctx, "QtyOnHand") +" 0 ";
 
 			}else {
 
@@ -93,7 +97,10 @@ public class SetDateMaterialPolicyColumnCallout implements IColumnCallout {
 				{
 					mTab.setValue(MPPFactLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
 				}else {
+
 					mTab.setValue(MPPFactLineMA.COLUMNNAME_MovementQty,qtyOnHand.negate());
+					MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+					return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription() + " - "+  Msg.getElement(ctx, "QtyOnHand") +" "+qtyOnHand.toString();
 				}
 			}
 
@@ -107,7 +114,7 @@ public class SetDateMaterialPolicyColumnCallout implements IColumnCallout {
 			if(MDocType.get(io.getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && !io.isSOTrx())//Receipt
 			{
 				mTab.setValue(MInOutLineMA.COLUMNNAME_DateMaterialPolicy, io.getMovementDate());
-
+				mTab.setValue(MPPFactLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
 
 			}else if(MDocType.get(io.getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && io.isSOTrx()) {//Customer Retern
 

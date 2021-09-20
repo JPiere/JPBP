@@ -26,6 +26,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.NegativeInventoryDisallowedException;
 import org.compiere.model.I_M_AttributeSet;
+import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
@@ -43,7 +44,6 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
-import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -459,9 +459,13 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 						}
 						if (qtyma.subtract(qtyDiff).signum() != 0)
 						{
+							String msg0 = Msg.getElement(Env.getCtx(), "JP_PP_FactLine_ID")+" - " + Msg.getElement(Env.getCtx(), "MovementQty");
+							String msg1 = Msg.getElement(Env.getCtx(), "JP_PP_FactLineMA_ID")+" - " + Msg.getElement(Env.getCtx(), "MovementQty");
+							String msg = Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+
 							//m_processMsg = "@Line@ " + line.getLine() + ": @FillMandatory@ @M_AttributeSetInstance_ID@";
 							m_processMsg = Msg.getElement(getCtx(), MPPFactLine.COLUMNNAME_JP_PP_FactLine_ID) + " : " + line.getLine()
-											+ " - " + Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "M_AttributeSetInstance_ID");
+											+ " - " + msg;
 							return DocAction.STATUS_Invalid;
 						}
 					}
@@ -470,7 +474,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		}
 
 		//In case of MStorageOnHand == null, MProduction create MStorageOnHand as M_AttributeSetInstance_ID = 0 ,
-		//So, We should create MStorageOnHand beforehand When MStorageOnHand == null.
+		//So, We should check MStorageOnHand beforehand.
 		StringBuilder errors = new StringBuilder();
 		for (MPPFactLine line : ppFactLines)
 		{
@@ -494,56 +498,80 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 						}
 					}
 
-					if (line.getM_AttributeSetInstance_ID() == 0)
+					if(!line.isEndProduct())
 					{
-						MPPFactLineMA mas[] = MPPFactLineMA.get(getCtx(),
-								line.getJP_PP_FactLine_ID(), get_TrxName());
-						for (int j = 0; j < mas.length; j++)
+						if (line.getM_AttributeSetInstance_ID() == 0)
 						{
-							MPPFactLineMA ma = mas[j];
-
-							MStorageOnHand storageOnHand =MStorageOnHand.get (getCtx(), line.getM_Locator_ID(),
-																		line.getM_Product_ID(),
-																		ma.getM_AttributeSetInstance_ID(),
-																		ma.getDateMaterialPolicy(), get_TrxName());
-
-
-							if(storageOnHand == null)
+							MPPFactLineMA mas[] = line.getPPFactLineMAs();
+							BigDecimal movementQtyMA = Env.ZERO;
+							BigDecimal qtyOnhand = Env.ZERO;
+							for (MPPFactLineMA ma : mas)
 							{
-								storageOnHand = MStorageOnHand.getCreate (getCtx(), line.getM_Locator_ID(),
-										line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
-										ma.getDateMaterialPolicy(), get_TrxName());
+
+
+								MStorageOnHand storageOnHand =MStorageOnHand.get (getCtx(), line.getM_Locator_ID(),
+																			line.getM_Product_ID(),
+																			ma.getM_AttributeSetInstance_ID(),
+																			ma.getDateMaterialPolicy(), get_TrxName());
+
 
 								if(storageOnHand == null)
 								{
-									String lastError = CLogger.retrieveErrorString("");
-									m_processMsg = "Cannot correct Inventory OnHand (MA) [" + product.getValue() + "] - " + lastError;
-									return DocAction.STATUS_Invalid;
+									MAttributeSetInstance asi =   new MAttributeSetInstance(getCtx(), ma.getM_AttributeSetInstance_ID(), get_TrxName());
+									m_processMsg = Msg.getMsg(getCtx(), "InsufficientQtyAvailable") +  asi.getDescription()
+											+ " - " + Msg.getElement(getCtx(), "DateMaterialPolicy") + " " + ma.getDateMaterialPolicy().toString().substring(0, 10)
+											+ " - " +  Msg.getElement(getCtx(), "QtyOnHand") + " " + " 0 ";
+									return DOCSTATUS_Invalid;
+
+								}else {
+
+									movementQtyMA = movementQtyMA.add(ma.getMovementQty());
+									qtyOnhand = qtyOnhand.add(storageOnHand.getQtyOnHand());
+
 								}
+							}//for
+
+							movementQtyMA = movementQtyMA.negate();
+							if(qtyOnhand.compareTo(movementQtyMA) >=0 )
+							{
+								;//Noting to do;
+							}else {
+								m_processMsg = Msg.getMsg(getCtx(), "InsufficientQtyAvailable")
+										+  Msg.getElement(getCtx(), "JP_PP_FactLine_ID")+" : "+line.getLine()
+										+ " - "+  Msg.getElement(getCtx(), "QtyOnHand") + " " + qtyOnhand.toString();
+								return DOCSTATUS_Invalid;
 							}
-						}//for
 
-					}else {
+						}else {
 
-						MStorageOnHand storageOnHand = MStorageOnHand.get (getCtx(), line.getM_Locator_ID(),
-								line.getM_Product_ID(),
-								line.getM_AttributeSetInstance_ID(),
-								getMovementDate(), get_TrxName());
-
-						if(storageOnHand == null)
-						{
-							storageOnHand = MStorageOnHand.getCreate (getCtx(), line.getM_Locator_ID(),
-									line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-									getMovementDate(), get_TrxName());
+							MStorageOnHand storageOnHand = MStorageOnHand.get (getCtx(), line.getM_Locator_ID(),
+									line.getM_Product_ID(),
+									line.getM_AttributeSetInstance_ID(),
+									null, get_TrxName());
 
 							if(storageOnHand == null)
 							{
-								String lastError = CLogger.retrieveErrorString("");
-								m_processMsg = "Cannot correct Inventory OnHand (MA) [" + product.getValue() + "] - " + lastError;
-								return DocAction.STATUS_Invalid;
+								MAttributeSetInstance asi =   new MAttributeSetInstance(getCtx(), line.getM_AttributeSetInstance_ID(), get_TrxName());
+								m_processMsg = Msg.getMsg(getCtx(), "InsufficientQtyAvailable")
+										+  " - " + Msg.getElement(getCtx(), "JP_PP_FactLine_ID")+" : "+line.getLine()
+										+  " - " + asi.getDescription() + " - "+  Msg.getElement(getCtx(), "QtyOnHand") + " 0 ";
+								return DOCSTATUS_Invalid;
+							}else {
+
+								if(storageOnHand.getQtyOnHand().compareTo(line.getQtyUsed()) >=0 )
+								{
+									;//Noting to do;
+								}else {
+									MAttributeSetInstance asi =   new MAttributeSetInstance(getCtx(), line.getM_AttributeSetInstance_ID(), get_TrxName());
+									m_processMsg = Msg.getMsg(getCtx(), "InsufficientQtyAvailable") + asi.getDescription()
+											+ " - "+  Msg.getElement(getCtx(), "QtyOnHand") + " " + storageOnHand.getQtyOnHand().toString();
+									return DOCSTATUS_Invalid;
+								}
 							}
+
 						}
-					}
+					}//if(!line.isEndProduct())
+
 				}
 			}
 			catch (NegativeInventoryDisallowedException e)
@@ -552,6 +580,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 				errors.append(Msg.getElement(getCtx(), "Line")).append(" ").append(line.getLine()).append(": ");
 				errors.append(e.getMessage()).append("\n");
 			}
+
 		}	//	for all lines
 
 		if (errors.toString().length() > 0)
@@ -605,6 +634,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 					{
 						MProductionLineMA ppLineMA = new MProductionLineMA(getCtx(), 0 ,get_TrxName());
 						PO.copyValues(ppFactLineMA, ppLineMA);
+						ppLineMA.setAD_Org_ID(ppLine.getAD_Org_ID());
 						ppLineMA.setM_ProductionLine_ID(ppLine.getM_ProductionLine_ID());
 						ppLineMA.setM_AttributeSetInstance_ID(ppFactLineMA.getM_AttributeSetInstance_ID());
 						ppLineMA.setDateMaterialPolicy(ppFactLineMA.getDateMaterialPolicy());

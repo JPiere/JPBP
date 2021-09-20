@@ -16,8 +16,6 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
-import org.compiere.util.Msg;
-
 
 
 /**
@@ -48,14 +46,14 @@ public class MPPFactLineQT extends X_JP_PP_FactLineQT {
 		}
 
 		//Check Parent processed
-		if(newRecord)
-		{
-			if(getParent().isProcessed())
-			{
-				log.saveError("Error", Msg.getElement(getCtx(), MPPFact.COLUMNNAME_Processed));
-				return false;
-			}
-		}
+//		if(newRecord)
+//		{
+//			if(getParent().isProcessed())
+//			{
+//				log.saveError("Error", Msg.getElement(getCtx(), MPPFact.COLUMNNAME_Processed));
+//				return false;
+//			}
+//		}
 
 		return true;
 	}
