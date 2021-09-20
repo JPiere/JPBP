@@ -267,4 +267,11 @@ public class MPPFactLine extends X_JP_PP_FactLine {
 	{
 		return getPPFactLineQTs(false, null);
 	}
+
+	public MProduct getProduct()
+	{
+		if (getM_Product_ID() != 0)
+			return MProduct.getCopy(getCtx(), getM_Product_ID(), get_TrxName());
+		return null;
+	}
 }

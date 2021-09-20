@@ -32,7 +32,7 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210919L;
+	private static final long serialVersionUID = 20210920L;
 
     /** Standard Constructor */
     public X_JP_PP_FactLine (Properties ctx, int JP_PP_FactLine_ID, String trxName)
@@ -445,6 +445,34 @@ public class X_JP_PP_FactLine extends PO implements I_JP_PP_FactLine, I_Persiste
 	public int getM_Product_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_ProductionLine getM_ProductionLine() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_ProductionLine)MTable.get(getCtx(), org.compiere.model.I_M_ProductionLine.Table_Name)
+			.getPO(getM_ProductionLine_ID(), get_TrxName());	}
+
+	/** Set Production Line.
+		@param M_ProductionLine_ID 
+		Document Line representing a production
+	  */
+	public void setM_ProductionLine_ID (int M_ProductionLine_ID)
+	{
+		if (M_ProductionLine_ID < 1) 
+			set_Value (COLUMNNAME_M_ProductionLine_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_ProductionLine_ID, Integer.valueOf(M_ProductionLine_ID));
+	}
+
+	/** Get Production Line.
+		@return Document Line representing a production
+	  */
+	public int getM_ProductionLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_ProductionLine_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
