@@ -106,6 +106,12 @@ public class PPEndProcess extends SvrProcess {
 					MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
 					if(wfProcess.getWFState().equals(MWFProcess.WFSTATE_Terminated))
 					{
+						msg = ((DocAction) po).getProcessMsg();
+						if(Util.isEmpty(msg))
+						{
+							msg = po.get_Logger().getName();
+						}
+
 						throw new Exception(((DocAction) po).getProcessMsg());
 					}
 

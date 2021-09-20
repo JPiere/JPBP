@@ -34,7 +34,6 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MProduct;
-import org.compiere.model.MProduction;
 import org.compiere.model.MProductionLine;
 import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MSysConfig;
@@ -163,8 +162,13 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 				}else {
 					uom = MUOM.get(line.getC_UOM_ID());
 					oldQty = line.getQtyUsed();
-					newQty = oldQty.multiply(rate).setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
-					line.setQtyUsed(newQty);
+					if(oldQty.compareTo(Env.ZERO) == 0)
+					{
+						;//Noting to do;
+					}else {
+						newQty = oldQty.multiply(rate).setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
+						line.setQtyUsed(newQty);
+					}
 				}
 				line.saveEx(get_TrxName());
 			}
@@ -624,7 +628,10 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_DocStatus , DocAction.STATUS_Drafted);
 				pp.set_ValueNoCheck(I_M_Production.COLUMNNAME_DocAction, DocAction.ACTION_Complete);
 
-				pp.saveEx(get_TrxName());
+				if(!pp.save(get_TrxName()))
+				{
+					m_processMsg = pp.get_Logger().toString();
+				}
 				setM_Production_ID(pp.get_ID());
 				setJP_PP_Status(MPPFact.JP_PP_STATUS_Completed);
 
@@ -819,13 +826,25 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 		if(getM_Production_ID() != 0)
 		{
-			MProduction pp = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
-			if(pp.getDocStatus().equals(DocAction.STATUS_Completed))
+			MTable m_table_Production = MTable.get(getCtx(), I_M_Production.Table_Name);
+			PO po = m_table_Production.getPO(getM_Production_ID(), get_TrxName());
+
+			DocAction pp = (DocAction)po;
+			if(pp.getDocStatus().equals(STATUS_Completed))
 			{
-				if(pp.processIt(DocAction.ACTION_Close))
+				try
 				{
-					pp.saveEx(get_TrxName());
-				}else {
+					if(pp.processIt(DocAction.ACTION_Close))
+					{
+						po.saveEx(get_TrxName());
+
+					}else {
+						m_processMsg = pp.getProcessMsg();
+						return false;
+					}
+
+				} catch (Exception e) {
+
 					m_processMsg = pp.getProcessMsg();
 					return false;
 				}
