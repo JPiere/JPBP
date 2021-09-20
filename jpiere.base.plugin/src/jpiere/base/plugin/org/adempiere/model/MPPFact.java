@@ -354,6 +354,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			return DocAction.STATUS_Invalid;
 		}
 
+
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -411,8 +412,6 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		//	Implicit Approval
 		if (!isApproved())
 			approveIt();
-		if (log.isLoggable(Level.INFO)) log.info(toString());
-		//
 
 		if(!isHaveEndProduct())
 		{
@@ -458,8 +457,11 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 								qtyma = qtyma.add(ma.getMovementQty());
 							}
 						}
-						if (qtyma.subtract(qtyDiff).signum() != 0) {
-							m_processMsg = "@Line@ " + line.getLine() + ": @FillMandatory@ @M_AttributeSetInstance_ID@";
+						if (qtyma.subtract(qtyDiff).signum() != 0)
+						{
+							//m_processMsg = "@Line@ " + line.getLine() + ": @FillMandatory@ @M_AttributeSetInstance_ID@";
+							m_processMsg = Msg.getElement(getCtx(), MPPFactLine.COLUMNNAME_JP_PP_FactLine_ID) + " : " + line.getLine()
+											+ " - " + Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "M_AttributeSetInstance_ID");
 							return DocAction.STATUS_Invalid;
 						}
 					}
@@ -611,7 +613,13 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 					}
 				}
 
-				pp.processIt(DocAction.ACTION_Complete);
+				if(!pp.processIt(DocAction.ACTION_Complete))
+				{
+					m_processMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate")+ " : " + Msg.getElement(getCtx(), COLUMNNAME_M_Production_ID)
+												+ " - "+  pp.getProcessMsg();
+					return DocAction.STATUS_Invalid;
+				}
+
 				MProductionLine[] productionLines = pp.getLines();
 				for(MProductionLine productionLine : productionLines)
 				{
@@ -628,13 +636,10 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 									isAutoGenerateLot = attributeset.isAutoGenerateLot();
 
 								if(isAutoGenerateLot)
-								{
 									ppFactLine.setM_AttributeSetInstance_ID(productionLine.getM_AttributeSetInstance_ID());
-								}
 							}
-
 							ppFactLine.saveEx(get_TrxName());
-							continue;
+							break;
 						}
 
 					}//for
@@ -969,6 +974,12 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			options[index++] = DocumentEngine.ACTION_Complete;
 
 			return index;
+
+		}else if(docStatus.equals(DocumentEngine.STATUS_Invalid)) {
+
+			index = 0;
+			options[index++] = DocumentEngine.ACTION_Void;
+			options[index++] = DocumentEngine.ACTION_Prepare;
 
 		}else if(docStatus.equals(DocumentEngine.STATUS_Completed)) {
 
