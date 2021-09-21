@@ -425,10 +425,16 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		{
 			if(ppFact.isProcessed())
 			{
-				;//Noting to do;
+				if(ppFact.getDocStatus().equals(STATUS_Completed))
+				{
+					isOK = ppFact.processIt(ACTION_Close);
+				}
 
-			}else{
-				isOK = ppFact.processIt(ACTION_Void);
+			}else{//Just in case
+
+				//You cannot be closed PP Plan because there is an unprocessed PP Fact.
+				m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NotClosedPPPlanForUnprocessedPPFact");
+				return false;
 			}
 
 			if(isOK)

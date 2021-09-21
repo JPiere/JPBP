@@ -49,21 +49,19 @@ public class MPPDocT extends X_JP_PP_DocT {
 	protected boolean beforeSave(boolean newRecord)
 	{
 		//Set Value
-		if(newRecord)
+		if(Util.isEmpty(getValue()))
 		{
-			if(Util.isEmpty(getValue()))
-			{
-				MProduct product = MProduct.get(getM_Product_ID());
-				String value = product.getValue() + "_" + LocalDateTime.now().toString().substring(0, 10);
-				setValue(value);
+			MProduct product = MProduct.get(getM_Product_ID());
+			String value = product.getValue() + "_" + LocalDateTime.now().toString().substring(0, 10);
+			setValue(value);
 
-				if(MPPDocT.get(getCtx(), value, get_TrxName()) != null)
-				{
-					log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") +" "+ Msg.getElement(getCtx(), MPPDocT.COLUMNNAME_Value)) ;
-					return false;
-				}
+			if(MPPDocT.get(getCtx(), value, get_TrxName()) != null)
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") +" "+ Msg.getElement(getCtx(), MPPDocT.COLUMNNAME_Value)) ;
+				return false;
 			}
 		}
+
 
 		//Rounding Production Qty
 		if(newRecord || is_ValueChanged(MPPDocT.COLUMNNAME_QtyEntered))

@@ -85,9 +85,20 @@ public class PPStartProcess extends SvrProcess {
 			MPPPlan ppPlan = new MPPPlan(getCtx(), ppFact.getJP_PP_Plan_ID(), get_TrxName());
 			if(ppPlan.getJP_PP_Status().equals(MPPPlan.JP_PP_STATUS_NotYetStarted))
 			{
-				ppPlan.setJP_PP_Start(Timestamp.valueOf(LocalDateTime.now()));
+				Timestamp now =	Timestamp.valueOf(LocalDateTime.now());
+				ppPlan.setJP_PP_Start(now);
 				ppPlan.setJP_PP_Status(MPPPlan.JP_PP_STATUS_WorkInProgress);
 				ppPlan.saveEx(get_TrxName());
+
+				MPPDoc ppDoc = ppPlan.getParent();
+				if(ppDoc.getJP_PP_Status().equals(MPPPlan.JP_PP_STATUS_NotYetStarted))
+				{
+					ppDoc.setJP_PP_Start(now);
+					ppDoc.setJP_PP_Status(MPPDoc.JP_PP_STATUS_WorkInProgress);
+					ppDoc.setJP_PP_StartProcess("Y");
+					ppDoc.saveEx(get_TrxName());
+				}
+
 			}
 
 		}

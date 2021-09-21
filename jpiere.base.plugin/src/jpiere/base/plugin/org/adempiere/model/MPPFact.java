@@ -164,7 +164,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 					oldQty = line.getQtyUsed();
 					if(oldQty.compareTo(Env.ZERO) == 0)
 					{
-						;//Noting to do;
+						;//Noting to do because 0 * X = 0;
 					}else {
 						newQty = oldQty.multiply(rate).setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 						line.setQtyUsed(newQty);
@@ -419,6 +419,14 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		//	Implicit Approval
 		if (!isApproved())
 			approveIt();
+
+
+		if(!getJP_PP_StartProcess().equals("Y"))
+		{
+			//Please perform PP Start Process before PP End process.
+			m_processMsg = Msg.getMsg(getCtx(), "JP_PP_RunEndProcessStartCheck");
+			return DocAction.STATUS_Invalid;
+		}
 
 		if(!isHaveEndProduct())
 		{

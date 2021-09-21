@@ -51,7 +51,8 @@ public class PPFactProcessAfterComplete extends SvrProcess {
 		String msg = "@OK@";
 
 		MPPFact ppFact = new MPPFact(getCtx(), p_JP_PP_Fact_ID, get_TrxName());
-		if(ppFact.getDocStatus().equals(DocAction.STATUS_Completed))
+
+		if(!ppFact.getDocStatus().equals(DocAction.STATUS_Completed))
 		{
 			msg = Msg.getMsg(getCtx(),"JP_Not_Completed_Document");
 			addBufferLog(0, null, null, msg + " - "+ppFact.getDocumentNo(), MPPFact.Table_ID ,ppFact.getJP_PP_Fact_ID());

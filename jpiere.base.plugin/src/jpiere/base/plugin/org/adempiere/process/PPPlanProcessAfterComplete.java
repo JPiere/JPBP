@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MColumn;
 import org.compiere.model.MProcess;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
@@ -28,6 +29,7 @@ import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MPPDoc;
+import jpiere.base.plugin.org.adempiere.model.MPPFact;
 import jpiere.base.plugin.org.adempiere.model.MPPPlan;
 
 
@@ -53,6 +55,14 @@ public class PPPlanProcessAfterComplete extends SvrProcess {
 		String msg = "@OK@";
 
 		MPPPlan ppPlan = new MPPPlan(getCtx(), p_JP_PP_Plan_ID, get_TrxName());
+
+		if(!ppPlan.getDocStatus().equals(DocAction.STATUS_Completed))
+		{
+			msg = Msg.getMsg(getCtx(),"JP_Not_Completed_Document");
+			addBufferLog(0, null, null, msg + " - "+ ppPlan.getDocumentNo(), MPPFact.Table_ID ,ppPlan.getJP_PP_Plan_ID());
+			return msg;
+		}
+
 		MPPDoc parent = ppPlan.getParent();
 		if(parent.isCompleteAutoJP())
 		{

@@ -65,21 +65,19 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 	protected boolean beforeSave(boolean newRecord)
 	{
 		//Set Value
-		if(newRecord)
+		if(Util.isEmpty(getValue()))
 		{
-			if(Util.isEmpty(getValue()))
-			{
-				MProduct product = MProduct.get(getM_Product_ID());
-				String value = product.getValue() + "_" + LocalDateTime.now().toString().substring(0, 10);
-				setValue(value);
+			MProduct product = MProduct.get(getM_Product_ID());
+			String value = product.getValue() + "_" + LocalDateTime.now().toString().substring(0, 10);
+			setValue(value);
 
-				if(MPPDoc.get(getCtx(), value, get_TrxName()) != null)
-				{
-					log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") +" "+ Msg.getElement(getCtx(), MPPDocT.COLUMNNAME_Value)) ;
-					return false;
-				}
+			if(MPPDoc.get(getCtx(), value, get_TrxName()) != null)
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") +" "+ Msg.getElement(getCtx(), MPPDocT.COLUMNNAME_Value)) ;
+				return false;
 			}
 		}
+
 
 		//Rounding Production Qty
 		if(newRecord || is_ValueChanged(MPPDoc.COLUMNNAME_ProductionQty))
@@ -248,6 +246,13 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
 
+		if(!getJP_PP_StartProcess().equals("Y"))
+		{
+			//Please perform PP Start Process before PP End process.
+			m_processMsg = Msg.getMsg(getCtx(), "JP_PP_RunEndProcessStartCheck");
+			return DocAction.STATUS_Invalid;
+		}
+
 		MPPPlan[] ppPlans = getPPPlans(true, null);
 		for(MPPPlan ppPlan : ppPlans)
 		{
@@ -371,9 +376,25 @@ public class MPPDoc extends X_JP_PP_Doc implements DocAction,DocOptions
 			return false;
 
 		MPPPlan[] ppPlans = getPPPlans(true, null);
+		boolean isOK = true;
 		for(MPPPlan ppPlan : ppPlans )
 		{
-			if(ppPlan.closeIt())
+
+			if(ppPlan.isProcessed())
+			{
+				if(ppPlan.getDocStatus().equals(ACTION_Complete))
+				{
+					isOK = ppPlan.processIt(ACTION_Close);
+				}
+
+			}else {//Just in case TODO
+
+				//You cannot be closed PP Doc because there is an unprocessed PP Plan.
+				m_processMsg = Msg.getMsg(getCtx(), "JP_PP_NotClosedPPDocForUnprocessedPPPlan");
+			}
+
+
+			if(isOK)
 			{
 				ppPlan.saveEx(get_TrxName());
 			}else {

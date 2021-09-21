@@ -45,16 +45,6 @@ public class MPPFactLineQT extends X_JP_PP_FactLineQT {
 			setAD_Org_ID(getParent().getAD_Org_ID());
 		}
 
-		//Check Parent processed
-//		if(newRecord)
-//		{
-//			if(getParent().isProcessed())
-//			{
-//				log.saveError("Error", Msg.getElement(getCtx(), MPPFact.COLUMNNAME_Processed));
-//				return false;
-//			}
-//		}
-
 		return true;
 	}
 
