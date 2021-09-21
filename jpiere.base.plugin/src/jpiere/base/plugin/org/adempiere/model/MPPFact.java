@@ -638,7 +638,9 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 				if(!pp.save(get_TrxName()))
 				{
-					m_processMsg = pp.get_Logger().toString();
+					m_processMsg = Msg.getMsg(getCtx(), "SaveError") + " - "+ Msg.getElement(getCtx(), I_M_Production.COLUMNNAME_M_Production_ID)
+											+ " - " + pp.get_Logger().getName();
+					return DOCSTATUS_Invalid;
 				}
 				setM_Production_ID(pp.get_ID());
 				setJP_PP_Status(MPPFact.JP_PP_STATUS_Completed);
@@ -660,7 +662,14 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_M_Locator_ID, ppFactLine.getM_Locator_ID());
 					ppLine.set_ValueNoCheck(I_M_ProductionLine.COLUMNNAME_Description, ppFactLine.getDescription());
 					ppLine.set_ValueNoCheck(MPPFactLine.COLUMNNAME_JP_PP_FactLine_ID, ppFactLine.getJP_PP_FactLine_ID());
-					ppLine.saveEx(get_TrxName());
+					if(!ppLine.save(get_TrxName()))
+					{
+						m_processMsg = Msg.getMsg(getCtx(), "SaveError") + " - "+ Msg.getElement(getCtx(), I_M_ProductionLine.COLUMNNAME_M_ProductionLine_ID)
+											+ " - "+ Msg.getElement(getCtx(), I_M_ProductionLine.COLUMNNAME_Line)
+											+ " : "  + ppLine.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_Line)
+											+ " - "  + ppLine.get_Logger().getName();
+								return DOCSTATUS_Invalid;
+					}
 
 					ppFactLineMAs = ppFactLine.getPPFactLineMAs();
 					for(MPPFactLineMA ppFactLineMA : ppFactLineMAs)
@@ -672,7 +681,14 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 						ppLineMA.set_ValueNoCheck(I_M_ProductionLineMA.COLUMNNAME_M_AttributeSetInstance_ID, ppFactLineMA.getM_AttributeSetInstance_ID());
 						ppLineMA.set_ValueNoCheck(I_M_ProductionLineMA.COLUMNNAME_DateMaterialPolicy,ppFactLineMA.getDateMaterialPolicy());
 						ppLineMA.set_ValueNoCheck(I_M_ProductionLineMA.COLUMNNAME_MovementQty, ppFactLineMA.getMovementQty());
-						ppLineMA.saveEx(get_TrxName());
+						if(!ppLineMA.save(get_TrxName()))
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "SaveError") + " - "+ Msg.getElement(getCtx(), I_M_ProductionLineMA.COLUMNNAME_M_AttributeSetInstance_ID)
+										+ " - "+ Msg.getElement(getCtx(), I_M_ProductionLine.COLUMNNAME_Line)
+										+ " : "  + ppLine.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_Line)
+										+ " - "  + ppLineMA.get_Logger().getName();
+										return DOCSTATUS_Invalid;
+						}
 					}
 				}
 
@@ -682,12 +698,16 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 					if(!doc.processIt(DocAction.ACTION_Complete))
 					{
 						m_processMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate")+ " : " + Msg.getElement(getCtx(), COLUMNNAME_M_Production_ID)
-													+ " - "+  doc.getProcessMsg();
+														+ " - "+ Msg.getElement(getCtx(), I_M_Production.COLUMNNAME_DocAction)
+														+ " : "+ DocAction.ACTION_Complete
+														+ " - "+ doc.getProcessMsg();
 						return DocAction.STATUS_Invalid;
 					}
 				} catch (Exception e) {
 
 					m_processMsg = Msg.getMsg(getCtx(), "JP_CouldNotCreate")+ " : " + Msg.getElement(getCtx(), COLUMNNAME_M_Production_ID)
+										+ " - "+ Msg.getElement(getCtx(), I_M_Production.COLUMNNAME_DocAction)
+										+ " : "+ DocAction.ACTION_Complete
 										+ " - "+  doc.getProcessMsg() + " - " + e.getMessage();
 						return DocAction.STATUS_Invalid;
 				}
@@ -718,7 +738,14 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 								if(isAutoGenerateLot)
 									ppFactLine.setM_AttributeSetInstance_ID(productionLine.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_M_AttributeSetInstance_ID));
 							}
-							ppFactLine.saveEx(get_TrxName());
+							if(!ppFactLine.save(get_TrxName()))
+							{
+								m_processMsg = Msg.getMsg(getCtx(), "SaveError") + " - "+ Msg.getElement(getCtx(), MPPFactLine.COLUMNNAME_JP_PP_FactLine_ID)
+														+ " - "+ Msg.getElement(getCtx(), MPPFactLine.COLUMNNAME_Line)
+														+ " : "  + ppFactLine.getLine()
+														+ " - "  + ppFactLine.get_Logger().getName();
+								return DOCSTATUS_Invalid;
+							}
 							break;
 						}
 

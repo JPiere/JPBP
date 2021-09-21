@@ -17,10 +17,8 @@ import org.compiere.model.MClient;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
-import org.compiere.util.CLogger;
 
 import jpiere.base.plugin.org.adempiere.model.I_JP_PP_Plan;
-import jpiere.base.plugin.org.adempiere.model.MPPPlan;
 
 
 /**
@@ -31,7 +29,7 @@ import jpiere.base.plugin.org.adempiere.model.MPPPlan;
  */
 public class PPPlanModelValidator implements ModelValidator {
 
-	private static CLogger log = CLogger.getCLogger(PPPlanModelValidator.class);
+	//private static CLogger log = CLogger.getCLogger(PPPlanModelValidator.class);
 	private int AD_Client_ID = -1;
 
 	@Override
@@ -39,7 +37,7 @@ public class PPPlanModelValidator implements ModelValidator {
 	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
-		engine.addModelChange(MPPPlan.Table_Name, this);
+		engine.addModelChange(I_JP_PP_Plan.Table_Name, this);
 		;
 	}
 

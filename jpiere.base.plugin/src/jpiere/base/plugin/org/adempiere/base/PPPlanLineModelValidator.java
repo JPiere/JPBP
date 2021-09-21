@@ -27,8 +27,6 @@ import org.compiere.util.DB;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.I_JP_PP_PlanLine;
-import jpiere.base.plugin.org.adempiere.model.MPPDoc;
-import jpiere.base.plugin.org.adempiere.model.MPPPlanLine;
 
 
 /**
@@ -47,7 +45,7 @@ public class PPPlanLineModelValidator implements ModelValidator {
 	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
-		engine.addModelChange(MPPPlanLine.Table_Name, this);
+		engine.addModelChange(I_JP_PP_PlanLine.Table_Name, this);
 		;
 	}
 
@@ -71,7 +69,7 @@ public class PPPlanLineModelValidator implements ModelValidator {
 			//Set Name for Tree
 			if(po instanceof I_JP_PP_PlanLine)
 			{
-				if(type == ModelValidator.TYPE_AFTER_CHANGE && !po.is_ValueChanged(MPPPlanLine.COLUMNNAME_PlannedQty))
+				if(type == ModelValidator.TYPE_AFTER_CHANGE && !po.is_ValueChanged(I_JP_PP_PlanLine.COLUMNNAME_PlannedQty))
 				{
 					;//Noting to do;
 				}else {
@@ -82,7 +80,7 @@ public class PPPlanLineModelValidator implements ModelValidator {
 							+ " WHERE JP_PP_Plan_ID=?";
 
 					BigDecimal factQty = i_PO.getJP_MovementQtyFact();
-					boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, i_PO.getAD_Client_ID(), i_PO.getAD_Org_ID());
+					boolean isStdPrecision = MSysConfig.getBooleanValue("JP_PP_UOM_STDPRECISION", true, i_PO.getAD_Client_ID(), i_PO.getAD_Org_ID());
 					MUOM uom = MUOM.get(i_PO.getC_UOM_ID());
 					factQty = factQty.setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 

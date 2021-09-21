@@ -155,7 +155,14 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 					line.setQtyUsed(newQty);
 					line.setMovementQty(newQty.negate());
 				}
-				line.saveEx(get_TrxName());
+				if(!line.save(get_TrxName()))
+				{
+					String msg =  Msg.getElement(getCtx(), MPPPlanLine.COLUMNNAME_JP_PP_PlanLine_ID)
+				 			+ " - " + Msg.getElement(getCtx(), MPPPlanLine.COLUMNNAME_Line) + " : " + line.getLine();
+					log.saveError("SaveError", msg);
+					m_processMsg = msg;
+					return false;
+				}
 			}
 		}
 

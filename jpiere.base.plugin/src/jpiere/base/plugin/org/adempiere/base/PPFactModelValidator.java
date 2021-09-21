@@ -18,6 +18,7 @@ import java.math.RoundingMode;
 
 import org.compiere.model.MClient;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOM;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -27,8 +28,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.I_JP_PP_Fact;
-import jpiere.base.plugin.org.adempiere.model.MPPDoc;
-import jpiere.base.plugin.org.adempiere.model.MPPFact;
+import jpiere.base.plugin.org.adempiere.model.I_JP_PP_Plan;
 
 
 /**
@@ -47,7 +47,7 @@ public class PPFactModelValidator implements ModelValidator {
 	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
-		engine.addModelChange(MPPFact.Table_Name, this);
+		engine.addModelChange(I_JP_PP_Fact.Table_Name, this);
 		;
 	}
 
@@ -67,7 +67,7 @@ public class PPFactModelValidator implements ModelValidator {
 	public String modelChange(PO po, int type) throws Exception
 	{
 		//Set Name for Tree
-		if(type == ModelValidator.TYPE_AFTER_CHANGE && po.is_ValueChanged(MPPFact.COLUMNNAME_DocStatus))
+		if(type == ModelValidator.TYPE_AFTER_CHANGE && po.is_ValueChanged(I_JP_PP_Fact.COLUMNNAME_DocStatus))
 		{
 			if(po instanceof I_JP_PP_Fact)
 			{
@@ -78,8 +78,11 @@ public class PPFactModelValidator implements ModelValidator {
 											+ "  WHERE f.JP_PP_Plan_ID=? AND f.DocStatus in ('CO','CL') AND fl.IsEndProduct='Y')  || '/' || ? || ']' "	//param1,2
 						+ " WHERE p.JP_PP_Plan_ID=?";	//param3
 
-				BigDecimal factQty = i_PO.getProductionQty();
-				boolean isStdPrecision = MSysConfig.getBooleanValue(MPPDoc.JP_PP_UOM_STDPRECISION, true, i_PO.getAD_Client_ID(), i_PO.getAD_Org_ID());
+				MTable m_table_PPPlan= MTable.get(po.getCtx(), I_JP_PP_Plan.Table_Name);
+				I_JP_PP_Plan pp = (I_JP_PP_Plan)m_table_PPPlan.getPO(i_PO.getJP_PP_Plan_ID(), po.get_TrxName());
+				BigDecimal factQty = pp.getProductionQty();
+
+				boolean isStdPrecision = MSysConfig.getBooleanValue("JP_PP_UOM_STDPRECISION", true, i_PO.getAD_Client_ID(), i_PO.getAD_Org_ID());
 				MUOM uom = MUOM.get(i_PO.getC_UOM_ID());
 				factQty = factQty.setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 

@@ -22,7 +22,6 @@ import org.compiere.util.DB;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.I_JP_PP_PlanLineT;
-import jpiere.base.plugin.org.adempiere.model.MPPPlanLineT;
 
 
 /**
@@ -41,7 +40,7 @@ public class PPPlanLineTemplateModelValidator implements ModelValidator {
 	{
 		if(client != null)
 			this.AD_Client_ID = client.getAD_Client_ID();
-		engine.addModelChange(MPPPlanLineT.Table_Name, this);
+		engine.addModelChange(I_JP_PP_PlanLineT.Table_Name, this);
 		;
 	}
 

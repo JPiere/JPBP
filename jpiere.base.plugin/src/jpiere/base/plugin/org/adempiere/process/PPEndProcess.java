@@ -109,10 +109,10 @@ public class PPEndProcess extends SvrProcess {
 						msg = ((DocAction) po).getProcessMsg();
 						if(Util.isEmpty(msg))
 						{
-							msg = po.get_Logger().getName();
+							msg = wfProcess.getTextMsg();
 						}
 
-						throw new Exception(((DocAction) po).getProcessMsg());
+						throw new Exception(msg);
 					}
 
 				}else {

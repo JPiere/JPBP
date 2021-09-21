@@ -141,7 +141,14 @@ public class MPPPlanT extends X_JP_PP_PlanT {
 					line.setQtyUsed(newQty);
 					line.setMovementQty(newQty.negate());
 				}
-				line.saveEx(get_TrxName());
+
+				if(!line.save(get_TrxName()))
+				{
+					String msg =  Msg.getElement(getCtx(), MPPPlanLineT.COLUMNNAME_JP_PP_PlanLineT_ID)
+				 			+ " - " + Msg.getElement(getCtx(), MPPPlanLineT.COLUMNNAME_Line) + " : " + line.getLine();
+					log.saveError("SaveError", msg);
+					return false;
+				}
 			}
 		}
 
