@@ -189,6 +189,7 @@ public class PPCreateTemplateByCopy extends SvrProcess {
 				ppPlanLineT_To.setM_Product_ID(ppPlanLineT_From.getM_Product_ID());
 				ppPlanLineT_To.setC_UOM_ID(ppPlanLineT_From.getC_UOM_ID());
 				ppPlanLineT_To.setIsEndProduct(ppPlanLineT_From.isEndProduct());
+				ppPlanLineT_To.setIsCreated("Y");
 				ppPlanLineT_To.setPlannedQty(p_CoefficientQty.multiply(ppPlanLineT_From.getPlannedQty()));
 				if(ppPlanLineT_To.isEndProduct())
 					ppPlanLineT_To.setQtyUsed(null);
