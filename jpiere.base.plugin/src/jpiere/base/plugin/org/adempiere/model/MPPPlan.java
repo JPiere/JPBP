@@ -102,6 +102,23 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 			}
 		}
 
+		//Check JP_PP_PlanT_ID
+		if( (newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_JP_PP_PlanT_ID))
+					&& getJP_PP_PlanT_ID() != 0)
+		{
+			MPPPlanT ppPlanT = new MPPPlanT(getCtx(), getJP_PP_PlanT_ID(), get_TrxName());
+			if(getM_Product_ID() != ppPlanT.getM_Product_ID())
+			{
+				//Different between {0} and {1}
+				String msg0 = Msg.getElement(Env.getCtx(), MPPPlan.COLUMNNAME_JP_PP_Plan_ID) + " - " + Msg.getElement(Env.getCtx(), MPPPlan.COLUMNNAME_M_Product_ID);
+				String msg1 = Msg.getElement(Env.getCtx(), MPPPlanT.COLUMNNAME_JP_PP_PlanT_ID) + " - " + Msg.getElement(Env.getCtx(),  MPPPlan.COLUMNNAME_M_Product_ID);
+				String msg = Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+
+				log.saveError("Error", msg);
+				return false;
+			}
+		}
+
 		//Rounding Production Qty
 		if(newRecord || is_ValueChanged(MPPPlan.COLUMNNAME_ProductionQty))
 		{

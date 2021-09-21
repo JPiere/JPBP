@@ -190,6 +190,14 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 
 			MPPPlanT ppPlanT = new MPPPlanT(getCtx(), ppPlan.getJP_PP_PlanT_ID(), get_TrxName());
 
+			if(ppPlan.getM_Product_ID() != ppPlanT.getM_Product_ID())
+			{
+				//Different between {0} and {1}
+				String msg0 = Msg.getElement(Env.getCtx(), MPPPlan.COLUMNNAME_JP_PP_Plan_ID) + " - " + Msg.getElement(Env.getCtx(), MPPPlan.COLUMNNAME_M_Product_ID);
+				String msg1 = Msg.getElement(Env.getCtx(), MPPPlanT.COLUMNNAME_JP_PP_PlanT_ID) + " - " + Msg.getElement(Env.getCtx(),  MPPPlan.COLUMNNAME_M_Product_ID);
+				throw new Exception(Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1}));
+			}
+
 			if(ppPlanT.getPPPlanLineTs().length == 0)
 			{
 				//There are not PP Plan Line Templates at PP Plan Template.
@@ -204,6 +212,9 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 
 			p_CoefficientQty = rate;
 			createPlanLine(ppPlan, ppPlanT);
+
+			ppPlan.setIsCreated("Y");
+			ppPlan.saveEx(get_TrxName());
 		}
 
 		return "@OK@";
