@@ -52,31 +52,94 @@ public class SetDateMaterialPolicyColumnCallout implements IColumnCallout {
 	@Override
 	public String start(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
-		if(!mField.getColumnName().equals("M_AttributeSetInstance_ID"))
+		String msg = null;
+
+		if(mField.getColumnName().equals("M_AttributeSetInstance_ID"))
+		{
+			msg = setM_AttributeSetInstance_ID(ctx, WindowNo, mTab, mField, value, oldValue);
+
+		}else if(mField.getColumnName().equals("DateMaterialPolicy")) {
+
+			msg = setDateMaterialPolicy(ctx, WindowNo, mTab, mField, value, oldValue);
+
+		}
+			return msg;
+
+	}
+	public String setDateMaterialPolicy(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+
+		if(value == null || Util.isEmpty(value.toString()))
+		{
 			return null;
 
+		}
+
+		int M_AttributeSetInstance_ID = 0;
+		int M_Product_ID = 0;
+		int M_Locator_ID = 0;
+		Timestamp DateMaterialPolicy = (Timestamp)value;
+
 		String tableName = mTab.getTableName();
+
+		//JPiere PP Doc
+		if(tableName.equals(MPPFactLineMA.Table_Name))
+		{
+			M_AttributeSetInstance_ID = Integer.valueOf(mTab.get_ValueAsString(MPPFactLineMA.COLUMNNAME_M_AttributeSetInstance_ID)).intValue();
+			int JP_PP_FactLine_ID = Integer.valueOf(mTab.get_ValueAsString(MPPFactLineMA.COLUMNNAME_JP_PP_FactLine_ID)).intValue();
+			MPPFactLine line = new MPPFactLine(ctx, JP_PP_FactLine_ID, null);
+			M_Product_ID = line.getM_Product_ID();
+			M_Locator_ID = line.getM_Locator_ID();
+
+			MStorageOnHand storageOnHand = MStorageOnHand.get(ctx, M_Locator_ID, M_Product_ID, M_AttributeSetInstance_ID,DateMaterialPolicy, null);
+			if(storageOnHand == null)
+			{
+				MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+				return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription()
+								+ " - "+  Msg.getElement(ctx, MPPFactLineMA.COLUMNNAME_DateMaterialPolicy) +" "+ DateMaterialPolicy.toString().substring(0, 10)
+								+ " - "+  DateMaterialPolicy.toString().substring(0, 10) + " - " +  Msg.getElement(ctx, "QtyOnHand") +" "+ 0;
+			}else {
+
+				BigDecimal qtyOnHand = storageOnHand.getQtyOnHand();
+				if(qtyOnHand.compareTo(line.getQtyUsed()) >= 0)
+				{
+					mTab.setValue(MPPFactLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
+				}else {
+
+					mTab.setValue(MPPFactLineMA.COLUMNNAME_MovementQty,qtyOnHand.negate());
+					MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+					return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription()
+								+ " - "+  Msg.getElement(ctx, MPPFactLineMA.COLUMNNAME_DateMaterialPolicy) +" "+ DateMaterialPolicy.toString().substring(0, 10)
+								+ " - "+  Msg.getElement(ctx, "QtyOnHand") +" "+qtyOnHand.toString();
+				}
+			}
+		}
+
+
+		return null;
+	}
+
+	public String setM_AttributeSetInstance_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
 
 		int M_AttributeSetInstance_ID = 0;
 		if(value == null || Util.isEmpty(value.toString()))
 		{
-			mTab.setValue("DateMaterialPolicy", null);
 			return null;
 
 		}else {
 
 			M_AttributeSetInstance_ID = Integer.valueOf(value.toString());
-			if(M_AttributeSetInstance_ID == 0)
-			{
-				mTab.setValue("DateMaterialPolicy", null);
+			if(M_AttributeSetInstance_ID < 0)
 				return null;
-			}
 		}
 
+		String tableName = mTab.getTableName();
 
 		//JPiere PP Doc
 		if(tableName.equals(MPPFactLineMA.Table_Name))
 		{
+
 			int JP_PP_FactLine_ID = Integer.valueOf(mTab.get_ValueAsString(MPPFactLineMA.COLUMNNAME_JP_PP_FactLine_ID)).intValue();
 			MPPFactLine line = new MPPFactLine(ctx, JP_PP_FactLine_ID, null);
 
@@ -91,7 +154,7 @@ public class SetDateMaterialPolicyColumnCallout implements IColumnCallout {
 			}else {
 
 				mTab.setValue(MPPFactLineMA.COLUMNNAME_DateMaterialPolicy, DateMaterialPolicy);
-				MStorageOnHand storageOnHand = MStorageOnHand.get(ctx, line.getM_Locator_ID(),line.getM_Product_ID(), M_AttributeSetInstance_ID,DateMaterialPolicy, null);
+				MStorageOnHand storageOnHand = MStorageOnHand.get(ctx, line.getM_Locator_ID(),line.getM_Product_ID(), M_AttributeSetInstance_ID, DateMaterialPolicy, null);
 				BigDecimal qtyOnHand = storageOnHand.getQtyOnHand();
 				if(qtyOnHand.compareTo(line.getQtyUsed()) >= 0)
 				{
@@ -100,7 +163,9 @@ public class SetDateMaterialPolicyColumnCallout implements IColumnCallout {
 
 					mTab.setValue(MPPFactLineMA.COLUMNNAME_MovementQty,qtyOnHand.negate());
 					MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
-					return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription() + " - "+  Msg.getElement(ctx, "QtyOnHand") +" "+qtyOnHand.toString();
+					return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription()
+										+ " - "+  Msg.getElement(ctx, MPPFactLineMA.COLUMNNAME_DateMaterialPolicy) +" "+ DateMaterialPolicy.toString().substring(0, 10)
+										+ " - "+  Msg.getElement(ctx, "QtyOnHand") +" "+qtyOnHand.toString();
 				}
 			}
 

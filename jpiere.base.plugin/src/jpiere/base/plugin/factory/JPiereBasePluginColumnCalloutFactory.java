@@ -332,7 +332,8 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				|| tableName.equals(MProductionLineMA.Table_Name)
 				|| tableName.equals(MMovementLineMA.Table_Name)
 				|| tableName.equals(MInventoryLineMA.Table_Name))
-				&& columnName.equals("M_AttributeSetInstance_ID")
+				&& (columnName.equals("M_AttributeSetInstance_ID")
+						|| columnName.equals("DateMaterialPolicy"))
 				)
 		{
 			list.add(new SetDateMaterialPolicyColumnCallout());
