@@ -477,7 +477,9 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 
 		if(ppPlanT.isCreatePPFactJP())
 		{
-			ppPlan.createFact(get_TrxName());
+			String msg = ppPlan.createFact(get_TrxName());
+			if(!Util.isEmpty(msg))
+				throw new Exception(msg);
 		}
 
 		return true;

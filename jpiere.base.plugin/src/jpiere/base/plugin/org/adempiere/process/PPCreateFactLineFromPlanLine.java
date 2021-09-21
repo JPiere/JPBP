@@ -20,6 +20,7 @@ import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MPPFact;
 import jpiere.base.plugin.org.adempiere.model.MPPFactLine;
@@ -69,7 +70,12 @@ public class PPCreateFactLineFromPlanLine extends SvrProcess {
 		}
 
 		MPPFact ppFact = new MPPFact(getCtx(), getRecord_ID(), get_TrxName());
-		ppFact.createFactLineFromPlanLine(get_TrxName());
+		String msg = ppFact.createFactLineFromPlanLine(get_TrxName());
+		if(!Util.isEmpty(msg))
+		{
+			throw new Exception(msg);
+		}
+
 		ppFact.setIsCreated("Y");
 		ppFact.saveEx(get_TrxName());
 

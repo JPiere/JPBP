@@ -1257,7 +1257,19 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 			ppFLine.setJP_Processing2("N");
 			ppFLine.setJP_Processing3("N");
 			ppFLine.setIsCreated("N");
-			ppFLine.saveEx(get_TrxName());
+			if(!ppFLine.save(get_TrxName()))
+			{
+				String msg = Msg.getMsg(getCtx(), "JP_CouldNotCreate")
+								+ " " + Msg.getMsg(getCtx(), "SaveError") + " - "+ Msg.getElement(getCtx(), MPPFactLine.COLUMNNAME_JP_PP_FactLine_ID)
+								+ " - "+ Msg.getElement(getCtx(), MPPFactLine.COLUMNNAME_Line)
+								+ " : "  + ppPLine.getLine()
+								;
+
+				m_processMsg = msg;
+				log.saveError("SaveError", msg);
+
+				return msg;
+			}
 
 		}
 

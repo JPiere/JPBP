@@ -803,6 +803,7 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	 */
 	public String createFact(String trxName)
 	{
+		String msg = null;
 
 		MPPFact[] ppFacts = getPPFacts(true, null);
 		for(MPPFact ppFact : ppFacts)
@@ -852,11 +853,24 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		ppFact.setJP_Processing4("N");
 		ppFact.setJP_Processing5("N");
 		ppFact.setJP_Processing6("N");
-		ppFact.saveEx(get_TrxName());
+		if(!ppFact.save(get_TrxName()))
+		{
+			msg = Msg.getMsg(getCtx(), "JP_CouldNotCreate")
+					+ " " + Msg.getMsg(getCtx(), "SaveError") + " - "+ Msg.getElement(getCtx(), MPPFact.COLUMNNAME_JP_PP_Fact_ID);
 
-		ppFact.createFactLineFromPlanLine(trxName);
+			m_processMsg = msg;
+			log.saveError("SaveError", msg);
 
-		return null;
+			return msg;
+		}
+
+		msg = ppFact.createFactLineFromPlanLine(trxName);
+		if(!Util.isEmpty(msg))
+		{
+			return msg;
+		}
+
+		return msg;
 	}
 
 }
