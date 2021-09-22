@@ -55,7 +55,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereOrderCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRecognitionCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereReferenceTestCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
-import jpiere.base.plugin.org.adempiere.callout.SetDateMaterialPolicyColumnCallout;
+import jpiere.base.plugin.org.adempiere.callout.SupportToEnterAttributesTabColumnCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -336,7 +336,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 						|| columnName.equals("DateMaterialPolicy"))
 				)
 		{
-			list.add(new SetDateMaterialPolicyColumnCallout());
+			list.add(new SupportToEnterAttributesTabColumnCallout());
 		}
 
 		return list != null ? list.toArray(new IColumnCallout[0]) : new IColumnCallout[0];
