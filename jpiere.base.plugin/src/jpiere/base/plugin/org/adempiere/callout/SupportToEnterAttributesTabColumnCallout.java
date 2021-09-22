@@ -218,7 +218,7 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 				}
 
 			//Shipment & Vendor Return
-			}else if(MDocType.get(io.getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery) && io.isSOTrx()) {
+			}else if(MDocType.get(io.getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)) {
 
 				//MovementQty(+)
 				if(line.getMovementQty().signum() > 0)
@@ -256,7 +256,7 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 			}
 
 
-		//MMovementLine
+		//MMovement
 		}else if(tableName.equals(MMovementLineMA.Table_Name)) {
 
 			int M_MovementLine_ID = Integer.valueOf(mTab.get_ValueAsString(MMovementLineMA.COLUMNNAME_M_MovementLine_ID)).intValue();
@@ -296,7 +296,7 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 				mTab.setValue(MMovementLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
 			}
 
-		//MInventoryLine
+		//MInventory
 		}else if(tableName.equals(MInventoryLineMA.Table_Name)) {
 
 			int M_InventoryLine_ID = Integer.valueOf(mTab.get_ValueAsString(MInventoryLineMA.COLUMNNAME_M_InventoryLine_ID)).intValue();
@@ -306,11 +306,12 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 			M_Locator_ID = line.getM_Locator_ID();
 			MDocType docType = MDocType.get(parent.getC_DocType_ID());
 
-			//Receipt & Customer Retern
+			//Pyshical Inventory
 			if(docType.getDocSubTypeInv().equals(MDocType.DOCSUBTYPEINV_PhysicalInventory))
 			{
 				;// Not impliment now
 
+			//Internal Use
 			}else if(docType.getDocSubTypeInv().equals(MDocType.DOCSUBTYPEINV_InternalUseInventory)) {
 
 				//QtyInternalUse(+)
