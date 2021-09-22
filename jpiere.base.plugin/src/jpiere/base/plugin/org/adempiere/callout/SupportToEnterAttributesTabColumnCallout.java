@@ -56,18 +56,18 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 
 		if(mField.getColumnName().equals("M_AttributeSetInstance_ID"))
 		{
-			msg = setM_AttributeSetInstance_ID(ctx, WindowNo, mTab, mField, value, oldValue);
+			msg = callFromM_AttributeSetInstance_ID(ctx, WindowNo, mTab, mField, value, oldValue);
 
 		}else if(mField.getColumnName().equals("DateMaterialPolicy")) {
 
-			msg = setDateMaterialPolicy(ctx, WindowNo, mTab, mField, value, oldValue);
+			msg = callFromDateMaterialPolicy(ctx, WindowNo, mTab, mField, value, oldValue);
 
 		}
 
 		return msg;
 
 	}
-	public String setDateMaterialPolicy(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	public String callFromDateMaterialPolicy(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 
 		//DateMaterialPolicy
@@ -171,18 +171,21 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 										+ " - "+  Msg.getElement(ctx, "QtyOnHand") + " : " + qtyOnHand.toString();
 						}
 					}
-
 				}
-
 			}
 
+			//Shipment & Delivery
+			if(MDocType.get(io.getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery) && io.isSOTrx())
+			{
+				;
+			}
 
 		}
 
 		return null;
 	}
 
-	public String setM_AttributeSetInstance_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	public String callFromM_AttributeSetInstance_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 
 		int M_AttributeSetInstance_ID = 0;

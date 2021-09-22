@@ -34,7 +34,7 @@ import jpiere.base.plugin.org.adempiere.model.MPPPlanT;
  * @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
  */
-public class JPierePPDocCallout extends CalloutEngine {
+public class PPDocCallout extends CalloutEngine {
 
 
 	public String convertUom(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
@@ -57,14 +57,17 @@ public class JPierePPDocCallout extends CalloutEngine {
 		{
 			MProduct m_Product = MProduct.get(M_Product_ID);
 
+			//For Display name to the Tree
 			if(mTab.getTableName().equals(MPPPlanT.Table_Name)
 					|| mTab.getTableName().equals(MPPPlan.Table_Name))
 			{
 				mTab.setValue("JP_Name", m_Product.getValue() + MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR) + m_Product.getName());
+				mTab.setValue("Name", m_Product.getValue() + MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR) + m_Product.getName());
 			}else {
 				mTab.setValue("Name", m_Product.getValue() + MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR) + m_Product.getName());
 			}
 
+			//Set Default Locator
 			if(mTab.getField("M_Locator_ID") != null && m_Product.getM_Locator_ID() != 0)
 			{
 				int AD_Org_ID = Integer.valueOf(mTab.get_ValueAsString("AD_Org_ID")).intValue();
@@ -79,4 +82,22 @@ public class JPierePPDocCallout extends CalloutEngine {
 		return null;
 	}
 
+	//For Display name to the Tree
+	public String name(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		String JP_Name = mTab.get_ValueAsString(MPPPlan.COLUMNNAME_JP_Name);
+		String ProductionQty = mTab.get_ValueAsString(MPPPlan.COLUMNNAME_ProductionQty);
+
+		if(mTab.getTableName().equals(MPPPlan.Table_Name))
+		{
+			String JP_ProductionQtyFact = mTab.get_ValueAsString(MPPPlan.COLUMNNAME_JP_ProductionQtyFact);
+			mTab.setValue("Name", JP_Name + " [" + JP_ProductionQtyFact + "/" + (ProductionQty == null? 0 : ProductionQty) + "]");
+
+		}else if(mTab.getTableName().equals(MPPPlanT.Table_Name)) {
+
+			mTab.setValue("Name", JP_Name + " [" + (ProductionQty == null? 0 : ProductionQty) +"]");
+		}
+
+		return null;
+	}
 }
