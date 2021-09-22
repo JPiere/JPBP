@@ -24,6 +24,9 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOMConversion;
 
+import jpiere.base.plugin.org.adempiere.model.MPPPlan;
+import jpiere.base.plugin.org.adempiere.model.MPPPlanT;
+
 
 /**
  * JPIERE-0501:JPiere PP Doc Callout
@@ -53,7 +56,14 @@ public class JPierePPDocCallout extends CalloutEngine {
 		if(M_Product_ID != 0)
 		{
 			MProduct m_Product = MProduct.get(M_Product_ID);
-			mTab.setValue("Name", m_Product.getValue() + MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR) + m_Product.getName());
+
+			if(mTab.getTableName().equals(MPPPlanT.Table_Name)
+					|| mTab.getTableName().equals(MPPPlan.Table_Name))
+			{
+				mTab.setValue("JP_Name", m_Product.getValue() + MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR) + m_Product.getName());
+			}else {
+				mTab.setValue("Name", m_Product.getValue() + MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR) + m_Product.getName());
+			}
 
 			if(mTab.getField("M_Locator_ID") != null && m_Product.getM_Locator_ID() != 0)
 			{

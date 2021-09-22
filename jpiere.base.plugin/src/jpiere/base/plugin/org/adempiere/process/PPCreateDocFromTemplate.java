@@ -126,10 +126,6 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		}else if(m_Table.getTableName().equals(MPPDoc.Table_Name)) {
 
 			m_PPDoc = new MPPDoc(getCtx(), p_Record_ID, get_TrxName());
-			if(m_PPDoc.getJP_PP_DocT_ID() == 0)
-			{
-				throw new Exception(Msg.getMsg(getCtx(), "NotFound")+ " " + Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_JP_PP_DocT_ID) );
-			}
 
 			if(m_PPDoc.getProductionQty().compareTo(Env.ZERO)==0)
 			{
@@ -141,6 +137,12 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 			if(p_JP_PP_DocT_ID == 0)
 			{
 				p_JP_PP_DocT_ID = m_PPDoc.getJP_PP_DocT_ID();
+			}
+
+			if(p_JP_PP_DocT_ID == 0)
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "NotFound")+ " " + Msg.getElement(getCtx(), MPPDoc.COLUMNNAME_JP_PP_DocT_ID) );
+
 			}else {
 
 				if(p_JP_PP_DocT_ID !=  m_PPDoc.getJP_PP_DocT_ID())
