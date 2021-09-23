@@ -80,14 +80,14 @@ public class PPFactModelValidator implements ModelValidator {
 
 				MTable m_table_PPPlan= MTable.get(po.getCtx(), I_JP_PP_Plan.Table_Name);
 				I_JP_PP_Plan pp = (I_JP_PP_Plan)m_table_PPPlan.getPO(i_PO.getJP_PP_Plan_ID(), po.get_TrxName());
-				BigDecimal factQty = pp.getProductionQty();
+				BigDecimal productionQtyPlan = pp.getProductionQty();
 
 				boolean isStdPrecision = MSysConfig.getBooleanValue("JP_PP_UOM_STDPRECISION", true, i_PO.getAD_Client_ID(), i_PO.getAD_Org_ID());
 				MUOM uom = MUOM.get(i_PO.getC_UOM_ID());
-				factQty = factQty.setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
+				productionQtyPlan = productionQtyPlan.setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 
 				int no = DB.executeUpdate(sql
-							, new Object[]{i_PO.getJP_PP_Plan_ID(), factQty, i_PO.getJP_PP_Plan_ID()}
+							, new Object[]{i_PO.getJP_PP_Plan_ID(), productionQtyPlan, i_PO.getJP_PP_Plan_ID()}
 							, false, po.get_TrxName(), 0);
 
 				if (no != 1)

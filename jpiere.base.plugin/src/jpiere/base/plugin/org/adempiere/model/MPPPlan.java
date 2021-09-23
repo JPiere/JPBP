@@ -822,6 +822,12 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 	{
 		String msg = null;
 
+		if(!isHaveEndProduct())
+		{
+			//PP Lines does not contain End Product
+			return Msg.getMsg(getCtx(), "JP_PP_NotContainEndProduct");
+		}
+
 		MPPFact[] ppFacts = getPPFacts(true, null);
 		for(MPPFact ppFact : ppFacts)
 		{
@@ -888,6 +894,18 @@ public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 		}
 
 		return msg;
+	}
+
+	public boolean isHaveEndProduct()
+	{
+		MPPPlanLine[] lines = getPPPlanLines();
+
+		for(MPPPlanLine line : lines) {
+			if(line.isEndProduct())
+				return true;
+		}
+
+		return false;
 	}
 
 }

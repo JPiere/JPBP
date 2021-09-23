@@ -65,8 +65,8 @@ public class PPPlanLineTemplateModelValidator implements ModelValidator {
 			if(po instanceof I_JP_PP_PlanLineT)
 			{
 				I_JP_PP_PlanLineT i_PO = (I_JP_PP_PlanLineT)po;
-				String sql = "UPDATE JP_PP_PlanT SET NAME = JP_NAME || ' [' || (SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLineT WHERE JP_PP_PlanT_ID=? AND IsEndProduct='Y') || ']' "
-						+ " WHERE JP_PP_PlanT_ID=?";
+				String sql = "UPDATE JP_PP_PlanT SET NAME = JP_NAME || ' [' || (SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLineT WHERE JP_PP_PlanT_ID=? AND IsEndProduct='Y' AND IsActive='Y') || ']' "
+						+ " WHERE JP_PP_PlanT_ID=? ";
 
 				int no = DB.executeUpdate(sql
 							, new Object[]{i_PO.getJP_PP_PlanT_ID(), i_PO.getJP_PP_PlanT_ID()}

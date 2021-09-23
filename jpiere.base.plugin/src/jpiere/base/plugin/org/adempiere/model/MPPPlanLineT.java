@@ -105,7 +105,7 @@ public class MPPPlanLineT extends X_JP_PP_PlanLineT {
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
 		//Update parent ProductionQty
-		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_PlannedQty)) )
+		if (isEndProduct() && (newRecord || is_ValueChanged(COLUMNNAME_PlannedQty) || is_ValueChanged(COLUMNNAME_IsActive)) )
 		{
 
 			int no = updateParentProductionQty(get_TrxName());
@@ -173,7 +173,7 @@ public class MPPPlanLineT extends X_JP_PP_PlanLineT {
 
 	private int updateParentProductionQty(String trxName)
 	{
-		String sql = "UPDATE JP_PP_PlanT SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLineT WHERE JP_PP_PlanT_ID=? AND IsEndProduct='Y') "
+		String sql = "UPDATE JP_PP_PlanT SET ProductionQty=(SELECT COALESCE(SUM(MovementQty),0) FROM JP_PP_PlanLineT WHERE JP_PP_PlanT_ID=? AND IsEndProduct='Y' AND IsActive='Y' ) "
 				+ " WHERE JP_PP_PlanT_ID=?";
 
 		int no = DB.executeUpdate(sql
