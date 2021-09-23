@@ -31,6 +31,7 @@ import jpiere.base.plugin.org.adempiere.model.MPPPlanT;
  */
 public class PPPlanTemplateModelValidator implements ModelValidator {
 
+	@SuppressWarnings("unused")
 	private static CLogger log = CLogger.getCLogger(PPPlanTemplateModelValidator.class);
 	private int AD_Client_ID = -1;
 

@@ -25,6 +25,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.I_C_NonBusinessDay;
 import org.compiere.model.MLocator;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MTable;
 import org.compiere.model.MTree;
@@ -102,8 +103,37 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		if(m_Table.getTableName().equals(MPPDocT.Table_Name))
+		if(m_Table.getTableName().equals(MOrderLine.Table_Name))
 		{
+			int C_OrderLine_ID = getRecord_ID();
+
+			if(Util.isEmpty(p_Value))
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "Value"));
+			}else {
+
+				MPPDoc ppd = MPPDoc.get(getCtx(), p_Value, get_TrxName());
+				if(ppd != null)
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "JP_Unique_Constraint_Value"));
+				}
+			}
+
+			createPPDoc();
+			createPlan();
+			updateTree();
+
+			MOrderLine oLine = new MOrderLine(getCtx(), C_OrderLine_ID, get_TrxName());
+			m_PPDoc.setC_BPartner_ID(oLine.getParent().getC_BPartner_ID());
+			m_PPDoc.setC_Order_ID(oLine.getC_Order_ID());
+			m_PPDoc.setPOReference(oLine.getParent().getPOReference());
+			m_PPDoc.save(get_TrxName());
+
+			addBufferLog(0, null, null, m_PPDoc.getDocumentInfo(), MPPDoc.Table_ID, m_PPDoc.getJP_PP_Doc_ID());
+
+
+		}else if(m_Table.getTableName().equals(MPPDocT.Table_Name)){
+
 			p_JP_PP_DocT_ID = p_Record_ID;
 
 			if(Util.isEmpty(p_Value))
@@ -111,7 +141,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "Value"));
 			}else {
 
-				MPPDoc ppd = MPPDoc.get(getCtx(), p_Value, p_Name);
+				MPPDoc ppd = MPPDoc.get(getCtx(), p_Value, get_TrxName());
 				if(ppd != null)
 				{
 					throw new Exception(Msg.getMsg(getCtx(), "JP_Unique_Constraint_Value"));
@@ -230,7 +260,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 		PO.copyValues(m_PPDocT, m_PPDoc);
 
 		//Copy mandatory column to make sure
-		m_PPDoc.setJP_PP_DocT_ID(p_Record_ID);
+		m_PPDoc.setJP_PP_DocT_ID(p_JP_PP_DocT_ID);
 		m_PPDoc.setAD_Org_ID(m_PPDocT.getAD_Org_ID());
 		m_PPDoc.setM_Product_ID(m_PPDocT.getM_Product_ID());
 		m_PPDoc.setQtyEntered(p_CoefficientQty);
