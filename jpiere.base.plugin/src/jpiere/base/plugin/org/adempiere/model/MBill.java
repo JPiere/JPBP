@@ -21,16 +21,21 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MBPartner;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MRefList;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
+import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -182,7 +187,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("approveIt - " + toString());
-	//	setIsApproved(true);
+		setIsApproved(true);
 		return true;
 	}	//	approveIt
 
@@ -212,17 +217,133 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 				return status;
 		}
 
-//		 setDefiniteDocumentNo();
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
 
 		//	Implicit Approval
-	//	if (!isApproved())
+		if (!isApproved())
 			approveIt();
-		if (log.isLoggable(Level.INFO)) log.info(toString());
-		//
+
+
+		boolean isCreateInvoice = false;
+		MBillTax[] taxes = getTaxes(true);
+		for(MBillTax tax : taxes)
+		{
+			if(tax.getJP_TaxAdjust_TaxAmt().compareTo(Env.ZERO) != 0)
+			{
+				isCreateInvoice = true;
+				break;
+			}
+		}
+
+		if(isCreateInvoice)
+		{
+			MBillSchema billSchema = MBillSchema.getBillSchemaBP(getC_BPartner_ID());
+			if(billSchema == null)
+			{
+				m_processMsg  = Msg.getMsg(getCtx(), "NotFound") + Msg.getElement(getCtx(), MBillSchema.COLUMNNAME_JP_BillSchema_ID, isSOTrx());
+				return DocAction.STATUS_Invalid;
+			}
+
+			if(billSchema.isTaxRecalculateJP())
+			{
+				MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
+				PO.copyValues(this, invoice);
+				invoice.setC_Invoice_ID(0);
+				invoice.setAD_Org_ID(getAD_Org_ID());
+				invoice.setSalesRep_ID(getSalesRep_ID());
+				invoice.setC_BPartner_ID(getC_BPartner_ID());
+				invoice.setC_BPartner_Location_ID(getC_BPartner_Location_ID());
+				invoice.setAD_User_ID(getAD_User_ID());
+				invoice.setDateInvoiced(getJPDateBilled());
+				invoice.setDateAcct(getDateAcct());
+				invoice.setC_DocTypeTarget_ID(billSchema.getJP_TaxAdjust_DocType_ID());
+				invoice.setC_DocType_ID(billSchema.getJP_TaxAdjust_DocType_ID());
+				invoice.setM_PriceList_ID(billSchema.getJP_TaxAdjust_PriceList_ID());
+				invoice.setDescription(billSchema.getJP_TaxAdjust_Description());
+				invoice.setDocumentNo(null);
+				invoice.setPaymentRule(getPaymentRule());
+				invoice.setC_PaymentTerm_ID(getC_PaymentTerm_ID());
+				invoice.set_ValueNoCheck(COLUMNNAME_JP_Bill_ID, getJP_Bill_ID());
+				if(!invoice.save(get_TrxName()))
+				{
+					m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx());
+					return DocAction.STATUS_Invalid;
+				}
+
+				setJP_TaxAdjust_Invoice_ID(invoice.getC_Invoice_ID());
+
+				MDocType docType = MDocType.get(billSchema.getJP_TaxAdjust_DocType_ID());
+				int line = 10;
+				for(MBillTax tax : taxes)
+				{
+					if(tax.getJP_TaxAdjust_TaxAmt().compareTo(Env.ZERO) == 0)
+						continue;
+
+					MInvoiceLine iLine = new MInvoiceLine(getCtx(), 0, get_TrxName());
+					iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
+					iLine.setInvoice(invoice);
+					iLine.setLine(line);
+					iLine.setC_Charge_ID(billSchema.getJP_TaxAdjust_Charge_ID());
+					iLine.setQty(Env.ONE);
+					iLine.setC_UOM_ID(100);
+					if(docType.getDocBaseType().equals("ARC") || docType.getDocBaseType().equals("APC"))
+					{
+						iLine.setPrice(tax.getJP_TaxAdjust_TaxAmt().negate());
+					}else {
+						iLine.setPrice(tax.getJP_TaxAdjust_TaxAmt());
+					}
+					iLine.setC_Tax_ID(billSchema.getJP_TaxAdjust_Tax_ID());
+
+					if(!iLine.save(get_TrxName()))
+					{
+						m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx())
+													+ " - "+ Msg.getElement(getCtx(), MInvoiceLine.COLUMNNAME_C_InvoiceLine_ID, isSOTrx());
+						return DocAction.STATUS_Invalid;
+					}
+
+					line = line + 10;
+
+					tax.setJP_TaxAdjust_InvoiceLine_ID(iLine.getC_InvoiceLine_ID());
+					if(!tax.save(get_TrxName()))
+					{
+						m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MBillTax.COLUMNNAME_JP_TaxAdjust_InvoiceLine_ID, isSOTrx());
+						return DocAction.STATUS_Invalid;
+					}
+
+				}//for
+
+				if(invoice.processIt(ACTION_Complete))
+				{
+					MBillLine billLine = new MBillLine(getCtx(), 0, get_TrxName());
+					billLine.setJP_Bill_ID(getJP_Bill_ID());
+					billLine.setAD_Org_ID(getAD_Org_ID());
+					billLine.setDescription(billSchema.getJP_TaxAdjust_Description());
+
+					String sql = "SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM JP_BillLine WHERE JP_Bill_ID=?";
+					line = DB.getSQLValue(get_TrxName(), sql, getJP_Bill_ID());
+					billLine.setLine(line);
+					billLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
+					billLine.setIsTaxAdjustLineJP(true);
+					if(!billLine.save(get_TrxName()))
+					{
+						m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MBillLine.COLUMNNAME_IsTaxAdjustLineJP, isSOTrx());
+						return DocAction.STATUS_Invalid;
+					}
+
+				}else {
+
+					m_processMsg = Msg.getMsg(getCtx(), "ProcessRunError") + " - "+ Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx())
+					 														+ " - "+ MRefList.getListName(getCtx(), 135, ACTION_Complete);
+					return DocAction.STATUS_Invalid;
+
+				}
+
+			}
+
+		}
 
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
@@ -237,34 +358,6 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 
-
-
-	/**
-	 * 	Set the definite document number after completed
-	 */
-	/*
-	private void setDefiniteDocumentNo() {
-		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
-		if (dt.isOverwriteDateOnComplete()) {
-			setDateInvoiced(new Timestamp (System.currentTimeMillis()));
-			if (getDateAcct().before(getDateInvoiced())) {
-				setDateAcct(getDateInvoiced());
-				MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
-			}
-		}
-		if (dt.isOverwriteSeqOnComplete()) {
-			String value = null;
-			int index = p_info.getColumnIndex("C_DocType_ID");
-			if (index == -1)
-				index = p_info.getColumnIndex("C_DocTypeTarget_ID");
-			if (index != -1)		//	get based on Doc Type (might return null)
-				value = DB.getDocumentNo(get_ValueAsInt(index), get_TrxName(), true);
-			if (value != null) {
-				setDocumentNo(value);
-			}
-		}
-	}
-	*/
 
 	/**
 	 * 	Void Document.
@@ -339,7 +432,14 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 	 */
 	public boolean closeIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_CLOSE);
+		if (m_processMsg != null)
+			return false;
+
+
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_CLOSE);
+		if (m_processMsg != null)
+			return false;
 
 		setDocAction(DOCACTION_None);
 
@@ -352,8 +452,22 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 	 */
 	public boolean reverseCorrectIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("reverseCorrectIt - " + toString());
-		return false;
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+
+		if(!reverse(ACTION_Reverse_Correct))
+			return false;
+
+
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+
+		return true;
 	}	//	reverseCorrectionIt
 
 	/**
@@ -362,9 +476,49 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 	 */
 	public boolean reverseAccrualIt()
 	{
-		if (log.isLoggable(Level.INFO)) log.info("reverseAccrualIt - " + toString());
-		return false;
+
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+
+		if(!reverse(ACTION_Reverse_Accrual))
+			return false;
+
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+
+		return true;
 	}	//	reverseAccrualIt
+
+	private boolean reverse(String docAction)
+	{
+		int C_Invoice_ID =	getJP_TaxAdjust_Invoice_ID();
+		if(C_Invoice_ID > 0)
+		{
+			MInvoice invoice = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
+			if(invoice.processIt(docAction))
+			{
+				if(!invoice.save(get_TrxName()))
+				{
+					m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx());
+					return false;
+				}
+			}else {
+
+				m_processMsg = Msg.getMsg(getCtx(), "ProcessRunError") + " - "+ Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx())
+				+ " - "+ MRefList.getListName(getCtx(), 135,  docAction);
+
+				return false;
+			}
+		}
+
+		return voidIt();
+	}
+
 
 	/**
 	 * 	Re-activate
@@ -429,7 +583,17 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		{
 			return index;
 		}else if(docStatus.equals(DocAction.STATUS_Completed)){
-			options[index++] = DocAction.ACTION_Void;
+
+			if(isTaxRecalculateJP() && getJP_TaxAdjust_Invoice_ID() > 0)
+			{
+				options[index++] = DocAction.ACTION_Reverse_Accrual;
+				options[index++] = DocAction.ACTION_Reverse_Correct;
+
+			}else {
+
+				options[index++] = DocAction.ACTION_Void;
+
+			}
 
 			return index;
 		}
@@ -445,16 +609,20 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		{
 			if(getJP_LastBill_ID() == 0)
 			{
-				setJPLastBillAmt(Env.ZERO);
-			}else{
-				MBill lastbill = new MBill(getCtx(),getJP_LastBill_ID(),get_TrxName());
-				if(lastbill.getDocStatus().equals(DocAction.STATUS_Completed)
-						|| lastbill.getDocStatus().equals(DocAction.STATUS_Closed))
+				;//Noting to do;
+
+			}else {
+
+				if(getJPLastBillAmt().compareTo(Env.ZERO) == 0)
 				{
-//					setJPLastBillAmt(lastbill.getJPBillAmt());
-				}else{
-					log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus"));
-					return false;
+					MBill lastbill = new MBill(getCtx(),getJP_LastBill_ID(),get_TrxName());
+					if(lastbill.getDocStatus().equals(DocAction.STATUS_Completed) || lastbill.getDocStatus().equals(DocAction.STATUS_Closed))
+					{
+						setJPLastBillAmt(lastbill.getJPBillAmt());
+					}else{
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus") + " - " + Msg.getElement(getCtx(), COLUMNNAME_JP_LastBill_ID));
+						return false;
+					}
 				}
 
 			}
@@ -464,18 +632,46 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		{
 			if(getC_Payment_ID() == 0)
 			{
-				setJPLastPayAmt(Env.ZERO);
-			}else{
-				MPayment lastPayment = new MPayment(getCtx(),getC_Payment_ID(),get_TrxName());
-				if(lastPayment.getDocStatus().equals(DocAction.STATUS_Completed)
-						|| lastPayment.getDocStatus().equals(DocAction.STATUS_Closed))
+				;//Noting to do;
+
+			}else {
+
+
+				if(getJPLastPayAmt().compareTo(Env.ZERO) == 0)
 				{
-//					setJPLastPayAmt(lastPayment.getPayAmt());
-				}else{
-					log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus"));
-					return false;
+					MPayment lastPayment = new MPayment(getCtx(),getC_Payment_ID(),get_TrxName());
+					if(lastPayment.getDocStatus().equals(DocAction.STATUS_Completed) || lastPayment.getDocStatus().equals(DocAction.STATUS_Closed))
+					{
+						setJPLastPayAmt(lastPayment.getPayAmt());
+					}else{
+						log.saveError("Error", Msg.getMsg(getCtx(), "JP_InvalidDocStatus") + " - " + Msg.getElement(getCtx(), COLUMNNAME_C_Payment_ID));
+						return false;
+					}
 				}
 
+			}
+		}
+
+		//JPIERE-0508
+		if(newRecord || is_ValueChanged(COLUMNNAME_C_BPartner_ID))
+		{
+			MBillLine[] lines = getLines();
+			if(lines.length > 0)
+			{
+				//You cannot change because there are some lines already.
+				log.saveError("Error", Msg.getMsg(getCtx(), "JP_CannotChangeForLines") + " - " + Msg.getElement(getCtx(), COLUMNNAME_C_BPartner_ID));
+				return false;
+			}
+
+			MBPartner bp = MBPartner.get(getCtx(), getC_BPartner_ID());
+			int JP_BillSchema_ID = bp.get_ValueAsInt(MBillSchema.COLUMNNAME_JP_BillSchema_ID);
+			if(JP_BillSchema_ID == 0)
+			{
+				setIsTaxRecalculateJP(false);
+			}else {
+
+				MBillSchema bs = MBillSchema.get(JP_BillSchema_ID);
+				setIsTaxRecalculateJP(bs.isTaxRecalculateJP());
 			}
 		}
 
@@ -542,10 +738,10 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		}
 	}	//	addDescription
 
-	
+
 	/**
 	 * Get Current Open Amt
-	 * 
+	 *
 	 * @return Total Open Amt
 	 */
 	public BigDecimal getCurrentOpenAmt()
@@ -558,9 +754,29 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 			inv = new MInvoice(getCtx(), m_lines[i].getC_Invoice_ID(), get_TrxName());
 			openAmt = openAmt.add(inv.getOpenAmt(true, null));
 		}
-		
+
 		return openAmt;
 	}
-	
+
+	/**	Bill Taxes			*/
+	private MBillTax[]	m_taxes;
+
+	/**
+	 * 	Get Taxes
+	 *	@param requery requery
+	 *	@return array of taxes
+	 */
+	public MBillTax[] getTaxes (boolean requery)
+	{
+		if (m_taxes != null && !requery)
+			return m_taxes;
+
+		final String whereClause = MBillTax.COLUMNNAME_JP_Bill_ID+"=?";
+		List<MBillTax> list = new Query(getCtx(), MBillTax.Table_Name, whereClause, get_TrxName())
+										.setParameters(get_ID())
+										.list();
+		m_taxes = list.toArray(new MBillTax[list.size()]);
+		return m_taxes;
+	}	//	getTaxes
 
 }	//	DocActionTemplate

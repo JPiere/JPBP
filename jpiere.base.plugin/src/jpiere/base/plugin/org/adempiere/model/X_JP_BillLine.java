@@ -33,7 +33,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210814L;
+	private static final long serialVersionUID = 20211007L;
 
     /** Standard Constructor */
     public X_JP_BillLine (Properties ctx, int JP_BillLine_ID, String trxName)
@@ -44,6 +44,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 			setC_Invoice_ID (0);
 			setGrandTotal (Env.ZERO);
 // 0
+			setIsTaxAdjustLineJP (false);
+// N
 			setJP_BillLine_ID (0);
 			setJP_Bill_ID (0);
 			setLine (0);
@@ -381,6 +383,30 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 		return bd;
 	}
 
+	/** Set line of Tax Adjust.
+		@param IsTaxAdjustLineJP 
+		JPIERE-0508:JPBP
+	  */
+	public void setIsTaxAdjustLineJP (boolean IsTaxAdjustLineJP)
+	{
+		set_ValueNoCheck (COLUMNNAME_IsTaxAdjustLineJP, Boolean.valueOf(IsTaxAdjustLineJP));
+	}
+
+	/** Get line of Tax Adjust.
+		@return JPIERE-0508:JPBP
+	  */
+	public boolean isTaxAdjustLineJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsTaxAdjustLineJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Bil lLine.
 		@param JP_BillLine_ID Bil lLine	  */
 	public void setJP_BillLine_ID (int JP_BillLine_ID)
@@ -586,18 +612,18 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	public static final int PAYMENTRULE_AD_Reference_ID=195;
 	/** Cash = B */
 	public static final String PAYMENTRULE_Cash = "B";
-	/** Credit Card = K */
-	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
-	/** Check = S */
-	public static final String PAYMENTRULE_Check = "S";
-	/** On Credit = P */
-	public static final String PAYMENTRULE_OnCredit = "P";
 	/** Direct Debit = D */
 	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** Direct Deposit = T */
+	public static final String PAYMENTRULE_DirectDeposit = "T";
 	/** Set Payment Rule.
 		@param PaymentRule 
 		How you pay the invoice

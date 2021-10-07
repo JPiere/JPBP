@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_BillSchema
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_BillSchema 
@@ -171,6 +171,19 @@ public interface I_JP_BillSchema
 	  */
 	public boolean isSOTrx();
 
+    /** Column name IsTaxRecalculateJP */
+    public static final String COLUMNNAME_IsTaxRecalculateJP = "IsTaxRecalculateJP";
+
+	/** Set Tax Recalculation.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setIsTaxRecalculateJP (boolean IsTaxRecalculateJP);
+
+	/** Get Tax Recalculation.
+	  * JPIERE-0508:JPBP
+	  */
+	public boolean isTaxRecalculateJP();
+
     /** Column name JP_BillOrg_ID */
     public static final String COLUMNNAME_JP_BillOrg_ID = "JP_BillOrg_ID";
 
@@ -197,6 +210,79 @@ public interface I_JP_BillSchema
 
 	/** Get JP_BillSchema_UU	  */
 	public String getJP_BillSchema_UU();
+
+    /** Column name JP_TaxAdjust_Charge_ID */
+    public static final String COLUMNNAME_JP_TaxAdjust_Charge_ID = "JP_TaxAdjust_Charge_ID";
+
+	/** Set Charge of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_Charge_ID (int JP_TaxAdjust_Charge_ID);
+
+	/** Get Charge of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_Charge_ID();
+
+	public org.compiere.model.I_C_Charge getJP_TaxAdjust_Charge() throws RuntimeException;
+
+    /** Column name JP_TaxAdjust_Description */
+    public static final String COLUMNNAME_JP_TaxAdjust_Description = "JP_TaxAdjust_Description";
+
+	/** Set Description of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_Description (String JP_TaxAdjust_Description);
+
+	/** Get Description of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public String getJP_TaxAdjust_Description();
+
+    /** Column name JP_TaxAdjust_DocType_ID */
+    public static final String COLUMNNAME_JP_TaxAdjust_DocType_ID = "JP_TaxAdjust_DocType_ID";
+
+	/** Set Doc Type of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_DocType_ID (int JP_TaxAdjust_DocType_ID);
+
+	/** Get Doc Type of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_DocType_ID();
+
+	public org.compiere.model.I_C_DocType getJP_TaxAdjust_DocType() throws RuntimeException;
+
+    /** Column name JP_TaxAdjust_PriceList_ID */
+    public static final String COLUMNNAME_JP_TaxAdjust_PriceList_ID = "JP_TaxAdjust_PriceList_ID";
+
+	/** Set Price List of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_PriceList_ID (int JP_TaxAdjust_PriceList_ID);
+
+	/** Get Price List of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_PriceList_ID();
+
+	public org.compiere.model.I_M_PriceList getJP_TaxAdjust_PriceList() throws RuntimeException;
+
+    /** Column name JP_TaxAdjust_Tax_ID */
+    public static final String COLUMNNAME_JP_TaxAdjust_Tax_ID = "JP_TaxAdjust_Tax_ID";
+
+	/** Set Tax of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_Tax_ID (int JP_TaxAdjust_Tax_ID);
+
+	/** Get Tax of Tax Adjust Invoice.
+	  * JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_Tax_ID();
+
+	public org.compiere.model.I_C_Tax getJP_TaxAdjust_Tax() throws RuntimeException;
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

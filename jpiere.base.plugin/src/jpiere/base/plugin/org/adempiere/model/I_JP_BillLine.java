@@ -263,6 +263,19 @@ public interface I_JP_BillLine
 	  */
 	public boolean isActive();
 
+    /** Column name IsTaxAdjustLineJP */
+    public static final String COLUMNNAME_IsTaxAdjustLineJP = "IsTaxAdjustLineJP";
+
+	/** Set line of Tax Adjust.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setIsTaxAdjustLineJP (boolean IsTaxAdjustLineJP);
+
+	/** Get line of Tax Adjust.
+	  * JPIERE-0508:JPBP
+	  */
+	public boolean isTaxAdjustLineJP();
+
     /** Column name JP_BillLine_ID */
     public static final String COLUMNNAME_JP_BillLine_ID = "JP_BillLine_ID";
 

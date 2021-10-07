@@ -33,7 +33,7 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210814L;
+	private static final long serialVersionUID = 20211007L;
 
     /** Standard Constructor */
     public X_JP_Bill (Properties ctx, int JP_Bill_ID, String trxName)
@@ -59,6 +59,8 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 // Y
 			setIsSOTrx (false);
 // @IsSOTrx@
+			setIsTaxRecalculateJP (false);
+// N
 			setJPBillAmt (Env.ZERO);
 // 0
 			setJPCarriedForwardAmt (Env.ZERO);
@@ -431,34 +433,34 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 
 	/** DocAction AD_Reference_ID=135 */
 	public static final int DOCACTION_AD_Reference_ID=135;
-	/** Complete = CO */
-	public static final String DOCACTION_Complete = "CO";
-	/** Approve = AP */
-	public static final String DOCACTION_Approve = "AP";
-	/** Reject = RJ */
-	public static final String DOCACTION_Reject = "RJ";
-	/** Post = PO */
-	public static final String DOCACTION_Post = "PO";
-	/** Void = VO */
-	public static final String DOCACTION_Void = "VO";
-	/** Close = CL */
-	public static final String DOCACTION_Close = "CL";
-	/** Reverse - Correct = RC */
-	public static final String DOCACTION_Reverse_Correct = "RC";
-	/** Reverse - Accrual = RA */
-	public static final String DOCACTION_Reverse_Accrual = "RA";
-	/** Invalidate = IN */
-	public static final String DOCACTION_Invalidate = "IN";
-	/** Re-activate = RE */
-	public static final String DOCACTION_Re_Activate = "RE";
 	/** <None> = -- */
 	public static final String DOCACTION_None = "--";
+	/** Approve = AP */
+	public static final String DOCACTION_Approve = "AP";
+	/** Close = CL */
+	public static final String DOCACTION_Close = "CL";
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
+	/** Invalidate = IN */
+	public static final String DOCACTION_Invalidate = "IN";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
 	/** Prepare = PR */
 	public static final String DOCACTION_Prepare = "PR";
-	/** Unlock = XL */
-	public static final String DOCACTION_Unlock = "XL";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
 	/** Wait Complete = WC */
 	public static final String DOCACTION_WaitComplete = "WC";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
 	/** Set Document Action.
 		@param DocAction 
 		The targeted status of the document
@@ -479,30 +481,30 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 
 	/** DocStatus AD_Reference_ID=131 */
 	public static final int DOCSTATUS_AD_Reference_ID=131;
-	/** Drafted = DR */
-	public static final String DOCSTATUS_Drafted = "DR";
-	/** Completed = CO */
-	public static final String DOCSTATUS_Completed = "CO";
-	/** Approved = AP */
-	public static final String DOCSTATUS_Approved = "AP";
-	/** Not Approved = NA */
-	public static final String DOCSTATUS_NotApproved = "NA";
-	/** Voided = VO */
-	public static final String DOCSTATUS_Voided = "VO";
-	/** Invalid = IN */
-	public static final String DOCSTATUS_Invalid = "IN";
-	/** Reversed = RE */
-	public static final String DOCSTATUS_Reversed = "RE";
-	/** Closed = CL */
-	public static final String DOCSTATUS_Closed = "CL";
 	/** Unknown = ?? */
 	public static final String DOCSTATUS_Unknown = "??";
+	/** Approved = AP */
+	public static final String DOCSTATUS_Approved = "AP";
+	/** Closed = CL */
+	public static final String DOCSTATUS_Closed = "CL";
+	/** Completed = CO */
+	public static final String DOCSTATUS_Completed = "CO";
+	/** Drafted = DR */
+	public static final String DOCSTATUS_Drafted = "DR";
+	/** Invalid = IN */
+	public static final String DOCSTATUS_Invalid = "IN";
 	/** In Progress = IP */
 	public static final String DOCSTATUS_InProgress = "IP";
-	/** Waiting Payment = WP */
-	public static final String DOCSTATUS_WaitingPayment = "WP";
+	/** Not Approved = NA */
+	public static final String DOCSTATUS_NotApproved = "NA";
+	/** Reversed = RE */
+	public static final String DOCSTATUS_Reversed = "RE";
+	/** Voided = VO */
+	public static final String DOCSTATUS_Voided = "VO";
 	/** Waiting Confirmation = WC */
 	public static final String DOCSTATUS_WaitingConfirmation = "WC";
+	/** Waiting Payment = WP */
+	public static final String DOCSTATUS_WaitingPayment = "WP";
 	/** Set Document Status.
 		@param DocStatus 
 		The current status of the document
@@ -597,6 +599,30 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	public boolean isSOTrx () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Tax Recalculation.
+		@param IsTaxRecalculateJP 
+		JPIERE-0508:JPBP
+	  */
+	public void setIsTaxRecalculateJP (boolean IsTaxRecalculateJP)
+	{
+		set_ValueNoCheck (COLUMNNAME_IsTaxRecalculateJP, Boolean.valueOf(IsTaxRecalculateJP));
+	}
+
+	/** Get Tax Recalculation.
+		@return JPIERE-0508:JPBP
+	  */
+	public boolean isTaxRecalculateJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsTaxRecalculateJP);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
@@ -823,6 +849,31 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_Subject);
 	}
 
+	public org.compiere.model.I_C_Invoice getJP_TaxAdjust_Invoice() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_Name)
+			.getPO(getJP_TaxAdjust_Invoice_ID(), get_TrxName());	}
+
+	/** Set Invoice of Tax Adjust.
+		@param JP_TaxAdjust_Invoice_ID Invoice of Tax Adjust	  */
+	public void setJP_TaxAdjust_Invoice_ID (int JP_TaxAdjust_Invoice_ID)
+	{
+		if (JP_TaxAdjust_Invoice_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_JP_TaxAdjust_Invoice_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_JP_TaxAdjust_Invoice_ID, Integer.valueOf(JP_TaxAdjust_Invoice_ID));
+	}
+
+	/** Get Invoice of Tax Adjust.
+		@return Invoice of Tax Adjust	  */
+	public int getJP_TaxAdjust_Invoice_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TaxAdjust_Invoice_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_AD_User getJP_User() throws RuntimeException
     {
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
@@ -912,18 +963,18 @@ public class X_JP_Bill extends PO implements I_JP_Bill, I_Persistent
 	public static final int PAYMENTRULE_AD_Reference_ID=195;
 	/** Cash = B */
 	public static final String PAYMENTRULE_Cash = "B";
-	/** Credit Card = K */
-	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
-	/** Check = S */
-	public static final String PAYMENTRULE_Check = "S";
-	/** On Credit = P */
-	public static final String PAYMENTRULE_OnCredit = "P";
 	/** Direct Debit = D */
 	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** Direct Deposit = T */
+	public static final String PAYMENTRULE_DirectDeposit = "T";
 	/** Set Payment Rule.
 		@param PaymentRule 
 		How you pay the invoice

@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_BillSchema
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170207L;
+	private static final long serialVersionUID = 20211007L;
 
     /** Standard Constructor */
     public X_JP_BillSchema (Properties ctx, int JP_BillSchema_ID, String trxName)
@@ -42,6 +42,8 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 			setIsBillOrgJP (false);
 // N
 			setIsSOTrx (false);
+			setIsTaxRecalculateJP (false);
+// N
 			setJP_BillSchema_ID (0);
 			setName (null);
 			setValue (null);
@@ -71,8 +73,8 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_BillSchema[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_BillSchema[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -211,6 +213,30 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 		return false;
 	}
 
+	/** Set Tax Recalculation.
+		@param IsTaxRecalculateJP 
+		JPIERE-0508:JPBP
+	  */
+	public void setIsTaxRecalculateJP (boolean IsTaxRecalculateJP)
+	{
+		set_Value (COLUMNNAME_IsTaxRecalculateJP, Boolean.valueOf(IsTaxRecalculateJP));
+	}
+
+	/** Get Tax Recalculation.
+		@return JPIERE-0508:JPBP
+	  */
+	public boolean isTaxRecalculateJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsTaxRecalculateJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set JP_BillOrg_ID.
 		@param JP_BillOrg_ID JP_BillOrg_ID	  */
 	public void setJP_BillOrg_ID (int JP_BillOrg_ID)
@@ -263,6 +289,135 @@ public class X_JP_BillSchema extends PO implements I_JP_BillSchema, I_Persistent
 	public String getJP_BillSchema_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_BillSchema_UU);
+	}
+
+	public org.compiere.model.I_C_Charge getJP_TaxAdjust_Charge() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
+			.getPO(getJP_TaxAdjust_Charge_ID(), get_TrxName());	}
+
+	/** Set Charge of Tax Adjust Invoice.
+		@param JP_TaxAdjust_Charge_ID 
+		JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_Charge_ID (int JP_TaxAdjust_Charge_ID)
+	{
+		if (JP_TaxAdjust_Charge_ID < 1) 
+			set_Value (COLUMNNAME_JP_TaxAdjust_Charge_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_TaxAdjust_Charge_ID, Integer.valueOf(JP_TaxAdjust_Charge_ID));
+	}
+
+	/** Get Charge of Tax Adjust Invoice.
+		@return JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_Charge_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TaxAdjust_Charge_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Description of Tax Adjust Invoice.
+		@param JP_TaxAdjust_Description 
+		JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_Description (String JP_TaxAdjust_Description)
+	{
+		set_Value (COLUMNNAME_JP_TaxAdjust_Description, JP_TaxAdjust_Description);
+	}
+
+	/** Get Description of Tax Adjust Invoice.
+		@return JPIERE-0508:JPBP
+	  */
+	public String getJP_TaxAdjust_Description () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_TaxAdjust_Description);
+	}
+
+	public org.compiere.model.I_C_DocType getJP_TaxAdjust_DocType() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
+			.getPO(getJP_TaxAdjust_DocType_ID(), get_TrxName());	}
+
+	/** Set Doc Type of Tax Adjust Invoice.
+		@param JP_TaxAdjust_DocType_ID 
+		JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_DocType_ID (int JP_TaxAdjust_DocType_ID)
+	{
+		if (JP_TaxAdjust_DocType_ID < 1) 
+			set_Value (COLUMNNAME_JP_TaxAdjust_DocType_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_TaxAdjust_DocType_ID, Integer.valueOf(JP_TaxAdjust_DocType_ID));
+	}
+
+	/** Get Doc Type of Tax Adjust Invoice.
+		@return JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_DocType_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TaxAdjust_DocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_PriceList getJP_TaxAdjust_PriceList() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
+			.getPO(getJP_TaxAdjust_PriceList_ID(), get_TrxName());	}
+
+	/** Set Price List of Tax Adjust Invoice.
+		@param JP_TaxAdjust_PriceList_ID 
+		JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_PriceList_ID (int JP_TaxAdjust_PriceList_ID)
+	{
+		if (JP_TaxAdjust_PriceList_ID < 1) 
+			set_Value (COLUMNNAME_JP_TaxAdjust_PriceList_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_TaxAdjust_PriceList_ID, Integer.valueOf(JP_TaxAdjust_PriceList_ID));
+	}
+
+	/** Get Price List of Tax Adjust Invoice.
+		@return JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_PriceList_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TaxAdjust_PriceList_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Tax getJP_TaxAdjust_Tax() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_Name)
+			.getPO(getJP_TaxAdjust_Tax_ID(), get_TrxName());	}
+
+	/** Set Tax of Tax Adjust Invoice.
+		@param JP_TaxAdjust_Tax_ID 
+		JPIERE-0508:JPBP
+	  */
+	public void setJP_TaxAdjust_Tax_ID (int JP_TaxAdjust_Tax_ID)
+	{
+		if (JP_TaxAdjust_Tax_ID < 1) 
+			set_Value (COLUMNNAME_JP_TaxAdjust_Tax_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_TaxAdjust_Tax_ID, Integer.valueOf(JP_TaxAdjust_Tax_ID));
+	}
+
+	/** Get Tax of Tax Adjust Invoice.
+		@return JPIERE-0508:JPBP
+	  */
+	public int getJP_TaxAdjust_Tax_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TaxAdjust_Tax_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Name.

@@ -345,6 +345,19 @@ public interface I_JP_Bill
 	  */
 	public boolean isSOTrx();
 
+    /** Column name IsTaxRecalculateJP */
+    public static final String COLUMNNAME_IsTaxRecalculateJP = "IsTaxRecalculateJP";
+
+	/** Set Tax Recalculation.
+	  * JPIERE-0508:JPBP
+	  */
+	public void setIsTaxRecalculateJP (boolean IsTaxRecalculateJP);
+
+	/** Get Tax Recalculation.
+	  * JPIERE-0508:JPBP
+	  */
+	public boolean isTaxRecalculateJP();
+
     /** Column name JPBillAmt */
     public static final String COLUMNNAME_JPBillAmt = "JPBillAmt";
 
@@ -471,6 +484,17 @@ public interface I_JP_Bill
 	  * JPIERE-0490:JPBP
 	  */
 	public String getJP_Subject();
+
+    /** Column name JP_TaxAdjust_Invoice_ID */
+    public static final String COLUMNNAME_JP_TaxAdjust_Invoice_ID = "JP_TaxAdjust_Invoice_ID";
+
+	/** Set Invoice of Tax Adjust	  */
+	public void setJP_TaxAdjust_Invoice_ID (int JP_TaxAdjust_Invoice_ID);
+
+	/** Get Invoice of Tax Adjust	  */
+	public int getJP_TaxAdjust_Invoice_ID();
+
+	public org.compiere.model.I_C_Invoice getJP_TaxAdjust_Invoice() throws RuntimeException;
 
     /** Column name JP_User_ID */
     public static final String COLUMNNAME_JP_User_ID = "JP_User_ID";

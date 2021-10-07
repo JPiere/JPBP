@@ -18,13 +18,18 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceTax;
+import org.compiere.model.MTax;
 import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
+import jpiere.base.plugin.util.JPiereUtil;
 
 /**
  *	MBillLine
@@ -111,7 +116,10 @@ public class MBillLine extends X_JP_BillLine {
 			setPayAmt(invoice.getGrandTotal().subtract(invoice.getOpenAmt()));
 			setOpenAmt(invoice.getOpenAmt());
 
-			if(invoice.getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo))
+			MDocType invoiceDocType = MDocType.get(invoice.getC_DocTypeTarget_ID());
+
+			if(invoiceDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)
+					|| invoiceDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo) )
 			{
 				setTotalLines(getTotalLines().negate());
 				setGrandTotal(getGrandTotal().negate());
@@ -119,6 +127,30 @@ public class MBillLine extends X_JP_BillLine {
 				setTaxAmt(getTaxAmt().negate());
 				setPayAmt(invoice.getGrandTotal().add(invoice.getOpenAmt()));
 //				setOverUnderAmt(getOverUnderAmt().negate());
+			}
+
+			//JPIERE-0508 Tax Adjust
+			if(isTaxAdjustLineJP())
+			{
+				if(invoiceDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)
+						|| invoiceDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo))
+				{
+					setTotalLines(Env.ZERO);
+					setGrandTotal(invoice.getGrandTotal().negate());
+					setTaxBaseAmt(Env.ZERO);
+					setTaxAmt(invoice.getGrandTotal().negate());
+					setPayAmt(Env.ZERO);
+					setOpenAmt(invoice.getGrandTotal().negate());
+					setOverUnderAmt(Env.ZERO);
+				}else {
+					setTotalLines(Env.ZERO);
+					setGrandTotal(invoice.getGrandTotal());
+					setTaxBaseAmt(Env.ZERO);
+					setTaxAmt(invoice.getGrandTotal());
+					setPayAmt(Env.ZERO);
+					setOpenAmt(invoice.getGrandTotal());
+					setOverUnderAmt(Env.ZERO);
+				}
 			}
 
 
@@ -130,17 +162,135 @@ public class MBillLine extends X_JP_BillLine {
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
 
-		if(newRecord || is_ValueChanged("C_Invoice_ID"))
+		if(newRecord || is_ValueChanged(COLUMNNAME_C_Invoice_ID))
 		{
 
-//			String sql = "UPDATE JP_Bill b"
-//					+ " SET TotalLines = (SELECT COALESCE(SUM(TotalLines),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//						+ ",GrandTotal = (SELECT COALESCE(SUM(GrandTotal),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//						+ ",TaxBaseAmt = (SELECT COALESCE(SUM(TaxBaseAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//						+ ",TaxAmt = (SELECT COALESCE(SUM(TaxAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//						+ ",PayAmt     = (SELECT COALESCE(SUM(PayAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//						+ ",OverUnderAmt     = (SELECT COALESCE(SUM(OverUnderAmt),0) FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-//					+ "WHERE JP_Bill_ID=" + getJP_Bill_ID();
+			if(!updateHeaderAndTax(newRecord, success, false))
+				return false;
+
+			//Update relation between Invoice and Bill.
+			if(invoice == null)
+				invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+
+			if(newRecord)
+			{
+				;
+
+			}else{
+
+				MInvoice invoice_old =new MInvoice(getCtx(),get_ValueOldAsInt(COLUMNNAME_C_Invoice_ID),get_TrxName());
+				Integer JP_Bill_ID = (Integer)invoice_old.get_Value(COLUMNNAME_JP_Bill_ID);
+				if(JP_Bill_ID != null && JP_Bill_ID.intValue()== getJP_Bill_ID())
+				{
+					invoice_old.set_ValueNoCheck(COLUMNNAME_JP_Bill_ID, null);
+					invoice_old.save(get_TrxName());
+				}
+			}
+
+			Integer JP_Bill_ID = (Integer)invoice.get_Value(COLUMNNAME_JP_Bill_ID);
+			if(JP_Bill_ID == null || JP_Bill_ID.intValue()==0)
+			{
+				invoice.set_ValueNoCheck(COLUMNNAME_JP_Bill_ID, getJP_Bill_ID());
+				invoice.save(get_TrxName());
+			}
+
+		}
+
+		return true;
+	}
+
+	@Override
+	protected boolean afterDelete(boolean success)
+	{
+
+		if(!updateHeaderAndTax(false, success, true))
+			return false;
+
+		if(invoice == null)
+			invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+
+		Integer JP_Bill_ID = (Integer)invoice.get_Value(COLUMNNAME_JP_Bill_ID);
+		if(JP_Bill_ID != null && JP_Bill_ID.intValue()== getJP_Bill_ID())
+		{
+			invoice.set_ValueNoCheck(COLUMNNAME_JP_Bill_ID, null);
+			invoice.save(get_TrxName());
+		}
+
+		return true;
+	}
+
+	private boolean updateHeaderAndTax(boolean newRecord, boolean success, boolean isDelete)
+	{
+		if(getParent().isTaxRecalculateJP())
+		{
+
+			if(isTaxAdjustLineJP())
+			{
+				//Tax Recalculation
+				if(invoice == null)
+					invoice = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+
+				MInvoiceTax[] taxes = invoice.getTaxes(true);
+				for(MInvoiceTax iTax : taxes)
+				{
+					MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+					if (taxCalculater == null)
+					{
+						throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+					}
+
+					success = taxCalculater.updateHeaderTax(this);
+			    	if(!success)
+			    		return false;
+
+			    	break;
+				}//for
+
+			}else {
+
+				//Old Tax Recalculation
+				if(!newRecord && is_ValueChanged(COLUMNNAME_C_Invoice_ID) && !isDelete)
+				{
+					int old_C_Invoice_ID = get_ValueOldAsInt(COLUMNNAME_C_Invoice_ID);
+					MInvoice oldInvoice = new MInvoice(getCtx(), old_C_Invoice_ID, get_TrxName());
+					MInvoiceTax[] taxes = oldInvoice.getTaxes(true);
+					for(MInvoiceTax iTax : taxes)
+					{
+						MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+						IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+						if (taxCalculater == null)
+						{
+							throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+						}
+
+						success = taxCalculater.recalculateTax(this, oldInvoice, iTax, true);
+				    	if(!success)
+				    		return false;
+					}//for
+				}
+
+				//Tax Recalculation
+				if(invoice == null)
+					invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+
+				MInvoiceTax[] taxes = invoice.getTaxes(true);
+				for(MInvoiceTax iTax : taxes)
+				{
+					MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+					if (taxCalculater == null)
+					{
+						throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+					}
+
+					success = taxCalculater.recalculateTax(this, invoice, iTax, false);
+			    	if(!success)
+			    		return false;
+				}//for
+			}
+
+		}else {
 
 			String sql = "UPDATE JP_Bill b"
 					+ " SET (TotalLines"
@@ -158,48 +308,22 @@ public class MBillLine extends X_JP_BillLine {
 							+ "  ,COALESCE(SUM(OpenAmt),0)"
 							+ "  ,COALESCE(SUM(OverUnderAmt),0)"
 					+ " FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-					+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
+					+ " WHERE JP_Bill_ID= ? " ;
 
-			int no = DB.executeUpdate(sql, get_TrxName());
+			int no = DB.executeUpdate(sql, getJP_Bill_ID(), false, get_TrxName());
 			if (no != 1)
 			{
-				log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
+				log.saveError("Error", "MBillLine#updateHeaderAndTax() : " + sql);
 				return false;
 			}
 
-			sql = "UPDATE JP_Bill b"
-					+" SET JPBillAmt =(SELECT COALESCE(OpenAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
-					+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
-			no = DB.executeUpdate(sql, get_TrxName());
+			sql = "UPDATE JP_Bill SET JPBillAmt = COALESCE(OpenAmt,0) + COALESCE(JPCarriedForwardAmt,0) WHERE JP_Bill_ID= ? ";
+
+			no = DB.executeUpdate(sql, getJP_Bill_ID(), false, get_TrxName());
 			if (no != 1)
 			{
-				log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
+				log.saveError("Error", "MBillLine#updateHeaderAndTax() : " + sql);
 				return false;
-			}
-
-
-			if(invoice == null)
-				invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
-
-			if(newRecord)
-			{
-				;
-			}else{
-
-				MInvoice invoice_old =new MInvoice(getCtx(),get_ValueOldAsInt("C_Invoice_ID"),get_TrxName());
-				Integer JP_Bill_ID = (Integer)invoice_old.get_Value("JP_Bill_ID");
-				if(JP_Bill_ID != null && JP_Bill_ID.intValue()== getJP_Bill_ID())
-				{
-					invoice_old.set_ValueNoCheck("JP_Bill_ID", null);
-					invoice_old.save(get_TrxName());
-				}
-			}
-
-			Integer JP_Bill_ID = (Integer)invoice.get_Value("JP_Bill_ID");
-			if(JP_Bill_ID == null || JP_Bill_ID.intValue()==0)
-			{
-				invoice.set_ValueNoCheck("JP_Bill_ID", getJP_Bill_ID());
-				invoice.save(get_TrxName());
 			}
 
 		}
@@ -207,56 +331,7 @@ public class MBillLine extends X_JP_BillLine {
 		return true;
 	}
 
-	@Override
-	protected boolean afterDelete(boolean success) {
 
-		String sql = "UPDATE JP_Bill b"
-				+ " SET (TotalLines"
-					+ " ,GrandTotal"
-					+ " ,TaxBaseAmt"
-					+ " ,TaxAmt"
-					+ " ,PayAmt"
-					+ " ,OpenAmt"
-					+ " ,OverUnderAmt )"
-				+ " = (SELECT COALESCE(SUM(TotalLines),0)"
-						+ "  ,COALESCE(SUM(GrandTotal),0)"
-						+ "  ,COALESCE(SUM(TaxBaseAmt),0)"
-						+ "  ,COALESCE(SUM(TaxAmt),0)"
-						+ "  ,COALESCE(SUM(PayAmt),0)"
-						+ "  ,COALESCE(SUM(OpenAmt),0)"
-						+ "  ,COALESCE(SUM(OverUnderAmt),0)"
-				+ " FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-				+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
-
-		int no = DB.executeUpdate(sql, get_TrxName());
-		if (no != 1)
-		{
-			log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
-			return false;
-		}
-
-		sql = "UPDATE JP_Bill b"
-				+" SET JPBillAmt =(SELECT COALESCE(OpenAmt,0) + COALESCE(JPCarriedForwardAmt,0) FROM JP_Bill WHERE JP_Bill_ID="+ getJP_Bill_ID() +" )"
-				+ " WHERE JP_Bill_ID=" + getJP_Bill_ID() ;
-		no = DB.executeUpdate(sql, get_TrxName());
-		if (no != 1)
-		{
-			log.saveError("Error", Msg.getMsg(getCtx(), "SaveErrorNotUnique"));
-			return false;
-		}
-
-		if(invoice == null)
-			invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
-
-		Integer JP_Bill_ID = (Integer)invoice.get_Value("JP_Bill_ID");
-		if(JP_Bill_ID != null && JP_Bill_ID.intValue()== getJP_Bill_ID())
-		{
-			invoice.set_ValueNoCheck("JP_Bill_ID", null);
-			invoice.save(get_TrxName());
-		}
-
-		return true;
-	}
 
 	private MBill m_parent = null;
 
@@ -266,6 +341,11 @@ public class MBillLine extends X_JP_BillLine {
 			m_parent = new MBill(getCtx(), getJP_Bill_ID(),get_TrxName());
 
 		return m_parent;
+	}
+
+	public void clearParent()
+	{
+		this.m_parent = null;
 	}
 
 }
