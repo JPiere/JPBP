@@ -393,10 +393,13 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 
 			//	Set lines to 0
 			MBillLine[] lines = getLines(false);
+			MBillLine line = null;
 			MInvoice invoice = null;
 			for (int i = 0; i < lines.length; i++)
 			{
-				MBillLine line = lines[i];
+				line = lines[i];
+				if(line.isTaxAdjustLineJP())
+					continue;
 
 				invoice = new MInvoice(getCtx(),line.getC_Invoice_ID(), get_TrxName());
 
@@ -500,19 +503,46 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		if(C_Invoice_ID > 0)
 		{
 			MInvoice invoice = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
-			if(invoice.processIt(docAction))
+
+			if(invoice.getDocStatus().equals(STATUS_Completed))
 			{
-				if(!invoice.save(get_TrxName()))
+				if(invoice.processIt(docAction))
 				{
-					m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx());
+					if(!invoice.save(get_TrxName()))
+					{
+						m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx());
+						return false;
+					}
+
+				}else {
+
+					m_processMsg = Msg.getMsg(getCtx(), "ProcessRunError") + " - "+ Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx())
+					+ " - "+ MRefList.getListName(getCtx(), 135,  docAction);
+
 					return false;
 				}
+			}else if(invoice.getDocStatus().equals(STATUS_Closed)
+					|| invoice.getDocStatus().equals(STATUS_Voided)
+					|| invoice.getDocStatus().equals(STATUS_Reversed)) {
+
+				;//Noting to do;
+
 			}else {
 
-				m_processMsg = Msg.getMsg(getCtx(), "ProcessRunError") + " - "+ Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx())
-				+ " - "+ MRefList.getListName(getCtx(), 135,  docAction);
+				if(invoice.processIt(ACTION_Void))
+				{
+					if(!invoice.save(get_TrxName()))
+					{
+						m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx());
+						return false;
+					}
 
-				return false;
+				}else {
+
+					m_processMsg = Msg.getMsg(getCtx(), "ProcessRunError") + " - "+ Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx())
+					+ " - "+ MRefList.getListName(getCtx(), 135,  ACTION_Void);
+				}
+
 			}
 		}
 

@@ -68,6 +68,18 @@ public interface IJPiereTaxProvider {
 
 
 	/**
+	 * JPIERE-0508 Recalculation Bill Tax - Calculate Bill Tax Total
+	 *
+	 * @param provider
+	 * @param bill
+	 * @return
+	 */
+	default public boolean calculateBillTaxTotal(MTaxProvider provider, MBill bill)
+	{
+		return true;
+	}
+
+	/**
 	 * JPIERE-0508 Recalculation Bill Tax - Recalcuation Tax
 	 *
 	 * @param billLine
@@ -76,16 +88,45 @@ public interface IJPiereTaxProvider {
 	 * @param isOldTax
 	 * @return
 	 */
-	default public boolean recalculateTax(MBillLine billLine, MInvoice invoice, MInvoiceTax invoiceTax , boolean isOldTax)
+	default public boolean recalculateTax(MTaxProvider provider, MBillLine billLine, MInvoice invoice, MInvoiceTax invoiceTax , boolean isOldTax)
 	{
-		if(!updateBillTax(billLine, invoice, invoiceTax))
+		if(!updateBillTax(provider, billLine, invoice, invoiceTax))
 			return false;
 
 		if(isOldTax)
 			return true;
 		else
-			return updateHeaderTax(billLine);
+			return updateHeaderTax(provider, billLine);
 
+	}
+
+
+	/**
+	 * JPIERE-0508 Recalculation Bill Tax - Update Bill Tax
+	 *
+	 * @param provider
+	 * @param billLine
+	 * @param invoice
+	 * @param invoiceTax
+	 * @return
+	 */
+	default public boolean updateBillTax(MTaxProvider provider, MBillLine billLine, MInvoice invoice, MInvoiceTax invoiceTax)
+	{
+		MCurrency currency = MCurrency.get(billLine.getParent().getC_Currency_ID());
+		MBillTax billTax = MBillTax.get(billLine, invoiceTax, currency.getStdPrecision(), billLine.get_TrxName());
+	    if (billTax != null)
+	    {
+	    	if (!calculateTaxFromInvoices(billLine, billTax, invoice, invoiceTax))
+	    		return false;
+	    	if (billTax.getTaxAmt().signum() != 0 || billTax.getTaxBaseAmt().signum() != 0) {
+	    		if (!billTax.save(billLine.get_TrxName()))
+	    			return false;
+	    	} else {
+	    		if (!billTax.is_new() && !billTax.isProcessed() && !billTax.delete(false, billLine.get_TrxName()))
+	    			return false;
+	    	}
+		}
+	    return true;
 	}
 
 
@@ -95,7 +136,7 @@ public interface IJPiereTaxProvider {
 	 * @param billLine
 	 * @return
 	 */
-	default public boolean updateHeaderTax(MBillLine billLine)
+	default public boolean updateHeaderTax(MTaxProvider provider, MBillLine billLine)
 	{
 		BigDecimal TotalLines = Env.ZERO;
 		BigDecimal GrandTotal = Env.ZERO;
@@ -237,27 +278,6 @@ public interface IJPiereTaxProvider {
 	}
 
 
-	private boolean updateBillTax(MBillLine billLine, MInvoice invoice, MInvoiceTax invoiceTax)
-	{
-		MCurrency currency = MCurrency.get(billLine.getParent().getC_Currency_ID());
-		MBillTax billTax = MBillTax.get(billLine, invoiceTax, currency.getStdPrecision(), billLine.get_TrxName());
-	    if (billTax != null)
-	    {
-	    	if (!calculateTaxFromInvoices(billLine, billTax, invoice, invoiceTax))
-	    		return false;
-	    	if (billTax.getTaxAmt().signum() != 0 || billTax.getTaxBaseAmt().signum() != 0) {
-	    		if (!billTax.save(billLine.get_TrxName()))
-	    			return false;
-	    	} else {
-	    		if (!billTax.is_new() && !billTax.isProcessed() && !billTax.delete(false, billLine.get_TrxName()))
-	    			return false;
-	    	}
-		}
-	    return true;
-	}
-
-
-
 	private boolean calculateTaxFromInvoices (MBillLine billLine, MBillTax billTax, MInvoice invoice, MInvoiceTax invoiceTax)
 	{
 		BigDecimal taxBaseAmt = Env.ZERO;
@@ -268,10 +288,15 @@ public interface IJPiereTaxProvider {
 
 		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(billLine.getParent().getC_BPartner_ID(), billLine.getParent().isSOTrx(), tax.getC_TaxProvider());
 
-		String sql = " SELECT COALESCE(SUM(it.TaxBaseAmt),0)"
-						+ "  ,COALESCE(SUM(it.TaxAmt),0)"
+		String sql = " SELECT COALESCE(SUM(CASE WHEN dt.DocBaseType='APC' THEN it.TaxBaseAmt*-1"
+											+ " WHEN dt.DocBaseType='ARC' THEN it.TaxBaseAmt*-1"
+											+ "	ELSE it.TaxBaseAmt END),0)"
+						+ "  ,COALESCE(SUM(CASE WHEN dt.DocBaseType='APC' THEN it.TaxAmt*-1"
+											+ " WHEN dt.DocBaseType='ARC' THEN it.TaxAmt*-1"
+											+ " ELSE it.TaxAmt END),0)"
 				+ " FROM C_InvoiceTax it "
 				+ " INNER JOIN C_Invoice i ON (it.C_Invoice_ID = i.C_Invoice_ID) "
+				+ " INNER JOIN C_DocType dt ON (i.C_DocTypeTarget_ID = dt.C_DocType_ID) "
 				+ " INNER JOIN JP_BillLine bl ON (i.C_Invoice_ID = bl.C_Invoice_ID) "
 				+ " WHERE bl.JP_Bill_ID=? AND it.C_Tax_ID = ? AND it.IsTaxIncluded=? " ;
 

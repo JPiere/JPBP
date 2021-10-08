@@ -23,6 +23,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceTax;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -125,7 +126,8 @@ public class MBillLine extends X_JP_BillLine {
 				setGrandTotal(getGrandTotal().negate());
 				setTaxBaseAmt(getTaxBaseAmt().negate());
 				setTaxAmt(getTaxAmt().negate());
-				setPayAmt(invoice.getGrandTotal().add(invoice.getOpenAmt()));
+				setPayAmt(getPayAmt().negate());
+				setOpenAmt(getOpenAmt().negate());
 //				setOverUnderAmt(getOverUnderAmt().negate());
 			}
 
@@ -234,13 +236,14 @@ public class MBillLine extends X_JP_BillLine {
 				for(MInvoiceTax iTax : taxes)
 				{
 					MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+					MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
 					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 					if (taxCalculater == null)
 					{
 						throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
 					}
 
-					success = taxCalculater.updateHeaderTax(this);
+					success = taxCalculater.updateHeaderTax(provider, this);
 			    	if(!success)
 			    		return false;
 
@@ -258,13 +261,14 @@ public class MBillLine extends X_JP_BillLine {
 					for(MInvoiceTax iTax : taxes)
 					{
 						MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+						MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
 						IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 						if (taxCalculater == null)
 						{
 							throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
 						}
 
-						success = taxCalculater.recalculateTax(this, oldInvoice, iTax, true);
+						success = taxCalculater.recalculateTax(provider, this, oldInvoice, iTax, true);
 				    	if(!success)
 				    		return false;
 					}//for
@@ -278,13 +282,14 @@ public class MBillLine extends X_JP_BillLine {
 				for(MInvoiceTax iTax : taxes)
 				{
 					MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+					MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
 					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 					if (taxCalculater == null)
 					{
 						throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
 					}
 
-					success = taxCalculater.recalculateTax(this, invoice, iTax, false);
+					success = taxCalculater.recalculateTax(provider, this, invoice, iTax, false);
 			    	if(!success)
 			    		return false;
 				}//for
