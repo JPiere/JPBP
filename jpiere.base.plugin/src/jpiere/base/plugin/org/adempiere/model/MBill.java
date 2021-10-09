@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.compiere.model.MBPartner;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MRefList;
+import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -42,7 +42,9 @@ import org.compiere.util.Msg;
 /**
  *	MBill
  *
- *	JPIERE-0106:JPBP:Bill
+ *	JPIERE-0106: Bill
+ *	JPIERE-0507: Set Las Bill and Payment Info
+ *	JPIERE-0508: Recalculate Tax
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  */
@@ -240,7 +242,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 
 		if(isCreateInvoice)
 		{
-			MBillSchema billSchema = MBillSchema.getBillSchemaBP(getC_BPartner_ID());
+			MBillSchema billSchema = MBillSchema.getBillSchemaBP(getC_BPartner_ID(), isSOTrx());
 			if(billSchema == null)
 			{
 				m_processMsg  = Msg.getMsg(getCtx(), "NotFound") + Msg.getElement(getCtx(), MBillSchema.COLUMNNAME_JP_BillSchema_ID, isSOTrx());
@@ -249,6 +251,8 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 
 			if(billSchema.isTaxRecalculateJP())
 			{
+				String description = Msg.getElement(getCtx(), COLUMNNAME_JP_Bill_ID, isSOTrx())+ " : " + getDocumentNo() ;
+
 				MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
 				PO.copyValues(this, invoice);
 				invoice.setC_Invoice_ID(0);
@@ -257,12 +261,12 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 				invoice.setC_BPartner_ID(getC_BPartner_ID());
 				invoice.setC_BPartner_Location_ID(getC_BPartner_Location_ID());
 				invoice.setAD_User_ID(getAD_User_ID());
-				invoice.setDateInvoiced(getJPDateBilled());
+				invoice.setDateInvoiced(getJPCutOffDate());
 				invoice.setDateAcct(getDateAcct());
 				invoice.setC_DocTypeTarget_ID(billSchema.getJP_TaxAdjust_DocType_ID());
 				invoice.setC_DocType_ID(billSchema.getJP_TaxAdjust_DocType_ID());
 				invoice.setM_PriceList_ID(billSchema.getJP_TaxAdjust_PriceList_ID());
-				invoice.setDescription(billSchema.getJP_TaxAdjust_Description());
+				invoice.setDescription(billSchema.getJP_TaxAdjust_Description()+ " - " + description);
 				invoice.setDocumentNo(null);
 				invoice.setPaymentRule(getPaymentRule());
 				invoice.setC_PaymentTerm_ID(getC_PaymentTerm_ID());
@@ -274,6 +278,8 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 				}
 
 				setJP_TaxAdjust_Invoice_ID(invoice.getC_Invoice_ID());
+
+
 
 				MDocType docType = MDocType.get(billSchema.getJP_TaxAdjust_DocType_ID());
 				int line = 10;
@@ -296,6 +302,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 						iLine.setPrice(tax.getJP_TaxAdjust_TaxAmt());
 					}
 					iLine.setC_Tax_ID(billSchema.getJP_TaxAdjust_Tax_ID());
+					iLine.setDescription(description + " - " + MTax.get(tax.getC_Tax_ID()).getName() + " - " + Msg.getElement(getCtx(), "IsTaxIncluded") + "=" + (tax.isTaxIncluded()?"Y":"N"));
 
 					if(!iLine.save(get_TrxName()))
 					{
@@ -398,9 +405,6 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 			for (int i = 0; i < lines.length; i++)
 			{
 				line = lines[i];
-				if(line.isTaxAdjustLineJP())
-					continue;
-
 				invoice = new MInvoice(getCtx(),line.getC_Invoice_ID(), get_TrxName());
 
 				Integer JP_Bill_ID = (Integer)invoice.get_Value("JP_Bill_ID");
@@ -499,6 +503,9 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 
 	private boolean reverse(String docAction)
 	{
+		if(!voidIt())
+			return false;
+
 		int C_Invoice_ID =	getJP_TaxAdjust_Invoice_ID();
 		if(C_Invoice_ID > 0)
 		{
@@ -525,12 +532,20 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 					|| invoice.getDocStatus().equals(STATUS_Voided)
 					|| invoice.getDocStatus().equals(STATUS_Reversed)) {
 
-				;//Noting to do;
+				//Reset JP_Bill_ID Because voidIt set null.
+				invoice.set_ValueNoCheck("JP_Bill_ID", getJP_Bill_ID());
+				if(!invoice.save(get_TrxName()))
+				{
+					m_processMsg = Msg.getMsg(getCtx(), "SaveError") + "MInvoice#setJP_Bill_ID ";
+					return false;
+				}
 
 			}else {
 
 				if(invoice.processIt(ACTION_Void))
 				{
+					//Reset JP_Bill_ID Because voidIt set null.
+					invoice.set_ValueNoCheck("JP_Bill_ID", getJP_Bill_ID());
 					if(!invoice.save(get_TrxName()))
 					{
 						m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MBill.COLUMNNAME_JP_TaxAdjust_Invoice_ID, isSOTrx());
@@ -546,7 +561,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 			}
 		}
 
-		return voidIt();
+		return true;
 	}
 
 
@@ -693,14 +708,12 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 				return false;
 			}
 
-			MBPartner bp = MBPartner.get(getCtx(), getC_BPartner_ID());
-			int JP_BillSchema_ID = bp.get_ValueAsInt(MBillSchema.COLUMNNAME_JP_BillSchema_ID);
-			if(JP_BillSchema_ID == 0)
+			MBillSchema bs = MBillSchema.getBillSchemaBP(getC_BPartner_ID(), isSOTrx());
+			if(bs == null || bs.getJP_BillSchema_ID() == 0)
 			{
 				setIsTaxRecalculateJP(false);
 			}else {
 
-				MBillSchema bs = MBillSchema.get(JP_BillSchema_ID);
 				setIsTaxRecalculateJP(bs.isTaxRecalculateJP());
 			}
 		}

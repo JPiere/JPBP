@@ -35,7 +35,9 @@ import jpiere.base.plugin.util.JPiereUtil;
 /**
  *	MBillLine
  *
- *	JPIERE-0106:JPBP:Bill
+ *	JPIERE-0106: Bill
+ *	JPIERE-0507: Set Las Bill and Payment Info
+ *	JPIERE-0508: Recalculate Tax
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  */

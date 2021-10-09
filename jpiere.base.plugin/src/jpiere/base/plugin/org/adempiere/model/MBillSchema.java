@@ -134,13 +134,18 @@ public class MBillSchema extends X_JP_BillSchema {
 	}	//	get
 
 
-	public static MBillSchema getBillSchemaBP(int C_BPartner_ID)
+	public static MBillSchema getBillSchemaBP(int C_BPartner_ID, boolean isSOTrx)
 	{
 		if(C_BPartner_ID == 0)
 			return null;
 
 		MBPartner bp = MBPartner.get(Env.getCtx(), C_BPartner_ID);
-		int JP_BillSchema_ID = bp.get_ValueAsInt(COLUMNNAME_JP_BillSchema_ID);
+		int JP_BillSchema_ID = 0;
+		if(isSOTrx)
+			JP_BillSchema_ID = bp.get_ValueAsInt("JP_BillSchema_ID");
+		else
+			JP_BillSchema_ID = bp.get_ValueAsInt("JP_BillSchemaPO_ID");
+
 		if(JP_BillSchema_ID == 0)
 		{
 			return null;
