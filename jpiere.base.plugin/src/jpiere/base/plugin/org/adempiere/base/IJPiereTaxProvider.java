@@ -331,7 +331,7 @@ public interface IJPiereTaxProvider {
 		billTax.setJP_RecalculatedTaxAmt(taxAmt);
 		billTax.setJP_TaxAdjust_TaxAmt(Env.ZERO);
 
-		if(documentLevel)
+		if(documentLevel && billLine.getParent().isTaxRecalculateJP())
 		{
 			//JPIERE-0369 Include Tax lines and exclude Tax lines in a Invoice
 			if(invoice.isTaxIncluded()==invoiceTax.isTaxIncluded())

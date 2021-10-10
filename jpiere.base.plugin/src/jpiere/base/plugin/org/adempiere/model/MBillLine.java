@@ -25,7 +25,6 @@ import org.compiere.model.MInvoiceTax;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxProvider;
 import org.compiere.process.DocAction;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -164,8 +163,8 @@ public class MBillLine extends X_JP_BillLine {
 	}
 
 	@Override
-	protected boolean afterSave(boolean newRecord, boolean success) {
-
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
 		if(newRecord || is_ValueChanged(COLUMNNAME_C_Invoice_ID))
 		{
 
@@ -225,114 +224,73 @@ public class MBillLine extends X_JP_BillLine {
 
 	private boolean updateHeaderAndTax(boolean newRecord, boolean success, boolean isDelete)
 	{
-		if(getParent().isTaxRecalculateJP())
+		if(isTaxAdjustLineJP())
 		{
+			//Tax Recalculation
+			if(invoice == null)
+				invoice = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
 
-			if(isTaxAdjustLineJP())
+			MInvoiceTax[] taxes = invoice.getTaxes(true);
+			for(MInvoiceTax iTax : taxes)
 			{
-				//Tax Recalculation
-				if(invoice == null)
-					invoice = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
-
-				MInvoiceTax[] taxes = invoice.getTaxes(true);
-				for(MInvoiceTax iTax : taxes)
+				MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+				MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
+				IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+				if (taxCalculater == null)
 				{
-					MTax m_tax = MTax.get(iTax.getC_Tax_ID());
-					MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
-					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
-					if (taxCalculater == null)
-					{
-						throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-					}
-
-					success = taxCalculater.updateHeaderTax(provider, this);
-			    	if(!success)
-			    		return false;
-
-			    	break;
-				}//for
-
-			}else {
-
-				//Old Tax Recalculation
-				if(!newRecord && is_ValueChanged(COLUMNNAME_C_Invoice_ID) && !isDelete)
-				{
-					int old_C_Invoice_ID = get_ValueOldAsInt(COLUMNNAME_C_Invoice_ID);
-					MInvoice oldInvoice = new MInvoice(getCtx(), old_C_Invoice_ID, get_TrxName());
-					MInvoiceTax[] taxes = oldInvoice.getTaxes(true);
-					for(MInvoiceTax iTax : taxes)
-					{
-						MTax m_tax = MTax.get(iTax.getC_Tax_ID());
-						MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
-						IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
-						if (taxCalculater == null)
-						{
-							throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-						}
-
-						success = taxCalculater.recalculateTax(provider, this, oldInvoice, iTax, true);
-				    	if(!success)
-				    		return false;
-					}//for
+					throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
 				}
 
-				//Tax Recalculation
-				if(invoice == null)
-					invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
+				success = taxCalculater.updateHeaderTax(provider, this);
+		    	if(!success)
+		    		return false;
 
-				MInvoiceTax[] taxes = invoice.getTaxes(true);
-				for(MInvoiceTax iTax : taxes)
-				{
-					MTax m_tax = MTax.get(iTax.getC_Tax_ID());
-					MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
-					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
-					if (taxCalculater == null)
-					{
-						throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
-					}
-
-					success = taxCalculater.recalculateTax(provider, this, invoice, iTax, false);
-			    	if(!success)
-			    		return false;
-				}//for
-			}
+		    	break;
+			}//for
 
 		}else {
 
-			String sql = "UPDATE JP_Bill b"
-					+ " SET (TotalLines"
-						+ " ,GrandTotal"
-						+ " ,TaxBaseAmt"
-						+ " ,TaxAmt"
-						+ " ,PayAmt"
-						+ " ,OpenAmt"
-						+ " ,OverUnderAmt )"
-					+ " = (SELECT COALESCE(SUM(TotalLines),0)"
-							+ "  ,COALESCE(SUM(GrandTotal),0)"
-							+ "  ,COALESCE(SUM(TaxBaseAmt),0)"
-							+ "  ,COALESCE(SUM(TaxAmt),0)"
-							+ "  ,COALESCE(SUM(PayAmt),0)"
-							+ "  ,COALESCE(SUM(OpenAmt),0)"
-							+ "  ,COALESCE(SUM(OverUnderAmt),0)"
-					+ " FROM JP_BillLine bl WHERE b.JP_Bill_ID=bl.JP_Bill_ID) "
-					+ " WHERE JP_Bill_ID= ? " ;
-
-			int no = DB.executeUpdate(sql, getJP_Bill_ID(), false, get_TrxName());
-			if (no != 1)
+			//Old Tax Recalculation
+			if(!newRecord && is_ValueChanged(COLUMNNAME_C_Invoice_ID) && !isDelete)
 			{
-				log.saveError("Error", "MBillLine#updateHeaderAndTax() : " + sql);
-				return false;
+				int old_C_Invoice_ID = get_ValueOldAsInt(COLUMNNAME_C_Invoice_ID);
+				MInvoice oldInvoice = new MInvoice(getCtx(), old_C_Invoice_ID, get_TrxName());
+				MInvoiceTax[] taxes = oldInvoice.getTaxes(true);
+				for(MInvoiceTax iTax : taxes)
+				{
+					MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+					MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
+					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+					if (taxCalculater == null)
+					{
+						throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+					}
+
+					success = taxCalculater.recalculateTax(provider, this, oldInvoice, iTax, true);
+			    	if(!success)
+			    		return false;
+				}//for
 			}
 
-			sql = "UPDATE JP_Bill SET JPBillAmt = COALESCE(OpenAmt,0) + COALESCE(JPCarriedForwardAmt,0) WHERE JP_Bill_ID= ? ";
+			//Tax Recalculation
+			if(invoice == null)
+				invoice = new MInvoice(getCtx(),getC_Invoice_ID(), get_TrxName());
 
-			no = DB.executeUpdate(sql, getJP_Bill_ID(), false, get_TrxName());
-			if (no != 1)
+			MInvoiceTax[] taxes = invoice.getTaxes(true);
+			for(MInvoiceTax iTax : taxes)
 			{
-				log.saveError("Error", "MBillLine#updateHeaderAndTax() : " + sql);
-				return false;
-			}
+				MTax m_tax = MTax.get(iTax.getC_Tax_ID());
+				MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
+				IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+				if (taxCalculater == null)
+				{
+					throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+				}
 
+				success = taxCalculater.recalculateTax(provider, this, invoice, iTax, false);
+		    	if(!success)
+		    		return false;
+			}//for
 		}
 
 		return true;

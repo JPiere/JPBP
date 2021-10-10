@@ -67,7 +67,7 @@ public class MBillTax extends X_JP_BillTax {
 		retValue.setJP_Bill_ID(billLine.getJP_Bill_ID());
 		retValue.setC_Tax_ID(invoiceTax.getC_Tax_ID());
 		retValue.setPrecision(precision);
-		retValue.setIsTaxIncluded(billLine.getC_Invoice().isTaxIncluded());
+		retValue.setIsTaxIncluded(invoiceTax.isTaxIncluded());
 		retValue.setIsDocumentLevel(mTax.isDocumentLevel());
 
 		return retValue;
