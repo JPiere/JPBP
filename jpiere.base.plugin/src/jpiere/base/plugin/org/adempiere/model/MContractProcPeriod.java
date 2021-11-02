@@ -133,7 +133,7 @@ public class MContractProcPeriod extends X_JP_ContractProcPeriod {
 	@Override
 	public String toString()
 	{
-		return getName();
+		return getName()+" StartDate:"+getStartDate().toString().substring(0,10) + " - EndDate:" + getEndDate().toString().substring(0,10);
 	}
 
 	public boolean isContainedBaseDocContractProcPeriod(int BaseDoc_ContractProcPeriod_ID)
