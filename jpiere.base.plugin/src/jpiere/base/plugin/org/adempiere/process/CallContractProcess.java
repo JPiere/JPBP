@@ -26,9 +26,16 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.IProcessUI;
 import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MColumn;
+import org.compiere.model.MDocType;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPInstance;
+import org.compiere.model.MRefList;
 import org.compiere.model.MSession;
+import org.compiere.model.MTable;
+import org.compiere.model.PO;
 import org.compiere.model.Query;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -49,6 +56,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcess;
 
 /**
 *  JPIERE-0363
+*  JPIERE-0512
 *
 * @author Hideaki Hagiwara
 *
@@ -251,13 +259,161 @@ public class CallContractProcess extends SvrProcess {
 		//ContractProcessType
 		if(p_JP_ContractProcessType.equals(AbstractContractProcess.JP_ContractProcessType_CreateDocument))
 		{
-			//Process is kicked from the window by Per Contract Content.
+			//Process is kicked from the window.
 			if(p_JP_ContractProcessUnit.equals(AbstractContractProcess.JP_ContractProcessUnit_PerContractContent))
 			{
+				int Table_ID = getTable_ID();
 				int Record_ID = getRecord_ID();
-				processContractContentNum = 1;
-				if(Record_ID > 0)
+
+				if(Table_ID <= 0 || Record_ID <= 0)
 				{
+					String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+									+ " Table_ID = 0 or Record_ID = 0";
+					return msg;
+				}
+
+				MTable m_Table = MTable.get(Table_ID);
+				processContractContentNum = 1;
+
+				//JPIERE-0512: Process is kicked from Window of C_Order table
+				if(m_Table != null && m_Table.getTableName().equals(MOrder.Table_Name))
+				{
+					PO m_Order = m_Table.getPO(Record_ID, get_TrxName());
+					int C_DocType_ID = m_Order.get_ValueAsInt(MOrder.COLUMNNAME_C_DocTypeTarget_ID);
+					MDocType m_DocType =  MDocType.get(C_DocType_ID);
+					if(!MDocType.DOCSUBTYPESO_StandardOrder.equals(m_DocType.getDocSubTypeSO()))
+					{
+						//Could not Call Contract Process - DocSubTypeSO
+						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+								+ Msg.getElement(getCtx(), "DocSubTypeSO")+ " - " + MRefList.getListName(getCtx(), 148, m_DocType.getDocSubTypeSO());
+						return msg;
+					}
+
+					int JP_ContractContent_ID = m_Order.get_ValueAsInt(MContractContent.COLUMNNAME_JP_ContractContent_ID);
+					if(JP_ContractContent_ID <= 0)
+					{
+						//Could not Call Contract Process - JP_ContractContent_ID is null
+						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess") + Msg.getElement(getCtx(), "JP_ContractContent_ID")+ " - " + Msg.getMsg(getCtx(), "JP_Null");
+						return msg;
+					}
+
+					String docStatus = m_Order.get_ValueAsString(MOrder.COLUMNNAME_DocStatus);
+					if(!docStatus.equals(DocAction.STATUS_Completed))
+					{
+						//Could not Call Contract Process - Doc Status
+						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess") + Msg.getElement(getCtx(), "DocStatus")+ " - " + MRefList.getListName(getCtx(), 131, docStatus);
+						return msg;
+					}
+
+					MContractContent contractContent = MContractContent.get(getCtx(), JP_ContractContent_ID);
+					if(!contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
+					{
+						//Could not Call Contract Process - Contract Type
+						MColumn column = MColumn.get(getCtx(), "JP_Contract", "JP_ContractType");
+						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+								+ Msg.getElement(getCtx(), "JP_ContractType")+ " - " + MRefList.getListName(getCtx(), column.getAD_Reference_Value_ID(), contractContent.getParent().getJP_ContractType());
+						return msg;
+					}
+
+
+					if(contractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_Manual))
+					{
+						//Could not Call Contract Process - JP_CreateDerivativeDocPolicy
+						MColumn column = MColumn.get(getCtx(), "JP_ContractContent", "JP_CreateDerivativeDocPolicy");
+						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+								+ Msg.getElement(getCtx(), "JP_CreateDerivativeDocPolicy")
+								+ " - " + MRefList.getListName(getCtx(), column.getAD_Reference_Value_ID(), contractContent.getJP_CreateDerivativeDocPolicy());
+						return msg;
+					}
+
+					if(!contractContent.getDocStatus().equals(DocAction.STATUS_Completed)
+							&& !contractContent.getDocStatus().equals(DocAction.STATUS_Closed))
+					{
+						//Could not Call Contract Process - DocStatus of JP_ContractContent
+						MColumn column = MColumn.get(getCtx(), "JP_ContractContent", "DocStatus");
+						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+								+ Msg.getElement(getCtx(), "JP_ContractContent") + " - " + Msg.getMsg(getCtx(), "DocStatus")
+								+ " - " + MRefList.getListName(getCtx(), column.getAD_Reference_Value_ID(), contractContent.getDocStatus());
+						return msg;
+					}
+
+
+					boolean isOSTrx = m_Order.get_ValueAsBoolean(MOrder.COLUMNNAME_IsSOTrx);
+
+					//Create Shipment / Receipt
+					if(contractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt)
+							|| contractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+					{
+						if(isOSTrx)
+							p_DocBaseType = "MMS";
+						else
+							p_DocBaseType = "MMR";
+
+
+						ArrayList<MContractProcPeriod> contractProcPeriodList = getInOutContractProcPeriodListFromOrderContractProcPeriod(contractContent, m_Order);
+						for(MContractProcPeriod period : contractProcPeriodList)
+						{
+							p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+
+							if(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess.equals(contractContent.getJP_ContractProcessMethod()))
+							{
+								callCreateDerivativeDocDirectly(contractContent, period);
+
+							}else if(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess.equals(contractContent.getJP_ContractProcessMethod())){
+
+								callCreateDerivativeDocIndirectly(contractContent, period);
+
+							}else {
+
+								//Could not Call Contract Process - JP_ContractProcessMethod
+								String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+										+ Msg.getElement(getCtx(), "JP_ContractContent") + " - " + Msg.getMsg(getCtx(), "JP_ContractProcessMethod")
+										+ " - " + Msg.getMsg(getCtx(), "JP_UnexpectedError");
+
+								return msg;
+
+							}
+
+						}//for
+					}
+
+					//Create Invoice
+					if(contractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice)
+							|| contractContent.getJP_CreateDerivativeDocPolicy().equals(MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice))
+					{
+						if(isOSTrx)
+							p_DocBaseType = "ARI";
+						else
+							p_DocBaseType = "API";
+
+						ArrayList<MContractProcPeriod> contractProcPeriodList = getInvoiceContractProcPeriodListFromOrderContractProcPeriod(contractContent, m_Order);
+						for(MContractProcPeriod period : contractProcPeriodList)
+						{
+							p_JP_ContractProcPeriod_ID = period.getJP_ContractProcPeriod_ID();
+
+							if(MContractContent.JP_CONTRACTPROCESSMETHOD_DirectContractProcess.equals(contractContent.getJP_ContractProcessMethod()))
+							{
+								callCreateDerivativeDocDirectly(contractContent, period);
+
+							}else if(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess.equals(contractContent.getJP_ContractProcessMethod())){
+
+								callCreateDerivativeDocIndirectly(contractContent, period);
+
+							}else {
+
+								//Could not Call Contract Process - JP_ContractProcessMethod
+								String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+										+ Msg.getElement(getCtx(), "JP_ContractContent") + " - " + Msg.getMsg(getCtx(), "JP_ContractProcessMethod")
+										+ " - " + Msg.getMsg(getCtx(), "JP_UnexpectedError");
+								return msg;
+
+							}
+						}//For
+					}
+
+				//Process is kicked from Window of JP_ContractContent table
+				}else if(m_Table != null && m_Table.getTableName().equals(MContractContent.Table_Name)) {
+
 					MContractContent contractContent = new MContractContent(getCtx(),Record_ID, get_TrxName());
 					processContractLineNum = processContractLineNum + contractContent.getLines().length;
 
@@ -297,8 +453,6 @@ public class CallContractProcess extends SvrProcess {
 
 					}else if(p_JP_ContractProcessMethod.equals(MContractContent.JP_CONTRACTPROCESSMETHOD_IndirectContractProcess)) {
 
-
-
 						if(p_DocBaseType.equals("JCS"))
 						{
 							callCreateContractProcSchdule(contractContent, null);
@@ -322,14 +476,21 @@ public class CallContractProcess extends SvrProcess {
 
 						}
 
-
 					}else {
-						;//TODO エラー
+
+						//Could not Call Contract Process - JP_ContractProcessMethod
+						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+								+ Msg.getElement(getCtx(), "JP_ContractContent") + " - " + Msg.getMsg(getCtx(), "JP_ContractProcessMethod")
+								+ " - " + Msg.getMsg(getCtx(), "JP_UnexpectedError");
+						return msg;
 					}
 
+				}else {
 
-				}else{
-					log.log(Level.SEVERE, "Record_ID <= 0 ");
+					//Could not Call Contract Process - Table
+					String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+							+ Msg.getElement(getCtx(), "AD_Table_ID") + " - " + (m_Table == null? Msg.getMsg(getCtx(), "JP_Null") : m_Table.getTableName());
+					return msg;
 				}
 
 			//Process is kicked from a contract process.
@@ -375,7 +536,12 @@ public class CallContractProcess extends SvrProcess {
 
 							}
 						}else {
-							;//TODO エラー
+
+							//Could not Call Contract Process - JP_ContractProcessMethod
+							String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
+									+ Msg.getElement(getCtx(), "JP_ContractContent") + " - " + Msg.getMsg(getCtx(), "JP_ContractProcessMethod")
+									+ " - " + Msg.getMsg(getCtx(), "JP_UnexpectedError");
+							return msg;
 						}
 
 					}//for:MContractContent
@@ -637,7 +803,84 @@ public class CallContractProcess extends SvrProcess {
 		return contractProcPeriodList;
 	}//
 
-	private ArrayList<MContract> getAutoRenewContractList() throws Exception //TODO
+	private ArrayList<MContractProcPeriod> getInOutContractProcPeriodListFromOrderContractProcPeriod(MContractContent contractContent, PO m_Order) throws Exception
+	{
+
+		int JP_ContractProcPeriod_ID = m_Order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
+		MContractProcPeriod orderContractProcPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+
+
+		ArrayList<MContractProcPeriod> contractProcPeriodList = new ArrayList<MContractProcPeriod>();
+
+		StringBuilder sql = new StringBuilder("SELECT DISTINCT cpp.* FROM JP_ContractProcPeriod cpp ")
+										.append(" INNER JOIN adempiere.JP_ContractCalender cc ON (cpp.JP_ContractCalender_ID=cc.JP_ContractCalender_ID) ")
+										.append(" INNER JOIN adempiere.JP_ContractLine cl ON (cc.JP_ContractCalender_ID=cl.JP_ContractCalender_InOut_ID) ")
+										.append(" WHERE cpp.StartDate <= ? AND cpp.EndDate >= ? AND cl.JP_ContractContent_ID=? ");
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), null);
+			pstmt.setTimestamp(1, orderContractProcPeriod.getEndDate());
+			pstmt.setTimestamp(2, orderContractProcPeriod.getStartDate());
+			pstmt.setInt(3, contractContent.getJP_ContractContent_ID());
+			rs = pstmt.executeQuery();
+			while(rs.next())
+				contractProcPeriodList.add(new MContractProcPeriod(getCtx(), rs, null));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, e.toString());
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		return contractProcPeriodList;
+	}
+
+	private ArrayList<MContractProcPeriod> getInvoiceContractProcPeriodListFromOrderContractProcPeriod(MContractContent contractContent, PO m_Order) throws Exception
+	{
+		int JP_ContractProcPeriod_ID = m_Order.get_ValueAsInt(MContractProcPeriod.COLUMNNAME_JP_ContractProcPeriod_ID);
+		MContractProcPeriod orderContractProcPeriod = MContractProcPeriod.get(getCtx(), JP_ContractProcPeriod_ID);
+
+
+		ArrayList<MContractProcPeriod> contractProcPeriodList = new ArrayList<MContractProcPeriod>();
+
+		StringBuilder sql = new StringBuilder("SELECT DISTINCT cpp.* FROM JP_ContractProcPeriod cpp ")
+										.append(" INNER JOIN adempiere.JP_ContractCalender cc ON (cpp.JP_ContractCalender_ID=cc.JP_ContractCalender_ID) ")
+										.append(" INNER JOIN adempiere.JP_ContractLine cl ON (cc.JP_ContractCalender_ID=cl.JP_ContractCalender_Inv_ID) ")
+										.append(" WHERE cpp.StartDate <= ? AND cpp.EndDate >= ? AND cl.JP_ContractContent_ID=? ");
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), null);
+			pstmt.setTimestamp(1, orderContractProcPeriod.getEndDate());
+			pstmt.setTimestamp(2, orderContractProcPeriod.getStartDate());
+			pstmt.setInt(3, contractContent.getJP_ContractContent_ID());
+			rs = pstmt.executeQuery();
+			while(rs.next())
+				contractProcPeriodList.add(new MContractProcPeriod(getCtx(), rs, null));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, e.toString());
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		return contractProcPeriodList;
+	}
+
+	private ArrayList<MContract> getAutoRenewContractList() throws Exception
 	{
 		ArrayList<MContract> list = new ArrayList<MContract>();
 		StringBuilder sql = new StringBuilder("SELECT c.* FROM JP_Contract c ")
@@ -714,7 +957,7 @@ public class CallContractProcess extends SvrProcess {
 		return list;
 	}
 
-	private ArrayList<MContract> getContractStatusUpdateList() throws Exception //TODO
+	private ArrayList<MContract> getContractStatusUpdateList() throws Exception
 	{
 		ArrayList<MContract> list = new ArrayList<MContract>();
 		final StringBuilder sql = new StringBuilder("SELECT c.* FROM JP_Contract c")
@@ -805,7 +1048,7 @@ public class CallContractProcess extends SvrProcess {
 
 			}else if(p_JP_IndirectContractProcType.equals(AbstractContractProcess.JP_IndirectContractProcType_AllValidContractProcessSchedule))
 			{
-				return getContractContentList_AllValidContractProcessSchedule(procPeriod);//TODO
+				return getContractContentList_AllValidContractProcessSchedule(procPeriod);
 
 			}
 
@@ -1363,6 +1606,7 @@ public class CallContractProcess extends SvrProcess {
 			pi.setAD_User_ID(getAD_User_ID());
 			pi.setAD_PInstance_ID(getAD_PInstance_ID());
 			pi.setRecord_ID(contractContent.getJP_ContractContent_ID());
+			pi.setTable_ID(getTable_ID());
 
 			ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
 			list.add (new ProcessInfoParameter("JP_ContractProcess_ID", contractProcesses[i].getJP_ContractProcess_ID(), null, null, null ));
@@ -1531,7 +1775,7 @@ public class CallContractProcess extends SvrProcess {
 
 	}
 
-	private void callAutoRenewContractProcess(MContract autoRenewContract) throws Exception //TODO
+	private void callAutoRenewContractProcess(MContract autoRenewContract) throws Exception
 	{
 
 		String className = null;
@@ -1561,7 +1805,7 @@ public class CallContractProcess extends SvrProcess {
 			failureNum++;
 	}
 
-	private void callContractStatusUpdateProcess(MContract contract) throws Exception //TODO
+	private void callContractStatusUpdateProcess(MContract contract) throws Exception
 	{
 		String className = null;
 		if(Util.isEmpty(p_JP_ContractStatusUpdateClass))

@@ -16,12 +16,18 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MColumn;
+import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProcess;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
+import org.compiere.process.ProcessInfo;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
@@ -79,6 +85,7 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 			PO.copyValues(contractProcSchedules[i], order);
 			order.setProcessed(false);
 			order.setDocStatus(DocAction.STATUS_Drafted);
+			order.setDocAction(DocAction.ACTION_Complete);
 			order.setAD_Org_ID(contractProcSchedules[i].getAD_Org_ID());
 			order.setAD_OrgTrx_ID(contractProcSchedules[i].getAD_OrgTrx_ID());
 			order.setDateOrdered(getDateOrdered());
@@ -200,34 +207,53 @@ public class DefaultContractProcessCreateBaseOrderIndirectly extends AbstractCon
 			updateContractProcStatus();
 			if(!Util.isEmpty(docAction))
 			{
-				if(!order.processIt(docAction))
+				if(docAction.equals(DocAction.ACTION_Complete))
 				{
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, order, order.getProcessMsg());
-					throw new AdempiereException(order.getProcessMsg());
-				}
+					ProcessInfo pInfo = getProcessInfo();
+					pInfo.setPO(order);
+					pInfo.setRecord_ID(order.getC_Order_ID());
+					pInfo.setTable_ID(MOrder.Table_ID);
+					MColumn docActionColumn = MColumn.get(getCtx(), MOrder.Table_Name, MOrder.COLUMNNAME_DocAction);
+					MProcess process = MProcess.get(docActionColumn.getAD_Process_ID());
+					MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
+					if(wfProcess.getWFState().equals(MWFProcess.WFSTATE_Terminated))
+					{
+						msg = wfProcess.getTextMsg();
+						//String msg = order.getProcessMsg();
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, order, msg);
+						throw new AdempiereException(msg);
+					}
 
-				if(!docAction.equals(DocAction.ACTION_Complete))
-				{
-					order.setDocAction(DocAction.ACTION_Complete);
+				}else if(docAction.equals(DocAction.ACTION_Prepare)){
+
+					if(order.processIt(DocAction.ACTION_Prepare))
+					{
+						try {
+							order.saveEx(get_TrxName());//DocStatus is Draft
+						} catch (AdempiereException e) {
+							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
+							throw e;
+						}finally {
+							;
+						}
+
+					}else {
+
+	                    createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_DocumentActionError, null, order, order.getProcessMsg());
+	                    throw new AdempiereException(order.getProcessMsg());
+					}
+
+				}else {
+
 					try {
-						order.saveEx(get_TrxName());
+						order.saveEx(get_TrxName());//DocStatus is Draft
 					} catch (AdempiereException e) {
 						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
 						throw e;
 					}finally {
 						;
 					}
-				}
-			}else{
 
-				order.setDocAction(DocAction.ACTION_Complete);
-				try {
-					order.saveEx(get_TrxName());//DocStatus is Draft
-				} catch (AdempiereException e) {
-					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, order, e.getMessage());
-					throw e;
-				}finally {
-					;
 				}
 
 			}
