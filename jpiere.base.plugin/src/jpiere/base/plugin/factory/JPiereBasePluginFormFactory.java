@@ -25,6 +25,8 @@ import org.compiere.util.Msg;
 import org.zkoss.zul.Html;
 import org.zkoss.zul.Vlayout;
 
+import jpiere.base.plugin.webui.apps.form.AbstractJPiereFormInfoWindow;
+
 
 /**
  *  JPiere Base Plugin Form Factory
@@ -97,6 +99,59 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 			};
 
 			return adForm;
+
+	     }else  if (formName.startsWith("AD_InfoWindow_ID=")){
+
+	    	 int AD_InfoWindow_ID = Integer.valueOf(formName.substring("AD_InfoWindow_ID=".length())).intValue();
+
+			ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			Class<?> clazz = null;
+			if (loader != null) {
+	    		try
+	    		{
+	        		clazz = loader.loadClass("jpiere.base.plugin.webui.apps.form.JPiereFormInfoWindow");
+	    		}
+	    		catch (Exception e)
+	    		{
+	    			if (log.isLoggable(Level.INFO))
+	    				log.log(Level.INFO, e.getLocalizedMessage(), e);
+	    		}
+			}
+			if (clazz == null) {
+				loader = this.getClass().getClassLoader();
+				try
+	    		{
+	    			//	Create instance w/o parameters
+	        		clazz = loader.loadClass("jpiere.base.plugin.webui.apps.form.JPiereFormInfoWindow");
+	    		}
+	    		catch (Exception e)
+	    		{
+	    			if (log.isLoggable(Level.INFO))
+	    				log.log(Level.INFO, e.getLocalizedMessage(), e);
+	    		}
+			}
+
+			if (clazz != null) {
+				try
+	    		{
+	    			form = clazz.getDeclaredConstructor().newInstance();
+	    		}
+	    		catch (Exception e)
+	    		{
+	    			if (log.isLoggable(Level.WARNING))
+	    				log.log(Level.WARNING, e.getLocalizedMessage(), e);
+	    		}
+			}
+
+			if (form != null) {
+				if (form instanceof AbstractJPiereFormInfoWindow ) {
+					AbstractJPiereFormInfoWindow  controller = (AbstractJPiereFormInfoWindow) form;
+					controller.createFormInfoWindow(AD_InfoWindow_ID);
+					ADForm adForm = controller.getForm();
+					adForm.setICustomForm(controller);
+					return adForm;
+				}
+			}
 
 	     }
 
