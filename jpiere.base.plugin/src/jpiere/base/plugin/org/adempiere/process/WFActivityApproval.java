@@ -24,6 +24,7 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWFNode;
 
 
 /**
@@ -75,6 +76,7 @@ public class WFActivityApproval extends SvrProcess {
 		MTable m_Table = null;
 		PO m_PO = null;
 		String msg = null;
+		MWFNode node = null;
 
 		for(MWFActivity m_activity : m_WFAs)
 		{
@@ -90,9 +92,36 @@ public class WFActivityApproval extends SvrProcess {
 				msg = m_PO.toString();
 			}
 
-			m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
+			node = m_activity.getNode();
+
+			if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
+			{
+				try
+				{
+					m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
+
+				}catch (Exception e) {
+
+					log.log(Level.SEVERE, node.getName(), e);
+					throw e;
+				}
+
+			}else {
+
+				try
+				{
+					m_activity.setUserConfirmation(Env.getAD_User_ID(getCtx()), p_Comments);
+
+				}catch (Exception e){
+
+					log.log(Level.SEVERE, node.getName(), e);
+					throw e;
+				}
+			}
+
 			addBufferLog(0, null, null, msg, m_activity.getAD_Table_ID(), m_activity.getRecord_ID());
-		}
+
+		}//for
 
 		return null;
 	}

@@ -27,6 +27,7 @@ import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 
@@ -41,6 +42,7 @@ public class WFActivityForward extends SvrProcess {
 
 	private int p_JP_WF_Forward_User_ID = 0;
 	private String[] p_JP_WF_Additional_User_Multi = new String[] {};
+	private String p_Comments = null;
 
 	@Override
 	protected void prepare()
@@ -54,6 +56,10 @@ public class WFActivityForward extends SvrProcess {
 			}else if (name.equals("JP_WF_Forward_User_ID")){
 
 				p_JP_WF_Forward_User_ID = para[i].getParameterAsInt();
+
+			}else if (name.equals("Comments")){
+
+				p_Comments = para[i].getParameterAsString();
 
 			}else if (name.equals("JP_WF_Additional_User_Multi")){
 
@@ -99,8 +105,10 @@ public class WFActivityForward extends SvrProcess {
 
 			if(p_JP_WF_Forward_User_ID != 0)
 			{
-				m_activity.setAD_User_ID(p_JP_WF_Forward_User_ID);
-				m_activity.saveEx(get_TrxName());
+				if(!m_activity.forwardTo(p_JP_WF_Forward_User_ID, p_Comments))
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "CannotForward"));
+				}
 			}
 
 			MUser[] m_ActivityApprovers = getActivityApprovers(m_activity.getAD_WF_Activity_ID());
