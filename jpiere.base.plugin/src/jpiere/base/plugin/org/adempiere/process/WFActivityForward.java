@@ -13,10 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.model.MTable;
@@ -26,10 +24,11 @@ import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
-import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWFEventAudit;
 
 
 /**
@@ -88,6 +87,8 @@ public class WFActivityForward extends SvrProcess {
 		MTable m_Table = null;
 		PO m_PO = null;
 		String msg = null;
+		int AD_User_ID = getAD_User_ID();
+		MWFActivityApprover[] m_ActivityApprovers = null;
 
 		for(MWFActivity m_activity : m_WFAs)
 		{
@@ -105,25 +106,104 @@ public class WFActivityForward extends SvrProcess {
 
 			if(p_JP_WF_Forward_User_ID != 0)
 			{
-				if(!m_activity.forwardTo(p_JP_WF_Forward_User_ID, p_Comments))
+				if(m_activity.getAD_User_ID() == AD_User_ID)
 				{
-					throw new Exception(Msg.getMsg(getCtx(), "CannotForward"));
-				}
-			}
+					if(p_JP_WF_Forward_User_ID == AD_User_ID)
+					{
+						//The user is already an approver.
+						addLog(msg + " : " + MUser.getNameOfUser(AD_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
 
-			MUser[] m_ActivityApprovers = getActivityApprovers(m_activity.getAD_WF_Activity_ID());
+					}else {
+
+						if(!m_activity.forwardTo(p_JP_WF_Forward_User_ID, p_Comments))
+						{
+							throw new Exception(Msg.getMsg(getCtx(), "CannotForward"));
+						}
+
+						MUser oldUser = MUser.get(getCtx(), AD_User_ID);
+						MUser newUser = MUser.get(getCtx(), p_JP_WF_Forward_User_ID);
+
+						MWFEventAudit ea = createWFEventAudit(m_activity);
+						ea.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
+						ea.setNewValue(newUser.getName()+ "("+newUser.getAD_User_ID()+")");
+						ea.saveEx(get_TrxName());
+						break;
+					}
+
+				}else {
+
+					m_ActivityApprovers = getActivityApprovers(m_activity.getAD_WF_Activity_ID());
+					boolean isAlreadyRegistered = false;
+					int additional_User_ID = 0;
+					for(String Additional_User_ID : p_JP_WF_Additional_User_Multi)
+					{
+						isAlreadyRegistered = false;
+						additional_User_ID = Integer.valueOf(Additional_User_ID).intValue();
+						if(p_JP_WF_Forward_User_ID == additional_User_ID)
+						{
+							isAlreadyRegistered = true;
+							//The user is already an approver.
+							addLog(msg + " : " + MUser.getNameOfUser(additional_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
+							break;
+						}
+					}
+
+					if(!isAlreadyRegistered)
+					{
+						for(MWFActivityApprover approver  : m_ActivityApprovers)
+						{
+							if(approver.getAD_User_ID() == AD_User_ID)
+							{
+								MUser oldUser = MUser.get(getCtx(), AD_User_ID);
+								MUser newUser = MUser.get(getCtx(), p_JP_WF_Forward_User_ID);
+
+								approver.setAD_User_ID(p_JP_WF_Forward_User_ID);
+								approver.saveEx(get_TrxName());
+
+								m_activity.setTextMsg(p_Comments);
+								m_activity.saveEx(get_TrxName());
+
+								MWFEventAudit ea = createWFEventAudit(m_activity);
+								ea.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
+								ea.setNewValue(newUser.getName()+ "("+newUser.getAD_User_ID()+")");
+								ea.saveEx(get_TrxName());
+								break;
+							}
+						}//for
+					}
+				}
+
+			}else {//p_JP_WF_Forward_User_ID == 0
+
+				if(p_JP_WF_Additional_User_Multi.length==0)
+				{
+					//Please enter either Forward User or Additional Approver.
+					throw new Exception(Msg.getMsg(getCtx(), "JP_WFActivityForwardMandatory"));
+				}
+
+				m_activity.setTextMsg(p_Comments);
+				m_activity.saveEx(get_TrxName());
+
+			}//if(p_JP_WF_Forward_User_ID != 0)
+
+
+			if(m_ActivityApprovers == null)
+				m_ActivityApprovers = getActivityApprovers(m_activity.getAD_WF_Activity_ID());
 			int additional_User_ID = 0;
 			boolean isAlreadyRegistered = false;
+			MUser additionalUser = null;
 
 			for(String Additional_User_ID : p_JP_WF_Additional_User_Multi)
 			{
 				isAlreadyRegistered = false;
 				additional_User_ID = Integer.valueOf(Additional_User_ID).intValue();
-				for(MUser approver : m_ActivityApprovers)
+				for(MWFActivityApprover approver : m_ActivityApprovers)
 				{
 					if(approver.getAD_User_ID() == additional_User_ID)
 					{
 						isAlreadyRegistered = true;
+						//The user is already an approver.
+						addLog(msg + " : " + MUser.getNameOfUser(additional_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
 						break;
 					}
 				}
@@ -135,7 +215,13 @@ public class WFActivityForward extends SvrProcess {
 				wfApprover.setAD_WF_Activity_ID(m_activity.getAD_WF_Activity_ID());
 				wfApprover.setAD_User_ID(additional_User_ID);
 				wfApprover.saveEx(get_TrxName());
-			}
+
+				additionalUser = MUser.get(additional_User_ID);
+				MWFEventAudit ea = createWFEventAudit(m_activity);
+				ea.setDescription("WFActivityForward - Additional Approver");
+				ea.setNewValue(additionalUser.getName()+ "("+additionalUser.getAD_User_ID()+")");
+				ea.saveEx(get_TrxName());
+			}//for
 
 			addBufferLog(0, null, null, msg, m_activity.getAD_Table_ID(), m_activity.getRecord_ID());
 		}
@@ -143,33 +229,37 @@ public class WFActivityForward extends SvrProcess {
 		return null;
 	}
 
-	public MUser[] getActivityApprovers(int AD_WF_Activity_ID)
+	private MWFActivityApprover[] getActivityApprovers(int AD_WF_Activity_ID)
 	{
-		ArrayList<MUser> list = new ArrayList<MUser>();
-		String sql = "SELECT u.* FROM AD_WF_ActivityApprover a INNER JOIN AD_User u ON (a.AD_User_ID=u.AD_User_ID) WHERE a.AD_WF_Activity_ID=? AND a.IsActive='Y' AND u.IsActive='Y'";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, get_TrxName());
-			pstmt.setInt(1, AD_WF_Activity_ID);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-				list.add(new MUser (getCtx(), rs, get_TrxName()));
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
+		StringBuilder whereClauseFinal = new StringBuilder(MWFActivityApprover.COLUMNNAME_AD_WF_Activity_ID+"=? ");
+		String orderClause = MWFActivityApprover.COLUMNNAME_AD_User_ID;
+		//
+		List<MWFActivityApprover> list = new Query(getCtx(), MWFActivityApprover.Table_Name, whereClauseFinal.toString(), get_TrxName())
+										.setParameters(AD_WF_Activity_ID)
+										.setOrderBy(orderClause)
+										.setOnlyActiveRecords(true)
+										.list();
 
-		return list.toArray(new MUser[list.size()]);
+		return list.toArray(new MWFActivityApprover[list.size()]);
+	}
 
+	private MWFEventAudit createWFEventAudit(MWFActivity m_activity )
+	{
+		MWFEventAudit wfEventAudit = new MWFEventAudit(getCtx(), 0 , get_TrxName());
+		wfEventAudit.setAD_WF_Process_ID(m_activity.getAD_WF_Process_ID());
+		wfEventAudit.setAD_WF_Node_ID(m_activity.getAD_WF_Node_ID());
+		wfEventAudit.setWFState(m_activity.getWFState());
+		wfEventAudit.setAD_WF_Responsible_ID(m_activity.getAD_WF_Responsible_ID());
+		wfEventAudit.setAD_User_ID(m_activity.getAD_User_ID());
+		wfEventAudit.setAD_Table_ID(m_activity.getAD_Table_ID());
+		wfEventAudit.setRecord_ID(m_activity.getRecord_ID());
+		wfEventAudit.setEventType(MWFEventAudit.EVENTTYPE_ProcessCreated);
+		wfEventAudit.setAttributeName("AD_User_ID");
+		wfEventAudit.setDescription("WFActivityForward");
+		wfEventAudit.setTextMsg(p_Comments);
+		wfEventAudit.setElapsedTimeMS(Env.ZERO);
+
+		return wfEventAudit;
 	}
 
 }
