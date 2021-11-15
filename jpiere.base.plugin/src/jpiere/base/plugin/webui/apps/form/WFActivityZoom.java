@@ -21,7 +21,6 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.Env;
-import org.compiere.util.Msg;
 import org.compiere.wf.MWFActivity;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
@@ -84,7 +83,7 @@ public class WFActivityZoom extends ADForm{
 		}else {
 
 			//More than one zoom destination is selected. Please select one zoom destination.
-			FDialog.error(getWindowNo(), Msg.getMsg(Env.getCtx(), "JP_WF_ZoomOne"));
+			FDialog.error(getWindowNo(), "JP_WF_ZoomOne");
 		}
 
 		addEventListener(Events.ON_CLOSE, this);
