@@ -8,7 +8,9 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  zcommon;bundle-version="8.0.1",
  zk,
  zul;bundle-version="8.0.1",
- net.sf.supercsv.super-csv
+ net.sf.supercsv.super-csv,
+ org.adempiere.ui,
+ zhtml
 Bundle-Vendor: OSS ERP Solutions
 Import-Package: org.compiere.apps,
  org.compiere.grid,
