@@ -190,7 +190,9 @@ public class WFNodeContainerJP
 			if(node.getAD_WF_Responsible_ID() > 0 && node.isUserChoice())
 			{
 				MWFResponsible responsible = MWFResponsible.get(node.getAD_WF_Responsible_ID());
-				MultilineLabelWidget label = new MultilineLabelWidget(graphScene, Msg.getElement(Env.getCtx(), MWFActivity.COLUMNNAME_AD_WF_Responsible_ID) + " : " + responsible.getName());
+				MultilineLabelWidget label = new MultilineLabelWidget(graphScene, Msg.getElement(Env.getCtx(), MWFActivity.COLUMNNAME_AD_WF_Responsible_ID)
+														+ " : " + responsible.getName() + (Util.isEmpty(node.getDescription())? "" : " ( "+ node.getDescription() +" )" ) );
+				label.setPreferredSize(new Dimension(WFNodeWidgetJP.NODE_WIDTH - 20, WFNodeWidgetJP.NODE_HEIGHT - 20));
 				label.setJustified(false);
 				w.addChild(label);
 
