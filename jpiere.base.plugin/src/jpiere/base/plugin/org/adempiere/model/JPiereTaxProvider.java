@@ -689,7 +689,7 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		}
 
 		//	Calculate Tax
-		if (documentLevel || taxAmt.signum() == 0)
+		if (documentLevel)
 			taxAmt = calculateTax(tax, taxBaseAmt, m_invoiceTax.isTaxIncluded(), line.getPrecision(), roundingMode);
 		m_invoiceTax.setTaxAmt(taxAmt);
 
