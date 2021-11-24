@@ -19,12 +19,14 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import org.adempiere.webui.ClientInfo;
 import org.adempiere.base.IDisplayTypeFactory;
 import org.adempiere.base.Service;
+import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.NumberBox;
+import org.adempiere.webui.editor.IEditorConfiguration;
+import org.adempiere.webui.editor.INumberEditorConfiguration;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WEditorPopupMenu;
 import org.adempiere.webui.event.ContextMenuEvent;
@@ -50,6 +52,13 @@ import org.zkoss.zk.ui.event.Events;
  * @author Cristina Ghita, www.arhipac.ro
  *  	   <li> BF [3058780] WNumberEditor allow only BigDecimal
  *  	   @see https://sourceforge.net/tracker/?func=detail&aid=3058780&group_id=176962&atid=955896
+ */
+/**
+ * JPIERE-0003 Modify WNumberEditor#setValue()
+ *
+ *
+ * @author h.hagiwara
+ *
  */
 public class WNumberEditorJP extends WEditor implements ContextMenuListener
 {
@@ -77,21 +86,40 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     */
     public WNumberEditorJP(GridField gridField)
     {
-    	this(false, gridField);
+    	this(gridField, false, null);
     }
 
     /**
      *
      * @param gridField
+     * @param tableEditor
+     * @param editorConfiguration
      */
-    public WNumberEditorJP(boolean tableEditor, GridField gridField)
+    public WNumberEditorJP(GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration)
     {
-        super(new NumberBox(gridField.getDisplayType() == DisplayType.Integer, tableEditor),
-                gridField);
+        super(newNumberBox(gridField, tableEditor, editorConfiguration),
+                gridField, tableEditor, editorConfiguration);
         this.displayType = gridField.getDisplayType();
-        this.tableEditor = tableEditor;
+        if (editorConfiguration != null && editorConfiguration instanceof INumberEditorConfiguration) {
+        	INumberEditorConfiguration config = (INumberEditorConfiguration) editorConfiguration;
+			if (config.getIntegral() != null) {
+				if (config.getIntegral())
+					this.displayType = DisplayType.Integer;
+				else
+					this.displayType = DisplayType.Number;
+			}
+        }
         init();
     }
+
+	protected static NumberBox newNumberBox(GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration) {
+		if (editorConfiguration != null && editorConfiguration instanceof INumberEditorConfiguration) {
+			INumberEditorConfiguration config = (INumberEditorConfiguration) editorConfiguration;
+			if (config.getIntegral() != null)
+				return new NumberBox(config.getIntegral(), tableEditor);
+		}
+		return new NumberBox(gridField.getDisplayType() == DisplayType.Integer, tableEditor);
+	}
 
     /**
      *
@@ -100,9 +128,12 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
      */
     public WNumberEditorJP(GridField gridField, boolean integral)
     {
-        super(new NumberBox(integral), gridField);
-        this.displayType = integral ? DisplayType.Integer : DisplayType.Number;
-        init();
+        this(gridField, false, new INumberEditorConfiguration() {
+        	@Override
+        	public Boolean getIntegral() {
+        		return Boolean.valueOf(integral);
+        	}
+		});
     }
 
     /**

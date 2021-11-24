@@ -45,7 +45,7 @@ public class JPiereBasePluginEditorFactory implements IEditorFactory {
         /** Number */
         if (DisplayType.isNumeric(displayType))
         {
-            editor = new WNumberEditorJP(tableEditor, gridField);
+            editor = new WNumberEditorJP(gridField, tableEditor,  editorConfiguration);
         }
 
         if(editor != null)
