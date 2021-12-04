@@ -151,6 +151,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	/**
 	 * 	Parent Constructor
 	 * 	@param recognition parent
+	 *  @param ioLine MInOutLine - Copy from
 	 */
 	public MRecognitionLine (MRecognition recognition, MInOutLine ioLine)
 	{
