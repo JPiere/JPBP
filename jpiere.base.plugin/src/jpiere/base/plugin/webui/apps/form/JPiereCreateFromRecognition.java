@@ -306,7 +306,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 					+ ", OrderLine_ID=" + C_OrderLine_ID + ", InOutLine_ID=" + M_InOutLine_ID);
 
 				//	Create new Invoice Line
-				MRecognitionLine recogLine = new MRecognitionLine (recognition);
+				MRecognitionLine recogLine = new MRecognitionLine (recognition, M_InOutLine_ID==0? null : new MInOutLine(Env.getCtx(),M_InOutLine_ID, null));
 				recogLine.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 				recogLine.setQty(QtyEntered);							//	Invoiced/Entered
 				BigDecimal QtyInvoiced = null;

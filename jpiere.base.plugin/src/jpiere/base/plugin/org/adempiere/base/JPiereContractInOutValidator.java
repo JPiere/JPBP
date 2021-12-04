@@ -201,7 +201,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 					if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
 						return null;
 
-					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct(), io);//JPIERE-0295
 
 				}else if(io.getM_RMA_ID() > 0){
 
@@ -216,7 +216,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 					if(orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") == 0)
 						return null;
 
-					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct());//JPIERE-0295
+					recognition = new MRecognition (order, orderDocType.get_ValueAsInt("JP_DocTypeRecognition_ID") , io.getDateAcct(), io);//JPIERE-0295
 					MDocType odt = MDocType.get(order.getCtx(), rma.getC_DocType_ID());
 					if (odt != null)
 					{
@@ -241,8 +241,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				{
 					MInOutLine ioLine = ioLines[i];
 					//
-					MRecognitionLine rcogLine = new MRecognitionLine(recognition);
-					rcogLine.setRecogLine(ioLine);
+					MRecognitionLine rcogLine = new MRecognitionLine(recognition, ioLine);
 					if(isRMA)
 					{
 						int M_RMALine_ID = ioLine.getM_RMALine_ID();

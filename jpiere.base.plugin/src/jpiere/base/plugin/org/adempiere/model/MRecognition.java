@@ -290,10 +290,37 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 	 *	@param order order
 	 *	@param C_DocTypeTarget_ID target document type
 	 *	@param DateAcct date or null
+	 *  @param MInOut io or null
 	 */
-	public MRecognition (MOrder order, int C_DocTypeTarget_ID, Timestamp DateAcct)
+	public MRecognition (MOrder order, int C_DocTypeTarget_ID, Timestamp DateAcct, MInOut io)
 	{
-		this (order.getCtx(), 0, order.get_TrxName());
+		super (order.getCtx(), 0, order.get_TrxName());
+
+
+		//Initial Value settings
+		if(io != null)
+		{
+			PO.copyValues(io, this);
+		}else {
+			PO.copyValues(order, this);
+		}
+		setDocumentNo("");
+		setDocStatus (DOCSTATUS_Drafted);
+		setDocAction (DOCACTION_Complete);
+		setTotalLines (Env.ZERO);
+		setGrandTotal (Env.ZERO);
+		setIsSOTrx (true);
+		setIsTaxIncluded (false);
+		setIsApproved (false);
+		setSendEMail (false);
+		setIsPrinted (false);
+		setIsSelfService(false);
+		setPosted(false);
+		super.setProcessed (false);
+		setProcessing(false);
+
+
+		//Update Value
 		setClientOrg(order);
 		setOrder(order);	//	set base settings
 		//
@@ -778,7 +805,6 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 				MOrder order = new MOrder(getCtx(), io.getC_Order_ID(), get_TrxName());
 				setC_Order_ID(order.getC_Order_ID());
 				setDateOrdered(order.getDateOrdered());
-
 
 			}
 

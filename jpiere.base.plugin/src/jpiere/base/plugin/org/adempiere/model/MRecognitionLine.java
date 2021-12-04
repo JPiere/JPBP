@@ -41,6 +41,7 @@ import org.compiere.model.MTax;
 import org.compiere.model.MTaxCategory;
 import org.compiere.model.MTaxProvider;
 import org.compiere.model.MUOM;
+import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.Tax;
 import org.compiere.process.ProcessInfo;
@@ -151,14 +152,19 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 	 * 	Parent Constructor
 	 * 	@param recognition parent
 	 */
-	public MRecognitionLine (MRecognition recognition)
+	public MRecognitionLine (MRecognition recognition, MInOutLine ioLine)
 	{
 		this (recognition.getCtx(), 0, recognition.get_TrxName());
 		if (recognition.get_ID() == 0)
 			throw new IllegalArgumentException("Header not saved");
+		if(ioLine == null)
+			throw new IllegalArgumentException("MInOutLine Is null");
+
+		PO.copyValues(ioLine, this);
 		setClientOrg(recognition.getAD_Client_ID(), recognition.getAD_Org_ID());
 		setJP_Recognition_ID(recognition.getJP_Recognition_ID());
 		setRecognition(recognition);
+		setRecogLine(ioLine);
 	}	//	MRecognitionLine
 
 
