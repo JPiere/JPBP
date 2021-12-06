@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractContent 
@@ -604,12 +604,12 @@ public interface I_JP_ContractContent
     public static final String COLUMNNAME_IsDropShip = "IsDropShip";
 
 	/** Set Drop Shipment.
-	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  * Drop Shipments are sent directly to the Drop Shipment Location
 	  */
 	public void setIsDropShip (boolean IsDropShip);
 
 	/** Get Drop Shipment.
-	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  * Drop Shipments are sent directly to the Drop Shipment Location
 	  */
 	public boolean isDropShip();
 
@@ -680,10 +680,10 @@ public interface I_JP_ContractContent
     /** Column name JP_ContractCalender_ID */
     public static final String COLUMNNAME_JP_ContractCalender_ID = "JP_ContractCalender_ID";
 
-	/** Set Contract Calender	  */
+	/** Set Contract Calendar	  */
 	public void setJP_ContractCalender_ID (int JP_ContractCalender_ID);
 
-	/** Get Contract Calender	  */
+	/** Get Contract Calendar	  */
 	public int getJP_ContractCalender_ID();
 
 	public I_JP_ContractCalender getJP_ContractCalender() throws RuntimeException;
@@ -874,6 +874,15 @@ public interface I_JP_ContractContent
 
 	/** Get Process Now	  */
 	public String getJP_Processing4();
+
+    /** Column name JP_Processing5 */
+    public static final String COLUMNNAME_JP_Processing5 = "JP_Processing5";
+
+	/** Set Process Now	  */
+	public void setJP_Processing5 (String JP_Processing5);
+
+	/** Get Process Now	  */
+	public String getJP_Processing5();
 
     /** Column name M_FreightCategory_ID */
     public static final String COLUMNNAME_M_FreightCategory_ID = "M_FreightCategory_ID";

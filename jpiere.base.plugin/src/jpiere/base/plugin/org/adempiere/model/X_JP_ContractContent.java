@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractContent
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190514L;
+	private static final long serialVersionUID = 20211205L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -127,8 +127,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractContent[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_ContractContent[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -631,18 +631,18 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** DeliveryRule AD_Reference_ID=151 */
 	public static final int DELIVERYRULE_AD_Reference_ID=151;
-	/** After Receipt = R */
-	public static final String DELIVERYRULE_AfterReceipt = "R";
 	/** Availability = A */
 	public static final String DELIVERYRULE_Availability = "A";
-	/** Complete Line = L */
-	public static final String DELIVERYRULE_CompleteLine = "L";
-	/** Complete Order = O */
-	public static final String DELIVERYRULE_CompleteOrder = "O";
 	/** Force = F */
 	public static final String DELIVERYRULE_Force = "F";
+	/** Complete Line = L */
+	public static final String DELIVERYRULE_CompleteLine = "L";
 	/** Manual = M */
 	public static final String DELIVERYRULE_Manual = "M";
+	/** Complete Order = O */
+	public static final String DELIVERYRULE_CompleteOrder = "O";
+	/** After Payment = R */
+	public static final String DELIVERYRULE_AfterPayment = "R";
 	/** Set Delivery Rule.
 		@param DeliveryRule 
 		Defines the timing of Delivery
@@ -683,10 +683,10 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** DeliveryViaRule AD_Reference_ID=152 */
 	public static final int DELIVERYVIARULE_AD_Reference_ID=152;
-	/** Pickup = P */
-	public static final String DELIVERYVIARULE_Pickup = "P";
 	/** Delivery = D */
 	public static final String DELIVERYVIARULE_Delivery = "D";
+	/** Pickup = P */
+	public static final String DELIVERYVIARULE_Pickup = "P";
 	/** Shipper = S */
 	public static final String DELIVERYVIARULE_Shipper = "S";
 	/** Set Delivery Via.
@@ -726,34 +726,34 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** DocAction AD_Reference_ID=135 */
 	public static final int DOCACTION_AD_Reference_ID=135;
-	/** Complete = CO */
-	public static final String DOCACTION_Complete = "CO";
-	/** Approve = AP */
-	public static final String DOCACTION_Approve = "AP";
-	/** Reject = RJ */
-	public static final String DOCACTION_Reject = "RJ";
-	/** Post = PO */
-	public static final String DOCACTION_Post = "PO";
-	/** Void = VO */
-	public static final String DOCACTION_Void = "VO";
-	/** Close = CL */
-	public static final String DOCACTION_Close = "CL";
-	/** Reverse - Correct = RC */
-	public static final String DOCACTION_Reverse_Correct = "RC";
-	/** Reverse - Accrual = RA */
-	public static final String DOCACTION_Reverse_Accrual = "RA";
-	/** Invalidate = IN */
-	public static final String DOCACTION_Invalidate = "IN";
-	/** Re-activate = RE */
-	public static final String DOCACTION_Re_Activate = "RE";
 	/** <None> = -- */
 	public static final String DOCACTION_None = "--";
+	/** Approve = AP */
+	public static final String DOCACTION_Approve = "AP";
+	/** Close = CL */
+	public static final String DOCACTION_Close = "CL";
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
+	/** Invalidate = IN */
+	public static final String DOCACTION_Invalidate = "IN";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
 	/** Prepare = PR */
 	public static final String DOCACTION_Prepare = "PR";
-	/** Unlock = XL */
-	public static final String DOCACTION_Unlock = "XL";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
 	/** Wait Complete = WC */
 	public static final String DOCACTION_WaitComplete = "WC";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
 	/** Set Document Action.
 		@param DocAction 
 		The targeted status of the document
@@ -776,16 +776,16 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public static final String DOCBASETYPE_APInvoice = "API";
 	/** AR Invoice = ARI */
 	public static final String DOCBASETYPE_ARInvoice = "ARI";
-	/** Purchase Order = POO */
-	public static final String DOCBASETYPE_PurchaseOrder = "POO";
-	/** Sales Order = SOO */
-	public static final String DOCBASETYPE_SalesOrder = "SOO";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Material Receipt = MMR */
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
-	/** Contract Proc Schedule = JCS */
-	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
+	/** Purchase Order = POO */
+	public static final String DOCBASETYPE_PurchaseOrder = "POO";
+	/** Sales Order = SOO */
+	public static final String DOCBASETYPE_SalesOrder = "SOO";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -806,30 +806,30 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** DocStatus AD_Reference_ID=131 */
 	public static final int DOCSTATUS_AD_Reference_ID=131;
-	/** Drafted = DR */
-	public static final String DOCSTATUS_Drafted = "DR";
-	/** Completed = CO */
-	public static final String DOCSTATUS_Completed = "CO";
-	/** Approved = AP */
-	public static final String DOCSTATUS_Approved = "AP";
-	/** Not Approved = NA */
-	public static final String DOCSTATUS_NotApproved = "NA";
-	/** Voided = VO */
-	public static final String DOCSTATUS_Voided = "VO";
-	/** Invalid = IN */
-	public static final String DOCSTATUS_Invalid = "IN";
-	/** Reversed = RE */
-	public static final String DOCSTATUS_Reversed = "RE";
-	/** Closed = CL */
-	public static final String DOCSTATUS_Closed = "CL";
 	/** Unknown = ?? */
 	public static final String DOCSTATUS_Unknown = "??";
+	/** Approved = AP */
+	public static final String DOCSTATUS_Approved = "AP";
+	/** Closed = CL */
+	public static final String DOCSTATUS_Closed = "CL";
+	/** Completed = CO */
+	public static final String DOCSTATUS_Completed = "CO";
+	/** Drafted = DR */
+	public static final String DOCSTATUS_Drafted = "DR";
+	/** Invalid = IN */
+	public static final String DOCSTATUS_Invalid = "IN";
 	/** In Progress = IP */
 	public static final String DOCSTATUS_InProgress = "IP";
-	/** Waiting Payment = WP */
-	public static final String DOCSTATUS_WaitingPayment = "WP";
+	/** Not Approved = NA */
+	public static final String DOCSTATUS_NotApproved = "NA";
+	/** Reversed = RE */
+	public static final String DOCSTATUS_Reversed = "RE";
+	/** Voided = VO */
+	public static final String DOCSTATUS_Voided = "VO";
 	/** Waiting Confirmation = WC */
 	public static final String DOCSTATUS_WaitingConfirmation = "WC";
+	/** Waiting Payment = WP */
+	public static final String DOCSTATUS_WaitingPayment = "WP";
 	/** Set Document Status.
 		@param DocStatus 
 		The current status of the document
@@ -979,14 +979,12 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** FreightCostRule AD_Reference_ID=153 */
 	public static final int FREIGHTCOSTRULE_AD_Reference_ID=153;
-	/** Freight included = I */
-	public static final String FREIGHTCOSTRULE_FreightIncluded = "I";
-	/** Fix price = F */
-	public static final String FREIGHTCOSTRULE_FixPrice = "F";
 	/** Calculated = C */
 	public static final String FREIGHTCOSTRULE_Calculated = "C";
-	/** Line = L */
-	public static final String FREIGHTCOSTRULE_Line = "L";
+	/** Fix price = F */
+	public static final String FREIGHTCOSTRULE_FixPrice = "F";
+	/** Freight included = I */
+	public static final String FREIGHTCOSTRULE_FreightIncluded = "I";
 	/** Set Freight Cost Rule.
 		@param FreightCostRule 
 		Method for charging Freight
@@ -1007,14 +1005,14 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** InvoiceRule AD_Reference_ID=150 */
 	public static final int INVOICERULE_AD_Reference_ID=150;
-	/** After Order delivered = O */
-	public static final String INVOICERULE_AfterOrderDelivered = "O";
 	/** After Delivery = D */
 	public static final String INVOICERULE_AfterDelivery = "D";
-	/** Customer Schedule after Delivery = S */
-	public static final String INVOICERULE_CustomerScheduleAfterDelivery = "S";
 	/** Immediate = I */
 	public static final String INVOICERULE_Immediate = "I";
+	/** After Order delivered = O */
+	public static final String INVOICERULE_AfterOrderDelivered = "O";
+	/** Customer Schedule after Delivery = S */
+	public static final String INVOICERULE_CustomerScheduleAfterDelivery = "S";
 	/** Set Invoice Rule.
 		@param InvoiceRule 
 		Frequency and method of invoicing 
@@ -1104,7 +1102,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** Set Drop Shipment.
 		@param IsDropShip 
-		Drop Shipments are sent from the Vendor directly to the Customer
+		Drop Shipments are sent directly to the Drop Shipment Location
 	  */
 	public void setIsDropShip (boolean IsDropShip)
 	{
@@ -1112,7 +1110,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	}
 
 	/** Get Drop Shipment.
-		@return Drop Shipments are sent from the Vendor directly to the Customer
+		@return Drop Shipments are sent directly to the Drop Shipment Location
 	  */
 	public boolean isDropShip () 
 	{
@@ -1265,8 +1263,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
 			.getPO(getJP_ContractCalender_ID(), get_TrxName());	}
 
-	/** Set Contract Calender.
-		@param JP_ContractCalender_ID Contract Calender	  */
+	/** Set Contract Calendar.
+		@param JP_ContractCalender_ID Contract Calendar	  */
 	public void setJP_ContractCalender_ID (int JP_ContractCalender_ID)
 	{
 		if (JP_ContractCalender_ID < 1) 
@@ -1275,8 +1273,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			set_Value (COLUMNNAME_JP_ContractCalender_ID, Integer.valueOf(JP_ContractCalender_ID));
 	}
 
-	/** Get Contract Calender.
-		@return Contract Calender	  */
+	/** Get Contract Calendar.
+		@return Contract Calendar	  */
 	public int getJP_ContractCalender_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_ID);
@@ -1372,18 +1370,18 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return (Timestamp)get_Value(COLUMNNAME_JP_ContractProcDate_To);
 	}
 
-	/** In Progress = IP */
-	public static final String JP_CONTRACTPROCSTATUS_InProgress = "IP";
+	/** -- = -- */
+	public static final String JP_CONTRACTPROCSTATUS___ = "--";
 	/** Invalid = IN */
 	public static final String JP_CONTRACTPROCSTATUS_Invalid = "IN";
-	/** Unprocessed = UN */
-	public static final String JP_CONTRACTPROCSTATUS_Unprocessed = "UN";
+	/** In Progress = IP */
+	public static final String JP_CONTRACTPROCSTATUS_InProgress = "IP";
 	/** Processed = PD */
 	public static final String JP_CONTRACTPROCSTATUS_Processed = "PD";
 	/** Suspend = SD */
 	public static final String JP_CONTRACTPROCSTATUS_Suspend = "SD";
-	/** -- = -- */
-	public static final String JP_CONTRACTPROCSTATUS___ = "--";
+	/** Unprocessed = UN */
+	public static final String JP_CONTRACTPROCSTATUS_Unprocessed = "UN";
 	/** Set Contract Process Status.
 		@param JP_ContractProcStatus Contract Process Status	  */
 	public void setJP_ContractProcStatus (String JP_ContractProcStatus)
@@ -1518,14 +1516,14 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return ii.intValue();
 	}
 
-	/** Manual = MA */
-	public static final String JP_CREATEDERIVATIVEDOCPOLICY_Manual = "MA";
+	/** Create Ship/Receipt & Invoice = BT */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice = "BT";
 	/** Create Ship/Receipt = IO */
 	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceipt = "IO";
 	/** Create Invoice = IV */
 	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateInvoice = "IV";
-	/** Create Ship/Receipt & Invoice = BT */
-	public static final String JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice = "BT";
+	/** Manual = MA */
+	public static final String JP_CREATEDERIVATIVEDOCPOLICY_Manual = "MA";
 	/** Set Create Derivative Doc Policy.
 		@param JP_CreateDerivativeDocPolicy Create Derivative Doc Policy	  */
 	public void setJP_CreateDerivativeDocPolicy (String JP_CreateDerivativeDocPolicy)
@@ -1672,6 +1670,20 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return (String)get_Value(COLUMNNAME_JP_Processing4);
 	}
 
+	/** Set Process Now.
+		@param JP_Processing5 Process Now	  */
+	public void setJP_Processing5 (String JP_Processing5)
+	{
+		set_Value (COLUMNNAME_JP_Processing5, JP_Processing5);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing5 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing5);
+	}
+
 	public org.compiere.model.I_M_FreightCategory getM_FreightCategory() throws RuntimeException
     {
 		return (org.compiere.model.I_M_FreightCategory)MTable.get(getCtx(), org.compiere.model.I_M_FreightCategory.Table_Name)
@@ -1801,6 +1813,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
+	/** Other = -- */
+	public static final String ORDERTYPE_Other = "--";
 	/** Quotation = OB */
 	public static final String ORDERTYPE_Quotation = "OB";
 	/** Proposal = ON */
@@ -1817,8 +1831,6 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public static final String ORDERTYPE_WarehouseOrder = "WP";
 	/** POS Order = WR */
 	public static final String ORDERTYPE_POSOrder = "WR";
-	/** Other = -- */
-	public static final String ORDERTYPE_Other = "--";
 	/** Set Order Type.
 		@param OrderType 
 		Type of Order: MRP records grouped by source (Sales Order, Purchase Order, Distribution Order, Requisition)
@@ -1858,18 +1870,18 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public static final int PAYMENTRULE_AD_Reference_ID=195;
 	/** Cash = B */
 	public static final String PAYMENTRULE_Cash = "B";
-	/** Credit Card = K */
-	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
-	/** Check = S */
-	public static final String PAYMENTRULE_Check = "S";
-	/** On Credit = P */
-	public static final String PAYMENTRULE_OnCredit = "P";
 	/** Direct Debit = D */
 	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** Direct Deposit = T */
+	public static final String PAYMENTRULE_DirectDeposit = "T";
 	/** Set Payment Rule.
 		@param PaymentRule 
 		How you pay the invoice
@@ -1914,14 +1926,14 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 
 	/** PriorityRule AD_Reference_ID=154 */
 	public static final int PRIORITYRULE_AD_Reference_ID=154;
+	/** Urgent = 1 */
+	public static final String PRIORITYRULE_Urgent = "1";
 	/** High = 3 */
 	public static final String PRIORITYRULE_High = "3";
 	/** Medium = 5 */
 	public static final String PRIORITYRULE_Medium = "5";
 	/** Low = 7 */
 	public static final String PRIORITYRULE_Low = "7";
-	/** Urgent = 1 */
-	public static final String PRIORITYRULE_Urgent = "1";
 	/** Minor = 9 */
 	public static final String PRIORITYRULE_Minor = "9";
 	/** Set Priority.

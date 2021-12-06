@@ -52,7 +52,9 @@ import org.compiere.util.Util;
 
 
 
-/** JPIERE-0363
+/**
+* JPIERE-0363 - Contract Management
+* JPIERE-0517 - Create Contract Calendar at Contract Doc
 *
 * @author Hideaki Hagiwara
 *
@@ -211,6 +213,43 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 
 
+		//Check JP_ContractCalender_ID
+		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
+		{
+			if(getJP_ContractCalender_ID() == 0)
+			{
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID")};
+				m_processMsg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
+				return DocAction.STATUS_Invalid;
+			}
+
+		}
+
+		//Check Existence of Contract Calendar Process Period.
+		if(getJP_ContractCalender_ID() > 0)
+		{
+			MContractCalender base_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_ID(), get_TrxName());
+			MContractProcPeriod start_ProcPeriod = base_Calender.getContractProcessPeriod(getCtx(), getJP_ContractProcDate_From());
+			if(start_ProcPeriod == null)
+			{
+				m_processMsg =Msg.getMsg(getCtx(), "NotFound") + " : " +
+							Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From");
+				return DocAction.STATUS_Invalid;
+			}
+
+			if(getJP_ContractProcDate_To() != null)
+			{
+				MContractProcPeriod end_ProcPeriod = base_Calender.getContractProcessPeriod(getCtx(), getJP_ContractProcDate_To());
+				if(end_ProcPeriod == null)
+				{
+					m_processMsg = Msg.getMsg(getCtx(), "NotFound") + " : " +
+									Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To");
+					return DocAction.STATUS_Invalid;
+				}
+			}
+		}
+
+		//Check JP_ContractProcDate_To
 		String msg = checkJP_ContractProcDate_To();
 		if(!Util.isEmpty(msg))
 		{
@@ -806,26 +845,6 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		}
 
 
-		//Check JP_ContractCalender_ID
-		if(newRecord)
-		{
-			;//We can not check. because Create Contract content from template process can not set JP_ContractCalender_ID automatically.
-		}else{
-
-			if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
-			{
-				if(getJP_ContractCalender_ID() == 0)
-				{
-					Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID")};
-					String msg = Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContract") + Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs);
-					log.saveError("Error",msg);
-					return false;
-				}
-
-			}
-		}
-
-
 		//JPIERE-0435:Check Contract Process Period and Automatic Update
 		if(getParent().getJP_ContractType().equals(MContractT.JP_CONTRACTTYPE_PeriodContract))
 		{
@@ -911,29 +930,6 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 					log.saveError("Error",Msg.getMsg(getCtx(),"JP_OutsidePperiod") + " : " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
 					return false;
-				}
-			}
-
-			if(!newRecord && getJP_ContractCalender_ID() > 0)
-			{
-				MContractCalender base_Calender = MContractCalender.get(getCtx(), getJP_ContractCalender_ID());
-				MContractProcPeriod start_ProcPeriod = base_Calender.getContractProcessPeriod(getCtx(), getJP_ContractProcDate_From());
-				if(start_ProcPeriod == null)
-				{
-					log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
-							Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_From"));
-					return false;
-				}
-
-				if(getJP_ContractProcDate_To() != null)
-				{
-					MContractProcPeriod end_ProcPeriod = base_Calender.getContractProcessPeriod(getCtx(), getJP_ContractProcDate_To());
-					if(end_ProcPeriod == null)
-					{
-						log.saveError("Error",Msg.getMsg(getCtx(), "NotFound") + " : " +
-								Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID") + " - " + Msg.getElement(getCtx(), "JP_ContractProcDate_To"));
-						return false;
-					}
 				}
 			}
 

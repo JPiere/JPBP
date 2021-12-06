@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractCalender
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170929L;
+	private static final long serialVersionUID = 20211205L;
 
     /** Standard Constructor */
     public X_JP_ContractCalender (Properties ctx, int JP_ContractCalender_ID, String trxName)
@@ -67,8 +67,8 @@ public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, 
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractCalender[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_ContractCalender[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -89,8 +89,8 @@ public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, 
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	/** Set Contract Calender.
-		@param JP_ContractCalender_ID Contract Calender	  */
+	/** Set Contract Calendar.
+		@param JP_ContractCalender_ID Contract Calendar	  */
 	public void setJP_ContractCalender_ID (int JP_ContractCalender_ID)
 	{
 		if (JP_ContractCalender_ID < 1) 
@@ -99,8 +99,8 @@ public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, 
 			set_ValueNoCheck (COLUMNNAME_JP_ContractCalender_ID, Integer.valueOf(JP_ContractCalender_ID));
 	}
 
-	/** Get Contract Calender.
-		@return Contract Calender	  */
+	/** Get Contract Calendar.
+		@return Contract Calendar	  */
 	public int getJP_ContractCalender_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_ID);
@@ -109,15 +109,15 @@ public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, 
 		return ii.intValue();
 	}
 
-	/** Set JP_ContractCalender_UU.
-		@param JP_ContractCalender_UU JP_ContractCalender_UU	  */
+	/** Set JP_ContractCalendar_UU.
+		@param JP_ContractCalender_UU JP_ContractCalendar_UU	  */
 	public void setJP_ContractCalender_UU (String JP_ContractCalender_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_ContractCalender_UU, JP_ContractCalender_UU);
 	}
 
-	/** Get JP_ContractCalender_UU.
-		@return JP_ContractCalender_UU	  */
+	/** Get JP_ContractCalendar_UU.
+		@return JP_ContractCalendar_UU	  */
 	public String getJP_ContractCalender_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractCalender_UU);
@@ -193,6 +193,31 @@ public class X_JP_ContractCalender extends PO implements I_JP_ContractCalender, 
 	public int getJP_ContractLine_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_Contract getJP_Contract() throws RuntimeException
+    {
+		return (I_JP_Contract)MTable.get(getCtx(), I_JP_Contract.Table_Name)
+			.getPO(getJP_Contract_ID(), get_TrxName());	}
+
+	/** Set Contract Document.
+		@param JP_Contract_ID Contract Document	  */
+	public void setJP_Contract_ID (int JP_Contract_ID)
+	{
+		if (JP_Contract_ID < 1) 
+			set_Value (COLUMNNAME_JP_Contract_ID, null);
+		else 
+			set_Value (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
+	}
+
+	/** Get Contract Document.
+		@return Contract Document	  */
+	public int getJP_Contract_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

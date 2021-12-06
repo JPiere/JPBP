@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractLine
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractLine 
@@ -377,10 +377,10 @@ public interface I_JP_ContractLine
     /** Column name JP_ContractCalender_InOut_ID */
     public static final String COLUMNNAME_JP_ContractCalender_InOut_ID = "JP_ContractCalender_InOut_ID";
 
-	/** Set Contract Calender(In/Out)	  */
+	/** Set Contract Calendar(In/Out)	  */
 	public void setJP_ContractCalender_InOut_ID (int JP_ContractCalender_InOut_ID);
 
-	/** Get Contract Calender(In/Out)	  */
+	/** Get Contract Calendar(In/Out)	  */
 	public int getJP_ContractCalender_InOut_ID();
 
 	public I_JP_ContractCalender getJP_ContractCalender_InOut() throws RuntimeException;
@@ -388,10 +388,10 @@ public interface I_JP_ContractLine
     /** Column name JP_ContractCalender_Inv_ID */
     public static final String COLUMNNAME_JP_ContractCalender_Inv_ID = "JP_ContractCalender_Inv_ID";
 
-	/** Set Contract Calender(Invoice)	  */
+	/** Set Contract Calendar(Invoice)	  */
 	public void setJP_ContractCalender_Inv_ID (int JP_ContractCalender_Inv_ID);
 
-	/** Get Contract Calender(Invoice)	  */
+	/** Get Contract Calendar(Invoice)	  */
 	public int getJP_ContractCalender_Inv_ID();
 
 	public I_JP_ContractCalender getJP_ContractCalender_Inv() throws RuntimeException;
@@ -726,6 +726,24 @@ public interface I_JP_ContractLine
 
 	/** Get Process Now	  */
 	public String getJP_Processing2();
+
+    /** Column name JP_Processing3 */
+    public static final String COLUMNNAME_JP_Processing3 = "JP_Processing3";
+
+	/** Set Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3);
+
+	/** Get Process Now	  */
+	public String getJP_Processing3();
+
+    /** Column name JP_Processing4 */
+    public static final String COLUMNNAME_JP_Processing4 = "JP_Processing4";
+
+	/** Set Process Now	  */
+	public void setJP_Processing4 (String JP_Processing4);
+
+	/** Get Process Now	  */
+	public String getJP_Processing4();
 
     /** Column name JP_QtyOrderd_UOM_ID */
     public static final String COLUMNNAME_JP_QtyOrderd_UOM_ID = "JP_QtyOrderd_UOM_ID";

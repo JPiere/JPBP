@@ -53,6 +53,18 @@ public class MContractCalender extends X_JP_ContractCalender {
 	 */
 	public static MContractCalender get (Properties ctx, int JP_ContractCalender_ID)
 	{
+		return get(ctx, JP_ContractCalender_ID, null);
+	}
+
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param JP_ContractCalender_ID id
+	 *	@param TrxName String
+	 *	@return Contract Calender
+	 */
+	public static MContractCalender get (Properties ctx, int JP_ContractCalender_ID, String trxName)
+	{
 		if(JP_ContractCalender_ID == 0)
 			return null;
 
@@ -60,7 +72,7 @@ public class MContractCalender extends X_JP_ContractCalender {
 		MContractCalender retValue = (MContractCalender)s_cache.get(ii);
 		if (retValue != null)
 			return retValue;
-		retValue = new MContractCalender (ctx, JP_ContractCalender_ID, null);
+		retValue = new MContractCalender (ctx, JP_ContractCalender_ID, trxName);
 		if (retValue.get_ID () != 0)
 			s_cache.put (JP_ContractCalender_ID, retValue);
 		return retValue;

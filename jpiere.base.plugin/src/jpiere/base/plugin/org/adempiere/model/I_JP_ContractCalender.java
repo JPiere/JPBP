@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractCalender
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractCalender 
@@ -109,19 +109,19 @@ public interface I_JP_ContractCalender
     /** Column name JP_ContractCalender_ID */
     public static final String COLUMNNAME_JP_ContractCalender_ID = "JP_ContractCalender_ID";
 
-	/** Set Contract Calender	  */
+	/** Set Contract Calendar	  */
 	public void setJP_ContractCalender_ID (int JP_ContractCalender_ID);
 
-	/** Get Contract Calender	  */
+	/** Get Contract Calendar	  */
 	public int getJP_ContractCalender_ID();
 
     /** Column name JP_ContractCalender_UU */
     public static final String COLUMNNAME_JP_ContractCalender_UU = "JP_ContractCalender_UU";
 
-	/** Set JP_ContractCalender_UU	  */
+	/** Set JP_ContractCalendar_UU	  */
 	public void setJP_ContractCalender_UU (String JP_ContractCalender_UU);
 
-	/** Get JP_ContractCalender_UU	  */
+	/** Get JP_ContractCalendar_UU	  */
 	public String getJP_ContractCalender_UU();
 
     /** Column name JP_ContractCategory_ID */
@@ -156,6 +156,17 @@ public interface I_JP_ContractCalender
 	public int getJP_ContractLine_ID();
 
 	public I_JP_ContractLine getJP_ContractLine() throws RuntimeException;
+
+    /** Column name JP_Contract_ID */
+    public static final String COLUMNNAME_JP_Contract_ID = "JP_Contract_ID";
+
+	/** Set Contract Document	  */
+	public void setJP_Contract_ID (int JP_Contract_ID);
+
+	/** Get Contract Document	  */
+	public int getJP_Contract_ID();
+
+	public I_JP_Contract getJP_Contract() throws RuntimeException;
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

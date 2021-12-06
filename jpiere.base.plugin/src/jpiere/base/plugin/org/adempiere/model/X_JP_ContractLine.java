@@ -27,14 +27,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_ContractLine
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190224L;
+	private static final long serialVersionUID = 20211205L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -91,7 +91,7 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractLine[")
+      StringBuilder sb = new StringBuilder ("X_JP_ContractLine[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -589,12 +589,12 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	public static final String JP_BASEDOCLINEPOLICY_ForTheDurationOfContractProcessPeriod = "DD";
 	/** Lump on a certain point of Contract process period = LP */
 	public static final String JP_BASEDOCLINEPOLICY_LumpOnACertainPointOfContractProcessPeriod = "LP";
-	/** From start Contract process period = PS */
-	public static final String JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriod = "PS";
-	/** To End Contract process period = PE */
-	public static final String JP_BASEDOCLINEPOLICY_ToEndContractProcessPeriod = "PE";
 	/** From Start Contract process period to End = PB */
 	public static final String JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriodToEnd = "PB";
+	/** To End Contract process period = PE */
+	public static final String JP_BASEDOCLINEPOLICY_ToEndContractProcessPeriod = "PE";
+	/** From start Contract process period = PS */
+	public static final String JP_BASEDOCLINEPOLICY_FromStartContractProcessPeriod = "PS";
 	/** Set Base Doc Line Policy.
 		@param JP_BaseDocLinePolicy Base Doc Line Policy	  */
 	public void setJP_BaseDocLinePolicy (String JP_BaseDocLinePolicy)
@@ -615,8 +615,8 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
 			.getPO(getJP_ContractCalender_InOut_ID(), get_TrxName());	}
 
-	/** Set Contract Calender(In/Out).
-		@param JP_ContractCalender_InOut_ID Contract Calender(In/Out)	  */
+	/** Set Contract Calendar(In/Out).
+		@param JP_ContractCalender_InOut_ID Contract Calendar(In/Out)	  */
 	public void setJP_ContractCalender_InOut_ID (int JP_ContractCalender_InOut_ID)
 	{
 		if (JP_ContractCalender_InOut_ID < 1) 
@@ -625,8 +625,8 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 			set_Value (COLUMNNAME_JP_ContractCalender_InOut_ID, Integer.valueOf(JP_ContractCalender_InOut_ID));
 	}
 
-	/** Get Contract Calender(In/Out).
-		@return Contract Calender(In/Out)	  */
+	/** Get Contract Calendar(In/Out).
+		@return Contract Calendar(In/Out)	  */
 	public int getJP_ContractCalender_InOut_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_InOut_ID);
@@ -640,8 +640,8 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
 			.getPO(getJP_ContractCalender_Inv_ID(), get_TrxName());	}
 
-	/** Set Contract Calender(Invoice).
-		@param JP_ContractCalender_Inv_ID Contract Calender(Invoice)	  */
+	/** Set Contract Calendar(Invoice).
+		@param JP_ContractCalender_Inv_ID Contract Calendar(Invoice)	  */
 	public void setJP_ContractCalender_Inv_ID (int JP_ContractCalender_Inv_ID)
 	{
 		if (JP_ContractCalender_Inv_ID < 1) 
@@ -650,8 +650,8 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 			set_Value (COLUMNNAME_JP_ContractCalender_Inv_ID, Integer.valueOf(JP_ContractCalender_Inv_ID));
 	}
 
-	/** Get Contract Calender(Invoice).
-		@return Contract Calender(Invoice)	  */
+	/** Get Contract Calendar(Invoice).
+		@return Contract Calendar(Invoice)	  */
 	public int getJP_ContractCalender_Inv_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_Inv_ID);
@@ -693,10 +693,10 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
         return new KeyNamePair(get_ID(), String.valueOf(getJP_ContractContent_ID()));
     }
 
-	/** Take over to renew the contract = TO */
-	public static final String JP_CONTRACTL_AUTOUPDATEPOLICY_TakeOverToRenewTheContract = "TO";
 	/** Not Take over to renew the contract = NO */
 	public static final String JP_CONTRACTL_AUTOUPDATEPOLICY_NotTakeOverToRenewTheContract = "NO";
+	/** Take over to renew the contract = TO */
+	public static final String JP_CONTRACTL_AUTOUPDATEPOLICY_TakeOverToRenewTheContract = "TO";
 	/** Set Auto Update Policy of Line.
 		@param JP_ContractL_AutoUpdatePolicy Auto Update Policy of Line	  */
 	public void setJP_ContractL_AutoUpdatePolicy (String JP_ContractL_AutoUpdatePolicy)
@@ -850,12 +850,12 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod = "DD";
 	/** Lump on a certain point of Contract process period = LP */
 	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod = "LP";
-	/** From start Contract process period = PS */
-	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod = "PS";
-	/** To End Contract process period = PE */
-	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod = "PE";
 	/** From Start Contract process period to End = PB */
 	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd = "PB";
+	/** To End Contract process period = PE */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod = "PE";
+	/** From start Contract process period = PS */
+	public static final String JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod = "PS";
 	/** Set Derivative Doc Policy(In/Out).
 		@param JP_DerivativeDocPolicy_InOut Derivative Doc Policy(In/Out)	  */
 	public void setJP_DerivativeDocPolicy_InOut (String JP_DerivativeDocPolicy_InOut)
@@ -875,12 +875,12 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	public static final String JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod = "DD";
 	/** Lump on a certain point of Contract process period = LP */
 	public static final String JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod = "LP";
-	/** From start Contract process period = PS */
-	public static final String JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod = "PS";
-	/** To End Contract process period = PE */
-	public static final String JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod = "PE";
 	/** From Start Contract process period to End = PB */
 	public static final String JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd = "PB";
+	/** To End Contract process period = PE */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod = "PE";
+	/** From start Contract process period = PS */
+	public static final String JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod = "PS";
 	/** Set Derivative Doc Policy(Invoice).
 		@param JP_DerivativeDocPolicy_Inv Derivative Doc Policy(Invoice)	  */
 	public void setJP_DerivativeDocPolicy_Inv (String JP_DerivativeDocPolicy_Inv)
@@ -1348,6 +1348,34 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	public String getJP_Processing2 () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing2);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing3 Process Now	  */
+	public void setJP_Processing3 (String JP_Processing3)
+	{
+		set_Value (COLUMNNAME_JP_Processing3, JP_Processing3);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing3 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing3);
+	}
+
+	/** Set Process Now.
+		@param JP_Processing4 Process Now	  */
+	public void setJP_Processing4 (String JP_Processing4)
+	{
+		set_Value (COLUMNNAME_JP_Processing4, JP_Processing4);
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public String getJP_Processing4 () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Processing4);
 	}
 
 	public org.compiere.model.I_C_UOM getJP_QtyOrderd_UOM() throws RuntimeException
