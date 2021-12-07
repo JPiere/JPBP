@@ -178,6 +178,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Lump_InOut_ID");
 
 					mTab.setValue ("JP_ProcPeriod_Lump_InOut_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_Lump_InOut_Date", period.getDateAcct());
 				}
 			}
 		}
@@ -210,6 +211,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Start_InOut_ID");
 
 					mTab.setValue ("JP_ProcPeriod_Start_InOut_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_Start_InOut_Date", period.getStartDate());
 				}
 			}
 		}
@@ -242,6 +244,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_End_InOut_ID");
 
 					mTab.setValue ("JP_ProcPeriod_End_InOut_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_Endt_InOut_Date", period.getEndDate());
 				}
 			}
 		}
@@ -291,6 +294,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Lump_Inv_ID");
 
 					mTab.setValue ("JP_ProcPeriod_Lump_Inv_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_Lump_Inv_Date", period.getDateAcct());
 				}
 			}
 		}
@@ -323,6 +327,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_Start_Inv_ID");
 
 					mTab.setValue ("JP_ProcPeriod_Start_Inv_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_Start_Inv_Date", period.getStartDate());
 				}
 			}
 		}
@@ -356,6 +361,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 						return Msg.getMsg(ctx, "NotFound") +" : " +Msg.getElement(ctx, "JP_ProcPeriod_End_Inv_ID");
 
 					mTab.setValue ("JP_ProcPeriod_End_Inv_ID", period.getJP_ContractProcPeriod_ID());
+					mTab.setValue ("JP_ProcPeriod_End_Inv_Date", period.getEndDate());
 				}
 			}
 		}
@@ -859,6 +865,14 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_ProcPeriod_Lump_InOut_ID", cpp.getJP_ContractProcPeriod_ID());
 			}
+
+		}else if(mTab.getValue("JP_ContractCalender_InOut_ID") == null){
+
+				mTab.setValue("JP_ProcPeriod_Lump_InOut_Date", null);
+
+				//Please enter {0} field first.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID")};
+				return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
 		}
 
 		return "";
@@ -910,6 +924,14 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_ProcPeriod_Start_InOut_ID", cpp.getJP_ContractProcPeriod_ID());
 			}
+
+		}else if(mTab.getValue("JP_ContractCalender_InOut_ID") == null){
+
+			mTab.setValue("JP_ProcPeriod_Start_InOut_Date", null);
+
+			//Please enter {0} field first.
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID")};
+			return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
 		}
 
 		return "";
@@ -961,6 +983,13 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_ProcPeriod_End_InOut_ID", cpp.getJP_ContractProcPeriod_ID());
 			}
+		}else if(mTab.getValue("JP_ContractCalender_InOut_ID") == null){
+
+			mTab.setValue("JP_ProcPeriod_End_InOut_Date", null);
+
+			//Please enter {0} field first.
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_InOut_ID")};
+			return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
 		}
 
 		return "";
@@ -1001,7 +1030,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 		Timestamp JP_ProcPeriod_Lump_Inv_Date = (Timestamp)value;
 		if(JP_ProcPeriod_Lump_Inv_Date == null)
 		{
-			mTab.setValue("JP_ProcPeriod_Lump_Invt_ID", null);
+			mTab.setValue("JP_ProcPeriod_Lump_Inv_ID", null);
 
 		}else if(mTab.getValue("JP_ContractCalender_Inv_ID") != null){
 
@@ -1012,6 +1041,14 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_ProcPeriod_Lump_Inv_ID", cpp.getJP_ContractProcPeriod_ID());
 			}
+
+		}else if(mTab.getValue("JP_ContractCalender_Inv_ID") == null){
+
+			mTab.setValue("JP_ProcPeriod_Lump_Inv_Date", null);
+
+			//Please enter {0} field first.
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")};
+			return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
 		}
 
 		return "";
@@ -1063,6 +1100,14 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_ProcPeriod_Start_Inv_ID", cpp.getJP_ContractProcPeriod_ID());
 			}
+
+		}else if(mTab.getValue("JP_ContractCalender_Inv_ID") == null){
+
+			mTab.setValue("JP_ProcPeriod_Start_Inv_Date", null);
+
+			//Please enter {0} field first.
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")};
+			return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
 		}
 
 		return "";
@@ -1115,6 +1160,14 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			{
 				mTab.setValue("JP_ProcPeriod_End_Inv_ID", cpp.getJP_ContractProcPeriod_ID());
 			}
+
+		}else if(mTab.getValue("JP_ContractCalender_Inv_ID") == null){
+
+			mTab.setValue("JP_ProcPeriod_Start_End_Date", null);
+
+			//Please enter {0} field first.
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_Inv_ID")};
+			return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
 		}
 
 		return "";

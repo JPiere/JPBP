@@ -917,6 +917,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 				log.saveError("Error",Msg.getMsg(getCtx(), "JP_IsAutomaticUpdateJP_UpdateError"));
 				return false;
 
+			}else if(!isAutomaticUpdateJP()) {
+
+				setJP_ContractC_AutoUpdatePolicy(null);
+
 			}
 
 
