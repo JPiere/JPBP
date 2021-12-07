@@ -269,9 +269,10 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 			for(int i = 0; i < lines.length; i++)
 			{
-				if(!lines[i].checkPeriodContractInfo(false))
+				if(!lines[i].checkPeriodContractInfo(false, true))
 				{
-					Object error= Env.getCtx().get( "org.compiere.util.CLogger.lastError");
+					//Object error= Env.getCtx().get( "org.compiere.util.CLogger.lastError");
+					String error = lines[i].getProcessMsg();
 					m_processMsg = Msg.getElement(getCtx(), MContractLine.COLUMNNAME_Line)+" : "+ lines[i].getLine() +"  " + error.toString();
 					return DocAction.STATUS_Invalid;
 				}

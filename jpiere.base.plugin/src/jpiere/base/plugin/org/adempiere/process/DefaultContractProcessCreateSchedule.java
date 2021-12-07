@@ -84,9 +84,10 @@ public class DefaultContractProcessCreateSchedule extends AbstractContractProces
 		MContractLine[] lines = m_ContractContent.getLines();
 		for(int i = 0; i < lines.length; i++)
 		{
-			if(!lines[i].checkPeriodContractInfo(false))
+			if(!lines[i].checkPeriodContractInfo(false, true))
 			{
-				Object error= Env.getCtx().get( "org.compiere.util.CLogger.lastError");
+				//Object error= Env.getCtx().get( "org.compiere.util.CLogger.lastError");
+				String error = lines[i].getProcessMsg();
 				createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_UnexpectedError, lines[i],  null,
 						Msg.getElement(getCtx(), MContractLine.COLUMNNAME_Line)+" : "+ lines[i].getLine() +"  " + error.toString());
 				isOK = false;

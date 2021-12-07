@@ -671,6 +671,15 @@ public class JPiereContractLineCallout implements IColumnCallout {
 
 		}else {
 
+			if(mTab.getParentTab().getValue("JP_ContractCalender_ID") == null)
+			{
+				mTab.setValue("JP_ProcPeriod_Lump_Date", null);
+
+				//Please enter {0} field first.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID")};
+				return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
+			}
+
 			int JP_ContractCalender_ID = ((Integer)mTab.getParentTab().getValue("JP_ContractCalender_ID")).intValue();
 			MContractCalender cc =MContractCalender.get(ctx, JP_ContractCalender_ID);
 			MContractProcPeriod cpp = cc.getContractProcessPeriod(ctx, JP_ProcPeriod_Lump_Date);
@@ -723,6 +732,15 @@ public class JPiereContractLineCallout implements IColumnCallout {
 
 		}else {
 
+			if(mTab.getParentTab().getValue("JP_ContractCalender_ID") == null)
+			{
+				mTab.setValue("JP_ProcPeriod_Start_Date", null);
+
+				//Please enter {0} field first.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID")};
+				return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
+			}
+
 			int JP_ContractCalender_ID = ((Integer)mTab.getParentTab().getValue("JP_ContractCalender_ID")).intValue();
 			MContractCalender cc =MContractCalender.get(ctx, JP_ContractCalender_ID);
 			MContractProcPeriod cpp = cc.getContractProcessPeriod(ctx, JP_ProcPeriod_Start_Date);
@@ -773,6 +791,15 @@ public class JPiereContractLineCallout implements IColumnCallout {
 			mTab.setValue("JP_ProcPeriod_Lump_ID", null);
 
 		}else {
+
+			if(mTab.getParentTab().getValue("JP_ContractCalender_ID") == null)
+			{
+				mTab.setValue("JP_ProcPeriod_End_Date", null);
+
+				//Please enter {0} field first.
+				Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "JP_ContractCalender_ID")};
+				return Msg.getMsg(Env.getCtx(), "JP_EnterFirst", objs);
+			}
 
 			int JP_ContractCalender_ID = ((Integer)mTab.getParentTab().getValue("JP_ContractCalender_ID")).intValue();
 			MContractCalender cc =MContractCalender.get(ctx, JP_ContractCalender_ID);

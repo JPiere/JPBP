@@ -156,6 +156,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				m_ContractCalendar.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
 				m_ContractCalendar.saveEx(get_TrxName());
 				p_JP_ContractCalender_ID = m_ContractCalendar.getJP_ContractCalender_ID();
+				p_IsCreateCProcPeriodGJP = true;
 			}
 
 			if(p_IsCreateCProcPeriodGJP)
