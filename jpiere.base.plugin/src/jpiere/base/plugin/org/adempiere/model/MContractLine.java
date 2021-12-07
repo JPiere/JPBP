@@ -808,7 +808,7 @@ public class MContractLine extends X_JP_ContractLine {
 		setJP_ContractProcess_Inv_ID(0);
 	}
 
-	private boolean checkCreateBaseDocLineInfo(boolean newRecord, boolean isCheckCalendarMandatory)//TODO
+	private boolean checkCreateBaseDocLineInfo(boolean newRecord, boolean isCheckCalendarMandatory)
 	{
 		//Base Doc Line
 		if(Util.isEmpty(getJP_BaseDocLinePolicy()))
@@ -1001,7 +1001,7 @@ public class MContractLine extends X_JP_ContractLine {
 	}
 
 
-	private boolean checkCreateDerivativeInOutInfo(boolean newRecord, boolean isCheckCalendarMandatory)//TODO
+	private boolean checkCreateDerivativeInOutInfo(boolean newRecord, boolean isCheckCalendarMandatory)
 	{
 		if(Util.isEmpty(getJP_DerivativeDocPolicy_InOut()))
 		{
@@ -1244,7 +1244,7 @@ public class MContractLine extends X_JP_ContractLine {
 		return true;
 	}
 
-	private boolean checkCreateDerivativeInvoiceInfo(boolean newRecord, boolean isCheckCalendarMandatory)//TODO
+	private boolean checkCreateDerivativeInvoiceInfo(boolean newRecord, boolean isCheckCalendarMandatory)
 	{
 		if(Util.isEmpty(getJP_DerivativeDocPolicy_Inv()))
 		{
@@ -1644,7 +1644,7 @@ public class MContractLine extends X_JP_ContractLine {
 
 		}else if(getJP_DerivativeDocPolicy_InOut().equals("PS") && getJP_DerivativeDocPolicy_Inv().equals("PS")){
 
-			if(!isCheckCalendarMandatory && ((getJP_ProcPeriod_Start_InOut_ID()==0 && getJP_ProcPeriod_Start_Inv_ID()==0) || parentJP_ContractCalender_ID == 0)) //for copy process
+			if(!isCheckCalendarMandatory && ((getJP_ProcPeriod_Start_InOut_ID()==0 && getJP_ProcPeriod_Start_Inv_ID()==0) || parentJP_ContractCalender_ID == 0))
 				return true;
 
 			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
@@ -1662,7 +1662,7 @@ public class MContractLine extends X_JP_ContractLine {
 
 		}else if(getJP_DerivativeDocPolicy_InOut().equals("PE") && getJP_DerivativeDocPolicy_Inv().equals("PE")){
 
-			if(!isCheckCalendarMandatory && (( getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0 ) || parentJP_ContractCalender_ID == 0 ))//for copy process
+			if(!isCheckCalendarMandatory && (( getJP_ProcPeriod_End_InOut_ID() ==0 && getJP_ProcPeriod_End_Inv_ID() ==0 ) || parentJP_ContractCalender_ID == 0 ))
 				return true;
 
 			MContractCalender order_Calender = MContractCalender.get(getCtx(), getParent().getJP_ContractCalender_ID());
@@ -1699,7 +1699,7 @@ public class MContractLine extends X_JP_ContractLine {
 		/** Check Contract Process Period correspondence between Derivative shi/Recipt And  Base doc Order */
 		if(getJP_DerivativeDocPolicy_InOut().equals("LP"))
 		{
-			if(!isCheckCalendarMandatory && getJP_ProcPeriod_Lump_InOut_ID()==0)//for copy process
+			if(!isCheckCalendarMandatory && getJP_ProcPeriod_Lump_InOut_ID()==0)
 				return true;
 
 			//It is necessary to be single order Contract process Period
@@ -1724,7 +1724,7 @@ public class MContractLine extends X_JP_ContractLine {
 		/** Check Contract Process Period correspondence between Derivative shi/Recipt And  Base doc Order */
 		if(getJP_DerivativeDocPolicy_Inv().equals("LP"))
 		{
-			if(!isCheckCalendarMandatory && getJP_ProcPeriod_Lump_Inv_ID()==0)//for copy process
+			if(!isCheckCalendarMandatory && getJP_ProcPeriod_Lump_Inv_ID()==0)
 				return true;
 
 			//It is necessary to be single order Contract process Period
