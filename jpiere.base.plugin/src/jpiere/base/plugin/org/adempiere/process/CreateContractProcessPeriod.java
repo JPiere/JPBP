@@ -36,6 +36,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractCalenderRef;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractContentT;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MContractLineT;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriodG;
 
@@ -62,7 +63,6 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 	private int	p_JP_ContractProcPeriodG_ID = 0;
 
-
 	private Timestamp p_DateContract_From;
 	private Timestamp p_DateContract_To;
 	private int p_Year = 0;
@@ -73,6 +73,12 @@ public class CreateContractProcessPeriod extends SvrProcess {
 	private int p_MonthOffset = 0;
 	private int p_DayOffset = 0;
 	private boolean isDueFixed = true;
+
+	private String p_JP_CalendarType = null;
+	private boolean p_IsSetAnotherLine = false;
+	private boolean p_IsUseInvoiceCalendar = false;
+
+	private boolean p_IsCreateContractCalendar = false;
 
 	@Override
 	protected void prepare()
@@ -119,13 +125,22 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				p_DayOffset = para[i].getParameterAsInt();
 			}else if (name.equals("IsDueFixed")){
 				isDueFixed = para[i].getParameterAsBoolean();
+			}else if (name.equals("JP_CalendarType")){
+				p_JP_CalendarType = para[i].getParameterAsString();
+			}else if (name.equals("IsSetAnotherLine")){
+				p_IsSetAnotherLine = para[i].getParameterAsBoolean();
+			}else if (name.equals("IsUseInvoiceCalendar")){
+				p_IsUseInvoiceCalendar = para[i].getParameterAsBoolean();
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}
 		}
 	}
 
+	MContractCalender m_ContractCalendar = null;
+	MContractProcPeriodG m_ContractProcPeriodG = null;
 	MContractContent m_ContractContent = null;
+	MContractLine m_ContractLine = null;
 
 	@Override
 	protected String doIt() throws Exception
@@ -142,31 +157,45 @@ public class CreateContractProcessPeriod extends SvrProcess {
 		{
 			p_JP_ContractProcPeriodG_ID = getRecord_ID();
 
-		}else if(m_Table.getTableName().equals(MContractContent.Table_Name)) {
+		}else if(m_Table.getTableName().equals(MContractContent.Table_Name)
+				|| m_Table.getTableName().equals(MContractLine.Table_Name)) {
 
-			m_ContractContent = new MContractContent(getCtx(), getRecord_ID(), get_TrxName());
+			if(m_Table.getTableName().equals(MContractContent.Table_Name))
+			{
+				m_ContractContent = new MContractContent(getCtx(), getRecord_ID(), get_TrxName());
+
+			}else if(m_Table.getTableName().equals(MContractLine.Table_Name)) {
+
+				m_ContractLine = new MContractLine(getCtx(), getRecord_ID(), get_TrxName());
+				m_ContractContent = new MContractContent(getCtx(), m_ContractLine.getJP_ContractContent_ID(), get_TrxName());
+			}
 
 			if(p_JP_ContractCalender_ID == 0)
 			{
-				MContractCalender m_ContractCalendar = new MContractCalender(getCtx(), 0 , get_TrxName());
+				m_ContractCalendar = new MContractCalender(getCtx(), 0 , get_TrxName());
 				m_ContractCalendar.setValue(p_JP_ContractCalendar_Value);
 				m_ContractCalendar.setName(p_JP_ContractCalendar_Name);
 				m_ContractCalendar.setJP_ContractCategory_ID(m_ContractContent.getParent().getJP_ContractCategory_ID());
 				m_ContractCalendar.setJP_Contract_ID(m_ContractContent.getJP_Contract_ID());
 				m_ContractCalendar.setJP_ContractContent_ID(m_ContractContent.getJP_ContractContent_ID());
+				if(m_Table.getTableName().equals(MContractLine.Table_Name))
+					m_ContractCalendar.setJP_ContractLine_ID(getRecord_ID());
 				m_ContractCalendar.saveEx(get_TrxName());
+
 				p_JP_ContractCalender_ID = m_ContractCalendar.getJP_ContractCalender_ID();
+				p_IsCreateContractCalendar = true;
 				p_IsCreateCProcPeriodGJP = true;
 			}
 
 			if(p_IsCreateCProcPeriodGJP)
 			{
-				MContractProcPeriodG m_ContractProcPeriodG = new MContractProcPeriodG(getCtx(), 0 , get_TrxName());
+				m_ContractProcPeriodG = new MContractProcPeriodG(getCtx(), 0 , get_TrxName());
 				m_ContractProcPeriodG.setJP_ContractCalender_ID(p_JP_ContractCalender_ID);
 				m_ContractProcPeriodG.setValue(p_JP_CProcPeriodG_Value);
 				m_ContractProcPeriodG.setName(p_JP_CProcPeriodG_Name);
 				m_ContractProcPeriodG.setJP_ContractProcessValue(p_JP_ContractProcessValue);
 				m_ContractProcPeriodG.saveEx(get_TrxName());
+
 				p_JP_ContractProcPeriodG_ID = m_ContractProcPeriodG.getJP_ContractProcPeriodG_ID();
 			}
 
@@ -174,8 +203,6 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			{
 				throw new Exception(Msg.getMsg(getCtx(), "JP_UnexpectedError") + " JP_ContractProcPeriodG_ID == 0");
 			}
-
-		}else if(m_Table.getTableName().equals(MContractLine.Table_Name)) {
 
 		}else {
 			throw new Exception(Msg.getMsg(getCtx(), "JP_UnexpectedError"));
@@ -192,7 +219,9 @@ public class CreateContractProcessPeriod extends SvrProcess {
 		}
 
 
-		MContractProcPeriodG m_ContractCalenderG = new MContractProcPeriodG(getCtx(), p_JP_ContractProcPeriodG_ID, get_TrxName());
+		if(m_ContractProcPeriodG == null)
+			m_ContractProcPeriodG = new MContractProcPeriodG(getCtx(), p_JP_ContractProcPeriodG_ID, get_TrxName());
+
 		if(p_Year == 0 &&  p_Month == 0 && p_Day == 0)
 		{
 			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));
@@ -289,7 +318,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			}
 			procPeriod.setDateDoc(Timestamp.valueOf(docDate));
 			procPeriod.setJP_ContractProcPeriodG_ID(p_JP_ContractProcPeriodG_ID);
-			procPeriod.setJP_ContractCalender_ID(m_ContractCalenderG.getJP_ContractCalender_ID());
+			procPeriod.setJP_ContractCalender_ID(m_ContractProcPeriodG.getJP_ContractCalender_ID());
 			procPeriod.saveEx(get_TrxName());
 			if (processMonitor != null)
 			{
@@ -313,8 +342,9 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			m_ContractContent.setJP_ContractCalender_ID(p_JP_ContractCalender_ID);
 			m_ContractContent.saveEx(get_TrxName());
 
+			//Register Calendar to list of template
 			int JP_ContractContentT_ID = m_ContractContent.getJP_ContractContentT_ID();
-			if(JP_ContractContentT_ID > 0)
+			if(p_IsCreateContractCalendar && JP_ContractContentT_ID > 0)
 			{
 				MContractContentT cct = new MContractContentT(getCtx(), JP_ContractContentT_ID, get_TrxName());
 				int JP_ContractCalenderRef_ID = cct.getJP_ContractCalenderRef_ID();
@@ -345,6 +375,62 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 		}else if(m_Table.getTableName().equals(MContractLine.Table_Name)) {
 
+			if("INOUT".equals(p_JP_CalendarType))
+			{
+				if(p_IsCreateContractCalendar)
+				{
+					setJP_ContractCalender_InOut(m_ContractLine);
+					if(p_IsUseInvoiceCalendar)
+					{
+						if(m_ContractLine.getJP_ContractCalender_Inv_ID() == 0
+								&& MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice.equals(m_ContractContent.getJP_CreateDerivativeDocPolicy()) )
+						{
+							setJP_ContractCalender_Invoice(m_ContractLine);
+						}
+					}
+
+					if(p_IsSetAnotherLine)
+					{
+						MContractLine[]  cLines = m_ContractContent.getLines(" AND JP_ContractLine_ID <>" + m_ContractLine.getJP_ContractLine_ID(), "");
+						for(MContractLine cLine : cLines)
+						{
+							if(cLine.getJP_ContractCalender_InOut_ID() == 0)
+							{
+								setJP_ContractCalender_InOut(cLine);
+							}
+
+							if(p_IsUseInvoiceCalendar)
+							{
+								if(cLine.getJP_ContractCalender_Inv_ID() == 0
+									&& MContractContent.JP_CREATEDERIVATIVEDOCPOLICY_CreateShipReceiptInvoice.equals(m_ContractContent.getJP_CreateDerivativeDocPolicy()) )
+								{
+									setJP_ContractCalender_Invoice(cLine);
+								}
+							}
+						}//For
+					}
+				}
+
+			}else if("INVOICE".equals(p_JP_CalendarType)) {
+
+				if(p_IsCreateContractCalendar)
+				{
+					setJP_ContractCalender_Invoice(m_ContractLine);
+					if(p_IsSetAnotherLine)
+					{
+						MContractLine[]  cLines = m_ContractContent.getLines(" AND JP_ContractLine_ID <>" + m_ContractLine.getJP_ContractLine_ID(), "");
+						for(MContractLine cLine : cLines)
+						{
+							if(cLine.getJP_ContractCalender_Inv_ID() == 0)
+							{
+								setJP_ContractCalender_Invoice(cLine);
+							}
+
+						}//For
+					}
+				}
+			}
+
 		}else {
 			throw new Exception(Msg.getMsg(getCtx(), "JP_UnexpectedError"));
 		}
@@ -352,4 +438,204 @@ public class CreateContractProcessPeriod extends SvrProcess {
 		return Msg.getMsg(getCtx(), "OK");
 	}
 
+	private void setJP_ContractCalender_InOut(MContractLine cLine) throws Exception
+	{
+		//Register Calendar to list of template
+		int JP_ContractLineT_ID = cLine.getJP_ContractLineT_ID();
+		if(JP_ContractLineT_ID > 0)
+		{
+			MContractLineT clt = MContractLineT.get(getCtx(), JP_ContractLineT_ID);
+			int JP_ContractCalenderRef_ID = clt.getJP_ContractCalRef_InOut_ID();
+			if(JP_ContractCalenderRef_ID > 0)
+			{
+				MContractCalenderRef m_ContractCalenderRef = MContractCalenderRef.get(getCtx(), JP_ContractCalenderRef_ID);
+				MContractCalenderList[] list = m_ContractCalenderRef.getContractCalenderList(getCtx(), true, get_TrxName());
+				boolean isRegistered = false;
+				for(MContractCalenderList ccl : list)
+				{
+					if(ccl.getJP_ContractCalender_ID() == p_JP_ContractCalender_ID)
+					{
+						isRegistered = true;
+						break;
+					}
+				}
+
+				if(!isRegistered)
+				{
+					MContractCalenderList ccl = new MContractCalenderList(getCtx(), 0, get_TrxName());
+					ccl.setJP_ContractCalenderRef_ID(JP_ContractCalenderRef_ID);
+					ccl.setJP_ContractCalender_ID(p_JP_ContractCalender_ID);
+					ccl.saveEx(get_TrxName());
+				}
+			}
+		}
+
+		//Set Calendar
+		cLine.setJP_ContractCalender_InOut_ID(p_JP_ContractCalender_ID);
+		if(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_InOut()))
+		{
+			;//Noting to do;
+
+		}else if(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_InOut())) {
+
+			if(cLine.getJP_ProcPeriod_Lump_InOut_Date() == null)
+			{
+				cLine.setJP_ProcPeriod_Lump_InOut_Date(p_DateContract_From);
+			}
+
+			MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Lump_InOut_Date());
+			if(cpp == null)
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
+						+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
+						+ " - " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_ID"));
+			}else {
+				cLine.setJP_ProcPeriod_Lump_InOut_ID(cpp.getJP_ContractProcPeriod_ID());
+			}
+
+		}else {
+
+			if(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_InOut())
+					|| MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd.equals(cLine.getJP_DerivativeDocPolicy_InOut()))
+			{
+				if(cLine.getJP_ProcPeriod_Start_InOut_Date() == null)
+				{
+					cLine.setJP_ProcPeriod_Start_InOut_Date(p_DateContract_From);
+				}
+
+				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Start_InOut_Date());
+				if(cpp == null)
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
+							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
+							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_Start_InOut_Date"));
+				}else {
+					cLine.setJP_ProcPeriod_Start_InOut_ID(cpp.getJP_ContractProcPeriod_ID());
+				}
+			}
+
+
+			if(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ToEndContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_InOut())
+					|| MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_FromStartContractProcessPeriodToEnd.equals(cLine.getJP_DerivativeDocPolicy_InOut()))
+			{
+				if(cLine.getJP_ProcPeriod_End_InOut_Date() == null)
+				{
+					cLine.setJP_ProcPeriod_End_InOut_Date(p_DateContract_To);
+				}
+
+				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_End_InOut_Date());
+				if(cpp == null)
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
+							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
+							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_End_InOut_Date"));//TODO
+				}else {
+					cLine.setJP_ProcPeriod_End_InOut_ID(cpp.getJP_ContractProcPeriod_ID());
+				}
+			}
+		}
+
+		cLine.saveEx(get_TrxName());
+	}
+
+	private void setJP_ContractCalender_Invoice(MContractLine cLine) throws Exception
+	{
+		//Register Calendar to list of template
+		int JP_ContractLineT_ID = cLine.getJP_ContractLineT_ID();
+		if(JP_ContractLineT_ID > 0)
+		{
+			MContractLineT clt = MContractLineT.get(getCtx(), JP_ContractLineT_ID);
+			int JP_ContractCalenderRef_ID = clt.getJP_ContractCalRef_Inv_ID();
+			if(JP_ContractCalenderRef_ID > 0)
+			{
+				MContractCalenderRef m_ContractCalenderRef = MContractCalenderRef.get(getCtx(), JP_ContractCalenderRef_ID);
+				MContractCalenderList[] list = m_ContractCalenderRef.getContractCalenderList(getCtx(), true, get_TrxName());
+				boolean isRegistered = false;
+				for(MContractCalenderList ccl : list)
+				{
+					if(ccl.getJP_ContractCalender_ID() == p_JP_ContractCalender_ID)
+					{
+						isRegistered = true;
+						break;
+					}
+				}
+
+				if(!isRegistered)
+				{
+					MContractCalenderList ccl = new MContractCalenderList(getCtx(), 0, get_TrxName());
+					ccl.setJP_ContractCalenderRef_ID(JP_ContractCalenderRef_ID);
+					ccl.setJP_ContractCalender_ID(p_JP_ContractCalender_ID);
+					ccl.saveEx(get_TrxName());
+				}
+			}
+		}
+
+
+		//Set Calendar
+		cLine.setJP_ContractCalender_Inv_ID(p_JP_ContractCalender_ID);
+		if(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_Inv()))
+		{
+			;//Noting to do;
+
+		}else if(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_Inv())) {
+
+			if(cLine.getJP_ProcPeriod_Lump_Inv_Date() == null)
+			{
+				cLine.setJP_ProcPeriod_Lump_Inv_Date(p_DateContract_From);
+			}
+
+			MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Lump_Inv_Date());
+			if(cpp == null)
+			{
+				throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
+						+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
+						+ " - " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_ID"));
+			}else {
+				cLine.setJP_ProcPeriod_Lump_Inv_ID(cpp.getJP_ContractProcPeriod_ID());
+			}
+
+		}else {
+
+			if(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_Inv())
+					|| MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd.equals(cLine.getJP_DerivativeDocPolicy_Inv()))
+			{
+				if(cLine.getJP_ProcPeriod_Start_Inv_Date() == null)
+				{
+					cLine.setJP_ProcPeriod_Start_Inv_Date(p_DateContract_From);
+				}
+
+				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Start_Inv_Date());
+				if(cpp == null)
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
+							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
+							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_Start_Inv_Date"));
+				}else {
+					cLine.setJP_ProcPeriod_Start_Inv_ID(cpp.getJP_ContractProcPeriod_ID());
+				}
+			}
+
+
+			if(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ToEndContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_Inv())
+					|| MContractLine.JP_DERIVATIVEDOCPOLICY_INV_FromStartContractProcessPeriodToEnd.equals(cLine.getJP_DerivativeDocPolicy_Inv()))
+			{
+				if(cLine.getJP_ProcPeriod_End_Inv_Date() == null)
+				{
+					cLine.setJP_ProcPeriod_End_Inv_Date(p_DateContract_To);
+				}
+
+				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_End_Inv_Date());
+				if(cpp == null)
+				{
+					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
+							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
+							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_End_Inv_Date"));
+				}else {
+					cLine.setJP_ProcPeriod_End_Inv_ID(cpp.getJP_ContractProcPeriod_ID());
+				}
+			}
+		}
+
+		cLine.saveEx(get_TrxName());
+	}
 }
