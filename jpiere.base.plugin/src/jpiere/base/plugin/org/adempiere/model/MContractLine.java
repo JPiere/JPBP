@@ -29,6 +29,7 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProductPricing;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -426,7 +427,36 @@ public class MContractLine extends X_JP_ContractLine {
 			}
 		}
 
-//
+		//JPIERE-0517 - Restriction of Contract Calendar
+		if(getJP_ContractCalender_InOut_ID() > 0 && is_ValueChanged("JP_ContractCalender_InOut_ID"))
+		{
+			if(MSysConfig.getBooleanValue("JP_RESTRICTION_OF_CONTRACT_CALENDAR", true, getAD_Client_ID(), getAD_Org_ID()))
+			{
+				MContractCalender cc = new MContractCalender(getCtx(), getJP_ContractCalender_InOut_ID(), get_TrxName());
+				if(cc.getJP_Contract_ID() != 0 && cc.getJP_Contract_ID() != getParent().getJP_Contract_ID())
+				{
+					//The contract calendar is used in other contracts.
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_RestrictionErrorOfContractCalendar") + " - " + cc.getName());
+					return false;
+				}
+			}
+		}
+
+		if(getJP_ContractCalender_Inv_ID() > 0 && is_ValueChanged("JP_ContractCalender_Inv_ID"))
+		{
+			if(MSysConfig.getBooleanValue("JP_RESTRICTION_OF_CONTRACT_CALENDAR", true, getAD_Client_ID(), getAD_Org_ID()))
+			{
+				MContractCalender cc = new MContractCalender(getCtx(), getJP_ContractCalender_Inv_ID(), get_TrxName());
+				if(cc.getJP_Contract_ID() != 0 && cc.getJP_Contract_ID() != getParent().getJP_Contract_ID())
+				{
+					//The contract calendar is used in other contracts.
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_RestrictionErrorOfContractCalendar") + " - " + cc.getName());
+					return false;
+				}
+			}
+		}
+
+
 		return true;
 
 	}//beforeSave

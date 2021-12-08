@@ -33,6 +33,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MQuery;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PrintInfo;
@@ -1188,16 +1189,20 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			}
 		}
 
-		//Check Contract Process Date(To)
-//		if(!newRecord)
-//		{
-//			String msg = checkJP_ContractProcDate_To();
-//			if(!Util.isEmpty(msg))
-//			{
-//				log.saveError("Error", msg);
-//				return false;
-//			}
-//		}
+		//JPIERE-0517 - Restriction of Contract Calendar
+		if(getJP_ContractCalender_ID() > 0 && is_ValueChanged("JP_ContractCalender_ID"))
+		{
+			if(MSysConfig.getBooleanValue("JP_RESTRICTION_OF_CONTRACT_CALENDAR", true, getAD_Client_ID(), getAD_Org_ID()))
+			{
+				MContractCalender cc = new MContractCalender(getCtx(), getJP_ContractCalender_ID(), get_TrxName());
+				if(cc.getJP_Contract_ID() != 0 && cc.getJP_Contract_ID() != getJP_Contract_ID())
+				{
+					//The contract calendar is used in other contracts.
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_RestrictionErrorOfContractCalendar") + " - " + cc.getName());
+					return false;
+				}
+			}
+		}
 
 		//Check Contract Process Status
 		updateContractProcStatus(DocAction.ACTION_None, newRecord);
