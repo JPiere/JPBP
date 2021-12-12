@@ -220,7 +220,8 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 
 		//JPIERE-0219:Create Invoice When Ship/Receipt Complete
-		if(timing == ModelValidator.TIMING_AFTER_COMPLETE)
+		if( (po.get_ValueAsBoolean(MInOut.COLUMNNAME_IsSOTrx) && timing == MSysConfig.getIntValue("JP_INOUT_TIMING_OF_CREATE_AR_INVOICE", 9, po.getAD_Client_ID(), po.getAD_Org_ID()))
+				|| (!po.get_ValueAsBoolean(MInOut.COLUMNNAME_IsSOTrx) && timing == MSysConfig.getIntValue("JP_INOUT_TIMING_OF_CREATE_AP_INVOICE", 9, po.getAD_Client_ID(), po.getAD_Org_ID())) )
 		{
 			MInOut io = (MInOut)po;
 			String trxName = po.get_TrxName();
