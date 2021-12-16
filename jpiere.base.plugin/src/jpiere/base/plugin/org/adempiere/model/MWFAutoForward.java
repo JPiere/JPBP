@@ -15,13 +15,14 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
@@ -29,19 +30,19 @@ import org.compiere.wf.MWorkflow;
 
 
 /**
- * JPIERE-0518 WF Auto Add Approvers
+ * JPIERE-0519 WF Auto Forward
  *
  * @author Hideaki Hagiwara
  *
  */
-public class MWFAutoAddApprovers extends X_JP_WF_AutoAddApprovers {
+public class MWFAutoForward extends X_JP_WF_AutoForward {
 
-	public MWFAutoAddApprovers(Properties ctx, int JP_WF_AutoAddApprovers_ID, String trxName)
+	public MWFAutoForward(Properties ctx, int JP_WF_AutoForward_ID, String trxName)
 	{
-		super(ctx, JP_WF_AutoAddApprovers_ID, trxName);
+		super(ctx, JP_WF_AutoForward_ID, trxName);
 	}
 
-	public MWFAutoAddApprovers(Properties ctx, ResultSet rs, String trxName)
+	public MWFAutoForward(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
@@ -93,11 +94,22 @@ public class MWFAutoAddApprovers extends X_JP_WF_AutoAddApprovers {
 		{
 			String sql = null;
 
-			if(get_Value(COLUMNNAME_JP_WF_Org_ID) == null )
+			if(get_Value(COLUMNNAME_AD_WF_Node_ID) == null )
 			{
-				sql = "SELECT * FROM JP_WF_AutoAddApprovers WHERE AD_Client_ID=? AND AD_WF_Node_ID = ? AND JP_WF_Org_ID IS NULL AND ValidFrom = ? ";
+				if(get_Value(COLUMNNAME_JP_WF_Org_ID) == null )
+				{
+					sql = "SELECT * FROM JP_WF_AutoForward WHERE AD_Client_ID=? AND JP_WF_User_From_ID=? AND AD_WF_Node_ID IS NULL AND JP_WF_Org_ID IS NULL AND ValidFrom = ? ";
+				}else {
+					sql = "SELECT * FROM JP_WF_AutoForward WHERE AD_Client_ID=? AND JP_WF_User_From_ID=? AND AD_WF_Node_ID IS NULL AND JP_WF_Org_ID = ? AND ValidFrom = ? ";
+				}
 			}else {
-				sql = "SELECT * FROM JP_WF_AutoAddApprovers WHERE AD_Client_ID=? AND AD_WF_Node_ID = ? AND JP_WF_Org_ID = ? AND ValidFrom = ? ";
+
+				if(get_Value(COLUMNNAME_JP_WF_Org_ID) == null )
+				{
+					sql = "SELECT * FROM JP_WF_AutoForward WHERE AD_Client_ID=? AND JP_WF_User_From_ID=? AND AD_WF_Node_ID = ? AND JP_WF_Org_ID IS NULL AND ValidFrom = ? ";
+				}else {
+					sql = "SELECT * FROM JP_WF_AutoForward WHERE AD_Client_ID=? AND JP_WF_User_From_ID=? AND AD_WF_Node_ID = ? AND JP_WF_Org_ID = ? AND ValidFrom = ? ";
+				}
 			}
 
 			PreparedStatement pstmt = null;
@@ -107,20 +119,32 @@ public class MWFAutoAddApprovers extends X_JP_WF_AutoAddApprovers {
 			{
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				pstmt.setInt(1, getAD_Client_ID());
-				pstmt.setInt(2, getAD_WF_Node_ID());
-				if(get_Value(COLUMNNAME_JP_WF_Org_ID) == null )
+				pstmt.setInt(2, getJP_WF_User_From_ID());
+				if(get_Value(COLUMNNAME_AD_WF_Node_ID) == null )
 				{
-					pstmt.setTimestamp(3, getValidFrom());
+					if(get_Value(COLUMNNAME_JP_WF_Org_ID) == null )
+					{
+						pstmt.setTimestamp(3, getValidFrom());
+					}else {
+						pstmt.setInt(3, getJP_WF_Org_ID());
+						pstmt.setTimestamp(4, getValidFrom());
+					}
 				}else {
-					pstmt.setInt(3, getJP_WF_Org_ID());
-					pstmt.setTimestamp(4, getValidFrom());
+					if(get_Value(COLUMNNAME_JP_WF_Org_ID) == null )
+					{
+						pstmt.setInt(3, getAD_WF_Node_ID());
+						pstmt.setTimestamp(4, getValidFrom());
+					}else {
+						pstmt.setInt(3, getAD_WF_Node_ID());
+						pstmt.setInt(4, getJP_WF_Org_ID());
+						pstmt.setTimestamp(5, getValidFrom());
+					}
 				}
 
 				rs = pstmt.executeQuery();
 				if (rs.next())
 				{
-					MWFAutoAddApprovers wfAAA = new MWFAutoAddApprovers(getCtx(), rs, get_TrxName());
-					log.saveError("Error", Msg.getMsg(getCtx(), "JP_AlreadyRegistered") + " - " + Msg.getElement(getCtx(), "Value") + " : " +wfAAA.getValue());
+					log.saveError("Error", Msg.getMsg(getCtx(), "JP_AlreadyRegistered"));
 					return false;
 				}
 			}
@@ -135,19 +159,17 @@ public class MWFAutoAddApprovers extends X_JP_WF_AutoAddApprovers {
 			}
 		}
 
-
 		//Cache Reset
 		if(newRecord
 				|| is_ValueChanged(COLUMNNAME_AD_Workflow_ID) || is_ValueChanged(COLUMNNAME_AD_WF_Node_ID) ||  is_ValueChanged(COLUMNNAME_ValidFrom)
-				|| is_ValueChanged(COLUMNNAME_JP_WF_Org_ID) ||  is_ValueChanged(COLUMNNAME_IsActive) )
+				|| is_ValueChanged(COLUMNNAME_JP_WF_Org_ID) ||  is_ValueChanged(COLUMNNAME_JP_WF_User_From_ID) ||  is_ValueChanged(COLUMNNAME_JP_WF_User_To_ID)
+				|| is_ValueChanged(COLUMNNAME_IsActive) )
 		{
 			s_cache.reset();
 		}
 
 		return true;
 	}
-
-
 
 	@Override
 	protected boolean beforeDelete()
@@ -156,76 +178,44 @@ public class MWFAutoAddApprovers extends X_JP_WF_AutoAddApprovers {
 		return true;
 	}
 
-
-
-	private MWFAutoAddUser[] autoAddUsers = null;
-
-	public MWFAutoAddUser[] getAutoAddUsers(boolean reload)
-	{
-		if (reload || autoAddUsers == null || autoAddUsers.length == 0)
-			;
-		else
-			return autoAddUsers;
-
-		ArrayList<MWFAutoAddUser> list = new ArrayList<MWFAutoAddUser>();
-		final String sql = "SELECT * FROM JP_WF_AutoAddUser WHERE JP_WF_AutoAddApprovers_ID=? AND IsActive = 'Y' ORDER BY AD_User_ID";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, get_TrxName());
-			pstmt.setInt(1, getJP_WF_AutoAddApprovers_ID());
-			rs = pstmt.executeQuery();
-			while (rs.next())
-				list.add(new MWFAutoAddUser (getCtx(), rs, get_TrxName()));
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-
-		autoAddUsers = new MWFAutoAddUser[list.size()];
-		list.toArray(autoAddUsers);
-
-		return autoAddUsers;
-	}
-
 	/** Cache			*/
-	private static CCache<String, MWFAutoAddApprovers> s_cache = new CCache<String, MWFAutoAddApprovers>(Table_Name, 100, 60);
+	private static CCache<String, MWFAutoForward> s_cache = new CCache<String, MWFAutoForward>(Table_Name, 100, 60);
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	static public MWFAutoAddApprovers get(MWFActivity wfActivity)
+	static public MWFAutoForward get(MWFActivity wfActivity)
 	{
-		String key = "" + wfActivity.getAD_Client_ID() + "_" + wfActivity.getAD_WF_Node_ID() + "_" + wfActivity.getAD_Org_ID() + "_" + sdf.format(wfActivity.getCreated());
-		MWFAutoAddApprovers approvers = null;
+		return MWFAutoForward.get(wfActivity.getAD_Client_ID(), wfActivity.getAD_User_ID(), wfActivity.getAD_WF_Node_ID(), wfActivity.getAD_Org_ID(), wfActivity.getCreated(), wfActivity.get_TrxName());
+	}
+
+	static public MWFAutoForward get(int AD_Client_ID, int AD_User_ID, int AD_WF_Node_ID, int AD_Org_ID, Timestamp Created, String trxName)
+	{
+		String key = "" + AD_Client_ID + "_" + AD_User_ID + "_" + AD_WF_Node_ID + "_" + AD_Org_ID + "_" + sdf.format(Created);
+		MWFAutoForward autoForward = null;
 		if(s_cache.containsKey(key))
 		{
-			approvers = s_cache.get(key);
-			return approvers;
+			autoForward = s_cache.get(key);
+			return autoForward;
 		}
 
-		final String sql = "SELECT * FROM JP_WF_AutoAddApprovers WHERE AD_Client_ID=? AND AD_WF_Node_ID = ? AND (JP_WF_Org_ID = ? OR JP_WF_Org_ID IS NULL) AND ValidFrom <= ? AND IsActive = 'Y'"
-							+ " ORDER BY JP_WF_Org_ID NULLS LAST, ValidFrom DESC";
+		final String sql = "SELECT * FROM JP_WF_AutoForward WHERE AD_Client_ID=? AND JP_WF_User_From_ID = ? "
+							+ " AND (AD_WF_Node_ID = ? OR AD_WF_Node_ID IS NULL) AND (JP_WF_Org_ID = ? OR JP_WF_Org_ID IS NULL) AND ValidFrom <= ? AND IsActive = 'Y'"
+							+ " ORDER BY AD_WF_Node_ID NULLS LAST, JP_WF_Org_ID NULLS LAST, ValidFrom DESC";
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try
 		{
-			pstmt = DB.prepareStatement(sql, wfActivity.get_TrxName());
-			pstmt.setInt(1, wfActivity.getAD_Client_ID());
-			pstmt.setInt(2, wfActivity.getAD_WF_Node_ID());
-			pstmt.setInt(3, wfActivity.getAD_Org_ID());
-			pstmt.setTimestamp(4, wfActivity.getCreated());
+			pstmt = DB.prepareStatement(sql, trxName);
+			pstmt.setInt(1, AD_Client_ID);
+			pstmt.setInt(2, AD_User_ID);
+			pstmt.setInt(3, AD_WF_Node_ID);
+			pstmt.setInt(4, AD_Org_ID);
+			pstmt.setTimestamp(5, Created);
 
 			rs = pstmt.executeQuery();
 			if (rs.next())
-				approvers = new MWFAutoAddApprovers (wfActivity.getCtx(), rs, wfActivity.get_TrxName());
+				autoForward = new MWFAutoForward (Env.getCtx(), rs, trxName);
 		}
 		catch (Exception e)
 		{
@@ -237,14 +227,17 @@ public class MWFAutoAddApprovers extends X_JP_WF_AutoAddApprovers {
 			rs = null; pstmt = null;
 		}
 
-		s_cache.put(key, approvers);//In spite of null, I put instance into the cache for performance.
+		if(autoForward != null)
+		{
+			MWFAutoForward reForward = MWFAutoForward.get(AD_Client_ID, autoForward.getJP_WF_User_To_ID(), AD_WF_Node_ID, AD_Org_ID, Created, trxName);
+			if(reForward != null)
+			{
+				autoForward = reForward;
+			}
+		}
 
-		return approvers;
+		s_cache.put(key, autoForward);//In spite of null, I put instance into the cache for performance.
+
+		return autoForward;
 	}
-
-	static public int cacheCrear()
-	{
-		return s_cache.reset();
-	}
-
 }
