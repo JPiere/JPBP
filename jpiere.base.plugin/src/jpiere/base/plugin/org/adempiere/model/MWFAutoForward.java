@@ -17,9 +17,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MUser;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -50,6 +52,11 @@ public class MWFAutoForward extends X_JP_WF_AutoForward {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		if(getJP_WF_User_From_ID() == getJP_WF_User_To_ID())
+		{
+			log.saveError("Error", Msg.getElement(getCtx(), COLUMNNAME_JP_WF_User_From_ID) + " = " + Msg.getElement(getCtx(), COLUMNNAME_JP_WF_User_To_ID));
+			return false;
+		}
 
 		if(newRecord && is_ValueChanged(COLUMNNAME_AD_Workflow_ID))
 		{
@@ -159,6 +166,7 @@ public class MWFAutoForward extends X_JP_WF_AutoForward {
 			}
 		}
 
+
 		//Cache Reset
 		if(newRecord
 				|| is_ValueChanged(COLUMNNAME_AD_Workflow_ID) || is_ValueChanged(COLUMNNAME_AD_WF_Node_ID) ||  is_ValueChanged(COLUMNNAME_ValidFrom)
@@ -182,14 +190,25 @@ public class MWFAutoForward extends X_JP_WF_AutoForward {
 	private static CCache<String, MWFAutoForward> s_cache = new CCache<String, MWFAutoForward>(Table_Name, 100, 60);
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	static public MWFAutoForward get(MWFActivity wfActivity)
+	static public MWFAutoForward get(MWFActivity wfActivity) throws Exception
 	{
-		return MWFAutoForward.get(wfActivity.getAD_Client_ID(), wfActivity.getAD_User_ID(), wfActivity.getAD_WF_Node_ID(), wfActivity.getAD_Org_ID(), wfActivity.getCreated(), wfActivity.get_TrxName());
+		return MWFAutoForward.get(wfActivity.getAD_Client_ID(), wfActivity.getAD_User_ID(), wfActivity.getAD_WF_Node_ID(), wfActivity.getAD_Org_ID(), wfActivity.getCreated(), null, wfActivity.get_TrxName());
 	}
 
-	static public MWFAutoForward get(int AD_Client_ID, int AD_User_ID, int AD_WF_Node_ID, int AD_Org_ID, Timestamp Created, String trxName)
+	static public MWFAutoForward get(int AD_Client_ID, int AD_User_ID, int AD_WF_Node_ID, int AD_Org_ID, Timestamp Date, String trxName) throws Exception
 	{
-		String key = "" + AD_Client_ID + "_" + AD_User_ID + "_" + AD_WF_Node_ID + "_" + AD_Org_ID + "_" + sdf.format(Created);
+		return MWFAutoForward.get(AD_Client_ID, AD_User_ID, AD_WF_Node_ID, AD_Org_ID, Date, null, trxName);
+	}
+
+	static private MWFAutoForward get(int AD_Client_ID, int AD_User_ID, int AD_WF_Node_ID, int AD_Org_ID, Timestamp Date, ArrayList<Integer> list_Forward_User_ID, String trxName) throws Exception
+	{
+		if(list_Forward_User_ID == null)
+		{
+			list_Forward_User_ID = new ArrayList<Integer>();
+			list_Forward_User_ID.add(AD_User_ID);
+		}
+
+		String key = "" + AD_Client_ID + "_" + AD_User_ID + "_" + AD_WF_Node_ID + "_" + AD_Org_ID + "_" + sdf.format(Date);
 		MWFAutoForward autoForward = null;
 		if(s_cache.containsKey(key))
 		{
@@ -211,7 +230,7 @@ public class MWFAutoForward extends X_JP_WF_AutoForward {
 			pstmt.setInt(2, AD_User_ID);
 			pstmt.setInt(3, AD_WF_Node_ID);
 			pstmt.setInt(4, AD_Org_ID);
-			pstmt.setTimestamp(5, Created);
+			pstmt.setTimestamp(5, Date);
 
 			rs = pstmt.executeQuery();
 			if (rs.next())
@@ -229,7 +248,20 @@ public class MWFAutoForward extends X_JP_WF_AutoForward {
 
 		if(autoForward != null)
 		{
-			MWFAutoForward reForward = MWFAutoForward.get(AD_Client_ID, autoForward.getJP_WF_User_To_ID(), AD_WF_Node_ID, AD_Org_ID, Created, trxName);
+			for(Integer forward_User_ID : list_Forward_User_ID)
+			{
+				if(forward_User_ID.intValue() == autoForward.getJP_WF_User_To_ID())
+				{
+					//Circulation of WF Auto Forward
+					throw new Exception(Msg.getMsg(Env.getCtx(), "JP_WF_CirculationAutoForward")
+							+ " - " + Msg.getElement(Env.getCtx(), COLUMNNAME_JP_WF_User_From_ID) + " : " + MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID())
+							+ " - "	+ Msg.getElement(Env.getCtx(), COLUMNNAME_JP_WF_User_To_ID) + " : " + MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()) );
+				}
+			}
+			list_Forward_User_ID.add(autoForward.getJP_WF_User_To_ID());
+
+			MWFAutoForward reForward = MWFAutoForward.get(AD_Client_ID, autoForward.getJP_WF_User_To_ID(), AD_WF_Node_ID, AD_Org_ID, Date, list_Forward_User_ID, trxName);
+
 			if(reForward != null)
 			{
 				autoForward = reForward;

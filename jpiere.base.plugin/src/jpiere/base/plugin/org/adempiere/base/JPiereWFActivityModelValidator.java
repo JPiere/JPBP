@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.compiere.model.MClient;
@@ -23,6 +25,7 @@ import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
+import org.compiere.util.Msg;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFEventAudit;
 import org.compiere.wf.MWFNode;
@@ -79,10 +82,22 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 					|| MWFNode.ACTION_UserWindow.equals(node.getAction()) )
 			{
 				if(wfa.getAD_User_ID() != 0
+						&& !wfa.isProcessed()
 						&& MWFActivity.WFSTATE_Suspended.equals(wfa.getWFState())
 						&& !MWFResponsible.RESPONSIBLETYPE_Role.equals(MWFResponsible.get(node.getAD_WF_Responsible_ID()).getResponsibleType()) )
 				{
-					MWFAutoForward autoForward = MWFAutoForward.get(wfa);
+					MWFAutoForward autoForward = null;
+
+					if(type == ModelValidator.TYPE_BEFORE_NEW)
+					{
+						autoForward = MWFAutoForward.get(wfa);
+
+					}else if(type == ModelValidator.TYPE_BEFORE_CHANGE){
+
+						LocalDateTime localDateTime = LocalDateTime.now();
+						autoForward = MWFAutoForward.get(wfa.getAD_Client_ID(), wfa.getAD_User_ID(), wfa.getAD_WF_Node_ID(), wfa.getAD_Org_ID(), Timestamp.valueOf(localDateTime), wfa.get_TrxName());
+					}
+
 					if(autoForward != null)
 					{
 						if(MSysConfig.getBooleanValue("JP_WF_AUTO_FORWARD_LOG", true, wfa.getAD_Client_ID(), wfa.getAD_Org_ID()))
@@ -91,8 +106,9 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 							eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 							eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 							eventLog.setAttributeName("Auto Forward - AD_WF_Activity");
-							eventLog.setOldValue(MUser.get(wfa.getAD_User_ID()).getName());
-							eventLog.setNewValue(MUser.get(autoForward.getJP_WF_User_To_ID()).getName());
+							eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+							eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
+							eventLog.setDescription(Msg.getElement(wfa.getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 							eventLog.saveEx(po.get_TrxName());
 						}
 
@@ -124,6 +140,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 						wfApprover.setAD_WF_Activity_ID(wfa.getAD_WF_Activity_ID());
 
 						autoForward = MWFAutoForward.get(wfa.getAD_Client_ID(), user.getAD_User_ID(), wfa.getAD_WF_Node_ID(), wfa.getAD_Org_ID(), wfa.getCreated(), wfa.get_TrxName());
+
 						if(autoForward != null)
 						{
 							//Check unique user
@@ -139,8 +156,9 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 										eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 										eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 										eventLog.setAttributeName("Auto Forward - AD_WF_ActivityApprover - Skip - Duplicate");
-										eventLog.setOldValue(MUser.get(user.getAD_User_ID()).getName());
-										eventLog.setNewValue(MUser.get(autoForward.getJP_WF_User_To_ID()).getName());
+										eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+										eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
+										eventLog.setDescription(Msg.getElement(wfa.getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 										eventLog.saveEx(po.get_TrxName());
 									}
 									break;
@@ -155,8 +173,9 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 									eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 									eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 									eventLog.setAttributeName("Auto Forward - AD_WF_ActivityApprover");
-									eventLog.setOldValue(MUser.get(user.getAD_User_ID()).getName());
-									eventLog.setNewValue(MUser.get(autoForward.getJP_WF_User_To_ID()).getName());
+									eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+									eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
+									eventLog.setDescription(Msg.getElement(wfa.getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 									eventLog.saveEx(po.get_TrxName());
 								}
 
