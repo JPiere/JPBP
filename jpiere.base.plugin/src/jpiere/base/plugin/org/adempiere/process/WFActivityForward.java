@@ -132,18 +132,20 @@ public class WFActivityForward extends SvrProcess {
 																				, m_activity.getAD_Org_ID(), Timestamp.valueOf(localDateTime), get_TrxName());
 						if(autoForward != null)
 						{
-							p_JP_WF_Forward_User_ID = autoForward.getJP_WF_User_To_ID();
 							if(MSysConfig.getBooleanValue("JP_WF_AUTO_FORWARD_LOG", true, m_activity.getAD_Client_ID(), m_activity.getAD_Org_ID()))
 							{
 								MWFEventAudit eventLog = new MWFEventAudit(m_activity);
 								eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 								eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 								eventLog.setAttributeName("Auto Forward - AD_WF_Activity");
-								eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+								eventLog.setOldValue(MUser.getNameOfUser(p_JP_WF_Forward_User_ID));
 								eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
 								eventLog.setDescription(Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 								eventLog.saveEx(get_TrxName());
 							}
+
+							p_JP_WF_Forward_User_ID = autoForward.getJP_WF_User_To_ID();
+
 						}//JPIERE-0519: WF Auto Forward - End
 
 						if(!m_activity.forwardTo(p_JP_WF_Forward_User_ID, p_Comments))
@@ -171,18 +173,20 @@ public class WFActivityForward extends SvrProcess {
 																			, m_activity.getAD_Org_ID(), Timestamp.valueOf(localDateTime), get_TrxName());
 					if(autoForward != null)
 					{
-						p_JP_WF_Forward_User_ID = autoForward.getJP_WF_User_To_ID();
 						if(MSysConfig.getBooleanValue("JP_WF_AUTO_FORWARD_LOG", true, m_activity.getAD_Client_ID(), m_activity.getAD_Org_ID()))
 						{
 							MWFEventAudit eventLog = new MWFEventAudit(m_activity);
 							eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 							eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 							eventLog.setAttributeName("Auto Forward - AD_WF_ActivityApprover");
-							eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+							eventLog.setOldValue(MUser.getNameOfUser(p_JP_WF_Forward_User_ID));
 							eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
 							eventLog.setDescription(Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 							eventLog.saveEx(get_TrxName());
 						}
+
+						p_JP_WF_Forward_User_ID = autoForward.getJP_WF_User_To_ID();
+
 					}//JPIERE-0519: WF Auto Forward - End
 
 					m_ActivityApprovers = getActivityApprovers(m_activity.getAD_WF_Activity_ID());
@@ -201,10 +205,9 @@ public class WFActivityForward extends SvrProcess {
 								//The user is already an approver.
 								addLog(msg + " : " + MUser.getNameOfUser(additional_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
 							}else {
+								//The user is already an approver.
 								addLog(msg + " : " + Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID)
-										+ " From " + MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID())
-										+ " To " + MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID())
-										+ " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
+													+ " - " + MUser.getNameOfUser(p_JP_WF_Forward_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
 							}
 							break;
 						}
@@ -222,8 +225,16 @@ public class WFActivityForward extends SvrProcess {
 									if(approver2.getAD_User_ID() == p_JP_WF_Forward_User_ID)
 									{
 										isAlreadyRegistered =true;
-										//The user is already an approver.
-										addLog(msg + " : " + MUser.getNameOfUser(p_JP_WF_Forward_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
+										if(autoForward == null)
+										{
+											//The user is already an approver.
+											addLog(msg + " : " + MUser.getNameOfUser(p_JP_WF_Forward_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
+
+										}else {
+											//The user is already an approver.
+											addLog(msg + " : " + Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID)
+																+ " - " + MUser.getNameOfUser(p_JP_WF_Forward_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
+										}
 										break;
 									}
 								}
@@ -276,10 +287,10 @@ public class WFActivityForward extends SvrProcess {
 			MWFAutoForward autoForward = null;
 			ArrayList<Integer> list_AutoForward_User_ID = new ArrayList<Integer>();//Check Auto Forward Duplicate.
 
-			for(String Additional_User_ID : p_JP_WF_Additional_User_Multi)
+			for(String string_Additional_User_ID : p_JP_WF_Additional_User_Multi)
 			{
 				isAlreadyRegistered = false;
-				additional_User_ID = Integer.valueOf(Additional_User_ID).intValue();
+				additional_User_ID = Integer.valueOf(string_Additional_User_ID).intValue();
 
 				//JPIERE-0519: WF Auto Forward - Start
 				LocalDateTime localDateTime = LocalDateTime.now();
@@ -296,7 +307,7 @@ public class WFActivityForward extends SvrProcess {
 							eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 							eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 							eventLog.setAttributeName("Auto Forward - AD_WF_ActivityApprover - Skip - Duplicate");
-							eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+							eventLog.setOldValue(MUser.getNameOfUser(Integer.valueOf(string_Additional_User_ID).intValue()));
 							eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
 							eventLog.setDescription(Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 							eventLog.saveEx(get_TrxName());
@@ -312,7 +323,7 @@ public class WFActivityForward extends SvrProcess {
 							eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 							eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 							eventLog.setAttributeName("Auto Forward - AD_WF_ActivityApprover");
-							eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+							eventLog.setOldValue(MUser.getNameOfUser(Integer.valueOf(string_Additional_User_ID).intValue()));
 							eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
 							eventLog.setDescription(Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 							eventLog.saveEx(get_TrxName());
@@ -330,10 +341,9 @@ public class WFActivityForward extends SvrProcess {
 							//The user is already an approver.
 							addLog(msg + " : " + MUser.getNameOfUser(additional_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
 						}else {
+							//The user is already an approver.
 							addLog(msg + " : " + Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID)
-									+ " From " + MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID())
-									+ " To " + MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID())
-									+ " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
+												+ " - " + MUser.getNameOfUser(additional_User_ID) + " - " + Msg.getMsg(getCtx(), "JP_WF_UserAlreadyApprover"));
 						}
 						break;
 					}

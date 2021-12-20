@@ -255,7 +255,8 @@ public class MWFAutoForward extends X_JP_WF_AutoForward {
 					//Circulation of WF Auto Forward
 					throw new Exception(Msg.getMsg(Env.getCtx(), "JP_WF_CirculationAutoForward")
 							+ " - " + Msg.getElement(Env.getCtx(), COLUMNNAME_JP_WF_User_From_ID) + " : " + MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID())
-							+ " - "	+ Msg.getElement(Env.getCtx(), COLUMNNAME_JP_WF_User_To_ID) + " : " + MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()) );
+							+ " - "	+ Msg.getElement(Env.getCtx(), COLUMNNAME_JP_WF_User_To_ID) + " : " + MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID())
+							+ " ("+COLUMNNAME_JP_WF_AutoForward_ID + " = " + autoForward.getJP_WF_AutoForward_ID()+")");
 				}
 			}
 			list_Forward_User_ID.add(autoForward.getJP_WF_User_To_ID());

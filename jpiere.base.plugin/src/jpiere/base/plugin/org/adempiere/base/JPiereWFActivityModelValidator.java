@@ -106,7 +106,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 							eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 							eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 							eventLog.setAttributeName("Auto Forward - AD_WF_Activity");
-							eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+							eventLog.setOldValue(MUser.getNameOfUser(wfa.getAD_User_ID()));
 							eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
 							eventLog.setDescription(Msg.getElement(wfa.getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 							eventLog.saveEx(po.get_TrxName());
@@ -156,7 +156,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 										eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 										eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 										eventLog.setAttributeName("Auto Forward - AD_WF_ActivityApprover - Skip - Duplicate");
-										eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+										eventLog.setOldValue(MUser.getNameOfUser(user.getAD_User_ID()));
 										eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
 										eventLog.setDescription(Msg.getElement(wfa.getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 										eventLog.saveEx(po.get_TrxName());
@@ -173,7 +173,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 									eventLog.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
 									eventLog.setWFState(MWFEventAudit.WFSTATE_Suspended);
 									eventLog.setAttributeName("Auto Forward - AD_WF_ActivityApprover");
-									eventLog.setOldValue(MUser.getNameOfUser(autoForward.getJP_WF_User_From_ID()));
+									eventLog.setOldValue(MUser.getNameOfUser(user.getAD_User_ID()));
 									eventLog.setNewValue(MUser.getNameOfUser(autoForward.getJP_WF_User_To_ID()));
 									eventLog.setDescription(Msg.getElement(wfa.getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 									eventLog.saveEx(po.get_TrxName());
