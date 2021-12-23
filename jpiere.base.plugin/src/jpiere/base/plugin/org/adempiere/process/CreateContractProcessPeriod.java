@@ -472,6 +472,12 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 		//Set Calendar
 		cLine.setJP_ContractCalender_InOut_ID(p_JP_ContractCalender_ID);
+		addLog("*** " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : "  +cLine.getLine() + " ***");
+
+		//Set Contract Calendar
+		String msg = Msg.getElement(getCtx(), "JP_ContractCalender_InOut_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_SetContractCalendar");
+		addLog(msg);
+
 		if(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_InOut()))
 		{
 			;//Noting to do;
@@ -486,11 +492,17 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Lump_InOut_Date());
 			if(cpp == null)
 			{
-				throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
-						+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
-						+ " - " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_ID"));
+				//Could not set Contract Process Period because of not found.
+				msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_CouldNotSetContractProcessPeriod") ;
+				addLog(msg);
+
 			}else {
+
 				cLine.setJP_ProcPeriod_Lump_InOut_ID(cpp.getJP_ContractProcPeriod_ID());
+
+				//Set Contract Process Period.
+				msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_InOut_ID") + " - " +  Msg.getMsg(getCtx(), "JP_Contract_SetContractProcessPeriod");
+				addLog(msg);
 			}
 
 		}else {
@@ -506,11 +518,17 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Start_InOut_Date());
 				if(cpp == null)
 				{
-					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
-							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
-							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_Start_InOut_Date"));
+					//Could not set Contract Process Period because of not found.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_CouldNotSetContractProcessPeriod") ;
+					addLog(msg);
+
 				}else {
+
 					cLine.setJP_ProcPeriod_Start_InOut_ID(cpp.getJP_ContractProcPeriod_ID());
+
+					//Set Contract Process Period.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Start_InOut_ID") + " - " +  Msg.getMsg(getCtx(), "JP_Contract_SetContractProcessPeriod");
+					addLog(msg);
 				}
 			}
 
@@ -526,11 +544,17 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_End_InOut_Date());
 				if(cpp == null)
 				{
-					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
-							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
-							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_End_InOut_Date"));//TODO
+					//Could not set Contract Process Period because of not found.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_CouldNotSetContractProcessPeriod") ;
+					addLog(msg);
+
 				}else {
+
 					cLine.setJP_ProcPeriod_End_InOut_ID(cpp.getJP_ContractProcPeriod_ID());
+
+					//Set Contract Process Period.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_End_InOut_ID") + " - " +  Msg.getMsg(getCtx(), "JP_Contract_SetContractProcessPeriod");
+					addLog(msg);
 				}
 			}
 		}
@@ -573,6 +597,10 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 		//Set Calendar
 		cLine.setJP_ContractCalender_Inv_ID(p_JP_ContractCalender_ID);
+		addLog("*** " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : "  +cLine.getLine() + " ***");
+		String msg = Msg.getElement(getCtx(), "JP_ContractCalender_Inv_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_SetContractCalendar");
+		addLog(msg);
+
 		if(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_Inv()))
 		{
 			;//Noting to do;
@@ -587,11 +615,17 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Lump_Inv_Date());
 			if(cpp == null)
 			{
-				throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
-						+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
-						+ " - " + Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_ID"));
+				//Could not set Contract Process Period because of not found.
+				msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_CouldNotSetContractProcessPeriod") ;
+				addLog(msg);
+
 			}else {
+
 				cLine.setJP_ProcPeriod_Lump_Inv_ID(cpp.getJP_ContractProcPeriod_ID());
+
+				//Set Contract Process Period.
+				msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Lump_Inv_ID") + " - " +  Msg.getMsg(getCtx(), "JP_Contract_SetContractProcessPeriod");
+				addLog(msg);
 			}
 
 		}else {
@@ -607,11 +641,17 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_Start_Inv_Date());
 				if(cpp == null)
 				{
-					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
-							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
-							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_Start_Inv_Date"));
+					//Could not set Contract Process Period because of not found.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_CouldNotSetContractProcessPeriod") ;
+					addLog(msg);
+
 				}else {
+
 					cLine.setJP_ProcPeriod_Start_Inv_ID(cpp.getJP_ContractProcPeriod_ID());
+
+					//Set Contract Process Period.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_Start_Inv_ID") + " - " +  Msg.getMsg(getCtx(), "JP_Contract_SetContractProcessPeriod");
+					addLog(msg);
 				}
 			}
 
@@ -627,11 +667,17 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				MContractProcPeriod cpp = m_ContractCalendar.getContractProcessPeriod(getCtx(), cLine.getJP_ProcPeriod_End_Inv_Date());
 				if(cpp == null)
 				{
-					throw new Exception(Msg.getMsg(getCtx(), "NotFound") + " : " + 	Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID")
-							+ " - " + Msg.getElement(getCtx(), "JP_ContractLine_ID") + " : " +cLine.getLine()
-							+ " - " + Msg.getElement(getCtx(), "getJP_ProcPeriod_End_Inv_Date"));
+					//Could not set Contract Process Period because of not found.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_ID") + " - " + Msg.getMsg(getCtx(), "JP_Contract_CouldNotSetContractProcessPeriod") ;
+					addLog(msg);
+
 				}else {
+
 					cLine.setJP_ProcPeriod_End_Inv_ID(cpp.getJP_ContractProcPeriod_ID());
+
+					//Set Contract Process Period.
+					msg = Msg.getElement(getCtx(), "JP_ProcPeriod_End_Inv_ID") + " - " +  Msg.getMsg(getCtx(), "JP_Contract_SetContractProcessPeriod");
+					addLog(msg);
 				}
 			}
 		}
