@@ -305,7 +305,7 @@ public class CallContractProcess extends SvrProcess {
 						return msg;
 					}
 
-					MContractContent contractContent = MContractContent.get(getCtx(), JP_ContractContent_ID);
+					MContractContent contractContent = new MContractContent(getCtx(), JP_ContractContent_ID, get_TrxName());
 					if(!contractContent.getParent().getJP_ContractType().equals(MContract.JP_CONTRACTTYPE_PeriodContract))
 					{
 						//Could not Call Contract Process - Contract Type
@@ -332,7 +332,7 @@ public class CallContractProcess extends SvrProcess {
 						//Could not Call Contract Process - DocStatus of JP_ContractContent
 						MColumn column = MColumn.get(getCtx(), "JP_ContractContent", "DocStatus");
 						String msg = Msg.getMsg(getCtx(), "JP_CouldNotCallContractProcess")
-								+ Msg.getElement(getCtx(), "JP_ContractContent") + " - " + Msg.getMsg(getCtx(), "DocStatus")
+								+ Msg.getElement(getCtx(), "JP_ContractContent") + " - " + Msg.getElement(getCtx(), "DocStatus")
 								+ " - " + MRefList.getListName(getCtx(), column.getAD_Reference_Value_ID(), contractContent.getDocStatus());
 						return msg;
 					}
