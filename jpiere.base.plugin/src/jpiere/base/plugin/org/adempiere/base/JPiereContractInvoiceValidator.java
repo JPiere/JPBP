@@ -910,7 +910,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				FactLine[]  factLine = fact.getLines();
 				for(int i = 0; i < factLine.length; i++)
 				{
-					if(invoice.getC_Order_ID() > 0)
+					if(JP_Order_ID > 0)
 						factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
 
 					if(JP_Contract_ID > 0)
