@@ -195,7 +195,11 @@ public class MReportCubeJP extends X_PA_ReportCubeJP {
 			if ( isProjectTaskDim() )
 				values.add("C_ProjectTask_ID");
 			if ( isContractDimJP() )
+			{
+				values.add("JP_Contract_ID");
 				values.add("JP_ContractContent_ID");
+				values.add("JP_ContractProcPeriod_ID");
+			}
 
 			//  --(CASE v.IsGL_Category_ID WHEN 'Y' THEN f."GL_Category_ID END) GL_Category_ID
 
@@ -321,7 +325,11 @@ public class MReportCubeJP extends X_PA_ReportCubeJP {
 			if ( isProjectTaskDim() )
 				values.add("C_ProjectTask_ID");
 			if ( isContractDimJP() )
+			{
+				values.add("JP_Contract_ID");
 				values.add("JP_ContractContent_ID");
+				values.add("JP_ContractProcPeriod_ID");
+			}
 
 			//  --(CASE v.IsGL_Category_ID WHEN 'Y' THEN f."GL_Category_ID END) GL_Category_ID
 
