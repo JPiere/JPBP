@@ -53,6 +53,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  *
  *
  * JPIERE-0364: Recognition Document
+ * JPIERE-0521: Add JP_Contract_ID, JP_ContractProcPeriod_ID Columns to Fact Acct Table
  *
  * <pre>
  *   Table:              JP_Recognition
@@ -391,8 +392,18 @@ public class Doc_JPRecognition extends Doc
 					fLines[i].setLocationFromBPartner(recog.getBill_Location_ID(), false);  //  to Loc
 				else
 					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				fLines[i].set_ValueNoCheck("JP_Order_ID", recog.getC_Order_ID());
-				fLines[i].set_ValueNoCheck("JP_ContractContent_ID", recog.getJP_ContractContent_ID());
+
+				if(recog.getC_Order_ID() > 0)
+					fLines[i].set_ValueNoCheck("JP_Order_ID", recog.getC_Order_ID());
+
+				if(recog.getJP_Contract_ID() > 0)
+					fLines[i].set_ValueNoCheck("JP_Contract_ID", recog.getJP_Contract_ID());
+
+				if(recog.getJP_ContractContent_ID() > 0)
+					fLines[i].set_ValueNoCheck("JP_ContractContent_ID", recog.getJP_ContractContent_ID());
+
+				if(recog.getJP_ContractProcPeriod_ID() > 0)
+					fLines[i].set_ValueNoCheck("JP_ContractProcPeriod_ID", recog.getJP_ContractProcPeriod_ID());
 			}
 		}//for
 

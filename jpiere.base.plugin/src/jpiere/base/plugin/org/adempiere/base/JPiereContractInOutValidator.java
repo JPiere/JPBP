@@ -56,6 +56,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  *
  *  JPIERE-0363: Contract Management
  *  JPIERE-0408:Set Counter Doc Line Info
+ *  JPIERE-0521: Add JP_Contract_ID, JP_ContractProcPeriod_ID Columns to Fact Acct Table
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -612,37 +613,46 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 	@Override
 	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po)
 	{
+		//JPIERE-0521: Add JP_Contract_ID, JP_ContractProcPeriod_ID Columns to Fact Acct Table
 		if(po.get_TableName().equals(MInOut.Table_Name))
 		{
-			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
-			if(JP_ContractContent_ID > 0)
+			MInOut inOut = (MInOut)po;
+
+			int JP_Contract_ID = inOut.get_ValueAsInt("JP_Contract_ID");
+			int JP_ContractContent_ID = inOut.get_ValueAsInt("JP_ContractContent_ID");
+			int JP_ContractProcPeriod_ID = inOut.get_ValueAsInt("JP_ContractProcPeriod_ID");;
+
+			int JP_Order_ID = 0;
+			if(inOut.getC_Order_ID() > 0)
 			{
-				MInOut inOut = (MInOut)po;
-				//Set Order Info
-				for(Fact fact : facts)
+				JP_Order_ID = inOut.getC_Order_ID();
+			}else if(inOut.getM_RMA_ID() > 0){
+				int M_RMA_ID = inOut.getM_RMA_ID();
+				MRMA rma = new MRMA (Env.getCtx(), M_RMA_ID, inOut.get_TrxName());
+				JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+			}
+
+			for(Fact fact : facts)
+			{
+				FactLine[]  factLine = fact.getLines();
+				for(int i = 0; i < factLine.length; i++)
 				{
-					FactLine[]  factLine = fact.getLines();
-					for(int i = 0; i < factLine.length; i++)
-					{
-						if(inOut.getC_Order_ID() > 0)
-						{
-							factLine[i].set_ValueNoCheck("JP_Order_ID", inOut.getC_Order_ID());
-						}else if(inOut.getM_RMA_ID() > 0){
-							int M_RMA_ID = inOut.getM_RMA_ID();
-							MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID,null);
-							int JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
-							if(JP_Order_ID > 0)
-								factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
-						}
+					if(JP_Order_ID > 0)
+						factLine[i].set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
 
+					if(JP_Contract_ID > 0)
+						factLine[i].set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
+
+					if(JP_ContractContent_ID > 0)
 						factLine[i].set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
-					}//for
 
+					if(JP_ContractProcPeriod_ID > 0)
+						factLine[i].set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 				}//for
 
-			}//if(JP_ContractContent_ID > 0)
+			}//for
 
-		}//if(po.get_TableName().equals(MInvoice.Table_Name))
+		}//JPIERE-0521
 
 		return null;
 	}
