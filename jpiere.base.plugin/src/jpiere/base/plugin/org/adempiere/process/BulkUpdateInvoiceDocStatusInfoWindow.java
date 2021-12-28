@@ -18,16 +18,26 @@ import java.util.Collection;
 import java.util.logging.Level;
 
 import org.adempiere.model.GenericPO;
+import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MColumn;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MProcess;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
+import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
+import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWFProcess;
 
 /**
- *  JPIERE-0221,0222
+ *  JPIERE-0221
+ *  JPIERE-0222
+ *
  *  Document Status of AP/AR Bulk Update
  *
  *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
@@ -68,6 +78,10 @@ public class BulkUpdateInvoiceDocStatusInfoWindow extends SvrProcess {
 		String success = Msg.getMsg(getCtx(), "JP_Success");
 		String failure = Msg.getMsg(getCtx(), "JP_Failure");
 
+		ProcessInfo pInfo = getProcessInfo();
+		MColumn docActionColumn = MColumn.get(getCtx(), MInvoice.Table_Name, MInvoice.COLUMNNAME_DocAction);
+		MProcess process = MProcess.get(docActionColumn.getAD_Process_ID());
+
 		for(PO po : genericPOs)
 		{
 			MInvoice inv = new MInvoice(getCtx(), po.get_ID(),get_TrxName());
@@ -76,15 +90,49 @@ public class BulkUpdateInvoiceDocStatusInfoWindow extends SvrProcess {
 				if(inv.isProcessed())
 					continue;
 
-				if(inv.processIt(p_DocAction))
+				String wfStatus = MWFActivity.getActiveInfo(Env.getCtx(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+				if (Util.isEmpty(wfStatus))
 				{
-					successNo++;
-					inv.saveEx(get_TrxName());
-					addBufferLog(0, null, null, success +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+					if(DocAction.ACTION_Complete.equals(p_DocAction))
+					{
+						pInfo.setPO(inv);
+						pInfo.setRecord_ID(inv.getC_Invoice_ID());
+						pInfo.setTable_ID(MInvoice.Table_ID);
+						MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, process.getAD_Workflow_ID());
+						if(wfProcess.getWFState().equals(MWFProcess.WFSTATE_Terminated))
+						{
+							failureNo++;
+							inv.saveEx(get_TrxName());
+							addBufferLog(0, null, null, failure +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+
+						}else {
+
+							successNo++;
+							inv.saveEx(get_TrxName());
+							addBufferLog(0, null, null, success +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+
+						}
+
+					}else if(DocAction.ACTION_Prepare.equals(p_DocAction)) {
+
+						if(inv.processIt(p_DocAction))
+						{
+							successNo++;
+							inv.saveEx(get_TrxName());
+							addBufferLog(0, null, null, success +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+						}else {
+
+							failureNo++;
+							inv.saveEx(get_TrxName());
+							addBufferLog(0, null, null, failure +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+						}
+
+					}
+
 				}else {
+
 					failureNo++;
-					inv.saveEx(get_TrxName());
-					addBufferLog(0, null, null, failure +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
+					addBufferLog(0, null, null, Msg.getMsg(getCtx(), "WFActiveForRecord") +":" + inv.getDocumentNo(), MInvoice.Table_ID, inv.getC_Invoice_ID());
 				}
 
 			}catch(Exception e){
