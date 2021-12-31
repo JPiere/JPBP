@@ -1104,14 +1104,20 @@ public class Doc_JPRecognition extends Doc
 
 			//CR - Invoice Expense Acct
 			dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
-			dr.setQty(line.getQty().negate());
+			if(dr != null)
+			{
+				dr.setQty(line.getQty().negate());
+			}
 
 			//DR - Recognition Expense Acct
 			cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-			cr.setQty(line.getQty());
+			if(cr != null)
+			{
+				cr.setQty(line.getQty());
 
-			cr.setM_Locator_ID(line.getM_Locator_ID());
-			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+				cr.setM_Locator_ID(line.getM_Locator_ID());
+				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+			}
 
 		}	//	for all lines
 
