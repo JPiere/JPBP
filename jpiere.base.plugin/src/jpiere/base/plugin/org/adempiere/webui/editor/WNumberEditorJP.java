@@ -71,8 +71,6 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 
 	private int displayType;
 
-	private boolean tableEditor;
-
 	private String originalStyle;
 
     public WNumberEditorJP()

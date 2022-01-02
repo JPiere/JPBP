@@ -18,18 +18,15 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-
-import jpiere.base.plugin.org.adempiere.model.I_JP_Corporation;
-
-import org.compiere.model.MTable;
+import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_CorporationJP
- *  @author iDempiere (generated)
- *  @version Release 2.1
+ *  @author iDempiere (generated) 
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
-public interface I_I_CorporationJP
+public interface I_I_CorporationJP 
 {
 
     /** TableName=I_CorporationJP */
@@ -40,7 +37,7 @@ public interface I_I_CorporationJP
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 3 - Client - Org
+    /** AccessLevel = 3 - Client - Org 
      */
     BigDecimal accessLevel = BigDecimal.valueOf(3);
 
@@ -197,10 +194,10 @@ public interface I_I_CorporationJP
     /** Column name JP_Corporation_ID */
     public static final String COLUMNNAME_JP_Corporation_ID = "JP_Corporation_ID";
 
-	/** Set JP_Corporation	  */
+	/** Set Corporation	  */
 	public void setJP_Corporation_ID (int JP_Corporation_ID);
 
-	/** Get JP_Corporation	  */
+	/** Get Corporation	  */
 	public int getJP_Corporation_ID();
 
 	public I_JP_Corporation getJP_Corporation() throws RuntimeException;

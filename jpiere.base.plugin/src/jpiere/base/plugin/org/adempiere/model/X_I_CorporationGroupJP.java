@@ -19,25 +19,18 @@ package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-
-import jpiere.base.plugin.org.adempiere.model.I_JP_Corporation;
-import jpiere.base.plugin.org.adempiere.model.I_JP_CorporationGroup;
-
-import org.compiere.model.I_Persistent;
-import org.compiere.model.MTable;
-import org.compiere.model.PO;
-import org.compiere.model.POInfo;
+import org.compiere.model.*;
 
 /** Generated Model for I_CorporationGroupJP
- *  @author iDempiere (generated)
- *  @version Release 2.1 - $Id$ */
-public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP, I_Persistent
+ *  @author iDempiere (generated) 
+ *  @version Release 8.2 - $Id$ */
+public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20150506L;
+	private static final long serialVersionUID = 20220102L;
 
     /** Standard Constructor */
     public X_I_CorporationGroupJP (Properties ctx, int I_CorporationGroupJP_ID, String trxName)
@@ -46,8 +39,6 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
       /** if (I_CorporationGroupJP_ID == 0)
         {
 			setI_CorporationGroupJP_ID (0);
-			setName (null);
-			setValue (null);
         } */
     }
 
@@ -58,7 +49,7 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org
+      * @return 3 - Client - Org 
       */
     protected int get_AccessLevel()
     {
@@ -74,8 +65,8 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_I_CorporationGroupJP[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_I_CorporationGroupJP[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -88,13 +79,13 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 
 	/** Get CorporationValue.
 		@return CorporationValue	  */
-	public String getCorporationValue ()
+	public String getCorporationValue () 
 	{
 		return (String)get_Value(COLUMNNAME_CorporationValue);
 	}
 
 	/** Set Description.
-		@param Description
+		@param Description 
 		Optional short description of the record
 	  */
 	public void setDescription (String Description)
@@ -105,7 +96,7 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription ()
+	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
@@ -114,15 +105,15 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 		@param I_CorporationGroupJP_ID I_CorporationGroupJP	  */
 	public void setI_CorporationGroupJP_ID (int I_CorporationGroupJP_ID)
 	{
-		if (I_CorporationGroupJP_ID < 1)
+		if (I_CorporationGroupJP_ID < 1) 
 			set_ValueNoCheck (COLUMNNAME_I_CorporationGroupJP_ID, null);
-		else
+		else 
 			set_ValueNoCheck (COLUMNNAME_I_CorporationGroupJP_ID, Integer.valueOf(I_CorporationGroupJP_ID));
 	}
 
 	/** Get I_CorporationGroupJP.
 		@return I_CorporationGroupJP	  */
-	public int getI_CorporationGroupJP_ID ()
+	public int getI_CorporationGroupJP_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_I_CorporationGroupJP_ID);
 		if (ii == null)
@@ -139,13 +130,13 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 
 	/** Get I_CorporationGroupJP_UU.
 		@return I_CorporationGroupJP_UU	  */
-	public String getI_CorporationGroupJP_UU ()
+	public String getI_CorporationGroupJP_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_I_CorporationGroupJP_UU);
 	}
 
 	/** Set Import Error Message.
-		@param I_ErrorMsg
+		@param I_ErrorMsg 
 		Messages generated from import process
 	  */
 	public void setI_ErrorMsg (String I_ErrorMsg)
@@ -156,13 +147,13 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	/** Get Import Error Message.
 		@return Messages generated from import process
 	  */
-	public String getI_ErrorMsg ()
+	public String getI_ErrorMsg () 
 	{
 		return (String)get_Value(COLUMNNAME_I_ErrorMsg);
 	}
 
 	/** Set Imported.
-		@param I_IsImported
+		@param I_IsImported 
 		Has this import been processed
 	  */
 	public void setI_IsImported (boolean I_IsImported)
@@ -173,13 +164,13 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	/** Get Imported.
 		@return Has this import been processed
 	  */
-	public boolean isI_IsImported ()
+	public boolean isI_IsImported () 
 	{
 		Object oo = get_Value(COLUMNNAME_I_IsImported);
-		if (oo != null)
+		if (oo != null) 
 		{
-			 if (oo instanceof Boolean)
-				 return ((Boolean)oo).booleanValue();
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
 			return "Y".equals(oo);
 		}
 		return false;
@@ -190,19 +181,19 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 		return (I_JP_CorporationGroup)MTable.get(getCtx(), I_JP_CorporationGroup.Table_Name)
 			.getPO(getJP_CorporationGroup_ID(), get_TrxName());	}
 
-	/** Set JP_CorporationGroup.
-		@param JP_CorporationGroup_ID JP_CorporationGroup	  */
+	/** Set Corporation Group.
+		@param JP_CorporationGroup_ID Corporation Group	  */
 	public void setJP_CorporationGroup_ID (int JP_CorporationGroup_ID)
 	{
-		if (JP_CorporationGroup_ID < 1)
+		if (JP_CorporationGroup_ID < 1) 
 			set_Value (COLUMNNAME_JP_CorporationGroup_ID, null);
-		else
+		else 
 			set_Value (COLUMNNAME_JP_CorporationGroup_ID, Integer.valueOf(JP_CorporationGroup_ID));
 	}
 
-	/** Get JP_CorporationGroup.
-		@return JP_CorporationGroup	  */
-	public int getJP_CorporationGroup_ID ()
+	/** Get Corporation Group.
+		@return Corporation Group	  */
+	public int getJP_CorporationGroup_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CorporationGroup_ID);
 		if (ii == null)
@@ -215,19 +206,19 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 		return (I_JP_Corporation)MTable.get(getCtx(), I_JP_Corporation.Table_Name)
 			.getPO(getJP_Corporation_ID(), get_TrxName());	}
 
-	/** Set JP_Corporation.
-		@param JP_Corporation_ID JP_Corporation	  */
+	/** Set Corporation.
+		@param JP_Corporation_ID Corporation	  */
 	public void setJP_Corporation_ID (int JP_Corporation_ID)
 	{
-		if (JP_Corporation_ID < 1)
+		if (JP_Corporation_ID < 1) 
 			set_Value (COLUMNNAME_JP_Corporation_ID, null);
-		else
+		else 
 			set_Value (COLUMNNAME_JP_Corporation_ID, Integer.valueOf(JP_Corporation_ID));
 	}
 
-	/** Get JP_Corporation.
-		@return JP_Corporation	  */
-	public int getJP_Corporation_ID ()
+	/** Get Corporation.
+		@return Corporation	  */
+	public int getJP_Corporation_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Corporation_ID);
 		if (ii == null)
@@ -236,7 +227,7 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	}
 
 	/** Set Name.
-		@param Name
+		@param Name 
 		Alphanumeric identifier of the entity
 	  */
 	public void setName (String Name)
@@ -247,13 +238,13 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName ()
+	public String getName () 
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Name 2.
-		@param Name2
+		@param Name2 
 		Additional Name
 	  */
 	public void setName2 (String Name2)
@@ -264,13 +255,13 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	/** Get Name 2.
 		@return Additional Name
 	  */
-	public String getName2 ()
+	public String getName2 () 
 	{
 		return (String)get_Value(COLUMNNAME_Name2);
 	}
 
 	/** Set Processed.
-		@param Processed
+		@param Processed 
 		The document has been processed
 	  */
 	public void setProcessed (boolean Processed)
@@ -281,13 +272,13 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	/** Get Processed.
 		@return The document has been processed
 	  */
-	public boolean isProcessed ()
+	public boolean isProcessed () 
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null)
+		if (oo != null) 
 		{
-			 if (oo instanceof Boolean)
-				 return ((Boolean)oo).booleanValue();
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
 			return "Y".equals(oo);
 		}
 		return false;
@@ -302,20 +293,20 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public boolean isProcessing ()
+	public boolean isProcessing () 
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null)
+		if (oo != null) 
 		{
-			 if (oo instanceof Boolean)
-				 return ((Boolean)oo).booleanValue();
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Search Key.
-		@param Value
+		@param Value 
 		Search key for the record in the format required - must be unique
 	  */
 	public void setValue (String Value)
@@ -326,7 +317,7 @@ public class X_I_CorporationGroupJP extends PO implements I_I_CorporationGroupJP
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue ()
+	public String getValue () 
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}
