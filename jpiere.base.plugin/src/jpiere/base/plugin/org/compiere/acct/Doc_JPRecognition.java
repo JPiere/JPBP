@@ -39,6 +39,7 @@ import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
@@ -54,6 +55,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  *
  * JPIERE-0364: Recognition Document
  * JPIERE-0521: Add JP_Contract_ID, JP_ContractProcPeriod_ID Columns to Fact Acct Table
+ * JPIERE-0536: Journal Policy of Recognition Doc if no accounting config
  *
  * <pre>
  *   Table:              JP_Recognition
@@ -414,6 +416,15 @@ public class Doc_JPRecognition extends Doc
 	} // createFact
 
 
+	/**
+	 *
+	 * Revenue Recognition
+	 *
+	 * @param as
+	 * @param contractAcct
+	 * @param fact
+	 * @return
+	 */
 	private String postJPR(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
@@ -738,6 +749,15 @@ public class Doc_JPRecognition extends Doc
 	}//JPR
 
 
+	/**
+	 *
+	 * Revenue Recognition Credit Memo
+	 *
+	 * @param as
+	 * @param contractAcct
+	 * @param fact
+	 * @return
+	 */
 	private String postJPS(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
@@ -1039,6 +1059,15 @@ public class Doc_JPRecognition extends Doc
 	}//JPS
 
 
+	/**
+	 *
+	 * Expense Recognition
+	 *
+	 * @param as
+	 * @param contractAcct
+	 * @param fact
+	 * @return
+	 */
 	private String postJPX(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
@@ -1092,31 +1121,39 @@ public class Doc_JPRecognition extends Doc
 				BigDecimal discount = p_lines[i].getDiscount();
 				if (discount != null && discount.signum() != 0)
 				{
-					amt = amt.add(discount);
-					dAmt = discount;
-					//CR
-					fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
+					MAccount account = getRecognitionTDiscountRecAccount(line, contractAcct,  as);
+					if(account != null)
+					{
+						amt = amt.add(discount);
+						dAmt = discount;
+						//CR
+						fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
 
-					//DR
-					fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
+						//DR
+						fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
+					}
 				}
 			}
 
-			//CR - Invoice Expense Acct
-			dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
-			if(dr != null)
+			MAccount account = getRecognitionExpenseAccount(line, contractAcct,  as);
+			if(account != null)
 			{
-				dr.setQty(line.getQty().negate());
-			}
+				//CR - Invoice Expense Acct
+				dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
+				if(dr != null)
+				{
+					dr.setQty(line.getQty().negate());
+				}
 
-			//DR - Recognition Expense Acct
-			cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-			if(cr != null)
-			{
-				cr.setQty(line.getQty());
+				//DR - Recognition Expense Acct
+				cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
+				if(cr != null)
+				{
+					cr.setQty(line.getQty());
 
-				cr.setM_Locator_ID(line.getM_Locator_ID());
-				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+					cr.setM_Locator_ID(line.getM_Locator_ID());
+					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+				}
 			}
 
 		}	//	for all lines
@@ -1125,6 +1162,15 @@ public class Doc_JPRecognition extends Doc
 	}//JPX
 
 
+	/**
+	 *
+	 * Expense Recognition - Credit memo
+	 *
+	 * @param as
+	 * @param contractAcct
+	 * @param fact
+	 * @return
+	 */
 	private String postJPY(MAcctSchema as, MContractAcct contractAcct, Fact fact)
 	{
 		//  Line pointers
@@ -1180,24 +1226,39 @@ public class Doc_JPRecognition extends Doc
 				{
 					amt = amt.add(discount);
 					dAmt = discount;
-					//CR
-					fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
 
-					//DR
-					fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
+					MAccount account = getRecognitionTDiscountRecAccount(line, contractAcct,  as);
+					if(account != null)
+					{
+						//CR
+						fact.createLine (line, getRecognitionTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), dAmt, null);
+
+						//DR
+						fact.createLine (line, getInvoiceTDiscountRecAccount(line, contractAcct,  as), getC_Currency_ID(), null, dAmt);
+					}
 				}
 			}
 
-			//CR - Invoice Expense Acct -> DR
-			dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-			dr.setQty(line.getQty().negate());
+			MAccount account = getRecognitionExpenseAccount(line, contractAcct,  as);
+			if(account != null)
+			{
+				//CR - Invoice Expense Acct -> DR
+				dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
+				if(dr != null)
+				{
+					dr.setQty(line.getQty().negate());
+				}
 
-			//DR - Recognition Expense Acct -> CR
-			cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
-			cr.setQty(line.getQty());
+				//DR - Recognition Expense Acct -> CR
+				cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
+				if(cr != null)
+				{
+					cr.setQty(line.getQty());
 
-			cr.setM_Locator_ID(line.getM_Locator_ID());
-			cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+					cr.setM_Locator_ID(line.getM_Locator_ID());
+					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+				}
+			}
 
 		}	//	for all lines
 
@@ -1280,7 +1341,31 @@ public class Doc_JPRecognition extends Doc
 			if(contractChargeAcct != null && contractChargeAcct.getJP_Ch_Expense_Acct() > 0)
 			{
 				return MAccount.get(getCtx(), contractChargeAcct.getJP_Ch_Expense_Acct());
+
 			}else{
+
+				if(contractChargeAcct != null)
+				{
+					String JP_Recognition_JournalPolicy =contractAcct.getJP_Recognition_JournalPolicy();
+					if(Util.isEmpty(JP_Recognition_JournalPolicy))
+					{
+						JP_Recognition_JournalPolicy = MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted;
+					}
+
+					if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted))//NN
+					{
+						return null;
+
+					}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded)) {//DN
+
+						return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+
+					}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount)) {//DD
+
+						return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+					}
+				}
+
 				return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 			}
 
@@ -1291,7 +1376,30 @@ public class Doc_JPRecognition extends Doc
 				if(contractProductAcct != null && contractProductAcct.getJP_PurchaseOffset_Acct() > 0 && contractProductAcct.getJP_Purchase_Acct() > 0)
 				{
 					return MAccount.get(getCtx(),contractProductAcct.getJP_Purchase_Acct());
+
 				}else{
+
+					if(contractProductAcct != null)
+					{
+						String JP_Recognition_JournalPolicy =contractAcct.getJP_Recognition_JournalPolicy();
+						if(Util.isEmpty(JP_Recognition_JournalPolicy))
+						{
+							JP_Recognition_JournalPolicy = MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted;
+						}
+
+						if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted))//NN
+						{
+							return null;
+
+						}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded)) {//DN
+
+							return docLine.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
+
+						}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount)) {//DD
+
+							return docLine.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
+						}
+					}
 
 					return docLine.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
 				}
@@ -1302,7 +1410,31 @@ public class Doc_JPRecognition extends Doc
 				if(contractProductAcct != null && contractProductAcct.getJP_Expense_Acct() > 0)
 				{
 					return MAccount.get(getCtx(),contractProductAcct.getJP_Expense_Acct());
+
 				}else{
+
+					if(contractProductAcct != null)
+					{
+						String JP_Recognition_JournalPolicy =contractAcct.getJP_Recognition_JournalPolicy();
+						if(Util.isEmpty(JP_Recognition_JournalPolicy))
+						{
+							JP_Recognition_JournalPolicy = MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted;
+						}
+
+						if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted))//NN
+						{
+							return null;
+
+						}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded)) {//DN
+
+							return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+
+						}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount)) {//DD
+
+							return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+						}
+					}
+
 					return docLine.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 				}
 			}
@@ -1388,7 +1520,31 @@ public class Doc_JPRecognition extends Doc
 		if(contractProductAcct != null && contractProductAcct.getJP_TradeDiscountRec_Acct() > 0)
 		{
 			return MAccount.get(getCtx(),contractProductAcct.getJP_TradeDiscountRec_Acct());
+
 		}else{
+
+			if(contractAcct != null)
+			{
+				String JP_Recognition_JournalPolicy =contractAcct.getJP_Recognition_JournalPolicy();
+				if(Util.isEmpty(JP_Recognition_JournalPolicy))
+				{
+					JP_Recognition_JournalPolicy = MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted;
+				}
+
+				if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted))//NN
+				{
+					return null;
+
+				}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded)) {//DN
+
+					return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+
+				}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount)) {//DD
+
+					return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+				}
+			}
+
 			return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
 		}
 	}
@@ -1478,7 +1634,31 @@ public class Doc_JPRecognition extends Doc
 		if(taxAcct != null && taxAcct.getJP_TaxDue_Acct() > 0)
 		{
 			return MAccount.get(getCtx(), taxAcct.getJP_TaxDue_Acct());
+
 		}else{
+
+			if(contractAcct != null)
+			{
+				String JP_Recognition_JournalPolicy =contractAcct.getJP_Recognition_JournalPolicy();
+				if(Util.isEmpty(JP_Recognition_JournalPolicy))
+				{
+					JP_Recognition_JournalPolicy = MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted;
+				}
+
+				if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted))//NN
+				{
+					return null;
+
+				}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded)) {//DN
+
+					return null;
+
+				}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount)) {//DD
+
+					return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxDue,as);
+				}
+			}
+
 			return null;
 		}
 	}
@@ -1492,15 +1672,66 @@ public class Doc_JPRecognition extends Doc
 			if(taxAcct != null && taxAcct.getJP_TaxExpense_Acct() > 0)
 			{
 				return MAccount.get(getCtx(), taxAcct.getJP_TaxExpense_Acct());
+
 			}else{
+
+				if(contractAcct != null)
+				{
+					String JP_Recognition_JournalPolicy = contractAcct.getJP_Recognition_JournalPolicy();
+					if(Util.isEmpty(JP_Recognition_JournalPolicy))
+					{
+						JP_Recognition_JournalPolicy = MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted;
+					}
+
+					if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted))//NN
+					{
+						return null;
+
+					}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded)) {//DN
+
+						return null;
+
+					}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount)) {//DD
+
+						return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxExpense,as);
+					}
+				}
+
 				return null;
 			}
+
 		}else{
+
 			if(taxAcct != null && taxAcct.getJP_TaxCredit_Acct() > 0)
 			{
 				return MAccount.get(getCtx(), taxAcct.getJP_TaxCredit_Acct());
+
 			}else{
+
+				if(contractAcct != null)
+				{
+					String JP_Recognition_JournalPolicy = contractAcct.getJP_Recognition_JournalPolicy();
+					if(Util.isEmpty(JP_Recognition_JournalPolicy))
+					{
+						JP_Recognition_JournalPolicy = MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted;
+					}
+
+					if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted))//NN
+					{
 				return null;
+
+					}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded)) {//DN
+
+						return null;
+
+					}else if(JP_Recognition_JournalPolicy.equals(MContractAcct.JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount)) {//DD
+
+						return doc_Tax.getAccount(DocTax.ACCTTYPE_TaxCredit,as);
+					}
+				}
+
+				return null;
+
 			}
 		}
 	}

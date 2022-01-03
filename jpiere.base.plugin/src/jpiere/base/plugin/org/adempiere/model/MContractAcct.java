@@ -23,13 +23,18 @@ import java.util.logging.Level;
 
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 
-/** JPIERE-0363
-*
-* @author Hideaki Hagiwara
-*
-*/
+/**
+ *
+ * JPIERE-0363: Contract Management
+ * JPIERE-0536: Journal Policy of Recognition Doc if no accounting config
+ *
+ * @author Hideaki Hagiwara
+ *
+ **/
 public class MContractAcct extends X_JP_Contract_Acct {
 
 	public MContractAcct(Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -84,6 +89,32 @@ public class MContractAcct extends X_JP_Contract_Acct {
 				setDocAction(null);
 				setIsSplitWhenDifferenceJP(false);
 				setJP_RecogToInvoicePolicy(null);
+				setJP_Recognition_JournalPolicy(null);
+
+			}else {
+
+				if(getDocBaseType().equals("SOO"))
+				{
+
+					setJP_Recognition_JournalPolicy(JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded);
+
+				}else if(getDocBaseType().equals("POO")) {
+
+					if(Util.isEmpty(getJP_Recognition_JournalPolicy()))
+					{
+						log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_Recognition_JournalPolicy) );
+						return false;
+					}
+
+				}else {
+
+					setDocAction(null);
+					setIsSplitWhenDifferenceJP(false);
+					setJP_RecogToInvoicePolicy(null);
+					setJP_Recognition_JournalPolicy(null);
+				}
+
+
 			}
 		}
 

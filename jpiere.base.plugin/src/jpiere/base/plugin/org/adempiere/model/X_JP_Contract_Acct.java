@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_Contract_Acct
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171009L;
+	private static final long serialVersionUID = 20220103L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -75,8 +75,8 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Contract_Acct[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_Contract_Acct[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -99,34 +99,34 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 
 	/** DocAction AD_Reference_ID=135 */
 	public static final int DOCACTION_AD_Reference_ID=135;
-	/** Complete = CO */
-	public static final String DOCACTION_Complete = "CO";
-	/** Approve = AP */
-	public static final String DOCACTION_Approve = "AP";
-	/** Reject = RJ */
-	public static final String DOCACTION_Reject = "RJ";
-	/** Post = PO */
-	public static final String DOCACTION_Post = "PO";
-	/** Void = VO */
-	public static final String DOCACTION_Void = "VO";
-	/** Close = CL */
-	public static final String DOCACTION_Close = "CL";
-	/** Reverse - Correct = RC */
-	public static final String DOCACTION_Reverse_Correct = "RC";
-	/** Reverse - Accrual = RA */
-	public static final String DOCACTION_Reverse_Accrual = "RA";
-	/** Invalidate = IN */
-	public static final String DOCACTION_Invalidate = "IN";
-	/** Re-activate = RE */
-	public static final String DOCACTION_Re_Activate = "RE";
 	/** <None> = -- */
 	public static final String DOCACTION_None = "--";
+	/** Approve = AP */
+	public static final String DOCACTION_Approve = "AP";
+	/** Close = CL */
+	public static final String DOCACTION_Close = "CL";
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
+	/** Invalidate = IN */
+	public static final String DOCACTION_Invalidate = "IN";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
 	/** Prepare = PR */
 	public static final String DOCACTION_Prepare = "PR";
-	/** Unlock = XL */
-	public static final String DOCACTION_Unlock = "XL";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
 	/** Wait Complete = WC */
 	public static final String DOCACTION_WaitComplete = "WC";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
 	/** Set Document Action.
 		@param DocAction 
 		The targeted status of the document
@@ -149,14 +149,16 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public static final String DOCBASETYPE_APInvoice = "API";
 	/** AR Invoice = ARI */
 	public static final String DOCBASETYPE_ARInvoice = "ARI";
-	/** Purchase Order = POO */
-	public static final String DOCBASETYPE_PurchaseOrder = "POO";
-	/** Sales Order = SOO */
-	public static final String DOCBASETYPE_SalesOrder = "SOO";
+	/** Contract Proc Schedule = JCS */
+	public static final String DOCBASETYPE_ContractProcSchedule = "JCS";
 	/** Material Receipt = MMR */
 	public static final String DOCBASETYPE_MaterialReceipt = "MMR";
 	/** Material Delivery = MMS */
 	public static final String DOCBASETYPE_MaterialDelivery = "MMS";
+	/** Purchase Order = POO */
+	public static final String DOCBASETYPE_PurchaseOrder = "POO";
+	/** Sales Order = SOO */
+	public static final String DOCBASETYPE_SalesOrder = "SOO";
 	/** Set Document BaseType.
 		@param DocBaseType 
 		Logical type of document
@@ -299,10 +301,10 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return (String)get_Value(COLUMNNAME_JP_Contract_Acct_UU);
 	}
 
-	/** Lump After Order All Recognized = LP */
-	public static final String JP_RECOGTOINVOICEPOLICY_LumpAfterOrderAllRecognized = "LP";
 	/** After Recognition = DD */
 	public static final String JP_RECOGTOINVOICEPOLICY_AfterRecognition = "DD";
+	/** Lump After Order All Recognized = LP */
+	public static final String JP_RECOGTOINVOICEPOLICY_LumpAfterOrderAllRecognized = "LP";
 	/** Manual = MA */
 	public static final String JP_RECOGTOINVOICEPOLICY_Manual = "MA";
 	/** Not Create Invoice from Recognition = NO */
@@ -320,6 +322,30 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public String getJP_RecogToInvoicePolicy () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_RecogToInvoicePolicy);
+	}
+
+	/** If no config, will be posted by default account. = DD */
+	public static final String JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultAccount = "DD";
+	/** If no config,will be posted by default but tax be excluded. = DN */
+	public static final String JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded = "DN";
+	/** If no config, the journal will not be posted. = NN */
+	public static final String JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted = "NN";
+	/** Set Journal Policy of Recognition Doc if no accounting config.
+		@param JP_Recognition_JournalPolicy 
+		JPIERE-0536:JPBP
+	  */
+	public void setJP_Recognition_JournalPolicy (String JP_Recognition_JournalPolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_Recognition_JournalPolicy, JP_Recognition_JournalPolicy);
+	}
+
+	/** Get Journal Policy of Recognition Doc if no accounting config.
+		@return JPIERE-0536:JPBP
+	  */
+	public String getJP_Recognition_JournalPolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_Recognition_JournalPolicy);
 	}
 
 	/** Set Name.
