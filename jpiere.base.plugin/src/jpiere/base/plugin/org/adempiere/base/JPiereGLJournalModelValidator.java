@@ -9,6 +9,7 @@ import org.compiere.model.FactsValidator;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MJournal;
+import org.compiere.model.MJournalLine;
 import org.compiere.model.ModelValidationEngine;
 /******************************************************************************
  * Product: JPiere                                                            *
@@ -37,7 +38,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 *
 * JPiere GL Journal Model Validator
 *
-* JPIERE-0522: Add JP_Contract_ID, JP_ContractContent_ID, JP_ContractProcPeriod_ID, JP_Order_ID Columns to GL_Journal Table
+* JPIERE-0522: Add JP_Contract_ID, JP_ContractContent_ID, JP_ContractProcPeriod_ID, JP_Order_ID Columns to GL_Journal&GL JournalLine Table
 *
 * @author h.hagiwara
 *
@@ -54,7 +55,7 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 			this.AD_Client_ID = client.getAD_Client_ID();
 
 		engine.addModelChange(MJournal.Table_Name, this);
-		//engine.addDocValidate(MJournal.Table_Name, this);
+		engine.addModelChange(MJournalLine.Table_Name, this);
 		engine.addFactsValidate(MJournal.Table_Name, this);
 
 		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereGLJournalModelValidator");
@@ -146,20 +147,41 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 			for(Fact fact : facts)
 			{
 				FactLine[]  factLine = fact.getLines();
+				PO m_GLJournalLine = null;
 				for(int i = 0; i < factLine.length; i++)
 				{
 
-					if(JP_Order_ID > 0)
+					m_GLJournalLine = factLine[i].getDocLine().getPO();
+
+					if(m_GLJournalLine.get_ValueAsInt(JP_ORDER_ID) > 0)
+					{
+						factLine[i].set_ValueNoCheck(JP_ORDER_ID, m_GLJournalLine.get_ValueAsInt(JP_ORDER_ID));
+
+					}else if(JP_Order_ID > 0) {
+
 						factLine[i].set_ValueNoCheck(JP_ORDER_ID, JP_Order_ID);
+					}
 
-					if(JP_Contract_ID > 0)
+					if(m_GLJournalLine.get_ValueAsInt(JP_CONTRACT_ID) > 0)
+					{
+						factLine[i].set_ValueNoCheck(JP_CONTRACT_ID, m_GLJournalLine.get_ValueAsInt(JP_CONTRACT_ID));
+					}else if(JP_Contract_ID > 0) {
 						factLine[i].set_ValueNoCheck(JP_CONTRACT_ID, JP_Contract_ID);
+					}
 
-					if(JP_ContractContent_ID > 0)
+					if(m_GLJournalLine.get_ValueAsInt(JP_CONTRACT_CONTENT_ID) > 0)
+					{
+						factLine[i].set_ValueNoCheck(JP_CONTRACT_CONTENT_ID, m_GLJournalLine.get_ValueAsInt(JP_CONTRACT_CONTENT_ID));
+					}else if(JP_ContractContent_ID > 0) {
 						factLine[i].set_ValueNoCheck(JP_CONTRACT_CONTENT_ID, JP_ContractContent_ID);
+					}
 
-					if(JP_ContractProcPeriod_ID > 0)
+					if(m_GLJournalLine.get_ValueAsInt(JP_CONTRACT_PROC_PERIOD_ID) > 0)
+					{
+						factLine[i].set_ValueNoCheck(JP_CONTRACT_PROC_PERIOD_ID, m_GLJournalLine.get_ValueAsInt(JP_CONTRACT_PROC_PERIOD_ID));
+					}else if(JP_ContractProcPeriod_ID > 0) {
 						factLine[i].set_ValueNoCheck(JP_CONTRACT_PROC_PERIOD_ID, JP_ContractProcPeriod_ID);
+					}
 
 				}//for
 
