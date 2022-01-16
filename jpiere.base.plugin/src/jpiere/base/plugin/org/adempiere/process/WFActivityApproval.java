@@ -25,6 +25,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
+import org.compiere.wf.MWFProcess;
 
 
 /**
@@ -99,6 +100,8 @@ public class WFActivityApproval extends SvrProcess {
 				try
 				{
 					m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
+					MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
+					wfpr.checkCloseActivities(m_activity.get_TrxName());
 
 				}catch (Exception e) {
 
