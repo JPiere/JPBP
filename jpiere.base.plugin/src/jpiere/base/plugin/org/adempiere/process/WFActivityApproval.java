@@ -13,6 +13,8 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.process;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.logging.Level;
 
@@ -99,6 +101,7 @@ public class WFActivityApproval extends SvrProcess {
 			{
 				try
 				{
+					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 					m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
 					MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
 					wfpr.checkCloseActivities(m_activity.get_TrxName());
@@ -113,7 +116,10 @@ public class WFActivityApproval extends SvrProcess {
 
 				try
 				{
+					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 					m_activity.setUserConfirmation(Env.getAD_User_ID(getCtx()), p_Comments);
+					MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
+					wfpr.checkCloseActivities(m_activity.get_TrxName());
 
 				}catch (Exception e){
 
