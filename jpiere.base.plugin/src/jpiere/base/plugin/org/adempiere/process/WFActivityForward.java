@@ -249,10 +249,14 @@ public class WFActivityForward extends SvrProcess {
 									MUser oldUser = MUser.get(getCtx(), AD_User_ID);
 									MUser newUser = MUser.get(getCtx(), p_JP_WF_Forward_User_ID);
 
-									if(approver.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )//JPIERE-0538
-										approver.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "N");
-
 									approver.setAD_User_ID(p_JP_WF_Forward_User_ID);
+
+									if(approver.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )//JPIERE-0538
+									{
+										JPiereWFActivityModelValidator.sendAdditinalApprovalRequestNotification(getCtx(), m_activity, approver, get_TrxName());
+										approver.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "Y");
+									}
+
 									approver.saveEx(get_TrxName());
 
 									m_activity.setTextMsg(p_Comments);

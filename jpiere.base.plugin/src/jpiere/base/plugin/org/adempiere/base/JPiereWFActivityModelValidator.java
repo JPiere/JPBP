@@ -338,6 +338,12 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 			return ;
 		}
 
+		MClient client = MClient.get(ctx,  m_WFActivity.getAD_Client_ID());
+		if(Util.isEmpty(client.getRequestEMail()) || (client.isSmtpAuthorization() && Util.isEmpty(client.getRequestUserPW())) )
+		{
+			return ;
+		}
+
 		MMailText text = new MMailText (ctx, m_node.getR_MailText_ID(), trxName);
 		PO m_po = MTable.get(m_WFActivity.getAD_Table_ID()).getPO(m_WFActivity.getRecord_ID(), trxName);
 		text.setPO(m_po, true);
@@ -364,7 +370,6 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 			message = text.getMailText(true);
 		}
 
-		MClient client = MClient.get(ctx,  m_WFActivity.getAD_Client_ID());
 		client.sendEMail(null, m_User, subject, message, pdf, text.isHtml());
 
 	}	//	sendEMail
