@@ -34,12 +34,14 @@ import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFEventAudit;
 
+import jpiere.base.plugin.org.adempiere.base.JPiereWFActivityModelValidator;
 import jpiere.base.plugin.org.adempiere.model.MWFAutoForward;
 
 
 /**
  *  JPIERE-0513: Approval of Unprocessed Work flow Activity at Info Window.
  *  JPIERE-0519: WF Auto Forward
+ *  JPIERE-0538: Send approval request notification
  *
  *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -148,6 +150,9 @@ public class WFActivityForward extends SvrProcess {
 
 						}//JPIERE-0519: WF Auto Forward - End
 
+						if(m_activity.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )//JPIERE-0538
+							m_activity.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "N");
+
 						if(!m_activity.forwardTo(p_JP_WF_Forward_User_ID, p_Comments))
 						{
 							throw new Exception(Msg.getMsg(getCtx(), "CannotForward"));
@@ -243,6 +248,9 @@ public class WFActivityForward extends SvrProcess {
 								{
 									MUser oldUser = MUser.get(getCtx(), AD_User_ID);
 									MUser newUser = MUser.get(getCtx(), p_JP_WF_Forward_User_ID);
+
+									if(approver.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )//JPIERE-0538
+										approver.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "N");
 
 									approver.setAD_User_ID(p_JP_WF_Forward_User_ID);
 									approver.saveEx(get_TrxName());
