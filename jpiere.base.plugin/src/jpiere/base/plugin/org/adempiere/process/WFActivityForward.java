@@ -150,13 +150,18 @@ public class WFActivityForward extends SvrProcess {
 
 						}//JPIERE-0519: WF Auto Forward - End
 
-						if(m_activity.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )//JPIERE-0538
-							m_activity.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "N");
-
+						//Forward
 						if(!m_activity.forwardTo(p_JP_WF_Forward_User_ID, p_Comments))
 						{
 							throw new Exception(Msg.getMsg(getCtx(), "CannotForward"));
 						}
+
+						//JPIERE-0538: Send approval request notification
+						if(m_activity.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )
+						{
+							JPiereWFActivityModelValidator.sendApprovalRequestNotification(getCtx(), m_activity, p_JP_WF_Forward_User_ID, p_Comments, get_TrxName());
+							m_activity.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "Y");
+						}//JPIERE-0538
 
 						MUser oldUser = MUser.get(getCtx(), AD_User_ID);
 						MUser newUser = MUser.get(getCtx(), p_JP_WF_Forward_User_ID);
@@ -165,7 +170,6 @@ public class WFActivityForward extends SvrProcess {
 						ea.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
 						ea.setNewValue(newUser.getName()+ "("+newUser.getAD_User_ID()+")");
 						ea.saveEx(get_TrxName());
-						break;
 					}
 
 
@@ -251,11 +255,12 @@ public class WFActivityForward extends SvrProcess {
 
 									approver.setAD_User_ID(p_JP_WF_Forward_User_ID);
 
-									if(approver.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )//JPIERE-0538
+									//JPIERE-0538: Send approval request notification
+									if(approver.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )
 									{
-										JPiereWFActivityModelValidator.sendAdditinalApprovalRequestNotification(getCtx(), m_activity, approver, get_TrxName());
+										JPiereWFActivityModelValidator.sendAdditinalApprovalRequestNotification(getCtx(), m_activity, approver, p_Comments, get_TrxName());
 										approver.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "Y");
-									}
+									}//JPIERE-0538
 
 									approver.saveEx(get_TrxName());
 
@@ -324,7 +329,7 @@ public class WFActivityForward extends SvrProcess {
 							eventLog.setDescription(Msg.getElement(getCtx(), MWFAutoForward.COLUMNNAME_JP_WF_AutoForward_ID));
 							eventLog.saveEx(get_TrxName());
 						}
-						break;
+						continue;
 
 					}else {
 
@@ -367,6 +372,14 @@ public class WFActivityForward extends SvrProcess {
 				MWFActivityApprover wfApprover = new MWFActivityApprover(getCtx(), 0, get_TrxName());
 				wfApprover.setAD_WF_Activity_ID(m_activity.getAD_WF_Activity_ID());
 				wfApprover.setAD_User_ID(additional_User_ID);
+
+				//JPIERE-0538: Send approval request notification
+				if(wfApprover.get_ColumnIndex(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST) >= 0 )
+				{
+					JPiereWFActivityModelValidator.sendAdditinalApprovalRequestNotification(getCtx(), m_activity, wfApprover, p_Comments, get_TrxName());
+					wfApprover.set_ValueNoCheck(JPiereWFActivityModelValidator.IS_PROCESSED_APPROVAL_REQUEST, "Y");
+				}//JPIERE-0538
+
 				wfApprover.saveEx(get_TrxName());
 
 				additionalUser = MUser.get(additional_User_ID);

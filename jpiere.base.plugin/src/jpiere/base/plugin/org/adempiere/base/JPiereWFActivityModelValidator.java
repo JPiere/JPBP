@@ -127,7 +127,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 					//JPIERE-0538 : Send approval request notification to user
 					if( wfa.get_ColumnIndex(IS_PROCESSED_APPROVAL_REQUEST) >= 0 && !wfa.get_ValueAsBoolean(IS_PROCESSED_APPROVAL_REQUEST))
 					{
-						sendApprovalRequestNotification(po.getCtx(), wfa, wfa.getAD_User_ID(), po.get_TrxName());
+						sendApprovalRequestNotification(po.getCtx(), wfa, wfa.getAD_User_ID(), null, po.get_TrxName());
 						wfa.set_ValueNoCheck(IS_PROCESSED_APPROVAL_REQUEST, "Y");
 					}
 				}
@@ -144,7 +144,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 					MUserRoles[] userRoles = MUserRoles.getOfRole(po.getCtx(), wfr.getAD_Role_ID());
 					for(MUserRoles userRole : userRoles)
 					{
-						sendApprovalRequestNotification(po.getCtx(), wfa, userRole.getAD_User_ID(), po.get_TrxName());
+						sendApprovalRequestNotification(po.getCtx(), wfa, userRole.getAD_User_ID(), null, po.get_TrxName());
 					}
 					wfa.set_ValueNoCheck(IS_PROCESSED_APPROVAL_REQUEST, "Y");
 				}
@@ -221,7 +221,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 								//JPIERE-0538 :  Send approval request notification to additional approval user.
 								if( wfApprover.get_ColumnIndex(IS_PROCESSED_APPROVAL_REQUEST) >= 0 && !wfApprover.get_ValueAsBoolean(IS_PROCESSED_APPROVAL_REQUEST))
 								{
-									sendAdditinalApprovalRequestNotification(po.getCtx(), wfa, wfApprover, po.get_TrxName());
+									sendAdditinalApprovalRequestNotification(po.getCtx(), wfa, wfApprover, null, po.get_TrxName());
 									wfApprover.set_ValueNoCheck(IS_PROCESSED_APPROVAL_REQUEST, "Y");
 								}
 								wfApprover.saveEx(po.get_TrxName());
@@ -235,7 +235,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 							//JPIERE-0538 :  Send approval request notification to additional approval user.
 							if( wfApprover.get_ColumnIndex(IS_PROCESSED_APPROVAL_REQUEST) >= 0 && !wfApprover.get_ValueAsBoolean(IS_PROCESSED_APPROVAL_REQUEST))
 							{
-								sendAdditinalApprovalRequestNotification(po.getCtx(), wfa, wfApprover, po.get_TrxName());
+								sendAdditinalApprovalRequestNotification(po.getCtx(), wfa, wfApprover, null, po.get_TrxName());
 								wfApprover.set_ValueNoCheck(IS_PROCESSED_APPROVAL_REQUEST, "Y");
 							}
 							wfApprover.saveEx(po.get_TrxName());
@@ -267,7 +267,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 	 * @param trxName
 	 * @return
 	 */
-	static public boolean sendApprovalRequestNotification(Properties ctx, MWFActivity m_WFActivity, int AD_User_ID, String trxName)
+	static public boolean sendApprovalRequestNotification(Properties ctx, MWFActivity m_WFActivity, int AD_User_ID, String comments, String trxName)
 	{
 		if( m_WFActivity == null || AD_User_ID < 0)
 		{
@@ -279,12 +279,12 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 
 		if(user.isNotificationEMail())
 		{
-			sendEMail(ctx, m_node, m_WFActivity, user, trxName);
+			sendEMail(ctx, m_node, m_WFActivity, user, comments, trxName);
 		}
 
 		if(user.isNotificationNote())
 		{
-			createNote(ctx, m_node, m_WFActivity, user, trxName);
+			createNote(ctx, m_node, m_WFActivity, user, comments, trxName);
 		}
 
 		return true;
@@ -299,7 +299,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 	 * @param trxName
 	 * @return
 	 */
-	static public boolean sendAdditinalApprovalRequestNotification(Properties ctx, MWFActivity m_WFActivity, MWFActivityApprover approver, String trxName)
+	static public boolean sendAdditinalApprovalRequestNotification(Properties ctx, MWFActivity m_WFActivity, MWFActivityApprover approver, String comments, String trxName)
 	{
 		if( m_WFActivity == null || approver == null)
 		{
@@ -311,12 +311,12 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 
 		if(user.isNotificationEMail())
 		{
-			sendEMail(ctx, m_node, m_WFActivity, user, trxName);
+			sendEMail(ctx, m_node, m_WFActivity, user, comments, trxName);
 		}
 
 		if(user.isNotificationNote())
 		{
-			createNote(ctx, m_node, m_WFActivity, user, trxName);
+			createNote(ctx, m_node, m_WFActivity, user, comments, trxName);
 		}
 
 		return true;
@@ -331,7 +331,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 	 * @param m_User
 	 * @param trxName
 	 */
-	static private void sendEMail(Properties ctx, MWFNode m_node, MWFActivity m_WFActivity, MUser m_User, String trxName)
+	static private void sendEMail(Properties ctx, MWFNode m_node, MWFActivity m_WFActivity, MUser m_User, String comments, String trxName)
 	{
 		if(m_node == null || m_node.getR_MailText_ID() <= 0 || Util.isEmpty(m_User.getEMail()))
 		{
@@ -370,6 +370,11 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 			message = text.getMailText(true);
 		}
 
+		if(!Util.isEmpty(comments))
+		{
+			message = message + "\n\n--- " + Msg.getElement(ctx, "Comments") + " ---\n" + comments;
+		}
+
 		client.sendEMail(null, m_User, subject, message, pdf, text.isHtml());
 
 	}	//	sendEMail
@@ -384,7 +389,7 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 	 * @param m_User
 	 * @param trxName
 	 */
-	static private void createNote(Properties ctx, MWFNode m_node, MWFActivity m_WFActivity, MUser m_User, String trxName)
+	static private void createNote(Properties ctx, MWFNode m_node, MWFActivity m_WFActivity, MUser m_User, String comments, String trxName)
 	{
 		if(m_node == null || m_node.getR_MailText_ID() <= 0)
 		{
@@ -414,6 +419,12 @@ public class JPiereWFActivityModelValidator implements ModelValidator {
 			subject = text.getMailHeader();
 			message = text.getMailText(true);
 
+		}
+
+
+		if(!Util.isEmpty(comments))
+		{
+			message = message + "\n\n--- " + Msg.getElement(ctx, "Comments") + " ---\n" + comments;
 		}
 
 		note.setAD_WF_Activity_ID(m_WFActivity.getAD_WF_Activity_ID());
