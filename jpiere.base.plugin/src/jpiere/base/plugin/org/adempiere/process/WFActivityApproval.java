@@ -103,8 +103,11 @@ public class WFActivityApproval extends SvrProcess {
 				{
 					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 					m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
-					MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
-					wfpr.checkCloseActivities(m_activity.get_TrxName());
+					if(!p_JP_IsApproval.equals("Y"))
+					{
+						MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+						wfpr.checkCloseActivities(m_activity.get_TrxName());
+					}
 
 				}catch (Exception e) {
 
@@ -118,8 +121,8 @@ public class WFActivityApproval extends SvrProcess {
 				{
 					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 					m_activity.setUserConfirmation(Env.getAD_User_ID(getCtx()), p_Comments);
-					MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
-					wfpr.checkCloseActivities(m_activity.get_TrxName());
+					//MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+					//wfpr.checkCloseActivities(m_activity.get_TrxName());
 
 				}catch (Exception e){
 
