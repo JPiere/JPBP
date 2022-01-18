@@ -370,6 +370,7 @@ public class WFActivityForward extends SvrProcess {
 					continue;
 
 				MWFActivityApprover wfApprover = new MWFActivityApprover(getCtx(), 0, get_TrxName());
+				wfApprover.setAD_Org_ID(m_activity.getAD_Org_ID());
 				wfApprover.setAD_WF_Activity_ID(m_activity.getAD_WF_Activity_ID());
 				wfApprover.setAD_User_ID(additional_User_ID);
 
