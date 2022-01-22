@@ -220,9 +220,11 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 
 		//JPIERE-0219:Create Invoice When Ship/Receipt Complete
-		if( (po.get_ValueAsBoolean(MInOut.COLUMNNAME_IsSOTrx) && timing == MSysConfig.getIntValue("JP_INOUT_TIMING_OF_CREATE_AR_INVOICE", 9, po.getAD_Client_ID(), po.getAD_Org_ID()))
-				|| (!po.get_ValueAsBoolean(MInOut.COLUMNNAME_IsSOTrx) && timing == MSysConfig.getIntValue("JP_INOUT_TIMING_OF_CREATE_AP_INVOICE", 9, po.getAD_Client_ID(), po.getAD_Org_ID())) )
+		if(!po.get_ValueAsBoolean(MInOut.COLUMNNAME_Posted) && //Check of repost to avoid duplicate processing
+				( (po.get_ValueAsBoolean(MInOut.COLUMNNAME_IsSOTrx) && timing == MSysConfig.getIntValue("JP_INOUT_TIMING_OF_CREATE_AR_INVOICE", 9, po.getAD_Client_ID(), po.getAD_Org_ID()))
+				|| (!po.get_ValueAsBoolean(MInOut.COLUMNNAME_IsSOTrx) && timing == MSysConfig.getIntValue("JP_INOUT_TIMING_OF_CREATE_AP_INVOICE", 9, po.getAD_Client_ID(), po.getAD_Org_ID())) ) )
 		{
+
 			MInOut io = (MInOut)po;
 			String trxName = po.get_TrxName();
 			boolean isReversal = io.isReversal();
@@ -242,8 +244,6 @@ public class JPiereInOutModelValidator implements ModelValidator {
 					;//Noting to DO
 
 				}else{//Create invoice
-
-
 
 					if(orderDocType.getC_DocTypeInvoice_ID() == 0)
 						return null;
