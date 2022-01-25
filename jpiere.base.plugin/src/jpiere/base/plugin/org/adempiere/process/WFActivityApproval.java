@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DisplayType;
@@ -106,7 +107,17 @@ public class WFActivityApproval extends SvrProcess {
 					if(!p_JP_IsApproval.equals("Y"))
 					{
 						MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
-						wfpr.checkCloseActivities(m_activity.get_TrxName());
+						wfpr.checkCloseActivities(get_TrxName());
+
+					}else if(m_PO instanceof DocAction) {
+
+						m_PO.load(get_TrxName());
+						String docStatus = ((DocAction)m_PO).getDocStatus();
+						if(DocAction.STATUS_Completed.equals(docStatus))
+						{
+							MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+							wfpr.checkCloseActivities(get_TrxName());
+						}
 					}
 
 				}catch (Exception e) {
@@ -121,8 +132,8 @@ public class WFActivityApproval extends SvrProcess {
 				{
 					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 					m_activity.setUserConfirmation(Env.getAD_User_ID(getCtx()), p_Comments);
-					//MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
-					//wfpr.checkCloseActivities(m_activity.get_TrxName());
+					MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+					wfpr.checkCloseActivities(get_TrxName());
 
 				}catch (Exception e){
 
