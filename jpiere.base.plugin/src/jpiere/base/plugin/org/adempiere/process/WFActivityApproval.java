@@ -107,7 +107,8 @@ public class WFActivityApproval extends SvrProcess {
 					if(!p_JP_IsApproval.equals("Y"))
 					{
 						MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
-						wfpr.checkCloseActivities(get_TrxName());
+						wfpr.setWFState(MWFProcess.WFSTATE_Aborted);
+						wfpr.save(get_TrxName());
 
 					}else if(m_PO instanceof DocAction) {
 
