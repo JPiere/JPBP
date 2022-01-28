@@ -34,6 +34,8 @@ import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MPriceList;
+import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MSysConfig;
@@ -736,6 +738,26 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 					}
 				}
 
+			}
+		}
+
+		// IDEMPIERE-1597 Price List and Date must be not-updateable
+		if (!newRecord && (is_ValueChanged(COLUMNNAME_M_PriceList_ID) || is_ValueChanged(COLUMNNAME_DateOrdered))) {
+			int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM JP_EstimationLine WHERE JP_Estimation_ID=? AND M_Product_ID>0", getJP_Estimation_ID());
+			if (cnt > 0) {
+				if (is_ValueChanged(COLUMNNAME_M_PriceList_ID)) {
+					log.saveError("Error", Msg.getMsg(getCtx(), "CannotChangePl"));
+					return false;
+				}
+				if (is_ValueChanged(COLUMNNAME_DateOrdered)) {
+					MPriceList pList =  MPriceList.get(getCtx(), getM_PriceList_ID(), null);
+					MPriceListVersion plOld = pList.getPriceListVersion((Timestamp)get_ValueOld(COLUMNNAME_DateOrdered));
+					MPriceListVersion plNew = pList.getPriceListVersion((Timestamp)get_Value(COLUMNNAME_DateOrdered));
+					if (plNew == null || !plNew.equals(plOld)) {
+						log.saveError("Error", Msg.getMsg(getCtx(), "CannotChangeDateOrdered"));
+						return false;
+					}
+				}
 			}
 		}
 
