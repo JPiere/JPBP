@@ -136,6 +136,9 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		//int AD_PrintFormat_ID = 1000133;
 		//System.out.print(getC_DocTypeTarget_ID());
 		int AD_PrintFormat_ID = getC_DocTypeTarget().getAD_PrintFormat_ID();
+		if(AD_PrintFormat_ID == 0)
+			return null;
+
 		MPrintFormat pf = new  MPrintFormat(getCtx(), AD_PrintFormat_ID, get_TrxName());
 
 		// set PrintInfo (temp)

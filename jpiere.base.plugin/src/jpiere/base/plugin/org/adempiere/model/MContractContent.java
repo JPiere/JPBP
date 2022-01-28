@@ -114,14 +114,17 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 	public File createPDF (File file)
 	{
 		// set query to search this document
-		int m_docid = getJP_Contract_ID();
+		int m_docid = getJP_ContractContent_ID();
 		MQuery query = new MQuery(Table_Name);
-		query.addRestriction( COLUMNNAME_JP_Contract_ID, MQuery.EQUAL, Integer.valueOf(m_docid));
+		query.addRestriction( COLUMNNAME_JP_ContractContent_ID, MQuery.EQUAL, Integer.valueOf(m_docid));
 
 		// get Print Format
 		//int AD_PrintFormat_ID = 1000133;
 		//System.out.print(getC_DocTypeTarget_ID());
 		int AD_PrintFormat_ID = getC_DocType().getAD_PrintFormat_ID();
+		if(AD_PrintFormat_ID == 0)
+			return null;
+
 		MPrintFormat pf = new  MPrintFormat(getCtx(), AD_PrintFormat_ID, get_TrxName());
 
 		// set PrintInfo (temp)
@@ -139,7 +142,7 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		if(pf.getJasperProcess_ID() > 0)
 		{
 			ProcessInfo pi = new ProcessInfo ("", pf.getJasperProcess_ID());
-			pi.setRecord_ID ( getJP_Contract_ID() );
+			pi.setRecord_ID ( getJP_ContractContent_ID() );
 			pi.setIsBatch(true);
 
 			ServerProcessCtl.process(pi, null);

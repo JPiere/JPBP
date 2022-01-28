@@ -111,6 +111,9 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 		//int AD_PrintFormat_ID = 1000133;
 		//System.out.print(getC_DocTypeTarget_ID());
 		int AD_PrintFormat_ID = getC_DocType().getAD_PrintFormat_ID();
+		if(AD_PrintFormat_ID == 0)
+			return null;
+
 		MPrintFormat pf = new  MPrintFormat(getCtx(), AD_PrintFormat_ID, get_TrxName());
 
 		// set PrintInfo (temp)
