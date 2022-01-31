@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import org.adempiere.util.Callback;
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MBankAccount;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPaySelection;
 import org.compiere.model.MPaySelectionLine;
@@ -380,10 +381,12 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 	private int lines = 0;
 	private String createPaySelectionLine(MPaySelection paySelection, MBill bill)
 	{
+		MInvoice invoice = null;
+		MDocType docType = null;
 		MBillLine[] billLines =  bill.getLines();
 		for(int i = 0; i < billLines.length; i++)
 		{
-			MInvoice invoice = new MInvoice(getCtx(), billLines[i].getC_Invoice_ID(), get_TrxName());
+			invoice = new MInvoice(getCtx(), billLines[i].getC_Invoice_ID(), get_TrxName());
 			if(invoice.isPaid())
 				continue;
 
@@ -393,10 +396,19 @@ public class CreatePaySelectionFromBill extends SvrProcess{
 			if(mBankAccount.getC_Currency_ID() != invoice.getC_Currency_ID())
 				continue;
 
+			docType = MDocType.get(invoice.getC_DocTypeTarget_ID());
+
 			lines++;
 			BigDecimal openAmt = invoice.getOpenAmt();
 			MPaySelectionLine pselLine = new MPaySelectionLine (paySelection, lines*10, bill.getPaymentRule());
-			pselLine.setInvoice (invoice.getC_Invoice_ID(), invoice.isSOTrx(), openAmt, openAmt, Env.ZERO, Env.ZERO);
+
+			if(docType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)
+					|| docType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo))
+			{
+				pselLine.setInvoice (invoice.getC_Invoice_ID(), invoice.isSOTrx(), openAmt.negate(), openAmt.negate(), Env.ZERO, Env.ZERO);
+			}else {
+				pselLine.setInvoice (invoice.getC_Invoice_ID(), invoice.isSOTrx(), openAmt, openAmt, Env.ZERO, Env.ZERO);
+			}
 			pselLine.saveEx(get_TrxName());
 		}
 
