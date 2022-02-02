@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_Contract_Charge_Acct
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_Contract_Charge_Acct extends PO implements I_JP_Contract_Charge_Acct, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20220202L;
 
     /** Standard Constructor */
     public X_JP_Contract_Charge_Acct (Properties ctx, int JP_Contract_Charge_Acct_ID, String trxName)
@@ -68,7 +68,7 @@ public class X_JP_Contract_Charge_Acct extends PO implements I_JP_Contract_Charg
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Contract_Charge_Acct[")
+      StringBuilder sb = new StringBuilder ("X_JP_Contract_Charge_Acct[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -233,5 +233,27 @@ public class X_JP_Contract_Charge_Acct extends PO implements I_JP_Contract_Charg
 	public String getJP_Contract_Charge_Acct_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_Contract_Charge_Acct_UU);
+	}
+
+	public I_C_ValidCombination getJP_GL_Ch_Expense_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_Ch_Expense_Acct(), get_TrxName());	}
+
+	/** Set Charge(GL Journal).
+		@param JP_GL_Ch_Expense_Acct Charge(GL Journal)	  */
+	public void setJP_GL_Ch_Expense_Acct (int JP_GL_Ch_Expense_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_Ch_Expense_Acct, Integer.valueOf(JP_GL_Ch_Expense_Acct));
+	}
+
+	/** Get Charge(GL Journal).
+		@return Charge(GL Journal)	  */
+	public int getJP_GL_Ch_Expense_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_Ch_Expense_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

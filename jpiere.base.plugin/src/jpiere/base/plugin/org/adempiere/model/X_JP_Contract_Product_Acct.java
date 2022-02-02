@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_Contract_Product_Acct
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Product_Acct, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20220202L;
 
     /** Standard Constructor */
     public X_JP_Contract_Product_Acct (Properties ctx, int JP_Contract_Product_Acct_ID, String trxName)
@@ -68,7 +68,7 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Contract_Product_Acct[")
+      StringBuilder sb = new StringBuilder ("X_JP_Contract_Product_Acct[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -177,6 +177,100 @@ public class X_JP_Contract_Product_Acct extends PO implements I_JP_Contract_Prod
 	public int getJP_Expense_Acct () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Expense_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_GL_Expense_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_Expense_Acct(), get_TrxName());	}
+
+	/** Set Product Expense(GL Journal).
+		@param JP_GL_Expense_Acct Product Expense(GL Journal)	  */
+	public void setJP_GL_Expense_Acct (int JP_GL_Expense_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_Expense_Acct, Integer.valueOf(JP_GL_Expense_Acct));
+	}
+
+	/** Get Product Expense(GL Journal).
+		@return Product Expense(GL Journal)	  */
+	public int getJP_GL_Expense_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_Expense_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_GL_Revenue_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_Revenue_Acct(), get_TrxName());	}
+
+	/** Set Product Revenue(GL Journal).
+		@param JP_GL_Revenue_Acct Product Revenue(GL Journal)	  */
+	public void setJP_GL_Revenue_Acct (int JP_GL_Revenue_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_Revenue_Acct, Integer.valueOf(JP_GL_Revenue_Acct));
+	}
+
+	/** Get Product Revenue(GL Journal).
+		@return Product Revenue(GL Journal)	  */
+	public int getJP_GL_Revenue_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_Revenue_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_GL_TradeDiscountGrant_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_TradeDiscountGrant_Acct(), get_TrxName());	}
+
+	/** Set Trade Discount Granted(GL Journal).
+		@param JP_GL_TradeDiscountGrant_Acct 
+		Trade Discount Granted Account
+	  */
+	public void setJP_GL_TradeDiscountGrant_Acct (int JP_GL_TradeDiscountGrant_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_TradeDiscountGrant_Acct, Integer.valueOf(JP_GL_TradeDiscountGrant_Acct));
+	}
+
+	/** Get Trade Discount Granted(GL Journal).
+		@return Trade Discount Granted Account
+	  */
+	public int getJP_GL_TradeDiscountGrant_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_TradeDiscountGrant_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_GL_TradeDiscountRec_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_TradeDiscountRec_Acct(), get_TrxName());	}
+
+	/** Set Trade Discount Received(GL Journal).
+		@param JP_GL_TradeDiscountRec_Acct 
+		Trade Discount Receivable Account
+	  */
+	public void setJP_GL_TradeDiscountRec_Acct (int JP_GL_TradeDiscountRec_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_TradeDiscountRec_Acct, Integer.valueOf(JP_GL_TradeDiscountRec_Acct));
+	}
+
+	/** Get Trade Discount Received(GL Journal).
+		@return Trade Discount Receivable Account
+	  */
+	public int getJP_GL_TradeDiscountRec_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_TradeDiscountRec_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

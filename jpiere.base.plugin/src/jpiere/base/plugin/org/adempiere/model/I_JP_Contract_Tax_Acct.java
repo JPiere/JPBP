@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Contract_Tax_Acct
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_Contract_Tax_Acct 
@@ -152,6 +152,39 @@ public interface I_JP_Contract_Tax_Acct
 	/** Get JP_Contract_Tax_Acct_UU	  */
 	public String getJP_Contract_Tax_Acct_UU();
 
+    /** Column name JP_GL_TaxCredit_Acct */
+    public static final String COLUMNNAME_JP_GL_TaxCredit_Acct = "JP_GL_TaxCredit_Acct";
+
+	/** Set Tax Credit(GL Journal)	  */
+	public void setJP_GL_TaxCredit_Acct (int JP_GL_TaxCredit_Acct);
+
+	/** Get Tax Credit(GL Journal)	  */
+	public int getJP_GL_TaxCredit_Acct();
+
+	public I_C_ValidCombination getJP_GL_TaxCredit_A() throws RuntimeException;
+
+    /** Column name JP_GL_TaxDue_Acct */
+    public static final String COLUMNNAME_JP_GL_TaxDue_Acct = "JP_GL_TaxDue_Acct";
+
+	/** Set Tax Due(GL Journal)	  */
+	public void setJP_GL_TaxDue_Acct (int JP_GL_TaxDue_Acct);
+
+	/** Get Tax Due(GL Journal)	  */
+	public int getJP_GL_TaxDue_Acct();
+
+	public I_C_ValidCombination getJP_GL_TaxDue_A() throws RuntimeException;
+
+    /** Column name JP_GL_TaxExpense_Acct */
+    public static final String COLUMNNAME_JP_GL_TaxExpense_Acct = "JP_GL_TaxExpense_Acct";
+
+	/** Set Tax Expense(GL Journal)	  */
+	public void setJP_GL_TaxExpense_Acct (int JP_GL_TaxExpense_Acct);
+
+	/** Get Tax Expense(GL Journal)	  */
+	public int getJP_GL_TaxExpense_Acct();
+
+	public I_C_ValidCombination getJP_GL_TaxExpense_A() throws RuntimeException;
+
     /** Column name JP_TaxCredit_Acct */
     public static final String COLUMNNAME_JP_TaxCredit_Acct = "JP_TaxCredit_Acct";
 
@@ -166,10 +199,10 @@ public interface I_JP_Contract_Tax_Acct
     /** Column name JP_TaxDue_Acct */
     public static final String COLUMNNAME_JP_TaxDue_Acct = "JP_TaxDue_Acct";
 
-	/** Set Tax Due(Recognition)	  */
+	/** Set Tax Due(Recognition Doc)	  */
 	public void setJP_TaxDue_Acct (int JP_TaxDue_Acct);
 
-	/** Get Tax Due(Recognition)	  */
+	/** Get Tax Due(Recognition Doc)	  */
 	public int getJP_TaxDue_Acct();
 
 	public I_C_ValidCombination getJP_TaxDue_A() throws RuntimeException;

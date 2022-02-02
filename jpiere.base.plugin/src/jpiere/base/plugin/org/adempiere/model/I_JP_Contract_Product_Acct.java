@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Contract_Product_Acct
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_Contract_Product_Acct 
@@ -147,6 +147,58 @@ public interface I_JP_Contract_Product_Acct
 	public int getJP_Expense_Acct();
 
 	public I_C_ValidCombination getJP_Expense_A() throws RuntimeException;
+
+    /** Column name JP_GL_Expense_Acct */
+    public static final String COLUMNNAME_JP_GL_Expense_Acct = "JP_GL_Expense_Acct";
+
+	/** Set Product Expense(GL Journal)	  */
+	public void setJP_GL_Expense_Acct (int JP_GL_Expense_Acct);
+
+	/** Get Product Expense(GL Journal)	  */
+	public int getJP_GL_Expense_Acct();
+
+	public I_C_ValidCombination getJP_GL_Expense_A() throws RuntimeException;
+
+    /** Column name JP_GL_Revenue_Acct */
+    public static final String COLUMNNAME_JP_GL_Revenue_Acct = "JP_GL_Revenue_Acct";
+
+	/** Set Product Revenue(GL Journal)	  */
+	public void setJP_GL_Revenue_Acct (int JP_GL_Revenue_Acct);
+
+	/** Get Product Revenue(GL Journal)	  */
+	public int getJP_GL_Revenue_Acct();
+
+	public I_C_ValidCombination getJP_GL_Revenue_A() throws RuntimeException;
+
+    /** Column name JP_GL_TradeDiscountGrant_Acct */
+    public static final String COLUMNNAME_JP_GL_TradeDiscountGrant_Acct = "JP_GL_TradeDiscountGrant_Acct";
+
+	/** Set Trade Discount Granted(GL Journal).
+	  * Trade Discount Granted Account
+	  */
+	public void setJP_GL_TradeDiscountGrant_Acct (int JP_GL_TradeDiscountGrant_Acct);
+
+	/** Get Trade Discount Granted(GL Journal).
+	  * Trade Discount Granted Account
+	  */
+	public int getJP_GL_TradeDiscountGrant_Acct();
+
+	public I_C_ValidCombination getJP_GL_TradeDiscountGrant_A() throws RuntimeException;
+
+    /** Column name JP_GL_TradeDiscountRec_Acct */
+    public static final String COLUMNNAME_JP_GL_TradeDiscountRec_Acct = "JP_GL_TradeDiscountRec_Acct";
+
+	/** Set Trade Discount Received(GL Journal).
+	  * Trade Discount Receivable Account
+	  */
+	public void setJP_GL_TradeDiscountRec_Acct (int JP_GL_TradeDiscountRec_Acct);
+
+	/** Get Trade Discount Received(GL Journal).
+	  * Trade Discount Receivable Account
+	  */
+	public int getJP_GL_TradeDiscountRec_Acct();
+
+	public I_C_ValidCombination getJP_GL_TradeDiscountRec_A() throws RuntimeException;
 
     /** Column name JP_PurchaseOffset_Acct */
     public static final String COLUMNNAME_JP_PurchaseOffset_Acct = "JP_PurchaseOffset_Acct";

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Contract_Charge_Acct
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 8.2
  */
 @SuppressWarnings("all")
 public interface I_JP_Contract_Charge_Acct 
@@ -177,6 +177,17 @@ public interface I_JP_Contract_Charge_Acct
 
 	/** Get JP_Contract_Charge_Acct_UU	  */
 	public String getJP_Contract_Charge_Acct_UU();
+
+    /** Column name JP_GL_Ch_Expense_Acct */
+    public static final String COLUMNNAME_JP_GL_Ch_Expense_Acct = "JP_GL_Ch_Expense_Acct";
+
+	/** Set Charge(GL Journal)	  */
+	public void setJP_GL_Ch_Expense_Acct (int JP_GL_Ch_Expense_Acct);
+
+	/** Get Charge(GL Journal)	  */
+	public int getJP_GL_Ch_Expense_Acct();
+
+	public I_C_ValidCombination getJP_GL_Ch_Expense_A() throws RuntimeException;
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

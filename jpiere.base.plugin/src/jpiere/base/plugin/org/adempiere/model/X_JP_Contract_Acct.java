@@ -18,6 +18,7 @@
 package jpiere.base.plugin.org.adempiere.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 
@@ -30,7 +31,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220103L;
+	private static final long serialVersionUID = 20220202L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -41,6 +42,8 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 			setDocBaseType (null);
 // SOO
 			setIsPostingContractAcctJP (false);
+// N
+			setIsPostingGLJournalJP (false);
 // N
 			setIsPostingRecognitionDocJP (false);
 // N
@@ -198,6 +201,27 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return false;
 	}
 
+	/** Set Use GL Journal.
+		@param IsPostingGLJournalJP Use GL Journal	  */
+	public void setIsPostingGLJournalJP (boolean IsPostingGLJournalJP)
+	{
+		set_Value (COLUMNNAME_IsPostingGLJournalJP, Boolean.valueOf(IsPostingGLJournalJP));
+	}
+
+	/** Get Use GL Journal.
+		@return Use GL Journal	  */
+	public boolean isPostingGLJournalJP () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsPostingGLJournalJP);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Use Recognition Doc.
 		@param IsPostingRecognitionDocJP Use Recognition Doc	  */
 	public void setIsPostingRecognitionDocJP (boolean IsPostingRecognitionDocJP)
@@ -301,6 +325,65 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		return (String)get_Value(COLUMNNAME_JP_Contract_Acct_UU);
 	}
 
+	/** Set Account Date of GL Journal.
+		@param JP_GLJournal_DateAcct 
+		JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateAcct (Timestamp JP_GLJournal_DateAcct)
+	{
+		set_Value (COLUMNNAME_JP_GLJournal_DateAcct, JP_GLJournal_DateAcct);
+	}
+
+	/** Get Account Date of GL Journal.
+		@return JPIERE-0539:JPBP
+	  */
+	public Timestamp getJP_GLJournal_DateAcct () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_GLJournal_DateAcct);
+	}
+
+	/** Fixed Date = FX */
+	public static final String JP_GLJOURNAL_DATEACCTSELECT_FixedDate = "FX";
+	/** Account Date of Invoice = IV */
+	public static final String JP_GLJOURNAL_DATEACCTSELECT_AccountDateOfInvoice = "IV";
+	/** Set Account date selection of GL Journal.
+		@param JP_GLJournal_DateAcctSelect 
+		JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateAcctSelect (String JP_GLJournal_DateAcctSelect)
+	{
+
+		set_Value (COLUMNNAME_JP_GLJournal_DateAcctSelect, JP_GLJournal_DateAcctSelect);
+	}
+
+	/** Get Account date selection of GL Journal.
+		@return JPIERE-0539:JPBP
+	  */
+	public String getJP_GLJournal_DateAcctSelect () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_GLJournal_DateAcctSelect);
+	}
+
+	/** Both item line and no config  will not create GL Journal = BT */
+	public static final String JP_GLJOURNAL_JOURNALPOLICY_BothItemLineAndNoConfigWillNotCreateGLJournal = "BT";
+	/** Set Journal Policy of GL Journal.
+		@param JP_GLJournal_JournalPolicy 
+		JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_JournalPolicy (String JP_GLJournal_JournalPolicy)
+	{
+
+		set_Value (COLUMNNAME_JP_GLJournal_JournalPolicy, JP_GLJournal_JournalPolicy);
+	}
+
+	/** Get Journal Policy of GL Journal.
+		@return JPIERE-0539:JPBP
+	  */
+	public String getJP_GLJournal_JournalPolicy () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_GLJournal_JournalPolicy);
+	}
+
 	/** After Recognition = DD */
 	public static final String JP_RECOGTOINVOICEPOLICY_AfterRecognition = "DD";
 	/** Lump After Order All Recognized = LP */
@@ -330,7 +413,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public static final String JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded = "DN";
 	/** If no config, the journal will not be posted. = NN */
 	public static final String JP_RECOGNITION_JOURNALPOLICY_IfNoConfigTheJournalWillNotBePosted = "NN";
-	/** Set Journal Policy of Recognition Doc if no accounting config.
+	/** Set Journal Policy of Recognition Doc.
 		@param JP_Recognition_JournalPolicy 
 		JPIERE-0536:JPBP
 	  */
@@ -340,7 +423,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 		set_Value (COLUMNNAME_JP_Recognition_JournalPolicy, JP_Recognition_JournalPolicy);
 	}
 
-	/** Get Journal Policy of Recognition Doc if no accounting config.
+	/** Get Journal Policy of Recognition Doc.
 		@return JPIERE-0536:JPBP
 	  */
 	public String getJP_Recognition_JournalPolicy () 

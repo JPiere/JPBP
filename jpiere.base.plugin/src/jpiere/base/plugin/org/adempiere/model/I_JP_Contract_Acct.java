@@ -141,6 +141,15 @@ public interface I_JP_Contract_Acct
 	/** Get Use Contract Acct Info	  */
 	public boolean isPostingContractAcctJP();
 
+    /** Column name IsPostingGLJournalJP */
+    public static final String COLUMNNAME_IsPostingGLJournalJP = "IsPostingGLJournalJP";
+
+	/** Set Use GL Journal	  */
+	public void setIsPostingGLJournalJP (boolean IsPostingGLJournalJP);
+
+	/** Get Use GL Journal	  */
+	public boolean isPostingGLJournalJP();
+
     /** Column name IsPostingRecognitionDocJP */
     public static final String COLUMNNAME_IsPostingRecognitionDocJP = "IsPostingRecognitionDocJP";
 
@@ -194,6 +203,45 @@ public interface I_JP_Contract_Acct
 	/** Get Contract Acct Info(UU)	  */
 	public String getJP_Contract_Acct_UU();
 
+    /** Column name JP_GLJournal_DateAcct */
+    public static final String COLUMNNAME_JP_GLJournal_DateAcct = "JP_GLJournal_DateAcct";
+
+	/** Set Account Date of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateAcct (Timestamp JP_GLJournal_DateAcct);
+
+	/** Get Account Date of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public Timestamp getJP_GLJournal_DateAcct();
+
+    /** Column name JP_GLJournal_DateAcctSelect */
+    public static final String COLUMNNAME_JP_GLJournal_DateAcctSelect = "JP_GLJournal_DateAcctSelect";
+
+	/** Set Account date selection of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateAcctSelect (String JP_GLJournal_DateAcctSelect);
+
+	/** Get Account date selection of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public String getJP_GLJournal_DateAcctSelect();
+
+    /** Column name JP_GLJournal_JournalPolicy */
+    public static final String COLUMNNAME_JP_GLJournal_JournalPolicy = "JP_GLJournal_JournalPolicy";
+
+	/** Set Journal Policy of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_JournalPolicy (String JP_GLJournal_JournalPolicy);
+
+	/** Get Journal Policy of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public String getJP_GLJournal_JournalPolicy();
+
     /** Column name JP_RecogToInvoicePolicy */
     public static final String COLUMNNAME_JP_RecogToInvoicePolicy = "JP_RecogToInvoicePolicy";
 
@@ -206,12 +254,12 @@ public interface I_JP_Contract_Acct
     /** Column name JP_Recognition_JournalPolicy */
     public static final String COLUMNNAME_JP_Recognition_JournalPolicy = "JP_Recognition_JournalPolicy";
 
-	/** Set Journal Policy of Recognition Doc if no accounting config.
+	/** Set Journal Policy of Recognition Doc.
 	  * JPIERE-0536:JPBP
 	  */
 	public void setJP_Recognition_JournalPolicy (String JP_Recognition_JournalPolicy);
 
-	/** Get Journal Policy of Recognition Doc if no accounting config.
+	/** Get Journal Policy of Recognition Doc.
 	  * JPIERE-0536:JPBP
 	  */
 	public String getJP_Recognition_JournalPolicy();

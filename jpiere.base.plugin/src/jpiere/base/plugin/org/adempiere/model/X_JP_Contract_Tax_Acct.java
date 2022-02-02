@@ -23,14 +23,14 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_Contract_Tax_Acct
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_JP_Contract_Tax_Acct extends PO implements I_JP_Contract_Tax_Acct, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170923L;
+	private static final long serialVersionUID = 20220202L;
 
     /** Standard Constructor */
     public X_JP_Contract_Tax_Acct (Properties ctx, int JP_Contract_Tax_Acct_ID, String trxName)
@@ -68,7 +68,7 @@ public class X_JP_Contract_Tax_Acct extends PO implements I_JP_Contract_Tax_Acct
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Contract_Tax_Acct[")
+      StringBuilder sb = new StringBuilder ("X_JP_Contract_Tax_Acct[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -188,6 +188,72 @@ public class X_JP_Contract_Tax_Acct extends PO implements I_JP_Contract_Tax_Acct
 		return (String)get_Value(COLUMNNAME_JP_Contract_Tax_Acct_UU);
 	}
 
+	public I_C_ValidCombination getJP_GL_TaxCredit_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_TaxCredit_Acct(), get_TrxName());	}
+
+	/** Set Tax Credit(GL Journal).
+		@param JP_GL_TaxCredit_Acct Tax Credit(GL Journal)	  */
+	public void setJP_GL_TaxCredit_Acct (int JP_GL_TaxCredit_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_TaxCredit_Acct, Integer.valueOf(JP_GL_TaxCredit_Acct));
+	}
+
+	/** Get Tax Credit(GL Journal).
+		@return Tax Credit(GL Journal)	  */
+	public int getJP_GL_TaxCredit_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_TaxCredit_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_GL_TaxDue_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_TaxDue_Acct(), get_TrxName());	}
+
+	/** Set Tax Due(GL Journal).
+		@param JP_GL_TaxDue_Acct Tax Due(GL Journal)	  */
+	public void setJP_GL_TaxDue_Acct (int JP_GL_TaxDue_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_TaxDue_Acct, Integer.valueOf(JP_GL_TaxDue_Acct));
+	}
+
+	/** Get Tax Due(GL Journal).
+		@return Tax Due(GL Journal)	  */
+	public int getJP_GL_TaxDue_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_TaxDue_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getJP_GL_TaxExpense_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getJP_GL_TaxExpense_Acct(), get_TrxName());	}
+
+	/** Set Tax Expense(GL Journal).
+		@param JP_GL_TaxExpense_Acct Tax Expense(GL Journal)	  */
+	public void setJP_GL_TaxExpense_Acct (int JP_GL_TaxExpense_Acct)
+	{
+		set_Value (COLUMNNAME_JP_GL_TaxExpense_Acct, Integer.valueOf(JP_GL_TaxExpense_Acct));
+	}
+
+	/** Get Tax Expense(GL Journal).
+		@return Tax Expense(GL Journal)	  */
+	public int getJP_GL_TaxExpense_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_GL_TaxExpense_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_C_ValidCombination getJP_TaxCredit_A() throws RuntimeException
     {
 		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
@@ -215,15 +281,15 @@ public class X_JP_Contract_Tax_Acct extends PO implements I_JP_Contract_Tax_Acct
 		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
 			.getPO(getJP_TaxDue_Acct(), get_TrxName());	}
 
-	/** Set Tax Due(Recognition).
-		@param JP_TaxDue_Acct Tax Due(Recognition)	  */
+	/** Set Tax Due(Recognition Doc).
+		@param JP_TaxDue_Acct Tax Due(Recognition Doc)	  */
 	public void setJP_TaxDue_Acct (int JP_TaxDue_Acct)
 	{
 		set_Value (COLUMNNAME_JP_TaxDue_Acct, Integer.valueOf(JP_TaxDue_Acct));
 	}
 
-	/** Get Tax Due(Recognition).
-		@return Tax Due(Recognition)	  */
+	/** Get Tax Due(Recognition Doc).
+		@return Tax Due(Recognition Doc)	  */
 	public int getJP_TaxDue_Acct () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_TaxDue_Acct);
