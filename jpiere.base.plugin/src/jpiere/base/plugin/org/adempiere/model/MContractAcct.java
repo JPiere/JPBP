@@ -21,8 +21,10 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MPeriod;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
@@ -31,6 +33,7 @@ import org.compiere.util.Util;
  *
  * JPIERE-0363: Contract Management
  * JPIERE-0536: Journal Policy of Recognition Doc if no accounting config
+ * JPIERE-0539: Create GL Journal From Invoice
  *
  * @author Hideaki Hagiwara
  *
@@ -82,7 +85,9 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			}
 		}
 
-		if(newRecord || is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingRecognitionDocJP))
+		if(newRecord
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingRecognitionDocJP)
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_Recognition_JournalPolicy) )
 		{
 			if(!isPostingRecognitionDocJP())
 			{
@@ -93,13 +98,8 @@ public class MContractAcct extends X_JP_Contract_Acct {
 
 			}else {
 
-				if(getDocBaseType().equals("SOO"))
+				if(getDocBaseType().equals("SOO") || getDocBaseType().equals("POO"))
 				{
-
-					setJP_Recognition_JournalPolicy(JP_RECOGNITION_JOURNALPOLICY_IfNoConfigWillBePostedByDefaultButTaxBeExcluded);
-
-				}else if(getDocBaseType().equals("POO")) {
-
 					if(Util.isEmpty(getJP_Recognition_JournalPolicy()))
 					{
 						log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_Recognition_JournalPolicy) );
@@ -113,9 +113,56 @@ public class MContractAcct extends X_JP_Contract_Acct {
 					setJP_RecogToInvoicePolicy(null);
 					setJP_Recognition_JournalPolicy(null);
 				}
-
-
 			}
+		}
+
+		if(newRecord
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingGLJournalJP)
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_JournalPolicy)
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_DateAcctSelect)
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_DateAcct) )
+		{
+			if(!isPostingGLJournalJP())
+			{
+				setJP_GLJournal_JournalPolicy(null);
+				setJP_GLJournal_DateAcctSelect(null);
+				setJP_GLJournal_DateAcct(null);
+
+			}else {
+
+				if(Util.isEmpty(getJP_GLJournal_JournalPolicy()))
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_GLJournal_JournalPolicy) );
+					return false;
+				}
+
+				if(Util.isEmpty(getJP_GLJournal_DateAcctSelect()))
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_GLJournal_DateAcctSelect) );
+					return false;
+				}
+
+				if(JP_GLJOURNAL_DATEACCTSELECT_FixedDate.equals(getJP_GLJournal_DateAcctSelect()))
+				{
+					if(getJP_GLJournal_DateAcct() == null)
+					{
+						log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_GLJournal_DateAcct) );
+						return false;
+					}
+
+					//validate period
+					int C_Period_ID = MPeriod.getC_Period_ID(getCtx(), getJP_GLJournal_DateAcct(), getAD_Org_ID());
+					if (C_Period_ID == 0)
+					{
+						log.saveError("PeriodNotFound", " : " + DisplayType.getDateFormat().format(getJP_GLJournal_DateAcct()));
+						return false;
+					}
+
+				}else {
+					setJP_GLJournal_DateAcct(null);
+				}
+			}
+
 		}
 
 		return true;

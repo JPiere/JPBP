@@ -24,15 +24,21 @@ import java.util.Properties;
 *
 */
 public class MContractBPAcct extends X_JP_Contract_BP_Acct {
-	
-	public MContractBPAcct(Properties ctx, int JP_Contract_BP_Acct_ID, String trxName) 
+
+	public MContractBPAcct(Properties ctx, int JP_Contract_BP_Acct_ID, String trxName)
 	{
 		super(ctx, JP_Contract_BP_Acct_ID, trxName);
 	}
-	
-	public MContractBPAcct(Properties ctx, ResultSet rs, String trxName) 
+
+	public MContractBPAcct(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
-	
+
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		return true;
+	}
+
 }
