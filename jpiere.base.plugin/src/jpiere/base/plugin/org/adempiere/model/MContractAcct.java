@@ -246,9 +246,8 @@ public class MContractAcct extends X_JP_Contract_Acct {
 	}	//	getContractBPAcct
 
 
-	//M_Product_Category_ID and C_AcctSchema_ID
-	HashMap<Integer, HashMap<Integer, MContractProductAcct>> contractProductAcct = null;
-
+	//String key = "M_Product_Category_ID" + "C_AcctSchema_ID"
+	HashMap<String, MContractProductAcct> contractProductAcct = null;
 
 	public MContractProductAcct getContractProductAcct(int M_Product_Category_ID,  int C_AcctSchema_ID, boolean reload)
 	{
@@ -258,29 +257,24 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		if(contractProductAcct == null || contractProductAcct.size() == 0)
 			return null;
 
-		if(contractProductAcct.containsKey(M_Product_Category_ID))
+		String key = String.valueOf(M_Product_Category_ID) + String.valueOf(C_AcctSchema_ID);
+		if(contractProductAcct.containsKey(key))
 		{
-			if(contractProductAcct.get(M_Product_Category_ID).containsKey(C_AcctSchema_ID))
-			{
-				return contractProductAcct.get(M_Product_Category_ID).get(C_AcctSchema_ID);
-			}else{
-				return null;
-			}
+			return contractProductAcct.get(key);
 
 		}else{
 			return null;
 		}
 	}
 
-
-	public HashMap<Integer, HashMap<Integer, MContractProductAcct>> getAllContractProductAccts (boolean reload)
+	public HashMap<String, MContractProductAcct> getAllContractProductAccts (boolean reload)
 	{
 		if (reload || contractProductAcct == null || contractProductAcct.size() == 0)
 			;
 		else
 			return contractProductAcct;
 
-		contractProductAcct = new HashMap<Integer, HashMap<Integer, MContractProductAcct>>();
+		contractProductAcct = new HashMap<String, MContractProductAcct>();
 		final String sql = "SELECT * FROM JP_Contract_Product_Acct WHERE JP_Contract_Acct_ID=? AND IsActive='Y'";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -292,9 +286,8 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			while (rs.next())
 			{
 				MContractProductAcct productAcct =  new MContractProductAcct (getCtx(), rs, get_TrxName());
-				HashMap<Integer, MContractProductAcct> innerMap = new HashMap<Integer, MContractProductAcct>();
-				innerMap.put(productAcct.getC_AcctSchema_ID(), productAcct);
-				contractProductAcct.put(productAcct.getM_Product_Category_ID(), innerMap);
+				String key = String.valueOf(productAcct.getM_Product_Category_ID()) + String.valueOf(productAcct.getC_AcctSchema_ID());
+				contractProductAcct.put(key, productAcct);
 			}
 		}
 		catch (Exception e)
@@ -312,9 +305,8 @@ public class MContractAcct extends X_JP_Contract_Acct {
 
 
 
-	//C_Tax_ID and C_AcctSchema_ID
-	HashMap<Integer, HashMap<Integer, MContractTaxAcct>> contractTaxAcct = null;
-
+	//String key = "C_Tax_ID" + "C_AcctSchema_ID"
+	HashMap<String, MContractTaxAcct> contractTaxAcct = null;
 
 	public MContractTaxAcct getContracTaxAcct(int C_Tax_ID,  int C_AcctSchema_ID, boolean reload)
 	{
@@ -324,29 +316,24 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		if(contractTaxAcct == null || contractTaxAcct.size() == 0)
 			return null;
 
-		if(contractTaxAcct.containsKey(C_Tax_ID))
+		String key = String.valueOf(C_Tax_ID) + String.valueOf(C_AcctSchema_ID);
+		if(contractTaxAcct.containsKey(key))
 		{
-			if(contractTaxAcct.get(C_Tax_ID).containsKey(C_AcctSchema_ID))
-			{
-				return contractTaxAcct.get(C_Tax_ID).get(C_AcctSchema_ID);
-			}else{
-				return null;
-			}
+			return contractTaxAcct.get(key);
 
 		}else{
 			return null;
 		}
 	}
 
-
-	public HashMap<Integer, HashMap<Integer, MContractTaxAcct>> getAllContractTaxAccts (boolean reload)
+	public HashMap<String, MContractTaxAcct> getAllContractTaxAccts (boolean reload)
 	{
 		if (reload || contractTaxAcct == null || contractTaxAcct.size() == 0)
 			;
 		else
 			return contractTaxAcct;
 
-		contractTaxAcct = new HashMap<Integer, HashMap<Integer, MContractTaxAcct>>();
+		contractTaxAcct = new HashMap<String, MContractTaxAcct>();
 		final String sql = "SELECT * FROM JP_Contract_Tax_Acct WHERE JP_Contract_Acct_ID=? AND IsActive='Y'";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -358,9 +345,8 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			while (rs.next())
 			{
 				MContractTaxAcct taxAcct =  new MContractTaxAcct (getCtx(), rs, get_TrxName());
-				HashMap<Integer, MContractTaxAcct> innerMap = new HashMap<Integer, MContractTaxAcct>();
-				innerMap.put(taxAcct.getC_AcctSchema_ID(), taxAcct);
-				contractTaxAcct.put(taxAcct.getC_Tax_ID(), innerMap);
+				String key = String.valueOf(taxAcct.getC_Tax_ID()) + String.valueOf(taxAcct.getC_AcctSchema_ID());
+				contractTaxAcct.put(key, taxAcct);
 			}
 		}
 		catch (Exception e)
@@ -377,9 +363,8 @@ public class MContractAcct extends X_JP_Contract_Acct {
 	}
 
 
-	//C_Charge_ID and C_AcctSchema_ID
-	HashMap<Integer, HashMap<Integer, MContractChargeAcct>> contractChargeAcct = null;
-
+	//String key = "C_Charge_ID" + "C_AcctSchema_ID"
+	HashMap<String, MContractChargeAcct> contractChargeAcct = null;
 
 	public MContractChargeAcct getContracChargeAcct(int C_Charge_ID,  int C_AcctSchema_ID, boolean reload)
 	{
@@ -389,14 +374,10 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		if(contractChargeAcct == null || contractChargeAcct.size() == 0)
 			return null;
 
-		if(contractChargeAcct.containsKey(C_Charge_ID))
+		String key = String.valueOf(C_Charge_ID) + String.valueOf(C_AcctSchema_ID);
+		if(contractChargeAcct.containsKey(key))
 		{
-			if(contractChargeAcct.get(C_Charge_ID).containsKey(C_AcctSchema_ID))
-			{
-				return contractChargeAcct.get(C_Charge_ID).get(C_AcctSchema_ID);
-			}else{
-				return null;
-			}
+			return contractChargeAcct.get(key);
 
 		}else{
 			return null;
@@ -404,14 +385,14 @@ public class MContractAcct extends X_JP_Contract_Acct {
 	}
 
 
-	public HashMap<Integer, HashMap<Integer, MContractChargeAcct>> getAllContractChargeAccts (boolean reload)
+	public HashMap<String, MContractChargeAcct> getAllContractChargeAccts (boolean reload)
 	{
 		if (reload || contractChargeAcct == null || contractChargeAcct.size() == 0)
 			;
 		else
 			return contractChargeAcct;
 
-		contractChargeAcct = new HashMap<Integer, HashMap<Integer, MContractChargeAcct>>();
+		contractChargeAcct = new HashMap<String, MContractChargeAcct>();
 		final String sql = "SELECT * FROM JP_Contract_Charge_Acct WHERE JP_Contract_Acct_ID=? AND IsActive='Y'";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -423,9 +404,8 @@ public class MContractAcct extends X_JP_Contract_Acct {
 			while (rs.next())
 			{
 				MContractChargeAcct chargeAcct =  new MContractChargeAcct (getCtx(), rs, get_TrxName());
-				HashMap<Integer, MContractChargeAcct> innerMap = new HashMap<Integer, MContractChargeAcct>();
-				innerMap.put(chargeAcct.getC_AcctSchema_ID(), chargeAcct);
-				contractChargeAcct.put(chargeAcct.getC_Charge_ID(), innerMap);
+				String key = String.valueOf(chargeAcct.getC_Charge_ID()) + String.valueOf(chargeAcct.getC_AcctSchema_ID());
+				contractChargeAcct.put(key, chargeAcct);
 			}
 		}
 		catch (Exception e)
