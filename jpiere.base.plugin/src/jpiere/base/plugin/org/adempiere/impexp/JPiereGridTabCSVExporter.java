@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import org.adempiere.base.IGridTabExporter;
 import org.adempiere.exceptions.AdempiereException;
@@ -99,10 +98,14 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 			OutputStreamWriter oStrW = new OutputStreamWriter(fileOut, Ini.getCharset());
 			BufferedWriter bw = new BufferedWriter(oStrW);
 			mapWriter = new CsvMapWriter(bw, CsvPreference.STANDARD_PREFERENCE);
+
+			/*JPIERE-0451 - CSV Down load from window that is read only.
 			String isValidTab = isValidTabToExport(gridTab);
 			if(isValidTab!=null){
 			   throw new AdempiereException(isValidTab);
 			}
+			JPIERE-0451 */
+
 			GridTable gt = gridTab.getTableModel();
 			GridField[] gridFields = getFields(gridTab);
 			if(gridFields.length==0)
@@ -174,11 +177,13 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				 if(detail.getTabLevel()>1)
 	 			    continue;
 
+				 /* JPIERE-0451 - CSV Down load from window that is read only.
 				 isValidTab = isValidTabToExport(detail);
 				 if (isValidTab!=null){
 					 if (log.isLoggable(Level.INFO)) log.info(isValidTab);
 					 continue;
-				 }
+				 } JPIERE-0451 */
+
 				 tableDetail = MTable.get(Env.getCtx(), detail.getTableName());
 				 gridFields = getFields(detail);
 				 for(GridField field : gridFields){
