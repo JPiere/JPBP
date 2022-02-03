@@ -1149,7 +1149,7 @@ public class JPiereContractLineCallout implements IColumnCallout {
 		Timestamp JP_ProcPeriod_End_Inv_Date = (Timestamp)value;
 		if(JP_ProcPeriod_End_Inv_Date == null)
 		{
-			mTab.setValue("JP_ProcPeriod_End_Invt_ID", null);
+			mTab.setValue("JP_ProcPeriod_End_Inv_ID", null);
 
 		}else if(mTab.getValue("JP_ContractCalender_Inv_ID") != null){
 
