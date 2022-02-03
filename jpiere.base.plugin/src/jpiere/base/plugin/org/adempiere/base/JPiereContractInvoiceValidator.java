@@ -14,39 +14,53 @@
 package jpiere.base.plugin.org.adempiere.base;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Level;
 
 import org.adempiere.webui.window.FDialog;
+import org.compiere.acct.DocTax;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.FactsValidator;
 import org.compiere.model.I_C_InvoiceLine;
+import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MInvoiceTax;
+import org.compiere.model.MJournal;
+import org.compiere.model.MJournalLine;
 import org.compiere.model.MOrder;
+import org.compiere.model.MPeriod;
+import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRefList;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.model.ProductCost;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MContract;
 import jpiere.base.plugin.org.adempiere.model.MContractAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
+import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
+import jpiere.base.plugin.org.adempiere.model.MContractTaxAcct;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
@@ -58,6 +72,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  *  JPIERE-0363: Contract Management
  *  JPIERE-0408: Set Counter Doc Info
  *  JPIERE-0521: Add JP_Contract_ID, JP_ContractProcPeriod_ID Columns to Fact Acct Table
+ *  JPIERE-0539: Create GL Journal From Invoice
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -928,7 +943,681 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 		}//JPIERE-0521
 
+
+		//JPIERE-0539: Create GL Journal From Invoice
+		if(!po.get_ValueAsBoolean(MInvoice.COLUMNNAME_Posted)) //Check of repost to avoid duplicate processing
+		{
+			int JP_ContractContent_ID = po.get_ValueAsInt("JP_ContractContent_ID");
+			if(JP_ContractContent_ID > 0 )
+			{
+				MContractContent m_Content = MContractContent.get(Env.getCtx(), JP_ContractContent_ID);
+				int JP_Contract_Acct_ID = m_Content.getJP_Contract_Acct_ID();
+				if(JP_Contract_Acct_ID > 0)
+				{
+					MContractAcct m_ContractAcct = MContractAcct.get(Env.getCtx(), JP_Contract_Acct_ID);
+					if(m_ContractAcct.isPostingContractAcctJP() && m_ContractAcct.isPostingGLJournalJP())
+					{
+						if(MContractAcct.JP_GLJOURNAL_JOURNALPOLICY_BothItemLineAndNoConfigWillNotCreateGLJournal.equals(m_ContractAcct.getJP_GLJournal_JournalPolicy()))
+						{
+							createGLJournal((MInvoice)po, m_ContractAcct, schema, facts);
+						}
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 
+	private String createGLJournal(MInvoice m_Invoice, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema, List<Fact> facts)
+	{
+
+		//Judge DocType of Invoice whether create GL Journal.
+		MDocType docType = MDocType.get(m_Invoice.getC_DocTypeTarget_ID());
+		if(!docType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice)
+				&& !docType.getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))
+		{
+			return null;
+		}
+
+		//Judge whether create GL Journal
+		if(!isCreateGLJournal(m_Invoice, m_ContractAcct, m_AcctSchema))
+			return null;
+
+
+		//Get DocType of GL Journal
+		int JP_DocTypeGLJournal_ID = docType.get_ValueAsInt("JP_DocTypeGLJournal_ID");
+		if(JP_DocTypeGLJournal_ID == 0)
+		{
+			JP_DocTypeGLJournal_ID = MDocType.getDocType(MDocType.DOCBASETYPE_GLJournal);
+		}
+		MDocType docTypeGL = MDocType.get(JP_DocTypeGLJournal_ID);
+
+
+		//Get DateAcct of GL Journal
+		Timestamp p_DateAcct = null;
+		if(MContractAcct.JP_GLJOURNAL_DATEACCTSELECT_FixedDate.equals(m_ContractAcct.getJP_GLJournal_DateAcctSelect()))
+		{
+			p_DateAcct = m_ContractAcct.getJP_GLJournal_DateAcct();
+		}else if(MContractAcct.JP_GLJOURNAL_DATEACCTSELECT_AccountDateOfInvoice.equals(m_ContractAcct.getJP_GLJournal_DateAcctSelect())) {
+
+			p_DateAcct = m_Invoice.getDateAcct();
+		}
+
+		//validate period
+		int C_Period_ID = MPeriod.getC_Period_ID(m_Invoice.getCtx(), p_DateAcct, m_Invoice.getAD_Org_ID());
+		if (C_Period_ID == 0)
+		{
+			return Msg.getMsg(m_Invoice.getCtx(), "PeriodNotFound") + " : " + DisplayType.getDateFormat().format(p_DateAcct);
+		}
+
+
+		//Get Fact
+		Fact fact = null;
+		for(Fact f : facts)
+		{
+			if(m_AcctSchema.getC_AcctSchema_ID() == f.getAcctSchema().getC_AcctSchema_ID())
+			{
+				fact = f;
+			}
+		}
+
+
+		//Create GL Journal
+		MJournal m_Journal = new MJournal(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+		PO.copyValues(m_Invoice, m_Journal);
+		m_Journal.setAD_Org_ID(m_Journal.getAD_Org_ID());
+		m_Journal.setC_AcctSchema_ID(m_AcctSchema.getC_AcctSchema_ID());
+		m_Journal.setC_DocType_ID(JP_DocTypeGLJournal_ID);
+		if(docTypeGL.isDocNoControlled()) {
+			m_Journal.setDocumentNo(null);
+		}else {
+			m_Journal.setDocumentNo(m_Invoice.getDocumentNo() + "-" + m_AcctSchema.getC_AcctSchema_ID());
+		}
+		m_Journal.setGL_Category_ID(docTypeGL.getGL_Category_ID());
+		m_Journal.setPostingType(MJournal.POSTINGTYPE_Actual);
+		m_Journal.setDateDoc(p_DateAcct);
+		m_Journal.setDateAcct(p_DateAcct);
+		m_Journal.setC_Period_ID(C_Period_ID);
+		m_Journal.setDescription(m_Invoice.getDocumentInfo());
+		m_Journal.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+		m_Journal.setDocStatus(DocAction.STATUS_Drafted);
+		m_Journal.setDocAction(DocAction.ACTION_Complete);
+		m_Journal.saveEx(m_Invoice.get_TrxName());
+
+		//Craete GL Journal Line
+		FactLine[]  factLines = fact.getLines();
+		FactLine	factLine = null;
+		MInvoiceLine[] iLines = m_Invoice.getLines();
+		MJournalLine glLine = null;
+		MAccount m_AccountDR = null;
+		MAccount m_AccountCR = null;
+		int line = 0;
+		for(MInvoiceLine iLine : iLines)
+		{
+			factLine = null;
+			for(int i = 0; i < factLines.length; i++)
+			{
+				if(iLine.getC_InvoiceLine_ID() == factLines[i].getLine_ID())
+				{
+					factLine = factLines[i];
+					break;
+				}
+			}
+
+			if(factLine == null)
+				continue;
+
+			if(!isCreateGLJournalLine(m_Invoice, iLine, m_ContractAcct, m_AcctSchema))
+				continue;
+
+			if(m_Invoice.isSOTrx())
+			{
+				//Create GL Journal Line - Dr
+				line++;
+				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+				PO.copyValues(iLine, glLine);
+				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+				glLine.setLine(line*10);
+				glLine.setDateAcct(p_DateAcct);
+				glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+				if(iLine.getM_Product_ID() > 0)
+					m_AccountDR = getP_Revenue_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				else if(iLine.getC_Charge_ID() > 0)
+					m_AccountDR = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				glLine.setQty(iLine.getQtyInvoiced().negate());
+				glLine.setAccount_ID(m_AccountDR.getAccount_ID());
+				glLine.setAmtSourceDr(factLine.getAmtAcctCr());
+				glLine.setAmtAcctDr(factLine.getAmtAcctCr());
+				glLine.setAmtSourceCr(factLine.getAmtAcctDr());
+				glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+				glLine.saveEx(m_Invoice.get_TrxName());
+
+				//Create GL Journal Line - Cr
+				line++;
+				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+				PO.copyValues(iLine, glLine);
+				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+				glLine.setLine(line*10);
+				glLine.setDateAcct(p_DateAcct);
+				glLine.setC_Currency_ID(m_Journal.getC_Currency_ID());
+				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+				if(iLine.getM_Product_ID() > 0)
+					m_AccountCR = getJP_GL_Revenue_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				else if(iLine.getC_Charge_ID() > 0)
+					m_AccountCR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				glLine.setQty(iLine.getQtyInvoiced());
+				glLine.setAccount_ID(m_AccountCR.getAccount_ID());
+				glLine.setAmtSourceDr(factLine.getAmtAcctDr());
+				glLine.setAmtAcctDr(factLine.getAmtAcctDr());
+				glLine.setAmtSourceCr(factLine.getAmtAcctCr());
+				glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+				glLine.saveEx(m_Invoice.get_TrxName());
+
+			}else {
+
+				//Create GL Journal Line - Dr
+				line++;
+				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+				PO.copyValues(iLine, glLine);
+				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+				glLine.setLine(line*10);
+				glLine.setDateAcct(p_DateAcct);
+				glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+				if(iLine.getM_Product_ID() > 0)
+					m_AccountDR = getJP_GL_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				else if(iLine.getC_Charge_ID() > 0)
+					m_AccountDR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				glLine.setQty(iLine.getQtyInvoiced());
+				glLine.setAccount_ID(m_AccountDR.getAccount_ID());
+				glLine.setAmtSourceDr(factLine.getAmtAcctDr());
+				glLine.setAmtAcctDr(factLine.getAmtAcctDr());
+				glLine.setAmtSourceCr(factLine.getAmtAcctCr());
+				glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+				glLine.saveEx(m_Invoice.get_TrxName());
+
+				//Create GL Journal Line - Cr
+				line++;
+				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+				PO.copyValues(iLine, glLine);
+				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+				glLine.setLine(line*10);
+				glLine.setDateAcct(p_DateAcct);
+				glLine.setC_Currency_ID(m_Journal.getC_Currency_ID());
+				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+				if(iLine.getM_Product_ID() > 0)
+					m_AccountCR = getP_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				else if(iLine.getC_Charge_ID() > 0)
+					m_AccountCR = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+				glLine.setQty(iLine.getQtyInvoiced().negate());
+				glLine.setAccount_ID(m_AccountCR.getAccount_ID());
+				glLine.setAmtSourceDr(factLine.getAmtAcctCr());
+				glLine.setAmtAcctDr(factLine.getAmtAcctCr());
+				glLine.setAmtSourceCr(factLine.getAmtAcctDr());
+				glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+				glLine.saveEx(m_Invoice.get_TrxName());
+
+			}
+
+		}//for - Craete GL Journal Line
+
+
+		//Crate GL Journal Line for Tax adjust
+		if(isCreateTaxAdjustGLJournalLine(m_Invoice, m_ContractAcct, m_AcctSchema))
+		{
+			MInvoiceTax[] iTaxes = m_Invoice.getTaxes(true);
+			for(MInvoiceTax iTax : iTaxes)
+			{
+				if(iTax.getTaxAmt().compareTo(Env.ZERO) == 0)
+					continue;
+
+				factLine = null;
+				for(int i = 0; i < factLines.length; i++)
+				{
+					if(iTax.getC_Tax_ID() == factLines[i].getC_Tax_ID()
+							&& factLines[i].getLine_ID() == 0)
+					{
+						factLine = factLines[i];
+						break;
+					}
+				}
+
+				if(factLine == null)
+					continue;
+
+				if(m_Invoice.isSOTrx())
+				{
+					m_AccountCR = getJP_GL_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+					if(m_AccountCR == null)
+						continue;
+
+					m_AccountDR = getT_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+
+					//Create GL Journal Line - Dr
+					line++;
+					glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+					PO.copyValues(m_Invoice, glLine);
+					glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+					glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+					glLine.setLine(line*10);
+					glLine.setDateAcct(p_DateAcct);
+					glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+					glLine.setCurrencyRate(Env.ONE);
+					glLine.setAccount_ID(m_AccountDR.getAccount_ID());
+					glLine.setAmtSourceDr(factLine.getAmtAcctCr());
+					glLine.setAmtAcctDr(factLine.getAmtAcctCr());
+					glLine.setAmtSourceCr(factLine.getAmtAcctDr());
+					glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+					glLine.setQty(Env.ZERO);
+					glLine.setC_UOM_ID(100);
+					glLine.saveEx(m_Invoice.get_TrxName());
+
+
+					//Create GL Journal Line - Cr
+					line++;
+					glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+					PO.copyValues(m_Invoice, glLine);
+					glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+					glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+					glLine.setLine(line*10);
+					glLine.setDateAcct(p_DateAcct);
+					glLine.setC_Currency_ID(m_Journal.getC_Currency_ID());
+					glLine.setCurrencyRate(Env.ONE);
+					glLine.setAccount_ID(m_AccountCR.getAccount_ID());
+					glLine.setAmtSourceDr(factLine.getAmtAcctDr());
+					glLine.setAmtAcctDr(factLine.getAmtAcctDr());
+					glLine.setAmtSourceCr(factLine.getAmtAcctCr());
+					glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+					glLine.setQty(Env.ZERO);
+					glLine.setC_UOM_ID(100);
+					glLine.saveEx(m_Invoice.get_TrxName());
+
+				}else {
+
+					if(iTax.getC_Tax().isSalesTax())
+					{
+						m_AccountDR = getJP_GL_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+						if(m_AccountDR == null)
+							continue;
+
+					}else {
+
+						m_AccountDR = getJP_GL_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+						if(m_AccountDR == null)
+							continue;
+					}
+
+					if(iTax.getC_Tax().isSalesTax()){
+						m_AccountCR = getT_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+					}else {
+						m_AccountCR = getT_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+					}
+
+					//Create GL Journal Line - Dr
+					line++;
+					glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+					PO.copyValues(m_Invoice, glLine);
+					glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+					glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+					glLine.setLine(line*10);
+					glLine.setDateAcct(p_DateAcct);
+					glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+					glLine.setCurrencyRate(Env.ONE);
+					glLine.setAccount_ID(m_AccountDR.getAccount_ID());
+					glLine.setAmtSourceDr(factLine.getAmtAcctDr());
+					glLine.setAmtAcctDr(factLine.getAmtAcctDr());
+					glLine.setAmtSourceCr(factLine.getAmtAcctCr());
+					glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+					glLine.setQty(Env.ZERO);
+					glLine.setC_UOM_ID(100);
+					glLine.saveEx(m_Invoice.get_TrxName());
+
+
+					//Create GL Journal Line - Cr
+					line++;
+					glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+					PO.copyValues(m_Invoice, glLine);
+					glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+					glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+					glLine.setLine(line*10);
+					glLine.setDateAcct(p_DateAcct);
+					glLine.setC_Currency_ID(m_Journal.getC_Currency_ID());
+					glLine.setCurrencyRate(Env.ONE);
+					glLine.setAccount_ID(m_AccountCR.getAccount_ID());
+					glLine.setAmtSourceDr(factLine.getAmtAcctCr());
+					glLine.setAmtAcctDr(factLine.getAmtAcctCr());
+					glLine.setAmtSourceCr(factLine.getAmtAcctDr());
+					glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+					glLine.setQty(Env.ZERO);
+					glLine.setC_UOM_ID(100);
+					glLine.saveEx(m_Invoice.get_TrxName());
+
+				}
+
+			}
+
+		}//Crate GL Journal Line for Tax adjust
+
+		return null;
+	}
+
+	private boolean isCreateGLJournal(MInvoice m_Invoice, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		boolean isCreateGLJournal = false;
+		MInvoiceLine[] lines = m_Invoice.getLines();
+		for(MInvoiceLine line : lines)
+		{
+			if(isCreateGLJournalLine(m_Invoice, line, m_ContractAcct,m_AcctSchema))
+			{
+				isCreateGLJournal = true;
+				break;
+			}
+		}
+
+		if(isCreateGLJournal)
+			return true;
+
+		if(isCreateTaxAdjustGLJournalLine(m_Invoice, m_ContractAcct,m_AcctSchema))
+			return true;
+
+		return false;
+	}
+
+	private boolean isCreateGLJournalLine(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema )
+	{
+		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
+		int C_Charge_ID = m_InvoiceLine.getC_Charge_ID();
+		MAccount m_Account = null;
+		if(m_Invoice.isSOTrx())
+		{
+			if(M_Product_ID > 0){
+				m_Account = getJP_GL_Revenue_Acct(m_Invoice, m_InvoiceLine, m_ContractAcct, m_AcctSchema);
+			}else if(C_Charge_ID > 0) {
+				m_Account = getJP_GL_Ch_Expense_Acct(m_Invoice, m_InvoiceLine, m_ContractAcct, m_AcctSchema);
+			}
+
+		}else {
+
+			if(M_Product_ID > 0){
+				 m_Account = getJP_GL_Expense_Acct(m_Invoice, m_InvoiceLine, m_ContractAcct, m_AcctSchema);
+			}else if(C_Charge_ID > 0) {
+				m_Account = getJP_GL_Ch_Expense_Acct(m_Invoice, m_InvoiceLine, m_ContractAcct, m_AcctSchema);
+			}
+		}
+
+		if(m_Account != null)
+			return true;
+
+		return false;
+	}
+
+	private boolean isCreateTaxAdjustGLJournalLine(MInvoice m_Invoice, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema )
+	{
+
+		MInvoiceTax[] iTaxes = m_Invoice.getTaxes(true);
+		if(iTaxes.length == 0)
+			return false;
+
+		boolean isCreateTaxAdjustGLJournalLine = false;
+
+		MAccount m_Account = null;
+		for(MInvoiceTax iTax : iTaxes)
+		{
+			if(iTax.getTaxAmt().compareTo(Env.ZERO) == 0)
+				continue;
+
+			if(m_Invoice.isSOTrx()){
+				m_Account = getJP_GL_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+			}else {
+				if(iTax.getC_Tax().isSalesTax()) {
+					m_Account = getJP_GL_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+				}else {
+					m_Account = getJP_GL_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+				}
+			}
+
+			if(m_Account != null)
+			{
+				isCreateTaxAdjustGLJournalLine = true;
+				break;
+			}
+		}//for
+
+		if(isCreateTaxAdjustGLJournalLine)
+			return true;
+
+		return false;
+	}
+
+	private MAccount getJP_GL_Revenue_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
+		if(M_Product_ID > 0)
+		{
+			MProduct m_Product = MProduct.get(M_Product_ID);
+			if(MProduct.PRODUCTTYPE_Item.equals(m_Product.getProductType()))
+			{
+				return null;
+			}
+
+			MContractProductAcct m_ContractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(m_ContractProductAcct == null)
+				return null;
+
+			int JP_GL_Revenue_Acct = m_ContractProductAcct.getJP_GL_Revenue_Acct();
+			if(JP_GL_Revenue_Acct == 0)
+				return null;
+
+			return MAccount.get(m_Invoice.getCtx(), JP_GL_Revenue_Acct);
+
+		}
+
+		return null;
+	}
+
+	private MAccount getP_Revenue_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
+		if(M_Product_ID > 0)
+		{
+			MProduct m_Product = MProduct.get(M_Product_ID);
+			if(MProduct.PRODUCTTYPE_Item.equals(m_Product.getProductType()))
+			{
+				return null;
+			}
+
+			MContractProductAcct m_ContractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(m_ContractProductAcct == null)
+				return null;
+
+			int P_Revenue_Acct = m_ContractProductAcct.getP_Revenue_Acct();
+			if(P_Revenue_Acct == 0)
+			{
+				//Get Default Account
+				return getProductCost(m_InvoiceLine).getAccount(ProductCost.ACCTTYPE_P_Revenue,m_AcctSchema);
+			}
+
+			return MAccount.get(m_Invoice.getCtx(), P_Revenue_Acct);
+
+		}
+
+		return null;
+	}
+
+	private MAccount getJP_GL_Expense_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
+		if(M_Product_ID > 0)
+		{
+			MProduct m_Product = MProduct.get(M_Product_ID);
+			if(MProduct.PRODUCTTYPE_Item.equals(m_Product.getProductType()))
+			{
+				return null;
+			}
+
+			MContractProductAcct m_ContractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(m_ContractProductAcct == null)
+				return null;
+
+			int JP_GL_Expense_Acct = m_ContractProductAcct.getJP_GL_Expense_Acct();
+			if(JP_GL_Expense_Acct == 0)
+				return null;
+
+			return MAccount.get(m_Invoice.getCtx(), JP_GL_Expense_Acct);
+
+		}
+		return null;
+	}
+
+	private MAccount getP_Expense_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
+		if(M_Product_ID > 0)
+		{
+			MProduct m_Product = MProduct.get(M_Product_ID);
+			if(MProduct.PRODUCTTYPE_Item.equals(m_Product.getProductType()))
+			{
+				return null;
+			}
+
+			MContractProductAcct m_ContractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(m_ContractProductAcct == null)
+				return null;
+
+			int P_Expense_Acct = m_ContractProductAcct.getP_Expense_Acct();
+			if(P_Expense_Acct == 0)
+			{
+				//Get Default Account
+				return getProductCost(m_InvoiceLine).getAccount(ProductCost.ACCTTYPE_P_Expense, m_AcctSchema);
+			}
+
+			return MAccount.get(m_Invoice.getCtx(), P_Expense_Acct);
+
+		}
+
+		return null;
+	}
+
+	private MAccount getJP_GL_Ch_Expense_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractChargeAcct m_ContractChargeAcct = m_ContractAcct.getContracChargeAcct(m_InvoiceLine.getC_Charge_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+		if(m_ContractChargeAcct == null)
+			return null;
+
+		int JP_GL_Ch_Expense_Acct = m_ContractChargeAcct.getJP_GL_Ch_Expense_Acct();
+		if(JP_GL_Ch_Expense_Acct == 0)
+			return null;
+
+		return MAccount.get(m_Invoice.getCtx(), JP_GL_Ch_Expense_Acct);
+	}
+
+	private MAccount getCh_Expense_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractChargeAcct m_ContractChargeAcct = m_ContractAcct.getContracChargeAcct(m_InvoiceLine.getC_Charge_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+		if(m_ContractChargeAcct == null || m_ContractChargeAcct.getCh_Expense_Acct() == 0)
+		{
+			//Get Default Account
+			return getProductCost(m_InvoiceLine).getAccount(ProductCost.ACCTTYPE_P_Expense, m_AcctSchema);
+
+		}else {
+
+			return MAccount.get(m_Invoice.getCtx(), m_ContractChargeAcct.getCh_Expense_Acct());
+
+		}
+	}
+
+	private MAccount getJP_GL_TaxDue_Acct(MInvoice m_Invoice, MInvoiceTax m_InvoiceTax, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractTaxAcct m_ContractTaxAcct = m_ContractAcct.getContracTaxAcct(m_InvoiceTax.getC_Tax_ID(), m_AcctSchema.getC_AcctSchema_ID(),false);
+		if(m_ContractTaxAcct == null)
+			return null;
+
+		int JP_GL_TaxDue_Acct = m_ContractTaxAcct.getJP_GL_TaxDue_Acct();
+		if(JP_GL_TaxDue_Acct == 0)
+			return null;
+
+		return MAccount.get(m_Invoice.getCtx(), JP_GL_TaxDue_Acct);
+	}
+
+	private MAccount getT_TaxDue_Acct(MInvoice m_Invoice, MInvoiceTax m_InvoiceTax, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractTaxAcct m_ContractTaxAcct = m_ContractAcct.getContracTaxAcct(m_InvoiceTax.getC_Tax_ID(), m_AcctSchema.getC_AcctSchema_ID(),false);
+		if(m_ContractTaxAcct != null && m_ContractTaxAcct.getT_Due_Acct() > 0)
+		{
+			return MAccount.get(m_Invoice.getCtx(), m_ContractTaxAcct.getT_Due_Acct());
+
+		}else{
+
+			DocTax docTax = new DocTax (m_InvoiceTax.getC_Tax_ID(), "", Env.ZERO, Env.ZERO, Env.ZERO, m_Invoice.isSOTrx());
+			return docTax.getAccount(DocTax.ACCTTYPE_TaxDue, m_AcctSchema);
+		}
+	}
+
+	private MAccount getJP_GL_TaxCredit_Acct(MInvoice m_Invoice, MInvoiceTax m_InvoiceTax, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractTaxAcct m_ContractTaxAcct = m_ContractAcct.getContracTaxAcct(m_InvoiceTax.getC_Tax_ID(), m_AcctSchema.getC_AcctSchema_ID(),false);
+		if(m_ContractTaxAcct == null)
+			return null;
+
+		int JP_GL_TaxCredit_Acct = m_ContractTaxAcct.getJP_GL_TaxCredit_Acct();
+		if(JP_GL_TaxCredit_Acct == 0)
+			return null;
+
+		return MAccount.get(m_Invoice.getCtx(), JP_GL_TaxCredit_Acct);
+	}
+
+	private MAccount getT_TaxCredit_Acct(MInvoice m_Invoice, MInvoiceTax m_InvoiceTax, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractTaxAcct m_ContractTaxAcct = m_ContractAcct.getContracTaxAcct(m_InvoiceTax.getC_Tax_ID(), m_AcctSchema.getC_AcctSchema_ID(),false);
+		if(m_ContractTaxAcct != null && m_ContractTaxAcct.getT_Credit_Acct() > 0)
+		{
+			return MAccount.get(m_Invoice.getCtx(), m_ContractTaxAcct.getT_Credit_Acct());
+
+		}else{
+
+			DocTax docTax = new DocTax (m_InvoiceTax.getC_Tax_ID(), "", Env.ZERO, Env.ZERO, Env.ZERO, m_Invoice.isSOTrx());
+			return docTax.getAccount(DocTax.ACCTTYPE_TaxCredit, m_AcctSchema);
+		}
+	}
+
+	private MAccount getJP_GL_TaxExpense_Acct(MInvoice m_Invoice, MInvoiceTax m_InvoiceTax, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractTaxAcct m_ContractTaxAcct = m_ContractAcct.getContracTaxAcct(m_InvoiceTax.getC_Tax_ID(), m_AcctSchema.getC_AcctSchema_ID(),false);
+		if(m_ContractTaxAcct == null)
+			return null;
+
+		int JP_GL_TaxExpense_Acct = m_ContractTaxAcct.getJP_GL_TaxExpense_Acct();
+		if(JP_GL_TaxExpense_Acct == 0)
+			return null;
+
+		return MAccount.get(m_Invoice.getCtx(), JP_GL_TaxExpense_Acct);
+	}
+
+	private MAccount getT_TaxExpense_Acct(MInvoice m_Invoice, MInvoiceTax m_InvoiceTax, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		MContractTaxAcct m_ContractTaxAcct = m_ContractAcct.getContracTaxAcct(m_InvoiceTax.getC_Tax_ID(), m_AcctSchema.getC_AcctSchema_ID(),false);
+		if(m_ContractTaxAcct != null && m_ContractTaxAcct.getT_Expense_Acct() > 0)
+		{
+			return MAccount.get(m_Invoice.getCtx(), m_ContractTaxAcct.getT_Expense_Acct());
+
+		}else{
+
+			DocTax docTax = new DocTax (m_InvoiceTax.getC_Tax_ID(), "", Env.ZERO, Env.ZERO, Env.ZERO, m_Invoice.isSOTrx());
+			return docTax.getAccount(DocTax.ACCTTYPE_TaxExpense, m_AcctSchema);
+		}
+	}
+
+	private ProductCost getProductCost(MInvoiceLine m_InvoiceLine)
+	{
+		ProductCost	m_productCost = new ProductCost (Env.getCtx(),
+					m_InvoiceLine.getM_Product_ID(), m_InvoiceLine.getM_AttributeSetInstance_ID(), m_InvoiceLine.get_TrxName());
+
+		return m_productCost;
+	}	//	getProductCost
 }
