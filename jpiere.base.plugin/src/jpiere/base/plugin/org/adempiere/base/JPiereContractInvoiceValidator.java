@@ -1026,7 +1026,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		//Create GL Journal
 		MJournal m_Journal = new MJournal(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
 		PO.copyValues(m_Invoice, m_Journal);
-		m_Journal.setAD_Org_ID(m_Journal.getAD_Org_ID());
+		m_Journal.setAD_Org_ID(m_Invoice.getAD_Org_ID());
 		m_Journal.setC_AcctSchema_ID(m_AcctSchema.getC_AcctSchema_ID());
 		m_Journal.setC_DocType_ID(JP_DocTypeGLJournal_ID);
 		if(docTypeGL.isDocNoControlled()) {
@@ -1045,9 +1045,9 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		m_Journal.setDocAction(DocAction.ACTION_Complete);
 		m_Journal.saveEx(m_Invoice.get_TrxName());
 
+
 		//Craete GL Journal Line
 		FactLine[]  factLines = fact.getLines();
-		FactLine	factLine = null;
 		MInvoiceLine[] iLines = m_Invoice.getLines();
 		MJournalLine glLine = null;
 		MAccount m_AccountDR = null;
@@ -1055,117 +1055,124 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		int line = 0;
 		for(MInvoiceLine iLine : iLines)
 		{
-			factLine = null;
-			for(int i = 0; i < factLines.length; i++)
+			for(FactLine factLine : factLines)
 			{
-				if(iLine.getC_InvoiceLine_ID() == factLines[i].getLine_ID())
+				if(iLine.getC_InvoiceLine_ID() != factLine.getLine_ID())
+					continue;
+
+				if(!isCreateGLJournalLine(m_Invoice, iLine, m_ContractAcct, m_AcctSchema))
+					continue;
+
+				//Create GL Journal Line
+				if(m_Invoice.isSOTrx())//AR Invoice
 				{
-					factLine = factLines[i];
-					break;
+					if(iLine.getM_Product_ID() > 0)
+						m_AccountDR = getP_Revenue_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+					else if(iLine.getC_Charge_ID() > 0)
+						m_AccountDR = getCh_Expense_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+
+					if(factLine.getAccount_ID() == m_AccountDR.getAccount_ID())
+					{
+						// Dr
+						line++;
+						glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+						PO.copyValues(iLine, glLine);
+						glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+						glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+						glLine.setDateAcct(p_DateAcct);
+						glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+						glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+						glLine.setLine(line*10);
+						glLine.setQty(iLine.getQtyInvoiced().negate());
+						glLine.setAccount_ID(m_AccountDR.getAccount_ID());
+						glLine.setAmtSourceDr(factLine.getAmtAcctCr());
+						glLine.setAmtAcctDr(factLine.getAmtAcctCr());
+						glLine.setAmtSourceCr(factLine.getAmtAcctDr());
+						glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+						glLine.saveEx(m_Invoice.get_TrxName());
+
+						//Cr
+						line++;
+						glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+						PO.copyValues(iLine, glLine);
+						glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+						glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+						glLine.setDateAcct(p_DateAcct);
+						glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+						glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+						glLine.setLine(line*10);
+						if(iLine.getM_Product_ID() > 0)
+							m_AccountCR = getJP_GL_Revenue_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						else if(iLine.getC_Charge_ID() > 0)
+							m_AccountCR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						glLine.setQty(iLine.getQtyInvoiced());
+						glLine.setAccount_ID(m_AccountCR.getAccount_ID());
+						glLine.setAmtSourceDr(factLine.getAmtAcctDr());
+						glLine.setAmtAcctDr(factLine.getAmtAcctDr());
+						glLine.setAmtSourceCr(factLine.getAmtAcctCr());
+						glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+						glLine.saveEx(m_Invoice.get_TrxName());
+					}
+
+					//TODO 売上値引き実装
+
+				}else {//AP Invoice
+
+					if(iLine.getM_Product_ID() > 0)
+						m_AccountCR = getP_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+					else if(iLine.getC_Charge_ID() > 0)
+						m_AccountCR = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+
+
+					if(factLine.getAccount_ID() == m_AccountCR.getAccount_ID())
+					{
+						//Dr
+						line++;
+						glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+						PO.copyValues(iLine, glLine);
+						glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+						glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+						glLine.setDateAcct(p_DateAcct);
+						glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+						glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+						glLine.setLine(line*10);
+						if(iLine.getM_Product_ID() > 0)
+							m_AccountDR = getJP_GL_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						else if(iLine.getC_Charge_ID() > 0)
+							m_AccountDR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						glLine.setQty(iLine.getQtyInvoiced());
+						glLine.setAccount_ID(m_AccountDR.getAccount_ID());
+						glLine.setAmtSourceDr(factLine.getAmtAcctDr());
+						glLine.setAmtAcctDr(factLine.getAmtAcctDr());
+						glLine.setAmtSourceCr(factLine.getAmtAcctCr());
+						glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+						glLine.saveEx(m_Invoice.get_TrxName());
+
+						//Cr
+						line++;
+						glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
+						PO.copyValues(iLine, glLine);
+						glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
+						glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
+						glLine.setDateAcct(p_DateAcct);
+						glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
+						glLine.setC_UOM_ID(iLine.getC_UOM_ID());
+						glLine.setLine(line*10);
+						glLine.setQty(iLine.getQtyInvoiced().negate());
+						glLine.setAccount_ID(m_AccountCR.getAccount_ID());
+						glLine.setAmtSourceDr(factLine.getAmtAcctCr());
+						glLine.setAmtAcctDr(factLine.getAmtAcctCr());
+						glLine.setAmtSourceCr(factLine.getAmtAcctDr());
+						glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+						glLine.saveEx(m_Invoice.get_TrxName());
+					}
+
+					//TODO 仕入値引実装
 				}
-			}
 
-			if(factLine == null)
-				continue;
+			}//for FactLine
 
-			if(!isCreateGLJournalLine(m_Invoice, iLine, m_ContractAcct, m_AcctSchema))
-				continue;
-
-			if(m_Invoice.isSOTrx())
-			{
-				//Create GL Journal Line - Dr
-				line++;
-				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
-				PO.copyValues(iLine, glLine);
-				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
-				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
-				glLine.setLine(line*10);
-				glLine.setDateAcct(p_DateAcct);
-				glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
-				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
-				if(iLine.getM_Product_ID() > 0)
-					m_AccountDR = getP_Revenue_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				else if(iLine.getC_Charge_ID() > 0)
-					m_AccountDR = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				glLine.setQty(iLine.getQtyInvoiced().negate());
-				glLine.setAccount_ID(m_AccountDR.getAccount_ID());
-				glLine.setAmtSourceDr(factLine.getAmtAcctCr());
-				glLine.setAmtAcctDr(factLine.getAmtAcctCr());
-				glLine.setAmtSourceCr(factLine.getAmtAcctDr());
-				glLine.setAmtAcctCr(factLine.getAmtAcctDr());
-				glLine.saveEx(m_Invoice.get_TrxName());
-
-				//Create GL Journal Line - Cr
-				line++;
-				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
-				PO.copyValues(iLine, glLine);
-				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
-				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
-				glLine.setLine(line*10);
-				glLine.setDateAcct(p_DateAcct);
-				glLine.setC_Currency_ID(m_Journal.getC_Currency_ID());
-				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
-				if(iLine.getM_Product_ID() > 0)
-					m_AccountCR = getJP_GL_Revenue_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				else if(iLine.getC_Charge_ID() > 0)
-					m_AccountCR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				glLine.setQty(iLine.getQtyInvoiced());
-				glLine.setAccount_ID(m_AccountCR.getAccount_ID());
-				glLine.setAmtSourceDr(factLine.getAmtAcctDr());
-				glLine.setAmtAcctDr(factLine.getAmtAcctDr());
-				glLine.setAmtSourceCr(factLine.getAmtAcctCr());
-				glLine.setAmtAcctCr(factLine.getAmtAcctCr());
-				glLine.saveEx(m_Invoice.get_TrxName());
-
-			}else {
-
-				//Create GL Journal Line - Dr
-				line++;
-				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
-				PO.copyValues(iLine, glLine);
-				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
-				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
-				glLine.setLine(line*10);
-				glLine.setDateAcct(p_DateAcct);
-				glLine.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
-				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
-				if(iLine.getM_Product_ID() > 0)
-					m_AccountDR = getJP_GL_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				else if(iLine.getC_Charge_ID() > 0)
-					m_AccountDR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				glLine.setQty(iLine.getQtyInvoiced());
-				glLine.setAccount_ID(m_AccountDR.getAccount_ID());
-				glLine.setAmtSourceDr(factLine.getAmtAcctDr());
-				glLine.setAmtAcctDr(factLine.getAmtAcctDr());
-				glLine.setAmtSourceCr(factLine.getAmtAcctCr());
-				glLine.setAmtAcctCr(factLine.getAmtAcctCr());
-				glLine.saveEx(m_Invoice.get_TrxName());
-
-				//Create GL Journal Line - Cr
-				line++;
-				glLine = new MJournalLine(m_Invoice.getCtx(), 0, m_Invoice.get_TrxName());
-				PO.copyValues(iLine, glLine);
-				glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
-				glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
-				glLine.setLine(line*10);
-				glLine.setDateAcct(p_DateAcct);
-				glLine.setC_Currency_ID(m_Journal.getC_Currency_ID());
-				glLine.setC_UOM_ID(iLine.getC_UOM_ID());
-				if(iLine.getM_Product_ID() > 0)
-					m_AccountCR = getP_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				else if(iLine.getC_Charge_ID() > 0)
-					m_AccountCR = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-				glLine.setQty(iLine.getQtyInvoiced().negate());
-				glLine.setAccount_ID(m_AccountCR.getAccount_ID());
-				glLine.setAmtSourceDr(factLine.getAmtAcctCr());
-				glLine.setAmtAcctDr(factLine.getAmtAcctCr());
-				glLine.setAmtSourceCr(factLine.getAmtAcctDr());
-				glLine.setAmtAcctCr(factLine.getAmtAcctDr());
-				glLine.saveEx(m_Invoice.get_TrxName());
-
-			}
-
-		}//for - Craete GL Journal Line
+		}//for MInvoiceLine
 
 
 		//Crate GL Journal Line for Tax adjust
@@ -1177,7 +1184,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				if(iTax.getTaxAmt().compareTo(Env.ZERO) == 0)
 					continue;
 
-				factLine = null;
+				FactLine factLine = null;
 				for(int i = 0; i < factLines.length; i++)
 				{
 					if(iTax.getC_Tax_ID() == factLines[i].getC_Tax_ID()
