@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.adempiere.webui.window.FDialog;
+import org.compiere.acct.DocLine;
 import org.compiere.acct.DocTax;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
@@ -959,7 +960,9 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					{
 						if(MContractAcct.JP_GLJOURNAL_JOURNALPOLICY_BothItemLineAndNoConfigWillNotCreateGLJournal.equals(m_ContractAcct.getJP_GLJournal_JournalPolicy()))
 						{
-							createGLJournal((MInvoice)po, m_ContractAcct, schema, facts);
+							String msg = createGLJournal((MInvoice)po, m_ContractAcct, schema, facts);
+							if(!Util.isEmpty(msg))
+								return msg;
 						}
 					}
 				}
@@ -1073,12 +1076,36 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 						if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
 						{
-							;//TODO 売上値引きの勘定科目に上書き
+							if(!m_AcctSchema.isTradeDiscountPosted())
+								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - !MAcctSchema["+ m_AcctSchema.getName() +"].isTradeDiscountPosted()" ;
+
+							m_AccountDR = getP_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
+							{
+								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - FactLine.getAccount_ID() != P_TradeDiscountGrant_Acct";
+							}else {
+								m_AccountCR = getJP_GL_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+							}
 						}
 
 					}else if(iLine.getC_Charge_ID() > 0) {
+
 						m_AccountDR = getCh_Expense_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
 						m_AccountCR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+
+						if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
+						{
+							if(!m_AcctSchema.isTradeDiscountPosted())
+								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - !MAcctSchema["+ m_AcctSchema.getName() +"]+.isTradeDiscountPosted()" ;
+
+							m_AccountDR = getP_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
+							{
+								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - FactLine.getAccount_ID() != P_TradeDiscountGrant_Acct" ;
+							}else {
+								m_AccountCR = getJP_GL_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+							}
+						}
 					}
 
 					// Dr
@@ -1114,12 +1141,35 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						m_AccountCR = getP_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
 						if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
 						{
-							;//TODO 仕入値引きの勘定科目で上書き
+							if(!m_AcctSchema.isTradeDiscountPosted())
+								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - !MAcctSchema["+ m_AcctSchema.getName() +"].isTradeDiscountPosted()" ;
+
+							m_AccountCR = getP_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
+							{
+								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - FactLine.getAccount_ID() != P_TradeDiscountRec_Acct" ;
+							}else {
+								m_AccountDR = getJP_GL_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+							}
 						}
 
 					}else if(iLine.getC_Charge_ID() > 0) {
 						m_AccountDR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
 						m_AccountCR = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+
+						if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
+						{
+							if(!m_AcctSchema.isTradeDiscountPosted())
+								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - !MAcctSchema["+ m_AcctSchema.getName() +"].isTradeDiscountPosted()" ;
+
+							m_AccountCR = getP_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
+							{
+								return  Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - FactLine.getAccount_ID() != P_TradeDiscountRec_Acct" ;
+							}else {
+								m_AccountDR = getJP_GL_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+							}
+						}
 					}
 
 					//Dr
@@ -1401,6 +1451,32 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		return null;
 	}
 
+	private MAccount getJP_GL_TradeDiscountGrant_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema, FactLine factLine)
+	{
+		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
+		if(M_Product_ID > 0)
+		{
+			MProduct m_Product = MProduct.get(M_Product_ID);
+			if(MProduct.PRODUCTTYPE_Item.equals(m_Product.getProductType()))
+			{
+				return null;
+			}
+
+			MContractProductAcct m_ContractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(m_ContractProductAcct == null)
+				return null;
+
+			int JP_GL_TradeDiscountGrant_Acct = m_ContractProductAcct.getJP_GL_TradeDiscountGrant_Acct();
+			if(JP_GL_TradeDiscountGrant_Acct == 0)
+				return getP_TradeDiscountGrant_Acct(m_Invoice, m_InvoiceLine, m_ContractAcct, m_AcctSchema);
+
+			return MAccount.get(m_Invoice.getCtx(), JP_GL_TradeDiscountGrant_Acct);
+
+		}
+
+		return factLine.getAccount();
+	}
+
 	private MAccount getP_Revenue_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
 	{
 		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
@@ -1428,6 +1504,27 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		}
 
 		return null;
+	}
+
+	private MAccount getP_TradeDiscountGrant_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		if(m_InvoiceLine.getM_Product_ID() > 0)
+		{
+			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_InvoiceLine.getM_Product().getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountGrant_Acct() > 0)
+			{
+				return MAccount.get(m_Invoice.getCtx(),contractProductAcct.getP_TradeDiscountGrant_Acct());
+			}else{
+
+				DocLine docLine = new DocLine (m_InvoiceLine , null);
+				return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, m_AcctSchema);
+			}
+
+		}else {
+
+			return MAccount.get(m_Invoice.getCtx(), m_AcctSchema.getAcctSchemaDefault().getP_TradeDiscountGrant_Acct());
+		}
+
 	}
 
 	private MAccount getJP_GL_Expense_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
@@ -1482,6 +1579,53 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		}
 
 		return null;
+	}
+
+	private MAccount getP_TradeDiscountRec_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
+	{
+		if(m_InvoiceLine.getM_Product_ID() > 0)
+		{
+			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_InvoiceLine.getM_Product().getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)
+			{
+				return MAccount.get(m_Invoice.getCtx(),contractProductAcct.getP_TradeDiscountRec_Acct());
+			}else{
+
+				DocLine docLine = new DocLine (m_InvoiceLine , null);
+				return docLine.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, m_AcctSchema);
+			}
+
+		}else {
+
+			return MAccount.get(m_Invoice.getCtx(), m_AcctSchema.getAcctSchemaDefault().getP_TradeDiscountRec_Acct());
+		}
+
+	}
+
+	private MAccount getJP_GL_TradeDiscountRec_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema, FactLine factLine)
+	{
+		int M_Product_ID = m_InvoiceLine.getM_Product_ID();
+		if(M_Product_ID > 0)
+		{
+			MProduct m_Product = MProduct.get(M_Product_ID);
+			if(MProduct.PRODUCTTYPE_Item.equals(m_Product.getProductType()))
+			{
+				return null;
+			}
+
+			MContractProductAcct m_ContractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			if(m_ContractProductAcct == null)
+				return null;
+
+			int JP_GL_TradeDiscountRec_Acct = m_ContractProductAcct.getJP_GL_TradeDiscountRec_Acct();
+			if(JP_GL_TradeDiscountRec_Acct == 0)
+				return getP_TradeDiscountRec_Acct(m_Invoice, m_InvoiceLine, m_ContractAcct, m_AcctSchema);
+
+			return MAccount.get(m_Invoice.getCtx(), JP_GL_TradeDiscountRec_Acct);
+
+		}
+
+		return factLine.getAccount();
 	}
 
 	private MAccount getJP_GL_Ch_Expense_Acct(MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MContractAcct m_ContractAcct, MAcctSchema m_AcctSchema)
