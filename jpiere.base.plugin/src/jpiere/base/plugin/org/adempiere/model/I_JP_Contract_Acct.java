@@ -229,6 +229,32 @@ public interface I_JP_Contract_Acct
 	  */
 	public String getJP_GLJournal_DateAcctSelect();
 
+    /** Column name JP_GLJournal_DateDoc */
+    public static final String COLUMNNAME_JP_GLJournal_DateDoc = "JP_GLJournal_DateDoc";
+
+	/** Set Doc Date of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateDoc (Timestamp JP_GLJournal_DateDoc);
+
+	/** Get Doc Date of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public Timestamp getJP_GLJournal_DateDoc();
+
+    /** Column name JP_GLJournal_DateDocSelect */
+    public static final String COLUMNNAME_JP_GLJournal_DateDocSelect = "JP_GLJournal_DateDocSelect";
+
+	/** Set Doc date selection of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateDocSelect (String JP_GLJournal_DateDocSelect);
+
+	/** Get Doc date selection of GL Journal.
+	  * JPIERE-0539:JPBP
+	  */
+	public String getJP_GLJournal_DateDocSelect();
+
     /** Column name JP_GLJournal_JournalPolicy */
     public static final String COLUMNNAME_JP_GLJournal_JournalPolicy = "JP_GLJournal_JournalPolicy";
 

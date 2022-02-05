@@ -119,12 +119,16 @@ public class MContractAcct extends X_JP_Contract_Acct {
 		if(newRecord
 				|| is_ValueChanged(MContractAcct.COLUMNNAME_IsPostingGLJournalJP)
 				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_JournalPolicy)
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_DateDocSelect)
+				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_DateDoc)
 				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_DateAcctSelect)
 				|| is_ValueChanged(MContractAcct.COLUMNNAME_JP_GLJournal_DateAcct) )
 		{
 			if(!isPostingGLJournalJP())
 			{
 				setJP_GLJournal_JournalPolicy(null);
+				setJP_GLJournal_DateDocSelect(null);
+				setJP_GLJournal_DateDoc(null);
 				setJP_GLJournal_DateAcctSelect(null);
 				setJP_GLJournal_DateAcct(null);
 
@@ -134,6 +138,24 @@ public class MContractAcct extends X_JP_Contract_Acct {
 				{
 					log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_GLJournal_JournalPolicy) );
 					return false;
+				}
+
+				if(Util.isEmpty(getJP_GLJournal_DateDocSelect()))
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_GLJournal_DateDocSelect) );
+					return false;
+				}
+
+				if(JP_GLJOURNAL_DATEACCTSELECT_FixedDate.equals(getJP_GLJournal_DateDocSelect()))
+				{
+					if(getJP_GLJournal_DateDoc() == null)
+					{
+						log.saveError("Error", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_JP_GLJournal_DateDoc) );
+						return false;
+					}
+
+				}else {
+					setJP_GLJournal_DateAcct(null);
 				}
 
 				if(Util.isEmpty(getJP_GLJournal_DateAcctSelect()))

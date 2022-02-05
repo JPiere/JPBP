@@ -996,6 +996,15 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		}
 		MDocType docTypeGL = MDocType.get(JP_DocTypeGLJournal_ID);
 
+		//Get DateDoc of GL Journal
+		Timestamp p_DateDoc = null;
+		if(MContractAcct.JP_GLJOURNAL_DATEDOCSELECT_FixedDate.equals(m_ContractAcct.getJP_GLJournal_DateDocSelect()))
+		{
+			p_DateDoc = m_ContractAcct.getJP_GLJournal_DateDoc();
+		}else if(MContractAcct.JP_GLJOURNAL_DATEDOCSELECT_AccountDateOfInvoice.equals(m_ContractAcct.getJP_GLJournal_DateDocSelect())) {
+
+			p_DateDoc = m_Invoice.getDateAcct();
+		}
 
 		//Get DateAcct of GL Journal
 		Timestamp p_DateAcct = null;
@@ -1039,13 +1048,22 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		}
 		m_Journal.setGL_Category_ID(docTypeGL.getGL_Category_ID());
 		m_Journal.setPostingType(MJournal.POSTINGTYPE_Actual);
-		m_Journal.setDateDoc(p_DateAcct);
+		m_Journal.setDateDoc(p_DateDoc);
 		m_Journal.setDateAcct(p_DateAcct);
 		m_Journal.setC_Period_ID(C_Period_ID);
 		m_Journal.setDescription(m_Invoice.getDocumentInfo());
 		m_Journal.setC_Currency_ID(m_AcctSchema.getC_Currency_ID());
 		m_Journal.setDocStatus(DocAction.STATUS_Drafted);
 		m_Journal.setDocAction(DocAction.ACTION_Complete);
+
+		int columnIndex = m_Journal.get_ColumnIndex("JP_Order_ID");
+		if(columnIndex > -1)
+			m_Journal.set_ValueNoCheck("JP_Order_ID", m_Invoice.getC_Order_ID());
+
+		columnIndex = m_Journal.get_ColumnIndex("JP_Invoice_ID");
+		if(columnIndex > -1)
+			m_Journal.set_ValueNoCheck("JP_Invoice_ID", m_Invoice.getC_Invoice_ID());
+
 		m_Journal.saveEx(m_Invoice.get_TrxName());
 
 

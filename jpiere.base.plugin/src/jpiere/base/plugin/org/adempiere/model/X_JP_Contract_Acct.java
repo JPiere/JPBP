@@ -31,7 +31,7 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220202L;
+	private static final long serialVersionUID = 20220205L;
 
     /** Standard Constructor */
     public X_JP_Contract_Acct (Properties ctx, int JP_Contract_Acct_ID, String trxName)
@@ -362,6 +362,45 @@ public class X_JP_Contract_Acct extends PO implements I_JP_Contract_Acct, I_Pers
 	public String getJP_GLJournal_DateAcctSelect () 
 	{
 		return (String)get_Value(COLUMNNAME_JP_GLJournal_DateAcctSelect);
+	}
+
+	/** Set Doc Date of GL Journal.
+		@param JP_GLJournal_DateDoc 
+		JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateDoc (Timestamp JP_GLJournal_DateDoc)
+	{
+		set_Value (COLUMNNAME_JP_GLJournal_DateDoc, JP_GLJournal_DateDoc);
+	}
+
+	/** Get Doc Date of GL Journal.
+		@return JPIERE-0539:JPBP
+	  */
+	public Timestamp getJP_GLJournal_DateDoc () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_GLJournal_DateDoc);
+	}
+
+	/** Fixed Date = FX */
+	public static final String JP_GLJOURNAL_DATEDOCSELECT_FixedDate = "FX";
+	/** Account Date of Invoice = IV */
+	public static final String JP_GLJOURNAL_DATEDOCSELECT_AccountDateOfInvoice = "IV";
+	/** Set Doc date selection of GL Journal.
+		@param JP_GLJournal_DateDocSelect 
+		JPIERE-0539:JPBP
+	  */
+	public void setJP_GLJournal_DateDocSelect (String JP_GLJournal_DateDocSelect)
+	{
+
+		set_Value (COLUMNNAME_JP_GLJournal_DateDocSelect, JP_GLJournal_DateDocSelect);
+	}
+
+	/** Get Doc date selection of GL Journal.
+		@return JPIERE-0539:JPBP
+	  */
+	public String getJP_GLJournal_DateDocSelect () 
+	{
+		return (String)get_Value(COLUMNNAME_JP_GLJournal_DateDocSelect);
 	}
 
 	/** Both item line and no config  will not create GL Journal = BT */
