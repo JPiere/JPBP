@@ -1070,10 +1070,9 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		//Craete GL Journal Line
 		FactLine[]  factLines = fact.getLines();
 		MInvoiceLine[] iLines = m_Invoice.getLines();
-		MJournalLine glLine = null;
-		MAccount m_AccountDR = null;
-		MAccount m_AccountCR = null;
-		int line = 0;
+		MAccount m_AccountReverse = null;
+		MAccount m_AccountTransfer = null;
+		int lineNo = 0;
 		for(MInvoiceLine iLine : iLines)
 		{
 			for(FactLine factLine : factLines)
@@ -1089,130 +1088,104 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				{
 					if(iLine.getM_Product_ID() > 0)
 					{
-						m_AccountDR = getP_Revenue_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
-						m_AccountCR = getJP_GL_Revenue_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						m_AccountReverse = getP_Revenue_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+						m_AccountTransfer = getJP_GL_Revenue_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
 
-						if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
+						//Trade Discount
+						if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 						{
 							if(!m_AcctSchema.isTradeDiscountPosted())
 								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - !MAcctSchema["+ m_AcctSchema.getName() +"].isTradeDiscountPosted()" ;
 
-							m_AccountDR = getP_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
-							if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
+							m_AccountReverse = getP_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 							{
 								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - FactLine.getAccount_ID() != P_TradeDiscountGrant_Acct";
 							}else {
-								m_AccountCR = getJP_GL_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+								m_AccountTransfer = getJP_GL_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
 							}
 						}
 
 					}else if(iLine.getC_Charge_ID() > 0) {
 
-						m_AccountDR = getCh_Expense_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
-						m_AccountCR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						m_AccountReverse = getCh_Expense_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+						m_AccountTransfer = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
 
-						if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
+						//Trade Discount - Basically unnecessary processing.
+						if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 						{
 							if(!m_AcctSchema.isTradeDiscountPosted())
 								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - !MAcctSchema["+ m_AcctSchema.getName() +"]+.isTradeDiscountPosted()" ;
 
-							m_AccountDR = getP_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
-							if(factLine.getAccount_ID() != m_AccountDR.getAccount_ID())
+							m_AccountReverse = getP_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 							{
 								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - FactLine.getAccount_ID() != P_TradeDiscountGrant_Acct" ;
 							}else {
-								m_AccountCR = getJP_GL_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+								m_AccountTransfer = getJP_GL_TradeDiscountGrant_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
 							}
 						}
 					}
 
 					// Dr
-					line++;
-					glLine = journalLineFactory(m_Journal, iLine);
-					glLine.setLine(line*10);
-					glLine.setQty(iLine.getQtyInvoiced().negate());
-					glLine.setAccount_ID(m_AccountDR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctCr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctDr());
-					glLine.saveEx(m_Invoice.get_TrxName());
+					if(createGLJournalLine(m_Journal, factLine, m_AccountReverse, lineNo++, true) == null)
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Invoice Dr";
 
 					//Cr
-					line++;
-					glLine = journalLineFactory(m_Journal, iLine);
-					glLine.setLine(line*10);
-					glLine.setQty(iLine.getQtyInvoiced());
-					glLine.setAccount_ID(m_AccountCR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctDr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctCr());
-					glLine.saveEx(m_Invoice.get_TrxName());
+					if(createGLJournalLine(m_Journal, factLine, m_AccountTransfer, lineNo++, false) == null);
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Invoice Cr";
 
 
 				}else {//AP Invoice
 
 					if(iLine.getM_Product_ID() > 0)
 					{
-						m_AccountDR = getJP_GL_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-						m_AccountCR = getP_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-						if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
+						m_AccountReverse = getP_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						m_AccountTransfer = getJP_GL_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+
+						//Trade Discount
+						if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 						{
 							if(!m_AcctSchema.isTradeDiscountPosted())
 								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - !MAcctSchema["+ m_AcctSchema.getName() +"].isTradeDiscountPosted()" ;
 
-							m_AccountCR = getP_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
-							if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
+							m_AccountReverse = getP_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 							{
 								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Product - FactLine.getAccount_ID() != P_TradeDiscountRec_Acct" ;
 							}else {
-								m_AccountDR = getJP_GL_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+								m_AccountTransfer = getJP_GL_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
 							}
 						}
 
 					}else if(iLine.getC_Charge_ID() > 0) {
-						m_AccountDR = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
-						m_AccountCR = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
 
-						if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
+						m_AccountReverse = getCh_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+						m_AccountTransfer = getJP_GL_Ch_Expense_Acct(m_Invoice,iLine, m_ContractAcct, m_AcctSchema);
+
+						//Trade Discount - Basically unnecessary processing.
+						if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 						{
 							if(!m_AcctSchema.isTradeDiscountPosted())
 								return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - !MAcctSchema["+ m_AcctSchema.getName() +"].isTradeDiscountPosted()" ;
 
-							m_AccountCR = getP_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
-							if(factLine.getAccount_ID() != m_AccountCR.getAccount_ID())
+							m_AccountReverse = getP_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema);
+							if(factLine.getAccount_ID() != m_AccountReverse.getAccount_ID())
 							{
 								return  Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " : Unexpected Account of Charge - FactLine.getAccount_ID() != P_TradeDiscountRec_Acct" ;
 							}else {
-								m_AccountDR = getJP_GL_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
+								m_AccountTransfer = getJP_GL_TradeDiscountRec_Acct(m_Invoice, iLine, m_ContractAcct, m_AcctSchema, factLine);
 							}
 						}
 					}
 
 					//Dr
-					line++;
-					glLine = journalLineFactory(m_Journal, iLine);
-					glLine.setLine(line*10);
-					glLine.setQty(iLine.getQtyInvoiced());
-					glLine.setAccount_ID(m_AccountDR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctDr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctCr());
-					glLine.saveEx(m_Invoice.get_TrxName());
+					if(createGLJournalLine(m_Journal, factLine, m_AccountTransfer, lineNo++, false) == null)
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Invoice Dr";
 
 					//Cr
-					line++;
-					glLine = journalLineFactory(m_Journal, iLine);
-					glLine.setLine(line*10);
-					glLine.setQty(iLine.getQtyInvoiced().negate());
-					glLine.setAccount_ID(m_AccountCR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctCr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctDr());
-					glLine.saveEx(m_Invoice.get_TrxName());
+					if(createGLJournalLine(m_Journal, factLine, m_AccountReverse, lineNo++, true) == null)
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Invoice Cr";
 
 				}
 
@@ -1246,82 +1219,48 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 				if(m_Invoice.isSOTrx())
 				{
-					m_AccountCR = getJP_GL_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
-					if(m_AccountCR == null)
+					m_AccountTransfer = getJP_GL_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+					if(m_AccountTransfer == null)
 						continue;
 
-					m_AccountDR = getT_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+					m_AccountReverse = getT_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 
-					//Create GL Journal Line - Dr
-					line++;
-					glLine = journalLineFactory(m_Journal, null);
-					glLine.setLine(line*10);
-					glLine.setAccount_ID(m_AccountDR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctCr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctDr());
-					glLine.setQty(Env.ZERO);
-					glLine.saveEx(m_Invoice.get_TrxName());
+					//Dr
+					if(createGLJournalLine(m_Journal, factLine, m_AccountReverse, lineNo++, true) == null)
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Tax adjust Dr";
 
-
-					//Create GL Journal Line - Cr
-					line++;
-					glLine = journalLineFactory(m_Journal, null);
-					glLine.setLine(line*10);
-					glLine.setAccount_ID(m_AccountCR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctDr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctCr());
-					glLine.setQty(Env.ZERO);
-					glLine.saveEx(m_Invoice.get_TrxName());
+					//Cr
+					if(createGLJournalLine(m_Journal, factLine, m_AccountTransfer, lineNo++, false) == null)
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Tax adjust Cr";
 
 				}else {
 
 					if(iTax.getC_Tax().isSalesTax())
 					{
-						m_AccountDR = getJP_GL_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
-						if(m_AccountDR == null)
+						m_AccountTransfer = getJP_GL_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+						if(m_AccountTransfer == null)
 							continue;
 
 					}else {
 
-						m_AccountDR = getJP_GL_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
-						if(m_AccountDR == null)
+						m_AccountTransfer = getJP_GL_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+						if(m_AccountTransfer == null)
 							continue;
 					}
 
 					if(iTax.getC_Tax().isSalesTax()){
-						m_AccountCR = getT_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+						m_AccountReverse = getT_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 					}else {
-						m_AccountCR = getT_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
+						m_AccountReverse = getT_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 					}
 
-					//Create GL Journal Line - Dr
-					line++;
-					glLine  = journalLineFactory(m_Journal, null);
-					glLine.setLine(line*10);
-					glLine.setAccount_ID(m_AccountDR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctDr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctCr());
-					glLine.setQty(Env.ZERO);
-					glLine.saveEx(m_Invoice.get_TrxName());
+					//Dr
+					if(createGLJournalLine(m_Journal, factLine, m_AccountTransfer, lineNo++, false) == null)
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Tax adjust Dr";
 
-
-					//Create GL Journal Line - Cr
-					line++;
-					glLine  = journalLineFactory(m_Journal, null);
-					glLine.setLine(line*10);
-					glLine.setAccount_ID(m_AccountCR.getAccount_ID());
-					glLine.setAmtSourceDr(factLine.getAmtAcctCr());
-					glLine.setAmtAcctDr(factLine.getAmtAcctCr());
-					glLine.setAmtSourceCr(factLine.getAmtAcctDr());
-					glLine.setAmtAcctCr(factLine.getAmtAcctDr());
-					glLine.setQty(Env.ZERO);
-					glLine.saveEx(m_Invoice.get_TrxName());
+					//Cr
+					if(createGLJournalLine(m_Journal, factLine, m_AccountReverse, lineNo++, true) == null)
+						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Tax adjust Cr";
 
 				}
 
@@ -1332,25 +1271,45 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		return null;
 	}
 
-	private MJournalLine journalLineFactory(MJournal m_Journal, MInvoiceLine m_InvoiceLine)
+	private MJournalLine createGLJournalLine(MJournal m_Journal, FactLine factLine, MAccount m_Account, int lineNo,  boolean isReverse)
 	{
-		if(m_Journal == null || m_Journal.getGL_Journal_ID() == 0)
+		if(m_Journal == null || m_Journal.getGL_Journal_ID() == 0 || factLine == null)
 			return null;
 
 		MJournalLine glLine = new MJournalLine(m_Journal.getCtx(), 0, m_Journal.get_TrxName());
+		PO.copyValues(factLine, glLine);
 
-		if(m_InvoiceLine != null)
-			PO.copyValues(m_InvoiceLine, glLine);
+		glLine.setLine(lineNo*10);
 		glLine.setAD_Org_ID(m_Journal.getAD_Org_ID());
 		glLine.setGL_Journal_ID(m_Journal.getGL_Journal_ID());
 		glLine.setDateAcct(m_Journal.getDateAcct());
 		glLine.setCurrencyRate(Env.ONE);
 		glLine.setC_Currency_ID(m_Journal.getC_Currency_ID());
 
-		if(m_InvoiceLine != null)
-			glLine.setC_UOM_ID(m_InvoiceLine.getC_UOM_ID());
-		else
-			glLine.setC_UOM_ID(100);
+		if(isReverse)
+		{
+			glLine.setAccount_ID(factLine.getAccount_ID());
+			glLine.setQty(factLine.getQty().negate());
+			glLine.setAmtSourceDr(factLine.getAmtAcctCr());
+			glLine.setAmtAcctDr(factLine.getAmtAcctCr());
+			glLine.setAmtSourceCr(factLine.getAmtAcctDr());
+			glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+
+		}else {
+
+			if(m_Account == null)
+				return null;
+
+			glLine.setAccount_ID(m_Account.getAccount_ID());
+			glLine.setQty(factLine.getQty());
+			glLine.setAmtSourceDr(factLine.getAmtAcctDr());
+			glLine.setAmtAcctDr(factLine.getAmtAcctDr());
+			glLine.setAmtSourceCr(factLine.getAmtAcctCr());
+			glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+
+		}
+
+		glLine.saveEx(m_Journal.get_TrxName());
 
 		return glLine;
 	}
