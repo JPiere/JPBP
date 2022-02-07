@@ -67,7 +67,7 @@ public class GLJournalBulkComplete extends SvrProcess {
 	private Timestamp	p_DateAcct_To = null;
 
 	/**Target DocStatus(Mandatory)*/
-	private String		p_DocStatus = "DR";
+	private String		p_DocStatus = null;
 
 	/**Original User(Option)*/
 	private int			p_AD_User_ID = 0;
@@ -177,6 +177,9 @@ public class GLJournalBulkComplete extends SvrProcess {
 			if(mj.isProcessed())
 				continue;
 
+			if(p_JP_OverwriteDateDoc != null)
+				mj.setDateDoc(p_JP_OverwriteDateDoc);
+
 			//Check validate period
 			if(p_JP_OverwriteDateAcct != null)
 			{
@@ -186,13 +189,11 @@ public class GLJournalBulkComplete extends SvrProcess {
 					String msg = Msg.getMsg(getCtx(), "PeriodNotFound") + " : " + DisplayType.getDateFormat().format(p_JP_OverwriteDateAcct) + " - " + mj.getDocumentNo() ;
 					throw new Exception(msg);
 				}
+
+				mj.setDateAcct(p_JP_OverwriteDateAcct);
+				mj.setC_Period_ID(C_Period_ID);
+				mj.saveEx(get_TrxName());
 			}
-
-			if(p_JP_OverwriteDateDoc != null)
-				mj.setDateDoc(p_JP_OverwriteDateDoc);
-
-			if(p_JP_OverwriteDateAcct != null)
-				mj.setDateDoc(p_JP_OverwriteDateAcct);
 
 			String wfStatus = MWFActivity.getActiveInfo(Env.getCtx(), MJournal.Table_ID, mj.getGL_Journal_ID());
 			if (Util.isEmpty(wfStatus))
@@ -270,14 +271,19 @@ public class GLJournalBulkComplete extends SvrProcess {
 		{
 			//Mandatory parameters
 			StringBuilder whereClause = new StringBuilder(MJournal.COLUMNNAME_AD_Client_ID + " = ? AND "
-															+ MJournal.COLUMNNAME_Processed + " = 'N' AND "
-															+ MJournal.COLUMNNAME_DocStatus + " = " + "'" + p_DocStatus + "'"
+															+ MJournal.COLUMNNAME_Processed + " = 'N' "
 															);
 
 			ArrayList<Object> docListParams = new ArrayList<Object>();
 			docListParams.add(p_AD_Client_ID);
 
 			//Option parameters
+			if (!Util.isEmpty(p_DocStatus))
+			{
+				whereClause.append(" AND " + MJournal.COLUMNNAME_DocStatus + " = ? ");
+				docListParams.add(p_DocStatus);
+			}
+
 			if (p_AD_Org_ID != 0)
 			{
 				whereClause.append(" AND " + MJournal.COLUMNNAME_AD_Org_ID + " = ? ");
