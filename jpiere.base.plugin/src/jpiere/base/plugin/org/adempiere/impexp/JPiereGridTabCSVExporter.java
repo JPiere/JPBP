@@ -40,6 +40,7 @@ import org.compiere.model.GridWindowVO;
 import org.compiere.model.I_AD_EntityType;
 import org.compiere.model.Lookup;
 import org.compiere.model.MColumn;
+import org.compiere.model.MField;
 import org.compiere.model.MLocation;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRefList;
@@ -132,7 +133,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				} else if (! (field.isDisplayed() || field.isDisplayedGrid())) {
 				   continue;
 				}
-				String headName = resolveColumnName(table, column);
+				String headName = resolveColumnName(table, column, gridTab);//JPIERE-0451 add argument GridTab
 				headArray.add(headName);
 				if (DisplayType.Date == field.getDisplayType()) {
 					procArray.add(new Optional(new FmtDate(DisplayType.DEFAULT_DATE_FORMAT)));
@@ -203,9 +204,9 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 					 String  headNameDetail = null;
 					 if(!MSysConfig.getBooleanValue("JP_EXPORT_CSV_DISPLAY_VALUE", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))//iDempiere original
 					{
-						headNameDetail = detail.getTableName()+">"+resolveColumnName(tableDetail, columnDetail);
+						headNameDetail = detail.getTableName()+">"+resolveColumnName(tableDetail, columnDetail, detail);//JPIERE-0451 add argument GridTab
 					}else {
-						headNameDetail = detail.getName()+">"+resolveColumnName(tableDetail, columnDetail);
+						headNameDetail = detail.getName()+">"+resolveColumnName(tableDetail, columnDetail, detail);//JPIERE-0451 add argument GridTab
 					}
 
 					 headArray.add(headNameDetail);
@@ -411,9 +412,9 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				    String headName = null;
 				    if(!MSysConfig.getBooleanValue("JP_EXPORT_CSV_DISPLAY_VALUE", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))//iDempiere original
 					{
-						headName = headArray.get(headArray.indexOf(childTab.getTableName()+">"+resolveColumnName(tableDetail,column)));
+						headName = headArray.get(headArray.indexOf(childTab.getTableName()+">"+resolveColumnName(tableDetail,column, childTab)));//JPIERE-0451 add argument GridTab
 					}else {
-						headName = headArray.get(headArray.indexOf(childTab.getName()+">"+resolveColumnName(tableDetail,column)));
+						headName = headArray.get(headArray.indexOf(childTab.getName()+">"+resolveColumnName(tableDetail,column, childTab)));//JPIERE-0451 add argument GridTab
 					}
 				    value = resolveValue(childTab, MTable.get(Env.getCtx(),childTab.getTableName()), column, currentDetRow, headName.substring(headName.indexOf(">")+ 1,headName.length()));
 
@@ -541,7 +542,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 	    return DB.getSQLValueStringEx(null, select.toString(),record_id);
 	}
 
-	private String resolveColumnName(MTable table, MColumn column) {
+	private String resolveColumnName(MTable table, MColumn column, GridTab gridTab) {
 
 		//JPIERE-0451: [4] CSV Download Data that is Display value.
 		if(!MSysConfig.getBooleanValue("JP_EXPORT_CSV_DISPLAY_VALUE", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))//iDempiere original
@@ -572,7 +573,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 
 		}else {//JPiere CSV Export - Display Value
 
-			return Msg.getElement(Env.getCtx(),column.getColumnName());
+			return MField.get(gridTab.getField(column.getColumnName()).getAD_Field_ID()).get_Translation("Name");
 		}
 	}
 
@@ -594,7 +595,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				if(!locField.isDisplayed())
 					continue;
 
-				String fName = resolveColumnName(MTable.get(Env.getCtx(), m_mTab.getTableName()),MColumn.get(Env.getCtx(), locField.getAD_Column_ID()));
+				String fName = resolveColumnName(MTable.get(Env.getCtx(), m_mTab.getTableName()),MColumn.get(Env.getCtx(), locField.getAD_Column_ID()), m_mTab);//JPIERE-0451 add argument GridTab
 				specialColumnNames.add(m_mTab.getTableName()+">"+ fName);
 			}
 		}
