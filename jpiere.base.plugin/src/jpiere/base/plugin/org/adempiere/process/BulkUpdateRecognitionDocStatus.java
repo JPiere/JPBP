@@ -23,6 +23,7 @@ import java.util.logging.Level;
 
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MColumn;
+import org.compiere.model.MPeriod;
 import org.compiere.model.MProcess;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
@@ -31,6 +32,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -121,14 +123,25 @@ public class BulkUpdateRecognitionDocStatus extends SvrProcess
 
 		for(MRecognition recog : list)
 		{
+			if(recog.isProcessed())
+				continue;
+
+			//Check validate period
+			if(p_JP_OverwriteDateAcct != null)
+			{
+				int C_Period_ID = MPeriod.getC_Period_ID(getCtx(), p_JP_OverwriteDateAcct, recog.getAD_Org_ID());
+				if (C_Period_ID == 0)
+				{
+					String msg = Msg.getMsg(getCtx(), "PeriodNotFound") + " : " + DisplayType.getDateFormat().format(p_JP_OverwriteDateAcct) + " - " + recog.getDocumentNo();
+					throw new Exception(msg);
+				}
+			}
+
+			if(p_JP_OverwriteDateAcct != null)
+				recog.setDateAcct(p_JP_OverwriteDateAcct);
+
 			try
 			{
-				if(recog.isProcessed())
-					continue;
-
-				if(p_JP_OverwriteDateAcct != null)
-					recog.setDateAcct(p_JP_OverwriteDateAcct);
-
 				String wfStatus = MWFActivity.getActiveInfo(Env.getCtx(), MRecognition.Table_ID, recog.getJP_Recognition_ID());
 				if (Util.isEmpty(wfStatus))
 				{
