@@ -32,6 +32,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPriceList;
+import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MQuery;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
@@ -1215,6 +1216,28 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		//Check Contract Process Status
 		updateContractProcStatus(DocAction.ACTION_None, newRecord);
+
+
+		// IDEMPIERE-1597 Price List and Date must be not-updateable
+		if (!newRecord && (is_ValueChanged(COLUMNNAME_M_PriceList_ID) || is_ValueChanged(COLUMNNAME_DateInvoiced))) {
+			int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND M_Product_ID>0", getJP_ContractContent_ID());
+			if (cnt > 0) {
+				if (is_ValueChanged(COLUMNNAME_M_PriceList_ID)) {
+					log.saveError("Error", Msg.getMsg(getCtx(), "CannotChangePlIn"));
+					return false;
+				}
+				if (is_ValueChanged(COLUMNNAME_DateInvoiced)) {
+					MPriceList pList =  MPriceList.get(getCtx(), getM_PriceList_ID(), null);
+					MPriceListVersion plOld = pList.getPriceListVersion((Timestamp)get_ValueOld(COLUMNNAME_DateInvoiced));
+					MPriceListVersion plNew = pList.getPriceListVersion((Timestamp)get_Value(COLUMNNAME_DateInvoiced));
+					if (plNew == null || !plNew.equals(plOld)) {
+						log.saveError("Error", Msg.getMsg(getCtx(), "CannotChangeDateInvoiced"));
+						return false;
+					}
+				}
+			}
+		}
+
 
 		return true;
 
