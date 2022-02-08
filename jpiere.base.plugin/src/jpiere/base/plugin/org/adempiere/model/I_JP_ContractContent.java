@@ -539,6 +539,19 @@ public interface I_JP_ContractContent
 	  */
 	public String getFreightCostRule();
 
+    /** Column name GrandTotal */
+    public static final String COLUMNNAME_GrandTotal = "GrandTotal";
+
+	/** Set Grand Total.
+	  * Total amount of document
+	  */
+	public void setGrandTotal (BigDecimal GrandTotal);
+
+	/** Get Grand Total.
+	  * Total amount of document
+	  */
+	public BigDecimal getGrandTotal();
+
     /** Column name InvoiceRule */
     public static final String COLUMNNAME_InvoiceRule = "InvoiceRule";
 

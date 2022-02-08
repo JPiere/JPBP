@@ -34,7 +34,7 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20211205L;
+	private static final long serialVersionUID = 20220208L;
 
     /** Standard Constructor */
     public X_JP_ContractContent (Properties ctx, int JP_ContractContent_ID, String trxName)
@@ -64,6 +64,8 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 			setDocumentNo (null);
 			setFreightCostRule (null);
 // I
+			setGrandTotal (Env.ZERO);
+// 0
 			setInvoiceRule (null);
 // I
 			setIsApproved (false);
@@ -1001,6 +1003,26 @@ public class X_JP_ContractContent extends PO implements I_JP_ContractContent, I_
 	public String getFreightCostRule () 
 	{
 		return (String)get_Value(COLUMNNAME_FreightCostRule);
+	}
+
+	/** Set Grand Total.
+		@param GrandTotal 
+		Total amount of document
+	  */
+	public void setGrandTotal (BigDecimal GrandTotal)
+	{
+		set_Value (COLUMNNAME_GrandTotal, GrandTotal);
+	}
+
+	/** Get Grand Total.
+		@return Total amount of document
+	  */
+	public BigDecimal getGrandTotal () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_GrandTotal);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** InvoiceRule AD_Reference_ID=150 */

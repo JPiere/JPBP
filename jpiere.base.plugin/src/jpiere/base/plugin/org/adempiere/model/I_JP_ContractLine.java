@@ -760,6 +760,24 @@ public interface I_JP_ContractLine
 
 	public org.compiere.model.I_C_UOM getJP_QtyOrderd_UOM() throws RuntimeException;
 
+    /** Column name JP_TaxAmt */
+    public static final String COLUMNNAME_JP_TaxAmt = "JP_TaxAmt";
+
+	/** Set Tax Amt	  */
+	public void setJP_TaxAmt (BigDecimal JP_TaxAmt);
+
+	/** Get Tax Amt	  */
+	public BigDecimal getJP_TaxAmt();
+
+    /** Column name JP_TaxBaseAmt */
+    public static final String COLUMNNAME_JP_TaxBaseAmt = "JP_TaxBaseAmt";
+
+	/** Set Tax base Amt	  */
+	public void setJP_TaxBaseAmt (BigDecimal JP_TaxBaseAmt);
+
+	/** Get Tax base Amt	  */
+	public BigDecimal getJP_TaxBaseAmt();
+
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";
 

@@ -34,7 +34,7 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20211205L;
+	private static final long serialVersionUID = 20220208L;
 
     /** Standard Constructor */
     public X_JP_ContractLine (Properties ctx, int JP_ContractLine_ID, String trxName)
@@ -50,6 +50,10 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 			setIsDescription (false);
 			setJP_ContractContent_ID (0);
 			setJP_ContractLine_ID (0);
+			setJP_TaxAmt (Env.ZERO);
+// 0
+			setJP_TaxBaseAmt (Env.ZERO);
+// 0
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_ContractLine WHERE JP_ContractContent_ID=@JP_ContractContent_ID@
 			setLineNetAmt (Env.ZERO);
@@ -1400,6 +1404,40 @@ public class X_JP_ContractLine extends PO implements I_JP_ContractLine, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Tax Amt.
+		@param JP_TaxAmt Tax Amt	  */
+	public void setJP_TaxAmt (BigDecimal JP_TaxAmt)
+	{
+		set_Value (COLUMNNAME_JP_TaxAmt, JP_TaxAmt);
+	}
+
+	/** Get Tax Amt.
+		@return Tax Amt	  */
+	public BigDecimal getJP_TaxAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_TaxAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Tax base Amt.
+		@param JP_TaxBaseAmt Tax base Amt	  */
+	public void setJP_TaxBaseAmt (BigDecimal JP_TaxBaseAmt)
+	{
+		set_Value (COLUMNNAME_JP_TaxBaseAmt, JP_TaxBaseAmt);
+	}
+
+	/** Get Tax base Amt.
+		@return Tax base Amt	  */
+	public BigDecimal getJP_TaxBaseAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_TaxBaseAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Line No.

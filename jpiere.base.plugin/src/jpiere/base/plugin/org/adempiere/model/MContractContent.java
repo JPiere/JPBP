@@ -56,6 +56,7 @@ import org.compiere.util.Util;
 /**
 * JPIERE-0363 - Contract Management
 * JPIERE-0517 - Create Contract Calendar at Contract Doc
+* JPIERE-0541: Calculate Contract Content Tax
 *
 * @author Hideaki Hagiwara
 *
@@ -411,7 +412,12 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 		int noLine = DB.executeUpdate(msgdb.toString(), getJP_ContractContent_ID(), get_TrxName());
 		m_lines = null;
 
-		if (log.isLoggable(Level.FINE)) log.fine(processed + " - Lines=" + noLine);
+		msgdb = new StringBuilder("UPDATE JP_ContractContentTax ").append(set);
+		int noTax = DB.executeUpdate(msgdb.toString(), getJP_ContractContent_ID(), get_TrxName());
+		m_taxes = null;
+
+		if (log.isLoggable(Level.FINE)) log.fine("setProcessed - " + processed + " - Lines=" + noLine + ", Tax=" + noTax);
+
 	}	//	setProcessed
 
 	/**
@@ -1779,5 +1785,21 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		return list.toArray(new MContractContent[list.size()]);
 
+	}
+
+
+	/**	Tax Lines					*/
+	protected MContractContentTax[] 	m_taxes = null;
+
+	public MContractContentTax[] getTaxes(boolean requery)
+	{
+		if (m_taxes != null && !requery)
+			return m_taxes;
+		//
+		List<MContractContentTax> list = new Query(getCtx(), I_JP_ContractContentTax.Table_Name, "JP_ContractContent_ID=?", get_TrxName())
+									.setParameters(get_ID())
+									.list();
+		m_taxes = list.toArray(new MContractContentTax[list.size()]);
+		return m_taxes;
 	}
 }	//	MContractContent
