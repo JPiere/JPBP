@@ -617,7 +617,7 @@ public class MContractLine extends X_JP_ContractLine {
 			return success;
 
 		if(newRecord
-				|| is_ValueChanged(MRecognitionLine.COLUMNNAME_C_Tax_ID)
+				|| is_ValueChanged(MContractLine.COLUMNNAME_C_Tax_ID)
 				|| is_ValueChanged(MContractLine.COLUMNNAME_LineNetAmt))
 		{
 			MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
