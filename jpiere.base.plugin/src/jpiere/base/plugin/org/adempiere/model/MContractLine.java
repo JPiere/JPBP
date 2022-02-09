@@ -32,9 +32,11 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProductPricing;
+import org.compiere.model.MResourceAssignment;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -631,6 +633,25 @@ public class MContractLine extends X_JP_ContractLine {
 		}
 
 		return success;
+	}
+
+	@Override
+	protected boolean afterDelete(boolean success) {
+		if (!success)
+			return success;
+		if (getS_ResourceAssignment_ID() != 0)
+		{
+			MResourceAssignment ra = new MResourceAssignment(getCtx(), getS_ResourceAssignment_ID(), get_TrxName());
+			ra.delete(true);
+		}
+
+		MTax m_tax = new MTax(getCtx(), getC_Tax_ID(), get_TrxName());
+		IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
+		MTaxProvider provider = new MTaxProvider(m_tax.getCtx(), m_tax.getC_TaxProvider_ID(), m_tax.get_TrxName());
+		if (taxCalculater == null)
+			throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+    	return taxCalculater.recalculateTax(provider, this, false);
+
 	}
 
 

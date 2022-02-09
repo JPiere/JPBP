@@ -20,10 +20,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
@@ -35,6 +37,7 @@ import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MQuery;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PrintInfo;
@@ -52,12 +55,15 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProvider;
+import jpiere.base.plugin.util.JPiereUtil;
+
 
 
 /**
 * JPIERE-0363 - Contract Management
 * JPIERE-0517 - Create Contract Calendar at Contract Doc
-* JPIERE-0541: Calculate Contract Content Tax
+* JPIERE-0541 - Calculate Contract Content Tax
 *
 * @author Hideaki Hagiwara
 *
@@ -298,6 +304,13 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 
 		}
 
+		//JPIERE-0541 - Calculate Contract Content Tax
+		if (!calculateTaxTotal())
+		{
+			m_processMsg = "Error calculating tax";
+			return DocAction.STATUS_Invalid;
+		}
+
 		//	Add up Amounts
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -307,6 +320,53 @@ public class MContractContent extends X_JP_ContractContent implements DocAction,
 			setDocAction(DOCACTION_Complete);
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
+
+
+	/**
+	 * 	Calculate Tax and Total
+	 * 	@return true if tax total calculated
+	 */
+	public boolean calculateTaxTotal()
+	{
+		log.fine("");
+		//	Delete Taxes
+		DB.executeUpdateEx("DELETE FROM JP_ContractContentTax WHERE JP_ContractContent_ID = " + getJP_ContractContent_ID(), get_TrxName());
+		m_taxes = null;
+
+		MTax[] taxes = getTaxes();
+		for (MTax tax : taxes)
+		{
+			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(tax);
+			if (taxCalculater == null)
+				throw new AdempiereException(Msg.getMsg(getCtx(), "TaxNoProvider"));
+
+			if (!taxCalculater.calculateContractContentTaxTotal(null, this))
+				return false;
+		}
+		return true;
+	}	//	calculateTaxTotal
+
+	public MTax[] getTaxes()
+	{
+		Hashtable<Integer, MTax> taxes = new Hashtable<Integer, MTax>();
+		MContractLine[] lines = getLines();
+		MTax tax = null;
+		for (MContractLine line : lines)
+		{
+            tax = taxes.get(line.getC_Tax_ID());
+            if (tax == null)
+            {
+            	tax = MTax.get(getCtx(), line.getC_Tax_ID());
+            	taxes.put(tax.getC_Tax_ID(), tax);
+            }
+		}
+
+		MTax[] retValue = new MTax[taxes.size()];
+		taxes.values().toArray(retValue);
+
+		return retValue;
+	}//getTaxes()
+
 
 	/**
 	 * 	Approve Document
