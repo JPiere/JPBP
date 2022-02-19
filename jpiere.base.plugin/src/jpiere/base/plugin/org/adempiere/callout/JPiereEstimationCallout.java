@@ -123,7 +123,7 @@ public class JPiereEstimationCallout implements IColumnCallout {
 					if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS))
 						mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Force);
 					else if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_Prepay))
-						mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_AfterReceipt);
+						mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_AfterPayment);
 					else
 						mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Availability);
 
