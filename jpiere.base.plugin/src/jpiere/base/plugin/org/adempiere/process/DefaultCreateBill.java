@@ -21,15 +21,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
+
+import org.adempiere.util.ProcessUtil;
+import org.compiere.model.MColumn;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPaymentTerm;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
+import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
+import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MBillLine;
@@ -87,6 +93,8 @@ public class DefaultCreateBill implements I_CreateBill{
 	int p_AD_PInstance_ID = 0;
 	String trxName = null;
 	
+	int p_Bill_WorkFlow_ID = 0;
+	
 	@Override
 	public String createBills(Properties ctx,int AD_PInstance_ID , SvrProcess process, ProcessInfoParameter[] para
 			, MBillSchema billSchema, MPaymentTerm paymentTerm, boolean isSOTrx,  boolean isCalledInfoWindow, String trxName) throws Exception
@@ -107,6 +115,9 @@ public class DefaultCreateBill implements I_CreateBill{
 		}else{
 			IsSOTrxString = "'N'";
 		}
+		
+		MColumn m_Column_BillDocAction = MColumn.get(ctx, MBill.Table_Name, MBill.COLUMNNAME_DocAction);
+		p_Bill_WorkFlow_ID = m_Column_BillDocAction.getAD_Process().getAD_Workflow_ID();
 		
 		if(isCalledInfoWindow)
 		{
@@ -246,7 +257,7 @@ public class DefaultCreateBill implements I_CreateBill{
 	}
 
 
-	private String createBills(ArrayList<MInvoice> invoiceList)
+	private String createBills(ArrayList<MInvoice> invoiceList) throws Exception
 	{
 		MBill 	 bill = null;
 		MInvoice oldInvoice = null;
@@ -270,10 +281,7 @@ public class DefaultCreateBill implements I_CreateBill{
 			//
 			if(oldInvoice.getC_BPartner_ID() != invoice.getC_BPartner_ID() )
 			{
-				bill.load(trxName);
-				bill.processIt(p_DocAction);
-				bill.saveEx(trxName);
-				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+				billDocActionProcess(bill);
 
 				bill = createBillHeader(invoice,m_BillSchema);
 				lineCounter = 0;
@@ -281,10 +289,7 @@ public class DefaultCreateBill implements I_CreateBill{
 			}
 			else if(oldInvoice.getC_Currency_ID() != invoice.getC_Currency_ID())
 			{
-				bill.load(trxName);
-				bill.processIt(p_DocAction);
-				bill.saveEx(trxName);
-				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+				billDocActionProcess(bill);
 
 				bill = createBillHeader(invoice,m_BillSchema);
 				lineCounter = 0;
@@ -292,10 +297,7 @@ public class DefaultCreateBill implements I_CreateBill{
 			}
 			else if( !oldInvoice.getPaymentRule().equals(invoice.getPaymentRule()) )
 			{
-				bill.load(trxName);
-				bill.processIt(p_DocAction);
-				bill.saveEx(trxName);
-				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+				billDocActionProcess(bill);
 
 				bill = createBillHeader(invoice,m_BillSchema);
 				lineCounter = 0;
@@ -303,21 +305,15 @@ public class DefaultCreateBill implements I_CreateBill{
 			}
 			else if(oldInvoice.getC_BPartner_Location_ID() != invoice.getC_BPartner_Location_ID())
 			{
-				bill.load(trxName);
-				bill.processIt(p_DocAction);
-				bill.saveEx(trxName);
-				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
-
+				billDocActionProcess(bill);
+				
 				bill = createBillHeader(invoice,m_BillSchema);
 				lineCounter = 0;
 				billCounter++;
 			}
 			else if(oldInvoice.getAD_User_ID() != invoice.getAD_User_ID())
 			{
-				bill.load(trxName);
-				bill.processIt(p_DocAction);
-				bill.saveEx(trxName);
-				process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+				billDocActionProcess(bill);
 
 				bill = createBillHeader(invoice,m_BillSchema);
 				lineCounter = 0;
@@ -327,10 +323,7 @@ public class DefaultCreateBill implements I_CreateBill{
 			{
 				if(oldInvoice.getAD_Org_ID() != invoice.getAD_Org_ID())
 				{
-					bill.load(trxName);
-					bill.processIt(p_DocAction);
-					bill.saveEx(trxName);
-					process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ invoice.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+					billDocActionProcess(bill);
 
 					bill = createBillHeader(invoice,m_BillSchema);
 					lineCounter = 0;
@@ -352,10 +345,7 @@ public class DefaultCreateBill implements I_CreateBill{
 
 		if(bill != null)
 		{
-			bill.load(trxName);
-			bill.processIt(p_DocAction);
-			bill.saveEx(trxName);
-			process.addBufferLog(0, null, null, bill.getDocumentNo()+" : "+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+			billDocActionProcess(bill);
 		}
 		
 		return Msg.getElement(ctx, "JP_Bill_ID",p_IsSOTrx) + " #" + billCounter;
@@ -401,6 +391,41 @@ public class DefaultCreateBill implements I_CreateBill{
 		return bill;
 	}
 
+	private boolean billDocActionProcess(MBill bill) throws Exception
+	{
+		bill.load(trxName);
+		
+		if(Util.isEmpty(p_DocAction))
+		{
+			process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+			return true;
+		}
+		
+		if(process == null || p_Bill_WorkFlow_ID == 0)
+		{
+			if(!bill.processIt(p_DocAction))
+			{
+				throw new Exception(bill.getProcessMsg());
+			}
+			
+		}else {
+			
+			ProcessInfo pInfo = process.getProcessInfo();
+			pInfo.setPO(bill);
+			pInfo.setRecord_ID(bill.getJP_Bill_ID());
+			pInfo.setTable_ID(MBill.Table_ID);	
+			MWFProcess wfProcess = ProcessUtil.startWorkFlow(Env.getCtx(), pInfo, p_Bill_WorkFlow_ID);
+			if(wfProcess.getWFState().equals(MWFProcess.WFSTATE_Terminated))
+			{
+				throw new Exception(bill.getProcessMsg());
+			}
+		}
+		
+		bill.saveEx(trxName);
+		process.addBufferLog(0, null, null, bill.getDocumentNo()+" : "+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+		
+		return true;
+	}
 
 
 }
