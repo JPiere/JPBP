@@ -2024,8 +2024,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		}//for
 
 		invoice.processIt(ACTION_Complete);
-		if(!invoice.getDocStatus().equals(STATUS_Completed))
-			invoice.saveEx(get_TrxName());
+		invoice.saveEx(get_TrxName());
 
 		return true;
 	}//createInvoiceFromRecog()
