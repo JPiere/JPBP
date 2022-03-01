@@ -147,8 +147,7 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 		if(!Util.isEmpty(p_DocAction))
 		{
 			order.processIt(p_DocAction);
-			if(!p_DocAction.equals(DocAction.ACTION_Complete))
-				order.saveEx(get_TrxName());
+			order.saveEx(get_TrxName());
 		}
 
 		addBufferLog(0, null, null, Msg.getElement(getCtx(), "DocumentNo") + " : " + order.getDocumentNo(), MOrder.Table_ID, order.getC_Order_ID());
@@ -208,8 +207,7 @@ public class CreateDocFromSpotContractContent extends SvrProcess {
 		if(!Util.isEmpty(p_DocAction))
 		{
 			invoice.processIt(p_DocAction);
-			if(!p_DocAction.equals(DocAction.ACTION_Complete))
-				invoice.saveEx(get_TrxName());
+			invoice.saveEx(get_TrxName());
 		}
 
 		addBufferLog(0, null, null, Msg.getElement(getCtx(), "DocumentNo") + " : " + invoice.getDocumentNo(), MInvoice.Table_ID, invoice.getC_Invoice_ID());

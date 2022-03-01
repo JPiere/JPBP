@@ -393,17 +393,15 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 							throw new AdempiereException(invoice.getProcessMsg());
 						}
 						 
-						 if(!invoice.getDocStatus().equals(DocAction.ACTION_Complete))
-						 {
-							 try{
-								 invoice.saveEx(get_TrxName());
-							 } catch (AdempiereException e) {
-								 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, invoice, e.getMessage(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
-								 throw e;
-							 }finally {
-								 ;
-							 }
+						 try{
+							 invoice.saveEx(get_TrxName());
+						 } catch (AdempiereException e) {
+							 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, invoice, e.getMessage(), MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Error);
+							 throw e;
+						 }finally {
+							 ;
 						 }
+						 
 					 }
 					 
 					 addBufferLog(0, null, null, invoice.getDocumentNo(), MInvoice.Table_ID, invoice.getC_Invoice_ID());

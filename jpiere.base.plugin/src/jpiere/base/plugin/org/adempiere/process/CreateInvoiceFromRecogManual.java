@@ -232,17 +232,15 @@ public class CreateInvoiceFromRecogManual extends SvrProcess {
 				throw new AdempiereException(invoice.getProcessMsg());
 			}
 			 
-			 if(!invoice.getDocStatus().equals(DocAction.ACTION_Complete))
-			 {
-				 try{
-					 invoice.saveEx(get_TrxName());
-				 } catch (AdempiereException e) {
-					 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, invoice, e.getMessage());
-					 throw e;
-				 }finally {
-					 ;
-				 }
+			 try{
+				 invoice.saveEx(get_TrxName());
+			 } catch (AdempiereException e) {
+				 createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, invoice, e.getMessage());
+				 throw e;
+			 }finally {
+				 ;
 			 }
+			 
 		 }
 		 
 		return null;

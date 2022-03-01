@@ -192,15 +192,17 @@ public class DefaultContractProcessCreateBaseInvoiceIndirectly extends AbstractC
 				if(!docAction.equals(DocAction.ACTION_Complete))
 				{
 					invoice.setDocAction(DocAction.ACTION_Complete);
-					try {
-						invoice.saveEx(get_TrxName());
-					} catch (AdempiereException e) {
-						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
-						throw e;
-					}finally {
-						;
-					}
 				}
+				
+				try {
+					invoice.saveEx(get_TrxName());
+				} catch (AdempiereException e) {
+					createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, invoice, e.getMessage());
+					throw e;
+				}finally {
+					;
+				}
+				
 			}else{
 
 				invoice.setDocAction(DocAction.ACTION_Complete);

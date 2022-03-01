@@ -219,15 +219,17 @@ public class DefaultContractProcessCreateDerivativeInOut extends AbstractContrac
 					if(!docAction.equals(DocAction.ACTION_Complete))
 					{
 						inout.setDocAction(DocAction.ACTION_Complete);
-						try {
-							inout.saveEx(get_TrxName());
-						} catch (AdempiereException e) {
-							createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, inout, e.getMessage());
-							throw e;
-						}finally {
-							;
-						}
 					}
+					
+					try {
+						inout.saveEx(get_TrxName());
+					} catch (AdempiereException e) {
+						createContractLogDetail(MContractLogDetail.JP_CONTRACTLOGMSG_SaveError, null, inout, e.getMessage());
+						throw e;
+					}finally {
+						;
+					}
+					
 				}else{
 
 					inout.setDocAction(DocAction.ACTION_Complete);
