@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
@@ -291,6 +292,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 					MInvoiceLine iLine = new MInvoiceLine(getCtx(), 0, get_TrxName());
 					iLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
 					iLine.setInvoice(invoice);
+					iLine.setAD_Org_ID(invoice.getAD_Org_ID());
 					iLine.setLine(line);
 					iLine.setC_Charge_ID(billSchema.getJP_TaxAdjust_Charge_ID());
 					iLine.setQty(Env.ONE);
@@ -324,6 +326,29 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 
 				if(invoice.processIt(ACTION_Complete))
 				{
+					//Check need to save or not for performance because Document Engine made Document save in case of immediate post.
+					//Ref: DocumentEngine#processIt()
+					boolean isAlreadySave = false;
+					if (STATUS_Completed.equals(invoice.getDocStatus()) && MClient.isClientAccountingImmediate())
+					{
+						isAlreadySave = true;
+						Object attribute = invoice.get_Attribute(DocumentEngine.DOCUMENT_POST_IMMEDIATE_AFTER_COMPLETE);
+						if (attribute != null && attribute instanceof Boolean)
+						{
+							isAlreadySave = (boolean) attribute;
+						}	
+					}
+					
+					if(!isAlreadySave)
+					{
+						if(!invoice.save(get_TrxName()))
+						{
+							m_processMsg = Msg.getMsg(getCtx(), "SaveError") + Msg.getElement(getCtx(), MInvoice.COLUMNNAME_C_Invoice_ID, isSOTrx());
+							return DocAction.STATUS_Invalid;
+						}
+					}
+					
+					//Create Bill line that is adjusting fraction of tax.
 					MBillLine billLine = new MBillLine(getCtx(), 0, get_TrxName());
 					billLine.setJP_Bill_ID(getJP_Bill_ID());
 					billLine.setAD_Org_ID(getAD_Org_ID());
