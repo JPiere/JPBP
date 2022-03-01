@@ -1297,7 +1297,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		payment.setC_BPartner_ID(Payment_BP_ID);
 		payment.setPayAmt(Payment_PayAmt);
 		payment.processIt(DocAction.ACTION_Complete);
-//		payment.saveEx(trxName);	//Method of processIT() saved already
+		payment.saveEx(trxName);
 
 		return payment;
 	}
