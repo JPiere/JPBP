@@ -309,7 +309,8 @@ public class Doc_BankStatementJP extends Doc
 				}else{
 					fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
 							getC_Currency_ID(), null,line.getDocTax().getAmount());
-					fl.setC_Tax_ID(line.getC_Tax_ID());
+					if(fl != null && line.getC_Tax_ID() != 0)
+						fl.setC_Tax_ID(line.getC_Tax_ID());
 
 					fl = fact.createLine(line,
 							line.getChargeAccount(as, line.getChargeAmt().negate()),
@@ -323,7 +324,8 @@ public class Doc_BankStatementJP extends Doc
 				}else{
 					fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxCredit, as),
 							getC_Currency_ID(), line.getDocTax().getAmount(),  null);
-					fl.setC_Tax_ID(line.getC_Tax_ID());
+					if(fl != null && line.getC_Tax_ID() != 0)
+						fl.setC_Tax_ID(line.getC_Tax_ID());
 
 					fl = fact.createLine(line,
 							line.getChargeAccount(as, line.getChargeAmt().negate()),
