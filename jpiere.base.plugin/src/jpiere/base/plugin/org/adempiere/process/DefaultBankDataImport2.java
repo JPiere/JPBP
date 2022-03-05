@@ -28,7 +28,7 @@ import org.compiere.util.Msg;
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 
 /**
- * JPIERE-0542 : Default Import Process of Bank Data(From Ver9)
+ * JPIERE-0542 : Default Import Process of Bank Data ver.2
  * 全銀 振込入金通知[固定長]フォーマット インポート
  * 
  * @author 
@@ -50,6 +50,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	private static final int     INDEX_HEADER_JP_BankAccountType = 10;
 	private static final int     INDEX_HEADER_AccountNo = 11;	
 	private static final int     INDEX_HEADER_JP_RequesterName = 12;
+	@SuppressWarnings("unused")
 	private static final int     INDEX_HEADER_DUMMY = 13;
 
 	// Line Data Index
@@ -65,6 +66,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	private static final int     INDEX_LINE_JP_BranchName_Kana = 9;
 	private static final int     INDEX_LINE_JP_BankData_Torikeshikubun = 10;
 	private static final int     INDEX_LINE_JP_BankDate_EDI_Info = 11;
+	@SuppressWarnings("unused")
 	private static final int     INDEX_LINE_DUMMY = 12;
 	
 	// Footer Data Index
@@ -73,6 +75,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	private static final int     INDEX_FOOTER_TotalAmt = 2;
 	private static final int     INDEX_FOOTER_JP_BankData_TorikeshiNum = 3;
 	private static final int     INDEX_FOOTER_JP_BankData_TorikeshiAmt = 4;
+	@SuppressWarnings("unused")
 	private static final int     INDEX_FOOTER_DUMMY = 5;
 	
 	
@@ -94,7 +97,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	private static final int     HEADER_JP_BranchCode = 3;
 	private static final int     HEADER_JP_BranchName_Kana = 15;	
 	private static final int     HEADER_JP_BankAccountType = 1;
-	private static final int     HEADER_AccountNo = 10;	
+	private static final int     HEADER_AccountNo = 7;	
 	private static final int     HEADER_JP_RequesterName = 40;
 	private static final int     HEADER_DUMMY = 93;
 	
@@ -177,6 +180,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	private static final int     END_POSITION_LINE_JP_BranchName_Kana = START_POSITION_LINE_JP_BranchName_Kana + LINE_JP_BranchName_Kana;
 	private static final int     END_POSITION_LINE_JP_BankData_Torikeshikubun = START_POSITION_LINE_JP_BankData_Torikeshikubun + LINE_JP_BankData_Torikeshikubun ;
 	private static final int     END_POSITION_LINE_JP_BankDate_EDI_Info = START_POSITION_LINE_JP_BankDate_EDI_Info + LINE_JP_BankDate_EDI_Info;
+	@SuppressWarnings("unused")
 	private static final int     END_POSITION_LINE_DUMMY = START_POSITION_LINE_DUMMY + LINE_DUMMY;		
 	
 	private static final int     START_POSITION_FOOTER_JP_BankDataType_Footer = 0;
@@ -191,13 +195,13 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	private static final int     END_POSITION_FOOTER_TotalAmt = START_POSITION_FOOTER_TotalAmt + FOOTER_TotalAmt;
 	private static final int     END_POSITION_FOOTER_JP_BankData_TorikeshiNum = START_POSITION_FOOTER_JP_BankData_TorikeshiNum + FOOTER_JP_BankData_TorikeshiNum;
 	private static final int     END_POSITION_FOOTER_JP_BankData_TorikeshiAmt = START_POSITION_FOOTER_JP_BankData_TorikeshiAmt + FOOTER_JP_BankData_TorikeshiAmt;
+	@SuppressWarnings("unused")
 	private static final int     END_POSITION_FOOTER_DUMMY = START_POSITION_FOOTER_DUMMY + FOOTER_DUMMY;
 	
 	// Data Diff
 	private static final String     DATADIFF_Header = "1";
 	private static final String     DATADIFF_Line = "2";
 	private static final String     DATADIFF_Trailer = "8";
-	
 	@SuppressWarnings("unused")
 	private static final String     DATADIFF_End = "9";
 	
@@ -270,14 +274,14 @@ public class DefaultBankDataImport2 extends SvrProcess{
 			{
 				// read header
 				fs = new FileInputStream(file);
-				isr = new InputStreamReader(fs, "UTF8");//TODO
+				//isr = new InputStreamReader(fs, "UTF8");
+				isr = new InputStreamReader(fs, "SJIS");
 				br = new BufferedReader(isr);
 				
 				String tmplinedata;
         		StringBuilder sql = null;
         		int lineNo = 10;
         		int no = 0;
-        		//StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
 
         		tmplinedata = br.readLine();
         		
@@ -304,12 +308,12 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	            		header[INDEX_HEADER_JP_BankAccountType] = str.substring(START_POSITION_HEADER_JP_BankAccountType, END_POSITION_HEADER_JP_BankAccountType);						//11
 	            		header[INDEX_HEADER_AccountNo] = str.substring(START_POSITION_HEADER_AccountNo, END_POSITION_HEADER_AccountNo);													//12
 	            		header[INDEX_HEADER_JP_RequesterName] = str.substring(START_POSITION_HEADER_JP_RequesterName, END_POSITION_HEADER_JP_RequesterName);							//13
-	            		header[INDEX_HEADER_DUMMY] = str.substring(START_POSITION_HEADER_DUMMY, END_POSITION_HEADER_DUMMY);
+	            		//header[INDEX_HEADER_DUMMY] = str.substring(START_POSITION_HEADER_DUMMY, END_POSITION_HEADER_DUMMY);
 
 	            		sql = new StringBuilder ("UPDATE JP_BankData ")
 	            				.append("SET ")
 	            						.append(" Updated = COALESCE (Updated, SysDate),")
-	            						.append(" UpdatedBy = ").append(Env.getAD_User_ID(getCtx()))
+	            						.append(" UpdatedBy = ").append(Env.getAD_User_ID(getCtx())).append(",")	
 	            						.append(" JP_BankDataType_Header = '").append(header[INDEX_HEADER_JP_BankDataType_Header]).append("',")			//1
 	            						.append(" JP_BankDataClassification = '").append(header[INDEX_HEADER_JP_BankDataClassification]).append("',")	//2
 	            						.append(" JP_BankDataCodeType = '").append(header[INDEX_HEADER_JP_BankDataCodeType]).append("',")				//3
@@ -321,7 +325,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	            						.append(" JP_BranchCode = '").append(header[INDEX_HEADER_JP_BranchCode]).append("',")							//9
 	            						.append(" JP_BranchName_Kana = '").append(header[INDEX_HEADER_JP_BranchName_Kana]).append("',")					//10
 	            						.append(" JP_BankAccountType = '").append(header[INDEX_HEADER_JP_BankAccountType]).append("',")					//11
-	            						.append(" AccountNo = '").append(header[INDEX_HEADER_AccountNo]).append("' ")									//12
+	            						.append(" AccountNo = '").append(header[INDEX_HEADER_AccountNo]).append("',")									//12
 	            						.append(" JP_RequesterName = '").append(header[INDEX_HEADER_JP_RequesterName]).append("' ")						//13
 	            						.append(" WHERE JP_BankData_ID =").append(p_JP_BankData_ID);
 	            		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -346,7 +350,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	            		line[INDEX_LINE_JP_BranchName_Kana] = str.substring(START_POSITION_LINE_JP_BranchName_Kana , END_POSITION_LINE_JP_BranchName_Kana);							//10
 	            		line[INDEX_LINE_JP_BankData_Torikeshikubun] = str.substring(START_POSITION_LINE_JP_BankData_Torikeshikubun , END_POSITION_LINE_JP_BankData_Torikeshikubun);	//11
 	            		line[INDEX_LINE_JP_BankDate_EDI_Info] = str.substring(START_POSITION_LINE_JP_BankDate_EDI_Info , END_POSITION_LINE_JP_BankDate_EDI_Info);					//12
-	            		line[INDEX_LINE_DUMMY] = str.substring(START_POSITION_LINE_DUMMY , END_POSITION_LINE_DUMMY);																//13
+	            		//line[INDEX_LINE_DUMMY] = str.substring(START_POSITION_LINE_DUMMY , END_POSITION_LINE_DUMMY);																//13
 	            		
 	            		sql = new StringBuilder ("INSERT INTO JP_BankDataLine ")
 	            				.append(" (AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy, ")
@@ -382,11 +386,11 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	            				.append(" ").append(DB.getNextID(p_AD_Client_ID, "JP_BankDataLine", get_TrxName())).append(",")														//JP_BankdateLine_ID
 	            				.append(" generate_uuid(), ")																														//JP_BankDateLine_UU
 	            				.append(" ").append("TO_DATE('").append(m_BankData.getStatementDate().toString().substring(0, 4))													//StatementLineDate
-	            															.append(line[INDEX_LINE_JP_BankData_Kanjyoubi]).append(" 00:00:00','YYYYMMDD HH24:MI:SS'),")
+	            													.append(line[INDEX_LINE_JP_BankData_Kanjyoubi].substring(2, 6)).append(" 00:00:00','YYYYMMDD HH24:MI:SS'),")
 	            				.append(" ").append("TO_DATE('").append(m_BankData.getDateAcct().toString().substring(0, 4))														//DateAcct
-	            															.append(line[INDEX_LINE_JP_BankData_Kanjyoubi]).append(" 00:00:00','YYYYMMDD HH24:MI:SS'),")
+	            													.append(line[INDEX_LINE_JP_BankData_Kanjyoubi].substring(2, 6)).append(" 00:00:00','YYYYMMDD HH24:MI:SS'),")
 	            				.append(" ").append("TO_DATE('").append(m_BankData.getDateAcct().toString().substring(0, 4))														//ValutaDate
-	            															.append(line[INDEX_LINE_JP_BankData_Kanjyoubi]).append(" 00:00:00','YYYYMMDD HH24:MI:SS'),")
+	            													.append(line[INDEX_LINE_JP_BankData_Kanjyoubi].substring(2, 6)).append(" 00:00:00','YYYYMMDD HH24:MI:SS'),")
 	            				.append(" ").append(line[INDEX_LINE_StmtAmt])																										//trx Amt
 	            				.append(");");
 	            		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
@@ -405,7 +409,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	            		footer[INDEX_FOOTER_TotalAmt] = str.substring(START_POSITION_FOOTER_TotalAmt, END_POSITION_FOOTER_TotalAmt);												//3
 	            		footer[INDEX_FOOTER_JP_BankData_TorikeshiNum] = str.substring(START_POSITION_FOOTER_JP_BankData_TorikeshiNum, END_POSITION_FOOTER_JP_BankData_TorikeshiNum);//4
 	            		footer[INDEX_FOOTER_JP_BankData_TorikeshiAmt] = str.substring(START_POSITION_FOOTER_JP_BankData_TorikeshiAmt, END_POSITION_FOOTER_JP_BankData_TorikeshiAmt);//5
-	            		footer[INDEX_FOOTER_DUMMY] = str.substring(START_POSITION_FOOTER_DUMMY, END_POSITION_FOOTER_DUMMY);															//6
+	            		//footer[INDEX_FOOTER_DUMMY] = str.substring(START_POSITION_FOOTER_DUMMY, END_POSITION_FOOTER_DUMMY);															//6
 	            		sql = new StringBuilder ("UPDATE JP_BankData ")
 	            				.append("SET")
 	            						.append(" JP_BankDataType_Footer = '").append(footer[INDEX_FOOTER_JP_BankDataType_Footer]).append("',")										//1
