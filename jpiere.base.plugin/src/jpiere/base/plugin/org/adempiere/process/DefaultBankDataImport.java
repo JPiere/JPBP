@@ -27,7 +27,9 @@ import org.compiere.util.Msg;
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 
 /**
- * JPIERE-0303 : Fefault Import Bank Data
+ * JPIERE-0303 : Default Import Process of Bank Data(Up to Ver8.2)
+ * 全銀　振込データ[固定長]フォーマット インポート
+ * 
  * 
  * @author 
  *

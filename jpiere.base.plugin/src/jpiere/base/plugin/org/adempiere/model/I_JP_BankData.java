@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_BankData
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_BankData 
@@ -269,6 +269,24 @@ public interface I_JP_BankData
 	/** Get Bank Data Code Type	  */
 	public String getJP_BankDataCodeType();
 
+    /** Column name JP_BankDataCreated */
+    public static final String COLUMNNAME_JP_BankDataCreated = "JP_BankDataCreated";
+
+	/** Set Bank Data Created	  */
+	public void setJP_BankDataCreated (String JP_BankDataCreated);
+
+	/** Get Bank Data Created	  */
+	public String getJP_BankDataCreated();
+
+    /** Column name JP_BankDataFrom */
+    public static final String COLUMNNAME_JP_BankDataFrom = "JP_BankDataFrom";
+
+	/** Set Bank Data From	  */
+	public void setJP_BankDataFrom (String JP_BankDataFrom);
+
+	/** Get Bank Data From	  */
+	public String getJP_BankDataFrom();
+
     /** Column name JP_BankDataSchema_ID */
     public static final String COLUMNNAME_JP_BankDataSchema_ID = "JP_BankDataSchema_ID";
 
@@ -279,6 +297,15 @@ public interface I_JP_BankData
 	public int getJP_BankDataSchema_ID();
 
 	public I_JP_BankDataSchema getJP_BankDataSchema() throws RuntimeException;
+
+    /** Column name JP_BankDataTo */
+    public static final String COLUMNNAME_JP_BankDataTo = "JP_BankDataTo";
+
+	/** Set Bank Data To	  */
+	public void setJP_BankDataTo (String JP_BankDataTo);
+
+	/** Get Bank Data To	  */
+	public String getJP_BankDataTo();
 
     /** Column name JP_BankDataType_Footer */
     public static final String COLUMNNAME_JP_BankDataType_Footer = "JP_BankDataType_Footer";
@@ -306,6 +333,24 @@ public interface I_JP_BankData
 
 	/** Get Import Bank Data	  */
 	public int getJP_BankData_ID();
+
+    /** Column name JP_BankData_TorikeshiAmt */
+    public static final String COLUMNNAME_JP_BankData_TorikeshiAmt = "JP_BankData_TorikeshiAmt";
+
+	/** Set Bank Data Torikeshi Amt	  */
+	public void setJP_BankData_TorikeshiAmt (BigDecimal JP_BankData_TorikeshiAmt);
+
+	/** Get Bank Data Torikeshi Amt	  */
+	public BigDecimal getJP_BankData_TorikeshiAmt();
+
+    /** Column name JP_BankData_TorikeshiNum */
+    public static final String COLUMNNAME_JP_BankData_TorikeshiNum = "JP_BankData_TorikeshiNum";
+
+	/** Set Bank Data Torikeshi Num	  */
+	public void setJP_BankData_TorikeshiNum (int JP_BankData_TorikeshiNum);
+
+	/** Get Bank Data Torikeshi Num	  */
+	public int getJP_BankData_TorikeshiNum();
 
     /** Column name JP_BankData_UU */
     public static final String COLUMNNAME_JP_BankData_UU = "JP_BankData_UU";
@@ -555,12 +600,12 @@ public interface I_JP_BankData
     /** Column name SalesRep_ID */
     public static final String COLUMNNAME_SalesRep_ID = "SalesRep_ID";
 
-	/** Set Sales Representative.
+	/** Set Sales Rep.
 	  * Sales Representative or Company Agent
 	  */
 	public void setSalesRep_ID (int SalesRep_ID);
 
-	/** Get Sales Representative.
+	/** Get Sales Rep.
 	  * Sales Representative or Company Agent
 	  */
 	public int getSalesRep_ID();

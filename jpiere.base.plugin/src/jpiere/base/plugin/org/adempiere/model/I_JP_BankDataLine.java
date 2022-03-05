@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_BankDataLine
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_BankDataLine 
@@ -93,12 +93,12 @@ public interface I_JP_BankDataLine
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -370,6 +370,15 @@ public interface I_JP_BankDataLine
 	/** Get Bank Data Type(Line)	  */
 	public String getJP_BankDataType_Line();
 
+    /** Column name JP_BankData_EDI_Info */
+    public static final String COLUMNNAME_JP_BankData_EDI_Info = "JP_BankData_EDI_Info";
+
+	/** Set BankData EDI Info	  */
+	public void setJP_BankData_EDI_Info (String JP_BankData_EDI_Info);
+
+	/** Get BankData EDI Info	  */
+	public String getJP_BankData_EDI_Info();
+
     /** Column name JP_BankData_ID */
     public static final String COLUMNNAME_JP_BankData_ID = "JP_BankData_ID";
 
@@ -380,6 +389,51 @@ public interface I_JP_BankDataLine
 	public int getJP_BankData_ID();
 
 	public I_JP_BankData getJP_BankData() throws RuntimeException;
+
+    /** Column name JP_BankData_Kanjyoubi */
+    public static final String COLUMNNAME_JP_BankData_Kanjyoubi = "JP_BankData_Kanjyoubi";
+
+	/** Set Kanjyoubi	  */
+	public void setJP_BankData_Kanjyoubi (String JP_BankData_Kanjyoubi);
+
+	/** Get Kanjyoubi	  */
+	public String getJP_BankData_Kanjyoubi();
+
+    /** Column name JP_BankData_Kisanbi */
+    public static final String COLUMNNAME_JP_BankData_Kisanbi = "JP_BankData_Kisanbi";
+
+	/** Set Kisanbi	  */
+	public void setJP_BankData_Kisanbi (String JP_BankData_Kisanbi);
+
+	/** Get Kisanbi	  */
+	public String getJP_BankData_Kisanbi();
+
+    /** Column name JP_BankData_ReferenceNo */
+    public static final String COLUMNNAME_JP_BankData_ReferenceNo = "JP_BankData_ReferenceNo";
+
+	/** Set Bank Data ReferenceNo	  */
+	public void setJP_BankData_ReferenceNo (String JP_BankData_ReferenceNo);
+
+	/** Get Bank Data ReferenceNo	  */
+	public String getJP_BankData_ReferenceNo();
+
+    /** Column name JP_BankData_Taten_StmtAmt */
+    public static final String COLUMNNAME_JP_BankData_Taten_StmtAmt = "JP_BankData_Taten_StmtAmt";
+
+	/** Set Taten StmtAmt	  */
+	public void setJP_BankData_Taten_StmtAmt (BigDecimal JP_BankData_Taten_StmtAmt);
+
+	/** Get Taten StmtAmt	  */
+	public BigDecimal getJP_BankData_Taten_StmtAmt();
+
+    /** Column name JP_BankData_Torikeshikubun */
+    public static final String COLUMNNAME_JP_BankData_Torikeshikubun = "JP_BankData_Torikeshikubun";
+
+	/** Set Torikeshikubun	  */
+	public void setJP_BankData_Torikeshikubun (String JP_BankData_Torikeshikubun);
+
+	/** Get Torikeshikubun	  */
+	public String getJP_BankData_Torikeshikubun();
 
     /** Column name JP_BankName_Kana */
     public static final String COLUMNNAME_JP_BankName_Kana = "JP_BankName_Kana";
@@ -393,10 +447,10 @@ public interface I_JP_BankDataLine
     /** Column name JP_Bill_ID */
     public static final String COLUMNNAME_JP_Bill_ID = "JP_Bill_ID";
 
-	/** Set JP Bill	  */
+	/** Set Bill	  */
 	public void setJP_Bill_ID (int JP_Bill_ID);
 
-	/** Get JP Bill	  */
+	/** Get Bill	  */
 	public int getJP_Bill_ID();
 
 	public I_JP_Bill getJP_Bill() throws RuntimeException;
@@ -427,6 +481,15 @@ public interface I_JP_BankDataLine
 
 	/** Get Clearing House	  */
 	public String getJP_ClearingHouse();
+
+    /** Column name JP_RequesterCode */
+    public static final String COLUMNNAME_JP_RequesterCode = "JP_RequesterCode";
+
+	/** Set Requester Code	  */
+	public void setJP_RequesterCode (String JP_RequesterCode);
+
+	/** Get Requester Code	  */
+	public String getJP_RequesterCode();
 
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";

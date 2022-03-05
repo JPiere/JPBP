@@ -26,14 +26,15 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_BankData
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="JP_BankData")
 public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170311L;
+	private static final long serialVersionUID = 20220305L;
 
     /** Standard Constructor */
     public X_JP_BankData (Properties ctx, int JP_BankData_ID, String trxName)
@@ -53,6 +54,39 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 			setJP_BankDataSchema_ID (0);
 			setJP_BankData_ID (0);
 			setName (null);
+// @#Date@
+			setNumLines (0);
+// 0
+			setStatementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setStmtAmt (Env.ZERO);
+// 0
+			setTotalAmt (Env.ZERO);
+// 0
+			setTrxAmt (Env.ZERO);
+// 0
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_BankData (Properties ctx, int JP_BankData_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_BankData_ID, trxName, virtualColumns);
+      /** if (JP_BankData_ID == 0)
+        {
+			setC_BankAccount_ID (0);
+			setChargeAmt (Env.ZERO);
+// 0
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setInterestAmt (Env.ZERO);
+// 0
+			setIsReceipt (true);
+// Y
+			setJP_BankDataSchema_ID (0);
+			setJP_BankData_ID (0);
+			setName (null);
+// @#Date@
 			setNumLines (0);
 // 0
 			setStatementDate (new Timestamp( System.currentTimeMillis() ));
@@ -89,27 +123,26 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_BankData[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_BankData[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	/** Set Trx Organization.
-		@param AD_OrgTrx_ID 
-		Performing or initiating organization
-	  */
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
 	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
 	{
-		if (AD_OrgTrx_ID < 1) 
+		if (AD_OrgTrx_ID < 1)
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
 	}
 
 	/** Get Trx Organization.
 		@return Performing or initiating organization
 	  */
-	public int getAD_OrgTrx_ID () 
+	public int getAD_OrgTrx_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
@@ -118,9 +151,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Account No.
-		@param AccountNo 
-		Account Number
-	  */
+		@param AccountNo Account Number
+	*/
 	public void setAccountNo (String AccountNo)
 	{
 		set_Value (COLUMNNAME_AccountNo, AccountNo);
@@ -129,32 +161,32 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Account No.
 		@return Account Number
 	  */
-	public String getAccountNo () 
+	public String getAccountNo()
 	{
 		return (String)get_Value(COLUMNNAME_AccountNo);
 	}
 
 	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_Name)
-			.getPO(getC_BankAccount_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
+			.getPO(getC_BankAccount_ID(), get_TrxName());
+	}
 
 	/** Set Bank Account.
-		@param C_BankAccount_ID 
-		Account at the Bank
-	  */
+		@param C_BankAccount_ID Account at the Bank
+	*/
 	public void setC_BankAccount_ID (int C_BankAccount_ID)
 	{
-		if (C_BankAccount_ID < 1) 
+		if (C_BankAccount_ID < 1)
 			set_Value (COLUMNNAME_C_BankAccount_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BankAccount_ID, Integer.valueOf(C_BankAccount_ID));
 	}
 
 	/** Get Bank Account.
 		@return Account at the Bank
 	  */
-	public int getC_BankAccount_ID () 
+	public int getC_BankAccount_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankAccount_ID);
 		if (ii == null)
@@ -163,26 +195,26 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	public org.compiere.model.I_C_BankStatement getC_BankStatement() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BankStatement)MTable.get(getCtx(), org.compiere.model.I_C_BankStatement.Table_Name)
-			.getPO(getC_BankStatement_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BankStatement)MTable.get(getCtx(), org.compiere.model.I_C_BankStatement.Table_ID)
+			.getPO(getC_BankStatement_ID(), get_TrxName());
+	}
 
 	/** Set Bank Statement.
-		@param C_BankStatement_ID 
-		Bank Statement of account
-	  */
+		@param C_BankStatement_ID Bank Statement of account
+	*/
 	public void setC_BankStatement_ID (int C_BankStatement_ID)
 	{
-		if (C_BankStatement_ID < 1) 
+		if (C_BankStatement_ID < 1)
 			set_Value (COLUMNNAME_C_BankStatement_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BankStatement_ID, Integer.valueOf(C_BankStatement_ID));
 	}
 
 	/** Get Bank Statement.
 		@return Bank Statement of account
 	  */
-	public int getC_BankStatement_ID () 
+	public int getC_BankStatement_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankStatement_ID);
 		if (ii == null)
@@ -191,14 +223,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
-			.getPO(getC_Currency_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
+			.getPO(getC_Currency_ID(), get_TrxName());
+	}
 
 	/** Set Currency.
-		@param C_Currency_ID 
-		The Currency for this record
-	  */
+		@param C_Currency_ID The Currency for this record
+	*/
 	public void setC_Currency_ID (int C_Currency_ID)
 	{
 		throw new IllegalArgumentException ("C_Currency_ID is virtual column");	}
@@ -206,7 +238,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Currency.
 		@return The Currency for this record
 	  */
-	public int getC_Currency_ID () 
+	public int getC_Currency_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
 		if (ii == null)
@@ -215,9 +247,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Charge amount.
-		@param ChargeAmt 
-		Charge Amount
-	  */
+		@param ChargeAmt Charge Amount
+	*/
 	public void setChargeAmt (BigDecimal ChargeAmt)
 	{
 		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
@@ -226,7 +257,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Charge amount.
 		@return Charge Amount
 	  */
-	public BigDecimal getChargeAmt () 
+	public BigDecimal getChargeAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
 		if (bd == null)
@@ -235,9 +266,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Account Date.
-		@param DateAcct 
-		Accounting Date
-	  */
+		@param DateAcct Accounting Date
+	*/
 	public void setDateAcct (Timestamp DateAcct)
 	{
 		set_Value (COLUMNNAME_DateAcct, DateAcct);
@@ -246,15 +276,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Account Date.
 		@return Accounting Date
 	  */
-	public Timestamp getDateAcct () 
+	public Timestamp getDateAcct()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -263,15 +292,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Import Error Message.
-		@param I_ErrorMsg 
-		Messages generated from import process
-	  */
+		@param I_ErrorMsg Messages generated from import process
+	*/
 	public void setI_ErrorMsg (String I_ErrorMsg)
 	{
 		set_Value (COLUMNNAME_I_ErrorMsg, I_ErrorMsg);
@@ -280,15 +308,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Import Error Message.
 		@return Messages generated from import process
 	  */
-	public String getI_ErrorMsg () 
+	public String getI_ErrorMsg()
 	{
 		return (String)get_Value(COLUMNNAME_I_ErrorMsg);
 	}
 
 	/** Set Interest Amount.
-		@param InterestAmt 
-		Interest Amount
-	  */
+		@param InterestAmt Interest Amount
+	*/
 	public void setInterestAmt (BigDecimal InterestAmt)
 	{
 		set_Value (COLUMNNAME_InterestAmt, InterestAmt);
@@ -297,7 +324,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Interest Amount.
 		@return Interest Amount
 	  */
-	public BigDecimal getInterestAmt () 
+	public BigDecimal getInterestAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_InterestAmt);
 		if (bd == null)
@@ -306,9 +333,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Receipt.
-		@param IsReceipt 
-		This is a sales transaction (receipt)
-	  */
+		@param IsReceipt This is a sales transaction (receipt)
+	*/
 	public void setIsReceipt (boolean IsReceipt)
 	{
 		set_Value (COLUMNNAME_IsReceipt, Boolean.valueOf(IsReceipt));
@@ -317,7 +343,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Receipt.
 		@return This is a sales transaction (receipt)
 	  */
-	public boolean isReceipt () 
+	public boolean isReceipt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReceipt);
 		if (oo != null) 
@@ -330,7 +356,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Bank Account Type.
-		@param JP_BankAccountType Bank Account Type	  */
+		@param JP_BankAccountType Bank Account Type
+	*/
 	public void setJP_BankAccountType (String JP_BankAccountType)
 	{
 		set_Value (COLUMNNAME_JP_BankAccountType, JP_BankAccountType);
@@ -338,13 +365,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Bank Account Type.
 		@return Bank Account Type	  */
-	public String getJP_BankAccountType () 
+	public String getJP_BankAccountType()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankAccountType);
 	}
 
 	/** Set Bank Data Classification.
-		@param JP_BankDataClassification Bank Data Classification	  */
+		@param JP_BankDataClassification Bank Data Classification
+	*/
 	public void setJP_BankDataClassification (String JP_BankDataClassification)
 	{
 		set_Value (COLUMNNAME_JP_BankDataClassification, JP_BankDataClassification);
@@ -352,13 +380,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Bank Data Classification.
 		@return Bank Data Classification	  */
-	public String getJP_BankDataClassification () 
+	public String getJP_BankDataClassification()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataClassification);
 	}
 
 	/** Set Bank Data Code Type.
-		@param JP_BankDataCodeType Bank Data Code Type	  */
+		@param JP_BankDataCodeType Bank Data Code Type
+	*/
 	public void setJP_BankDataCodeType (String JP_BankDataCodeType)
 	{
 		set_Value (COLUMNNAME_JP_BankDataCodeType, JP_BankDataCodeType);
@@ -366,29 +395,61 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Bank Data Code Type.
 		@return Bank Data Code Type	  */
-	public String getJP_BankDataCodeType () 
+	public String getJP_BankDataCodeType()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataCodeType);
 	}
 
+	/** Set Bank Data Created.
+		@param JP_BankDataCreated Bank Data Created
+	*/
+	public void setJP_BankDataCreated (String JP_BankDataCreated)
+	{
+		set_Value (COLUMNNAME_JP_BankDataCreated, JP_BankDataCreated);
+	}
+
+	/** Get Bank Data Created.
+		@return Bank Data Created	  */
+	public String getJP_BankDataCreated()
+	{
+		return (String)get_Value(COLUMNNAME_JP_BankDataCreated);
+	}
+
+	/** Set Bank Data From.
+		@param JP_BankDataFrom Bank Data From
+	*/
+	public void setJP_BankDataFrom (String JP_BankDataFrom)
+	{
+		set_Value (COLUMNNAME_JP_BankDataFrom, JP_BankDataFrom);
+	}
+
+	/** Get Bank Data From.
+		@return Bank Data From	  */
+	public String getJP_BankDataFrom()
+	{
+		return (String)get_Value(COLUMNNAME_JP_BankDataFrom);
+	}
+
 	public I_JP_BankDataSchema getJP_BankDataSchema() throws RuntimeException
-    {
-		return (I_JP_BankDataSchema)MTable.get(getCtx(), I_JP_BankDataSchema.Table_Name)
-			.getPO(getJP_BankDataSchema_ID(), get_TrxName());	}
+	{
+		return (I_JP_BankDataSchema)MTable.get(getCtx(), I_JP_BankDataSchema.Table_ID)
+			.getPO(getJP_BankDataSchema_ID(), get_TrxName());
+	}
 
 	/** Set Import Bank Data Schema.
-		@param JP_BankDataSchema_ID Import Bank Data Schema	  */
+		@param JP_BankDataSchema_ID Import Bank Data Schema
+	*/
 	public void setJP_BankDataSchema_ID (int JP_BankDataSchema_ID)
 	{
-		if (JP_BankDataSchema_ID < 1) 
+		if (JP_BankDataSchema_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_BankDataSchema_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_BankDataSchema_ID, Integer.valueOf(JP_BankDataSchema_ID));
 	}
 
 	/** Get Import Bank Data Schema.
 		@return Import Bank Data Schema	  */
-	public int getJP_BankDataSchema_ID () 
+	public int getJP_BankDataSchema_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BankDataSchema_ID);
 		if (ii == null)
@@ -396,8 +457,24 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Bank Data To.
+		@param JP_BankDataTo Bank Data To
+	*/
+	public void setJP_BankDataTo (String JP_BankDataTo)
+	{
+		set_Value (COLUMNNAME_JP_BankDataTo, JP_BankDataTo);
+	}
+
+	/** Get Bank Data To.
+		@return Bank Data To	  */
+	public String getJP_BankDataTo()
+	{
+		return (String)get_Value(COLUMNNAME_JP_BankDataTo);
+	}
+
 	/** Set Bank Datat Type(Footer).
-		@param JP_BankDataType_Footer Bank Datat Type(Footer)	  */
+		@param JP_BankDataType_Footer Bank Datat Type(Footer)
+	*/
 	public void setJP_BankDataType_Footer (String JP_BankDataType_Footer)
 	{
 		set_Value (COLUMNNAME_JP_BankDataType_Footer, JP_BankDataType_Footer);
@@ -405,13 +482,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Bank Datat Type(Footer).
 		@return Bank Datat Type(Footer)	  */
-	public String getJP_BankDataType_Footer () 
+	public String getJP_BankDataType_Footer()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataType_Footer);
 	}
 
 	/** Set Bank Data Type(Header).
-		@param JP_BankDataType_Header Bank Data Type(Header)	  */
+		@param JP_BankDataType_Header Bank Data Type(Header)
+	*/
 	public void setJP_BankDataType_Header (String JP_BankDataType_Header)
 	{
 		set_Value (COLUMNNAME_JP_BankDataType_Header, JP_BankDataType_Header);
@@ -419,24 +497,25 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Bank Data Type(Header).
 		@return Bank Data Type(Header)	  */
-	public String getJP_BankDataType_Header () 
+	public String getJP_BankDataType_Header()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataType_Header);
 	}
 
 	/** Set Import Bank Data.
-		@param JP_BankData_ID Import Bank Data	  */
+		@param JP_BankData_ID Import Bank Data
+	*/
 	public void setJP_BankData_ID (int JP_BankData_ID)
 	{
-		if (JP_BankData_ID < 1) 
+		if (JP_BankData_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_BankData_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_BankData_ID, Integer.valueOf(JP_BankData_ID));
 	}
 
 	/** Get Import Bank Data.
 		@return Import Bank Data	  */
-	public int getJP_BankData_ID () 
+	public int getJP_BankData_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BankData_ID);
 		if (ii == null)
@@ -444,8 +523,45 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Bank Data Torikeshi Amt.
+		@param JP_BankData_TorikeshiAmt Bank Data Torikeshi Amt
+	*/
+	public void setJP_BankData_TorikeshiAmt (BigDecimal JP_BankData_TorikeshiAmt)
+	{
+		set_Value (COLUMNNAME_JP_BankData_TorikeshiAmt, JP_BankData_TorikeshiAmt);
+	}
+
+	/** Get Bank Data Torikeshi Amt.
+		@return Bank Data Torikeshi Amt	  */
+	public BigDecimal getJP_BankData_TorikeshiAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_BankData_TorikeshiAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Bank Data Torikeshi Num.
+		@param JP_BankData_TorikeshiNum Bank Data Torikeshi Num
+	*/
+	public void setJP_BankData_TorikeshiNum (int JP_BankData_TorikeshiNum)
+	{
+		set_Value (COLUMNNAME_JP_BankData_TorikeshiNum, Integer.valueOf(JP_BankData_TorikeshiNum));
+	}
+
+	/** Get Bank Data Torikeshi Num.
+		@return Bank Data Torikeshi Num	  */
+	public int getJP_BankData_TorikeshiNum()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BankData_TorikeshiNum);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set JP_BankData_UU.
-		@param JP_BankData_UU JP_BankData_UU	  */
+		@param JP_BankData_UU JP_BankData_UU
+	*/
 	public void setJP_BankData_UU (String JP_BankData_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_BankData_UU, JP_BankData_UU);
@@ -453,13 +569,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get JP_BankData_UU.
 		@return JP_BankData_UU	  */
-	public String getJP_BankData_UU () 
+	public String getJP_BankData_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankData_UU);
 	}
 
 	/** Set Bank Name(Kana).
-		@param JP_BankName_Kana Bank Name(Kana)	  */
+		@param JP_BankName_Kana Bank Name(Kana)
+	*/
 	public void setJP_BankName_Kana (String JP_BankName_Kana)
 	{
 		set_Value (COLUMNNAME_JP_BankName_Kana, JP_BankName_Kana);
@@ -467,13 +584,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Bank Name(Kana).
 		@return Bank Name(Kana)	  */
-	public String getJP_BankName_Kana () 
+	public String getJP_BankName_Kana()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankName_Kana);
 	}
 
 	/** Set Branch Code.
-		@param JP_BranchCode Branch Code	  */
+		@param JP_BranchCode Branch Code
+	*/
 	public void setJP_BranchCode (String JP_BranchCode)
 	{
 		set_Value (COLUMNNAME_JP_BranchCode, JP_BranchCode);
@@ -481,13 +599,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Branch Code.
 		@return Branch Code	  */
-	public String getJP_BranchCode () 
+	public String getJP_BranchCode()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BranchCode);
 	}
 
 	/** Set Branch Name(Kana).
-		@param JP_BranchName_Kana Branch Name(Kana)	  */
+		@param JP_BranchName_Kana Branch Name(Kana)
+	*/
 	public void setJP_BranchName_Kana (String JP_BranchName_Kana)
 	{
 		set_Value (COLUMNNAME_JP_BranchName_Kana, JP_BranchName_Kana);
@@ -495,13 +614,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Branch Name(Kana).
 		@return Branch Name(Kana)	  */
-	public String getJP_BranchName_Kana () 
+	public String getJP_BranchName_Kana()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BranchName_Kana);
 	}
 
 	/** Set Processed Time.
-		@param JP_ProcessedTime1 Processed Time	  */
+		@param JP_ProcessedTime1 Processed Time
+	*/
 	public void setJP_ProcessedTime1 (Timestamp JP_ProcessedTime1)
 	{
 		set_Value (COLUMNNAME_JP_ProcessedTime1, JP_ProcessedTime1);
@@ -509,13 +629,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Processed Time.
 		@return Processed Time	  */
-	public Timestamp getJP_ProcessedTime1 () 
+	public Timestamp getJP_ProcessedTime1()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime1);
 	}
 
 	/** Set Processed Time.
-		@param JP_ProcessedTime2 Processed Time	  */
+		@param JP_ProcessedTime2 Processed Time
+	*/
 	public void setJP_ProcessedTime2 (Timestamp JP_ProcessedTime2)
 	{
 		set_Value (COLUMNNAME_JP_ProcessedTime2, JP_ProcessedTime2);
@@ -523,13 +644,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Processed Time.
 		@return Processed Time	  */
-	public Timestamp getJP_ProcessedTime2 () 
+	public Timestamp getJP_ProcessedTime2()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime2);
 	}
 
 	/** Set Processed Time.
-		@param JP_ProcessedTime3 Processed Time	  */
+		@param JP_ProcessedTime3 Processed Time
+	*/
 	public void setJP_ProcessedTime3 (Timestamp JP_ProcessedTime3)
 	{
 		set_Value (COLUMNNAME_JP_ProcessedTime3, JP_ProcessedTime3);
@@ -537,13 +659,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Processed Time.
 		@return Processed Time	  */
-	public Timestamp getJP_ProcessedTime3 () 
+	public Timestamp getJP_ProcessedTime3()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime3);
 	}
 
 	/** Set Processed Time.
-		@param JP_ProcessedTime4 Processed Time	  */
+		@param JP_ProcessedTime4 Processed Time
+	*/
 	public void setJP_ProcessedTime4 (Timestamp JP_ProcessedTime4)
 	{
 		set_Value (COLUMNNAME_JP_ProcessedTime4, JP_ProcessedTime4);
@@ -551,13 +674,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Processed Time.
 		@return Processed Time	  */
-	public Timestamp getJP_ProcessedTime4 () 
+	public Timestamp getJP_ProcessedTime4()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime4);
 	}
 
 	/** Set Processed Time.
-		@param JP_ProcessedTime5 Processed Time	  */
+		@param JP_ProcessedTime5 Processed Time
+	*/
 	public void setJP_ProcessedTime5 (Timestamp JP_ProcessedTime5)
 	{
 		set_Value (COLUMNNAME_JP_ProcessedTime5, JP_ProcessedTime5);
@@ -565,13 +689,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Processed Time.
 		@return Processed Time	  */
-	public Timestamp getJP_ProcessedTime5 () 
+	public Timestamp getJP_ProcessedTime5()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime5);
 	}
 
 	/** Set Processed Time.
-		@param JP_ProcessedTime6 Processed Time	  */
+		@param JP_ProcessedTime6 Processed Time
+	*/
 	public void setJP_ProcessedTime6 (Timestamp JP_ProcessedTime6)
 	{
 		set_Value (COLUMNNAME_JP_ProcessedTime6, JP_ProcessedTime6);
@@ -579,13 +704,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Processed Time.
 		@return Processed Time	  */
-	public Timestamp getJP_ProcessedTime6 () 
+	public Timestamp getJP_ProcessedTime6()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime6);
 	}
 
 	/** Set Processed Time.
-		@param JP_ProcessedTime7 Processed Time	  */
+		@param JP_ProcessedTime7 Processed Time
+	*/
 	public void setJP_ProcessedTime7 (Timestamp JP_ProcessedTime7)
 	{
 		set_Value (COLUMNNAME_JP_ProcessedTime7, JP_ProcessedTime7);
@@ -593,13 +719,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Processed Time.
 		@return Processed Time	  */
-	public Timestamp getJP_ProcessedTime7 () 
+	public Timestamp getJP_ProcessedTime7()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_JP_ProcessedTime7);
 	}
 
 	/** Set Process Now.
-		@param JP_Processing1 Process Now	  */
+		@param JP_Processing1 Process Now
+	*/
 	public void setJP_Processing1 (String JP_Processing1)
 	{
 		set_Value (COLUMNNAME_JP_Processing1, JP_Processing1);
@@ -607,13 +734,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public String getJP_Processing1 () 
+	public String getJP_Processing1()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing1);
 	}
 
 	/** Set Process Now.
-		@param JP_Processing2 Process Now	  */
+		@param JP_Processing2 Process Now
+	*/
 	public void setJP_Processing2 (String JP_Processing2)
 	{
 		set_Value (COLUMNNAME_JP_Processing2, JP_Processing2);
@@ -621,13 +749,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public String getJP_Processing2 () 
+	public String getJP_Processing2()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing2);
 	}
 
 	/** Set Process Now.
-		@param JP_Processing3 Process Now	  */
+		@param JP_Processing3 Process Now
+	*/
 	public void setJP_Processing3 (String JP_Processing3)
 	{
 		set_Value (COLUMNNAME_JP_Processing3, JP_Processing3);
@@ -635,13 +764,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public String getJP_Processing3 () 
+	public String getJP_Processing3()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing3);
 	}
 
 	/** Set Process Now.
-		@param JP_Processing4 Process Now	  */
+		@param JP_Processing4 Process Now
+	*/
 	public void setJP_Processing4 (String JP_Processing4)
 	{
 		set_Value (COLUMNNAME_JP_Processing4, JP_Processing4);
@@ -649,13 +779,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public String getJP_Processing4 () 
+	public String getJP_Processing4()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing4);
 	}
 
 	/** Set Process Now.
-		@param JP_Processing5 Process Now	  */
+		@param JP_Processing5 Process Now
+	*/
 	public void setJP_Processing5 (String JP_Processing5)
 	{
 		set_Value (COLUMNNAME_JP_Processing5, JP_Processing5);
@@ -663,13 +794,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public String getJP_Processing5 () 
+	public String getJP_Processing5()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing5);
 	}
 
 	/** Set Process Now.
-		@param JP_Processing6 Process Now	  */
+		@param JP_Processing6 Process Now
+	*/
 	public void setJP_Processing6 (String JP_Processing6)
 	{
 		set_Value (COLUMNNAME_JP_Processing6, JP_Processing6);
@@ -677,13 +809,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public String getJP_Processing6 () 
+	public String getJP_Processing6()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing6);
 	}
 
 	/** Set Process Now.
-		@param JP_Processing7 Process Now	  */
+		@param JP_Processing7 Process Now
+	*/
 	public void setJP_Processing7 (String JP_Processing7)
 	{
 		set_Value (COLUMNNAME_JP_Processing7, JP_Processing7);
@@ -691,13 +824,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public String getJP_Processing7 () 
+	public String getJP_Processing7()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Processing7);
 	}
 
 	/** Set Requester Code.
-		@param JP_RequesterCode Requester Code	  */
+		@param JP_RequesterCode Requester Code
+	*/
 	public void setJP_RequesterCode (String JP_RequesterCode)
 	{
 		set_Value (COLUMNNAME_JP_RequesterCode, JP_RequesterCode);
@@ -705,13 +839,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Requester Code.
 		@return Requester Code	  */
-	public String getJP_RequesterCode () 
+	public String getJP_RequesterCode()
 	{
 		return (String)get_Value(COLUMNNAME_JP_RequesterCode);
 	}
 
 	/** Set Requester Name.
-		@param JP_RequesterName Requester Name	  */
+		@param JP_RequesterName Requester Name
+	*/
 	public void setJP_RequesterName (String JP_RequesterName)
 	{
 		set_Value (COLUMNNAME_JP_RequesterName, JP_RequesterName);
@@ -719,15 +854,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 
 	/** Get Requester Name.
 		@return Requester Name	  */
-	public String getJP_RequesterName () 
+	public String getJP_RequesterName()
 	{
 		return (String)get_Value(COLUMNNAME_JP_RequesterName);
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -736,15 +870,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Number of Lines.
-		@param NumLines 
-		Number of lines for a field
-	  */
+		@param NumLines Number of lines for a field
+	*/
 	public void setNumLines (int NumLines)
 	{
 		set_Value (COLUMNNAME_NumLines, Integer.valueOf(NumLines));
@@ -753,7 +886,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Number of Lines.
 		@return Number of lines for a field
 	  */
-	public int getNumLines () 
+	public int getNumLines()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_NumLines);
 		if (ii == null)
@@ -762,9 +895,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Payment date.
-		@param PayDate 
-		Date Payment made
-	  */
+		@param PayDate Date Payment made
+	*/
 	public void setPayDate (Timestamp PayDate)
 	{
 		set_Value (COLUMNNAME_PayDate, PayDate);
@@ -773,15 +905,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Payment date.
 		@return Date Payment made
 	  */
-	public Timestamp getPayDate () 
+	public Timestamp getPayDate()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_PayDate);
 	}
 
 	/** Set Processed.
-		@param Processed 
-		The document has been processed
-	  */
+		@param Processed The document has been processed
+	*/
 	public void setProcessed (boolean Processed)
 	{
 		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
@@ -790,7 +921,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Processed.
 		@return The document has been processed
 	  */
-	public boolean isProcessed () 
+	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
 		if (oo != null) 
@@ -803,9 +934,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Routing No.
-		@param RoutingNo 
-		Bank Routing Number
-	  */
+		@param RoutingNo Bank Routing Number
+	*/
 	public void setRoutingNo (String RoutingNo)
 	{
 		set_Value (COLUMNNAME_RoutingNo, RoutingNo);
@@ -814,32 +944,32 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Routing No.
 		@return Bank Routing Number
 	  */
-	public String getRoutingNo () 
+	public String getRoutingNo()
 	{
 		return (String)get_Value(COLUMNNAME_RoutingNo);
 	}
 
 	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
-			.getPO(getSalesRep_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getSalesRep_ID(), get_TrxName());
+	}
 
-	/** Set Sales Representative.
-		@param SalesRep_ID 
-		Sales Representative or Company Agent
-	  */
+	/** Set Sales Rep.
+		@param SalesRep_ID Sales Representative or Company Agent
+	*/
 	public void setSalesRep_ID (int SalesRep_ID)
 	{
-		if (SalesRep_ID < 1) 
+		if (SalesRep_ID < 1)
 			set_Value (COLUMNNAME_SalesRep_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
 	}
 
-	/** Get Sales Representative.
+	/** Get Sales Rep.
 		@return Sales Representative or Company Agent
 	  */
-	public int getSalesRep_ID () 
+	public int getSalesRep_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SalesRep_ID);
 		if (ii == null)
@@ -848,9 +978,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Statement date.
-		@param StatementDate 
-		Date of the statement
-	  */
+		@param StatementDate Date of the statement
+	*/
 	public void setStatementDate (Timestamp StatementDate)
 	{
 		set_Value (COLUMNNAME_StatementDate, StatementDate);
@@ -859,15 +988,14 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Statement date.
 		@return Date of the statement
 	  */
-	public Timestamp getStatementDate () 
+	public Timestamp getStatementDate()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_StatementDate);
 	}
 
 	/** Set Statement amount.
-		@param StmtAmt 
-		Statement Amount
-	  */
+		@param StmtAmt Statement Amount
+	*/
 	public void setStmtAmt (BigDecimal StmtAmt)
 	{
 		set_Value (COLUMNNAME_StmtAmt, StmtAmt);
@@ -876,7 +1004,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Statement amount.
 		@return Statement Amount
 	  */
-	public BigDecimal getStmtAmt () 
+	public BigDecimal getStmtAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_StmtAmt);
 		if (bd == null)
@@ -885,9 +1013,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Total Amount.
-		@param TotalAmt 
-		Total Amount
-	  */
+		@param TotalAmt Total Amount
+	*/
 	public void setTotalAmt (BigDecimal TotalAmt)
 	{
 		set_Value (COLUMNNAME_TotalAmt, TotalAmt);
@@ -896,7 +1023,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Total Amount.
 		@return Total Amount
 	  */
-	public BigDecimal getTotalAmt () 
+	public BigDecimal getTotalAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalAmt);
 		if (bd == null)
@@ -905,9 +1032,8 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	}
 
 	/** Set Transaction Amount.
-		@param TrxAmt 
-		Amount of a transaction
-	  */
+		@param TrxAmt Amount of a transaction
+	*/
 	public void setTrxAmt (BigDecimal TrxAmt)
 	{
 		set_Value (COLUMNNAME_TrxAmt, TrxAmt);
@@ -916,7 +1042,7 @@ public class X_JP_BankData extends PO implements I_JP_BankData, I_Persistent
 	/** Get Transaction Amount.
 		@return Amount of a transaction
 	  */
-	public BigDecimal getTrxAmt () 
+	public BigDecimal getTrxAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TrxAmt);
 		if (bd == null)
