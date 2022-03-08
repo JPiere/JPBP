@@ -152,6 +152,7 @@ public class DefaultBankDataImport2 extends SvrProcess{
 	private static final int     END_POSITION_HEADER_JP_BankAccountType = START_POSITION_HEADER_JP_BankAccountType + HEADER_JP_BankAccountType;
 	private static final int     END_POSITION_HEADER_AccountNo = START_POSITION_HEADER_AccountNo + HEADER_AccountNo;
 	private static final int     END_POSITION_HEADER_JP_RequesterName = START_POSITION_HEADER_JP_RequesterName + HEADER_JP_RequesterName;
+	@SuppressWarnings("unused")
 	private static final int     END_POSITION_HEADER_DUMMY = START_POSITION_HEADER_DUMMY + HEADER_DUMMY;
 	
 	private static final int     START_POSITION_LINE_JP_BankDataType_Line = 0;
