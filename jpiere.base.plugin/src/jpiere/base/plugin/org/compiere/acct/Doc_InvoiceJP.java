@@ -32,6 +32,7 @@ import org.compiere.model.MCharge;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
@@ -415,13 +416,16 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						serviceAmt = serviceAmt.add(amt);
 					}
 					//
-					if (line.getM_Product_ID() != 0
-						&& line.getProduct().isService())	//	otherwise Inv Matching
-						MCostDetail.createInvoice(as, line.getAD_Org_ID(),
-							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-							line.get_ID(), 0,		//	No Cost Element
-							line.getAmtSource(), line.getQty(),
-							line.getDescription(), getTrxName());
+					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+					{
+						if (line.getM_Product_ID() != 0
+							&& line.getProduct().isService())	//	otherwise Inv Matching
+							MCostDetail.createInvoice(as, line.getAD_Org_ID(),
+								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.get_ID(), 0,		//	No Cost Element
+								line.getAmtSource(), line.getQty(),
+								line.getDescription(), getTrxName());
+					}
 				}
 			}
 
@@ -535,13 +539,16 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						serviceAmt = serviceAmt.add(amt);
 					}
 					//
-					if (line.getM_Product_ID() != 0
-						&& line.getProduct().isService())	//	otherwise Inv Matching
-						MCostDetail.createInvoice(as, line.getAD_Org_ID(),
-							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-							line.get_ID(), 0,		//	No Cost Element
-							line.getAmtSource().negate(), line.getQty(),
-							line.getDescription(), getTrxName());
+					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+					{
+						if (line.getM_Product_ID() != 0
+							&& line.getProduct().isService())	//	otherwise Inv Matching
+							MCostDetail.createInvoice(as, line.getAD_Org_ID(),
+								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.get_ID(), 0,		//	No Cost Element
+								line.getAmtSource().negate(), line.getQty(),
+								line.getDescription(), getTrxName());
+					}
 				}
 			}
 
@@ -810,13 +817,16 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					serviceAmt = serviceAmt.add(amt);
 				}
 				//
-				if (line.getM_Product_ID() != 0
-					&& line.getProduct().isService())	//	otherwise Inv Matching
-					MCostDetail.createInvoice(as, line.getAD_Org_ID(),
-						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-						line.get_ID(), 0,		//	No Cost Element
-						line.getAmtSource(), line.getQty(),
-						line.getDescription(), getTrxName());
+				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+				{
+					if (line.getM_Product_ID() != 0
+						&& line.getProduct().isService())	//	otherwise Inv Matching
+						MCostDetail.createInvoice(as, line.getAD_Org_ID(),
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,		//	No Cost Element
+							line.getAmtSource(), line.getQty(),
+							line.getDescription(), getTrxName());
+				}
 			}
 		}
 
@@ -911,13 +921,16 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					serviceAmt = serviceAmt.add(amt);
 				}
 				//
-				if (line.getM_Product_ID() != 0
-					&& line.getProduct().isService())	//	otherwise Inv Matching
-					MCostDetail.createInvoice(as, line.getAD_Org_ID(),
-						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-						line.get_ID(), 0,		//	No Cost Element
-						line.getAmtSource().negate(), line.getQty(),
-						line.getDescription(), getTrxName());
+				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+				{
+					if (line.getM_Product_ID() != 0
+						&& line.getProduct().isService())	//	otherwise Inv Matching
+						MCostDetail.createInvoice(as, line.getAD_Org_ID(),
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,		//	No Cost Element
+							line.getAmtSource().negate(), line.getQty(),
+							line.getDescription(), getTrxName());
+				}
 			}
 		}
 
