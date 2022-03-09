@@ -952,9 +952,6 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			if (field.isParentValue())
 				continue;
 
-//			if (field.isReadOnly() && !field.isParentValue() && !field.isParentColumn())
-//				return new StringBuilder(Msg.getMsg(Env.getCtx(), "FieldIsReadOnly",new Object[] {header.get(i)}));
-
 			if (!(field.isDisplayed() || field.isDisplayedGrid()))
 				return new StringBuilder(Msg.getMsg(Env.getCtx(), "FieldNotDisplayed",new Object[] {header.get(i)}));
 
@@ -988,7 +985,6 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				     return new StringBuilder(Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value}));
 				}
 			} else {
-				// no validation here
 				// TODO: we could validate length of string or min/max
 			}
 		}
@@ -1004,9 +1000,6 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	   GridField field = gridTab.getField(sField);
 	   if(field == null)
 		  return new StringBuilder(Msg.getMsg(Env.getCtx(), "NotAWindowField",new Object[] {sField}));
-
-//	   if(field.isReadOnly() && !field.isParentValue())
-//		  return new StringBuilder(Msg.getMsg(Env.getCtx(), "FieldIsReadOnly",new Object[] {field.getColumnName()}));
 
 	   if(!(field.isDisplayed() || field.isDisplayedGrid()))
 		  return new StringBuilder(Msg.getMsg(Env.getCtx(), "FieldNotDisplayed",new Object[] {field.getColumnName()}));
@@ -1169,10 +1162,6 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				if(!field.isDisplayed(true))
 					continue;
 
-//				if(!isInsertMode() && !field.isEditable(true) && value!=null){
-//				   logMsg = Msg.getMsg(Env.getCtx(), "FieldNotEditable", new Object[] {header.get(i)}) + "{" + value + "}";
-//				   break;
-//				}
 				if("(null)".equals(value.toString().trim())){
 				   logMsg = gridTab.setValue(field,null);
 				   if(logMsg.equals(""))
