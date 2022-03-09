@@ -71,7 +71,7 @@ import org.supercsv.prefs.CsvPreference;
  *  [2] CSV Down load from window that is read only.
  *  [3] CSV Download include fields that is read only.
  *	[4] CSV Download Data that is Display value.
- *
+ *  [5] set Character Code
  *
  * @author Carlos Ruiz
  * @author Juan David Arboleda
@@ -92,17 +92,24 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		MTable tableDetail = null;
 		try {
 			FileOutputStream fileOut = new FileOutputStream (file);
+			OutputStreamWriter oStrW = null;
+			
+			//JPIERE-0451[5] set Character Code -- e.g. UTF-8 , SHIFT_JIS and so on・・・
+			String charaCode = MSysConfig.getValue("JP_EXPORT_CSV_CHARACTER_CODE", String.valueOf(Ini.getCharset()), Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));		
+			if("UTF-8".equals(charaCode))
+			{	
+				//JPIERE-0451-[1] Export CSV with BOM -- Start
+		        if(MSysConfig.getBooleanValue("JP_EXPORT_CSV_WITH_BOM", false, Env.getAD_Client_ID(Env.getCtx())))
+		        {
+					fileOut.write(0xef);
+					fileOut.write(0xbb);
+					fileOut.write(0xbf);
+		        }
+		        //JPIERE-0451-[1] Export CSV with BOM -- End
+		        
+			}//JPIERE-0451[5] set Character Code -- End
 
-			//JPIERE-0451-[1] Export CSV with BOM -- Start
-	        if(MSysConfig.getBooleanValue("JP_EXPORT_CSV_WITH_BOM", false, Env.getAD_Client_ID(Env.getCtx())))
-	        {
-				fileOut.write(0xef);
-				fileOut.write(0xbb);
-				fileOut.write(0xbf);
-	        }
-	        //JPIERE-0451-[1] Export CSV with BOM -- End
-
-			OutputStreamWriter oStrW = new OutputStreamWriter(fileOut, Ini.getCharset());
+			oStrW = new OutputStreamWriter(fileOut, charaCode);
 			BufferedWriter bw = new BufferedWriter(oStrW);
 			mapWriter = new CsvMapWriter(bw, CsvPreference.STANDARD_PREFERENCE);
 
@@ -161,25 +168,17 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 			//Details up to tab level 1
 			if(childs.size() > 0){
 			  int specialDetDispayType = 0;
-			  //int numOfTabs=0;
-			  for(GridTab detail: childs){
 
-				 //if(indxDetailSelected != detail.getTabNo())
-					//continue;
+			  for(GridTab detail: childs){
 
 				 if(!detail.isDisplayed())
 					continue;
 
 				 if(detail.getDisplayLogic()!=null){
-				    //if(!currentRowOnly)
-				       //numOfTabs--;
 					//TODO: it's need? DisplayLogic is evaluated when call detail.isDisplayed()
 				    if(currentRowOnly && !Evaluator.evaluateLogic(detail,detail.getDisplayLogic()))
 					   continue;
 				 }
-				 //comment this line if you want to export all tabs
-				 //if(numOfTabs > 0)
-					//break;
 
 				 if(detail.getTabLevel()>1)
 	 			    continue;
@@ -234,7 +233,6 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				   specialDetDispayType = 0;
 			    }
 			    tabMapDetails.put(detail,gridFields);
-			    //numOfTabs++;
 			}
 				gridFields = null;
 		   }
@@ -259,7 +257,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				int index =0;
 				int rowDetail=0;
 				int record_Id = 0;
-//				boolean isActiveRow = true;
+
 				gridTab.setCurrentRow(idxrow);
 				for(GridField field : getFields(gridTab)){
 					MColumn column = MColumn.get(Env.getCtx(), field.getAD_Column_ID());
@@ -276,17 +274,10 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 					}else{
 					   value = resolveValue(gridTab, table, column, idxrow, headName);
 					}
-					//Ignore row
-//					if("IsActive".equals(headName) && value!=null && Boolean.valueOf((Boolean)value)==false){
-//						isActiveRow=false;
-//						break;
-//					}
 					row.put(headName,value);
 					idxfld++;
 					index++;
 				}
-//			    if(!isActiveRow)
-//			       continue;
 
 				if(specialHDispayType > 0 && record_Id > 0){
 				   switch(specialHDispayType) {
@@ -367,13 +358,10 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 	private String isValidTabToExport(GridTab gridTab){
 	    String result=null;
 
-	    MTab tab = new MTab(Env.getCtx(), gridTab.getAD_Tab_ID(), null);
+	     MTab tab = MTab.get(gridTab.getAD_Tab_ID());
 
 		if (tab.isReadOnly())
 		   result = Msg.getMsg(Env.getCtx(),"FieldIsReadOnly", new Object[] {gridTab.getName()});
-
-//		if (gridTab.getTableName().endsWith("_Acct"))
-//		   result = "Accounting Tab are not exported by default: "+ gridTab.getName();
 
 		return result;
 	}
@@ -390,10 +378,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 
 		for(Map.Entry<GridTab, GridField[]> childTabDetail : tabMapDetails.entrySet()) {
 		    GridTab childTab = childTabDetail.getKey();
-		    //String  whereCla = getWhereClause (childTab ,record_Id ,keyColumnParent);
-		    //childTab.getTableModel().dataRequery(whereCla, false, 0);
 			Map<String,Object> row = new HashMap<String,Object>();
-//			boolean isActiveRow = true;
 		    if (childTab.getRowCount() > 0) {
 		    	int specialRecordId = 0;
 		    	for(GridField field : childTabDetail.getValue()){
@@ -424,13 +409,8 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				    row.put(headName,value);
 				    if(value!=null)
 				       hasDetails = true;
-					//Ignore row
-//					if(headName.contains("IsActive")&& value!=null && Boolean.valueOf((Boolean)value)==false){
-//					   isActiveRow=false;
-//					   break;
-//					}
 			    }
-				if(/* isActiveRow && */ specialDetDispayType > 0 && specialRecordId > 0){
+				if(specialDetDispayType > 0 && specialRecordId > 0){
 					MLocation address = new MLocation (Env.getCtx(),specialRecordId,null);
 					for(String specialHeader:resolveSpecialColumnName(specialDetDispayType)){
 						String columnName = specialHeader.substring(specialHeader.indexOf(">")+1,specialHeader.length());
@@ -455,8 +435,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 					}
 				}
 		    }
-//		    if(isActiveRow)
-		       activeRow.putAll(row);
+	       activeRow.putAll(row);
 		}
 		if (hasDetails)
 			return activeRow;
@@ -643,7 +622,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 							|| gridField.isEncrypted()
 							|| gridField.isEncryptedColumn()
 							|| !(gridField.isDisplayed() || gridField.isDisplayedGrid())
-							//|| gridField.isReadOnly() JPIER-451-[3]
+							//|| gridField.isReadOnly() JPIER-0451-[3]
 							|| (DisplayType.Button == MColumn.get(Env.getCtx(),gridField.getAD_Column_ID()).getAD_Reference_ID())
 						   )
 							continue;
@@ -670,8 +649,8 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 						|| field.isEncryptedColumn()
 						|| !(field.isDisplayed() || field.isDisplayedGrid()))
 						continue;
-				//if (field.isParentValue() || (!field.isReadOnly() && field.isDisplayedGrid()) || field.isParentColumn()) JPIER-451-[3]
-				if (field.isParentValue() || field.isDisplayedGrid() || field.isParentColumn()) //JPIER-451-[3]
+				//if (field.isParentValue() || (!field.isReadOnly() && field.isDisplayedGrid()) || field.isParentColumn()) JPIER-0451-[3]
+				if (field.isParentValue() || field.isDisplayedGrid() || field.isParentColumn()) //JPIER-0451-[3]
 					gridFieldList.add(field);
 			}
 
