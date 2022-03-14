@@ -20,9 +20,11 @@ import java.util.logging.Level;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
+import org.compiere.model.MPeriod;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
@@ -65,6 +67,11 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		//Std Period open?
+		MPeriod.testPeriodOpen(getCtx(), m_BankData.getStatementDate(), MDocType.DOCBASETYPE_BankStatement, m_BankData.getAD_Org_ID());
+		MPeriod.testPeriodOpen(getCtx(), m_BankData.getDateAcct(), MDocType.DOCBASETYPE_BankStatement, m_BankData.getAD_Org_ID());
+		MPeriod.testPeriodOpen(getCtx(), m_BankData.getDateAcct(), MDocType.DOCBASETYPE_ARReceipt, m_BankData.getAD_Org_ID());
+		
 		MBankStatement bs = new MBankStatement(getCtx(), 0, get_TrxName());
 		MBankDataLine[] lines =  m_BankData.getLines();
 		for(int i = 0 ; i < lines.length; i++)
