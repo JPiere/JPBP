@@ -27,12 +27,14 @@ import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceTax;
+import org.compiere.model.MJournalLine;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxProvider;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
 import jpiere.base.plugin.org.adempiere.model.MBill;
@@ -43,6 +45,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractContentTax;
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
 import jpiere.base.plugin.org.adempiere.model.MEstimation;
 import jpiere.base.plugin.org.adempiere.model.MEstimationLine;
+import jpiere.base.plugin.org.adempiere.model.MGLJournalTax;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
@@ -739,5 +742,156 @@ public interface IJPiereTaxProvider {
 		return true;
 
 	}	//	calculateTaxFromLines
+	
+	
+	/**
+	 * JPIERE-05XX: Calculate GL Journal Tax
+	 *
+	 * @param provider
+	 * @param line
+	 * @param newRecord
+	 * @return
+	 */
+	default public boolean recalculateTax(MTaxProvider provider, MJournalLine line, boolean newRecord)
+	{
+		if (!newRecord && !line.getParent().isProcessed() &&
+				(line.is_ValueChanged(MGLJournalTax.COLUMNNAME_C_Tax_ID)
+				|| line.is_ValueChanged(MGLJournalTax.COLUMNNAME_JP_SOPOType)
+				|| line.is_ValueChanged(MJournalLine.COLUMNNAME_AmtSourceDr)
+				|| line.is_ValueChanged(MJournalLine.COLUMNNAME_AmtSourceCr)
+				))
+		{
+    		if (!updateGLJournalTax(line, true))
+				return false;
+		}
 
+		String JP_SOPOType = line.get_ValueAsString(MGLJournalTax.COLUMNNAME_JP_SOPOType);
+		if("S".equals(JP_SOPOType) || "P".equals(JP_SOPOType))
+		{
+			if(!updateGLJournalTax(line, false))
+				return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * JPIERE-0541: Calculate Contract Content Tax
+	 *
+	 * @param line
+	 * @param oldTax
+	 * @return
+	 */
+	private boolean updateGLJournalTax(MJournalLine line, boolean oldTax)
+	{
+		
+		String JP_SOPOType = null;
+		if(oldTax)
+		{
+			Object obj = line.get_ValueOld("JP_SOPOType");
+			if(obj != null)
+				JP_SOPOType = (String)obj;
+			
+		}else {
+			JP_SOPOType = line.get_ValueAsString("JP_SOPOType");
+		}
+		
+		MGLJournalTax tax = MGLJournalTax.get (line, line.getPrecision(), oldTax, line.get_TrxName());
+		if(tax != null)
+		{
+			if (!calculateTaxFromJournalLines(line,tax,JP_SOPOType))
+				return false;
+			if (tax.getTaxAmt().signum() != 0 || tax.getTaxBaseAmt().signum() != 0) {
+				if (!tax.save(line.get_TrxName()))
+					return false;
+			} else {
+				if (!tax.is_new() && !tax.delete(false, line.get_TrxName()))
+					return false;
+			}
+		}
+
+		return true;
+	}
+	
+
+	/**
+	 * JPIERE-05XX: Calculate GL Journal Tax
+	 *
+	 * @param line
+	 * @param m_GLJournalTax
+	 * @return
+	 */
+	private boolean calculateTaxFromJournalLines (MJournalLine line, MGLJournalTax m_GLJournalTax, String JP_SOPOType)
+	{	
+		if(Util.isEmpty(JP_SOPOType) || "N".equals(JP_SOPOType))
+			return true;
+		
+		BigDecimal taxBaseAmt = Env.ZERO;
+		BigDecimal taxAmt = Env.ZERO;
+
+		MTax tax = MTax.get(m_GLJournalTax.getCtx(), m_GLJournalTax.getC_Tax_ID());
+		boolean documentLevel = tax.isDocumentLevel();
+
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getC_BPartner_ID(), JP_SOPOType.equals("S"), tax.getC_TaxProvider());
+		int Precision =MCurrency.getStdPrecision(Env.getCtx(), line.getC_Currency_ID());
+		//
+		String sql = null;
+		
+		if(JP_SOPOType.equals("S"))
+		{
+			sql = "SELECT AmtSourceCr - AmtSourceDr FROM GL_JournalLine WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=?";
+			
+		}else if(JP_SOPOType.equals("P")){
+			
+			sql = "SELECT AmtSourceDr - AmtSourceCr FROM GL_JournalLine WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=?";
+			
+		}
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, m_GLJournalTax.get_TrxName());
+			pstmt.setInt (1,m_GLJournalTax.getGL_Journal_ID());
+			pstmt.setString(2, JP_SOPOType);
+			pstmt.setInt (3, m_GLJournalTax.getC_Tax_ID());
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				BigDecimal baseAmt = rs.getBigDecimal(1);
+				taxBaseAmt = taxBaseAmt.add(baseAmt);
+				//
+				if (!documentLevel)		// calculate line tax
+					taxAmt = taxAmt.add(calculateTax(tax, baseAmt, m_GLJournalTax.isTaxIncluded(), Precision, roundingMode));
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, m_GLJournalTax.get_TrxName(), e);
+			taxBaseAmt = null;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		//
+		if (taxBaseAmt == null)
+			return false;
+
+		//	Calculate Tax
+		if (documentLevel)		//	document level
+			taxAmt = calculateTax(tax, taxBaseAmt, m_GLJournalTax.isTaxIncluded(), Precision, roundingMode);
+		m_GLJournalTax.setTaxAmt(taxAmt);
+
+		//	Set Base
+		if (m_GLJournalTax.isTaxIncluded())
+			m_GLJournalTax.setTaxBaseAmt (taxBaseAmt.subtract(taxAmt));
+		else
+			m_GLJournalTax.setTaxBaseAmt (taxBaseAmt);
+		if (log.isLoggable(Level.FINE)) log.fine(toString());
+		return true;
+
+	}	//	calculateTaxFromLines
 }

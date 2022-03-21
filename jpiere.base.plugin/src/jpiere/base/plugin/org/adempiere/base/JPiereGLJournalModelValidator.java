@@ -151,6 +151,9 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 				for(int i = 0; i < factLine.length; i++)
 				{
 
+					if(factLine[i].getDocLine() == null)
+						continue;
+					
 					m_GLJournalLine = factLine[i].getDocLine().getPO();
 
 					if(m_GLJournalLine.get_ValueAsInt(JP_ORDER_ID) > 0)

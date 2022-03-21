@@ -25,6 +25,7 @@ import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MJournal;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
@@ -64,6 +65,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 				|| AD_Table_ID==MMatchInv.Table_ID//472
 				|| AD_Table_ID==MAllocationHdr.Table_ID//735
 				|| AD_Table_ID==MBankStatement.Table_ID //392
+				|| AD_Table_ID==MJournal.Table_ID //224
 				|| AD_Table_ID==MRecognition.Table_ID //1000188
 				|| AD_Table_ID==MEstimation.Table_ID //1000080
 				|| AD_Table_ID==MBill.Table_ID //1000032
@@ -129,6 +131,8 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_AllocationHdrJP";
 		}else if(AD_Table_ID == MBankStatement.Table_ID){//392
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_BankStatementJP";
+		}else if(AD_Table_ID == MJournal.Table_ID){//224
+			className = "jpiere.base.plugin.org.compiere.acct.Doc_GLJournalJP";
 		}else if(AD_Table_ID == MRecognition.Table_ID){
 			className = "jpiere.base.plugin.org.compiere.acct.Doc_JPRecognition";
 		}else if(AD_Table_ID == MBill.Table_ID){
