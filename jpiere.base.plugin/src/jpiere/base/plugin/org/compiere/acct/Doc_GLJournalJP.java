@@ -314,12 +314,14 @@ public class Doc_GLJournalJP extends Doc
 						
 					}else if("P".equals(JP_SOPOType)) {
 						
+						boolean isSalesTax = MTax.get(docLine.getC_Tax_ID()).isSalesTax();
+						
 						if(amtSourceDr.compareTo(Env.ZERO) == 0)
 						{
 							fLine = fact.createLine (docLine, docLine.getAccount(), getC_Currency_ID(), Env.ZERO, JP_TaxBaseAmt.negate());
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 
-							fLine = fact.createLine(docLine, docTax.getAccount(DocTax.ACCTTYPE_TaxCredit, as), getC_Currency_ID(), Env.ZERO, JP_TaxAmt.negate());
+							fLine = fact.createLine(docLine, docTax.getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as), getC_Currency_ID(), Env.ZERO, JP_TaxAmt.negate());
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 							
 						}else {
@@ -327,7 +329,7 @@ public class Doc_GLJournalJP extends Doc
 							fLine = fact.createLine (docLine,docLine.getAccount (), getC_Currency_ID(), JP_TaxBaseAmt, Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 
-							fLine = fact.createLine(docLine, docTax.getAccount(DocTax.ACCTTYPE_TaxCredit, as),	getC_Currency_ID(), JP_TaxAmt, Env.ZERO);
+							fLine = fact.createLine(docLine, docTax.getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),	getC_Currency_ID(), JP_TaxAmt, Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 
 						}
@@ -372,7 +374,8 @@ public class Doc_GLJournalJP extends Doc
 					
 				}else {
 	
-					FactLine fLine = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxCredit, as), getC_Currency_ID(),  differenceAmt, null);
+					boolean isSalesTax = MTax.get(m_taxes[i].getC_Tax_ID()).isSalesTax();
+					FactLine fLine = fact.createLine(null, m_taxes[i].getAccount( isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as), getC_Currency_ID(),  differenceAmt, null);
 					setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "P", differenceAmt.negate(), differenceAmt);
 					
 					AdjustTaxInfo[] adjustTaxInfos = getAdjustTaxInfo(m_taxes[i], "P");
@@ -381,10 +384,10 @@ public class Doc_GLJournalJP extends Doc
 						fLine = fact.createLine (null, adjustTaxInfo.getAccount(), getC_Currency_ID(), null, adjustTaxInfo.getAdjustTaxAmt());
 						setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "P", adjustTaxInfo.getAdjustTaxBaseAmt(), adjustTaxInfo.getAdjustTaxAmt());
 					}
+					
 				}			
 			}
-
-		}
+		}//for
 		
 		//
 		facts.add(fact);
