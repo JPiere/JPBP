@@ -80,7 +80,7 @@ public class JPiereBasePluginDocFactory implements IDocFactory {
 			)
 		{
 
-			String tableName = MTable.get(Env.getCtx(), AD_Table_ID).get_TableName();
+			String tableName = MTable.get(Env.getCtx(), AD_Table_ID).getTableName();
 			StringBuffer sql = new StringBuffer("SELECT * FROM ")
 				.append(tableName)
 				.append(" WHERE ").append(tableName).append("_ID=? AND Processed='Y'");
