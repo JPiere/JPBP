@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_GLJournalJP
  *  @author iDempiere (generated) 
- *  @version Release 5.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_I_GLJournalJP 
@@ -192,12 +192,12 @@ public interface I_I_GLJournalJP
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -677,6 +677,26 @@ public interface I_I_GLJournalJP
 
 	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException;
 
+    /** Column name JP_ContractProcPeriod_ID */
+    public static final String COLUMNNAME_JP_ContractProcPeriod_ID = "JP_ContractProcPeriod_ID";
+
+	/** Set Contract Process Period	  */
+	public void setJP_ContractProcPeriod_ID (int JP_ContractProcPeriod_ID);
+
+	/** Get Contract Process Period	  */
+	public int getJP_ContractProcPeriod_ID();
+
+	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException;
+
+    /** Column name JP_ContractProcPeriod_Name */
+    public static final String COLUMNNAME_JP_ContractProcPeriod_Name = "JP_ContractProcPeriod_Name";
+
+	/** Set Contract Process Period Name	  */
+	public void setJP_ContractProcPeriod_Name (String JP_ContractProcPeriod_Name);
+
+	/** Get Contract Process Period Name	  */
+	public String getJP_ContractProcPeriod_Name();
+
     /** Column name JP_ConversionType_Value */
     public static final String COLUMNNAME_JP_ConversionType_Value = "JP_ConversionType_Value";
 
@@ -854,6 +874,19 @@ public interface I_I_GLJournalJP
 	/** Get Project(Search Key)	  */
 	public String getJP_Project_Value();
 
+    /** Column name JP_SOPOType */
+    public static final String COLUMNNAME_JP_SOPOType = "JP_SOPOType";
+
+	/** Set SO/PO Type.
+	  * JPIERE-0543:JPBP
+	  */
+	public void setJP_SOPOType (String JP_SOPOType);
+
+	/** Get SO/PO Type.
+	  * JPIERE-0543:JPBP
+	  */
+	public String getJP_SOPOType();
+
     /** Column name JP_SalesRegion_Value */
     public static final String COLUMNNAME_JP_SalesRegion_Value = "JP_SalesRegion_Value";
 
@@ -888,19 +921,19 @@ public interface I_I_GLJournalJP
     /** Column name JP_UserElement1_Value */
     public static final String COLUMNNAME_JP_UserElement1_Value = "JP_UserElement1_Value";
 
-	/** Set User Column 1(Search key)	  */
+	/** Set User Element List 1(Search key)	  */
 	public void setJP_UserElement1_Value (String JP_UserElement1_Value);
 
-	/** Get User Column 1(Search key)	  */
+	/** Get User Element List 1(Search key)	  */
 	public String getJP_UserElement1_Value();
 
     /** Column name JP_UserElement2_Value */
     public static final String COLUMNNAME_JP_UserElement2_Value = "JP_UserElement2_Value";
 
-	/** Set User Column 2(Search key)	  */
+	/** Set User Element List 2(Search key)	  */
 	public void setJP_UserElement2_Value (String JP_UserElement2_Value);
 
-	/** Get User Column 2(Search key)	  */
+	/** Get User Element List 2(Search key)	  */
 	public String getJP_UserElement2_Value();
 
     /** Column name Line */

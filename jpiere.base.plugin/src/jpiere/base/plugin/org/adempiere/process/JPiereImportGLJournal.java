@@ -42,6 +42,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.X_I_GLJournalJP;
 import jpiere.base.plugin.org.adempiere.model.X_I_WarehouseJP;
 
@@ -343,6 +344,35 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			return message;
 
 
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Tax_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Tax_ID())
+			commitEx();
+		else
+			return message;
+		
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Order_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Order_ID())
+			commitEx();
+		else
+			return message;
+		
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_ContractContent_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_ContractContent_ID())
+			commitEx();
+		else
+			return message;
+		
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_ContractProcPeriod_ID())
+			commitEx();
+		else
+			return message;
+		
+		
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		if (p_IsValidateOnly)
@@ -1932,8 +1962,174 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 	}//reverseLookupM_Locator_ID
 
 
+	/**
+	 * Reverse lookup C_Tax_ID From JP_Tax_Name
+	 *
+	 * @throws Exception
+	 */
+	private boolean reverseLookupC_Tax_ID() throws Exception
+	{
+		int no = 0;
 
+		StringBuilder sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+			.append("SET C_Tax_ID=(SELECT C_Tax_ID FROM C_Tax p")
+			.append(" WHERE i.JP_Tax_Name=p.Name AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE i.C_Tax_ID IS NULL AND i.JP_Tax_Name IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
 
+		//Invalid JP_Tax_Name
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Tax_Name");
+		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE C_Tax_ID IS NULL AND JP_Tax_Name IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupC_Tax_ID()
+
+	
+	/**
+	 * Reverse lookup C_Order_ID From JP_Order_DocumentNo
+	 *
+	 * @throws Exception
+	 */
+	private boolean reverseLookupC_Order_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+			.append("SET JP_Order_ID=(SELECT C_Order_ID FROM C_Order p")
+			.append(" WHERE i.JP_Order_DocumentNo=p.DocumentNo AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE i.JP_Order_ID IS NULL AND i.JP_Order_DocumentNo IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Order_DocumentNo
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Order_DocumentNo");
+		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_Order_ID IS NULL AND JP_Order_DocumentNo IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupC_Order_ID
+	
+	
+	/**
+	 * Reverse lookup JP_ContractContent_ID From JP_ContractContent_DocNo
+	 *
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_ContractContent_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+			.append("SET JP_ContractContent_ID=(SELECT JP_ContractContent_ID FROM JP_ContractContent p")
+			.append(" WHERE i.JP_ContractContent_DocNo=p.DocumentNo AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE i.JP_ContractContent_ID IS NULL AND i.JP_ContractContent_DocNo IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Order_DocumentNo
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractContent_DocNo");
+		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_ContractContent_ID IS NULL AND JP_ContractContent_DocNo IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_ContractContent_ID
+	
+	
+	/**
+	 * Reverse lookup JP_ContractProcPeriod_ID From JP_ContractProcPeriod_Name
+	 *
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_ContractProcPeriod_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+			.append("SET JP_ContractProcPeriod_ID=(SELECT JP_ContractProcPeriod_ID FROM JP_ContractProcPeriod p, JP_ContractContent c")
+			.append(" WHERE i.JP_ContractProcPeriod_Name=p.Name AND i.AD_Client_ID=p.AD_Client_ID AND c.JP_ContractContent_ID = i.JP_ContractContent_ID AND p.JP_ContractCalender_ID = c.JP_ContractCalender_ID ) ")
+			.append(" WHERE i.JP_ContractProcPeriod_ID IS NULL AND i.JP_ContractProcPeriod_Name IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Order_DocumentNo
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_ContractProcPeriod_Name");
+		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_ContractProcPeriod_ID IS NULL AND JP_ContractProcPeriod_Name IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_ContractProcPeriod_ID
+	
+	
 	/**
 	 * Create Journal
 	 *
@@ -2097,6 +2293,24 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		journalLine.setA_Asset_ID(impJournal.getA_Asset_ID());
 		if(journalLine.get_ColumnIndex("M_Locator_ID") >= 0)
 			journalLine.set_ValueNoCheck("M_Locator_ID",impJournal.getM_Locator_ID() );
+		if(journalLine.get_ColumnIndex("C_Tax_ID") >= 0)
+			journalLine.set_ValueNoCheck("C_Tax_ID",impJournal.getC_Tax_ID() );
+		if(journalLine.get_ColumnIndex("JP_SOPOType") >= 0)
+			journalLine.set_ValueNoCheck("JP_SOPOType",impJournal.getJP_SOPOType() );
+		if(journalLine.get_ColumnIndex("JP_Order_ID") >= 0)
+			journalLine.set_ValueNoCheck("JP_Order_ID",impJournal.getJP_Order_ID() );
+		if(journalLine.get_ColumnIndex("JP_ContractContent_ID") >= 0)
+		{
+			journalLine.set_ValueNoCheck("JP_ContractContent_ID",impJournal.getJP_ContractContent_ID() );
+			if(journalLine.get_ColumnIndex("JP_Contract_ID") >= 0)
+			{
+				MContractContent cc =MContractContent.get(getCtx(), impJournal.getJP_ContractContent_ID() );
+				journalLine.set_ValueNoCheck("JP_Contract_ID",cc.getJP_Contract_ID() );
+			}
+			
+			if(journalLine.get_ColumnIndex("JP_ContractProcPeriod_ID") >= 0)
+				journalLine.set_ValueNoCheck("JP_ContractProcPeriod_ID",impJournal.getJP_ContractProcPeriod_ID() );
+		}
 
 		//Set Currency Conversion Rate
 		if(impJournal.getCurrencyRate().compareTo(Env.ZERO) == 0)
