@@ -129,6 +129,7 @@ public class DocLine_BankStatementJP extends DocLine
 	 */
 	private DocTax docTax = null;
 	private BigDecimal taxBaseAmt =Env.ZERO;
+	private BigDecimal taxAmt =Env.ZERO;
 
 	public void setDocTax(DocTax docTax){
 		this.docTax = docTax;
@@ -144,6 +145,14 @@ public class DocLine_BankStatementJP extends DocLine
 
 	public BigDecimal getTaxBaseAmt(){
 		return taxBaseAmt;
+	}
+	
+	public void setTaxAmt(BigDecimal taxAmt){
+		this.taxAmt = taxAmt;
+	}
+
+	public BigDecimal getTaxAmt(){
+		return taxAmt;
 	}
 
 }   //  DocLine_JPiereBankStatementTax

@@ -31,6 +31,7 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
+import org.compiere.model.MTax;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
@@ -167,6 +168,7 @@ public class Doc_BankStatementJP extends Doc
 					if(docLine.get_ID() == C_BankStatementLine_ID){
 						docLine.setDocTax(docTax);
 						docLine.setTaxBaseAmt(taxBaseAmt);
+						docLine.setTaxAmt(amount);
 						break;
 					}
 
@@ -300,38 +302,124 @@ public class Doc_BankStatementJP extends Doc
 			}
 			// End Avoid usage of clearing accounts
 
-			//  Charge          DR          (Charge)
-			if (line.getChargeAmt().compareTo(Env.ZERO) > 0) {
-				if(line.getDocTax() == null){
+			//JPIERE-0012 -- Calculate Tax of Bank Statemet Line 
+			if (line.getChargeAmt().compareTo(Env.ZERO) > 0) 
+			{
+				if(line.getDocTax() == null)
+				{
 					fl = fact.createLine(line,
 							line.getChargeAccount(as, line.getChargeAmt().negate()),
 							line.getC_Currency_ID(), null, line.getChargeAmt());
 				}else{
-					fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
-							getC_Currency_ID(), null,line.getDocTax().getAmount());
-					if(fl != null && line.getC_Tax_ID() != 0)
-						fl.setC_Tax_ID(line.getC_Tax_ID());
-
-					fl = fact.createLine(line,
-							line.getChargeAccount(as, line.getChargeAmt().negate()),
-							line.getC_Currency_ID(), null, line.getTaxBaseAmt());//TODO line.getDocTax().getTaxBaseAmt()
+					
+					if(line.getPO().get_Value("JP_SOPOType") == null || line.getPO().get_ValueAsString("JP_SOPOType").equals("S"))
+					{
+						fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
+								getC_Currency_ID(), null,line.getDocTax().getAmount());
+						if(fl != null)
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "S");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+						}
+	
+						fl = fact.createLine(line,
+								line.getChargeAccount(as, line.getChargeAmt().negate()),
+								line.getC_Currency_ID(), null, line.getTaxBaseAmt());
+						if(fl != null)
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "S");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+						}
+						
+					}else {//Nagative
+						
+						boolean isSalesTax = MTax.get(line.getC_Tax_ID()).isSalesTax();
+						fl = fact.createLine(null, line.getDocTax().getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),
+								getC_Currency_ID(), null,line.getDocTax().getAmount());
+						if(fl != null)
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "P");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt().negate());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt().negate());
+						}
+	
+						fl = fact.createLine(line,
+								line.getChargeAccount(as, line.getChargeAmt().negate()),
+								line.getC_Currency_ID(), null, line.getTaxBaseAmt());
+						if(fl != null)
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "P");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt().negate());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt().negate());
+						}						
+					}
 				}
+				
 			} else {
-				if(line.getDocTax() == null){
+				
+				if(line.getDocTax() == null)
+				{
 					fl = fact.createLine(line,
 							line.getChargeAccount(as, line.getChargeAmt().negate()),
 							line.getC_Currency_ID(), line.getChargeAmt().negate(), null);
 				}else{
-					fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxCredit, as),
-							getC_Currency_ID(), line.getDocTax().getAmount(),  null);
-					if(fl != null && line.getC_Tax_ID() != 0)
-						fl.setC_Tax_ID(line.getC_Tax_ID());
+					
+					if(line.getPO().get_Value("JP_SOPOType") == null || line.getPO().get_ValueAsString("JP_SOPOType").equals("P"))
+					{
+						boolean isSalesTax = MTax.get(line.getC_Tax_ID()).isSalesTax();
+						fl = fact.createLine(null, line.getDocTax().getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),
+								getC_Currency_ID(), line.getDocTax().getAmount(),  null);
+						if(fl != null)
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "P");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+						}
+	
+						fl = fact.createLine(line,
+								line.getChargeAccount(as, line.getChargeAmt().negate()),
+								line.getC_Currency_ID(), line.getTaxBaseAmt(), null);
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "P");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());							
+						}
+						
+					}else {//Nagetive
 
-					fl = fact.createLine(line,
-							line.getChargeAccount(as, line.getChargeAmt().negate()),
-							line.getC_Currency_ID(), line.getTaxBaseAmt(), null);//TODO line.getDocTax().getTaxBaseAmt()
+						fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
+								getC_Currency_ID(), line.getDocTax().getAmount(),  null);
+						if(fl != null)
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "S");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt().negate());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt().negate());
+						}
+	
+						fl = fact.createLine(line,
+								line.getChargeAccount(as, line.getChargeAmt().negate()),
+								line.getC_Currency_ID(), line.getTaxBaseAmt(), null);
+						{
+							fl.setC_Tax_ID(line.getC_Tax_ID());
+							fl.set_ValueNoCheck("JP_SOPOType", "S");
+							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt().negate());
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt().negate());							
+						}
+					}
 				}
 			}
+			
+			
+			
 			if (fl != null && C_BPartner_ID != 0)
 				fl.setC_BPartner_ID(C_BPartner_ID);
 

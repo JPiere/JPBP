@@ -79,11 +79,37 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 	public String modelChange(PO po, int type) throws Exception
 	{
 
-		//JPIERE-0087
+		//JPIERE-0012 & JPIERE-0087
 		if(type == ModelValidator.TYPE_BEFORE_NEW || type == ModelValidator.TYPE_BEFORE_CHANGE)
 		{
-
 			MBankStatementLine bsl = (MBankStatementLine)po;
+			
+			//JPIERE-0012 -- Calculate Tax of Bank Statemet Line 
+			if(bsl.getChargeAmt().compareTo(Env.ZERO) == 0)
+			{
+				
+				bsl.setC_Charge_ID(0);
+				bsl.set_ValueNoCheck("C_Tax_ID", null);
+				bsl.set_ValueNoCheck("JP_SOPOType", null);
+				
+			}else {
+			
+				Object C_Tax_ID = bsl.get_Value("C_Tax_ID");
+				Object JP_SOPOType = bsl.get_Value("JP_SOPOType");
+				if(C_Tax_ID != null && JP_SOPOType == null)
+				{
+					if(bsl.getChargeAmt().compareTo(Env.ZERO) > 0)
+					{
+						bsl.set_ValueNoCheck("JP_SOPOType", "S");
+					}else if(bsl.getChargeAmt().compareTo(Env.ZERO) < 0) {
+						bsl.set_ValueNoCheck("JP_SOPOType", "P");
+					}else{
+						bsl.set_ValueNoCheck("JP_SOPOType", "N");
+					}
+				}	
+			}
+
+			//JPIERE-0087
 			MBankAccount ba = MBankAccount.get(bsl.getCtx(), bsl.getParent().getC_BankAccount_ID());
 			if(bsl.getAD_Org_ID() != ba.getAD_Org_ID())
 			{
@@ -95,15 +121,11 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 				return Msg.getMsg(bsl.getCtx(), "JP_DifferentCurrency");
 			}
 
-			if(bsl.getChargeAmt().compareTo(Env.ZERO)==0)
-			{
-				bsl.setC_Charge_ID(0);
-				bsl.set_ValueNoCheck("C_Tax_ID", null);
-			}
-
 		}
+		
+		
 		//JPIERE-0012 & JPIERE-0300
-		else if(type == ModelValidator.TYPE_AFTER_NEW || type == ModelValidator.TYPE_AFTER_CHANGE)
+		if(type == ModelValidator.TYPE_AFTER_NEW || type == ModelValidator.TYPE_AFTER_CHANGE)
 		{
 
 			MBankStatementLine bsl = (MBankStatementLine)po;
@@ -198,23 +220,27 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 			if(type == ModelValidator.TYPE_AFTER_CHANGE)
 				newRecord = false;
 
-			if(bsl.getChargeAmt().compareTo(Env.ZERO)==0){
+			if(bsl.getChargeAmt().compareTo(Env.ZERO)==0)
+			{
 				PO bst = MBankStatementTax.get(bsl.getCtx(), bsl.getC_BankStatementLine_ID());
-				if(bst!=null){
+				if(bst!=null)
+				{
 					bst.deleteEx(false);
 				}
 				return null;
 			}
 
-			Object C_Tax_ID = po.get_Value("C_Tax_ID");
-			if(C_Tax_ID==null){
+			Object C_Tax_ID = bsl.get_Value("C_Tax_ID");
+			if(C_Tax_ID==null)
+			{
 				PO bst = MBankStatementTax.get(bsl.getCtx(), bsl.getC_BankStatementLine_ID());
-				if(bst!=null){
+				if(bst!=null)
+				{
 					bst.deleteEx(false);
 				}
 				return null;
 			}
-
+			
 			MTax tax = new MTax(po.getCtx(), Integer.valueOf(C_Tax_ID.toString()).intValue(), po.get_TrxName());
 			if(tax.getC_TaxProvider_ID()==0){
 				return Msg.getMsg(bsl.getCtx(), "JP_SetTaxProvider");
@@ -224,8 +250,8 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 
 	        //If Tax Provider class is Setting "jpiere.taxprovider.JPiereTaxProvider",
 	        //JPiere Tax Provider of Bank Statement is "jpiere.bankstatementtax.JPiereBankStatementTaxProvider".
-	        if(provider.getTaxProviderClass().equals("jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider")){
-
+	        if(provider.getTaxProviderClass().equals("jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider"))
+	        {
 				Class<?> ppClass = Class.forName("jpiere.base.plugin.org.adempiere.model.JPiereBankStatementTaxProvider");
 				JPiereBankStatementTaxProvider calculator = (JPiereBankStatementTaxProvider)ppClass.getDeclaredConstructor().newInstance();
 				boolean isCalculate = calculator.recalculateTax(provider, bsl, newRecord);
@@ -238,7 +264,12 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 
 	        }
 
-		}else if(type == ModelValidator.TYPE_AFTER_DELETE){
+		}//JPIERE-0012 & JPIERE-0300
+		
+		
+		//JPIERE-0012
+		if(type == ModelValidator.TYPE_AFTER_DELETE)
+		{
 			MBankStatementLine bsl = (MBankStatementLine)po;
 			PO bst = MBankStatementTax.get(bsl.getCtx(), bsl.getC_BankStatementLine_ID());
 			if(bst!=null){
