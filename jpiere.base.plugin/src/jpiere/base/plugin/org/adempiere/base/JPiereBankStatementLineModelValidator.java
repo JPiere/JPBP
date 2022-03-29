@@ -241,6 +241,17 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 				return null;
 			}
 			
+			String JP_SOPOType = bsl.get_ValueAsString("JP_SOPOType");
+			if(JP_SOPOType == null || "N".equals(JP_SOPOType))
+			{
+				PO bst = MBankStatementTax.get(bsl.getCtx(), bsl.getC_BankStatementLine_ID());
+				if(bst!=null)
+				{
+					bst.deleteEx(false);
+				}
+				return null;
+			}
+			
 			MTax tax = new MTax(po.getCtx(), Integer.valueOf(C_Tax_ID.toString()).intValue(), po.get_TrxName());
 			if(tax.getC_TaxProvider_ID()==0){
 				return Msg.getMsg(bsl.getCtx(), "JP_SetTaxProvider");

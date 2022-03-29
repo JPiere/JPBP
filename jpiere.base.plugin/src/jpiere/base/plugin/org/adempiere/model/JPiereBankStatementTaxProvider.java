@@ -123,7 +123,7 @@ public class JPiereBankStatementTaxProvider {
 
 	private boolean calculateTaxFromBankStatementLine (MBankStatementLine line, MBankStatementTax m_bankStatementTax)
 	{
-		BigDecimal taxBaseAmt = line.getChargeAmt().abs();
+		BigDecimal taxBaseAmt = Env.ZERO;
 		BigDecimal taxAmt = Env.ZERO;
 
 		MTax tax = MTax.get(m_bankStatementTax.getCtx(), m_bankStatementTax.getC_Tax_ID());
@@ -137,11 +137,19 @@ public class JPiereBankStatementTaxProvider {
 				isSOTrx = true;
 			}
 			
+			taxBaseAmt = line.getChargeAmt().abs();
+			
 		}else {
 			
 			String JP_SOPOType = (String)obj_JP_SOPOType;
-			if(JP_SOPOType.equals("S")) {
+			if(JP_SOPOType.equals("S")) 
+			{
 				isSOTrx = true;
+				taxBaseAmt = line.getChargeAmt();				
+			}else {
+				
+				isSOTrx = false;
+				taxBaseAmt = line.getChargeAmt().negate();			
 			}
 		}
 		
