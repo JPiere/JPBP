@@ -129,9 +129,22 @@ public class JPiereBankStatementTaxProvider {
 		MTax tax = MTax.get(m_bankStatementTax.getCtx(), m_bankStatementTax.getC_Tax_ID());
 
 		boolean isSOTrx = false;
-		if(line.getChargeAmt().compareTo(Env.ZERO) > 0){
-			isSOTrx = true;
+		
+		Object obj_JP_SOPOType = line.get_Value("JP_SOPOType");
+		if(obj_JP_SOPOType == null)
+		{
+			if(line.getChargeAmt().compareTo(Env.ZERO) > 0){
+				isSOTrx = true;
+			}
+			
+		}else {
+			
+			String JP_SOPOType = (String)obj_JP_SOPOType;
+			if(JP_SOPOType.equals("S")) {
+				isSOTrx = true;
+			}
 		}
+		
 		m_bankStatementTax.setIsSOTrx(isSOTrx);
 
 		RoundingMode roundingMode = JPiereBankStatementTaxProvider.getRoundingMode(line.getC_BPartner_ID(), isSOTrx, tax.getC_TaxProvider());
