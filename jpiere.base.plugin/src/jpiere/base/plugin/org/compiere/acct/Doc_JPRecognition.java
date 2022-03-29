@@ -446,12 +446,23 @@ public class Doc_JPRecognition extends Doc
 					//DR
 					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
 					if (taxLineDR != null)
+					{
 						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineDR.set_ValueNoCheck("JP_SOPOType", "S");
+						taxLineDR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
+						taxLineDR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
+					}
 
 					//CR
 					FactLine taxLineCR = fact.createLine(null, recognitionTaxDueAccount, getC_Currency_ID(), null, amt);
 					if (taxLineCR != null)
+					{
 						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineCR.set_ValueNoCheck("JP_SOPOType", "S");
+						taxLineCR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
+						taxLineCR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
+					}
+					
 				}
 			}
 		}//for
@@ -494,13 +505,24 @@ public class Doc_JPRecognition extends Doc
 
 			//DR - Invoice Revenue Acct
 			dr = fact.createLine (line, getInvoiceRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-			if(dr != null)
+			if(dr != null && line.getPO().get_Value("JP_TaxBaseAmt") != null)
+			{
 				dr.setQty(line.getQty().negate());
+				dr.setC_Tax_ID(p_lines[i].getC_Tax_ID());
+				dr.set_ValueNoCheck("JP_SOPOType", "S");
+				dr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
+				dr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
+			}
 
 			//CR - Recognition Revenue Acct
 			cr = fact.createLine (line, getRecognitionRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 			if(cr != null)
+			{
 				cr.setQty(line.getQty());
+				cr.set_ValueNoCheck("JP_SOPOType", "S");
+				cr.set_ValueNoCheck("JP_TaxBaseAmt", line.getPO().get_Value("JP_TaxBaseAmt"));
+				cr.set_ValueNoCheck("JP_TaxAmt", line.getPO().get_Value("JP_TaxAmt"));
+			}
 
 
 			/*** COGS ***/
@@ -778,12 +800,23 @@ public class Doc_JPRecognition extends Doc
 					//DR -> CR
 					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
 					if (taxLineDR != null)
+					{
 						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineDR.set_ValueNoCheck("JP_SOPOType", "S");
+						taxLineDR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
+						taxLineDR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
+					}
 
 					//CR -> DR
 					FactLine taxLineCR = fact.createLine(null, recognitionTaxDueAccount, getC_Currency_ID(), amt, null);
 					if (taxLineCR != null)
+					{
 						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineCR.set_ValueNoCheck("JP_SOPOType", "S");
+						taxLineCR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
+						taxLineCR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
+					}
 				}
 			}
 		}//for
@@ -824,10 +857,16 @@ public class Doc_JPRecognition extends Doc
 			//DR - Invoice Revenue Acct -> CR
 			dr = fact.createLine (line, getInvoiceRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 			dr.setQty(line.getQty().negate());
+			dr.set_ValueNoCheck("JP_SOPOType", "S");
+			dr.set_ValueNoCheck("JP_TaxBaseAmt", line.getPO().get_Value("JP_TaxBaseAmt"));
+			dr.set_ValueNoCheck("JP_TaxAmt", line.getPO().get_Value("JP_TaxAmt"));
 
 			//CR - Recognition Revenue Acct -> DR
 			cr = fact.createLine (line, getRecognitionRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
 			cr.setQty(line.getQty());
+			cr.set_ValueNoCheck("JP_SOPOType", "S");
+			cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
+			cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
 
 
 			/***COGS***/
@@ -1086,14 +1125,24 @@ public class Doc_JPRecognition extends Doc
 				if(recognitionTaxCreditAccount != null)
 				{
 					//CR
-					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
-					if (taxLineDR != null)
-						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+					FactLine taxLineCR = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
+					if (taxLineCR != null)
+					{
+						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineCR.set_ValueNoCheck("JP_SOPOType", "P");
+						taxLineCR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
+						taxLineCR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
+					}
 
 					//DR
-					FactLine taxLineCR = fact.createLine(null, getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
-					if (taxLineCR != null)
-						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+					FactLine taxLineDR = fact.createLine(null, getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
+					if (taxLineDR != null)
+					{
+						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineDR.set_ValueNoCheck("JP_SOPOType", "P");
+						taxLineDR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
+						taxLineDR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
+					}
 				}
 			}
 		}//for
@@ -1139,20 +1188,26 @@ public class Doc_JPRecognition extends Doc
 			if(account != null)
 			{
 				//CR - Invoice Expense Acct
-				dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
-				if(dr != null)
+				cr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
+				if(cr != null)
 				{
-					dr.setQty(line.getQty().negate());
+					cr.setQty(line.getQty().negate());
+					cr.set_ValueNoCheck("JP_SOPOType", "P");
+					cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
+					cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
 				}
 
 				//DR - Recognition Expense Acct
-				cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-				if(cr != null)
+				dr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
+				if(dr != null)
 				{
-					cr.setQty(line.getQty());
-
-					cr.setM_Locator_ID(line.getM_Locator_ID());
-					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+					dr.setQty(line.getQty());
+					dr.set_ValueNoCheck("JP_SOPOType", "P");
+					dr.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
+					dr.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));
+					
+					dr.setM_Locator_ID(line.getM_Locator_ID());
+					dr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
 				}
 			}
 
@@ -1188,15 +1243,25 @@ public class Doc_JPRecognition extends Doc
 				MAccount recognitionTaxCreditAccount = getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as);
 				if(recognitionTaxCreditAccount != null)
 				{
-					//CR
+					//DR
 					FactLine taxLineDR = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
 					if (taxLineDR != null)
+					{
 						taxLineDR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineDR.set_ValueNoCheck("JP_SOPOType", "P");
+						taxLineDR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
+						taxLineDR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
+					}
 
-					//DR
+					//CR
 					FactLine taxLineCR = fact.createLine(null, getRecognitionTaxCreditAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
 					if (taxLineCR != null)
+					{
 						taxLineCR.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+						taxLineCR.set_ValueNoCheck("JP_SOPOType", "P");
+						taxLineCR.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
+						taxLineCR.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
+					}
 				}
 			}
 		}//for
@@ -1247,6 +1312,9 @@ public class Doc_JPRecognition extends Doc
 				if(dr != null)
 				{
 					dr.setQty(line.getQty().negate());
+					dr.set_ValueNoCheck("JP_SOPOType", "P");
+					dr.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
+					dr.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));
 				}
 
 				//DR - Recognition Expense Acct -> CR
@@ -1254,6 +1322,9 @@ public class Doc_JPRecognition extends Doc
 				if(cr != null)
 				{
 					cr.setQty(line.getQty());
+					cr.set_ValueNoCheck("JP_SOPOType", "P");
+					cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt")).negate());
+					cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxAmt")).negate());
 
 					cr.setM_Locator_ID(line.getM_Locator_ID());
 					cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
