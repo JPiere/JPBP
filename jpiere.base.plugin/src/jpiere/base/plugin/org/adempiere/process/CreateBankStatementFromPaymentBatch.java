@@ -73,8 +73,6 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 		if(p_StatementDate == null)
 			return Msg.getMsg(getCtx(), "FillMandatory")+ " : " + Msg.getElement(getCtx(), "StatementDate");
 		
-		
-
 		MPaymentBatch paymentBatch = new MPaymentBatch( getCtx(), C_PaymentBatch_ID, get_TrxName() );
 		if(paymentBatch.get_ColumnIndex("JP_BankStatement_ID") != -1)
 		{
@@ -88,7 +86,7 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		StringBuilder sql = new StringBuilder("SELECT p.C_Payment_ID, p.C_BankAccount_ID, p.PayAmt")
+		StringBuilder sql = new StringBuilder("SELECT p.* ")
 		                        		.append(" FROM C_Payment p")
 		                                .append(" WHERE p.C_PaymentBatch_ID = ? AND p.IsReconciled = 'N' ")
 		                        		.append(" ORDER BY p.DocumentNo")
@@ -97,54 +95,60 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 		try
 		{
 			boolean isHeaderExists = false;
-			int C_BankAccount_ID = 0;
-			MBankStatement bankStatement = null;
+			MBankStatement m_bankStatement = null;
+			MPayment m_Payment = null;
 
 			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
 			pstmt.setInt(1, C_PaymentBatch_ID);
-			rs = pstmt.executeQuery();
-
-			
+			rs = pstmt.executeQuery();			
 			
 			while( rs.next())
 			{
-				if(rs.getBigDecimal(3).compareTo(Env.ZERO) == 0)
+				m_Payment = new MPayment(getCtx(), rs, get_TrxName());
+				if(m_Payment.getPayAmt().equals(Env.ZERO) 
+						|| (!m_Payment.getDocStatus().equals(DocAction.STATUS_Completed) && !m_Payment.getDocStatus().equals(DocAction.STATUS_Closed))
+						|| m_Payment.isReconciled() )
+				{
 					continue;
+				}
 				
 				if(!isHeaderExists)
 				{
-					C_BankAccount_ID = rs.getInt(2);
-					bankStatement = new MBankStatement( getCtx(), 0, get_TrxName() );
+					m_bankStatement = new MBankStatement( getCtx(), 0, get_TrxName() );
+					MBankAccount bankAccount = MBankAccount.get(getCtx(),  m_Payment.getC_BankAccount_ID());
+					m_bankStatement.setC_BankAccount_ID(bankAccount.getC_BankAccount_ID());
+					m_bankStatement.setBeginningBalance(bankAccount.getCurrentBalance());
 
-					MBankAccount bankAccount = MBankAccount.get(getCtx(), C_BankAccount_ID);
-					bankStatement.setC_BankAccount_ID(bankAccount.getC_BankAccount_ID());
-					bankStatement.setBeginningBalance(bankAccount.getCurrentBalance());
+					m_bankStatement.setAD_Org_ID(paymentBatch.getAD_Org_ID());
+					m_bankStatement.setDocAction(DocAction.ACTION_Complete);
+					m_bankStatement.setDocStatus(DocAction.STATUS_Drafted);
+					m_bankStatement.setStatementDate(p_StatementDate);
+					m_bankStatement.setDateAcct(p_StatementDate);
+					m_bankStatement.setName(Msg.getElement(getCtx(), "C_PaymentBatch_ID") + " : " + paymentBatch.getDocumentNo());
+					m_bankStatement.setIsManual(false);
 
-					bankStatement.setAD_Org_ID(paymentBatch.getAD_Org_ID());
-					bankStatement.setDocAction(DocAction.ACTION_Complete);
-					bankStatement.setDocStatus(DocAction.STATUS_Drafted);
-					bankStatement.setStatementDate(p_StatementDate);
-					bankStatement.setDateAcct(p_StatementDate);
-					bankStatement.setName(Msg.getElement(getCtx(), "C_PaymentBatch_ID") + " : " + paymentBatch.getDocumentNo());
-					bankStatement.setIsManual(false);
-
-					bankStatement.saveEx(get_TrxName());
+					m_bankStatement.saveEx(get_TrxName());
 
 					isHeaderExists = true;
+					
 				}else{
 					
-					if( C_BankAccount_ID != rs.getInt(2) )
+					if( m_bankStatement.getC_BankAccount_ID() != m_Payment.getC_BankAccount_ID())
 					{
-						log.log(Level.SEVERE, "Illigal Bank Account : " + rs.getInt(2) );
+						//Different between {0} and {1}
+						String msg0 = Msg.getElement(Env.getCtx(), MBankStatement.COLUMNNAME_C_BankStatement_ID) +" - " + Msg.getElement(Env.getCtx(), MBankStatement.COLUMNNAME_C_BankAccount_ID);
+						String msg1 = Msg.getElement(Env.getCtx(), MPayment.COLUMNNAME_C_Payment_ID, paymentBatch.get_ValueAsBoolean("IsReceiptJP")) +" - " + Msg.getElement(Env.getCtx(),  MPayment.COLUMNNAME_C_BankAccount_ID);
+						String msg = Msg.getMsg(Env.getCtx(),"JP_Different",new Object[]{msg0,msg1});
+						
+						log.log(Level.SEVERE, msg );
+						addBufferLog(0, null, null, m_Payment.getDocumentNo() + " " + msg, MPayment.Table_ID, m_Payment.getC_Payment_ID());
 						continue;
 					}
 				}
 
-				MPayment payment = new MPayment( getCtx(), rs.getInt(1), get_TrxName() );
-				MBankStatementLine bankStatementLine = new MBankStatementLine( bankStatement );
+				MBankStatementLine bankStatementLine = new MBankStatementLine( m_bankStatement );
 				bankStatementLine.setStatementLineDate(p_StatementDate);
-				bankStatementLine.setPayment(payment);
-
+				bankStatementLine.setPayment(m_Payment);
 				bankStatementLine.saveEx(get_TrxName());
 
 				count++;
@@ -156,17 +160,18 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 				return Msg.getMsg(getCtx(), "JP_NoPaymentNeedToWriteBS");//There is no Payment that is need to write into Bank Statement
 			
 			}else{
-				bankStatement.processIt(p_DocAction);
-				bankStatement.saveEx(get_TrxName());
+				m_bankStatement.processIt(p_DocAction);
+				m_bankStatement.saveEx(get_TrxName());
 			}
 
-			addBufferLog(0, null, null, bankStatement.getDocumentInfo(), bankStatement.get_Table_ID(), bankStatement.getC_BankStatement_ID());
+			addBufferLog(0, null, null, m_bankStatement.getDocumentInfo(), m_bankStatement.get_Table_ID(), m_bankStatement.getC_BankStatement_ID());
 			if(paymentBatch.get_ColumnIndex("JP_BankStatement_ID") != -1)
 			{
-				paymentBatch.set_ValueNoCheck("JP_BankStatement_ID", bankStatement.getC_BankStatement_ID());
-				paymentBatch.saveEx(get_TrxName());
+				paymentBatch.set_ValueNoCheck("JP_BankStatement_ID", m_bankStatement.getC_BankStatement_ID());
 			}
 			
+			paymentBatch.setProcessed(true);
+			paymentBatch.saveEx(get_TrxName());
 			
 		}catch(Exception e){
 			
