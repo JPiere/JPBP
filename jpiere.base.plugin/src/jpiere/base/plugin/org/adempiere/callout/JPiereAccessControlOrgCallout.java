@@ -21,7 +21,7 @@ import org.compiere.model.GridTab;
 
 /**
  * 
- * Set Default Value to AD_Org_ID for Access Controle
+ * Set Default Value to AD_Org_ID for Access Control
  * 
  * JPIERE-0546: Access Update of User Organization.
  * JPIERE-0547: Access Update of Role Organization.
@@ -33,7 +33,7 @@ import org.compiere.model.GridTab;
  * @author Hideaki Hagiwara
  *
  */
-public class JPiereAccessControleOrgCallout implements IColumnCallout {
+public class JPiereAccessControlOrgCallout implements IColumnCallout {
 
 	
 	@Override

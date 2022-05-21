@@ -33,7 +33,7 @@ import org.compiere.model.MRoleOrgAccess;
 import org.compiere.model.MUserOrgAccess;
 import org.compiere.model.MUserRoles;
 
-import jpiere.base.plugin.org.adempiere.callout.JPiereAccessControleOrgCallout;
+import jpiere.base.plugin.org.adempiere.callout.JPiereAccessControlOrgCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankDataCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
@@ -334,7 +334,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				
 				if(columnName.equals("AD_Org_ID")) { 
 
-					list.add(new JPiereAccessControleOrgCallout());	//JPIERE-0549
+					list.add(new JPiereAccessControlOrgCallout());	//JPIERE-0549
 				}
 			}
 		}
