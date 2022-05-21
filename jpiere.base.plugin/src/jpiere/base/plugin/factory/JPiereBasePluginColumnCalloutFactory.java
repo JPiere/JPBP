@@ -29,7 +29,11 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPayment;
 import org.compiere.model.MProductionLineMA;
+import org.compiere.model.MRoleOrgAccess;
+import org.compiere.model.MUserOrgAccess;
+import org.compiere.model.MUserRoles;
 
+import jpiere.base.plugin.org.adempiere.callout.JPiereAccessControleOrgCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankAcountCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBankDataCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereBillAmountCallout;
@@ -322,6 +326,15 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				}else if (columnName.equals("C_OrderLine_ID")) { //JPIERE-0381
 
 					list.add(new JPiereInvoiceLineCallout());
+				}
+				
+			}else if(tableName.equals(MUserOrgAccess.Table_Name) 	//JPIERE-0546
+					|| tableName.equals(MRoleOrgAccess.Table_Name)  //JPIERE-0547
+					|| tableName.equals(MUserRoles.Table_Name)){	//JPIERE-0548
+				
+				if(columnName.equals("AD_Org_ID")) { 
+
+					list.add(new JPiereAccessControleOrgCallout());	//JPIERE-0549
 				}
 			}
 		}
