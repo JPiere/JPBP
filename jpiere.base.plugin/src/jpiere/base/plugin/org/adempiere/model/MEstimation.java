@@ -763,6 +763,12 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 				}
 			}
 		}
+		
+		if(newRecord || is_ValueChanged(MEstimation.COLUMNNAME_M_PriceList_ID))
+		{
+			setM_PriceList_ID(getM_PriceList_ID());
+		}
+		
 
 		return true;
 	}
@@ -963,5 +969,20 @@ public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 		return "";
 
 	}
+	
+	/**
+	 * 	Set Price List (and Currency) when valid
+	 * 	@param M_PriceList_ID price list
+	 */
+	@Override
+	public void setM_PriceList_ID (int M_PriceList_ID)
+	{
+		MPriceList pl = MPriceList.get(getCtx(), M_PriceList_ID, null);
+		if (pl != null) {
+			setC_Currency_ID(pl.getC_Currency_ID());
+			setIsTaxIncluded(pl.isTaxIncluded());
+			super.setM_PriceList_ID(M_PriceList_ID);
+		}
+	}	//	setM_PriceList_ID
 
 }	//MEstimation

@@ -897,6 +897,11 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			}
 		}
 
+		if(newRecord || is_ValueChanged(MRecognition.COLUMNNAME_M_PriceList_ID))
+		{
+			setM_PriceList_ID(getM_PriceList_ID());
+		}
+		
 		//	Currency
 		if (getC_Currency_ID() == 0)
 		{
@@ -1034,6 +1039,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		MPriceList pl = MPriceList.get(getCtx(), M_PriceList_ID, null);
 		if (pl != null) {
 			setC_Currency_ID(pl.getC_Currency_ID());
+			setIsTaxIncluded(pl.isTaxIncluded());
 			super.setM_PriceList_ID(M_PriceList_ID);
 		}
 	}	//	setM_PriceList_ID

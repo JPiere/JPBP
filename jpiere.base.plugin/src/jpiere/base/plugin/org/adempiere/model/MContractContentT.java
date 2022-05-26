@@ -402,8 +402,7 @@ public class MContractContentT extends X_JP_ContractContentT {
 		{
 			if(getM_PriceList_ID() > 0)
 			{
-				MPriceList  priceList = MPriceList.get(getCtx(), getM_PriceList_ID(), get_TrxName());
-				setIsTaxIncluded(priceList.isTaxIncluded());
+				setM_PriceList_ID(getM_PriceList_ID());				
 			}else{
 				setIsTaxIncluded(false);
 			}
@@ -505,5 +504,20 @@ public class MContractContentT extends X_JP_ContractContentT {
 	{
 		return MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
 	}
+	
+	/**
+	 * 	Set Price List (and Currency) when valid
+	 * 	@param M_PriceList_ID price list
+	 */
+	@Override
+	public void setM_PriceList_ID (int M_PriceList_ID)
+	{
+		MPriceList pl = MPriceList.get(getCtx(), M_PriceList_ID, null);
+		if (pl != null) {
+			setC_Currency_ID(pl.getC_Currency_ID());
+			setIsTaxIncluded(pl.isTaxIncluded());
+			super.setM_PriceList_ID(M_PriceList_ID);
+		}
+	}	//	setM_PriceList_ID
 
 }
