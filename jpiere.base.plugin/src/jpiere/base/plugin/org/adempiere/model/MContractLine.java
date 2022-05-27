@@ -27,6 +27,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrderLine;
@@ -310,11 +311,18 @@ public class MContractLine extends X_JP_ContractLine {
 				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit());
 				return false;
 			}
-			//
-			if (!m_productPrice.isCalculated())
+		
+			if(newRecord || is_ValueChanged(COLUMNNAME_M_Product_ID))
 			{
-				throw new ProductNotOnPriceListException(m_productPrice, getLine());
+				int C_DocType_ID = getParent().getC_DocType_ID();
+				MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
+				//
+				if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
+				{
+					throw new ProductNotOnPriceListException(m_productPrice, getLine());
+				}
 			}
+							
 		}
 
 		//JPIERE-0408:Check Counter Contract Info

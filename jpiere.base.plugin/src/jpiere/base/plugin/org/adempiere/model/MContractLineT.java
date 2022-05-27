@@ -271,9 +271,26 @@ public class MContractLineT extends X_JP_ContractLineT {
 			}
 
 
-			if (!m_productPrice.isCalculated())
+			if(getParent() != null)
 			{
-				throw new ProductNotOnPriceListException(m_productPrice, getLine());
+				if(newRecord || is_ValueChanged(COLUMNNAME_M_Product_ID))
+				{
+					int C_DocType_ID = getParent().getC_DocType_ID();
+					MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
+					//
+					if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
+					{
+						throw new ProductNotOnPriceListException(m_productPrice, getLine());
+					}
+				}
+				
+			}else {
+				
+				if (!m_productPrice.isCalculated())
+				{
+					throw new ProductNotOnPriceListException(m_productPrice, getLine());
+				}
+				
 			}
 		}
 

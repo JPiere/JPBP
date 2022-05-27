@@ -127,10 +127,15 @@ public class MEstimationLine extends X_JP_EstimationLine {
 				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit());
 				return false;
 			}
-			//
-			if (!m_productPrice.isCalculated())
+			
+			if(newRecord || is_ValueChanged(COLUMNNAME_M_Product_ID))
 			{
-				throw new ProductNotOnPriceListException(m_productPrice, getLine());
+				int C_DocType_ID = getParent().getC_DocTypeTarget_ID();
+				MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
+				if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
+				{
+					throw new ProductNotOnPriceListException(m_productPrice, getLine());
+				}
 			}
 		}
 
