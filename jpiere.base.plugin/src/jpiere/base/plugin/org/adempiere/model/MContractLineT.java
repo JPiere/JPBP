@@ -270,29 +270,34 @@ public class MContractLineT extends X_JP_ContractLineT {
 				return false;
 			}
 
-
-			if(getParent() != null)
+			if(newRecord || is_ValueChanged(COLUMNNAME_M_Product_ID))
 			{
-				if(newRecord || is_ValueChanged(COLUMNNAME_M_Product_ID))
+				if(getParent() != null)
 				{
-					int C_DocType_ID = getParent().getC_DocType_ID();
-					MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
-					//
-					if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
+					String docBasaeTpye = getParent().getDocBaseType();
+					if(docBasaeTpye.equals(MDocType.DOCBASETYPE_SalesOrder) || docBasaeTpye.equals(MDocType.DOCBASETYPE_PurchaseOrder))
 					{
-						throw new ProductNotOnPriceListException(m_productPrice, getLine());
+						int C_DocType_ID = getParent().getJP_BaseDocDocType_ID();
+						MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
+						if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
+						{
+							throw new ProductNotOnPriceListException(m_productPrice, getLine());
+						}
+					}
+						
+				}else {
+					
+					String docBasaeTpye = getDocBaseType();
+					if(docBasaeTpye != null && (docBasaeTpye.equals(MDocType.DOCBASETYPE_SalesOrder) || docBasaeTpye.equals(MDocType.DOCBASETYPE_PurchaseOrder)) )
+					{
+						if (!m_productPrice.isCalculated())
+						{
+							throw new ProductNotOnPriceListException(m_productPrice, getLine());
+						}
 					}
 				}
-				
-			}else {
-				
-				if (!m_productPrice.isCalculated())
-				{
-					throw new ProductNotOnPriceListException(m_productPrice, getLine());
-				}
-				
-			}
-		}
+			}//if(newRecord || is_ValueChanged(COLUMNNAME_M_Product_ID))
+		}//if (getM_Product_ID() > 0)
 
 		return true;
 
@@ -370,7 +375,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 	{
 		//	Calculations & Rounding
 		BigDecimal bd = getPriceActual().multiply(getQtyOrdered());
-		int precision = Integer.valueOf(getParent().getPrecision());
+		int precision = Integer.valueOf(getParent() == null? MCurrency.get(getC_Currency_ID()).getStdPrecision():getParent().getPrecision());
 		if (bd.scale() > precision)
 			bd = bd.setScale(precision, RoundingMode.HALF_UP);
 		super.setLineNetAmt (bd);
@@ -379,7 +384,7 @@ public class MContractLineT extends X_JP_ContractLineT {
 	protected MProductPricing getProductPricing (int M_PriceList_ID)
 	{
 		m_productPrice = new MProductPricing (getM_Product_ID(),
-			getC_BPartner_ID(), getQtyOrdered(), getParent().isSOTrx(), get_TrxName());
+			getC_BPartner_ID(), getQtyOrdered(), getParent() == null ? isSOTrx():getParent().isSOTrx(), get_TrxName());
 		m_productPrice.setM_PriceList_ID(M_PriceList_ID);
 //		m_productPrice.setPriceDate(getDateOrdered());
 		//

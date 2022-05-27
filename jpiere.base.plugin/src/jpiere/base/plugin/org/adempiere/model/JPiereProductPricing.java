@@ -866,6 +866,9 @@ public class JPiereProductPricing extends MProductPricing
 	public void setM_PriceList_ID( int M_PriceList_ID)
 	{
 		super.setM_PriceList_ID(M_PriceList_ID);
+		MPriceList pl = MPriceList.get(M_PriceList_ID);
+		m_C_Currency_ID = pl.getC_Currency_ID();
+		m_isTaxIncluded = pl.isTaxIncluded();
 		m_calculated = false;
 	}	//	setM_PriceList_ID
 

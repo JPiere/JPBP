@@ -314,15 +314,17 @@ public class MContractLine extends X_JP_ContractLine {
 		
 			if(newRecord || is_ValueChanged(COLUMNNAME_M_Product_ID))
 			{
-				int C_DocType_ID = getParent().getC_DocType_ID();
-				MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
-				//
-				if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
+				String docBasaeTpye = getParent().getDocBaseType();
+				if(docBasaeTpye.equals(MDocType.DOCBASETYPE_SalesOrder) || docBasaeTpye.equals(MDocType.DOCBASETYPE_PurchaseOrder))
 				{
-					throw new ProductNotOnPriceListException(m_productPrice, getLine());
+					int C_DocType_ID = getParent().getJP_BaseDocDocType_ID();
+					MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
+					if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
+					{
+						throw new ProductNotOnPriceListException(m_productPrice, getLine());
+					}
 				}
-			}
-							
+			}			
 		}
 
 		//JPIERE-0408:Check Counter Contract Info
