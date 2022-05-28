@@ -79,6 +79,8 @@ public class CreateContractProcessPeriod extends SvrProcess {
 	private boolean p_IsUseInvoiceCalendar = false;
 
 	private boolean p_IsCreateContractCalendar = false;
+	
+	private boolean p_IsCreateOnlyOneCProcPeriodJP = false;
 
 	@Override
 	protected void prepare()
@@ -131,6 +133,8 @@ public class CreateContractProcessPeriod extends SvrProcess {
 				p_IsSetAnotherLine = para[i].getParameterAsBoolean();
 			}else if (name.equals("IsUseInvoiceCalendar")){
 				p_IsUseInvoiceCalendar = para[i].getParameterAsBoolean();
+			}else if (name.equals("IsCreateOnlyOneCProcPeriodJP")){
+				p_IsCreateOnlyOneCProcPeriodJP = para[i].getParameterAsBoolean();
 			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}
@@ -222,7 +226,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 		if(m_ContractProcPeriodG == null)
 			m_ContractProcPeriodG = new MContractProcPeriodG(getCtx(), p_JP_ContractProcPeriodG_ID, get_TrxName());
 
-		if(p_Year == 0 &&  p_Month == 0 && p_Day == 0)
+		if(!p_IsCreateOnlyOneCProcPeriodJP && p_Year == 0 &&  p_Month == 0 && p_Day == 0)
 		{
 			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_ContractProcPeriod_ID"));
 		}
@@ -250,7 +254,14 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			return Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "DateContract");
 
 		LocalDateTime startDate= p_DateContract_From.toLocalDateTime();
-		LocalDateTime endDate= startDate.plusYears(p_Year).plusMonths(p_Month).plusDays(p_Day).minusDays(1);
+		LocalDateTime endDate = null;
+		if(p_IsCreateOnlyOneCProcPeriodJP)
+		{
+			endDate = dateContract_To.plusDays(1);//+1 Day is to be only One Time Do-While loop
+		}else {
+			endDate= startDate.plusYears(p_Year).plusMonths(p_Month).plusDays(p_Day).minusDays(1);
+		}
+		
 		LocalDateTime docDate = null;
 
 		boolean isBreak = false;
