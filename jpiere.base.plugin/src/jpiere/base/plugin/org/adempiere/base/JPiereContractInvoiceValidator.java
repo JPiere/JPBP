@@ -1072,7 +1072,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		MInvoiceLine[] iLines = m_Invoice.getLines();
 		MAccount m_AccountReverse = null;
 		MAccount m_AccountTransfer = null;
-		int lineNo = 0;
+		int lineNo = 1;
 		for(MInvoiceLine iLine : iLines)
 		{
 			for(FactLine factLine : factLines)
