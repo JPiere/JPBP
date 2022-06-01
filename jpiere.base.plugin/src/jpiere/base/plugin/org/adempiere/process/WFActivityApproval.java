@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.logging.Level;
 
+import org.compiere.model.MRefList;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
@@ -26,6 +27,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFProcess;
@@ -41,6 +43,7 @@ public class WFActivityApproval extends SvrProcess {
 
 	private String p_JP_IsApproval = "N";
 	private String p_Comments = null;
+	private Timestamp starTime = Timestamp.valueOf(LocalDateTime.now());
 
 	@Override
 	protected void prepare()
@@ -63,7 +66,6 @@ public class WFActivityApproval extends SvrProcess {
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}//if
 		}//for
-
 	}
 
 	@Override
@@ -97,7 +99,7 @@ public class WFActivityApproval extends SvrProcess {
 			}
 
 			node = m_activity.getNode();
-
+			MWFProcess wfpr = null;
 			if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
 			{
 				try
@@ -106,7 +108,7 @@ public class WFActivityApproval extends SvrProcess {
 					m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
 					if(!p_JP_IsApproval.equals("Y"))
 					{
-						MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+						wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
 						wfpr.setWFState(MWFProcess.WFSTATE_Aborted);
 						wfpr.save(get_TrxName());
 
@@ -116,7 +118,7 @@ public class WFActivityApproval extends SvrProcess {
 						String docStatus = ((DocAction)m_PO).getDocStatus();
 						if(DocAction.STATUS_Completed.equals(docStatus))
 						{
-							MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+							wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
 							wfpr.checkCloseActivities(get_TrxName());
 						}
 					}
@@ -133,7 +135,7 @@ public class WFActivityApproval extends SvrProcess {
 				{
 					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 					m_activity.setUserConfirmation(Env.getAD_User_ID(getCtx()), p_Comments);
-					MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+					wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
 					wfpr.checkCloseActivities(get_TrxName());
 
 				}catch (Exception e){
@@ -143,6 +145,24 @@ public class WFActivityApproval extends SvrProcess {
 				}
 			}
 
+			if(wfpr == null)
+				wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+			
+			MWFActivity[] activities = wfpr.getActivities (true, false, get_TrxName());
+			for (int i = 0; i < activities.length; i++)
+			{
+				if(MWFActivity.WFSTATE_Terminated.equals(activities[i].getWFState()))
+				{
+					if(activities[i].getUpdated().compareTo(starTime) > 0)
+					{
+						throw new Exception(msg + " - [ " + 
+									Msg.getElement(getCtx(), MWFActivity.COLUMNNAME_AD_WF_Node_ID)+ " : " + activities[i].getNode().getName()
+									+ " - " + MRefList.getListName(getCtx(), 305, MWFActivity.WFSTATE_Terminated)
+									+ " ] - " + wfpr.getTextMsg());
+					}
+				}
+			}//for i
+			
 			addBufferLog(0, null, null, msg, m_activity.getAD_Table_ID(), m_activity.getRecord_ID());
 
 		}//for
