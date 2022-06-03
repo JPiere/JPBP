@@ -28,6 +28,7 @@ import org.compiere.acct.DocLine_Allocation;
 import org.compiere.acct.DocManager;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
+import org.compiere.model.I_C_AllocationLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAcctSchemaElement;
@@ -42,6 +43,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MRMA;
+import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -66,8 +68,10 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
  *  @author phib
  *  BF [ 2019262 ] Allocation posting currency gain/loss omits line reference
  *
- *  JPIERE-0363
- *  JPIERE-0026
+ *  JPIERE-0052 - JPiere original Doc_AcclocationHdr
+ *  
+ *  ref: JPIERE-0363
+ *  ref: JPIERE-0026
  *
  */
 public class Doc_AllocationHdrJP extends Doc
@@ -278,7 +282,8 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), line.getAmtSource(), null);
 					if (fl != null && payment != null) {
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
-					allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance());
+						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+						allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance());
 					}
 				}
 				else
@@ -321,6 +326,7 @@ public class Doc_AllocationHdrJP extends Doc
 							getC_Currency_ID(), line.getAmtSource(), null);
 						if (fl != null && payment != null) {
 							fl.setAD_Org_ID(payment.getAD_Org_ID());
+							fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
 							if (payment.getReversal_ID() > 0 )
 								allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
 							else
@@ -345,7 +351,10 @@ public class Doc_AllocationHdrJP extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_DiscountExp, as),
 						getC_Currency_ID(), line.getDiscountAmt(), null);
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+					}
 				}
 				//	Write off		DR
 				if (Env.ZERO.compareTo(line.getWriteOffAmt()) != 0)
@@ -353,7 +362,10 @@ public class Doc_AllocationHdrJP extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_WriteOff, as),
 						getC_Currency_ID(), line.getWriteOffAmt(), null);
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+					}
 				}
 
 				//	AR Invoice Amount	CR
@@ -366,6 +378,7 @@ public class Doc_AllocationHdrJP extends Doc
 						allocationAccounted = fl.getAcctBalance().negate();
 					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#reateFacts() by Hideaki hagiwara
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
+						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
 					}													//JPiere-0026 Finish
 					if(JP_ContractContent_ID > 0)
@@ -424,6 +437,7 @@ public class Doc_AllocationHdrJP extends Doc
 						allocationAccounted = fl.getAcctBalance();
 					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#reateFacts() by Hideaki hagiwara
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
+						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());		//JPIERE-0052
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
 					}														//JPiere-0026 Finish
 					if(JP_ContractContent_ID > 0)
@@ -449,7 +463,10 @@ public class Doc_AllocationHdrJP extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_DiscountRev, as),
 						getC_Currency_ID(), null, line.getDiscountAmt().negate());
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+					}
 				}
 				//	Write off		CR
 				if (Env.ZERO.compareTo(line.getWriteOffAmt()) != 0)
@@ -457,7 +474,10 @@ public class Doc_AllocationHdrJP extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_WriteOff, as),
 						getC_Currency_ID(), null, line.getWriteOffAmt().negate());
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+					}
 				}
 				//	Payment/Cash	CR
 				if (isUsingClearing && line.getC_Payment_ID() != 0) // Avoid usage of clearing accounts
@@ -465,7 +485,10 @@ public class Doc_AllocationHdrJP extends Doc
 					fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 						getC_Currency_ID(), null, line.getAmtSource().negate());
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+					}
 					if (fl != null)
 						allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
 				}
@@ -965,18 +988,43 @@ public class Doc_AllocationHdrJP extends Doc
 				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() >= 0 && invoice.isCreditMemo())
 				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() < 0 && !invoice.isCreditMemo()))
 		{
-				FactLine fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference);
+			FactLine fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference);
 			fl.setDescription(description.toString());
+			PO po = line.getPO();
+			if(po instanceof I_C_AllocationLine)//JPIERE-0052
+			{
+				I_C_AllocationLine aLine = (I_C_AllocationLine)po;
+				if(aLine.getC_Payment_ID() != 0)
+				{
+					MPayment payment = new MPayment(Env.getCtx(),aLine.getC_Payment_ID(), null);
+					fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());
+				}
+			}
 			invGainLossFactLines.add(fl);
 			fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 			fl.setDescription(description.toString());
+			fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
+			fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
+			
 		}
 		else
 		{
 			FactLine fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference);
 			fl.setDescription(description.toString());
+			fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
+			fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
 			fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
-				fl.setDescription(description.toString());
+			fl.setDescription(description.toString());
+			PO po = line.getPO();
+			if(po instanceof I_C_AllocationLine)//JPIERE-0052
+			{
+				I_C_AllocationLine aLine = (I_C_AllocationLine)po;
+				if(aLine.getC_Payment_ID() != 0)
+				{
+					MPayment payment = new MPayment(Env.getCtx(),aLine.getC_Payment_ID(), null);
+					fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());
+				}
+			}
 			invGainLossFactLines.add(fl);
 		}
 		return null;
