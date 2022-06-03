@@ -78,7 +78,10 @@ import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
  */
 
 /**
-*  JPIERE-0363 : Contract Management
+*  
+*  JPIERE-0552: JPiere original Doc_MatchInv
+*  
+*  ref: JPIERE-0363 : Contract Management
 *
 * @author Hideaki Hagiwara
 *
@@ -483,7 +486,7 @@ public class Doc_MatchInvJP extends Doc
 					 m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					 as.getC_Currency_ID(), ipv);
 		}
-		updateFactLine(pv);
+		updateFactLineByReceiptLine(pv);//JPIERE-0552
 
 		MMatchInv matchInv = (MMatchInv)getPO();
 		Trx trx = Trx.get(getTrxName(), false);
@@ -526,20 +529,20 @@ public class Doc_MatchInvJP extends Doc
 			FactLine line = fact.createLine(null,
 					m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					as.getC_Currency_ID(), ipv.negate());
-			updateFactLine(line);
+			updateFactLineByReceiptLine(line);//JPIERE-0552
 			line.setQty(getQty().negate());
 
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
-			updateFactLine(line);
+			updateFactLineByReceiptLine(line);//JPIERE-0552
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
 			FactLine line = fact.createLine(null,
 					m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					as.getC_Currency_ID(), ipv.negate());
-			updateFactLine(line);
+			updateFactLineByReceiptLine(line);//JPIERE-0552
 			line.setQty(getQty().negate());
 
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
-			updateFactLine(line);
+			updateFactLineByReceiptLine(line);//JPIERE-0552
 		}
 	}
 
@@ -1278,6 +1281,28 @@ public class Doc_MatchInvJP extends Doc
 		factLine.setUser1_ID(m_invoiceLine.getUser1_ID());
 		factLine.setUser2_ID(m_invoiceLine.getUser2_ID());
 		factLine.setM_Product_ID(m_invoiceLine.getM_Product_ID());
+		factLine.setQty(getQty());
+	}
+	
+	/**
+	 * JPIERE-0552
+	 * 
+	 * for processInvoicePriceVariance 
+	 * 
+	 * @param factLine
+	 */
+	protected void updateFactLineByReceiptLine(FactLine factLine) {
+		factLine.setAD_Org_ID(m_receiptLine.getAD_Org_ID());
+		factLine.setAD_OrgTrx_ID(m_receiptLine.getAD_OrgTrx_ID());
+		factLine.setC_Activity_ID(m_receiptLine.getC_Activity_ID());
+		factLine.setC_Campaign_ID(m_receiptLine.getC_Campaign_ID());
+		factLine.setC_Project_ID(m_receiptLine.getC_Project_ID());
+		factLine.setC_ProjectPhase_ID(m_receiptLine.getC_ProjectPhase_ID());
+		factLine.setC_ProjectTask_ID(m_receiptLine.getC_ProjectTask_ID());
+		factLine.setC_UOM_ID(m_receiptLine.getC_UOM_ID());
+		factLine.setUser1_ID(m_receiptLine.getUser1_ID());
+		factLine.setUser2_ID(m_receiptLine.getUser2_ID());
+		factLine.setM_Product_ID(m_receiptLine.getM_Product_ID());
 		factLine.setQty(getQty());
 	}
 
