@@ -326,7 +326,7 @@ public class Doc_BankStatementJP extends Doc
 					
 					if(line.getPO().get_Value("JP_SOPOType") == null || line.getPO().get_ValueAsString("JP_SOPOType").equals("S"))
 					{
-						fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
+						fl = fact.createLine(line, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
 								getC_Currency_ID(), null,line.getDocTax().getAmount());
 						if(fl != null)
 						{
@@ -350,7 +350,7 @@ public class Doc_BankStatementJP extends Doc
 					}else {//ChargeAmt > 0 && JP_SOPOType == P
 						
 						boolean isSalesTax = MTax.get(line.getC_Tax_ID()).isSalesTax();
-						fl = fact.createLine(null, line.getDocTax().getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),
+						fl = fact.createLine(line, line.getDocTax().getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),
 								getC_Currency_ID(), null,line.getDocTax().getAmount().negate());
 						if(fl != null)
 						{
@@ -396,7 +396,7 @@ public class Doc_BankStatementJP extends Doc
 					if(line.getPO().get_Value("JP_SOPOType") == null || line.getPO().get_ValueAsString("JP_SOPOType").equals("P"))
 					{
 						boolean isSalesTax = MTax.get(line.getC_Tax_ID()).isSalesTax();
-						fl = fact.createLine(null, line.getDocTax().getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),
+						fl = fact.createLine(line, line.getDocTax().getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),
 								getC_Currency_ID(), line.getDocTax().getAmount(),  null);
 						if(fl != null)
 						{
@@ -418,7 +418,7 @@ public class Doc_BankStatementJP extends Doc
 						
 					}else {//ChargeAmt < 0 && JP_SOPOType == S
 
-						fl = fact.createLine(null, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
+						fl = fact.createLine(line, line.getDocTax().getAccount(DocTax.ACCTTYPE_TaxDue, as),
 								getC_Currency_ID(), line.getDocTax().getAmount().negate(),  null);
 						if(fl != null)
 						{
