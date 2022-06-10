@@ -903,6 +903,10 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
 		BigDecimal serviceAmt = Env.ZERO;
 
+		//JPIERE-0553: Qualified　Invoice　Issuer
+		MBPartner bp = MBPartner.get(getCtx(), getC_BPartner_ID());
+		boolean IsQualifiedInvoiceIssuerJP = bp.get_ValueAsBoolean("IsQualifiedInvoiceIssuerJP");
+		
 		//  TaxCredit       DR
 		for (int i = 0; i < m_taxes.length; i++)
 		{
@@ -914,6 +918,25 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				tl.set_ValueNoCheck("JP_SOPOType", "P");
 				tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
 				tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
+				
+				//JPIERE-0553: Qualified　Invoice　Issuer
+				tl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
+				if(IsQualifiedInvoiceIssuerJP)
+				{
+					Object obj_RegisteredDateOfQII = bp.get_Value("JP_RegisteredDateOfQII");
+					if(obj_RegisteredDateOfQII == null)
+					{
+						tl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+						tl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+					}else {
+						Timestamp JP_RegisteredDateOfQII = (Timestamp)obj_RegisteredDateOfQII;
+						if(getDateAcct().compareTo(JP_RegisteredDateOfQII) >= 0)
+						{
+							tl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+							tl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+						}
+					}
+				}//JPIERE-0553: 
 			}
 		}
 		//  Expense         DR
@@ -972,6 +995,25 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					fLine.set_ValueNoCheck("JP_SOPOType", "P");
 					fLine.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
 					fLine.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));
+					
+					//JPIERE-0553: Qualified　Invoice　Issuer
+					fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
+					if(IsQualifiedInvoiceIssuerJP)
+					{
+						Object obj_RegisteredDateOfQII = bp.get_Value("JP_RegisteredDateOfQII");
+						if(obj_RegisteredDateOfQII == null)
+						{
+							fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+							fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+						}else {
+							Timestamp JP_RegisteredDateOfQII = (Timestamp)obj_RegisteredDateOfQII;
+							if(getDateAcct().compareTo(JP_RegisteredDateOfQII) >= 0)
+							{
+								fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+								fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+							}
+						}
+					}//JPIERE-0553: 
 				}
 				if (!line.isItem())
 				{
@@ -1018,6 +1060,10 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
 		BigDecimal serviceAmt = Env.ZERO;
 
+		//JPIERE-0553: Qualified　Invoice　Issuer
+		MBPartner bp = MBPartner.get(getCtx(), getC_BPartner_ID());
+		boolean IsQualifiedInvoiceIssuerJP = bp.get_ValueAsBoolean("IsQualifiedInvoiceIssuerJP");
+		
 		//  TaxCredit               CR
 		for (int i = 0; i < m_taxes.length; i++)
 		{
@@ -1029,6 +1075,25 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				tl.set_ValueNoCheck("JP_SOPOType", "P");
 				tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
 				tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
+				
+				//JPIERE-0553: Qualified　Invoice　Issuer
+				tl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
+				if(IsQualifiedInvoiceIssuerJP)
+				{
+					Object obj_RegisteredDateOfQII = bp.get_Value("JP_RegisteredDateOfQII");
+					if(obj_RegisteredDateOfQII == null)
+					{
+						tl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+						tl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+					}else {
+						Timestamp JP_RegisteredDateOfQII = (Timestamp)obj_RegisteredDateOfQII;
+						if(getDateAcct().compareTo(JP_RegisteredDateOfQII) >= 0)
+						{
+							tl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+							tl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+						}
+					}
+				}//JPIERE-0553: 
 			}
 		}
 		//  Expense                 CR
@@ -1087,6 +1152,25 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					fLine.set_ValueNoCheck("JP_SOPOType", "P");
 					fLine.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt")).negate());
 					fLine.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxAmt")).negate());
+					
+					//JPIERE-0553: Qualified　Invoice　Issuer
+					fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
+					if(IsQualifiedInvoiceIssuerJP)
+					{
+						Object obj_RegisteredDateOfQII = bp.get_Value("JP_RegisteredDateOfQII");
+						if(obj_RegisteredDateOfQII == null)
+						{
+							fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+							fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+						}else {
+							Timestamp JP_RegisteredDateOfQII = (Timestamp)obj_RegisteredDateOfQII;
+							if(getDateAcct().compareTo(JP_RegisteredDateOfQII) >= 0)
+							{
+								fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+								fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+							}
+						}
+					}//JPIERE-0553: 
 				}
 				if (!line.isItem())
 				{
