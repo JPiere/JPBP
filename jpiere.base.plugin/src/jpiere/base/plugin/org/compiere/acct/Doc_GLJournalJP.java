@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
@@ -42,6 +43,7 @@ import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MBPartner;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
@@ -56,6 +58,7 @@ import jpiere.base.plugin.util.JPiereUtil;
 
 /**
  *  JPIERE-0544: Calculate Tax Amount automatically at GL Journal.
+ *  JPIERE-0553: Qualified　Invoice　Issuer
  * 
  *  @author h.hagiwara
  */
@@ -426,6 +429,32 @@ public class Doc_GLJournalJP extends Doc
 				fLine.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
 			else
 				fLine.set_ValueNoCheck("JP_TaxAmt", JP_TaxAmt);
+			
+			int C_BPartner_ID = fLine.getC_BPartner_ID();
+			if(C_BPartner_ID > 0 && "P".equals(JP_SOPOType))
+			{
+				MBPartner bp = MBPartner.get(getCtx(), C_BPartner_ID);
+				boolean IsQualifiedInvoiceIssuerJP = bp.get_ValueAsBoolean("IsQualifiedInvoiceIssuerJP");
+				
+				//JPIERE-0553: Qualified　Invoice　Issuer
+				fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
+				if(IsQualifiedInvoiceIssuerJP)
+				{
+					Object obj_RegisteredDateOfQII = bp.get_Value("JP_RegisteredDateOfQII");
+					if(obj_RegisteredDateOfQII == null)
+					{
+						fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+						fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+					}else {
+						Timestamp JP_RegisteredDateOfQII = (Timestamp)obj_RegisteredDateOfQII;
+						if(getDateAcct().compareTo(JP_RegisteredDateOfQII) >= 0)
+						{
+							fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+							fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+						}
+					}
+				}//JPIERE-0553: 
+			}
 		}
 	}
 	
