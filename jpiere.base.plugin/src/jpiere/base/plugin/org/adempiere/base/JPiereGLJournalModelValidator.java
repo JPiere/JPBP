@@ -6,10 +6,12 @@ import java.util.logging.Level;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.FactsValidator;
+import org.compiere.model.I_GL_Journal;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 /******************************************************************************
  * Product: JPiere                                                            *
@@ -39,6 +41,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractProcPeriod;
 * JPiere GL Journal Model Validator
 *
 * JPIERE-0522: Add JP_Contract_ID, JP_ContractContent_ID, JP_ContractProcPeriod_ID, JP_Order_ID Columns to GL_Journal&GL JournalLine Table
+* JPIERE-0554: GL Journal Balance Check
 *
 * @author h.hagiwara
 *
@@ -56,6 +59,7 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 
 		engine.addModelChange(MJournal.Table_Name, this);
 		engine.addModelChange(MJournalLine.Table_Name, this);
+		engine.addDocValidate(MJournal.Table_Name, this);
 		engine.addFactsValidate(MJournal.Table_Name, this);
 
 		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPiereGLJournalModelValidator");
@@ -130,6 +134,25 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 	@Override
 	public String docValidate(PO po, int timing)
 	{
+		if(timing == ModelValidator.TIMING_BEFORE_PREPARE)
+		{
+			if(po instanceof I_GL_Journal)
+			{
+				I_GL_Journal journal = (I_GL_Journal)po;
+				
+				//JPIERE-0554: GL Journal Balance Check
+				String JP_GL_JOURNAL_BALANCE_CHECK_POSTINGTYPE = MSysConfig.getValue("JP_GL_JOURNAL_BALANCE_CHECK_POSTINGTYPE", "A", po.getAD_Client_ID());
+				String postingType = journal.getPostingType();
+				if(JP_GL_JOURNAL_BALANCE_CHECK_POSTINGTYPE.contains(postingType))
+				{
+					if (journal.getTotalDr().compareTo(journal.getTotalCr()) != 0)
+					{
+						return Msg.getMsg(Env.getCtx(), "UnbalancedJornal");
+					}
+				}
+			}
+		}
+		
 		return null;
 	}
 
