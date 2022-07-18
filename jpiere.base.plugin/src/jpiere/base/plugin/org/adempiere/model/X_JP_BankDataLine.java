@@ -34,7 +34,7 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220305L;
+	private static final long serialVersionUID = 20220718L;
 
     /** Standard Constructor */
     public X_JP_BankDataLine (Properties ctx, int JP_BankDataLine_ID, String trxName)
@@ -52,6 +52,10 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 // N
 			setJP_BankDataLine_ID (0);
 			setJP_BankData_ID (0);
+			setJP_PriceActual (Env.ZERO);
+// 0
+			setJP_Qty (Env.ZERO);
+// 0
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_BankDataLine WHERE JP_BankData_ID=@JP_BankData_ID@
 			setStatementLineDate (new Timestamp( System.currentTimeMillis() ));
@@ -81,6 +85,10 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 // N
 			setJP_BankDataLine_ID (0);
 			setJP_BankData_ID (0);
+			setJP_PriceActual (Env.ZERO);
+// 0
+			setJP_Qty (Env.ZERO);
+// 0
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_BankDataLine WHERE JP_BankData_ID=@JP_BankData_ID@
 			setStatementLineDate (new Timestamp( System.currentTimeMillis() ));
@@ -797,6 +805,71 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 		return (String)get_Value(COLUMNNAME_JP_ClearingHouse);
 	}
 
+	/** Set Unit Price.
+		@param JP_PriceActual Actual Price 
+	*/
+	public void setJP_PriceActual (BigDecimal JP_PriceActual)
+	{
+		set_Value (COLUMNNAME_JP_PriceActual, JP_PriceActual);
+	}
+
+	/** Get Unit Price.
+		@return Actual Price 
+	  */
+	public BigDecimal getJP_PriceActual()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_PriceActual);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public org.compiere.model.I_M_Product getJP_Product() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
+			.getPO(getJP_Product_ID(), get_TrxName());
+	}
+
+	/** Set Product.
+		@param JP_Product_ID Product
+	*/
+	public void setJP_Product_ID (int JP_Product_ID)
+	{
+		if (JP_Product_ID < 1)
+			set_Value (COLUMNNAME_JP_Product_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_Product_ID, Integer.valueOf(JP_Product_ID));
+	}
+
+	/** Get Product.
+		@return Product	  */
+	public int getJP_Product_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Product_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Quantity.
+		@param JP_Qty Quantity
+	*/
+	public void setJP_Qty (BigDecimal JP_Qty)
+	{
+		set_Value (COLUMNNAME_JP_Qty, JP_Qty);
+	}
+
+	/** Get Quantity.
+		@return Quantity
+	  */
+	public BigDecimal getJP_Qty()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_Qty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Requester Code.
 		@param JP_RequesterCode Requester Code
 	*/
@@ -810,6 +883,57 @@ public class X_JP_BankDataLine extends PO implements I_JP_BankDataLine, I_Persis
 	public String getJP_RequesterCode()
 	{
 		return (String)get_Value(COLUMNNAME_JP_RequesterCode);
+	}
+
+	/** Auto Tax Calculation not applicable = N */
+	public static final String JP_SOPOTYPE_AutoTaxCalculationNotApplicable = "N";
+	/** Purchase Tax = P */
+	public static final String JP_SOPOTYPE_PurchaseTax = "P";
+	/** Sales Tax = S */
+	public static final String JP_SOPOTYPE_SalesTax = "S";
+	/** Set SO/PO Type.
+		@param JP_SOPOType JPIERE-0543:JPBP
+	*/
+	public void setJP_SOPOType (String JP_SOPOType)
+	{
+
+		set_Value (COLUMNNAME_JP_SOPOType, JP_SOPOType);
+	}
+
+	/** Get SO/PO Type.
+		@return JPIERE-0543:JPBP
+	  */
+	public String getJP_SOPOType()
+	{
+		return (String)get_Value(COLUMNNAME_JP_SOPOType);
+	}
+
+	public org.compiere.model.I_C_UOM getJP_UOM() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_ID)
+			.getPO(getJP_UOM_ID(), get_TrxName());
+	}
+
+	/** Set UOM.
+		@param JP_UOM_ID Unit of Measure
+	*/
+	public void setJP_UOM_ID (int JP_UOM_ID)
+	{
+		if (JP_UOM_ID < 1)
+			set_Value (COLUMNNAME_JP_UOM_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_UOM_ID, Integer.valueOf(JP_UOM_ID));
+	}
+
+	/** Get UOM.
+		@return Unit of Measure
+	  */
+	public int getJP_UOM_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Line No.

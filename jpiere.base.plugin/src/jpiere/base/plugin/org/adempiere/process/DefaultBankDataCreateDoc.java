@@ -106,6 +106,20 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 			bsl.set_ValueNoCheck("C_Tax_ID", lines[i].get_Value("C_Tax_ID"));
 			bsl.setInterestAmt(lines[i].getInterestAmt());
 			bsl.setC_BPartner_ID(lines[i].getC_BPartner_ID());
+			if(lines[i].getJP_Product_ID() > 0)
+			{
+				bsl.set_ValueNoCheck("JP_Product_ID", lines[i].getJP_Product_ID());
+			}else {
+				bsl.set_ValueNoCheck("JP_Product_ID", null);
+			}
+			if(lines[i].getJP_UOM_ID() > 0)
+			{
+				bsl.set_ValueNoCheck("JP_UOM_ID", lines[i].getJP_UOM_ID());
+			}else {
+				bsl.set_ValueNoCheck("JP_UOM_ID", null);
+			}
+			bsl.set_ValueNoCheck("JP_Qty", lines[i].getJP_Qty());
+			bsl.set_ValueNoCheck("JP_PriceActual", lines[i].getJP_PriceActual());
 			bsl.saveEx(get_TrxName());
 
 			if(lines[i].getC_Invoice_ID() > 0)

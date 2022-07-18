@@ -482,6 +482,43 @@ public interface I_JP_BankDataLine
 	/** Get Clearing House	  */
 	public String getJP_ClearingHouse();
 
+    /** Column name JP_PriceActual */
+    public static final String COLUMNNAME_JP_PriceActual = "JP_PriceActual";
+
+	/** Set Unit Price.
+	  * Actual Price 
+	  */
+	public void setJP_PriceActual (BigDecimal JP_PriceActual);
+
+	/** Get Unit Price.
+	  * Actual Price 
+	  */
+	public BigDecimal getJP_PriceActual();
+
+    /** Column name JP_Product_ID */
+    public static final String COLUMNNAME_JP_Product_ID = "JP_Product_ID";
+
+	/** Set Product	  */
+	public void setJP_Product_ID (int JP_Product_ID);
+
+	/** Get Product	  */
+	public int getJP_Product_ID();
+
+	public org.compiere.model.I_M_Product getJP_Product() throws RuntimeException;
+
+    /** Column name JP_Qty */
+    public static final String COLUMNNAME_JP_Qty = "JP_Qty";
+
+	/** Set Quantity.
+	  * Quantity
+	  */
+	public void setJP_Qty (BigDecimal JP_Qty);
+
+	/** Get Quantity.
+	  * Quantity
+	  */
+	public BigDecimal getJP_Qty();
+
     /** Column name JP_RequesterCode */
     public static final String COLUMNNAME_JP_RequesterCode = "JP_RequesterCode";
 
@@ -490,6 +527,34 @@ public interface I_JP_BankDataLine
 
 	/** Get Requester Code	  */
 	public String getJP_RequesterCode();
+
+    /** Column name JP_SOPOType */
+    public static final String COLUMNNAME_JP_SOPOType = "JP_SOPOType";
+
+	/** Set SO/PO Type.
+	  * JPIERE-0543:JPBP
+	  */
+	public void setJP_SOPOType (String JP_SOPOType);
+
+	/** Get SO/PO Type.
+	  * JPIERE-0543:JPBP
+	  */
+	public String getJP_SOPOType();
+
+    /** Column name JP_UOM_ID */
+    public static final String COLUMNNAME_JP_UOM_ID = "JP_UOM_ID";
+
+	/** Set UOM.
+	  * Unit of Measure
+	  */
+	public void setJP_UOM_ID (int JP_UOM_ID);
+
+	/** Get UOM.
+	  * Unit of Measure
+	  */
+	public int getJP_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getJP_UOM() throws RuntimeException;
 
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";
