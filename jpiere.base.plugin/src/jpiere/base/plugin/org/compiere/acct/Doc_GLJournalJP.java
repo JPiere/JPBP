@@ -45,6 +45,7 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MElementValue;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MTax;
@@ -272,10 +273,25 @@ public class Doc_GLJournalJP extends Doc
 			BigDecimal JP_TaxAmt = Env.ZERO;
 			FactLine fLine = null;
 			DocTax docTax = null;
+			MElementValue  elementValue = null;//JPIERE-0556
+			int C_BankAccount_ID = 0;//JPIERE-0556
 			
 			for (int i = 0; i < p_lines.length; i++)
 			{
 				docLine = p_lines[i];
+				if(docLine.getAccount() != null)//JPIERE-0556
+				{
+					elementValue = docLine.getAccount().getAccount();
+					if(elementValue != null)
+					{
+						C_BankAccount_ID = elementValue.getC_BankAccount_ID();
+					}else {
+						C_BankAccount_ID = 0;
+					}
+				}else {
+					elementValue = null;
+					C_BankAccount_ID = 0;
+				}
 				C_Tax_ID = docLine.getC_Tax_ID();
 				JP_SOPOType = docLine.getPO().get_ValueAsString("JP_SOPOType");
 				if(docLine.getPO().get_Value("JP_TaxBaseAmt") != null)
@@ -304,6 +320,8 @@ public class Doc_GLJournalJP extends Doc
 							fLine = fact.createLine (docLine, docLine.getAccount(), getC_Currency_ID(), Env.ZERO, JP_TaxBaseAmt);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
+							if(C_BankAccount_ID > 0)
+								fLine.set_ValueNoCheck("JP_BankAccount_ID" ,C_BankAccount_ID);//JPIERE-0556
 							
 							fLine = fact.createLine(docLine, docTax.getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), Env.ZERO, JP_TaxAmt);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
@@ -316,6 +334,8 @@ public class Doc_GLJournalJP extends Doc
 							fLine = fact.createLine (docLine,docLine.getAccount (), getC_Currency_ID(), JP_TaxBaseAmt.negate(), Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
+							if(C_BankAccount_ID > 0)
+								fLine.set_ValueNoCheck("JP_BankAccount_ID" ,C_BankAccount_ID);//JPIERE-0556
 
 							fLine = fact.createLine(docLine, docTax.getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), JP_TaxAmt.negate(), Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
@@ -333,6 +353,8 @@ public class Doc_GLJournalJP extends Doc
 							fLine = fact.createLine (docLine, docLine.getAccount(), getC_Currency_ID(), Env.ZERO, JP_TaxBaseAmt.negate());
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
+							if(C_BankAccount_ID > 0)
+								fLine.set_ValueNoCheck("JP_BankAccount_ID" ,C_BankAccount_ID);//JPIERE-0556
 
 							fLine = fact.createLine(docLine, docTax.getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as), getC_Currency_ID(), Env.ZERO, JP_TaxAmt.negate());
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
@@ -345,6 +367,8 @@ public class Doc_GLJournalJP extends Doc
 							fLine = fact.createLine (docLine,docLine.getAccount (), getC_Currency_ID(), JP_TaxBaseAmt, Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
+							if(C_BankAccount_ID > 0)
+								fLine.set_ValueNoCheck("JP_BankAccount_ID" ,C_BankAccount_ID);//JPIERE-0556
 
 							fLine = fact.createLine(docLine, docTax.getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),	getC_Currency_ID(), JP_TaxAmt, Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
@@ -360,6 +384,8 @@ public class Doc_GLJournalJP extends Doc
 					fLine = fact.createLine (docLine, docLine.getAccount (), docLine.getC_Currency_ID(), docLine.getAmtSourceDr (), docLine.getAmtSourceCr ());
 					setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
 					fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
+					if(C_BankAccount_ID > 0)
+						fLine.set_ValueNoCheck("JP_BankAccount_ID" ,C_BankAccount_ID);//JPIERE-0556
 					
 				}
 				
