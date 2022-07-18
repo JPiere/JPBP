@@ -2294,22 +2294,48 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		if(journalLine.get_ColumnIndex("M_Locator_ID") >= 0)
 			journalLine.set_ValueNoCheck("M_Locator_ID",impJournal.getM_Locator_ID() );
 		if(journalLine.get_ColumnIndex("C_Tax_ID") >= 0)
-			journalLine.set_ValueNoCheck("C_Tax_ID",impJournal.getC_Tax_ID() );
+		{
+			if(impJournal.getC_Tax_ID() > 0)
+			{
+				journalLine.set_ValueNoCheck("C_Tax_ID", impJournal.getC_Tax_ID());
+			}else {
+				journalLine.set_ValueNoCheck("C_Tax_ID", null);
+			}
+		}
 		if(journalLine.get_ColumnIndex("JP_SOPOType") >= 0)
 			journalLine.set_ValueNoCheck("JP_SOPOType",impJournal.getJP_SOPOType() );
 		if(journalLine.get_ColumnIndex("JP_Order_ID") >= 0)
-			journalLine.set_ValueNoCheck("JP_Order_ID",impJournal.getJP_Order_ID() );
+		{
+			if(impJournal.getJP_Order_ID() > 0)
+			{
+				journalLine.set_ValueNoCheck("JP_Order_ID", impJournal.getJP_Order_ID() );
+			}else {
+				journalLine.set_ValueNoCheck("JP_Order_ID", null );
+			}
+		}
 		if(journalLine.get_ColumnIndex("JP_ContractContent_ID") >= 0)
 		{
 			journalLine.set_ValueNoCheck("JP_ContractContent_ID",impJournal.getJP_ContractContent_ID() );
 			if(journalLine.get_ColumnIndex("JP_Contract_ID") >= 0)
 			{
-				MContractContent cc =MContractContent.get(getCtx(), impJournal.getJP_ContractContent_ID() );
-				journalLine.set_ValueNoCheck("JP_Contract_ID",cc.getJP_Contract_ID() );
+				if(impJournal.getJP_ContractContent_ID() > 0)
+				{
+					MContractContent cc =MContractContent.get(getCtx(), impJournal.getJP_ContractContent_ID() );
+					journalLine.set_ValueNoCheck("JP_Contract_ID",cc.getJP_Contract_ID() );
+				}else {
+					journalLine.set_ValueNoCheck("JP_Contract_ID", null );
+				}
 			}
 			
 			if(journalLine.get_ColumnIndex("JP_ContractProcPeriod_ID") >= 0)
-				journalLine.set_ValueNoCheck("JP_ContractProcPeriod_ID",impJournal.getJP_ContractProcPeriod_ID() );
+			{
+				if(impJournal.getJP_ContractProcPeriod_ID() > 0)
+				{
+					journalLine.set_ValueNoCheck("JP_ContractProcPeriod_ID",impJournal.getJP_ContractProcPeriod_ID() );
+				}else {
+					journalLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", null );
+				}
+			}
 		}
 
 		//Set Currency Conversion Rate
@@ -2333,7 +2359,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			impJournal.setCurrencyRate(currencyRate);
 			journalLine.setCurrencyRate(currencyRate);
 		}
-
+		
 		ModelValidationEngine.get().fireImportValidate(this, impJournal, journalLine, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {
