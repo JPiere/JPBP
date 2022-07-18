@@ -13,8 +13,14 @@
  *****************************************************************************/
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.util.List;
 import java.util.logging.Level;
 
+import org.compiere.acct.Fact;
+import org.compiere.acct.FactLine;
+import org.compiere.model.FactsValidator;
+import org.compiere.model.I_C_Payment;
+import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MClient;
 import org.compiere.model.MPayment;
@@ -31,11 +37,12 @@ import org.compiere.util.Msg;
  *
  *  JPIERE-0087: Check between Payment and Bank Statement
  *  JPIERE-0091: Check between Payment and Bank Statement
+ *  JPIERE-0556: Add column to the Journal For legal compliance.
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
  */
-public class JPierePaymentModelValidator implements ModelValidator {
+public class JPierePaymentModelValidator implements ModelValidator,FactsValidator {
 
 	private static CLogger log = CLogger.getCLogger(JPierePaymentModelValidator.class);
 	private int AD_Client_ID = -1;
@@ -48,6 +55,7 @@ public class JPierePaymentModelValidator implements ModelValidator {
 			this.AD_Client_ID = client.getAD_Client_ID();
 		engine.addModelChange(MPayment.Table_Name, this);
 		engine.addDocValidate(MPayment.Table_Name, this);
+		engine.addFactsValidate(MPayment.Table_Name, this);//JPIERE-0556
 
 		if (log.isLoggable(Level.FINE)) log.fine("Initialize JPierePaymentModelValidator");
 
@@ -117,6 +125,29 @@ public class JPierePaymentModelValidator implements ModelValidator {
 			}
 		}
 
+		return null;
+	}
+
+	@Override
+	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po) 
+	{
+		if(po instanceof I_C_Payment)
+		{
+			I_C_Payment i_Payment = (I_C_Payment)po;
+		
+			//JPIERE-0556: Add column to the Journal For legal compliance.
+			for(Fact fact : facts)
+			{
+				FactLine[]  factLine = fact.getLines();
+				for(int i = 0; i < factLine.length; i++)
+				{
+					factLine[i].set_ValueNoCheck("JP_BankAccount_ID", i_Payment.getC_BankAccount_ID());
+					factLine[i].set_ValueNoCheck("JP_Charge_ID", i_Payment.getC_Charge_ID());
+				}//for
+	
+			}//for
+		}
+		
 		return null;
 	}
 

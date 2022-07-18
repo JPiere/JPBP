@@ -59,6 +59,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  * JPIERE-0521: Add JP_Contract_ID, JP_ContractProcPeriod_ID Columns to Fact Acct Table
  * JPIERE-0536: Journal Policy of Recognition Doc if no accounting config
  * JPIERE-0553: Qualified　Invoice　Issuer
+ * JPIERE-0556: Add column to the Journal For legal compliance.
  *
  * <pre>
  *   Table:              JP_Recognition
@@ -508,19 +509,31 @@ public class Doc_JPRecognition extends Doc
 
 			//DR - Invoice Revenue Acct
 			dr = fact.createLine (line, getInvoiceRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-			if(dr != null && line.getPO().get_Value("JP_TaxBaseAmt") != null)
+			if(dr != null)
 			{
+				if(C_Charge_ID != 0)
+					dr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+				dr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
 				dr.setQty(line.getQty().negate());
 				dr.setC_Tax_ID(p_lines[i].getC_Tax_ID());
 				dr.set_ValueNoCheck("JP_SOPOType", "S");
-				dr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
-				dr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
+				if(line.getPO().get_Value("JP_TaxBaseAmt") != null)
+				{
+					dr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
+					dr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
+				}else {
+					dr.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
+					dr.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+				}
 			}
 
 			//CR - Recognition Revenue Acct
 			cr = fact.createLine (line, getRecognitionRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 			if(cr != null)
 			{
+				if(C_Charge_ID != 0)
+					cr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+				cr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));				
 				cr.setQty(line.getQty());
 				cr.set_ValueNoCheck("JP_SOPOType", "S");
 				cr.set_ValueNoCheck("JP_TaxBaseAmt", line.getPO().get_Value("JP_TaxBaseAmt"));
@@ -859,17 +872,35 @@ public class Doc_JPRecognition extends Doc
 
 			//DR - Invoice Revenue Acct -> CR
 			dr = fact.createLine (line, getInvoiceRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
-			dr.setQty(line.getQty().negate());
-			dr.set_ValueNoCheck("JP_SOPOType", "S");
-			dr.set_ValueNoCheck("JP_TaxBaseAmt", line.getPO().get_Value("JP_TaxBaseAmt"));
-			dr.set_ValueNoCheck("JP_TaxAmt", line.getPO().get_Value("JP_TaxAmt"));
-
+			if(dr != null)
+			{
+				if(C_Charge_ID != 0)
+					dr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+				dr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
+				dr.setQty(line.getQty().negate());
+				dr.set_ValueNoCheck("JP_SOPOType", "S");
+				dr.set_ValueNoCheck("JP_TaxBaseAmt", line.getPO().get_Value("JP_TaxBaseAmt"));
+				dr.set_ValueNoCheck("JP_TaxAmt", line.getPO().get_Value("JP_TaxAmt"));
+			}
+			
 			//CR - Recognition Revenue Acct -> DR
 			cr = fact.createLine (line, getRecognitionRevenueAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
-			cr.setQty(line.getQty());
-			cr.set_ValueNoCheck("JP_SOPOType", "S");
-			cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
-			cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
+			if(cr != null)
+			{
+				if(C_Charge_ID != 0)
+					cr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+				cr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
+				cr.setQty(line.getQty());
+				cr.set_ValueNoCheck("JP_SOPOType", "S");
+				if(line.getPO().get_Value("JP_TaxBaseAmt") != null)
+				{
+					cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
+					cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
+				}else {
+					cr.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
+					cr.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+				}
+			}
 
 
 			/***COGS***/
@@ -1236,10 +1267,19 @@ public class Doc_JPRecognition extends Doc
 				cr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 				if(cr != null)
 				{
+					if(C_Charge_ID != 0)
+						cr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+					cr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
 					cr.setQty(line.getQty().negate());
 					cr.set_ValueNoCheck("JP_SOPOType", "P");
-					cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
-					cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
+					if(line.getPO().get_Value("JP_TaxBaseAmt") != null)
+					{
+						cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxBaseAmt")).negate());
+						cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)line.getPO().get_Value("JP_TaxAmt")).negate());
+					}else {
+						cr.set_ValueNoCheck("JP_TaxBaseAmt",Env.ZERO);
+						cr.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+					}
 					
 					//JPIERE-0553: Qualified　Invoice　Issuer
 					cr.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
@@ -1265,6 +1305,9 @@ public class Doc_JPRecognition extends Doc
 				dr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
 				if(dr != null)
 				{
+					if(C_Charge_ID != 0)
+						dr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+					dr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
 					dr.setQty(line.getQty());
 					dr.set_ValueNoCheck("JP_SOPOType", "P");
 					dr.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
@@ -1436,6 +1479,9 @@ public class Doc_JPRecognition extends Doc
 				dr = fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), amt, null);
 				if(dr != null)
 				{
+					if(C_Charge_ID != 0)
+						dr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+					dr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
 					dr.setQty(line.getQty().negate());
 					dr.set_ValueNoCheck("JP_SOPOType", "P");
 					dr.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
@@ -1465,10 +1511,19 @@ public class Doc_JPRecognition extends Doc
 				cr = fact.createLine (line, getRecognitionExpenseAccount(line, contractAcct,  as), getC_Currency_ID(), null, amt);
 				if(cr != null)
 				{
+					if(C_Charge_ID != 0)
+						cr.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+					cr.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));					
 					cr.setQty(line.getQty());
 					cr.set_ValueNoCheck("JP_SOPOType", "P");
-					cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt")).negate());
-					cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxAmt")).negate());
+					if(line.getPO().get_Value("JP_TaxBaseAmt") != null)
+					{
+						cr.set_ValueNoCheck("JP_TaxBaseAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt")).negate());
+						cr.set_ValueNoCheck("JP_TaxAmt", ((BigDecimal)p_lines[i].getPO().get_Value("JP_TaxAmt")).negate());
+					}else {
+						cr.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
+						cr.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+					}
 
 					//JPIERE-0553: Qualified　Invoice　Issuer
 					cr.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	

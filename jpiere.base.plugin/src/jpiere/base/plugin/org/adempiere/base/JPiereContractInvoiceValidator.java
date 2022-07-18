@@ -74,6 +74,7 @@ import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
  *  JPIERE-0408: Set Counter Doc Info
  *  JPIERE-0521: Add JP_Contract_ID, JP_ContractProcPeriod_ID Columns to Fact Acct Table
  *  JPIERE-0539: Create GL Journal From Invoice
+ *  JPIERE-0556: Add column to the Journal For legal compliance.
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -1329,6 +1330,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		{
 			glLine.setAccount_ID(factLine.getAccount_ID());
 			glLine.setQty(factLine.getQty().negate());
+			glLine.set_ValueNoCheck("JP_PriceActual" ,m_InvoiceLine.getPriceActual());//JPIERE-0556
 			glLine.setAmtSourceDr(factLine.getAmtAcctCr());
 			glLine.setAmtAcctDr(factLine.getAmtAcctCr());
 			glLine.setAmtSourceCr(factLine.getAmtAcctDr());
@@ -1338,6 +1340,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 			glLine.setAccount_ID(m_Account.getAccount_ID());
 			glLine.setQty(factLine.getQty());
+			glLine.set_ValueNoCheck("JP_PriceActual" ,m_InvoiceLine.getPriceActual());//JPIERE-0556
 			glLine.setAmtSourceDr(factLine.getAmtAcctDr());
 			glLine.setAmtAcctDr(factLine.getAmtAcctDr());
 			glLine.setAmtSourceCr(factLine.getAmtAcctCr());

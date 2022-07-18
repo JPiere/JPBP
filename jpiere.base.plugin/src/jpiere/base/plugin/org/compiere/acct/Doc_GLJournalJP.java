@@ -59,6 +59,7 @@ import jpiere.base.plugin.util.JPiereUtil;
 /**
  *  JPIERE-0544: Calculate Tax Amount automatically at GL Journal.
  *  JPIERE-0553: Qualified　Invoice　Issuer
+ *  JPIERE-0556: Add column to the Journal For legal compliance.
  * 
  *  @author h.hagiwara
  */
@@ -302,17 +303,25 @@ public class Doc_GLJournalJP extends Doc
 						{
 							fLine = fact.createLine (docLine, docLine.getAccount(), getC_Currency_ID(), Env.ZERO, JP_TaxBaseAmt);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
 							
 							fLine = fact.createLine(docLine, docTax.getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), Env.ZERO, JP_TaxAmt);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("Qty" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("C_UOM_ID", null);//JPIERE-0556
 
 						}else {
 							
 							fLine = fact.createLine (docLine,docLine.getAccount (), getC_Currency_ID(), JP_TaxBaseAmt.negate(), Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
 
 							fLine = fact.createLine(docLine, docTax.getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), JP_TaxAmt.negate(), Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("Qty" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("C_UOM_ID", null);//JPIERE-0556
 						}
 						
 					}else if("P".equals(JP_SOPOType)) {
@@ -323,17 +332,25 @@ public class Doc_GLJournalJP extends Doc
 						{
 							fLine = fact.createLine (docLine, docLine.getAccount(), getC_Currency_ID(), Env.ZERO, JP_TaxBaseAmt.negate());
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
 
 							fLine = fact.createLine(docLine, docTax.getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as), getC_Currency_ID(), Env.ZERO, JP_TaxAmt.negate());
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("Qty" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("C_UOM_ID", null);//JPIERE-0556
 							
 						}else {
 							
 							fLine = fact.createLine (docLine,docLine.getAccount (), getC_Currency_ID(), JP_TaxBaseAmt, Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
 
 							fLine = fact.createLine(docLine, docTax.getAccount(isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as),	getC_Currency_ID(), JP_TaxAmt, Env.ZERO);
 							setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+							fLine.set_ValueNoCheck("JP_PriceActual" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("Qty" ,Env.ZERO);//JPIERE-0556
+							fLine.set_ValueNoCheck("C_UOM_ID", null);//JPIERE-0556
 
 						}
 					}
@@ -342,8 +359,10 @@ public class Doc_GLJournalJP extends Doc
 					
 					fLine = fact.createLine (docLine, docLine.getAccount (), docLine.getC_Currency_ID(), docLine.getAmtSourceDr (), docLine.getAmtSourceCr ());
 					setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+					fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
 					
 				}
+				
 			}	//	for all lines
 		}
 		else

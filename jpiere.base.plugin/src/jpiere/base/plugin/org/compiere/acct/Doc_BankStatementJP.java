@@ -57,6 +57,7 @@ import org.compiere.util.Env;
  *  JPIERE-0012: Tax of Bank Statement
  *  JPIERE-0543: Tax Base Amt & Tax Amt To the Fact_Acct
  *  JPIERE-0553: Qualified　Invoice　Issuer
+ *  JPIERE-0556: Add column to the Journal For legal compliance.
  *
  */
 public class Doc_BankStatementJP extends Doc
@@ -273,7 +274,8 @@ public class Doc_BankStatementJP extends Doc
 						fl.setAD_Org_ID(AD_Org_ID);
 					if (fl != null && C_BPartner_ID != 0)
 						fl.setC_BPartner_ID(C_BPartner_ID);
-
+					
+					setAccountInfo(fl);//JPIERE-0556
 				}
 
 			} else {
@@ -288,6 +290,8 @@ public class Doc_BankStatementJP extends Doc
 					fl.setAD_Org_ID(AD_Org_ID);
 				if (fl != null && C_BPartner_ID != 0)
 					fl.setC_BPartner_ID(C_BPartner_ID);
+				
+				setAccountInfo(fl);//JPIERE-0556
 
 				//  BankInTransit   DR      CR              (Payment)
 				fl = fact.createLine(line,
@@ -301,6 +305,8 @@ public class Doc_BankStatementJP extends Doc
 						fl.setAD_Org_ID(AD_Org_ID);
 					else
 						fl.setAD_Org_ID(line.getAD_Org_ID(true)); // from payment
+					
+					setAccountInfo(fl);//JPIERE-0556
 				}
 
 			}
@@ -323,6 +329,8 @@ public class Doc_BankStatementJP extends Doc
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
 							fl.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
 						}
+						
+						setAdditionalChargeInfo(fl,line);//JPIERE-0556
 					}
 					
 				}else{
@@ -337,6 +345,8 @@ public class Doc_BankStatementJP extends Doc
 							fl.set_ValueNoCheck("JP_SOPOType", "S");
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
 							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+							
+							setAccountInfo(fl);//JPIERE-0556
 						}
 	
 						fl = fact.createLine(line,
@@ -348,6 +358,8 @@ public class Doc_BankStatementJP extends Doc
 							fl.set_ValueNoCheck("JP_SOPOType", "S");
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
 							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+							
+							setAdditionalChargeInfo(fl,line);//JPIERE-0556
 						}
 						
 					}else {//ChargeAmt > 0 && JP_SOPOType == P
@@ -368,6 +380,8 @@ public class Doc_BankStatementJP extends Doc
 							fl.set_ValueNoCheck("JP_SOPOType", "P");
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
 							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+							
+							setAccountInfo(fl);//JPIERE-0556
 							
 							//JPIERE-0553: Qualified　Invoice　Issuer
 							if(bp != null)
@@ -425,7 +439,9 @@ public class Doc_BankStatementJP extends Doc
 									}
 								}//JPIERE-0553: 
 							}
-						}						
+							
+							setAdditionalChargeInfo(fl,line);//JPIERE-0556
+						}
 					}
 				}
 				
@@ -445,6 +461,8 @@ public class Doc_BankStatementJP extends Doc
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
 							fl.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
 						}
+						
+						setAdditionalChargeInfo(fl,line);//JPIERE-0556
 					}
 					
 				}else{
@@ -467,6 +485,8 @@ public class Doc_BankStatementJP extends Doc
 							fl.set_ValueNoCheck("JP_SOPOType", "P");
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
 							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+							
+							setAccountInfo(fl);//JPIERE-0556
 							
 							//JPIERE-0553: Qualified　Invoice　Issuer
 							if(bp != null)
@@ -523,6 +543,8 @@ public class Doc_BankStatementJP extends Doc
 									}
 								}//JPIERE-0553: 
 							}
+							
+							setAdditionalChargeInfo(fl,line);//JPIERE-0556
 						}
 						
 					}else {//ChargeAmt < 0 && JP_SOPOType == S
@@ -535,6 +557,8 @@ public class Doc_BankStatementJP extends Doc
 							fl.set_ValueNoCheck("JP_SOPOType", "S");
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
 							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+							
+							setAccountInfo(fl);//JPIERE-0556
 						}
 	
 						fl = fact.createLine(line,
@@ -544,7 +568,9 @@ public class Doc_BankStatementJP extends Doc
 							fl.setC_Tax_ID(line.getC_Tax_ID());
 							fl.set_ValueNoCheck("JP_SOPOType", "S");
 							fl.set_ValueNoCheck("JP_TaxBaseAmt", line.getTaxBaseAmt());
-							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());							
+							fl.set_ValueNoCheck("JP_TaxAmt", line.getTaxAmt());
+							
+							setAdditionalChargeInfo(fl,line);//JPIERE-0556
 						}
 					}
 				}
@@ -566,6 +592,8 @@ public class Doc_BankStatementJP extends Doc
 					line.getC_Currency_ID(), line.getInterestAmt().negate());
 			if (fl != null && C_BPartner_ID != 0)
 				fl.setC_BPartner_ID(C_BPartner_ID);
+			
+			setAccountInfo(fl);//JPIERE-0556
 			//
 		//	fact.createTaxCorrection();
 		}
@@ -615,4 +643,20 @@ public class Doc_BankStatementJP extends Doc
 		return ba.getAD_Org_ID();
 	}	//	getBank_Org_ID
 
+	private void setAdditionalChargeInfo(FactLine fl,DocLine_BankStatementJP line)
+	{
+		setAccountInfo(fl);
+		fl.set_ValueNoCheck("JP_Charge_ID", line.getPO().get_Value("C_Charge_ID"));
+		fl.set_ValueNoCheck("JP_PriceActual" ,line.getPO().get_Value("JP_PriceActual"));;
+		fl.set_ValueNoCheck("Qty" ,line.getPO().get_Value("JP_Qty"));
+		fl.set_ValueNoCheck("M_Product_ID" ,line.getPO().get_Value("JP_Product_ID"));
+		fl.set_ValueNoCheck("C_UOM_ID" ,line.getPO().get_Value("JP_UOM_ID"));
+		return;
+	}
+	
+	private void setAccountInfo(FactLine fl)
+	{
+		if(fl != null)
+			fl.set_ValueNoCheck("JP_BankAccount_ID", m_C_BankAccount_ID);
+	}
 }   //  Doc_Bank
