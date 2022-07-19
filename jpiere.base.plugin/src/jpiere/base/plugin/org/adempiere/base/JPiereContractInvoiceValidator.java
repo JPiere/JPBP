@@ -1129,11 +1129,11 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}
 
 					// Dr
-					if(createGLJournalLine(m_Journal, m_Invoice, iLine, factLine, m_AccountReverse, lineNo++, true) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, iLine, null, factLine, m_AccountReverse, lineNo++, true) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Invoice Dr";
 
 					//Cr
-					if(createGLJournalLine(m_Journal, m_Invoice, iLine, factLine, m_AccountTransfer, lineNo++, false) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, iLine, null, factLine, m_AccountTransfer, lineNo++, false) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Invoice Cr";
 
 
@@ -1181,11 +1181,11 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}
 
 					//Dr
-					if(createGLJournalLine(m_Journal, m_Invoice, iLine, factLine, m_AccountTransfer, lineNo++, false) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, iLine, null, factLine, m_AccountTransfer, lineNo++, false) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Invoice Dr";
 
 					//Cr
-					if(createGLJournalLine(m_Journal, m_Invoice, iLine, factLine, m_AccountReverse, lineNo++, true) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, iLine, null, factLine, m_AccountReverse, lineNo++, true) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Invoice Cr";
 
 				}
@@ -1227,11 +1227,11 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					m_AccountReverse = getT_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 
 					//Dr
-					if(createGLJournalLine(m_Journal, m_Invoice, null, factLine, m_AccountReverse, lineNo++, true) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, null, iTax, factLine, m_AccountReverse, lineNo++, true) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Tax adjust Dr";
 
 					//Cr
-					if(createGLJournalLine(m_Journal, m_Invoice, null, factLine, m_AccountTransfer, lineNo++, false) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, null, iTax, factLine, m_AccountTransfer, lineNo++, false) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AR Tax adjust Cr";
 
 				}else {
@@ -1256,11 +1256,11 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					}
 
 					//Dr
-					if(createGLJournalLine(m_Journal, m_Invoice, null, factLine, m_AccountTransfer, lineNo++, false) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, null, iTax, factLine, m_AccountTransfer, lineNo++, false) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Tax adjust Dr";
 
 					//Cr
-					if(createGLJournalLine(m_Journal, m_Invoice, null, factLine, m_AccountReverse, lineNo++, true) == null)
+					if(createGLJournalLine(m_Journal, m_Invoice, null, iTax, factLine, m_AccountReverse, lineNo++, true) == null)
 						return Msg.getMsg(Env.getCtx(), "JP_UnexpectedError") + " Could Not Create GL Journal Line " + "- AP Tax adjust Cr";
 
 				}
@@ -1272,7 +1272,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		return null;
 	}
 
-	private MJournalLine createGLJournalLine(MJournal m_Journal, MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, FactLine factLine, MAccount m_Account, int lineNo,  boolean isReverse)
+	private MJournalLine createGLJournalLine(MJournal m_Journal, MInvoice m_Invoice, MInvoiceLine m_InvoiceLine, MInvoiceTax iTax, FactLine factLine, MAccount m_Account, int lineNo,  boolean isReverse)
 	{
 		if(m_Journal == null || m_Journal.getGL_Journal_ID() == 0 || m_Invoice == null | factLine == null)
 			return null;
@@ -1318,6 +1318,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 		if(m_InvoiceLine != null)
 		{
+			glLine.set_ValueNoCheck("JP_PriceActual" ,m_InvoiceLine.getPriceActual());//JPIERE-0556
+			
 			if(glLine.get_ColumnIndex("JP_InvoiceLine_ID") > -1)
 				glLine.set_ValueNoCheck("JP_InvoiceLine_ID", m_InvoiceLine.get_Value("C_InvoiceLine_ID"));
 
@@ -1326,25 +1328,40 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 		}
 
+		if(iTax != null)//JPIERE-0556
+		{
+			glLine.set_ValueNoCheck("C_Tax_ID" , iTax.getC_Tax_ID());
+			glLine.set_ValueNoCheck("JP_SOPOType" , "N");
+		}
+		
+		
 		if(isReverse)
 		{
 			glLine.setAccount_ID(factLine.getAccount_ID());
-			glLine.setQty(factLine.getQty().negate());
-			glLine.set_ValueNoCheck("JP_PriceActual" ,m_InvoiceLine.getPriceActual());//JPIERE-0556
+			glLine.setQty(factLine.getQty().negate());			
 			glLine.setAmtSourceDr(factLine.getAmtAcctCr());
 			glLine.setAmtAcctDr(factLine.getAmtAcctCr());
 			glLine.setAmtSourceCr(factLine.getAmtAcctDr());
 			glLine.setAmtAcctCr(factLine.getAmtAcctDr());
+			if(iTax != null)//JPIERE-0556
+			{
+				glLine.set_ValueNoCheck("JP_TaxBaseAmt" , iTax.getTaxBaseAmt().negate());
+				glLine.set_ValueNoCheck("JP_TaxAmt" , iTax.getTaxAmt().negate());
+			}
 
 		}else {
 
 			glLine.setAccount_ID(m_Account.getAccount_ID());
 			glLine.setQty(factLine.getQty());
-			glLine.set_ValueNoCheck("JP_PriceActual" ,m_InvoiceLine.getPriceActual());//JPIERE-0556
 			glLine.setAmtSourceDr(factLine.getAmtAcctDr());
 			glLine.setAmtAcctDr(factLine.getAmtAcctDr());
 			glLine.setAmtSourceCr(factLine.getAmtAcctCr());
 			glLine.setAmtAcctCr(factLine.getAmtAcctCr());
+			if(iTax != null)//JPIERE-0556
+			{
+				glLine.set_ValueNoCheck("JP_TaxBaseAmt" , iTax.getTaxBaseAmt());
+				glLine.set_ValueNoCheck("JP_TaxAmt" , iTax.getTaxAmt());
+			}
 
 		}
 

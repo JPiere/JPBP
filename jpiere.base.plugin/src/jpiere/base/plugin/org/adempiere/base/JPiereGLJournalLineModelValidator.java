@@ -41,6 +41,7 @@ import jpiere.base.plugin.util.JPiereUtil;
  */
 public class JPiereGLJournalLineModelValidator implements ModelValidator {
 
+	@SuppressWarnings("unused")
 	private static CLogger log = CLogger.getCLogger(JPiereGLJournalLineModelValidator.class);
 	private int AD_Client_ID = -1;
 	
@@ -87,8 +88,13 @@ public class JPiereGLJournalLineModelValidator implements ModelValidator {
 			}else if(Util.isEmpty(JP_SOPOType) || "N".equals(JP_SOPOType)) {
 				
 				jl.set_ValueNoCheck("JP_SOPOType",  "N");
-				jl.set_ValueNoCheck("JP_TaxBaseAmt",  Env.ZERO);
-				jl.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+				if(jl.get_Value("JP_TaxBaseAmt") == null)
+				{
+					jl.set_ValueNoCheck("JP_TaxBaseAmt",  Env.ZERO);
+					jl.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+				}else if(jl.get_Value("JP_TaxAmt") == null){
+					jl.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+				}
 				
 			}else {
 				

@@ -141,8 +141,10 @@ public class JPierePaymentModelValidator implements ModelValidator,FactsValidato
 				FactLine[]  factLine = fact.getLines();
 				for(int i = 0; i < factLine.length; i++)
 				{
-					factLine[i].set_ValueNoCheck("JP_BankAccount_ID", i_Payment.getC_BankAccount_ID());
-					factLine[i].set_ValueNoCheck("JP_Charge_ID", i_Payment.getC_Charge_ID());
+					if(i_Payment.getC_BankAccount_ID() > 0)
+						factLine[i].set_ValueNoCheck("JP_BankAccount_ID", i_Payment.getC_BankAccount_ID());
+					if(i_Payment.getC_Charge_ID() > 0)
+						factLine[i].set_ValueNoCheck("JP_Charge_ID", i_Payment.getC_Charge_ID());
 				}//for
 	
 			}//for
