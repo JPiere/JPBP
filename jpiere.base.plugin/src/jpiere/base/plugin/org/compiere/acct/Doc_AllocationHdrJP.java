@@ -70,6 +70,8 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
  *
  *  JPIERE-0052 - JPiere original Doc_AcclocationHdr
  *  
+ *  ref: JPIERE-0566
+ *  ref: JPIERE-0556
  *  ref: JPIERE-0363
  *  ref: JPIERE-0026
  *
@@ -283,6 +285,8 @@ public class Doc_AllocationHdrJP extends Doc
 					if (fl != null && payment != null) {
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
+						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
 						allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance());
 					}
 				}
@@ -327,6 +331,8 @@ public class Doc_AllocationHdrJP extends Doc
 						if (fl != null && payment != null) {
 							fl.setAD_Org_ID(payment.getAD_Org_ID());
 							fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+							fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
+							fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
 							if (payment.getReversal_ID() > 0 )
 								allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
 							else
@@ -354,6 +360,8 @@ public class Doc_AllocationHdrJP extends Doc
 					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
+						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
 					}
 				}
 				//	Write off		DR
@@ -365,6 +373,8 @@ public class Doc_AllocationHdrJP extends Doc
 					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
+						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
 					}
 				}
 
@@ -380,6 +390,7 @@ public class Doc_AllocationHdrJP extends Doc
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
+						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
 					}													//JPiere-0026 Finish
 					if(JP_ContractContent_ID > 0)
 						fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
@@ -439,6 +450,7 @@ public class Doc_AllocationHdrJP extends Doc
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());		//JPIERE-0052
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
+						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
 					}														//JPiere-0026 Finish
 					if(JP_ContractContent_ID > 0)
 						fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
@@ -466,6 +478,8 @@ public class Doc_AllocationHdrJP extends Doc
 					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
+						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
 					}
 				}
 				//	Write off		CR
@@ -477,6 +491,8 @@ public class Doc_AllocationHdrJP extends Doc
 					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
+						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
 					}
 				}
 				//	Payment/Cash	CR
@@ -488,6 +504,8 @@ public class Doc_AllocationHdrJP extends Doc
 					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
+						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
+						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
 					}
 					if (fl != null)
 						allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
