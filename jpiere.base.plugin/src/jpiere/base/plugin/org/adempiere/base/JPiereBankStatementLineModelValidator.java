@@ -42,6 +42,7 @@ import jpiere.base.plugin.org.adempiere.model.MBankStatementTax;
  *  JPIERE-0012: Tax at Bank Statement
  *  JPIERE-0087: Org check at Bank Statemnt and Account.
  *  JPIERE-0300: Control of Bank Statemnet and Payment relation.
+ *  JPIERE-0543(v9): Set tax info to the Fact_Acct table
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -106,7 +107,9 @@ public class JPiereBankStatementLineModelValidator implements ModelValidator {
 					}else{
 						bsl.set_ValueNoCheck("JP_SOPOType", "N");
 					}
-				}	
+				}else if(C_Tax_ID == null) {
+					bsl.set_ValueNoCheck("JP_SOPOType", null);
+				}
 			}
 
 			//JPIERE-0087
