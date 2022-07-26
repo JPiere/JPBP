@@ -287,7 +287,7 @@ public class JPiereResetPassword implements IFormController, EventListener<Event
 		String p_NewEMailUser = txtNewEMailUser.getValue();
 		String p_NewEMailUserPW = txtNewEMailUserPW.getValue();
 
-		MUser user = MUser.get(Env.getCtx(), p_AD_User_ID);
+		MUser user = new MUser(Env.getCtx(), p_AD_User_ID, null);
 		if (log.isLoggable(Level.FINE)) log.fine("User=" + user);
 
 		//	Do we need a password ?
