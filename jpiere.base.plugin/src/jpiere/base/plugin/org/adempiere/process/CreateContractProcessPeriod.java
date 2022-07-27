@@ -250,7 +250,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 		LocalDateTime dateContract_From = p_DateContract_From.toLocalDateTime();
 		LocalDateTime dateContract_To = p_DateContract_To.toLocalDateTime();
-		if(dateContract_From.compareTo(dateContract_To) >= 0)
+		if(dateContract_From.compareTo(dateContract_To) > 0)
 			return Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "DateContract");
 
 		LocalDateTime startDate= p_DateContract_From.toLocalDateTime();
