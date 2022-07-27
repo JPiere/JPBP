@@ -269,7 +269,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 		do
 		{
-			if(endDate.compareTo(dateContract_To) > 0)
+			if(endDate.compareTo(dateContract_To) >= 0)
 			{
 				endDate = dateContract_To;
 				isBreak = true;
@@ -340,7 +340,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 			startDate = endDate.plusDays(1);
 			endDate= startDate.plusYears(p_Year).plusMonths(p_Month).plusDays(p_Day).minusDays(1);
 
-		} while (!isBreak && startDate.compareTo(dateContract_To) < 0);
+		} while (!isBreak && startDate.compareTo(dateContract_To) <= 0);
 
 
 		//After
