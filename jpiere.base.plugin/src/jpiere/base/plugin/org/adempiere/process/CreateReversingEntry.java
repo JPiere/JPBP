@@ -91,7 +91,7 @@ public class CreateReversingEntry extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		//Delete I_GLJournalJP
-		String deleteSQL = "DELETE I_GLJournalJP WHERE AD_Client_ID=?";
+		String deleteSQL = "DELETE FROM I_GLJournalJP WHERE AD_Client_ID=?";
 		int deleteNum = DB.executeUpdate(deleteSQL, getAD_Client_ID(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Delete I_GLJournalJP -> #" + deleteNum);
 		commitEx();
@@ -238,31 +238,38 @@ public class CreateReversingEntry extends SvrProcess {
 	private MFactAcct[] getTargetReversingEntry()
 	{
 		ArrayList<MFactAcct> list = new ArrayList<MFactAcct>();
-		StringBuffer sql = new StringBuffer("SELECT * FROM FACT_ACCT WHERE DateAcct >= ? AND DateAcct <=? AND AD_Client_ID=? AND C_AcctSchema_ID=? AND PostingType='A'");//1 ... 4
+		StringBuffer select = new StringBuffer("SELECT * FROM FACT_ACCT f ");
+		StringBuffer where = new StringBuffer(" WHERE f.DateAcct >= ? AND f.DateAcct <=? AND f.AD_Client_ID=? AND f.C_AcctSchema_ID=? AND f.PostingType='A'");//1 ... 4
 		if(p_AD_Org_ID > 0)
 		{
-			sql.append(" AND AD_Org_ID=?");
+			where.append(" AND f.AD_Org_ID=?");
 		}
 
 		if(p_AD_Table_ID > 0)
 		{
-			sql.append(" AND AD_Table_ID=?");
+			where.append(" AND f.AD_Table_ID=?");
+			if(p_AD_Table_ID == 224)
+			{
+				select.append(" INNER JOIN GL_Journal j ON ( f.Record_ID = j.GL_Journal_ID AND f.AD_Table_ID=224 ) ");
+				where.append(" AND JP_DataMigration_Identifier IS NULL ");//224 = GL_Journal 
+			}
+			
 		}else {
-			sql.append(" AND AD_Table_ID<>224");//224 = GL_Journal -> To except GL_Journal from reversing entory is better at data migration generally.
+			where.append(" AND f.AD_Table_ID<>224");//224 = GL_Journal -> To except GL_Journal from reversing entory is better at data migration generally.
 		}
 
 		if(p_AD_Table_ID > 0 && p_Record_ID > 0)
 		{
-			sql.append(" AND Record_ID=?");
+			where.append(" AND f.Record_ID=?");
 		}
 
-		sql.append(" ORDER BY DateAcct, AD_Table_ID, Record_ID, Fact_Acct_ID");
+		where.append(" ORDER BY f.DateAcct, f.AD_Table_ID, f.Record_ID, f.Fact_Acct_ID");
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+			pstmt = DB.prepareStatement(select.toString() + where.toString(), get_TrxName());
 			pstmt.setTimestamp(1, p_DateAcct_From);
 			pstmt.setTimestamp(2, p_DateAcct_To);
 			pstmt.setInt(3, getAD_Client_ID());
@@ -293,7 +300,7 @@ public class CreateReversingEntry extends SvrProcess {
 		}
 		catch (Exception e)
 		{
-			log.log(Level.SEVERE, sql.toString(), e);
+			log.log(Level.SEVERE, where.toString(), e);
 		}
 		finally
 		{
