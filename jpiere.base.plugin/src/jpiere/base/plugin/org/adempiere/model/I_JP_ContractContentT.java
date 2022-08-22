@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractContentT
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractContentT 
@@ -155,12 +155,12 @@ public interface I_JP_ContractContentT
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -489,12 +489,12 @@ public interface I_JP_ContractContentT
     public static final String COLUMNNAME_IsDropShip = "IsDropShip";
 
 	/** Set Drop Shipment.
-	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  * Drop Shipments are sent directly to the Drop Shipment Location
 	  */
 	public void setIsDropShip (boolean IsDropShip);
 
 	/** Get Drop Shipment.
-	  * Drop Shipments are sent from the Vendor directly to the Customer
+	  * Drop Shipments are sent directly to the Drop Shipment Location
 	  */
 	public boolean isDropShip();
 
@@ -544,6 +544,15 @@ public interface I_JP_ContractContentT
 
 	public org.compiere.model.I_C_DocType getJP_BaseDocDocType() throws RuntimeException;
 
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
+
     /** Column name JP_ContractC_AutoUpdatePolicy */
     public static final String COLUMNNAME_JP_ContractC_AutoUpdatePolicy = "JP_ContractC_AutoUpdatePolicy";
 
@@ -556,10 +565,10 @@ public interface I_JP_ContractContentT
     /** Column name JP_ContractCalenderRef_ID */
     public static final String COLUMNNAME_JP_ContractCalenderRef_ID = "JP_ContractCalenderRef_ID";
 
-	/** Set Contract Calender Reference	  */
+	/** Set Contract Calendar Reference	  */
 	public void setJP_ContractCalenderRef_ID (int JP_ContractCalenderRef_ID);
 
-	/** Get Contract Calender Reference	  */
+	/** Get Contract Calendar Reference	  */
 	public int getJP_ContractCalenderRef_ID();
 
 	public I_JP_ContractCalenderRef getJP_ContractCalenderRef() throws RuntimeException;
@@ -670,6 +679,32 @@ public interface I_JP_ContractContentT
 	public int getJP_Locator_ID();
 
 	public org.compiere.model.I_M_Locator getJP_Locator() throws RuntimeException;
+
+    /** Column name JP_Remarks */
+    public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
+
+	/** Set Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks);
+
+	/** Get Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks();
+
+    /** Column name JP_Subject */
+    public static final String COLUMNNAME_JP_Subject = "JP_Subject";
+
+	/** Set Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject);
+
+	/** Get Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject();
 
     /** Column name M_FreightCategory_ID */
     public static final String COLUMNNAME_M_FreightCategory_ID = "M_FreightCategory_ID";

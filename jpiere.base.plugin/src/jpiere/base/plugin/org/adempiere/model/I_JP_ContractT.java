@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractT
  *  @author iDempiere (generated) 
- *  @version Release 6.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractT 
@@ -169,6 +169,15 @@ public interface I_JP_ContractT
 	  */
 	public String getJP_Classname1();
 
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
+
     /** Column name JP_ContractCancelTerm_ID */
     public static final String COLUMNNAME_JP_ContractCancelTerm_ID = "JP_ContractCancelTerm_ID";
 
@@ -239,6 +248,32 @@ public interface I_JP_ContractT
 
 	/** Get Contract Type	  */
 	public String getJP_ContractType();
+
+    /** Column name JP_Remarks */
+    public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
+
+	/** Set Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks);
+
+	/** Get Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks();
+
+    /** Column name JP_Subject */
+    public static final String COLUMNNAME_JP_Subject = "JP_Subject";
+
+	/** Set Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject);
+
+	/** Get Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

@@ -25,14 +25,15 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ContractPSInvoiceLine
  *  @author iDempiere (generated) 
- *  @version Release 6.1 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="JP_ContractPSInvoiceLine")
 public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInvoiceLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181205L;
+	private static final long serialVersionUID = 20220822L;
 
     /** Standard Constructor */
     public X_JP_ContractPSInvoiceLine (Properties ctx, int JP_ContractPSInvoiceLine_ID, String trxName)
@@ -53,7 +54,38 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 // @JP_ContractProcSchedule_ID@
 			setJP_ContractProcess_Inv_ID (0);
 			setLine (0);
-// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM JP_ContractPSInvoiceLine WHERE JP_ContractPSLine_ID=@JP_ContractPSLine_ID@
+// @SQL=SELECT Line AS DefaultValue FROM JP_ContractPSLine WHERE JP_ContractPSLine_ID=@JP_ContractPSLine_ID@
+			setLineNetAmt (Env.ZERO);
+			setPriceActual (Env.ZERO);
+			setPriceEntered (Env.ZERO);
+			setPriceLimit (Env.ZERO);
+			setPriceList (Env.ZERO);
+			setProcessed (false);
+			setQtyEntered (Env.ZERO);
+			setQtyInvoiced (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_ContractPSInvoiceLine (Properties ctx, int JP_ContractPSInvoiceLine_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_ContractPSInvoiceLine_ID, trxName, virtualColumns);
+      /** if (JP_ContractPSInvoiceLine_ID == 0)
+        {
+			setC_Tax_ID (0);
+			setC_UOM_ID (0);
+			setIsDescription (false);
+			setIsFactCreatedJP (false);
+// N
+			setJP_ContractCalender_Inv_ID (0);
+			setJP_ContractPSInvoiceLine_ID (0);
+			setJP_ContractPSLine_ID (0);
+			setJP_ContractProcPeriod_ID (0);
+			setJP_ContractProcSchedule_ID (0);
+// @JP_ContractProcSchedule_ID@
+			setJP_ContractProcess_Inv_ID (0);
+			setLine (0);
+// @SQL=SELECT Line AS DefaultValue FROM JP_ContractPSLine WHERE JP_ContractPSLine_ID=@JP_ContractPSLine_ID@
 			setLineNetAmt (Env.ZERO);
 			setPriceActual (Env.ZERO);
 			setPriceEntered (Env.ZERO);
@@ -88,27 +120,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractPSInvoiceLine[")
+      StringBuilder sb = new StringBuilder ("X_JP_ContractPSInvoiceLine[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
 
 	/** Set Trx Organization.
-		@param AD_OrgTrx_ID 
-		Performing or initiating organization
-	  */
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
 	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
 	{
-		if (AD_OrgTrx_ID < 1) 
+		if (AD_OrgTrx_ID < 1)
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
 	}
 
 	/** Get Trx Organization.
 		@return Performing or initiating organization
 	  */
-	public int getAD_OrgTrx_ID () 
+	public int getAD_OrgTrx_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
@@ -117,26 +148,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
-			.getPO(getC_Activity_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_ID)
+			.getPO(getC_Activity_ID(), get_TrxName());
+	}
 
 	/** Set Activity.
-		@param C_Activity_ID 
-		Business Activity
-	  */
+		@param C_Activity_ID Business Activity
+	*/
 	public void setC_Activity_ID (int C_Activity_ID)
 	{
-		if (C_Activity_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Activity_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
+		if (C_Activity_ID < 1)
+			set_Value (COLUMNNAME_C_Activity_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
 	/** Get Activity.
 		@return Business Activity
 	  */
-	public int getC_Activity_ID () 
+	public int getC_Activity_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Activity_ID);
 		if (ii == null)
@@ -145,26 +176,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_Campaign getC_Campaign() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_Name)
-			.getPO(getC_Campaign_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_ID)
+			.getPO(getC_Campaign_ID(), get_TrxName());
+	}
 
 	/** Set Campaign.
-		@param C_Campaign_ID 
-		Marketing Campaign
-	  */
+		@param C_Campaign_ID Marketing Campaign
+	*/
 	public void setC_Campaign_ID (int C_Campaign_ID)
 	{
-		if (C_Campaign_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Campaign_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
+		if (C_Campaign_ID < 1)
+			set_Value (COLUMNNAME_C_Campaign_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
 	}
 
 	/** Get Campaign.
 		@return Marketing Campaign
 	  */
-	public int getC_Campaign_ID () 
+	public int getC_Campaign_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Campaign_ID);
 		if (ii == null)
@@ -173,26 +204,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
-			.getPO(getC_Charge_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_ID)
+			.getPO(getC_Charge_ID(), get_TrxName());
+	}
 
 	/** Set Charge.
-		@param C_Charge_ID 
-		Additional document charges
-	  */
+		@param C_Charge_ID Additional document charges
+	*/
 	public void setC_Charge_ID (int C_Charge_ID)
 	{
-		if (C_Charge_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
+		if (C_Charge_ID < 1)
+			set_Value (COLUMNNAME_C_Charge_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
 	}
 
 	/** Get Charge.
 		@return Additional document charges
 	  */
-	public int getC_Charge_ID () 
+	public int getC_Charge_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
 		if (ii == null)
@@ -201,26 +232,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_InvoiceLine)MTable.get(getCtx(), org.compiere.model.I_C_InvoiceLine.Table_Name)
-			.getPO(getC_InvoiceLine_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_InvoiceLine)MTable.get(getCtx(), org.compiere.model.I_C_InvoiceLine.Table_ID)
+			.getPO(getC_InvoiceLine_ID(), get_TrxName());
+	}
 
 	/** Set Invoice Line.
-		@param C_InvoiceLine_ID 
-		Invoice Detail Line
-	  */
+		@param C_InvoiceLine_ID Invoice Detail Line
+	*/
 	public void setC_InvoiceLine_ID (int C_InvoiceLine_ID)
 	{
-		if (C_InvoiceLine_ID < 1) 
+		if (C_InvoiceLine_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_InvoiceLine_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_InvoiceLine_ID, Integer.valueOf(C_InvoiceLine_ID));
 	}
 
 	/** Get Invoice Line.
 		@return Invoice Detail Line
 	  */
-	public int getC_InvoiceLine_ID () 
+	public int getC_InvoiceLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_InvoiceLine_ID);
 		if (ii == null)
@@ -229,26 +260,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_ProjectPhase getC_ProjectPhase() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ProjectPhase)MTable.get(getCtx(), org.compiere.model.I_C_ProjectPhase.Table_Name)
-			.getPO(getC_ProjectPhase_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ProjectPhase)MTable.get(getCtx(), org.compiere.model.I_C_ProjectPhase.Table_ID)
+			.getPO(getC_ProjectPhase_ID(), get_TrxName());
+	}
 
 	/** Set Project Phase.
-		@param C_ProjectPhase_ID 
-		Phase of a Project
-	  */
+		@param C_ProjectPhase_ID Phase of a Project
+	*/
 	public void setC_ProjectPhase_ID (int C_ProjectPhase_ID)
 	{
-		if (C_ProjectPhase_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_ProjectPhase_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_C_ProjectPhase_ID, Integer.valueOf(C_ProjectPhase_ID));
+		if (C_ProjectPhase_ID < 1)
+			set_Value (COLUMNNAME_C_ProjectPhase_ID, null);
+		else
+			set_Value (COLUMNNAME_C_ProjectPhase_ID, Integer.valueOf(C_ProjectPhase_ID));
 	}
 
 	/** Get Project Phase.
 		@return Phase of a Project
 	  */
-	public int getC_ProjectPhase_ID () 
+	public int getC_ProjectPhase_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectPhase_ID);
 		if (ii == null)
@@ -257,26 +288,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_ProjectTask getC_ProjectTask() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ProjectTask)MTable.get(getCtx(), org.compiere.model.I_C_ProjectTask.Table_Name)
-			.getPO(getC_ProjectTask_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ProjectTask)MTable.get(getCtx(), org.compiere.model.I_C_ProjectTask.Table_ID)
+			.getPO(getC_ProjectTask_ID(), get_TrxName());
+	}
 
 	/** Set Project Task.
-		@param C_ProjectTask_ID 
-		Actual Project Task in a Phase
-	  */
+		@param C_ProjectTask_ID Actual Project Task in a Phase
+	*/
 	public void setC_ProjectTask_ID (int C_ProjectTask_ID)
 	{
-		if (C_ProjectTask_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_ProjectTask_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_C_ProjectTask_ID, Integer.valueOf(C_ProjectTask_ID));
+		if (C_ProjectTask_ID < 1)
+			set_Value (COLUMNNAME_C_ProjectTask_ID, null);
+		else
+			set_Value (COLUMNNAME_C_ProjectTask_ID, Integer.valueOf(C_ProjectTask_ID));
 	}
 
 	/** Get Project Task.
 		@return Actual Project Task in a Phase
 	  */
-	public int getC_ProjectTask_ID () 
+	public int getC_ProjectTask_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectTask_ID);
 		if (ii == null)
@@ -285,26 +316,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
-			.getPO(getC_Project_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
 
 	/** Set Project.
-		@param C_Project_ID 
-		Financial Project
-	  */
+		@param C_Project_ID Financial Project
+	*/
 	public void setC_Project_ID (int C_Project_ID)
 	{
-		if (C_Project_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+		if (C_Project_ID < 1)
+			set_Value (COLUMNNAME_C_Project_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
 	}
 
 	/** Get Project.
 		@return Financial Project
 	  */
-	public int getC_Project_ID () 
+	public int getC_Project_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
@@ -313,26 +344,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_Name)
-			.getPO(getC_Tax_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_ID)
+			.getPO(getC_Tax_ID(), get_TrxName());
+	}
 
 	/** Set Tax.
-		@param C_Tax_ID 
-		Tax identifier
-	  */
+		@param C_Tax_ID Tax identifier
+	*/
 	public void setC_Tax_ID (int C_Tax_ID)
 	{
-		if (C_Tax_ID < 1) 
+		if (C_Tax_ID < 1)
 			set_Value (COLUMNNAME_C_Tax_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Tax_ID, Integer.valueOf(C_Tax_ID));
 	}
 
 	/** Get Tax.
 		@return Tax identifier
 	  */
-	public int getC_Tax_ID () 
+	public int getC_Tax_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Tax_ID);
 		if (ii == null)
@@ -341,26 +372,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
-			.getPO(getC_UOM_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_ID)
+			.getPO(getC_UOM_ID(), get_TrxName());
+	}
 
 	/** Set UOM.
-		@param C_UOM_ID 
-		Unit of Measure
-	  */
+		@param C_UOM_ID Unit of Measure
+	*/
 	public void setC_UOM_ID (int C_UOM_ID)
 	{
-		if (C_UOM_ID < 1) 
+		if (C_UOM_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
 	}
 
 	/** Get UOM.
 		@return Unit of Measure
 	  */
-	public int getC_UOM_ID () 
+	public int getC_UOM_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_UOM_ID);
 		if (ii == null)
@@ -369,9 +400,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -380,15 +410,14 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Description Only.
-		@param IsDescription 
-		if true, the line is just description and no transaction
-	  */
+		@param IsDescription if true, the line is just description and no transaction
+	*/
 	public void setIsDescription (boolean IsDescription)
 	{
 		set_Value (COLUMNNAME_IsDescription, Boolean.valueOf(IsDescription));
@@ -397,7 +426,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Description Only.
 		@return if true, the line is just description and no transaction
 	  */
-	public boolean isDescription () 
+	public boolean isDescription()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDescription);
 		if (oo != null) 
@@ -410,7 +439,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Fact was created.
-		@param IsFactCreatedJP Fact was created	  */
+		@param IsFactCreatedJP Fact was created
+	*/
 	public void setIsFactCreatedJP (boolean IsFactCreatedJP)
 	{
 		set_Value (COLUMNNAME_IsFactCreatedJP, Boolean.valueOf(IsFactCreatedJP));
@@ -418,7 +448,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 
 	/** Get Fact was created.
 		@return Fact was created	  */
-	public boolean isFactCreatedJP () 
+	public boolean isFactCreatedJP()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFactCreatedJP);
 		if (oo != null) 
@@ -430,24 +460,41 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 		return false;
 	}
 
-	public I_JP_ContractCalender getJP_ContractCalender_Inv() throws RuntimeException
-    {
-		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_Name)
-			.getPO(getJP_ContractCalender_Inv_ID(), get_TrxName());	}
+	/** Set Communication Column.
+		@param JP_CommunicationColumn Communication Column
+	*/
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn)
+	{
+		set_Value (COLUMNNAME_JP_CommunicationColumn, JP_CommunicationColumn);
+	}
 
-	/** Set Contract Calender(Invoice).
-		@param JP_ContractCalender_Inv_ID Contract Calender(Invoice)	  */
+	/** Get Communication Column.
+		@return Communication Column	  */
+	public String getJP_CommunicationColumn()
+	{
+		return (String)get_Value(COLUMNNAME_JP_CommunicationColumn);
+	}
+
+	public I_JP_ContractCalender getJP_ContractCalender_Inv() throws RuntimeException
+	{
+		return (I_JP_ContractCalender)MTable.get(getCtx(), I_JP_ContractCalender.Table_ID)
+			.getPO(getJP_ContractCalender_Inv_ID(), get_TrxName());
+	}
+
+	/** Set Contract Calendar(Invoice).
+		@param JP_ContractCalender_Inv_ID Contract Calendar(Invoice)
+	*/
 	public void setJP_ContractCalender_Inv_ID (int JP_ContractCalender_Inv_ID)
 	{
-		if (JP_ContractCalender_Inv_ID < 1) 
+		if (JP_ContractCalender_Inv_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractCalender_Inv_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractCalender_Inv_ID, Integer.valueOf(JP_ContractCalender_Inv_ID));
 	}
 
-	/** Get Contract Calender(Invoice).
-		@return Contract Calender(Invoice)	  */
-	public int getJP_ContractCalender_Inv_ID () 
+	/** Get Contract Calendar(Invoice).
+		@return Contract Calendar(Invoice)	  */
+	public int getJP_ContractCalender_Inv_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCalender_Inv_ID);
 		if (ii == null)
@@ -456,23 +503,25 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public I_JP_ContractLine getJP_ContractLine() throws RuntimeException
-    {
-		return (I_JP_ContractLine)MTable.get(getCtx(), I_JP_ContractLine.Table_Name)
-			.getPO(getJP_ContractLine_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractLine)MTable.get(getCtx(), I_JP_ContractLine.Table_ID)
+			.getPO(getJP_ContractLine_ID(), get_TrxName());
+	}
 
 	/** Set Contract Content Line.
-		@param JP_ContractLine_ID Contract Content Line	  */
+		@param JP_ContractLine_ID Contract Content Line
+	*/
 	public void setJP_ContractLine_ID (int JP_ContractLine_ID)
 	{
-		if (JP_ContractLine_ID < 1) 
+		if (JP_ContractLine_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_ContractLine_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_ContractLine_ID, Integer.valueOf(JP_ContractLine_ID));
 	}
 
 	/** Get Contract Content Line.
 		@return Contract Content Line	  */
-	public int getJP_ContractLine_ID () 
+	public int getJP_ContractLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractLine_ID);
 		if (ii == null)
@@ -481,18 +530,19 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set JP_ContractPSInvoiceLine.
-		@param JP_ContractPSInvoiceLine_ID JP_ContractPSInvoiceLine	  */
+		@param JP_ContractPSInvoiceLine_ID JP_ContractPSInvoiceLine
+	*/
 	public void setJP_ContractPSInvoiceLine_ID (int JP_ContractPSInvoiceLine_ID)
 	{
-		if (JP_ContractPSInvoiceLine_ID < 1) 
+		if (JP_ContractPSInvoiceLine_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_ContractPSInvoiceLine_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_ContractPSInvoiceLine_ID, Integer.valueOf(JP_ContractPSInvoiceLine_ID));
 	}
 
 	/** Get JP_ContractPSInvoiceLine.
 		@return JP_ContractPSInvoiceLine	  */
-	public int getJP_ContractPSInvoiceLine_ID () 
+	public int getJP_ContractPSInvoiceLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractPSInvoiceLine_ID);
 		if (ii == null)
@@ -501,7 +551,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set JP_ContractPSInvoiceLine_UU.
-		@param JP_ContractPSInvoiceLine_UU JP_ContractPSInvoiceLine_UU	  */
+		@param JP_ContractPSInvoiceLine_UU JP_ContractPSInvoiceLine_UU
+	*/
 	public void setJP_ContractPSInvoiceLine_UU (String JP_ContractPSInvoiceLine_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_ContractPSInvoiceLine_UU, JP_ContractPSInvoiceLine_UU);
@@ -509,29 +560,31 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 
 	/** Get JP_ContractPSInvoiceLine_UU.
 		@return JP_ContractPSInvoiceLine_UU	  */
-	public String getJP_ContractPSInvoiceLine_UU () 
+	public String getJP_ContractPSInvoiceLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractPSInvoiceLine_UU);
 	}
 
 	public I_JP_ContractPSLine getJP_ContractPSLine() throws RuntimeException
-    {
-		return (I_JP_ContractPSLine)MTable.get(getCtx(), I_JP_ContractPSLine.Table_Name)
-			.getPO(getJP_ContractPSLine_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractPSLine)MTable.get(getCtx(), I_JP_ContractPSLine.Table_ID)
+			.getPO(getJP_ContractPSLine_ID(), get_TrxName());
+	}
 
 	/** Set Contract Process Schedule Line.
-		@param JP_ContractPSLine_ID Contract Process Schedule Line	  */
+		@param JP_ContractPSLine_ID Contract Process Schedule Line
+	*/
 	public void setJP_ContractPSLine_ID (int JP_ContractPSLine_ID)
 	{
-		if (JP_ContractPSLine_ID < 1) 
+		if (JP_ContractPSLine_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_ContractPSLine_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_ContractPSLine_ID, Integer.valueOf(JP_ContractPSLine_ID));
 	}
 
 	/** Get Contract Process Schedule Line.
 		@return Contract Process Schedule Line	  */
-	public int getJP_ContractPSLine_ID () 
+	public int getJP_ContractPSLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractPSLine_ID);
 		if (ii == null)
@@ -540,23 +593,25 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException
-    {
-		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
-			.getPO(getJP_ContractProcPeriod_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_ID)
+			.getPO(getJP_ContractProcPeriod_ID(), get_TrxName());
+	}
 
 	/** Set Contract Process Period.
-		@param JP_ContractProcPeriod_ID Contract Process Period	  */
+		@param JP_ContractProcPeriod_ID Contract Process Period
+	*/
 	public void setJP_ContractProcPeriod_ID (int JP_ContractProcPeriod_ID)
 	{
-		if (JP_ContractProcPeriod_ID < 1) 
+		if (JP_ContractProcPeriod_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, Integer.valueOf(JP_ContractProcPeriod_ID));
 	}
 
 	/** Get Contract Process Period.
 		@return Contract Process Period	  */
-	public int getJP_ContractProcPeriod_ID () 
+	public int getJP_ContractProcPeriod_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPeriod_ID);
 		if (ii == null)
@@ -565,23 +620,25 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public I_JP_ContractProcSchedule getJP_ContractProcSchedule() throws RuntimeException
-    {
-		return (I_JP_ContractProcSchedule)MTable.get(getCtx(), I_JP_ContractProcSchedule.Table_Name)
-			.getPO(getJP_ContractProcSchedule_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractProcSchedule)MTable.get(getCtx(), I_JP_ContractProcSchedule.Table_ID)
+			.getPO(getJP_ContractProcSchedule_ID(), get_TrxName());
+	}
 
 	/** Set Contract Process Schedule Doc.
-		@param JP_ContractProcSchedule_ID Contract Process Schedule Doc	  */
+		@param JP_ContractProcSchedule_ID Contract Process Schedule Doc
+	*/
 	public void setJP_ContractProcSchedule_ID (int JP_ContractProcSchedule_ID)
 	{
-		if (JP_ContractProcSchedule_ID < 1) 
+		if (JP_ContractProcSchedule_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_ContractProcSchedule_ID, Integer.valueOf(JP_ContractProcSchedule_ID));
 	}
 
 	/** Get Contract Process Schedule Doc.
 		@return Contract Process Schedule Doc	  */
-	public int getJP_ContractProcSchedule_ID () 
+	public int getJP_ContractProcSchedule_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcSchedule_ID);
 		if (ii == null)
@@ -590,23 +647,25 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public I_JP_ContractProcess getJP_ContractProcess_Inv() throws RuntimeException
-    {
-		return (I_JP_ContractProcess)MTable.get(getCtx(), I_JP_ContractProcess.Table_Name)
-			.getPO(getJP_ContractProcess_Inv_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractProcess)MTable.get(getCtx(), I_JP_ContractProcess.Table_ID)
+			.getPO(getJP_ContractProcess_Inv_ID(), get_TrxName());
+	}
 
 	/** Set Contract Process(Invoice).
-		@param JP_ContractProcess_Inv_ID Contract Process(Invoice)	  */
+		@param JP_ContractProcess_Inv_ID Contract Process(Invoice)
+	*/
 	public void setJP_ContractProcess_Inv_ID (int JP_ContractProcess_Inv_ID)
 	{
-		if (JP_ContractProcess_Inv_ID < 1) 
+		if (JP_ContractProcess_Inv_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractProcess_Inv_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractProcess_Inv_ID, Integer.valueOf(JP_ContractProcess_Inv_ID));
 	}
 
 	/** Get Contract Process(Invoice).
 		@return Contract Process(Invoice)	  */
-	public int getJP_ContractProcess_Inv_ID () 
+	public int getJP_ContractProcess_Inv_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcess_Inv_ID);
 		if (ii == null)
@@ -615,9 +674,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Line No.
-		@param Line 
-		Unique line for this document
-	  */
+		@param Line Unique line for this document
+	*/
 	public void setLine (int Line)
 	{
 		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
@@ -626,7 +684,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Line No.
 		@return Unique line for this document
 	  */
-	public int getLine () 
+	public int getLine()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Line);
 		if (ii == null)
@@ -635,9 +693,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Line Amount.
-		@param LineNetAmt 
-		Line Extended Amount (Quantity * Actual Price) without Freight and Charges
-	  */
+		@param LineNetAmt Line Extended Amount (Quantity * Actual Price) without Freight and Charges
+	*/
 	public void setLineNetAmt (BigDecimal LineNetAmt)
 	{
 		set_ValueNoCheck (COLUMNNAME_LineNetAmt, LineNetAmt);
@@ -646,7 +703,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Line Amount.
 		@return Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	  */
-	public BigDecimal getLineNetAmt () 
+	public BigDecimal getLineNetAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LineNetAmt);
 		if (bd == null)
@@ -655,26 +712,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException
-    {
-		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
-			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());	}
+	{
+		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_ID)
+			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());
+	}
 
 	/** Set Attribute Info.
-		@param M_AttributeSetInstance_ID 
-		Product Attribute Set Instance
-	  */
+		@param M_AttributeSetInstance_ID Product Attribute Set Instance
+	*/
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
 	{
-		if (M_AttributeSetInstance_ID < 0) 
+		if (M_AttributeSetInstance_ID < 0)
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
 	}
 
 	/** Get Attribute Info.
 		@return Product Attribute Set Instance
 	  */
-	public int getM_AttributeSetInstance_ID () 
+	public int getM_AttributeSetInstance_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
 		if (ii == null)
@@ -683,26 +740,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_Name)
-			.getPO(getM_Product_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
+			.getPO(getM_Product_ID(), get_TrxName());
+	}
 
 	/** Set Product.
-		@param M_Product_ID 
-		Product, Service, Item
-	  */
+		@param M_Product_ID Product, Service, Item
+	*/
 	public void setM_Product_ID (int M_Product_ID)
 	{
-		if (M_Product_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_Product_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
+		if (M_Product_ID < 1)
+			set_Value (COLUMNNAME_M_Product_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
 	}
 
 	/** Get Product.
 		@return Product, Service, Item
 	  */
-	public int getM_Product_ID () 
+	public int getM_Product_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
 		if (ii == null)
@@ -711,9 +768,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Unit Price.
-		@param PriceActual 
-		Actual Price 
-	  */
+		@param PriceActual Actual Price 
+	*/
 	public void setPriceActual (BigDecimal PriceActual)
 	{
 		set_ValueNoCheck (COLUMNNAME_PriceActual, PriceActual);
@@ -722,7 +778,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Unit Price.
 		@return Actual Price 
 	  */
-	public BigDecimal getPriceActual () 
+	public BigDecimal getPriceActual()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceActual);
 		if (bd == null)
@@ -731,9 +787,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Price.
-		@param PriceEntered 
-		Price Entered - the price based on the selected/base UoM
-	  */
+		@param PriceEntered Price Entered - the price based on the selected/base UoM
+	*/
 	public void setPriceEntered (BigDecimal PriceEntered)
 	{
 		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
@@ -742,7 +797,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Price.
 		@return Price Entered - the price based on the selected/base UoM
 	  */
-	public BigDecimal getPriceEntered () 
+	public BigDecimal getPriceEntered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceEntered);
 		if (bd == null)
@@ -751,9 +806,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Limit Price.
-		@param PriceLimit 
-		Lowest price for a product
-	  */
+		@param PriceLimit Lowest price for a product
+	*/
 	public void setPriceLimit (BigDecimal PriceLimit)
 	{
 		set_Value (COLUMNNAME_PriceLimit, PriceLimit);
@@ -762,7 +816,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Limit Price.
 		@return Lowest price for a product
 	  */
-	public BigDecimal getPriceLimit () 
+	public BigDecimal getPriceLimit()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceLimit);
 		if (bd == null)
@@ -771,9 +825,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set List Price.
-		@param PriceList 
-		List Price
-	  */
+		@param PriceList List Price
+	*/
 	public void setPriceList (BigDecimal PriceList)
 	{
 		set_Value (COLUMNNAME_PriceList, PriceList);
@@ -782,7 +835,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get List Price.
 		@return List Price
 	  */
-	public BigDecimal getPriceList () 
+	public BigDecimal getPriceList()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceList);
 		if (bd == null)
@@ -791,9 +844,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Processed.
-		@param Processed 
-		The document has been processed
-	  */
+		@param Processed The document has been processed
+	*/
 	public void setProcessed (boolean Processed)
 	{
 		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
@@ -802,7 +854,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Processed.
 		@return The document has been processed
 	  */
-	public boolean isProcessed () 
+	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
 		if (oo != null) 
@@ -815,9 +867,8 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Quantity.
-		@param QtyEntered 
-		The Quantity Entered is based on the selected UoM
-	  */
+		@param QtyEntered The Quantity Entered is based on the selected UoM
+	*/
 	public void setQtyEntered (BigDecimal QtyEntered)
 	{
 		set_Value (COLUMNNAME_QtyEntered, QtyEntered);
@@ -826,7 +877,7 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	/** Get Quantity.
 		@return The Quantity Entered is based on the selected UoM
 	  */
-	public BigDecimal getQtyEntered () 
+	public BigDecimal getQtyEntered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyEntered);
 		if (bd == null)
@@ -835,18 +886,17 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Invoiced Qty.
-		@param QtyInvoiced 
-		Invoiced Quantity
-	  */
+		@param QtyInvoiced Invoiced Quantity
+	*/
 	public void setQtyInvoiced (BigDecimal QtyInvoiced)
 	{
-		set_ValueNoCheck (COLUMNNAME_QtyInvoiced, QtyInvoiced);
+		set_Value (COLUMNNAME_QtyInvoiced, QtyInvoiced);
 	}
 
 	/** Get Invoiced Qty.
 		@return Invoiced Quantity
 	  */
-	public BigDecimal getQtyInvoiced () 
+	public BigDecimal getQtyInvoiced()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyInvoiced);
 		if (bd == null)
@@ -855,21 +905,20 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	/** Set Resource Assign.
-		@param S_ResourceAssignment_ID 
-		Resource Assignment
-	  */
+		@param S_ResourceAssignment_ID Resource Assignment
+	*/
 	public void setS_ResourceAssignment_ID (int S_ResourceAssignment_ID)
 	{
-		if (S_ResourceAssignment_ID < 1) 
+		if (S_ResourceAssignment_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_S_ResourceAssignment_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_S_ResourceAssignment_ID, Integer.valueOf(S_ResourceAssignment_ID));
 	}
 
 	/** Get Resource Assign.
 		@return Resource Assignment
 	  */
-	public int getS_ResourceAssignment_ID () 
+	public int getS_ResourceAssignment_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_S_ResourceAssignment_ID);
 		if (ii == null)
@@ -878,26 +927,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser1_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser1_ID(), get_TrxName());
+	}
 
 	/** Set User Element List 1.
-		@param User1_ID 
-		User defined list element #1
-	  */
+		@param User1_ID User defined list element #1
+	*/
 	public void setUser1_ID (int User1_ID)
 	{
-		if (User1_ID < 1) 
+		if (User1_ID < 1)
 			set_Value (COLUMNNAME_User1_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
 	/** Get User Element List 1.
 		@return User defined list element #1
 	  */
-	public int getUser1_ID () 
+	public int getUser1_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
 		if (ii == null)
@@ -906,26 +955,26 @@ public class X_JP_ContractPSInvoiceLine extends PO implements I_JP_ContractPSInv
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser2_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser2_ID(), get_TrxName());
+	}
 
 	/** Set User Element List 2.
-		@param User2_ID 
-		User defined list element #2
-	  */
+		@param User2_ID User defined list element #2
+	*/
 	public void setUser2_ID (int User2_ID)
 	{
-		if (User2_ID < 1) 
+		if (User2_ID < 1)
 			set_Value (COLUMNNAME_User2_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
 	}
 
 	/** Get User Element List 2.
 		@return User defined list element #2
 	  */
-	public int getUser2_ID () 
+	public int getUser2_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
 		if (ii == null)

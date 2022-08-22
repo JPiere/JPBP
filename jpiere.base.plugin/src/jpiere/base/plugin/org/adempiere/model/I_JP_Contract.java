@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Contract
  *  @author iDempiere (generated) 
- *  @version Release 6.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_Contract 
@@ -95,12 +95,12 @@ public interface I_JP_Contract
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -304,6 +304,15 @@ public interface I_JP_Contract
 
 	/** Get Automatic Update	  */
 	public boolean isAutomaticUpdateJP();
+
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
 
     /** Column name JP_ContractBPNo */
     public static final String COLUMNNAME_JP_ContractBPNo = "JP_ContractBPNo";
@@ -616,10 +625,12 @@ public interface I_JP_Contract
     /** Column name JP_Estimation_ID */
     public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
 
-	/** Set Estimation & Handwritten	  */
+	/** Set Estimation &amp;
+ Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID);
 
-	/** Get Estimation & Handwritten	  */
+	/** Get Estimation &amp;
+ Handwritten	  */
 	public int getJP_Estimation_ID();
 
 	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
@@ -632,6 +643,32 @@ public interface I_JP_Contract
 
 	/** Get Process Now	  */
 	public String getJP_Processing1();
+
+    /** Column name JP_Remarks */
+    public static final String COLUMNNAME_JP_Remarks = "JP_Remarks";
+
+	/** Set Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Remarks (String JP_Remarks);
+
+	/** Get Remarks.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Remarks();
+
+    /** Column name JP_Subject */
+    public static final String COLUMNNAME_JP_Subject = "JP_Subject";
+
+	/** Set Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public void setJP_Subject (String JP_Subject);
+
+	/** Get Subject.
+	  * JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

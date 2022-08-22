@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractPSLine
  *  @author iDempiere (generated) 
- *  @version Release 6.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractPSLine 
@@ -95,12 +95,12 @@ public interface I_JP_ContractPSLine
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -368,6 +368,15 @@ public interface I_JP_ContractPSLine
 	public int getJP_ASI_To_ID();
 
 	public I_M_AttributeSetInstance getJP_ASI_To() throws RuntimeException;
+
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
 
     /** Column name JP_ContractLine_ID */
     public static final String COLUMNNAME_JP_ContractLine_ID = "JP_ContractLine_ID";

@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractPSInvoiceLine
  *  @author iDempiere (generated) 
- *  @version Release 6.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractPSInvoiceLine 
@@ -276,13 +276,22 @@ public interface I_JP_ContractPSInvoiceLine
 	/** Get Fact was created	  */
 	public boolean isFactCreatedJP();
 
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
+
     /** Column name JP_ContractCalender_Inv_ID */
     public static final String COLUMNNAME_JP_ContractCalender_Inv_ID = "JP_ContractCalender_Inv_ID";
 
-	/** Set Contract Calender(Invoice)	  */
+	/** Set Contract Calendar(Invoice)	  */
 	public void setJP_ContractCalender_Inv_ID (int JP_ContractCalender_Inv_ID);
 
-	/** Get Contract Calender(Invoice)	  */
+	/** Get Contract Calendar(Invoice)	  */
 	public int getJP_ContractCalender_Inv_ID();
 
 	public I_JP_ContractCalender getJP_ContractCalender_Inv() throws RuntimeException;

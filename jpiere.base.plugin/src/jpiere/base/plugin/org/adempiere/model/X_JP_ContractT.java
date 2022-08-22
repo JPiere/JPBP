@@ -23,19 +23,38 @@ import org.compiere.model.*;
 
 /** Generated Model for JP_ContractT
  *  @author iDempiere (generated) 
- *  @version Release 6.1 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="JP_ContractT")
 public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190101L;
+	private static final long serialVersionUID = 20220822L;
 
     /** Standard Constructor */
     public X_JP_ContractT (Properties ctx, int JP_ContractT_ID, String trxName)
     {
       super (ctx, JP_ContractT_ID, trxName);
+      /** if (JP_ContractT_ID == 0)
+        {
+			setC_DocType_ID (0);
+			setIsAutomaticUpdateJP (false);
+// N
+			setJP_ContractCategory_ID (0);
+			setJP_ContractT_ID (0);
+			setJP_ContractType (null);
+// PDC
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_ContractT (Properties ctx, int JP_ContractT_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_ContractT_ID, trxName, virtualColumns);
       /** if (JP_ContractT_ID == 0)
         {
 			setC_DocType_ID (0);
@@ -73,27 +92,26 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_ContractT[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_ContractT[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	/** Set Trx Organization.
-		@param AD_OrgTrx_ID 
-		Performing or initiating organization
-	  */
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
 	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
 	{
-		if (AD_OrgTrx_ID < 1) 
+		if (AD_OrgTrx_ID < 1)
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
 	}
 
 	/** Get Trx Organization.
 		@return Performing or initiating organization
 	  */
-	public int getAD_OrgTrx_ID () 
+	public int getAD_OrgTrx_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
@@ -102,26 +120,26 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
-			.getPO(getC_DocType_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getC_DocType_ID(), get_TrxName());
+	}
 
 	/** Set Document Type.
-		@param C_DocType_ID 
-		Document type or rules
-	  */
+		@param C_DocType_ID Document type or rules
+	*/
 	public void setC_DocType_ID (int C_DocType_ID)
 	{
-		if (C_DocType_ID < 0) 
+		if (C_DocType_ID < 0)
 			set_Value (COLUMNNAME_C_DocType_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
 	}
 
 	/** Get Document Type.
 		@return Document type or rules
 	  */
-	public int getC_DocType_ID () 
+	public int getC_DocType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
 		if (ii == null)
@@ -130,9 +148,8 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	/** Set Classname.
-		@param Classname 
-		Java Classname
-	  */
+		@param Classname Java Classname
+	*/
 	public void setClassname (String Classname)
 	{
 		set_Value (COLUMNNAME_Classname, Classname);
@@ -141,15 +158,14 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	/** Get Classname.
 		@return Java Classname
 	  */
-	public String getClassname () 
+	public String getClassname()
 	{
 		return (String)get_Value(COLUMNNAME_Classname);
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -158,13 +174,14 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Automatic Update.
-		@param IsAutomaticUpdateJP Automatic Update	  */
+		@param IsAutomaticUpdateJP Automatic Update
+	*/
 	public void setIsAutomaticUpdateJP (boolean IsAutomaticUpdateJP)
 	{
 		set_Value (COLUMNNAME_IsAutomaticUpdateJP, Boolean.valueOf(IsAutomaticUpdateJP));
@@ -172,7 +189,7 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 
 	/** Get Automatic Update.
 		@return Automatic Update	  */
-	public boolean isAutomaticUpdateJP () 
+	public boolean isAutomaticUpdateJP()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAutomaticUpdateJP);
 		if (oo != null) 
@@ -185,9 +202,8 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	/** Set Classname.
-		@param JP_Classname1 
-		Java Classname
-	  */
+		@param JP_Classname1 Java Classname
+	*/
 	public void setJP_Classname1 (String JP_Classname1)
 	{
 		set_Value (COLUMNNAME_JP_Classname1, JP_Classname1);
@@ -196,29 +212,46 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	/** Get Classname.
 		@return Java Classname
 	  */
-	public String getJP_Classname1 () 
+	public String getJP_Classname1()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Classname1);
 	}
 
+	/** Set Communication Column.
+		@param JP_CommunicationColumn Communication Column
+	*/
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn)
+	{
+		set_Value (COLUMNNAME_JP_CommunicationColumn, JP_CommunicationColumn);
+	}
+
+	/** Get Communication Column.
+		@return Communication Column	  */
+	public String getJP_CommunicationColumn()
+	{
+		return (String)get_Value(COLUMNNAME_JP_CommunicationColumn);
+	}
+
 	public I_JP_ContractCancelTerm getJP_ContractCancelTerm() throws RuntimeException
-    {
-		return (I_JP_ContractCancelTerm)MTable.get(getCtx(), I_JP_ContractCancelTerm.Table_Name)
-			.getPO(getJP_ContractCancelTerm_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractCancelTerm)MTable.get(getCtx(), I_JP_ContractCancelTerm.Table_ID)
+			.getPO(getJP_ContractCancelTerm_ID(), get_TrxName());
+	}
 
 	/** Set Contract Cancel Term.
-		@param JP_ContractCancelTerm_ID Contract Cancel Term	  */
+		@param JP_ContractCancelTerm_ID Contract Cancel Term
+	*/
 	public void setJP_ContractCancelTerm_ID (int JP_ContractCancelTerm_ID)
 	{
-		if (JP_ContractCancelTerm_ID < 1) 
+		if (JP_ContractCancelTerm_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractCancelTerm_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractCancelTerm_ID, Integer.valueOf(JP_ContractCancelTerm_ID));
 	}
 
 	/** Get Contract Cancel Term.
 		@return Contract Cancel Term	  */
-	public int getJP_ContractCancelTerm_ID () 
+	public int getJP_ContractCancelTerm_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCancelTerm_ID);
 		if (ii == null)
@@ -227,23 +260,25 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	public I_JP_ContractCategory getJP_ContractCategory() throws RuntimeException
-    {
-		return (I_JP_ContractCategory)MTable.get(getCtx(), I_JP_ContractCategory.Table_Name)
-			.getPO(getJP_ContractCategory_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractCategory)MTable.get(getCtx(), I_JP_ContractCategory.Table_ID)
+			.getPO(getJP_ContractCategory_ID(), get_TrxName());
+	}
 
 	/** Set Contract Category.
-		@param JP_ContractCategory_ID Contract Category	  */
+		@param JP_ContractCategory_ID Contract Category
+	*/
 	public void setJP_ContractCategory_ID (int JP_ContractCategory_ID)
 	{
-		if (JP_ContractCategory_ID < 1) 
+		if (JP_ContractCategory_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_ContractCategory_ID, Integer.valueOf(JP_ContractCategory_ID));
 	}
 
 	/** Get Contract Category.
 		@return Contract Category	  */
-	public int getJP_ContractCategory_ID () 
+	public int getJP_ContractCategory_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractCategory_ID);
 		if (ii == null)
@@ -252,23 +287,25 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	public I_JP_ContractExtendPeriod getJP_ContractExtendPeriod() throws RuntimeException
-    {
-		return (I_JP_ContractExtendPeriod)MTable.get(getCtx(), I_JP_ContractExtendPeriod.Table_Name)
-			.getPO(getJP_ContractExtendPeriod_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractExtendPeriod)MTable.get(getCtx(), I_JP_ContractExtendPeriod.Table_ID)
+			.getPO(getJP_ContractExtendPeriod_ID(), get_TrxName());
+	}
 
 	/** Set Contract Extend Period.
-		@param JP_ContractExtendPeriod_ID Contract Extend Period	  */
+		@param JP_ContractExtendPeriod_ID Contract Extend Period
+	*/
 	public void setJP_ContractExtendPeriod_ID (int JP_ContractExtendPeriod_ID)
 	{
-		if (JP_ContractExtendPeriod_ID < 1) 
+		if (JP_ContractExtendPeriod_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractExtendPeriod_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractExtendPeriod_ID, Integer.valueOf(JP_ContractExtendPeriod_ID));
 	}
 
 	/** Get Contract Extend Period.
 		@return Contract Extend Period	  */
-	public int getJP_ContractExtendPeriod_ID () 
+	public int getJP_ContractExtendPeriod_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractExtendPeriod_ID);
 		if (ii == null)
@@ -277,18 +314,19 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	/** Set Contract Doc Template.
-		@param JP_ContractT_ID Contract Doc Template	  */
+		@param JP_ContractT_ID Contract Doc Template
+	*/
 	public void setJP_ContractT_ID (int JP_ContractT_ID)
 	{
-		if (JP_ContractT_ID < 1) 
+		if (JP_ContractT_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_ContractT_ID, Integer.valueOf(JP_ContractT_ID));
 	}
 
 	/** Get Contract Doc Template.
 		@return Contract Doc Template	  */
-	public int getJP_ContractT_ID () 
+	public int getJP_ContractT_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractT_ID);
 		if (ii == null)
@@ -297,23 +335,25 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	public I_JP_ContractT getJP_ContractT_Parent() throws RuntimeException
-    {
-		return (I_JP_ContractT)MTable.get(getCtx(), I_JP_ContractT.Table_Name)
-			.getPO(getJP_ContractT_Parent_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractT)MTable.get(getCtx(), I_JP_ContractT.Table_ID)
+			.getPO(getJP_ContractT_Parent_ID(), get_TrxName());
+	}
 
 	/** Set Parent Contract Template .
-		@param JP_ContractT_Parent_ID Parent Contract Template 	  */
+		@param JP_ContractT_Parent_ID Parent Contract Template 
+	*/
 	public void setJP_ContractT_Parent_ID (int JP_ContractT_Parent_ID)
 	{
-		if (JP_ContractT_Parent_ID < 1) 
+		if (JP_ContractT_Parent_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractT_Parent_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractT_Parent_ID, Integer.valueOf(JP_ContractT_Parent_ID));
 	}
 
 	/** Get Parent Contract Template .
 		@return Parent Contract Template 	  */
-	public int getJP_ContractT_Parent_ID () 
+	public int getJP_ContractT_Parent_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractT_Parent_ID);
 		if (ii == null)
@@ -322,7 +362,8 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	}
 
 	/** Set Contract Doc Template(UU).
-		@param JP_ContractT_UU Contract Doc Template(UU)	  */
+		@param JP_ContractT_UU Contract Doc Template(UU)
+	*/
 	public void setJP_ContractT_UU (String JP_ContractT_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_ContractT_UU, JP_ContractT_UU);
@@ -330,19 +371,20 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 
 	/** Get Contract Doc Template(UU).
 		@return Contract Doc Template(UU)	  */
-	public String getJP_ContractT_UU () 
+	public String getJP_ContractT_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractT_UU);
 	}
 
+	/** General Contract = GLC */
+	public static final String JP_CONTRACTTYPE_GeneralContract = "GLC";
 	/** Period Contract = PDC */
 	public static final String JP_CONTRACTTYPE_PeriodContract = "PDC";
 	/** Spot Contract = STC */
 	public static final String JP_CONTRACTTYPE_SpotContract = "STC";
-	/** General Contract = GLC */
-	public static final String JP_CONTRACTTYPE_GeneralContract = "GLC";
 	/** Set Contract Type.
-		@param JP_ContractType Contract Type	  */
+		@param JP_ContractType Contract Type
+	*/
 	public void setJP_ContractType (String JP_ContractType)
 	{
 
@@ -351,15 +393,46 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 
 	/** Get Contract Type.
 		@return Contract Type	  */
-	public String getJP_ContractType () 
+	public String getJP_ContractType()
 	{
 		return (String)get_Value(COLUMNNAME_JP_ContractType);
 	}
 
-	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
+	/** Set Remarks.
+		@param JP_Remarks JPIERE-0490:JPBP
+	*/
+	public void setJP_Remarks (String JP_Remarks)
+	{
+		set_Value (COLUMNNAME_JP_Remarks, JP_Remarks);
+	}
+
+	/** Get Remarks.
+		@return JPIERE-0490:JPBP
 	  */
+	public String getJP_Remarks()
+	{
+		return (String)get_Value(COLUMNNAME_JP_Remarks);
+	}
+
+	/** Set Subject.
+		@param JP_Subject JPIERE-0490:JPBP
+	*/
+	public void setJP_Subject (String JP_Subject)
+	{
+		set_Value (COLUMNNAME_JP_Subject, JP_Subject);
+	}
+
+	/** Get Subject.
+		@return JPIERE-0490:JPBP
+	  */
+	public String getJP_Subject()
+	{
+		return (String)get_Value(COLUMNNAME_JP_Subject);
+	}
+
+	/** Set Name.
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -368,15 +441,14 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -385,7 +457,7 @@ public class X_JP_ContractT extends PO implements I_JP_ContractT, I_Persistent
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}

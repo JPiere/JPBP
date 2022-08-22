@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ContractLine
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_ContractLine 
@@ -95,12 +95,12 @@ public interface I_JP_ContractLine
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -373,6 +373,15 @@ public interface I_JP_ContractLine
 
 	/** Get Base Doc Line Policy	  */
 	public String getJP_BaseDocLinePolicy();
+
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
 
     /** Column name JP_ContractCalender_InOut_ID */
     public static final String COLUMNNAME_JP_ContractCalender_InOut_ID = "JP_ContractCalender_InOut_ID";
@@ -744,21 +753,6 @@ public interface I_JP_ContractLine
 
 	/** Get Process Now	  */
 	public String getJP_Processing4();
-
-    /** Column name JP_QtyOrderd_UOM_ID */
-    public static final String COLUMNNAME_JP_QtyOrderd_UOM_ID = "JP_QtyOrderd_UOM_ID";
-
-	/** Set Ordered Qty UOM.
-	  * Ordered Qty Unit of Measure
-	  */
-	public void setJP_QtyOrderd_UOM_ID (int JP_QtyOrderd_UOM_ID);
-
-	/** Get Ordered Qty UOM.
-	  * Ordered Qty Unit of Measure
-	  */
-	public int getJP_QtyOrderd_UOM_ID();
-
-	public org.compiere.model.I_C_UOM getJP_QtyOrderd_UOM() throws RuntimeException;
 
     /** Column name JP_TaxAmt */
     public static final String COLUMNNAME_JP_TaxAmt = "JP_TaxAmt";
