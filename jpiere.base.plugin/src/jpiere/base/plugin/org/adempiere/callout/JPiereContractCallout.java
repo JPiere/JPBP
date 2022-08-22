@@ -132,6 +132,9 @@ public class JPiereContractCallout implements IColumnCallout {
 		mTab.setValue("JP_ContractCategory_ID", contractTemplate.getJP_ContractCategory_ID());
 		mTab.setValue("C_DocType_ID", contractTemplate.getC_DocType_ID());
 		mTab.setValue("Name", contractTemplate.getName());
+		mTab.setValue("JP_Subject", contractTemplate.getJP_Subject());
+		mTab.setValue("JP_CommunicationColumn", contractTemplate.getJP_CommunicationColumn());
+		mTab.setValue("JP_Remarks", contractTemplate.getJP_Remarks());
 		mTab.setValue("Description", contractTemplate.getDescription());
 		mTab.setValue("IsAutomaticUpdateJP",contractTemplate.isAutomaticUpdateJP());
 		if(contractTemplate.isAutomaticUpdateJP())
