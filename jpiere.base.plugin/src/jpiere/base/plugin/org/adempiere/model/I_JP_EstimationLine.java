@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_EstimationLine
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_EstimationLine 
@@ -95,12 +95,12 @@ public interface I_JP_EstimationLine
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -378,10 +378,10 @@ public interface I_JP_EstimationLine
     /** Column name JP_ASI_From_ID */
     public static final String COLUMNNAME_JP_ASI_From_ID = "JP_ASI_From_ID";
 
-	/** Set Attribute Set Instance(From)	  */
+	/** Set Attribute Info(From)	  */
 	public void setJP_ASI_From_ID (int JP_ASI_From_ID);
 
-	/** Get Attribute Set Instance(From)	  */
+	/** Get Attribute Info(From)	  */
 	public int getJP_ASI_From_ID();
 
 	public I_M_AttributeSetInstance getJP_ASI_From() throws RuntimeException;
@@ -389,21 +389,32 @@ public interface I_JP_EstimationLine
     /** Column name JP_ASI_To_ID */
     public static final String COLUMNNAME_JP_ASI_To_ID = "JP_ASI_To_ID";
 
-	/** Set Attribute Set Instance(To)	  */
+	/** Set Attribute Info(To)	  */
 	public void setJP_ASI_To_ID (int JP_ASI_To_ID);
 
-	/** Get Attribute Set Instance(To)	  */
+	/** Get Attribute Info(To)	  */
 	public int getJP_ASI_To_ID();
 
 	public I_M_AttributeSetInstance getJP_ASI_To() throws RuntimeException;
 
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
+
     /** Column name JP_EstimationLine_ID */
     public static final String COLUMNNAME_JP_EstimationLine_ID = "JP_EstimationLine_ID";
 
-	/** Set Estimation & Handwritten Line	  */
+	/** Set Estimation &amp;
+ Handwritten Line	  */
 	public void setJP_EstimationLine_ID (int JP_EstimationLine_ID);
 
-	/** Get Estimation & Handwritten Line	  */
+	/** Get Estimation &amp;
+ Handwritten Line	  */
 	public int getJP_EstimationLine_ID();
 
     /** Column name JP_EstimationLine_UU */
@@ -418,10 +429,12 @@ public interface I_JP_EstimationLine
     /** Column name JP_Estimation_ID */
     public static final String COLUMNNAME_JP_Estimation_ID = "JP_Estimation_ID";
 
-	/** Set Estimation & Handwritten	  */
+	/** Set Estimation &amp;
+ Handwritten	  */
 	public void setJP_Estimation_ID (int JP_Estimation_ID);
 
-	/** Get Estimation & Handwritten	  */
+	/** Get Estimation &amp;
+ Handwritten	  */
 	public int getJP_Estimation_ID();
 
 	public I_JP_Estimation getJP_Estimation() throws RuntimeException;
@@ -489,10 +502,10 @@ public interface I_JP_EstimationLine
     /** Column name JP_TaxBaseAmt */
     public static final String COLUMNNAME_JP_TaxBaseAmt = "JP_TaxBaseAmt";
 
-	/** Set Tax base Amount	  */
+	/** Set Tax base Amt	  */
 	public void setJP_TaxBaseAmt (BigDecimal JP_TaxBaseAmt);
 
-	/** Get Tax base Amount	  */
+	/** Get Tax base Amt	  */
 	public BigDecimal getJP_TaxBaseAmt();
 
     /** Column name Line */
@@ -539,12 +552,12 @@ public interface I_JP_EstimationLine
     /** Column name M_AttributeSetInstance_ID */
     public static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
 
-	/** Set Attribute Set Instance.
+	/** Set Attribute Info.
 	  * Product Attribute Set Instance
 	  */
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID);
 
-	/** Get Attribute Set Instance.
+	/** Get Attribute Info.
 	  * Product Attribute Set Instance
 	  */
 	public int getM_AttributeSetInstance_ID();
@@ -595,12 +608,12 @@ public interface I_JP_EstimationLine
     /** Column name M_Warehouse_ID */
     public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
 
-	/** Set Warehouse.
+	/** Set Org Warehouse.
 	  * Storage Warehouse and Service Point
 	  */
 	public void setM_Warehouse_ID (int M_Warehouse_ID);
 
-	/** Get Warehouse.
+	/** Get Org Warehouse.
 	  * Storage Warehouse and Service Point
 	  */
 	public int getM_Warehouse_ID();
@@ -686,12 +699,12 @@ public interface I_JP_EstimationLine
     /** Column name QtyDelivered */
     public static final String COLUMNNAME_QtyDelivered = "QtyDelivered";
 
-	/** Set Delivered Quantity.
+	/** Set Delivered Qty.
 	  * Delivered Quantity
 	  */
 	public void setQtyDelivered (BigDecimal QtyDelivered);
 
-	/** Get Delivered Quantity.
+	/** Get Delivered Qty.
 	  * Delivered Quantity
 	  */
 	public BigDecimal getQtyDelivered();
@@ -712,12 +725,12 @@ public interface I_JP_EstimationLine
     /** Column name QtyInvoiced */
     public static final String COLUMNNAME_QtyInvoiced = "QtyInvoiced";
 
-	/** Set Quantity Invoiced.
+	/** Set Invoiced Qty.
 	  * Invoiced Quantity
 	  */
 	public void setQtyInvoiced (BigDecimal QtyInvoiced);
 
-	/** Get Quantity Invoiced.
+	/** Get Invoiced Qty.
 	  * Invoiced Quantity
 	  */
 	public BigDecimal getQtyInvoiced();
@@ -738,12 +751,12 @@ public interface I_JP_EstimationLine
     /** Column name QtyOrdered */
     public static final String COLUMNNAME_QtyOrdered = "QtyOrdered";
 
-	/** Set Ordered Quantity.
+	/** Set Ordered Qty.
 	  * Ordered Quantity
 	  */
 	public void setQtyOrdered (BigDecimal QtyOrdered);
 
-	/** Get Ordered Quantity.
+	/** Get Ordered Qty.
 	  * Ordered Quantity
 	  */
 	public BigDecimal getQtyOrdered();
@@ -751,12 +764,12 @@ public interface I_JP_EstimationLine
     /** Column name QtyReserved */
     public static final String COLUMNNAME_QtyReserved = "QtyReserved";
 
-	/** Set Reserved Quantity.
+	/** Set Reserved Qty.
 	  * Reserved Quantity
 	  */
 	public void setQtyReserved (BigDecimal QtyReserved);
 
-	/** Get Reserved Quantity.
+	/** Get Reserved Qty.
 	  * Reserved Quantity
 	  */
 	public BigDecimal getQtyReserved();
@@ -790,12 +803,12 @@ public interface I_JP_EstimationLine
     /** Column name Ref_OrderLine_ID */
     public static final String COLUMNNAME_Ref_OrderLine_ID = "Ref_OrderLine_ID";
 
-	/** Set Referenced Order Line.
+	/** Set Ref Order Line.
 	  * Reference to corresponding Sales/Purchase Order
 	  */
 	public void setRef_OrderLine_ID (int Ref_OrderLine_ID);
 
-	/** Get Referenced Order Line.
+	/** Get Ref Order Line.
 	  * Reference to corresponding Sales/Purchase Order
 	  */
 	public int getRef_OrderLine_ID();
@@ -805,12 +818,12 @@ public interface I_JP_EstimationLine
     /** Column name S_ResourceAssignment_ID */
     public static final String COLUMNNAME_S_ResourceAssignment_ID = "S_ResourceAssignment_ID";
 
-	/** Set Resource Assignment.
+	/** Set Resource Assign.
 	  * Resource Assignment
 	  */
 	public void setS_ResourceAssignment_ID (int S_ResourceAssignment_ID);
 
-	/** Get Resource Assignment.
+	/** Get Resource Assign.
 	  * Resource Assignment
 	  */
 	public int getS_ResourceAssignment_ID();

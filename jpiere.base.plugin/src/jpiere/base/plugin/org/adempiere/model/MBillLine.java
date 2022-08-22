@@ -89,6 +89,9 @@ public class MBillLine extends X_JP_BillLine {
 
 			if(getJP_Remarks()== null || getJP_Remarks().isEmpty())
 				setJP_Remarks(invoice.get_ValueAsString("JP_Remarks"));
+			
+			if(getJP_CommunicationColumn()== null || getJP_CommunicationColumn().isEmpty())
+				setJP_CommunicationColumn(invoice.get_ValueAsString("JP_CommunicationColumn"));
 
 			setC_DocType_ID(invoice.getC_DocType_ID());
 			setDateInvoiced(invoice.getDateInvoiced());

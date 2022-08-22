@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_Bill
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_Bill 
@@ -95,12 +95,12 @@ public interface I_JP_Bill
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -438,6 +438,15 @@ public interface I_JP_Bill
 
 	/** Get JP_Bill_UU	  */
 	public String getJP_Bill_UU();
+
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
 
     /** Column name JP_LastBill_ID */
     public static final String COLUMNNAME_JP_LastBill_ID = "JP_LastBill_ID";

@@ -816,6 +816,9 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 
 			if(getJP_Remarks()== null || getJP_Remarks().isEmpty())
 				setJP_Remarks(io.get_ValueAsString("JP_Remarks"));
+			
+			if(getJP_CommunicationColumn()== null || getJP_CommunicationColumn().isEmpty())
+				setJP_CommunicationColumn(io.get_ValueAsString("JP_CommunicationColumn"));
 
 			//Should be Comment out Because Recognitiond document can not create from InOut when DocAciton Complete
 //			if(!io.getDocStatus().equals(DocAction.STATUS_Completed)

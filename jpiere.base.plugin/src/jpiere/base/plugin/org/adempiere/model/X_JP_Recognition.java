@@ -27,19 +27,65 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_Recognition
  *  @author iDempiere (generated) 
- *  @version Release 8.2 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="JP_Recognition")
 public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210815L;
+	private static final long serialVersionUID = 20220822L;
 
     /** Standard Constructor */
     public X_JP_Recognition (Properties ctx, int JP_Recognition_ID, String trxName)
     {
       super (ctx, JP_Recognition_ID, trxName);
+      /** if (JP_Recognition_ID == 0)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_Currency_ID (0);
+// @C_Currency_ID@
+			setC_DocTypeTarget_ID (0);
+			setC_DocType_ID (0);
+// 0
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateInvoiced (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setGrandTotal (Env.ZERO);
+			setIsApproved (false);
+// @IsApproved@
+			setIsDiscountPrinted (false);
+// N
+			setIsPrinted (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setIsSelfService (false);
+			setIsTaxIncluded (false);
+			setJP_ContractContent_ID (0);
+			setJP_Contract_ID (0);
+			setJP_Recognition_ID (0);
+			setM_InOut_ID (0);
+			setM_PriceList_ID (0);
+			setPosted (false);
+// N
+			setProcessed (false);
+			setSendEMail (false);
+			setTotalLines (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_Recognition (Properties ctx, int JP_Recognition_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_Recognition_ID, trxName, virtualColumns);
       /** if (JP_Recognition_ID == 0)
         {
 			setC_BPartner_ID (0);
@@ -110,21 +156,20 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
     }
 
 	/** Set Trx Organization.
-		@param AD_OrgTrx_ID 
-		Performing or initiating organization
-	  */
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
 	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
 	{
-		if (AD_OrgTrx_ID < 1) 
+		if (AD_OrgTrx_ID < 1)
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
 	}
 
 	/** Get Trx Organization.
 		@return Performing or initiating organization
 	  */
-	public int getAD_OrgTrx_ID () 
+	public int getAD_OrgTrx_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
@@ -133,26 +178,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
-			.getPO(getAD_User_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getAD_User_ID(), get_TrxName());
+	}
 
 	/** Set User/Contact.
-		@param AD_User_ID 
-		User within the system - Internal or Business Partner Contact
-	  */
+		@param AD_User_ID User within the system - Internal or Business Partner Contact
+	*/
 	public void setAD_User_ID (int AD_User_ID)
 	{
-		if (AD_User_ID < 1) 
+		if (AD_User_ID < 1)
 			set_Value (COLUMNNAME_AD_User_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
 	}
 
 	/** Get User/Contact.
 		@return User within the system - Internal or Business Partner Contact
 	  */
-	public int getAD_User_ID () 
+	public int getAD_User_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_User_ID);
 		if (ii == null)
@@ -161,26 +206,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_BPartner getBill_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getBill_BPartner_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getBill_BPartner_ID(), get_TrxName());
+	}
 
 	/** Set Invoice Partner.
-		@param Bill_BPartner_ID 
-		Business Partner to be invoiced
-	  */
+		@param Bill_BPartner_ID Business Partner to be invoiced
+	*/
 	public void setBill_BPartner_ID (int Bill_BPartner_ID)
 	{
-		if (Bill_BPartner_ID < 1) 
+		if (Bill_BPartner_ID < 1)
 			set_Value (COLUMNNAME_Bill_BPartner_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_Bill_BPartner_ID, Integer.valueOf(Bill_BPartner_ID));
 	}
 
 	/** Get Invoice Partner.
 		@return Business Partner to be invoiced
 	  */
-	public int getBill_BPartner_ID () 
+	public int getBill_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_BPartner_ID);
 		if (ii == null)
@@ -189,26 +234,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_BPartner_Location getBill_Location() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
-			.getPO(getBill_Location_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_ID)
+			.getPO(getBill_Location_ID(), get_TrxName());
+	}
 
 	/** Set Invoice Location.
-		@param Bill_Location_ID 
-		Business Partner Location for invoicing
-	  */
+		@param Bill_Location_ID Business Partner Location for invoicing
+	*/
 	public void setBill_Location_ID (int Bill_Location_ID)
 	{
-		if (Bill_Location_ID < 1) 
+		if (Bill_Location_ID < 1)
 			set_Value (COLUMNNAME_Bill_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_Bill_Location_ID, Integer.valueOf(Bill_Location_ID));
 	}
 
 	/** Get Invoice Location.
 		@return Business Partner Location for invoicing
 	  */
-	public int getBill_Location_ID () 
+	public int getBill_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_Location_ID);
 		if (ii == null)
@@ -217,26 +262,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_AD_User getBill_User() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
-			.getPO(getBill_User_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getBill_User_ID(), get_TrxName());
+	}
 
 	/** Set Invoice Contact.
-		@param Bill_User_ID 
-		Business Partner Contact for invoicing
-	  */
+		@param Bill_User_ID Business Partner Contact for invoicing
+	*/
 	public void setBill_User_ID (int Bill_User_ID)
 	{
-		if (Bill_User_ID < 1) 
+		if (Bill_User_ID < 1)
 			set_Value (COLUMNNAME_Bill_User_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_Bill_User_ID, Integer.valueOf(Bill_User_ID));
 	}
 
 	/** Get Invoice Contact.
 		@return Business Partner Contact for invoicing
 	  */
-	public int getBill_User_ID () 
+	public int getBill_User_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Bill_User_ID);
 		if (ii == null)
@@ -245,26 +290,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
-			.getPO(getC_Activity_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_ID)
+			.getPO(getC_Activity_ID(), get_TrxName());
+	}
 
 	/** Set Activity.
-		@param C_Activity_ID 
-		Business Activity
-	  */
+		@param C_Activity_ID Business Activity
+	*/
 	public void setC_Activity_ID (int C_Activity_ID)
 	{
-		if (C_Activity_ID < 1) 
+		if (C_Activity_ID < 1)
 			set_Value (COLUMNNAME_C_Activity_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
 	/** Get Activity.
 		@return Business Activity
 	  */
-	public int getC_Activity_ID () 
+	public int getC_Activity_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Activity_ID);
 		if (ii == null)
@@ -273,26 +318,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_BPartner_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
+	}
 
-	/** Set Business Partner .
-		@param C_BPartner_ID 
-		Identifies a Business Partner
-	  */
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_BPartner_ID < 1) 
+		if (C_BPartner_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 		@return Identifies a Business Partner
 	  */
-	public int getC_BPartner_ID () 
+	public int getC_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
@@ -301,26 +346,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
-			.getPO(getC_BPartner_Location_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_ID)
+			.getPO(getC_BPartner_Location_ID(), get_TrxName());
+	}
 
 	/** Set Partner Location.
-		@param C_BPartner_Location_ID 
-		Identifies the (ship to) address for this Business Partner
-	  */
+		@param C_BPartner_Location_ID Identifies the (ship to) address for this Business Partner
+	*/
 	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID)
 	{
-		if (C_BPartner_Location_ID < 1) 
+		if (C_BPartner_Location_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
 	}
 
 	/** Get Partner Location.
 		@return Identifies the (ship to) address for this Business Partner
 	  */
-	public int getC_BPartner_Location_ID () 
+	public int getC_BPartner_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
 		if (ii == null)
@@ -329,26 +374,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_Campaign getC_Campaign() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_Name)
-			.getPO(getC_Campaign_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_ID)
+			.getPO(getC_Campaign_ID(), get_TrxName());
+	}
 
 	/** Set Campaign.
-		@param C_Campaign_ID 
-		Marketing Campaign
-	  */
+		@param C_Campaign_ID Marketing Campaign
+	*/
 	public void setC_Campaign_ID (int C_Campaign_ID)
 	{
-		if (C_Campaign_ID < 1) 
+		if (C_Campaign_ID < 1)
 			set_Value (COLUMNNAME_C_Campaign_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
 	}
 
 	/** Get Campaign.
 		@return Marketing Campaign
 	  */
-	public int getC_Campaign_ID () 
+	public int getC_Campaign_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Campaign_ID);
 		if (ii == null)
@@ -357,26 +402,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_ConversionType getC_ConversionType() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ConversionType)MTable.get(getCtx(), org.compiere.model.I_C_ConversionType.Table_Name)
-			.getPO(getC_ConversionType_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ConversionType)MTable.get(getCtx(), org.compiere.model.I_C_ConversionType.Table_ID)
+			.getPO(getC_ConversionType_ID(), get_TrxName());
+	}
 
 	/** Set Currency Type.
-		@param C_ConversionType_ID 
-		Currency Conversion Rate Type
-	  */
+		@param C_ConversionType_ID Currency Conversion Rate Type
+	*/
 	public void setC_ConversionType_ID (int C_ConversionType_ID)
 	{
-		if (C_ConversionType_ID < 1) 
+		if (C_ConversionType_ID < 1)
 			set_Value (COLUMNNAME_C_ConversionType_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_ConversionType_ID, Integer.valueOf(C_ConversionType_ID));
 	}
 
 	/** Get Currency Type.
 		@return Currency Conversion Rate Type
 	  */
-	public int getC_ConversionType_ID () 
+	public int getC_ConversionType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_ConversionType_ID);
 		if (ii == null)
@@ -385,26 +430,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
-			.getPO(getC_Currency_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
+			.getPO(getC_Currency_ID(), get_TrxName());
+	}
 
 	/** Set Currency.
-		@param C_Currency_ID 
-		The Currency for this record
-	  */
+		@param C_Currency_ID The Currency for this record
+	*/
 	public void setC_Currency_ID (int C_Currency_ID)
 	{
-		if (C_Currency_ID < 1) 
+		if (C_Currency_ID < 1)
 			set_Value (COLUMNNAME_C_Currency_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
 	}
 
 	/** Get Currency.
 		@return The Currency for this record
 	  */
-	public int getC_Currency_ID () 
+	public int getC_Currency_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
 		if (ii == null)
@@ -413,26 +458,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_DocType getC_DocTypeTarget() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
-			.getPO(getC_DocTypeTarget_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getC_DocTypeTarget_ID(), get_TrxName());
+	}
 
 	/** Set Target Doc Type.
-		@param C_DocTypeTarget_ID 
-		Target document type for conversing documents
-	  */
+		@param C_DocTypeTarget_ID Target document type for conversing documents
+	*/
 	public void setC_DocTypeTarget_ID (int C_DocTypeTarget_ID)
 	{
-		if (C_DocTypeTarget_ID < 1) 
+		if (C_DocTypeTarget_ID < 1)
 			set_Value (COLUMNNAME_C_DocTypeTarget_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_DocTypeTarget_ID, Integer.valueOf(C_DocTypeTarget_ID));
 	}
 
 	/** Get Target Doc Type.
 		@return Target document type for conversing documents
 	  */
-	public int getC_DocTypeTarget_ID () 
+	public int getC_DocTypeTarget_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocTypeTarget_ID);
 		if (ii == null)
@@ -441,26 +486,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
-			.getPO(getC_DocType_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getC_DocType_ID(), get_TrxName());
+	}
 
 	/** Set Document Type.
-		@param C_DocType_ID 
-		Document type or rules
-	  */
+		@param C_DocType_ID Document type or rules
+	*/
 	public void setC_DocType_ID (int C_DocType_ID)
 	{
-		if (C_DocType_ID < 0) 
+		if (C_DocType_ID < 0)
 			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
 	}
 
 	/** Get Document Type.
 		@return Document type or rules
 	  */
-	public int getC_DocType_ID () 
+	public int getC_DocType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
 		if (ii == null)
@@ -469,26 +514,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_Name)
-			.getPO(getC_Invoice_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
+			.getPO(getC_Invoice_ID(), get_TrxName());
+	}
 
 	/** Set Invoice.
-		@param C_Invoice_ID 
-		Invoice Identifier
-	  */
+		@param C_Invoice_ID Invoice Identifier
+	*/
 	public void setC_Invoice_ID (int C_Invoice_ID)
 	{
-		if (C_Invoice_ID < 1) 
+		if (C_Invoice_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
 	}
 
 	/** Get Invoice.
 		@return Invoice Identifier
 	  */
-	public int getC_Invoice_ID () 
+	public int getC_Invoice_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
 		if (ii == null)
@@ -497,26 +542,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_Name)
-			.getPO(getC_Order_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_ID)
+			.getPO(getC_Order_ID(), get_TrxName());
+	}
 
 	/** Set Order.
-		@param C_Order_ID 
-		Order
-	  */
+		@param C_Order_ID Order
+	*/
 	public void setC_Order_ID (int C_Order_ID)
 	{
-		if (C_Order_ID < 1) 
+		if (C_Order_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_Order_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
 	}
 
 	/** Get Order.
 		@return Order
 	  */
-	public int getC_Order_ID () 
+	public int getC_Order_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
 		if (ii == null)
@@ -525,26 +570,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
-			.getPO(getC_Project_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
 
 	/** Set Project.
-		@param C_Project_ID 
-		Financial Project
-	  */
+		@param C_Project_ID Financial Project
+	*/
 	public void setC_Project_ID (int C_Project_ID)
 	{
-		if (C_Project_ID < 1) 
+		if (C_Project_ID < 1)
 			set_Value (COLUMNNAME_C_Project_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
 	}
 
 	/** Get Project.
 		@return Financial Project
 	  */
-	public int getC_Project_ID () 
+	public int getC_Project_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
@@ -553,9 +598,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Create lines from.
-		@param CreateFrom 
-		Process which will generate a new document lines based on an existing document
-	  */
+		@param CreateFrom Process which will generate a new document lines based on an existing document
+	*/
 	public void setCreateFrom (String CreateFrom)
 	{
 		set_Value (COLUMNNAME_CreateFrom, CreateFrom);
@@ -564,15 +608,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Create lines from.
 		@return Process which will generate a new document lines based on an existing document
 	  */
-	public String getCreateFrom () 
+	public String getCreateFrom()
 	{
 		return (String)get_Value(COLUMNNAME_CreateFrom);
 	}
 
 	/** Set Account Date.
-		@param DateAcct 
-		Accounting Date
-	  */
+		@param DateAcct Accounting Date
+	*/
 	public void setDateAcct (Timestamp DateAcct)
 	{
 		set_Value (COLUMNNAME_DateAcct, DateAcct);
@@ -581,15 +624,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Account Date.
 		@return Accounting Date
 	  */
-	public Timestamp getDateAcct () 
+	public Timestamp getDateAcct()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
 	}
 
 	/** Set Date Invoiced.
-		@param DateInvoiced 
-		Date printed on Invoice
-	  */
+		@param DateInvoiced Date printed on Invoice
+	*/
 	public void setDateInvoiced (Timestamp DateInvoiced)
 	{
 		set_Value (COLUMNNAME_DateInvoiced, DateInvoiced);
@@ -598,15 +640,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Date Invoiced.
 		@return Date printed on Invoice
 	  */
-	public Timestamp getDateInvoiced () 
+	public Timestamp getDateInvoiced()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateInvoiced);
 	}
 
 	/** Set Date Ordered.
-		@param DateOrdered 
-		Date of Order
-	  */
+		@param DateOrdered Date of Order
+	*/
 	public void setDateOrdered (Timestamp DateOrdered)
 	{
 		set_ValueNoCheck (COLUMNNAME_DateOrdered, DateOrdered);
@@ -615,15 +656,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Date Ordered.
 		@return Date of Order
 	  */
-	public Timestamp getDateOrdered () 
+	public Timestamp getDateOrdered()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
 	}
 
 	/** Set Date printed.
-		@param DatePrinted 
-		Date the document was printed.
-	  */
+		@param DatePrinted Date the document was printed.
+	*/
 	public void setDatePrinted (Timestamp DatePrinted)
 	{
 		set_Value (COLUMNNAME_DatePrinted, DatePrinted);
@@ -632,15 +672,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Date printed.
 		@return Date the document was printed.
 	  */
-	public Timestamp getDatePrinted () 
+	public Timestamp getDatePrinted()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DatePrinted);
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -649,45 +688,44 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** DocAction AD_Reference_ID=135 */
 	public static final int DOCACTION_AD_Reference_ID=135;
-	/** Complete = CO */
-	public static final String DOCACTION_Complete = "CO";
+	/** &lt;None&gt; = -- */
+	public static final String DOCACTION_None = "--";
 	/** Approve = AP */
 	public static final String DOCACTION_Approve = "AP";
-	/** Reject = RJ */
-	public static final String DOCACTION_Reject = "RJ";
-	/** Post = PO */
-	public static final String DOCACTION_Post = "PO";
-	/** Void = VO */
-	public static final String DOCACTION_Void = "VO";
 	/** Close = CL */
 	public static final String DOCACTION_Close = "CL";
-	/** Reverse - Correct = RC */
-	public static final String DOCACTION_Reverse_Correct = "RC";
-	/** Reverse - Accrual = RA */
-	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
 	/** Invalidate = IN */
 	public static final String DOCACTION_Invalidate = "IN";
-	/** Re-activate = RE */
-	public static final String DOCACTION_Re_Activate = "RE";
-	/** <None> = -- */
-	public static final String DOCACTION_None = "--";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
 	/** Prepare = PR */
 	public static final String DOCACTION_Prepare = "PR";
-	/** Unlock = XL */
-	public static final String DOCACTION_Unlock = "XL";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
 	/** Wait Complete = WC */
 	public static final String DOCACTION_WaitComplete = "WC";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
 	/** Set Document Action.
-		@param DocAction 
-		The targeted status of the document
-	  */
+		@param DocAction The targeted status of the document
+	*/
 	public void setDocAction (String DocAction)
 	{
 
@@ -697,41 +735,40 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Document Action.
 		@return The targeted status of the document
 	  */
-	public String getDocAction () 
+	public String getDocAction()
 	{
 		return (String)get_Value(COLUMNNAME_DocAction);
 	}
 
 	/** DocStatus AD_Reference_ID=131 */
 	public static final int DOCSTATUS_AD_Reference_ID=131;
-	/** Drafted = DR */
-	public static final String DOCSTATUS_Drafted = "DR";
-	/** Completed = CO */
-	public static final String DOCSTATUS_Completed = "CO";
-	/** Approved = AP */
-	public static final String DOCSTATUS_Approved = "AP";
-	/** Not Approved = NA */
-	public static final String DOCSTATUS_NotApproved = "NA";
-	/** Voided = VO */
-	public static final String DOCSTATUS_Voided = "VO";
-	/** Invalid = IN */
-	public static final String DOCSTATUS_Invalid = "IN";
-	/** Reversed = RE */
-	public static final String DOCSTATUS_Reversed = "RE";
-	/** Closed = CL */
-	public static final String DOCSTATUS_Closed = "CL";
 	/** Unknown = ?? */
 	public static final String DOCSTATUS_Unknown = "??";
+	/** Approved = AP */
+	public static final String DOCSTATUS_Approved = "AP";
+	/** Closed = CL */
+	public static final String DOCSTATUS_Closed = "CL";
+	/** Completed = CO */
+	public static final String DOCSTATUS_Completed = "CO";
+	/** Drafted = DR */
+	public static final String DOCSTATUS_Drafted = "DR";
+	/** Invalid = IN */
+	public static final String DOCSTATUS_Invalid = "IN";
 	/** In Progress = IP */
 	public static final String DOCSTATUS_InProgress = "IP";
-	/** Waiting Payment = WP */
-	public static final String DOCSTATUS_WaitingPayment = "WP";
+	/** Not Approved = NA */
+	public static final String DOCSTATUS_NotApproved = "NA";
+	/** Reversed = RE */
+	public static final String DOCSTATUS_Reversed = "RE";
+	/** Voided = VO */
+	public static final String DOCSTATUS_Voided = "VO";
 	/** Waiting Confirmation = WC */
 	public static final String DOCSTATUS_WaitingConfirmation = "WC";
+	/** Waiting Payment = WP */
+	public static final String DOCSTATUS_WaitingPayment = "WP";
 	/** Set Document Status.
-		@param DocStatus 
-		The current status of the document
-	  */
+		@param DocStatus The current status of the document
+	*/
 	public void setDocStatus (String DocStatus)
 	{
 
@@ -741,15 +778,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Document Status.
 		@return The current status of the document
 	  */
-	public String getDocStatus () 
+	public String getDocStatus()
 	{
 		return (String)get_Value(COLUMNNAME_DocStatus);
 	}
 
 	/** Set Document No.
-		@param DocumentNo 
-		Document sequence number of the document
-	  */
+		@param DocumentNo Document sequence number of the document
+	*/
 	public void setDocumentNo (String DocumentNo)
 	{
 		set_ValueNoCheck (COLUMNNAME_DocumentNo, DocumentNo);
@@ -758,7 +794,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Document No.
 		@return Document sequence number of the document
 	  */
-	public String getDocumentNo () 
+	public String getDocumentNo()
 	{
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
@@ -772,9 +808,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
     }
 
 	/** Set Grand Total.
-		@param GrandTotal 
-		Total amount of document
-	  */
+		@param GrandTotal Total amount of document
+	*/
 	public void setGrandTotal (BigDecimal GrandTotal)
 	{
 		set_ValueNoCheck (COLUMNNAME_GrandTotal, GrandTotal);
@@ -783,7 +818,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Grand Total.
 		@return Total amount of document
 	  */
-	public BigDecimal getGrandTotal () 
+	public BigDecimal getGrandTotal()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_GrandTotal);
 		if (bd == null)
@@ -792,9 +827,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Approved.
-		@param IsApproved 
-		Indicates if this document requires approval
-	  */
+		@param IsApproved Indicates if this document requires approval
+	*/
 	public void setIsApproved (boolean IsApproved)
 	{
 		set_ValueNoCheck (COLUMNNAME_IsApproved, Boolean.valueOf(IsApproved));
@@ -803,7 +837,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Approved.
 		@return Indicates if this document requires approval
 	  */
-	public boolean isApproved () 
+	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
 		if (oo != null) 
@@ -816,9 +850,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Discount Printed.
-		@param IsDiscountPrinted 
-		Print Discount on Invoice and Order
-	  */
+		@param IsDiscountPrinted Print Discount on Invoice and Order
+	*/
 	public void setIsDiscountPrinted (boolean IsDiscountPrinted)
 	{
 		set_Value (COLUMNNAME_IsDiscountPrinted, Boolean.valueOf(IsDiscountPrinted));
@@ -827,7 +860,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Discount Printed.
 		@return Print Discount on Invoice and Order
 	  */
-	public boolean isDiscountPrinted () 
+	public boolean isDiscountPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDiscountPrinted);
 		if (oo != null) 
@@ -840,9 +873,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Printed.
-		@param IsPrinted 
-		Indicates if this document / line is printed
-	  */
+		@param IsPrinted Indicates if this document / line is printed
+	*/
 	public void setIsPrinted (boolean IsPrinted)
 	{
 		set_ValueNoCheck (COLUMNNAME_IsPrinted, Boolean.valueOf(IsPrinted));
@@ -851,7 +883,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Printed.
 		@return Indicates if this document / line is printed
 	  */
-	public boolean isPrinted () 
+	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
 		if (oo != null) 
@@ -864,9 +896,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Sales Transaction.
-		@param IsSOTrx 
-		This is a Sales Transaction
-	  */
+		@param IsSOTrx This is a Sales Transaction
+	*/
 	public void setIsSOTrx (boolean IsSOTrx)
 	{
 		set_ValueNoCheck (COLUMNNAME_IsSOTrx, Boolean.valueOf(IsSOTrx));
@@ -875,7 +906,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Sales Transaction.
 		@return This is a Sales Transaction
 	  */
-	public boolean isSOTrx () 
+	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
 		if (oo != null) 
@@ -888,9 +919,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Self-Service.
-		@param IsSelfService 
-		This is a Self-Service entry or this entry can be changed via Self-Service
-	  */
+		@param IsSelfService This is a Self-Service entry or this entry can be changed via Self-Service
+	*/
 	public void setIsSelfService (boolean IsSelfService)
 	{
 		set_Value (COLUMNNAME_IsSelfService, Boolean.valueOf(IsSelfService));
@@ -899,7 +929,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Self-Service.
 		@return This is a Self-Service entry or this entry can be changed via Self-Service
 	  */
-	public boolean isSelfService () 
+	public boolean isSelfService()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelfService);
 		if (oo != null) 
@@ -912,9 +942,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Price includes Tax.
-		@param IsTaxIncluded 
-		Tax is included in the price 
-	  */
+		@param IsTaxIncluded Tax is included in the price 
+	*/
 	public void setIsTaxIncluded (boolean IsTaxIncluded)
 	{
 		set_Value (COLUMNNAME_IsTaxIncluded, Boolean.valueOf(IsTaxIncluded));
@@ -923,7 +952,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Price includes Tax.
 		@return Tax is included in the price 
 	  */
-	public boolean isTaxIncluded () 
+	public boolean isTaxIncluded()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxIncluded);
 		if (oo != null) 
@@ -935,24 +964,41 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 		return false;
 	}
 
+	/** Set Communication Column.
+		@param JP_CommunicationColumn Communication Column
+	*/
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn)
+	{
+		set_Value (COLUMNNAME_JP_CommunicationColumn, JP_CommunicationColumn);
+	}
+
+	/** Get Communication Column.
+		@return Communication Column	  */
+	public String getJP_CommunicationColumn()
+	{
+		return (String)get_Value(COLUMNNAME_JP_CommunicationColumn);
+	}
+
 	public I_JP_ContractContent getJP_ContractContent() throws RuntimeException
-    {
-		return (I_JP_ContractContent)MTable.get(getCtx(), I_JP_ContractContent.Table_Name)
-			.getPO(getJP_ContractContent_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractContent)MTable.get(getCtx(), I_JP_ContractContent.Table_ID)
+			.getPO(getJP_ContractContent_ID(), get_TrxName());
+	}
 
 	/** Set Contract Content.
-		@param JP_ContractContent_ID Contract Content	  */
+		@param JP_ContractContent_ID Contract Content
+	*/
 	public void setJP_ContractContent_ID (int JP_ContractContent_ID)
 	{
-		if (JP_ContractContent_ID < 1) 
+		if (JP_ContractContent_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractContent_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractContent_ID, Integer.valueOf(JP_ContractContent_ID));
 	}
 
 	/** Get Contract Content.
 		@return Contract Content	  */
-	public int getJP_ContractContent_ID () 
+	public int getJP_ContractContent_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractContent_ID);
 		if (ii == null)
@@ -961,23 +1007,25 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public I_JP_ContractProcPeriod getJP_ContractProcPeriod() throws RuntimeException
-    {
-		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_Name)
-			.getPO(getJP_ContractProcPeriod_ID(), get_TrxName());	}
+	{
+		return (I_JP_ContractProcPeriod)MTable.get(getCtx(), I_JP_ContractProcPeriod.Table_ID)
+			.getPO(getJP_ContractProcPeriod_ID(), get_TrxName());
+	}
 
 	/** Set Contract Process Period.
-		@param JP_ContractProcPeriod_ID Contract Process Period	  */
+		@param JP_ContractProcPeriod_ID Contract Process Period
+	*/
 	public void setJP_ContractProcPeriod_ID (int JP_ContractProcPeriod_ID)
 	{
-		if (JP_ContractProcPeriod_ID < 1) 
+		if (JP_ContractProcPeriod_ID < 1)
 			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_ContractProcPeriod_ID, Integer.valueOf(JP_ContractProcPeriod_ID));
 	}
 
 	/** Get Contract Process Period.
 		@return Contract Process Period	  */
-	public int getJP_ContractProcPeriod_ID () 
+	public int getJP_ContractProcPeriod_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ContractProcPeriod_ID);
 		if (ii == null)
@@ -986,23 +1034,25 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public I_JP_Contract getJP_Contract() throws RuntimeException
-    {
-		return (I_JP_Contract)MTable.get(getCtx(), I_JP_Contract.Table_Name)
-			.getPO(getJP_Contract_ID(), get_TrxName());	}
+	{
+		return (I_JP_Contract)MTable.get(getCtx(), I_JP_Contract.Table_ID)
+			.getPO(getJP_Contract_ID(), get_TrxName());
+	}
 
 	/** Set Contract Document.
-		@param JP_Contract_ID Contract Document	  */
+		@param JP_Contract_ID Contract Document
+	*/
 	public void setJP_Contract_ID (int JP_Contract_ID)
 	{
-		if (JP_Contract_ID < 1) 
+		if (JP_Contract_ID < 1)
 			set_Value (COLUMNNAME_JP_Contract_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_Contract_ID, Integer.valueOf(JP_Contract_ID));
 	}
 
 	/** Get Contract Document.
 		@return Contract Document	  */
-	public int getJP_Contract_ID () 
+	public int getJP_Contract_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Contract_ID);
 		if (ii == null)
@@ -1011,18 +1061,19 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Revenue Recognition Doc.
-		@param JP_Recognition_ID Revenue Recognition Doc	  */
+		@param JP_Recognition_ID Revenue Recognition Doc
+	*/
 	public void setJP_Recognition_ID (int JP_Recognition_ID)
 	{
-		if (JP_Recognition_ID < 1) 
+		if (JP_Recognition_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_Recognition_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_Recognition_ID, Integer.valueOf(JP_Recognition_ID));
 	}
 
 	/** Get Revenue Recognition Doc.
 		@return Revenue Recognition Doc	  */
-	public int getJP_Recognition_ID () 
+	public int getJP_Recognition_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_ID);
 		if (ii == null)
@@ -1031,23 +1082,25 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public I_JP_Recognition getJP_Recognition_SplitFrom() throws RuntimeException
-    {
-		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
-			.getPO(getJP_Recognition_SplitFrom_ID(), get_TrxName());	}
+	{
+		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_ID)
+			.getPO(getJP_Recognition_SplitFrom_ID(), get_TrxName());
+	}
 
 	/** Set Recognition Doc(Split from).
-		@param JP_Recognition_SplitFrom_ID Recognition Doc(Split from)	  */
+		@param JP_Recognition_SplitFrom_ID Recognition Doc(Split from)
+	*/
 	public void setJP_Recognition_SplitFrom_ID (int JP_Recognition_SplitFrom_ID)
 	{
-		if (JP_Recognition_SplitFrom_ID < 1) 
+		if (JP_Recognition_SplitFrom_ID < 1)
 			set_Value (COLUMNNAME_JP_Recognition_SplitFrom_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_Recognition_SplitFrom_ID, Integer.valueOf(JP_Recognition_SplitFrom_ID));
 	}
 
 	/** Get Recognition Doc(Split from).
 		@return Recognition Doc(Split from)	  */
-	public int getJP_Recognition_SplitFrom_ID () 
+	public int getJP_Recognition_SplitFrom_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_SplitFrom_ID);
 		if (ii == null)
@@ -1056,23 +1109,25 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public I_JP_Recognition getJP_Recognition_SplitTo() throws RuntimeException
-    {
-		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
-			.getPO(getJP_Recognition_SplitTo_ID(), get_TrxName());	}
+	{
+		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_ID)
+			.getPO(getJP_Recognition_SplitTo_ID(), get_TrxName());
+	}
 
 	/** Set Recognition Doc(Split To).
-		@param JP_Recognition_SplitTo_ID Recognition Doc(Split To)	  */
+		@param JP_Recognition_SplitTo_ID Recognition Doc(Split To)
+	*/
 	public void setJP_Recognition_SplitTo_ID (int JP_Recognition_SplitTo_ID)
 	{
-		if (JP_Recognition_SplitTo_ID < 1) 
+		if (JP_Recognition_SplitTo_ID < 1)
 			set_Value (COLUMNNAME_JP_Recognition_SplitTo_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_Recognition_SplitTo_ID, Integer.valueOf(JP_Recognition_SplitTo_ID));
 	}
 
 	/** Get Recognition Doc(Split To).
 		@return Recognition Doc(Split To)	  */
-	public int getJP_Recognition_SplitTo_ID () 
+	public int getJP_Recognition_SplitTo_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Recognition_SplitTo_ID);
 		if (ii == null)
@@ -1081,7 +1136,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set JP_Recognition_UU.
-		@param JP_Recognition_UU JP_Recognition_UU	  */
+		@param JP_Recognition_UU JP_Recognition_UU
+	*/
 	public void setJP_Recognition_UU (String JP_Recognition_UU)
 	{
 		set_Value (COLUMNNAME_JP_Recognition_UU, JP_Recognition_UU);
@@ -1089,15 +1145,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 
 	/** Get JP_Recognition_UU.
 		@return JP_Recognition_UU	  */
-	public String getJP_Recognition_UU () 
+	public String getJP_Recognition_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Recognition_UU);
 	}
 
 	/** Set Remarks.
-		@param JP_Remarks 
-		JPIERE-0490:JPBP
-	  */
+		@param JP_Remarks JPIERE-0490:JPBP
+	*/
 	public void setJP_Remarks (String JP_Remarks)
 	{
 		set_Value (COLUMNNAME_JP_Remarks, JP_Remarks);
@@ -1106,15 +1161,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Remarks.
 		@return JPIERE-0490:JPBP
 	  */
-	public String getJP_Remarks () 
+	public String getJP_Remarks()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Remarks);
 	}
 
 	/** Set Subject.
-		@param JP_Subject 
-		JPIERE-0490:JPBP
-	  */
+		@param JP_Subject JPIERE-0490:JPBP
+	*/
 	public void setJP_Subject (String JP_Subject)
 	{
 		set_Value (COLUMNNAME_JP_Subject, JP_Subject);
@@ -1123,32 +1177,32 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Subject.
 		@return JPIERE-0490:JPBP
 	  */
-	public String getJP_Subject () 
+	public String getJP_Subject()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Subject);
 	}
 
 	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_InOut)MTable.get(getCtx(), org.compiere.model.I_M_InOut.Table_Name)
-			.getPO(getM_InOut_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_InOut)MTable.get(getCtx(), org.compiere.model.I_M_InOut.Table_ID)
+			.getPO(getM_InOut_ID(), get_TrxName());
+	}
 
 	/** Set Shipment/Receipt.
-		@param M_InOut_ID 
-		Material Shipment Document
-	  */
+		@param M_InOut_ID Material Shipment Document
+	*/
 	public void setM_InOut_ID (int M_InOut_ID)
 	{
-		if (M_InOut_ID < 1) 
+		if (M_InOut_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, Integer.valueOf(M_InOut_ID));
 	}
 
 	/** Get Shipment/Receipt.
 		@return Material Shipment Document
 	  */
-	public int getM_InOut_ID () 
+	public int getM_InOut_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOut_ID);
 		if (ii == null)
@@ -1157,26 +1211,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
-			.getPO(getM_PriceList_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_ID)
+			.getPO(getM_PriceList_ID(), get_TrxName());
+	}
 
 	/** Set Price List.
-		@param M_PriceList_ID 
-		Unique identifier of a Price List
-	  */
+		@param M_PriceList_ID Unique identifier of a Price List
+	*/
 	public void setM_PriceList_ID (int M_PriceList_ID)
 	{
-		if (M_PriceList_ID < 1) 
+		if (M_PriceList_ID < 1)
 			set_Value (COLUMNNAME_M_PriceList_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
 	}
 
 	/** Get Price List.
 		@return Unique identifier of a Price List
 	  */
-	public int getM_PriceList_ID () 
+	public int getM_PriceList_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_PriceList_ID);
 		if (ii == null)
@@ -1185,26 +1239,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_M_RMA getM_RMA() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_RMA)MTable.get(getCtx(), org.compiere.model.I_M_RMA.Table_Name)
-			.getPO(getM_RMA_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_RMA)MTable.get(getCtx(), org.compiere.model.I_M_RMA.Table_ID)
+			.getPO(getM_RMA_ID(), get_TrxName());
+	}
 
 	/** Set RMA.
-		@param M_RMA_ID 
-		Return Material Authorization
-	  */
+		@param M_RMA_ID Return Material Authorization
+	*/
 	public void setM_RMA_ID (int M_RMA_ID)
 	{
-		if (M_RMA_ID < 1) 
+		if (M_RMA_ID < 1)
 			set_Value (COLUMNNAME_M_RMA_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_RMA_ID, Integer.valueOf(M_RMA_ID));
 	}
 
 	/** Get RMA.
 		@return Return Material Authorization
 	  */
-	public int getM_RMA_ID () 
+	public int getM_RMA_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_RMA_ID);
 		if (ii == null)
@@ -1213,9 +1267,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Movement Date.
-		@param MovementDate 
-		Date a product was moved in or out of inventory
-	  */
+		@param MovementDate Date a product was moved in or out of inventory
+	*/
 	public void setMovementDate (Timestamp MovementDate)
 	{
 		set_ValueNoCheck (COLUMNNAME_MovementDate, MovementDate);
@@ -1224,15 +1277,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Movement Date.
 		@return Date a product was moved in or out of inventory
 	  */
-	public Timestamp getMovementDate () 
+	public Timestamp getMovementDate()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
 	}
 
 	/** Set Order Reference.
-		@param POReference 
-		Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
-	  */
+		@param POReference Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	*/
 	public void setPOReference (String POReference)
 	{
 		set_Value (COLUMNNAME_POReference, POReference);
@@ -1241,15 +1293,14 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Order Reference.
 		@return Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
 	  */
-	public String getPOReference () 
+	public String getPOReference()
 	{
 		return (String)get_Value(COLUMNNAME_POReference);
 	}
 
 	/** Set Posted.
-		@param Posted 
-		Posting status
-	  */
+		@param Posted Posting status
+	*/
 	public void setPosted (boolean Posted)
 	{
 		set_Value (COLUMNNAME_Posted, Boolean.valueOf(Posted));
@@ -1258,7 +1309,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Posted.
 		@return Posting status
 	  */
-	public boolean isPosted () 
+	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
 		if (oo != null) 
@@ -1271,9 +1322,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Processed.
-		@param Processed 
-		The document has been processed
-	  */
+		@param Processed The document has been processed
+	*/
 	public void setProcessed (boolean Processed)
 	{
 		set_ValueNoCheck (COLUMNNAME_Processed, Boolean.valueOf(Processed));
@@ -1282,7 +1332,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Processed.
 		@return The document has been processed
 	  */
-	public boolean isProcessed () 
+	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
 		if (oo != null) 
@@ -1295,9 +1345,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Processed On.
-		@param ProcessedOn 
-		The date+time (expressed in decimal format) when the document has been processed
-	  */
+		@param ProcessedOn The date+time (expressed in decimal format) when the document has been processed
+	*/
 	public void setProcessedOn (BigDecimal ProcessedOn)
 	{
 		set_Value (COLUMNNAME_ProcessedOn, ProcessedOn);
@@ -1306,7 +1355,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Processed On.
 		@return The date+time (expressed in decimal format) when the document has been processed
 	  */
-	public BigDecimal getProcessedOn () 
+	public BigDecimal getProcessedOn()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ProcessedOn);
 		if (bd == null)
@@ -1315,7 +1364,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Process Now.
-		@param Processing Process Now	  */
+		@param Processing Process Now
+	*/
 	public void setProcessing (boolean Processing)
 	{
 		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
@@ -1323,7 +1373,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public boolean isProcessing () 
+	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
 		if (oo != null) 
@@ -1336,26 +1386,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public I_JP_Recognition getReversal() throws RuntimeException
-    {
-		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_Name)
-			.getPO(getReversal_ID(), get_TrxName());	}
+	{
+		return (I_JP_Recognition)MTable.get(getCtx(), I_JP_Recognition.Table_ID)
+			.getPO(getReversal_ID(), get_TrxName());
+	}
 
 	/** Set Reversal ID.
-		@param Reversal_ID 
-		ID of document reversal
-	  */
+		@param Reversal_ID ID of document reversal
+	*/
 	public void setReversal_ID (int Reversal_ID)
 	{
-		if (Reversal_ID < 1) 
+		if (Reversal_ID < 1)
 			set_Value (COLUMNNAME_Reversal_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_Reversal_ID, Integer.valueOf(Reversal_ID));
 	}
 
 	/** Get Reversal ID.
 		@return ID of document reversal
 	  */
-	public int getReversal_ID () 
+	public int getReversal_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Reversal_ID);
 		if (ii == null)
@@ -1364,26 +1414,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
-			.getPO(getSalesRep_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getSalesRep_ID(), get_TrxName());
+	}
 
 	/** Set Sales Rep.
-		@param SalesRep_ID 
-		Sales Representative or Company Agent
-	  */
+		@param SalesRep_ID Sales Representative or Company Agent
+	*/
 	public void setSalesRep_ID (int SalesRep_ID)
 	{
-		if (SalesRep_ID < 1) 
+		if (SalesRep_ID < 1)
 			set_Value (COLUMNNAME_SalesRep_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
 	}
 
 	/** Get Sales Rep.
 		@return Sales Representative or Company Agent
 	  */
-	public int getSalesRep_ID () 
+	public int getSalesRep_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SalesRep_ID);
 		if (ii == null)
@@ -1392,9 +1442,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Send EMail.
-		@param SendEMail 
-		Enable sending Document EMail
-	  */
+		@param SendEMail Enable sending Document EMail
+	*/
 	public void setSendEMail (boolean SendEMail)
 	{
 		set_Value (COLUMNNAME_SendEMail, Boolean.valueOf(SendEMail));
@@ -1403,7 +1452,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Send EMail.
 		@return Enable sending Document EMail
 	  */
-	public boolean isSendEMail () 
+	public boolean isSendEMail()
 	{
 		Object oo = get_Value(COLUMNNAME_SendEMail);
 		if (oo != null) 
@@ -1416,9 +1465,8 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	/** Set Total Lines.
-		@param TotalLines 
-		Total of all document lines
-	  */
+		@param TotalLines Total of all document lines
+	*/
 	public void setTotalLines (BigDecimal TotalLines)
 	{
 		set_ValueNoCheck (COLUMNNAME_TotalLines, TotalLines);
@@ -1427,7 +1475,7 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	/** Get Total Lines.
 		@return Total of all document lines
 	  */
-	public BigDecimal getTotalLines () 
+	public BigDecimal getTotalLines()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalLines);
 		if (bd == null)
@@ -1436,26 +1484,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser1_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser1_ID(), get_TrxName());
+	}
 
 	/** Set User Element List 1.
-		@param User1_ID 
-		User defined list element #1
-	  */
+		@param User1_ID User defined list element #1
+	*/
 	public void setUser1_ID (int User1_ID)
 	{
-		if (User1_ID < 1) 
+		if (User1_ID < 1)
 			set_Value (COLUMNNAME_User1_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
 	/** Get User Element List 1.
 		@return User defined list element #1
 	  */
-	public int getUser1_ID () 
+	public int getUser1_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
 		if (ii == null)
@@ -1464,26 +1512,26 @@ public class X_JP_Recognition extends PO implements I_JP_Recognition, I_Persiste
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser2_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser2_ID(), get_TrxName());
+	}
 
 	/** Set User Element List 2.
-		@param User2_ID 
-		User defined list element #2
-	  */
+		@param User2_ID User defined list element #2
+	*/
 	public void setUser2_ID (int User2_ID)
 	{
-		if (User2_ID < 1) 
+		if (User2_ID < 1)
 			set_Value (COLUMNNAME_User2_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
 	}
 
 	/** Get User Element List 2.
 		@return User defined list element #2
 	  */
-	public int getUser2_ID () 
+	public int getUser2_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
 		if (ii == null)

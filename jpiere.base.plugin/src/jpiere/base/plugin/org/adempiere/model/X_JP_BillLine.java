@@ -26,19 +26,50 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_BillLine
  *  @author iDempiere (generated) 
- *  @version Release 8.2 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="JP_BillLine")
 public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20211007L;
+	private static final long serialVersionUID = 20220822L;
 
     /** Standard Constructor */
     public X_JP_BillLine (Properties ctx, int JP_BillLine_ID, String trxName)
     {
       super (ctx, JP_BillLine_ID, trxName);
+      /** if (JP_BillLine_ID == 0)
+        {
+			setC_Invoice_ID (0);
+			setGrandTotal (Env.ZERO);
+// 0
+			setIsTaxAdjustLineJP (false);
+// N
+			setJP_BillLine_ID (0);
+			setJP_Bill_ID (0);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM JP_BillLine WHERE JP_Bill_ID=@JP_Bill_ID@
+			setOpenAmt (Env.ZERO);
+// 0
+			setOverUnderAmt (Env.ZERO);
+// 0
+			setPayAmt (Env.ZERO);
+// 0
+			setTaxAmt (Env.ZERO);
+// 0
+			setTaxBaseAmt (Env.ZERO);
+// 0
+			setTotalLines (Env.ZERO);
+// 0
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_BillLine (Properties ctx, int JP_BillLine_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_BillLine_ID, trxName, virtualColumns);
       /** if (JP_BillLine_ID == 0)
         {
 			setC_Invoice_ID (0);
@@ -94,21 +125,20 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
     }
 
 	/** Set Trx Organization.
-		@param AD_OrgTrx_ID 
-		Performing or initiating organization
-	  */
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
 	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
 	{
-		if (AD_OrgTrx_ID < 1) 
+		if (AD_OrgTrx_ID < 1)
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
 	}
 
 	/** Get Trx Organization.
 		@return Performing or initiating organization
 	  */
-	public int getAD_OrgTrx_ID () 
+	public int getAD_OrgTrx_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
@@ -117,26 +147,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
-			.getPO(getAD_User_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getAD_User_ID(), get_TrxName());
+	}
 
 	/** Set User/Contact.
-		@param AD_User_ID 
-		User within the system - Internal or Business Partner Contact
-	  */
+		@param AD_User_ID User within the system - Internal or Business Partner Contact
+	*/
 	public void setAD_User_ID (int AD_User_ID)
 	{
-		if (AD_User_ID < 1) 
+		if (AD_User_ID < 1)
 			set_Value (COLUMNNAME_AD_User_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
 	}
 
 	/** Get User/Contact.
 		@return User within the system - Internal or Business Partner Contact
 	  */
-	public int getAD_User_ID () 
+	public int getAD_User_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_User_ID);
 		if (ii == null)
@@ -145,26 +175,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_BPartner_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
+	}
 
-	/** Set Business Partner .
-		@param C_BPartner_ID 
-		Identifies a Business Partner
-	  */
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_BPartner_ID < 1) 
+		if (C_BPartner_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 		@return Identifies a Business Partner
 	  */
-	public int getC_BPartner_ID () 
+	public int getC_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
@@ -173,26 +203,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
-			.getPO(getC_BPartner_Location_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_ID)
+			.getPO(getC_BPartner_Location_ID(), get_TrxName());
+	}
 
 	/** Set Partner Location.
-		@param C_BPartner_Location_ID 
-		Identifies the (ship to) address for this Business Partner
-	  */
+		@param C_BPartner_Location_ID Identifies the (ship to) address for this Business Partner
+	*/
 	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID)
 	{
-		if (C_BPartner_Location_ID < 1) 
+		if (C_BPartner_Location_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
 	}
 
 	/** Get Partner Location.
 		@return Identifies the (ship to) address for this Business Partner
 	  */
-	public int getC_BPartner_Location_ID () 
+	public int getC_BPartner_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
 		if (ii == null)
@@ -201,26 +231,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
-			.getPO(getC_Currency_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
+			.getPO(getC_Currency_ID(), get_TrxName());
+	}
 
 	/** Set Currency.
-		@param C_Currency_ID 
-		The Currency for this record
-	  */
+		@param C_Currency_ID The Currency for this record
+	*/
 	public void setC_Currency_ID (int C_Currency_ID)
 	{
-		if (C_Currency_ID < 1) 
+		if (C_Currency_ID < 1)
 			set_Value (COLUMNNAME_C_Currency_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
 	}
 
 	/** Get Currency.
 		@return The Currency for this record
 	  */
-	public int getC_Currency_ID () 
+	public int getC_Currency_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
 		if (ii == null)
@@ -229,26 +259,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
-			.getPO(getC_DocType_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getC_DocType_ID(), get_TrxName());
+	}
 
 	/** Set Document Type.
-		@param C_DocType_ID 
-		Document type or rules
-	  */
+		@param C_DocType_ID Document type or rules
+	*/
 	public void setC_DocType_ID (int C_DocType_ID)
 	{
-		if (C_DocType_ID < 0) 
+		if (C_DocType_ID < 0)
 			set_Value (COLUMNNAME_C_DocType_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
 	}
 
 	/** Get Document Type.
 		@return Document type or rules
 	  */
-	public int getC_DocType_ID () 
+	public int getC_DocType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
 		if (ii == null)
@@ -257,26 +287,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_Name)
-			.getPO(getC_Invoice_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
+			.getPO(getC_Invoice_ID(), get_TrxName());
+	}
 
 	/** Set Invoice.
-		@param C_Invoice_ID 
-		Invoice Identifier
-	  */
+		@param C_Invoice_ID Invoice Identifier
+	*/
 	public void setC_Invoice_ID (int C_Invoice_ID)
 	{
-		if (C_Invoice_ID < 1) 
+		if (C_Invoice_ID < 1)
 			set_Value (COLUMNNAME_C_Invoice_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
 	}
 
 	/** Get Invoice.
 		@return Invoice Identifier
 	  */
-	public int getC_Invoice_ID () 
+	public int getC_Invoice_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
 		if (ii == null)
@@ -285,26 +315,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_PaymentTerm)MTable.get(getCtx(), org.compiere.model.I_C_PaymentTerm.Table_Name)
-			.getPO(getC_PaymentTerm_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_PaymentTerm)MTable.get(getCtx(), org.compiere.model.I_C_PaymentTerm.Table_ID)
+			.getPO(getC_PaymentTerm_ID(), get_TrxName());
+	}
 
 	/** Set Payment Term.
-		@param C_PaymentTerm_ID 
-		The terms of Payment (timing, discount)
-	  */
+		@param C_PaymentTerm_ID The terms of Payment (timing, discount)
+	*/
 	public void setC_PaymentTerm_ID (int C_PaymentTerm_ID)
 	{
-		if (C_PaymentTerm_ID < 1) 
+		if (C_PaymentTerm_ID < 1)
 			set_Value (COLUMNNAME_C_PaymentTerm_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_PaymentTerm_ID, Integer.valueOf(C_PaymentTerm_ID));
 	}
 
 	/** Get Payment Term.
 		@return The terms of Payment (timing, discount)
 	  */
-	public int getC_PaymentTerm_ID () 
+	public int getC_PaymentTerm_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaymentTerm_ID);
 		if (ii == null)
@@ -313,9 +343,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Account Date.
-		@param DateAcct 
-		Accounting Date
-	  */
+		@param DateAcct Accounting Date
+	*/
 	public void setDateAcct (Timestamp DateAcct)
 	{
 		set_Value (COLUMNNAME_DateAcct, DateAcct);
@@ -324,15 +353,14 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Account Date.
 		@return Accounting Date
 	  */
-	public Timestamp getDateAcct () 
+	public Timestamp getDateAcct()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
 	}
 
 	/** Set Date Invoiced.
-		@param DateInvoiced 
-		Date printed on Invoice
-	  */
+		@param DateInvoiced Date printed on Invoice
+	*/
 	public void setDateInvoiced (Timestamp DateInvoiced)
 	{
 		set_Value (COLUMNNAME_DateInvoiced, DateInvoiced);
@@ -341,15 +369,14 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Date Invoiced.
 		@return Date printed on Invoice
 	  */
-	public Timestamp getDateInvoiced () 
+	public Timestamp getDateInvoiced()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateInvoiced);
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -358,15 +385,14 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Grand Total.
-		@param GrandTotal 
-		Total amount of document
-	  */
+		@param GrandTotal Total amount of document
+	*/
 	public void setGrandTotal (BigDecimal GrandTotal)
 	{
 		set_Value (COLUMNNAME_GrandTotal, GrandTotal);
@@ -375,7 +401,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Grand Total.
 		@return Total amount of document
 	  */
-	public BigDecimal getGrandTotal () 
+	public BigDecimal getGrandTotal()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_GrandTotal);
 		if (bd == null)
@@ -384,9 +410,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set line of Tax Adjust.
-		@param IsTaxAdjustLineJP 
-		JPIERE-0508:JPBP
-	  */
+		@param IsTaxAdjustLineJP JPIERE-0508:JPBP
+	*/
 	public void setIsTaxAdjustLineJP (boolean IsTaxAdjustLineJP)
 	{
 		set_ValueNoCheck (COLUMNNAME_IsTaxAdjustLineJP, Boolean.valueOf(IsTaxAdjustLineJP));
@@ -395,7 +420,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get line of Tax Adjust.
 		@return JPIERE-0508:JPBP
 	  */
-	public boolean isTaxAdjustLineJP () 
+	public boolean isTaxAdjustLineJP()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxAdjustLineJP);
 		if (oo != null) 
@@ -408,18 +433,19 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Bil lLine.
-		@param JP_BillLine_ID Bil lLine	  */
+		@param JP_BillLine_ID Bil lLine
+	*/
 	public void setJP_BillLine_ID (int JP_BillLine_ID)
 	{
-		if (JP_BillLine_ID < 1) 
+		if (JP_BillLine_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_BillLine_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_BillLine_ID, Integer.valueOf(JP_BillLine_ID));
 	}
 
 	/** Get Bil lLine.
 		@return Bil lLine	  */
-	public int getJP_BillLine_ID () 
+	public int getJP_BillLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BillLine_ID);
 		if (ii == null)
@@ -428,7 +454,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set JP_BillLine_UU.
-		@param JP_BillLine_UU JP_BillLine_UU	  */
+		@param JP_BillLine_UU JP_BillLine_UU
+	*/
 	public void setJP_BillLine_UU (String JP_BillLine_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_BillLine_UU, JP_BillLine_UU);
@@ -436,29 +463,31 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 
 	/** Get JP_BillLine_UU.
 		@return JP_BillLine_UU	  */
-	public String getJP_BillLine_UU () 
+	public String getJP_BillLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BillLine_UU);
 	}
 
 	public I_JP_Bill getJP_Bill() throws RuntimeException
-    {
-		return (I_JP_Bill)MTable.get(getCtx(), I_JP_Bill.Table_Name)
-			.getPO(getJP_Bill_ID(), get_TrxName());	}
+	{
+		return (I_JP_Bill)MTable.get(getCtx(), I_JP_Bill.Table_ID)
+			.getPO(getJP_Bill_ID(), get_TrxName());
+	}
 
 	/** Set Bill.
-		@param JP_Bill_ID Bill	  */
+		@param JP_Bill_ID Bill
+	*/
 	public void setJP_Bill_ID (int JP_Bill_ID)
 	{
-		if (JP_Bill_ID < 1) 
+		if (JP_Bill_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_Bill_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_Bill_ID, Integer.valueOf(JP_Bill_ID));
 	}
 
 	/** Get Bill.
 		@return Bill	  */
-	public int getJP_Bill_ID () 
+	public int getJP_Bill_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Bill_ID);
 		if (ii == null)
@@ -466,10 +495,24 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Communication Column.
+		@param JP_CommunicationColumn Communication Column
+	*/
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn)
+	{
+		set_Value (COLUMNNAME_JP_CommunicationColumn, JP_CommunicationColumn);
+	}
+
+	/** Get Communication Column.
+		@return Communication Column	  */
+	public String getJP_CommunicationColumn()
+	{
+		return (String)get_Value(COLUMNNAME_JP_CommunicationColumn);
+	}
+
 	/** Set Remarks.
-		@param JP_Remarks 
-		JPIERE-0490:JPBP
-	  */
+		@param JP_Remarks JPIERE-0490:JPBP
+	*/
 	public void setJP_Remarks (String JP_Remarks)
 	{
 		set_Value (COLUMNNAME_JP_Remarks, JP_Remarks);
@@ -478,15 +521,14 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Remarks.
 		@return JPIERE-0490:JPBP
 	  */
-	public String getJP_Remarks () 
+	public String getJP_Remarks()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Remarks);
 	}
 
 	/** Set Subject.
-		@param JP_Subject 
-		JPIERE-0490:JPBP
-	  */
+		@param JP_Subject JPIERE-0490:JPBP
+	*/
 	public void setJP_Subject (String JP_Subject)
 	{
 		set_Value (COLUMNNAME_JP_Subject, JP_Subject);
@@ -495,15 +537,14 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Subject.
 		@return JPIERE-0490:JPBP
 	  */
-	public String getJP_Subject () 
+	public String getJP_Subject()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Subject);
 	}
 
 	/** Set Line No.
-		@param Line 
-		Unique line for this document
-	  */
+		@param Line Unique line for this document
+	*/
 	public void setLine (int Line)
 	{
 		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
@@ -512,7 +553,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Line No.
 		@return Unique line for this document
 	  */
-	public int getLine () 
+	public int getLine()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Line);
 		if (ii == null)
@@ -521,26 +562,26 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
-			.getPO(getM_PriceList_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_ID)
+			.getPO(getM_PriceList_ID(), get_TrxName());
+	}
 
 	/** Set Price List.
-		@param M_PriceList_ID 
-		Unique identifier of a Price List
-	  */
+		@param M_PriceList_ID Unique identifier of a Price List
+	*/
 	public void setM_PriceList_ID (int M_PriceList_ID)
 	{
-		if (M_PriceList_ID < 1) 
+		if (M_PriceList_ID < 1)
 			set_Value (COLUMNNAME_M_PriceList_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
 	}
 
 	/** Get Price List.
 		@return Unique identifier of a Price List
 	  */
-	public int getM_PriceList_ID () 
+	public int getM_PriceList_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_PriceList_ID);
 		if (ii == null)
@@ -549,9 +590,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Open Amount.
-		@param OpenAmt 
-		Open item amount
-	  */
+		@param OpenAmt Open item amount
+	*/
 	public void setOpenAmt (BigDecimal OpenAmt)
 	{
 		set_Value (COLUMNNAME_OpenAmt, OpenAmt);
@@ -560,7 +600,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Open Amount.
 		@return Open item amount
 	  */
-	public BigDecimal getOpenAmt () 
+	public BigDecimal getOpenAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_OpenAmt);
 		if (bd == null)
@@ -569,9 +609,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Over/Under Payment.
-		@param OverUnderAmt 
-		Over-Payment (unallocated) or Under-Payment (partial payment) Amount
-	  */
+		@param OverUnderAmt Over-Payment (unallocated) or Under-Payment (partial payment) Amount
+	*/
 	public void setOverUnderAmt (BigDecimal OverUnderAmt)
 	{
 		set_Value (COLUMNNAME_OverUnderAmt, OverUnderAmt);
@@ -580,7 +619,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Over/Under Payment.
 		@return Over-Payment (unallocated) or Under-Payment (partial payment) Amount
 	  */
-	public BigDecimal getOverUnderAmt () 
+	public BigDecimal getOverUnderAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_OverUnderAmt);
 		if (bd == null)
@@ -589,9 +628,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Payment amount.
-		@param PayAmt 
-		Amount being paid
-	  */
+		@param PayAmt Amount being paid
+	*/
 	public void setPayAmt (BigDecimal PayAmt)
 	{
 		set_Value (COLUMNNAME_PayAmt, PayAmt);
@@ -600,7 +638,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Payment amount.
 		@return Amount being paid
 	  */
-	public BigDecimal getPayAmt () 
+	public BigDecimal getPayAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PayAmt);
 		if (bd == null)
@@ -625,9 +663,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Direct Deposit = T */
 	public static final String PAYMENTRULE_DirectDeposit = "T";
 	/** Set Payment Rule.
-		@param PaymentRule 
-		How you pay the invoice
-	  */
+		@param PaymentRule How you pay the invoice
+	*/
 	public void setPaymentRule (String PaymentRule)
 	{
 
@@ -637,32 +674,32 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Payment Rule.
 		@return How you pay the invoice
 	  */
-	public String getPaymentRule () 
+	public String getPaymentRule()
 	{
 		return (String)get_Value(COLUMNNAME_PaymentRule);
 	}
 
 	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
-			.getPO(getSalesRep_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getSalesRep_ID(), get_TrxName());
+	}
 
 	/** Set Sales Rep.
-		@param SalesRep_ID 
-		Sales Representative or Company Agent
-	  */
+		@param SalesRep_ID Sales Representative or Company Agent
+	*/
 	public void setSalesRep_ID (int SalesRep_ID)
 	{
-		if (SalesRep_ID < 1) 
+		if (SalesRep_ID < 1)
 			set_Value (COLUMNNAME_SalesRep_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
 	}
 
 	/** Get Sales Rep.
 		@return Sales Representative or Company Agent
 	  */
-	public int getSalesRep_ID () 
+	public int getSalesRep_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SalesRep_ID);
 		if (ii == null)
@@ -671,9 +708,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Tax Amount.
-		@param TaxAmt 
-		Tax Amount for a document
-	  */
+		@param TaxAmt Tax Amount for a document
+	*/
 	public void setTaxAmt (BigDecimal TaxAmt)
 	{
 		set_ValueNoCheck (COLUMNNAME_TaxAmt, TaxAmt);
@@ -682,7 +718,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Tax Amount.
 		@return Tax Amount for a document
 	  */
-	public BigDecimal getTaxAmt () 
+	public BigDecimal getTaxAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TaxAmt);
 		if (bd == null)
@@ -691,9 +727,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Tax base Amount.
-		@param TaxBaseAmt 
-		Base for calculating the tax amount
-	  */
+		@param TaxBaseAmt Base for calculating the tax amount
+	*/
 	public void setTaxBaseAmt (BigDecimal TaxBaseAmt)
 	{
 		set_Value (COLUMNNAME_TaxBaseAmt, TaxBaseAmt);
@@ -702,7 +737,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Tax base Amount.
 		@return Base for calculating the tax amount
 	  */
-	public BigDecimal getTaxBaseAmt () 
+	public BigDecimal getTaxBaseAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TaxBaseAmt);
 		if (bd == null)
@@ -711,9 +746,8 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	}
 
 	/** Set Total Lines.
-		@param TotalLines 
-		Total of all document lines
-	  */
+		@param TotalLines Total of all document lines
+	*/
 	public void setTotalLines (BigDecimal TotalLines)
 	{
 		set_Value (COLUMNNAME_TotalLines, TotalLines);
@@ -722,7 +756,7 @@ public class X_JP_BillLine extends PO implements I_JP_BillLine, I_Persistent
 	/** Get Total Lines.
 		@return Total of all document lines
 	  */
-	public BigDecimal getTotalLines () 
+	public BigDecimal getTotalLines()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalLines);
 		if (bd == null)

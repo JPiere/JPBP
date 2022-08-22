@@ -33,6 +33,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
 *
@@ -44,6 +45,7 @@ import org.compiere.util.Msg;
 * JPIERE-0294: Explode BOM
 * JPIERE-0317: Physical Warehouse
 * JPIERE-0376: Check Over Qty Delivered
+* JPIERE-0573: Copy Communication Column
 *
 * @author h.hagiwara
 *
@@ -323,6 +325,22 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 
 			}
 
+		}//JPIERE-0376
+		
+		
+		//JPIERE-0573 : Copy Subject and Remarks,Communication Column.
+		if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("C_OrderLine_ID"))
+		{
+			MInOutLine iol = (MInOutLine)po;
+			if(iol.getC_OrderLine_ID() > 0)
+			{
+				MOrderLine order = new MOrderLine(po.getCtx(),iol.getC_OrderLine_ID(), po.get_TrxName());
+
+				if(Util.isEmpty(iol.get_ValueAsString("JP_CommunicationColumn")))
+				{
+					iol.set_ValueNoCheck("JP_CommunicationColumn", order.get_ValueAsString("JP_CommunicationColumn"));
+				}
+			}
 		}
 
 		return null;

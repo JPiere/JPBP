@@ -42,7 +42,8 @@ import jpiere.base.plugin.util.JPierePaymentTerms;
 * JPIERE-0223: Restrict Match Inv.
 * JPIERE-0295: Explode BOM
 * JPIERE-0368: Period Closing by Payment Term
-* JPIERE-0490:Copy Subject and Remarks
+* JPIERE-0490: Copy Subject and Remarks
+* JPIERE-0573: Copy Communication Column
 *
 * @author h.hagiwara
 *
@@ -119,7 +120,7 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 				return Msg.getMsg(po.getCtx(), "JP_Can_Not_Change_Diff_DocBaseType");//You can not change different Doc Base type.
 		}
 
-		//JPIERE-0490 : Copy Subject and Remarks
+		//JPIERE-0490 & 0573 : Copy Subject and Remarks,Communication Column.
 		if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("C_Order_ID"))
 		{
 			MInvoice invoice = (MInvoice)po;
@@ -141,6 +142,11 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 					invoice.set_ValueNoCheck("JP_Remarks", order.get_ValueAsString("JP_Remarks"));
 				}
 
+				if(Util.isEmpty(invoice.get_ValueAsString("JP_CommunicationColumn")))
+				{
+					invoice.set_ValueNoCheck("JP_CommunicationColumn", order.get_ValueAsString("JP_CommunicationColumn"));
+				}
+				
 			}
 		}
 

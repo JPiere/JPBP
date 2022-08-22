@@ -51,6 +51,7 @@ import jpiere.base.plugin.org.adempiere.model.MInvoiceJP;
  * JPIERE-0295:Explode BOM
  * JPIERE-0317:Physical Warehouse - check same physical warehouse between locator and document.
  * JPIERE-0490:Copy Subject and Remarks
+ * JPIERE-0573: Copy Communication Column
  *
  * @author h.hagiwara
  *
@@ -127,7 +128,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 
 		}//JPiere-0229
 
-		//JPIERE-0490 : Copy Subject and Remarks
+		//JPIERE-0490 & 0573 : Copy Subject and Remarks,Communication Column.
 		if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("C_Order_ID"))
 		{
 			MInOut io = (MInOut)po;
@@ -149,6 +150,10 @@ public class JPiereInOutModelValidator implements ModelValidator {
 					io.set_ValueNoCheck("JP_Remarks", order.get_ValueAsString("JP_Remarks"));
 				}
 
+				if(Util.isEmpty(io.get_ValueAsString("JP_CommunicationColumn")))
+				{
+					io.set_ValueNoCheck("JP_CommunicationColumn", order.get_ValueAsString("JP_CommunicationColumn"));
+				}
 			}
 		}
 

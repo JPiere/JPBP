@@ -33,6 +33,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
@@ -45,7 +46,8 @@ import jpiere.base.plugin.util.JPiereUtil;
  *  JPIERE-0295: Explode BOM
  *  JPIERE-0369: Mix Include Tax and Exclude Tax Line a Doc.
  *  JPIERE-0375: Check Over Qty Invoice
- *  JPIERE-0409:Set Counter Doc Line Info
+ *  JPIERE-0409: Set Counter Doc Line Info
+ *  JPIERE-0573: Copy Communication Column
  *
  *  @author  Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -386,6 +388,21 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 			}
 
+		}
+		
+		//JPIERE-0573 : Copy Subject and Remarks,Communication Column.
+		if(type == ModelValidator.TYPE_BEFORE_NEW || po.is_ValueChanged("C_OrderLine_ID"))
+		{
+			MInvoiceLine il = (MInvoiceLine)po;
+			if(il.getC_OrderLine_ID() > 0)
+			{
+				MOrderLine order = new MOrderLine(po.getCtx(),il.getC_OrderLine_ID(), po.get_TrxName());
+
+				if(Util.isEmpty(il.get_ValueAsString("JP_CommunicationColumn")))
+				{
+					il.set_ValueNoCheck("JP_CommunicationColumn", order.get_ValueAsString("JP_CommunicationColumn"));
+				}
+			}
 		}
 
 

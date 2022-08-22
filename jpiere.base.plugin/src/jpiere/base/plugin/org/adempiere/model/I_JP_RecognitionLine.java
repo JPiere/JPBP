@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_RecognitionLine
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 9
  */
 @SuppressWarnings("all")
 public interface I_JP_RecognitionLine 
@@ -294,6 +294,15 @@ public interface I_JP_RecognitionLine
 	  * Indicates if this document / line is printed
 	  */
 	public boolean isPrinted();
+
+    /** Column name JP_CommunicationColumn */
+    public static final String COLUMNNAME_JP_CommunicationColumn = "JP_CommunicationColumn";
+
+	/** Set Communication Column	  */
+	public void setJP_CommunicationColumn (String JP_CommunicationColumn);
+
+	/** Get Communication Column	  */
+	public String getJP_CommunicationColumn();
 
     /** Column name JP_ContractLine_ID */
     public static final String COLUMNNAME_JP_ContractLine_ID = "JP_ContractLine_ID";
