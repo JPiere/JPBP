@@ -257,12 +257,12 @@ public class Doc_AllocationHdrJP extends Doc
 					MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID, getTrxName());
 					JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
 				}
+				JP_Contract_ID = invoice.get_ValueAsInt("JP_Contract_ID");
 				JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
+				JP_ContractProcPeriod_ID = invoice.get_ValueAsInt("JP_ContractProcPeriod_ID");
 				if(JP_ContractContent_ID > 0)
 				{
 					MContractContent content = MContractContent.get(getCtx(), JP_ContractContent_ID);
-					JP_Contract_ID = content.getJP_Contract_ID();
-					JP_ContractProcPeriod_ID = invoice.get_ValueAsInt("JP_ContractProcPeriod_ID");
 					if(content.getJP_Contract_Acct_ID() > 0)
 						contractAcct = MContractAcct.get(getCtx(), content.getJP_Contract_Acct_ID());
 				}
@@ -390,7 +390,7 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), null, allocationSource);		//	payment currency
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance().negate();
-					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#reateFacts() by Hideaki hagiwara
+					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#createFacts() by Hideaki hagiwara
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
@@ -454,7 +454,7 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), allocationSource, null);		//	payment currency
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance();
-					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#reateFacts() by Hideaki hagiwara
+					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#createFacts() by Hideaki hagiwara
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());		//JPIERE-0052
 						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
@@ -1005,6 +1005,7 @@ public class Doc_AllocationHdrJP extends Doc
 
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
+		//
 		
 		
 		//JPIERE-0363
@@ -1020,13 +1021,9 @@ public class Doc_AllocationHdrJP extends Doc
 			MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID, getTrxName());
 			JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
 		}
+		JP_Contract_ID = invoice.get_ValueAsInt("JP_Contract_ID");
 		JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
-		if(JP_ContractContent_ID > 0)
-		{
-			MContractContent content = MContractContent.get(getCtx(), JP_ContractContent_ID);
-			JP_Contract_ID = content.getJP_Contract_ID();
-			JP_ContractProcPeriod_ID = invoice.get_ValueAsInt("JP_ContractProcPeriod_ID");
-		}
+		JP_ContractProcPeriod_ID = invoice.get_ValueAsInt("JP_ContractProcPeriod_ID");
 		//JPIERE-0363
 		
 
@@ -1153,6 +1150,7 @@ public class Doc_AllocationHdrJP extends Doc
 					}
 				}
 				invGainLossFactLines.add(fl);
+				
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
 				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
