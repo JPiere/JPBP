@@ -241,25 +241,10 @@ public class Doc_AllocationHdrJP extends Doc
 				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
 
 			//JPIERE-0363
-			int JP_Contract_ID = 0;
-			int JP_ContractContent_ID = 0;
-			int JP_ContractProcPeriod_ID = 0;
-			int JP_Order_ID = 0;
 			MContractAcct contractAcct = null;
 			if (invoice != null)
 			{
-
-				if(invoice.getC_Order_ID() > 0)
-				{
-					JP_Order_ID = invoice.getC_Order_ID();
-				}else if(invoice.getM_RMA_ID() > 0){
-					int M_RMA_ID = invoice.getM_RMA_ID();
-					MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID, getTrxName());
-					JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
-				}
-				JP_Contract_ID = invoice.get_ValueAsInt("JP_Contract_ID");
-				JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
-				JP_ContractProcPeriod_ID = invoice.get_ValueAsInt("JP_ContractProcPeriod_ID");
+				int JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
 				if(JP_ContractContent_ID > 0)
 				{
 					MContractContent content = MContractContent.get(getCtx(), JP_ContractContent_ID);
@@ -287,10 +272,7 @@ public class Doc_AllocationHdrJP extends Doc
 					fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 						getC_Currency_ID(), line.getAmtSource(), null);
 					if (fl != null && payment != null) {
-						fl.setAD_Org_ID(payment.getAD_Org_ID());
-						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
+						setPaymentInfo(fl, payment, true);//JPIERE-0052
 						allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance());
 					}
 				}
@@ -333,10 +315,7 @@ public class Doc_AllocationHdrJP extends Doc
 						fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 							getC_Currency_ID(), line.getAmtSource(), null);
 						if (fl != null && payment != null) {
-							fl.setAD_Org_ID(payment.getAD_Org_ID());
-							fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
-							fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-							fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
+							setPaymentInfo(fl, payment, true);//JPIERE-0052
 							if (payment.getReversal_ID() > 0 )
 								allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
 							else
@@ -362,19 +341,8 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), line.getDiscountAmt(), null);
 					if (fl != null && payment != null)
 					{
-						fl.setAD_Org_ID(invoice.getAD_Org_ID());//JPIERE-0052
-						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());//JPIERE-0052
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-						if(JP_Contract_ID > 0)
-							fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-						if(JP_ContractContent_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-						if(JP_ContractProcPeriod_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-						if(JP_Order_ID > 0)
-							fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+						setInvoiceInfo(fl, invoice, true); //JPIERE-0052
+						setPaymentInfo(fl, payment, false);//JPIERE-0052
 					}
 				}
 				//	Write off		DR
@@ -384,19 +352,8 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), line.getWriteOffAmt(), null);
 					if (fl != null && payment != null)
 					{
-						fl.setAD_Org_ID(invoice.getAD_Org_ID());//JPIERE-0052
-						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());//JPIERE-0052
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-						if(JP_Contract_ID > 0)
-							fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-						if(JP_ContractContent_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-						if(JP_ContractProcPeriod_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-						if(JP_Order_ID > 0)
-							fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+						setInvoiceInfo(fl, invoice, true); //JPIERE-0052
+						setPaymentInfo(fl, payment, false);//JPIERE-0052
 					}
 				}
 
@@ -408,20 +365,9 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), null, allocationSource);		//	payment currency
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance().negate();
-					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#createFacts() by Hideaki hagiwara
-						fl.setAD_Org_ID(invoice.getAD_Org_ID());
-						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
-						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-					}													//JPiere-0026 Finish
-					if(JP_Contract_ID > 0)
-						fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-					if(JP_ContractContent_ID > 0)
-						fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-					if(JP_ContractProcPeriod_ID > 0)
-						fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-					if(JP_Order_ID > 0)
-						fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+					if (fl != null && invoice != null)
+						setInvoiceInfo(fl, invoice, true); //JPIERE-0052
+					
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
 						getC_Currency_ID(), null, allocationSourceForRGL);		//	payment currency
@@ -472,20 +418,9 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), allocationSource, null);		//	payment currency
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance();
-					if (fl != null && invoice != null){						//JPIERE-0026 Modify Doc_AllocationHdr#createFacts() by Hideaki hagiwara
-						fl.setAD_Org_ID(invoice.getAD_Org_ID());
-						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());		//JPIERE-0052
-						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
-						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-					}														//JPiere-0026 Finish
-					if(JP_Contract_ID > 0)
-						fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-					if(JP_ContractContent_ID > 0)
-						fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-					if(JP_ContractProcPeriod_ID > 0)
-						fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-					if(JP_Order_ID > 0)
-						fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+					if (fl != null && invoice != null)
+						setInvoiceInfo(fl, invoice, true); //JPIERE-0052
+
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
 						getC_Currency_ID(), allocationSourceForRGL, null);		//	payment currency
@@ -506,19 +441,8 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), null, line.getDiscountAmt().negate());
 					if (fl != null && payment != null)
 					{
-						fl.setAD_Org_ID(invoice.getAD_Org_ID());//JPIERE-0052
-						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());//JPIERE-0052
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-						if(JP_Contract_ID > 0)
-							fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-						if(JP_ContractContent_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-						if(JP_ContractProcPeriod_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-						if(JP_Order_ID > 0)
-							fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+						setInvoiceInfo(fl, invoice, true); //JPIERE-0052
+						setPaymentInfo(fl, payment, false);//JPIERE-0052
 					}
 				}
 				//	Write off		CR
@@ -528,19 +452,8 @@ public class Doc_AllocationHdrJP extends Doc
 						getC_Currency_ID(), null, line.getWriteOffAmt().negate());
 					if (fl != null && payment != null)
 					{
-						fl.setAD_Org_ID(invoice.getAD_Org_ID());//JPIERE-0052
-						fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());//JPIERE-0052
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-						fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-						if(JP_Contract_ID > 0)
-							fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-						if(JP_ContractContent_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-						if(JP_ContractProcPeriod_ID > 0)
-							fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-						if(JP_Order_ID > 0)
-							fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+						setInvoiceInfo(fl, invoice, true); //JPIERE-0052
+						setPaymentInfo(fl, payment, false);//JPIERE-0052
 					}
 				}
 				//	Payment/Cash	CR
@@ -549,12 +462,7 @@ public class Doc_AllocationHdrJP extends Doc
 					fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 						getC_Currency_ID(), null, line.getAmtSource().negate());
 					if (fl != null && payment != null)
-					{
-						fl.setAD_Org_ID(payment.getAD_Org_ID());
-						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());//JPIERE-0052
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-					}
+						setPaymentInfo(fl, payment, true);//JPIERE-0052
 					if (fl != null)
 						allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
 				}
@@ -1016,11 +924,20 @@ public class Doc_AllocationHdrJP extends Doc
 		}
 		else	//	partial or MC
 		{
-			BigDecimal allocationAccounted0 = MConversionRate.convert(getCtx(),
-					allocationSource, getC_Currency_ID(),
-					as.getC_Currency_ID(), invoice.getDateAcct(),
-					invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
-			acctDifference = allocationAccounted0.abs().subtract(allocationAccounted.abs());
+			//JPIERE-0052 bug fix multi currency in case of Override Currency Rate at Invoice
+			BigDecimal allocationAccounted0 = Env.ZERO;
+			if(invoice.isOverrideCurrencyRate())
+			{
+				allocationAccounted0 = allocationSource.multiply(invoice.getCurrencyRate());
+						
+			}else {
+				allocationAccounted0 = MConversionRate.convert(getCtx(),
+						allocationSource, getC_Currency_ID(),
+						as.getC_Currency_ID(), invoice.getDateAcct(),
+						invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
+			}
+			//JPIERE-0052 bug fix
+			acctDifference = allocationAccounted0.abs().subtract(allocationAccounted.abs());			
 			//	ignore Tolerance
 			if (acctDifference.abs().compareTo(TOLERANCE) < 0)
 				acctDifference = Env.ZERO;
@@ -1042,26 +959,6 @@ public class Doc_AllocationHdrJP extends Doc
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
 		//
-		
-		
-		//JPIERE-0363
-		int JP_Contract_ID = 0;
-		int JP_ContractContent_ID = 0;
-		int JP_ContractProcPeriod_ID = 0;
-		int JP_Order_ID = 0;
-		if(invoice.getC_Order_ID() > 0)
-		{
-			JP_Order_ID = invoice.getC_Order_ID();
-		}else if(invoice.getM_RMA_ID() > 0){
-			int M_RMA_ID = invoice.getM_RMA_ID();
-			MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID, getTrxName());
-			JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
-		}
-		JP_Contract_ID = invoice.get_ValueAsInt("JP_Contract_ID");
-		JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
-		JP_ContractProcPeriod_ID = invoice.get_ValueAsInt("JP_ContractProcPeriod_ID");
-		//JPIERE-0363
-		
 
 		MAllocationHdr alloc = (MAllocationHdr) getPO();
 		if (alloc.getReversal_ID() == 0 || alloc.get_ID() < alloc.getReversal_ID())
@@ -1070,86 +967,24 @@ public class Doc_AllocationHdrJP extends Doc
 			{
 				FactLine fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference);
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				PO po = line.getPO();
-				if(po instanceof I_C_AllocationLine)//JPIERE-0052
-				{
-					I_C_AllocationLine aLine = (I_C_AllocationLine)po;
-					if(aLine.getC_Payment_ID() != 0)
-					{
-						MPayment payment = new MPayment(Env.getCtx(),aLine.getC_Payment_ID(), null);
-						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-					}
-				}
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
+				setPaymentInfo(fl, line, false);//JPIERE-0052
 				invGainLossFactLines.add(fl);
 				
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
-				fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 			}
 			else 
 			{
 				FactLine fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference);
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
-				fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 				
 				fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				PO po = line.getPO();
-				if(po instanceof I_C_AllocationLine)//JPIERE-0052
-				{
-					I_C_AllocationLine aLine = (I_C_AllocationLine)po;
-					if(aLine.getC_Payment_ID() != 0)
-					{
-						MPayment payment = new MPayment(Env.getCtx(),aLine.getC_Payment_ID(), null);
-						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-					}
-				}
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
+				setPaymentInfo(fl, line, false);//JPIERE-0052
 				invGainLossFactLines.add(fl);	
 			}
 		}
@@ -1159,88 +994,25 @@ public class Doc_AllocationHdrJP extends Doc
 			{
 				FactLine fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference);
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
-				fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 				
-				
-				fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+				fl = fact.createLine (line, gain, loss, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				PO po = line.getPO();
-				if(po instanceof I_C_AllocationLine)//JPIERE-0052
-				{
-					I_C_AllocationLine aLine = (I_C_AllocationLine)po;
-					if(aLine.getC_Payment_ID() != 0)
-					{
-						MPayment payment = new MPayment(Env.getCtx(),aLine.getC_Payment_ID(), null);
-						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-					}
-				}
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
+				setPaymentInfo(fl, line, false);//JPIERE-0052
 				invGainLossFactLines.add(fl);
 			}
 			else
 			{
 				FactLine fl = fact.createLine (line, gain, loss, as.getC_Currency_ID(), acctDifference);
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				PO po = line.getPO();
-				if(po instanceof I_C_AllocationLine)//JPIERE-0052
-				{
-					I_C_AllocationLine aLine = (I_C_AllocationLine)po;
-					if(aLine.getC_Payment_ID() != 0)
-					{
-						MPayment payment = new MPayment(Env.getCtx(),aLine.getC_Payment_ID(), null);
-						fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());
-						fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());//JPIERE-0556
-						fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());//JPIERE-0566
-					}
-				}
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
+				setPaymentInfo(fl, line, false);//JPIERE-0052
 				invGainLossFactLines.add(fl);
 				
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
-				fl.setAD_Org_ID(invoice.getAD_Org_ID());		//JPIERE-0052
-				fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());	//JPIERE-0052
-				fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
-				fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());//JPIERE-0566
-				if(JP_Contract_ID > 0)
-					fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);//JPIERE-0363
-				if(JP_ContractContent_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);//JPIERE-0363
-				if(JP_ContractProcPeriod_ID > 0)
-					fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);//JPIERE-0363
-				if(JP_Order_ID > 0)
-					fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);//JPIERE-0363
+				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 			}
 			
 		}
@@ -2112,7 +1884,7 @@ public class Doc_AllocationHdrJP extends Doc
 	}
 
 	/**
-	 * JPIERE
+	 * JPIERE-0363
 	 *
 	 * @param contractAcct
 	 * @param as
@@ -2133,7 +1905,7 @@ public class Doc_AllocationHdrJP extends Doc
 	}
 
 	/**
-	 * JPIERE
+	 * JPIERE-0363
 	 *
 	 * @param contractAcct
 	 * @param as
@@ -2153,8 +1925,79 @@ public class Doc_AllocationHdrJP extends Doc
 		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_V_Liability, as));
 	}
 
-}   //  Doc_Allocation
+	/**
+	 * JPIERE-0052 & JPIERE-0363
+	 * 
+	 */
 
+	private void setInvoiceInfo(FactLine fl, MInvoice invoice, boolean isSetOrgAndBP)
+	{
+		if(isSetOrgAndBP)
+		{
+			fl.setAD_Org_ID(invoice.getAD_Org_ID());
+			fl.setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
+			fl.setC_BPartner_ID(invoice.getC_BPartner_ID());//JPIERE-0026: Allocation between different Business Partners.
+		}
+		
+		int JP_Order_ID = 0;
+		if(invoice.getC_Order_ID() > 0)
+		{
+			JP_Order_ID = invoice.getC_Order_ID();
+		}else if(invoice.getM_RMA_ID() > 0){
+			int M_RMA_ID = invoice.getM_RMA_ID();
+			MRMA rma = new MRMA (Env.getCtx(),M_RMA_ID, getTrxName());
+			JP_Order_ID = rma.get_ValueAsInt("JP_Order_ID");
+		}
+		int JP_Contract_ID = invoice.get_ValueAsInt("JP_Contract_ID");
+		int JP_ContractContent_ID = invoice.get_ValueAsInt("JP_ContractContent_ID");
+		int JP_ContractProcPeriod_ID = invoice.get_ValueAsInt("JP_ContractProcPeriod_ID");
+
+		if(JP_Contract_ID > 0)
+			fl.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
+		if(JP_ContractContent_ID > 0)
+			fl.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
+		if(JP_ContractProcPeriod_ID > 0)
+			fl.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+		if(JP_Order_ID > 0)
+			fl.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
+		
+		fl.set_ValueNoCheck("JP_Invoice_ID", invoice.getC_Invoice_ID());
+	}
+	
+	/**
+	 * JPIERE-0052 & JPIERE-0363 & JPIERE-0556 & JPIERE-0566
+	 * 
+	 */
+
+	private void setPaymentInfo(FactLine fl, DocLine line, boolean isSetOrgAndBP)
+	{		
+		PO po = line.getPO();
+		if(po instanceof I_C_AllocationLine)//JPIERE-0052
+		{
+			I_C_AllocationLine aLine = (I_C_AllocationLine)po;
+			if(aLine.getC_Payment_ID() != 0)
+			{
+				MPayment payment = new MPayment(Env.getCtx(),aLine.getC_Payment_ID(), null);
+				setPaymentInfo(fl, payment, isSetOrgAndBP);
+			}
+		}
+	}
+	
+	private void setPaymentInfo(FactLine fl, MPayment payment, boolean isSetOrgAndBP)
+	{		
+		if(isSetOrgAndBP)
+		{
+			fl.setAD_Org_ID(payment.getAD_Org_ID());
+			fl.setAD_OrgTrx_ID(payment.getAD_OrgTrx_ID());
+			fl.setC_BPartner_ID(payment.getC_BPartner_ID());//JPIERE-0026: Allocation between different Business Partners.
+		}
+		
+		fl.set_ValueNoCheck("JP_BankAccount_ID", payment.getC_BankAccount_ID());
+		fl.set_ValueNoCheck("JP_Payment_ID", payment.getC_Payment_ID());
+	}
+
+	
+}   //  Doc_Allocation
 
 
 /**
@@ -2444,6 +2287,5 @@ class Doc_AllocationTax
 		if (log.isLoggable(Level.FINE)) log.fine(retValue + " (Mult=" + multiplier + "(Prec=" + precision + ")");
 		return retValue;
 	}	//	calcAmount
-
 
 }	//	Doc_AllocationTax
