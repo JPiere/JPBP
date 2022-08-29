@@ -72,7 +72,9 @@ import jpiere.base.plugin.org.adempiere.model.MContractContent;
  *
  *  JPIERE-0052 - JPiere original Doc_AcclocationHdr
  *  
- *  ref: JPIERE-0566  Compliant journals in Tax law.
+ *  ref: JPIERE-0575: Reverse Accrual in case of Foreign currency is applied original Invoice rate.
+ *  ref: JPIERE-0574: Reverse Accrual in case of Foreign currency is applied original payment rate.
+ *  ref: JPIERE-0566: Compliant journals in Tax law.
  *  ref: JPIERE-0556: Compliant journals. 
  *  ref: JPIERE-0363: Allocation of Contract Management.
  *  ref: JPIERE-0026: Allocation between different Business Partners.
@@ -124,16 +126,13 @@ public class Doc_AllocationHdrJP extends Doc
 		for (int i = 0; i < lines.length; i++)
 		{
 			MAllocationLine line = lines[i];
-			DocLine_AllocationJP docLine = new DocLine_AllocationJP(line, this);//JPIERE
+			DocLine_AllocationJP docLine = new DocLine_AllocationJP(line, this);//JPIERE-0052
 
 			//	Get Payment Conversion Rate
 			if (line.getC_Payment_ID() != 0)
 			{
 				MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
-				int C_ConversionType_ID = payment.getC_ConversionType_ID();
-				docLine.setC_ConversionType_ID(C_ConversionType_ID);
-				if (payment.isOverrideCurrencyRate())
-					docLine.setCurrencyRate(payment.getCurrencyRate());
+				setPaymentCurrencyRate(docLine, payment);//JPIERE-0052 -set Payment rate basically
 			}
 			//
 			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
@@ -212,7 +211,7 @@ public class Doc_AllocationHdrJP extends Doc
 
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			DocLine_Allocation line = (DocLine_Allocation)p_lines[i];
+			DocLine_AllocationJP line = (DocLine_AllocationJP)p_lines[i];//JPIERE-0052
 			setC_BPartner_ID(line.getC_BPartner_ID());
 
 			//  CashBankTransfer - all references null and Discount/WriteOff = 0
@@ -242,7 +241,7 @@ public class Doc_AllocationHdrJP extends Doc
 			if (line.getC_Invoice_ID() != 0)
 				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
 
-			//JPIERE-0363
+			//JPIERE-0363 - Get Contract Info
 			MContractAcct contractAcct = null;
 			if (invoice != null)
 			{
@@ -363,6 +362,7 @@ public class Doc_AllocationHdrJP extends Doc
 				if (as.isAccrual())
 				{
 					bpAcct = getReceivableAccount(contractAcct, as); //JPIERE-0363
+					setInvoiceCurrencyRate(line, invoice);//JPIERE-0052
 					fl = fact.createLine (line, bpAcct,
 						getC_Currency_ID(), null, allocationSource);		//	payment currency
 					if (fl != null)
@@ -416,6 +416,7 @@ public class Doc_AllocationHdrJP extends Doc
 				if (as.isAccrual())
 				{
 					bpAcct = getPayableAccount(contractAcct, as);//JPIERE-0363
+					setInvoiceCurrencyRate(line, invoice);//JPIERE-0052
 					fl = fact.createLine (line, bpAcct,
 						getC_Currency_ID(), allocationSource, null);		//	payment currency
 					if (fl != null)
@@ -1081,11 +1082,21 @@ public class Doc_AllocationHdrJP extends Doc
 			description.append(" - ").append(d2);
 		}
 		else
+		{
+			//JPIERE-0052 bug fix multi currency in case of Override Currency Rate at Invoice
+			BigDecimal allocationAccounted0 = Env.ZERO;
+			if(payment.isOverrideCurrencyRate())
 			{
-				BigDecimal allocationAccounted0 = MConversionRate.convert(getCtx(),
+				allocationAccounted0 = allocationSource.multiply(payment.getCurrencyRate());
+						
+			}else {
+			
+				allocationAccounted0 = MConversionRate.convert(getCtx(),
 						allocationSource, getC_Currency_ID(),
 						as.getC_Currency_ID(), payment.getDateAcct(),
 						payment.getC_ConversionType_ID(), payment.getAD_Client_ID(), payment.getAD_Org_ID());
+			}
+			//JPIERE-0052 bug fix
 			acctDifference = allocationAccounted.abs().subtract(allocationAccounted0.abs());
 			//	ignore Tolerance
 			if (acctDifference.abs().compareTo(TOLERANCE) < 0)
@@ -1112,16 +1123,20 @@ public class Doc_AllocationHdrJP extends Doc
 		{
 			FactLine fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 			fl.setDescription(description.toString());
+			setPaymentInfo(fl, payment, false);//JPIERE-0052
 			fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference);
 			fl.setDescription(description.toString());
+			setPaymentInfo(fl, payment, false);//JPIERE-0052
 			payGainLossFactLines.add(fl);
 		}
 		else
 		{
 			FactLine fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference);
 			fl.setDescription(description.toString());
+			setPaymentInfo(fl, payment, false);//JPIERE-0052
 			fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
 			fl.setDescription(description.toString());
+			setPaymentInfo(fl, payment, false);//JPIERE-0052
 			payGainLossFactLines.add(fl);
 		}
 		return null;
@@ -1927,11 +1942,57 @@ public class Doc_AllocationHdrJP extends Doc
 		return MAccount.get(getCtx(), getValidCombination_ID(Doc.ACCTTYPE_V_Liability, as));
 	}
 
+	
+	/**
+	 * JPIERE-0052 - Set Payment Currency Rate.
+	 * 
+	 * Allocation should use Payment Rate.
+	 * 
+	 */
+	private void setPaymentCurrencyRate(DocLine_AllocationJP docLine, MPayment Payment)//TODO
+	{
+		//	Get Invoice Currency Conversion Rate
+		int C_ConversionType_ID = Payment.getC_ConversionType_ID();
+		docLine.setC_ConversionType_ID(C_ConversionType_ID);
+		if (Payment.isOverrideCurrencyRate())
+		{
+			docLine.setCurrencyRate(Payment.getCurrencyRate());
+			
+		}else {
+			
+			BigDecimal rate = MConversionRate.getRate(Payment.getC_Currency_ID(),getAcctSchema().getC_Currency_ID(),Payment.getDateAcct(),C_ConversionType_ID,getAD_Client_ID(),Payment.getAD_Org_ID());
+			docLine.setCurrencyRate(rate);
+		}
+		
+	}
+	
+	/**
+	 * JPIERE-0052 - Set Invoice Currency Rate
+	 * 
+	 * Allocation should use Invoice Rate in case of Receivable & Payable
+	 * 
+	 */
+	private void setInvoiceCurrencyRate(DocLine_AllocationJP docLine, MInvoice invoice)//TODO
+	{
+		//	Get Invoice Currency Conversion Rate
+		int C_ConversionType_ID = invoice.getC_ConversionType_ID();
+		docLine.setC_ConversionType_ID(C_ConversionType_ID);
+		if (invoice.isOverrideCurrencyRate())
+		{
+			docLine.setCurrencyRate(invoice.getCurrencyRate());
+			
+		}else {
+			
+			BigDecimal rate = MConversionRate.getRate(invoice.getC_Currency_ID(),getAcctSchema().getC_Currency_ID(),invoice.getDateAcct(),C_ConversionType_ID,getAD_Client_ID(),invoice.getAD_Org_ID());
+			docLine.setCurrencyRate(rate);
+		}
+	}
+	
+	
 	/**
 	 * JPIERE-0052 & JPIERE-0363
 	 * 
 	 */
-
 	private void setInvoiceInfo(FactLine fl, MInvoice invoice, boolean isSetOrgAndBP)
 	{
 		if(isSetOrgAndBP)
