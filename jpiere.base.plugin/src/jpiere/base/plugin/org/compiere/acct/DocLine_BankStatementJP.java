@@ -51,6 +51,17 @@ public class DocLine_BankStatementJP extends DocLine
 		setDateAcct(doc.getDateAcct());  // adaxa-pb use statement date
 		setC_BPartner_ID(line.getC_BPartner_ID());
 	}
+	
+	public void setC_ConversionType_ID(int C_ConversionType_ID)
+	{
+		super.setC_ConversionType_ID(C_ConversionType_ID);
+	}
+
+
+	public void setCurrencyRate(BigDecimal currencyRate)
+	{
+		super.setCurrencyRate(currencyRate);
+	}
 
 	/** Reversal Flag			*/
 	private boolean     m_IsReversal = false;

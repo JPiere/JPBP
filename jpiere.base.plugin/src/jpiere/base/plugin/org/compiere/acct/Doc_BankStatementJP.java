@@ -33,6 +33,8 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
+import org.compiere.model.MConversionRate;
+import org.compiere.model.MPayment;
 import org.compiere.model.MTax;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -58,6 +60,7 @@ import org.compiere.util.Env;
  *  JPIERE-0543: Tax Base Amt & Tax Amt To the Fact_Acct
  *  JPIERE-0553: Qualified　Invoice　Issuer
  *  JPIERE-0556: Add column to the Journal For legal compliance.
+ *  JPIERE-0576: Apply currency rate in Payment at Bank Statement.
  *
  */
 public class Doc_BankStatementJP extends Doc
@@ -123,9 +126,26 @@ public class Doc_BankStatementJP extends Doc
 		for (int i = 0; i < lines.length; i++)
 		{
 			MBankStatementLine line = lines[i];
-						if(line.isActive())
+			if(line.isActive())
 			{
 				DocLine_BankStatementJP docLine = new DocLine_BankStatementJP(line, this);
+				
+				//JPIERE-0576: Apply currency rate in Payment.
+				if(line.getC_Payment_ID() != 0)
+				{
+					MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+					int C_ConversionType_ID = payment.getC_ConversionType_ID();
+					docLine.setC_ConversionType_ID(C_ConversionType_ID);
+					if (payment.isOverrideCurrencyRate())
+					{
+						docLine.setCurrencyRate(payment.getCurrencyRate());
+					}else {
+						
+						BigDecimal rate = MConversionRate.getRate(payment.getC_Currency_ID(),getAcctSchema().getC_Currency_ID(),payment.getDateAcct(),C_ConversionType_ID,getAD_Client_ID(),payment.getAD_Org_ID());
+						docLine.setCurrencyRate(rate);
+					}
+				}//JPIERE-0576
+				
 				list.add(docLine);
 			}
 		}
