@@ -1949,7 +1949,7 @@ public class Doc_AllocationHdrJP extends Doc
 	 * Allocation should use Payment Rate.
 	 * 
 	 */
-	private void setPaymentCurrencyRate(DocLine_AllocationJP docLine, MPayment Payment)//TODO
+	private void setPaymentCurrencyRate(DocLine_AllocationJP docLine, MPayment Payment)
 	{
 		//	Get Invoice Currency Conversion Rate
 		int C_ConversionType_ID = Payment.getC_ConversionType_ID();
@@ -1972,7 +1972,7 @@ public class Doc_AllocationHdrJP extends Doc
 	 * Allocation should use Invoice Rate in case of Receivable & Payable
 	 * 
 	 */
-	private void setInvoiceCurrencyRate(DocLine_AllocationJP docLine, MInvoice invoice)//TODO
+	private void setInvoiceCurrencyRate(DocLine_AllocationJP docLine, MInvoice invoice)
 	{
 		//	Get Invoice Currency Conversion Rate
 		int C_ConversionType_ID = invoice.getC_ConversionType_ID();
@@ -1995,6 +1995,10 @@ public class Doc_AllocationHdrJP extends Doc
 	 */
 	private void setInvoiceInfo(FactLine fl, MInvoice invoice, boolean isSetOrgAndBP)
 	{
+		if(fl == null || invoice == null)
+			return ;
+		
+		
 		if(isSetOrgAndBP)
 		{
 			fl.setAD_Org_ID(invoice.getAD_Org_ID());
@@ -2033,7 +2037,10 @@ public class Doc_AllocationHdrJP extends Doc
 	 */
 
 	private void setPaymentInfo(FactLine fl, DocLine line, boolean isSetOrgAndBP)
-	{		
+	{	
+		if(fl == null || line == null)
+			return ;
+		
 		PO po = line.getPO();
 		if(po instanceof I_C_AllocationLine)
 		{
@@ -2048,6 +2055,9 @@ public class Doc_AllocationHdrJP extends Doc
 	
 	private void setPaymentInfo(FactLine fl, MPayment payment, boolean isSetOrgAndBP)
 	{		
+		if(fl == null || payment == null)
+			return ;
+		
 		if(isSetOrgAndBP)
 		{
 			fl.setAD_Org_ID(payment.getAD_Org_ID());
