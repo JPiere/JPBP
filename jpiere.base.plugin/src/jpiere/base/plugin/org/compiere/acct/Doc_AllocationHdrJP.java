@@ -521,16 +521,18 @@ public class Doc_AllocationHdrJP extends Doc
 			}
 		}	//	for all lines
 
+		//JPIERE-0052: commented out as it is not needed.
+		// Basically, balanceAccounting() method adjust balance.
 		//	rounding adjustment
-		if (getC_Currency_ID() != as.getC_Currency_ID())
-		{
-			p_Error = createInvoiceRoundingCorrection (as, fact,  bpAcct);
-			if (p_Error != null)
-				return null;
-			p_Error = createPaymentRoundingCorrection (as, fact);
-			if (p_Error != null)
-				return null;
-		}
+//		if (getC_Currency_ID() != as.getC_Currency_ID())
+//		{
+//			p_Error = createInvoiceRoundingCorrection (as, fact,  bpAcct);
+//			if (p_Error != null)
+//				return null;
+//			p_Error = createPaymentRoundingCorrection (as, fact);
+//			if (p_Error != null)
+//				return null;
+//		}//JPIERE-0052
 
 		// FR [ 1840016 ] Avoid usage of clearing accounts - subject to C_AcctSchema.IsPostIfClearingEqual
 		if ( (!as.isPostIfClearingEqual()) && p_lines.length > 0 && (!isInterOrg)) {
@@ -1186,30 +1188,30 @@ public class Doc_AllocationHdrJP extends Doc
 			if (valuesInv != null && valuesInv.size() >= 4) {
 				BigDecimal invoiceSource = null;
 				BigDecimal invoiceAccounted = null;
-			if (invoice.getReversal_ID() == 0 || invoice.get_ID() < invoice.getReversal_ID())
-			{
-					if (hasDebitTradeAmt(invoice)) {
-						invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
-						invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
-					} else {
-						invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
-						invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
-					}
-			}
-			else
-			{
-					if (hasDebitTradeAmt(invoice)) {
-						invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
-						invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
-					} else {
-						invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
-						invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
-					}
-			}
-					htInvSource.put(invoice.getC_Invoice_ID(), invoiceSource);
-					htInvAccounted.put(invoice.getC_Invoice_ID(), invoiceAccounted);
+				if (invoice.getReversal_ID() == 0 || invoice.get_ID() < invoice.getReversal_ID())
+				{
+						if (hasDebitTradeAmt(invoice)) {
+							invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
+							invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
+						} else {
+							invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
+							invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
+						}
 				}
+				else
+				{
+						if (hasDebitTradeAmt(invoice)) {
+							invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
+							invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
+						} else {
+							invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
+							invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
+						}
+				}
+				htInvSource.put(invoice.getC_Invoice_ID(), invoiceSource);
+				htInvAccounted.put(invoice.getC_Invoice_ID(), invoiceAccounted);
 			}
+		}
 
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
@@ -1250,9 +1252,9 @@ public class Doc_AllocationHdrJP extends Doc
 						htTotalAmtAcctDr.put(allocationLine.getC_Invoice_ID(), totalAmtAcctDr);
 						htTotalAmtSourceCr.put(allocationLine.getC_Invoice_ID(), totalAmtSourceCr);
 						htTotalAmtAcctCr.put(allocationLine.getC_Invoice_ID(), totalAmtAcctCr);
-						}
+					}
 					else if (factLine.getAccount_ID() == gain.getAccount_ID() || factLine.getAccount_ID() == loss.getAccount_ID())
-						{
+					{
 						if (!invGainLossFactLines.contains(factLine))
 							continue;
 
@@ -1299,29 +1301,29 @@ public class Doc_AllocationHdrJP extends Doc
 				allocateAccounted = allocateAccounted.add(totalAmtAcctCr);
 			}
 			else if (totalAmtSourceCr.signum() == 0 && totalAmtAcctCr.signum() == 0)
-				{
+			{
 				allocateSource = allocateSource.add(totalAmtSourceDr);
 				allocateAccounted = allocateAccounted.add(totalAmtAcctDr);
-				}
-				else
+			}
+			else
 			{
 				if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
 				{
 					allocateSource = allocateSource.add(totalAmtSourceDr).subtract(totalAmtSourceCr);
 					allocateAccounted = allocateAccounted.add(totalAmtAcctDr).subtract(totalAmtAcctCr);
-			}
-			else
-			{
+				}
+				else
+				{
 					allocateSource = allocateSource.add(totalAmtSourceCr).subtract(totalAmtSourceDr);
 					allocateAccounted = allocateAccounted.add(totalAmtAcctCr).subtract(totalAmtAcctDr);
 				}
 			}
 
-				MAllocationHdr[] allocations = MAllocationHdr.getOfInvoice(getCtx(), invoice.get_ID(), getTrxName());
-				for (MAllocationHdr alloc : allocations)
-				{
-					if (alloc.get_ID() == get_ID())
-						continue;
+			MAllocationHdr[] allocations = MAllocationHdr.getOfInvoice(getCtx(), invoice.get_ID(), getTrxName());
+			for (MAllocationHdr alloc : allocations)
+			{
+				if (alloc.get_ID() == get_ID())
+					continue;
 
 				BigDecimal currencyAdjustment = Env.ZERO;
 				StringBuilder sql = new StringBuilder()
@@ -1332,7 +1334,7 @@ public class Doc_AllocationHdrJP extends Doc
 						.append(" AND PostingType='A'")
 						.append(" AND Account_ID=?")
 						.append(" AND Line_ID IN (SELECT C_AllocationLine_ID FROM C_AllocationLine WHERE C_AllocationHdr_ID=? AND C_Invoice_ID=?)");
-
+		
 				// For Allocation
 				List<Object> valuesAlloc = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 						MAllocationHdr.Table_ID, alloc.get_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID(), alloc.get_ID(), invoice.getC_Invoice_ID());
@@ -1349,7 +1351,7 @@ public class Doc_AllocationHdrJP extends Doc
 					totalAmtAcctCr = (BigDecimal) valuesAlloc.get(3);
 					if (totalAmtAcctCr == null)
 						totalAmtAcctCr = Env.ZERO;
-
+		
 					if (totalAmtSourceDr.signum() == 0 && totalAmtAcctDr.signum() == 0)
 					{
 						allocateSource = allocateSource.add(totalAmtSourceCr);
