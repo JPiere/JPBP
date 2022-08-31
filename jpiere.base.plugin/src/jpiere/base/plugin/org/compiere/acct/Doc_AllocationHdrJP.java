@@ -1153,6 +1153,7 @@ public class Doc_AllocationHdrJP extends Doc
 	 *	@param acct account
 	 *	@return Error Message or null if OK
 	 */
+	@SuppressWarnings("unused")//JPIERE-0052
 	private String createInvoiceRoundingCorrection (MAcctSchema as, Fact fact, MAccount acct)
 	{
 		ArrayList<MInvoice> invList = new ArrayList<MInvoice>();
@@ -1533,6 +1534,7 @@ public class Doc_AllocationHdrJP extends Doc
 	 *	@param fact fact
 	 *	@return Error Message or null if OK
 	 */
+	@SuppressWarnings("unused") //JPIERE-0052
 	private String createPaymentRoundingCorrection (MAcctSchema as, Fact fact)
 	{
 		ArrayList<MPayment> payList = new ArrayList<MPayment>();
