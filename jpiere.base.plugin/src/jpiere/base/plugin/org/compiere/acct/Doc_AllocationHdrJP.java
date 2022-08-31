@@ -438,6 +438,8 @@ public class Doc_AllocationHdrJP extends Doc
 					allocationAccountedForRGL = allocationAccounted;
 				}
 
+				setPaymentCurrencyRate(line, payment);//JPIERE-0052
+				
 				//	Discount		CR
 				if (Env.ZERO.compareTo(line.getDiscountAmt()) != 0)
 				{
@@ -479,6 +481,8 @@ public class Doc_AllocationHdrJP extends Doc
 						fl.setAD_Org_ID(cashLine.getAD_Org_ID());
 				}
 			}
+			
+			setPaymentCurrencyRate(line, payment);//JPIERE-0052
 
 			//	VAT Tax Correction
 			if (invoice != null && as.isTaxCorrection())
@@ -1951,21 +1955,24 @@ public class Doc_AllocationHdrJP extends Doc
 	/**
 	 * JPIERE-0052 - Set Payment Currency Rate.
 	 * 
-	 * Allocation should use Payment Rate.
+	 * Allocation should use Payment Rate basically.
 	 * 
 	 */
-	private void setPaymentCurrencyRate(DocLine_AllocationJP docLine, MPayment Payment)
+	private void setPaymentCurrencyRate(DocLine_AllocationJP docLine, MPayment payment)
 	{
+		if(docLine == null || payment == null)
+			return ;
+		
 		//	Get Invoice Currency Conversion Rate
-		int C_ConversionType_ID = Payment.getC_ConversionType_ID();
+		int C_ConversionType_ID = payment.getC_ConversionType_ID();
 		docLine.setC_ConversionType_ID(C_ConversionType_ID);
-		if (Payment.isOverrideCurrencyRate())
+		if (payment.isOverrideCurrencyRate())
 		{
-			docLine.setCurrencyRate(Payment.getCurrencyRate());
+			docLine.setCurrencyRate(payment.getCurrencyRate());
 			
 		}else {
 			
-			BigDecimal rate = MConversionRate.getRate(Payment.getC_Currency_ID(),getAcctSchema().getC_Currency_ID(),Payment.getDateAcct(),C_ConversionType_ID,getAD_Client_ID(),Payment.getAD_Org_ID());
+			BigDecimal rate = MConversionRate.getRate(payment.getC_Currency_ID(),getAcctSchema().getC_Currency_ID(),payment.getDateAcct(),C_ConversionType_ID,getAD_Client_ID(),payment.getAD_Org_ID());
 			docLine.setCurrencyRate(rate);
 		}
 		
@@ -1979,6 +1986,9 @@ public class Doc_AllocationHdrJP extends Doc
 	 */
 	private void setInvoiceCurrencyRate(DocLine_AllocationJP docLine, MInvoice invoice)
 	{
+		if(docLine == null || invoice == null)
+			return ;
+		
 		//	Get Invoice Currency Conversion Rate
 		int C_ConversionType_ID = invoice.getC_ConversionType_ID();
 		docLine.setC_ConversionType_ID(C_ConversionType_ID);
