@@ -266,6 +266,7 @@ public class Doc_AllocationHdrJP extends Doc
 				{
 					fl = fact.createLine (line, line.getChargeAccount(as, line.getAmtSource()),
 						getC_Currency_ID(), line.getAmtSource());
+					fl.set_ValueNoCheck("JP_Charge_ID", line.getC_Charge_ID());//JPIERE-0556
 				}
 				//	Payment Only
 				else if (line.getC_Invoice_ID() == 0 && line.getC_Payment_ID() != 0)
@@ -522,7 +523,7 @@ public class Doc_AllocationHdrJP extends Doc
 		}	//	for all lines
 
 		//JPIERE-0052: commented out as it is not needed.
-		// Basically, balanceAccounting() method adjust balance.
+		// In the end, balanceAccounting() method adjust balance.
 		//	rounding adjustment
 //		if (getC_Currency_ID() != as.getC_Currency_ID())
 //		{
