@@ -2209,35 +2209,35 @@ class Doc_AllocationTax
 						if (m_IsSOTrx) {
 							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
 								fl = fact.createLine (line, m_DiscountAccount,
-										as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-										as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							}else {
 
 								fl = fact.createLine (line, m_DiscountAccount,
-									as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							}
 						} else {
 						//for purchase actions
 							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
 								fl = fact.createLine (line, m_DiscountAccount,
-										as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-										as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							} else {
 								fl = fact.createLine (line, m_DiscountAccount,
-									as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							}
 
@@ -2255,36 +2255,36 @@ class Doc_AllocationTax
 						if (m_IsSOTrx) {
 							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
 								fl = fact.createLine (line, taxAcct,
-										as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_DiscountAccount,
-									as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							}else {
 
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_DiscountAccount,
-									as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							}
 
 						} else {
 							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_DiscountAccount,
-									as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							}else {
 
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_DiscountAccount,
-									as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							}
 						}
@@ -2305,33 +2305,33 @@ class Doc_AllocationTax
 						if (m_IsSOTrx) {
 							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							} else {
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							}
 						} else {
 							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							} else {
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 							}
 						}
@@ -2347,33 +2347,33 @@ class Doc_AllocationTax
 						if(m_IsSOTrx) {
 							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							} else {
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							}
 						} else {
 							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount, null);
+										line.getC_Currency_ID(), amount, null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), null, amount);
+										line.getC_Currency_ID(), null, amount);
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							} else {
 								fl = fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount.negate(), null);
+										line.getC_Currency_ID(), amount.negate(), null);
 								copyAcctInfo(fl, factAcct, true);//JPIERE-0052
 								fl = fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), null, amount.negate());
+										line.getC_Currency_ID(), null, amount.negate());
 								copyAcctInfo(fl, factAcct, false);//JPIERE-0052
 							}
 						}
