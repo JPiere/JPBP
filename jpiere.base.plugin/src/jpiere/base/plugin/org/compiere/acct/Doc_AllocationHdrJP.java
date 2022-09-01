@@ -43,6 +43,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MRMA;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -363,7 +364,7 @@ public class Doc_AllocationHdrJP extends Doc
 				if (as.isAccrual())
 				{
 					bpAcct = getReceivableAccount(contractAcct, as); //JPIERE-0363
-					setInvoiceCurrencyRate(line, invoice);//JPIERE-0052
+					setInvoiceCurrencyRate(line, invoice, payment);//JPIERE-0052
 					fl = fact.createLine (line, bpAcct,
 						getC_Currency_ID(), null, allocationSource);		//	payment currency
 					if (fl != null)
@@ -417,7 +418,7 @@ public class Doc_AllocationHdrJP extends Doc
 				if (as.isAccrual())
 				{
 					bpAcct = getPayableAccount(contractAcct, as);//JPIERE-0363
-					setInvoiceCurrencyRate(line, invoice);//JPIERE-0052
+					setInvoiceCurrencyRate(line, invoice, payment);//JPIERE-0052
 					fl = fact.createLine (line, bpAcct,
 						getC_Currency_ID(), allocationSource, null);		//	payment currency
 					if (fl != null)
@@ -1874,8 +1875,9 @@ public class Doc_AllocationHdrJP extends Doc
 	private FactLine balanceAccounting(MAcctSchema as, Fact fact)
 	{
 		FactLine line = null;
-		if (!fact.isAcctBalanced())
-		{
+		//JPIERE-0052 Need not Check unbalanced. because JPiere need Calculate realised gain and loss this method always.
+		//if (!fact.isAcctBalanced()) avoid log warning when unbalanced.
+		//{
 			MAccount gain = MAccount.get(as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 			MAccount loss = MAccount.get(as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
 
@@ -1888,11 +1890,14 @@ public class Doc_AllocationHdrJP extends Doc
 			}
 
 			BigDecimal acctDifference = totalAmtAcctDr.subtract(totalAmtAcctCr);
-			if (as.isCurrencyBalancing() && acctDifference.abs().compareTo(TOLERANCE) < 0)
-				line = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
-			else
-				line = fact.createLine(null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
-		}
+			if(acctDifference.compareTo(Env.ZERO) != 0)
+			{
+				if (as.isCurrencyBalancing() && acctDifference.abs().compareTo(TOLERANCE) < 0)
+					line = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
+				else
+					line = fact.createLine(null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+			}
+		//}
 		return line;
 	}
 
@@ -1983,11 +1988,18 @@ public class Doc_AllocationHdrJP extends Doc
 	 * 
 	 * Allocation should use Invoice Rate in case of Receivable & Payable
 	 * 
-	 */
-	private void setInvoiceCurrencyRate(DocLine_AllocationJP docLine, MInvoice invoice)
+	 */	
+	private void setInvoiceCurrencyRate(DocLine_AllocationJP docLine, MInvoice invoice, MPayment payment)
 	{
 		if(docLine == null || invoice == null)
 			return ;
+		
+		
+		if(payment != null && MSysConfig.getBooleanValue("JP_APPLY_PAYMENT_RATE_TO_INVOICE", false, getAD_Client_ID()))
+		{
+			setPaymentCurrencyRate(docLine, payment);
+			return ;
+		}
 		
 		//	Get Invoice Currency Conversion Rate
 		int C_ConversionType_ID = invoice.getC_ConversionType_ID();
