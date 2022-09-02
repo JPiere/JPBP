@@ -25,7 +25,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import org.adempiere.webui.ClientInfo;
-import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Column;
@@ -42,6 +41,7 @@ import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.WListbox;
 import org.adempiere.webui.editor.WDateEditor;
+import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
@@ -63,6 +63,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.TrxRunnable;
 import org.compiere.util.Util;
+import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.util.Clients;
@@ -82,7 +83,7 @@ import org.zkoss.zul.South;
  * 
  * Contributor : Fabian Aguilar - OFBConsulting - Multiallocation
  * 
- * JPIERE-0022
+ * JPIERE-0026
  * 
  */
 public class WAllocation extends Allocation
@@ -150,7 +151,7 @@ public class WAllocation extends Allocation
 	private WDateEditor dateField = new WDateEditor();
 	private Checkbox autoWriteOff = new Checkbox();
 	private Label organizationLabel = new Label();
-	private WSearchEditor organizationPick;
+	private WSearchEditor organizationPick;				//JPIERE-0026
 	private Label organizationLabel2 = new Label();		//JPIERE-0026
 	private WSearchEditor organizationPick2;				//JPIERE-0026
 	private Label docOrganizationLabel = new Label();		//JPIERE-0026
@@ -160,7 +161,7 @@ public class WAllocation extends Allocation
 	private Label corporation = new Label();   			//JPIERE-0026
 	private WSearchEditor corporationSearch = null;		//JPIERE-0026
 	private Label orgCorporation = new Label();   			//JPIERE-0026
-	private WTableDirEditor orgCorporationSearch = null;		//JPIERE-0026
+	private WTableDirEditor orgCorporationSearch = null;	//JPIERE-0026
 	private int noOfColumn;
 	
 	/**
@@ -353,31 +354,26 @@ public class WAllocation extends Allocation
 		row.appendCellChild(orgCorporationSearch.getComponent(),1);
 		orgCorporationSearch.showMenu();	
 		
-		//JPIERE-0026
-		
 		row = rows.newRow();
 		row.appendCellChild(currencyLabel.rightAlign(),1);
 		ZKUpdateUtil.setHflex(currencyPick.getComponent(), "true");
 		row.appendCellChild(currencyPick.getComponent(),1);		
 		currencyPick.showMenu();
 		
-		//row.appendCellChild(new Label(""), 1);		
+//		Hbox cbox = new Hbox();
+//		cbox.setWidth("100%");
+//		if (noOfColumn == 6)
+//			cbox.setPack("center");
+//		else
+//			cbox.setPack("end");
+//		cbox.appendChild(multiCurrency);
+//		cbox.appendChild(autoWriteOff);
+//		row.appendCellChild(cbox, 2);		
+//		if (noOfColumn < 6)		
+//			LayoutUtils.compactTo(parameterLayout, noOfColumn);
+//		else
+//			LayoutUtils.expandTo(parameterLayout, noOfColumn, true);
 		
-		Hbox cbox = new Hbox();
-		cbox.setWidth("100%");
-		if (noOfColumn == 6)
-			cbox.setPack("center");
-		else
-			cbox.setPack("end");
-		cbox.appendChild(multiCurrency);
-		cbox.appendChild(autoWriteOff);
-		row.appendCellChild(cbox, 2);		
-		if (noOfColumn < 6)		
-			LayoutUtils.compactTo(parameterLayout, noOfColumn);
-		else
-			LayoutUtils.expandTo(parameterLayout, noOfColumn, true);
-		
-		//JPIERE-0026
 		row = rows.newRow();
 		row.appendCellChild(docOrganizationLabel.rightAlign());
 		ZKUpdateUtil.setHflex(docOrganizationPick.getComponent(), "true");
@@ -507,10 +503,10 @@ public class WAllocation extends Allocation
 	    //  JPIERE-0026 - Start
 		AD_Column_ID = COLUMN_C_PERIOD_AD_ORG_ID; //C_Period.AD_Org_ID (needed to allow org 0)
 		MLookup lookupOrg2 = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
-		organizationPick2 = new WSearchEditor("AD_Org2_ID", true, false, true, lookupOrg2);		//JPIERE-0026
-		organizationPick2.setValue(null);															//JPIERE-0026
+		organizationPick2 = new WSearchEditor("AD_Org2_ID", true, false, true, lookupOrg2);
+		organizationPick2.setValue(null);
 		organizationPick2.addValueChangeListener(this);
-		m_AD_Org2_ID = 0;	//JPIERE-0026
+		m_AD_Org2_ID = 0;
 		
 		AD_Column_ID = COLUMN_C_PERIOD_AD_ORG_ID; //C_Period.AD_Org_ID (needed not to allow org 0)
 		MLookup lookupDocOrg = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
@@ -677,29 +673,41 @@ public class WAllocation extends Allocation
 		String name = e.getPropertyName();
 		Object value = e.getNewValue();
 		if (log.isLoggable(Level.CONFIG)) log.config(name + "=" + value);
-//		if (value == null && (!name.equals("C_Charge_ID")||!name.equals("C_DocType_ID") ))
+//		if (value == null && (!name.equals("C_Charge_ID")||!name.equals("C_DocType_ID") )) //JPIERE-0026
 //			return;
 		
 		// Organization
 		if (name.equals("AD_Org_ID"))
 		{
 			m_AD_Org_ID = value!=null? ((Integer) value).intValue() : 0;			
-			m_JP_OrgInfo_Corporation_ID = 0;
-			orgCorporationSearch.setValue(null);
+			if(m_AD_Org_ID != 0 && m_JP_OrgInfo_Corporation_ID != 0)
+			{
+				m_JP_OrgInfo_Corporation_ID = 0;
+				orgCorporationSearch.setValue(null);
+				Clients.showNotification("組織が入力されたのでグループ会社を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false); //TODO
+			}
 			loadBPartner();
 		}else if (name.equals("AD_Org2_ID"))//JPIERE-0026
 		{
 			m_AD_Org2_ID  = value!=null? ((Integer) value).intValue() : 0;
-			m_JP_OrgInfo_Corporation_ID = 0;
-			orgCorporationSearch.setValue(null);
+			if(m_AD_Org2_ID != 0 && m_JP_OrgInfo_Corporation_ID != 0)
+			{
+				m_JP_OrgInfo_Corporation_ID = 0;
+				orgCorporationSearch.setValue(null);
+				Clients.showNotification("組織が入力されたのでグループ会社を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false); //TODO
+			}
 			loadBPartner();
 		}else if (name.equals("JP_Org_Corporation_ID")){//JPIERE-0026
 			
 			m_JP_OrgInfo_Corporation_ID  = value!=null? ((Integer) value).intValue() : 0;
-			m_AD_Org_ID = 0;
-			organizationPick.setValue(null);
-			m_AD_Org2_ID = 0;
-			organizationPick2.setValue(null);
+			if(m_JP_OrgInfo_Corporation_ID != 0 && (m_AD_Org_ID != 0 || m_AD_Org2_ID !=0))
+			{
+				m_AD_Org_ID = 0;
+				organizationPick.setValue(null);
+				m_AD_Org2_ID = 0;
+				organizationPick2.setValue(null);
+				Clients.showNotification("グループ会社が入力されたので組織を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false); //TODO
+			}
 			loadBPartner();
 		}
 		//		Charge
@@ -709,7 +717,6 @@ public class WAllocation extends Allocation
 			
 			setAllocateButton();
 		}
-
 		else if (name.equals("C_DocType_ID") )
 		{
 			m_C_DocType_ID = value!=null? ((Integer) value).intValue() : 0;
@@ -718,32 +725,72 @@ public class WAllocation extends Allocation
 		else if (name.equals("Doc_AD_Org_ID"))//JPIERE-0026
 		{
 			m_Doc_AD_Org_ID = value!=null? ((Integer) value).intValue() : 0;
+			docOrganizationPick.setValue(m_Doc_AD_Org_ID);
+			if(m_Doc_AD_Org_ID == 0)
+			{
+				if(value == null)
+				{
+					Clients.showNotification("空欄はダメですよ！", Clients.NOTIFICATION_TYPE_ERROR, docOrganizationPick.getComponent(), "start_before", -1, false); //TODO
+				}else {
+					Clients.showNotification("*はダメですよ！", Clients.NOTIFICATION_TYPE_ERROR, docOrganizationPick.getComponent(), "start_before", -1, false); //TODO
+				}
+				
+//				Object obj =  e.getSource();
+//				if(obj instanceof WEditor)
+//				{
+//					WEditor editor = (WEditor)obj;
+//					throw new WrongValueException(editor.getComponent(), Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "AD_OrgDoc_ID"));
+//				}
+			}
 			
 		}else if (name.equals("C_BPartner_ID")){
 			
 			m_C_BPartner_ID = value!=null? ((Integer) value).intValue() : 0;
-			m_JP_Corporation_ID = 0;
-			corporationSearch.setValue(null);
+			if(m_C_BPartner_ID != 0 && m_JP_Corporation_ID != 0)
+			{
+				m_JP_Corporation_ID = 0;
+				corporationSearch.setValue(null);
+				Clients.showNotification("取引先マスタが入力されたのでグループ法人を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false); //TODO
+			}
 			loadBPartner();
 		}
 		else if (name.equals("C_BPartner2_ID"))//JPIERE-0026
 		{
 			m_C_BPartner2_ID = value!=null? ((Integer) value).intValue() : 0;
-			m_JP_Corporation_ID = 0;
-			corporationSearch.setValue(null);
+			if(m_C_BPartner2_ID != 0 && m_JP_Corporation_ID != 0)
+			{
+				m_JP_Corporation_ID = 0;
+				corporationSearch.setValue(null);
+				Clients.showNotification("取引先マスタが入力されたのでグループ法人を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false); //TODO
+			}
 			loadBPartner ();
 		}else if (name.equals("JP_Corporation_ID")){//JPIERE-0026
+			
 			m_JP_Corporation_ID = value!=null? ((Integer) value).intValue() : 0;
-			m_C_BPartner_ID = 0;
-			bpartnerSearch.setValue(null);
-			m_C_BPartner2_ID = 0;
-			bpartnerSearch2.setValue(null);
+			if(m_JP_Corporation_ID != 0 && ( m_C_BPartner_ID != 0 || m_C_BPartner2_ID != 0) )
+			{
+				m_C_BPartner_ID = 0;
+				bpartnerSearch.setValue(null);
+				m_C_BPartner2_ID = 0;
+				bpartnerSearch2.setValue(null);
+				Clients.showNotification("法人マスタが入力されたので取引先を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false); //TODO
+			}
 			loadBPartner();
 		//	Currency
 		}else if (name.equals("C_Currency_ID"))
 		{
-			m_C_Currency_ID = ((Integer)value).intValue();
-			loadBPartner();
+			m_C_Currency_ID = value!=null? ((Integer) value).intValue() : 0;
+			if(m_C_Currency_ID == 0)
+			{
+				Object obj =  e.getSource();
+				if(obj instanceof WEditor)
+				{
+					WEditor editor = (WEditor)obj;
+					throw new WrongValueException(editor.getComponent(), Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "C_Currency_ID"));
+				}
+			}else {
+				loadBPartner();
+			}
 		}
 		
 		//	Date for Multi-Currency
@@ -813,6 +860,10 @@ public class WAllocation extends Allocation
 		calculate();
 		
 		statusBar.getChildren().clear();
+		
+		if(m_C_BPartner_ID == 0 && m_C_BPartner2_ID == 0 && m_JP_Corporation_ID == 0)//TODO
+			Clients.showNotification("取引先か法人マスタのどちらかを入力して下さい", Clients.NOTIFICATION_TYPE_WARNING, bpartnerSearch.getComponent(), "start_before", -1, false); //TODO
+		
 	}   //  loadBPartner
 	
 	public void calculate()
