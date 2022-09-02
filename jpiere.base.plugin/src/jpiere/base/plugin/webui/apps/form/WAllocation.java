@@ -151,10 +151,14 @@ public class WAllocation extends Allocation
 	private Checkbox autoWriteOff = new Checkbox();
 	private Label organizationLabel = new Label();
 	private WSearchEditor organizationPick;
+	private Label organizationLabel2 = new Label();		//JPIERE-0026
+	private WSearchEditor organizationPick2;				//JPIERE-0026
 	private Label docOrganizationLabel = new Label();		//JPIERE-0026
 	private WSearchEditor docOrganizationPick; 			//JPIERE-0026
 	private Label bpartnerLabel2 = new Label();   			//JPIERE-0026
 	private WSearchEditor bpartnerSearch2 = null; 			//JPIERE-0026
+	private Label corporation = new Label();   			//JPIERE-0026
+	private WSearchEditor corporationSearch = null;		//JPIERE-0026
 	private Label orgCorporation = new Label();   			//JPIERE-0026
 	private WTableDirEditor orgCorporationSearch = null;		//JPIERE-0026
 	private int noOfColumn;
@@ -176,7 +180,7 @@ public class WAllocation extends Allocation
 		mainLayout.setStyle("min-height: 600px");
 		/////
 		
-		dateLabel.setText(Msg.getElement(Env.getCtx(), "DateDoc"));//JPIERE-0026
+		dateLabel.setText(Msg.getElement(Env.getCtx(), "C_AllocationHdr_ID") + " : " +Msg.getElement(Env.getCtx(), "DateDoc"));//JPIERE-0026
 		autoWriteOff.setSelected(false);
 		autoWriteOff.setText(Msg.getMsg(Env.getCtx(), "AutoWriteOff", true));
 		autoWriteOff.setTooltiptext(Msg.getMsg(Env.getCtx(), "AutoWriteOff", false));
@@ -209,8 +213,10 @@ public class WAllocation extends Allocation
 		organizationLabel.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 		
 		//JPIERE-0026
+		organizationLabel2.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 		bpartnerLabel2.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
-		docOrganizationLabel.setText(Msg.translate(Env.getCtx(), "AD_OrgDoc_ID"));
+		docOrganizationLabel.setText(Msg.getElement(Env.getCtx(), "C_AllocationHdr_ID") + " : " + Msg.translate(Env.getCtx(), "AD_OrgDoc_ID"));
+		corporation.setText(Msg.translate(Env.getCtx(), "JP_Corporation_ID"));
 		orgCorporation.setText(Msg.translate(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));
 		//JPIERE-0026
 		
@@ -326,10 +332,20 @@ public class WAllocation extends Allocation
 		row.appendCellChild(bpartnerSearch2.getComponent(),1);		
 		bpartnerSearch2.showMenu();
 		
+		row.appendCellChild(corporation.rightAlign());
+		ZKUpdateUtil.setHflex(corporationSearch.getComponent(), "true");
+		row.appendCellChild(corporationSearch.getComponent(),1);
+		corporationSearch.showMenu();	
+		
 		row = rows.newRow();
 		row.appendCellChild(organizationLabel.rightAlign());
 		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
 		row.appendCellChild(organizationPick.getComponent(),1);
+		organizationPick.showMenu();	
+		
+		row.appendCellChild(organizationLabel2.rightAlign());
+		ZKUpdateUtil.setHflex(organizationPick2.getComponent(), "true");
+		row.appendCellChild(organizationPick2.getComponent(),1);
 		organizationPick.showMenu();	
 		
 		row.appendCellChild(orgCorporation.rightAlign());
@@ -478,7 +494,7 @@ public class WAllocation extends Allocation
 		AD_Column_ID = COLUMN_C_PERIOD_AD_ORG_ID; //C_Period.AD_Org_ID (needed to allow org 0)
 		MLookup lookupOrg = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
 		organizationPick = new WSearchEditor("AD_Org_ID", true, false, true, lookupOrg);		//JPIERE-0026
-		organizationPick.setValue(0);															//JPIERE-0026
+		organizationPick.setValue(null);														//JPIERE-0026
 		organizationPick.addValueChangeListener(this);
 		m_AD_Org_ID = 0;	//JPIERE-0026
 		
@@ -489,6 +505,13 @@ public class WAllocation extends Allocation
 		bpartnerSearch.addValueChangeListener(this);
 
 	    //  JPIERE-0026 - Start
+		AD_Column_ID = COLUMN_C_PERIOD_AD_ORG_ID; //C_Period.AD_Org_ID (needed to allow org 0)
+		MLookup lookupOrg2 = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
+		organizationPick2 = new WSearchEditor("AD_Org2_ID", true, false, true, lookupOrg2);		//JPIERE-0026
+		organizationPick2.setValue(null);															//JPIERE-0026
+		organizationPick2.addValueChangeListener(this);
+		m_AD_Org2_ID = 0;	//JPIERE-0026
+		
 		AD_Column_ID = COLUMN_C_PERIOD_AD_ORG_ID; //C_Period.AD_Org_ID (needed not to allow org 0)
 		MLookup lookupDocOrg = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
 		docOrganizationPick = new WSearchEditor("Doc_AD_Org_ID", true, false, true, lookupDocOrg);
@@ -498,9 +521,14 @@ public class WAllocation extends Allocation
 		
 		AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
 		MLookup lookupBP2 = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
-		bpartnerSearch2 = new WSearchEditor("C_BPartner_ID", true, false, true, lookupBP2);
+		bpartnerSearch2 = new WSearchEditor("C_BPartner2_ID", true, false, true, lookupBP2);
 		bpartnerSearch2.addValueChangeListener(this);
 
+		AD_Column_ID = MColumn.getColumn_ID("C_BPartner", "JP_Corporation_ID");        //  AD_OrgInfo.JP_Corporation_ID
+		MLookup lookupCorporation = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
+		corporationSearch = new WSearchEditor("JP_Corporation_ID", false, false, true, lookupCorporation);
+		corporationSearch.addValueChangeListener(this);
+		
 		AD_Column_ID = MColumn.getColumn_ID("AD_OrgInfo", "JP_Corporation_ID");        //  AD_OrgInfo.JP_Corporation_ID
 		MLookup lookupOrgCorporation = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), AD_Column_ID,0
 												, Env.getLanguage(Env.getCtx()),"JP_Corporation_ID",0, false, "JP_Corporation.JP_Corporation_ID IN (SELECT JP_Corporation_ID FROM AD_OrgInfo)");
@@ -508,6 +536,7 @@ public class WAllocation extends Allocation
 		orgCorporationSearch = new WTableDirEditor("JP_Org_Corporation_ID", false, false, true,lookupOrgCorporation);
 		orgCorporationSearch.addValueChangeListener(this);
 		//	JPIERE-0026 - end
+		
 
 		//  Translation
 		statusBar.appendChild(new Label(Msg.getMsg(Env.getCtx(), "AllocateStatus")));
@@ -648,14 +677,29 @@ public class WAllocation extends Allocation
 		String name = e.getPropertyName();
 		Object value = e.getNewValue();
 		if (log.isLoggable(Level.CONFIG)) log.config(name + "=" + value);
-		if (value == null && (!name.equals("C_Charge_ID")||!name.equals("C_DocType_ID") ))
-			return;
+//		if (value == null && (!name.equals("C_Charge_ID")||!name.equals("C_DocType_ID") ))
+//			return;
 		
 		// Organization
 		if (name.equals("AD_Org_ID"))
 		{
-			m_AD_Org_ID = ((Integer) value).intValue();
+			m_AD_Org_ID = value!=null? ((Integer) value).intValue() : 0;			
+			m_JP_OrgInfo_Corporation_ID = 0;
+			orgCorporationSearch.setValue(null);
+			loadBPartner();
+		}else if (name.equals("AD_Org2_ID"))//JPIERE-0026
+		{
+			m_AD_Org2_ID  = value!=null? ((Integer) value).intValue() : 0;
+			m_JP_OrgInfo_Corporation_ID = 0;
+			orgCorporationSearch.setValue(null);
+			loadBPartner();
+		}else if (name.equals("JP_Org_Corporation_ID")){//JPIERE-0026
 			
+			m_JP_OrgInfo_Corporation_ID  = value!=null? ((Integer) value).intValue() : 0;
+			m_AD_Org_ID = 0;
+			organizationPick.setValue(null);
+			m_AD_Org2_ID = 0;
+			organizationPick2.setValue(null);
 			loadBPartner();
 		}
 		//		Charge
@@ -671,32 +715,32 @@ public class WAllocation extends Allocation
 			m_C_DocType_ID = value!=null? ((Integer) value).intValue() : 0;
 			
 		}
-		else if (name.equals("Doc_AD_Org_ID"))//JPIERE-0026 - Start
+		else if (name.equals("Doc_AD_Org_ID"))//JPIERE-0026
 		{
-			m_Doc_AD_Org_ID = ((Integer) value).intValue();
-		}
-		else if (name.equals("JP_Org_Corporation_ID"))
-		{
-			m_JP_OrgInfo_Corporation_ID = ((Integer) value).intValue();
-			loadBPartner();
-		}//JPIERE-0026 - end
-
-		//  BPartner
-		if (e.getSource().equals(bpartnerSearch))//JPIERE-0026
-		{
-			bpartnerSearch.setValue(value);
-			m_C_BPartner_ID = ((Integer)value).intValue();
+			m_Doc_AD_Org_ID = value!=null? ((Integer) value).intValue() : 0;
+			
+		}else if (name.equals("C_BPartner_ID")){
+			
+			m_C_BPartner_ID = value!=null? ((Integer) value).intValue() : 0;
+			m_JP_Corporation_ID = 0;
+			corporationSearch.setValue(null);
 			loadBPartner();
 		}
-		//JPIERE-0026  BPartner2
-		else if (e.getSource().equals(bpartnerSearch2))
+		else if (name.equals("C_BPartner2_ID"))//JPIERE-0026
 		{
-			bpartnerSearch2.setValue(value);
-			m_C_BPartner2_ID = ((Integer)value).intValue();
+			m_C_BPartner2_ID = value!=null? ((Integer) value).intValue() : 0;
+			m_JP_Corporation_ID = 0;
+			corporationSearch.setValue(null);
 			loadBPartner ();
-		}
+		}else if (name.equals("JP_Corporation_ID")){//JPIERE-0026
+			m_JP_Corporation_ID = value!=null? ((Integer) value).intValue() : 0;
+			m_C_BPartner_ID = 0;
+			bpartnerSearch.setValue(null);
+			m_C_BPartner2_ID = 0;
+			bpartnerSearch2.setValue(null);
+			loadBPartner();
 		//	Currency
-		else if (name.equals("C_Currency_ID"))
+		}else if (name.equals("C_Currency_ID"))
 		{
 			m_C_Currency_ID = ((Integer)value).intValue();
 			loadBPartner();

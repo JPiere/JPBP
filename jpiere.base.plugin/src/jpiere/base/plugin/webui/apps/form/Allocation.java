@@ -75,8 +75,10 @@ public class Allocation
 //	private int			i_multiplier = 10;
 	
 	public int         	m_AD_Org_ID = 0;
+	public int				m_AD_Org2_ID = 0;				//JPIERE-0026
 	public int         	m_Doc_AD_Org_ID = 0;			//JPIERE-0026
 	public int				m_JP_OrgInfo_Corporation_ID = 0;//JPIERE-0026
+	public int				m_JP_Corporation_ID = 0;		//JPIERE-0026
 
 	private ArrayList<Integer>	m_bpartnerCheck = new ArrayList<Integer>(); 
 
@@ -127,26 +129,36 @@ public class Allocation
 		 *      5-ConvAmt, 6-ConvOpen, 7-Allocated
 		 */
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		
+		if(m_C_BPartner_ID == 0 && m_C_BPartner2_ID == 0 && m_JP_Corporation_ID == 0)
+			return data;
+		
 		StringBuilder sql = new StringBuilder("SELECT p.DateTrx,p.DocumentNo,p.C_Payment_ID,"  //  1..3
 			+ "c.ISO_Code,p.PayAmt,"                            //  4..5
 			+ "currencyConvertPayment(p.C_Payment_ID,?,null,?),"//  6   #1, #2
 			+ "currencyConvertPayment(p.C_Payment_ID,?,paymentAvailable(p.C_Payment_ID),?),"  //  7   #3, #4
-			+ "p.MultiplierAP, bp.Name, o.Name, cp.Name "	//JPIERE-0026
+			+ "p.MultiplierAP, bp.Name, bc.Name, o.Name, cp.Name "	//JPIERE-0026
 			+ "FROM C_Payment_v p"		//	Corrected for AP/AR
 			+ " INNER JOIN C_Currency c ON (p.C_Currency_ID=c.C_Currency_ID) "
-			+ " INNER JOIN C_BPartner bp ON (p.C_BPartner_ID=bp.C_BPartner_ID) "	//JPIERE-0026
-			+ " INNER JOIN AD_Org o ON (p.AD_Org_ID=o.AD_Org_ID) "					//JPIERE-0026
-			+ " LEFT OUTER JOIN AD_OrgInfo oi ON (p.AD_Org_ID=oi.AD_Org_ID) "		//JPIERE-0026
-			+ " LEFT OUTER JOIN JP_Corporation cp ON (oi.JP_Corporation_ID=cp.JP_Corporation_ID) "//JPIERE-0026
+			+ " INNER JOIN C_BPartner bp ON (p.C_BPartner_ID=bp.C_BPartner_ID) "
+			+ " INNER JOIN AD_Org o ON (p.AD_Org_ID=o.AD_Org_ID) "
+				+ " LEFT OUTER JOIN JP_Corporation bc ON (bp.JP_Corporation_ID = bc.JP_Corporation_ID) "
+			+ " LEFT OUTER JOIN AD_OrgInfo oi ON (p.AD_Org_ID=oi.AD_Org_ID) "
+				+ " LEFT OUTER JOIN JP_Corporation cp ON (oi.JP_Corporation_ID=cp.JP_Corporation_ID) "
 			+ "WHERE p.IsAllocated='N' AND p.Processed='Y'"
-			+ " AND p.C_Charge_ID IS NULL"		//	Prepayments OK
-			+ " AND p.C_BPartner_ID in (?,?)");                   		//      #5 JPIERE-0026
+			+ " AND p.C_Charge_ID IS NULL");		//	Prepayments OK
+		if(m_C_BPartner_ID != 0 || m_C_BPartner2_ID != 0)
+			sql.append(" AND p.C_BPartner_ID in (?,?)");
+		if (m_JP_Corporation_ID != 0 )
+			sql.append(" AND bp.JP_Corporation_ID=?");
 		if (!isMultiCurrency)
-			sql.append(" AND p.C_Currency_ID=?");				//      #6
-		if (m_AD_Org_ID != 0 )
-			sql.append(" AND p.AD_Org_ID=" + m_AD_Org_ID);
+			sql.append(" AND p.C_Currency_ID=?");
+		if (m_AD_Org_ID != 0 || m_AD_Org2_ID != 0)
+			sql.append(" AND p.AD_Org_ID in (?,?) ");
 		if (m_JP_OrgInfo_Corporation_ID != 0 )
-			sql.append(" AND oi.JP_Corporation_ID=" + m_JP_OrgInfo_Corporation_ID);
+			sql.append(" AND oi.JP_Corporation_ID=?");
+		//JPIERE-0026
+		
 		sql.append(" ORDER BY p.DateTrx,p.DocumentNo");
 		
 		// role security
@@ -157,15 +169,29 @@ public class Allocation
 		ResultSet rs = null;
 		try
 		{
+			int i = 0;
 			pstmt = DB.prepareStatement(sql.toString(), null);
-			pstmt.setInt(1, m_C_Currency_ID);
-			pstmt.setTimestamp(2, (Timestamp)date);
-			pstmt.setInt(3, m_C_Currency_ID);
-			pstmt.setTimestamp(4, (Timestamp)date);
-			pstmt.setInt(5, m_C_BPartner_ID);
-			pstmt.setInt(6, m_C_BPartner2_ID);	//JPIERE-0026
+			pstmt.setInt(++i, m_C_Currency_ID);
+			pstmt.setTimestamp(++i, (Timestamp)date);
+			pstmt.setInt(++i, m_C_Currency_ID);
+			pstmt.setTimestamp(++i, (Timestamp)date);
+			if(m_C_BPartner_ID != 0 || m_C_BPartner2_ID != 0)
+			{
+				pstmt.setInt(++i, m_C_BPartner_ID);
+				pstmt.setInt(++i, m_C_BPartner2_ID);
+			}
+			if (m_JP_Corporation_ID != 0 )
+				pstmt.setInt(++i, m_JP_Corporation_ID);
 			if (!isMultiCurrency)
-				pstmt.setInt(7, m_C_Currency_ID);	//JPIERE-0026
+				pstmt.setInt(++i, m_C_Currency_ID);
+			if (m_AD_Org_ID != 0 || m_AD_Org2_ID != 0)
+			{
+				pstmt.setInt(++i, m_AD_Org_ID);
+				pstmt.setInt(++i, m_AD_Org2_ID);
+			}
+			if (m_JP_OrgInfo_Corporation_ID != 0 )
+				pstmt.setInt(++i, m_JP_OrgInfo_Corporation_ID);
+			
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -186,9 +212,10 @@ public class Allocation
 				line.add(available);				//  4/6-ConvOpen/Available
 				line.add(Env.ZERO);					//  5/7-Payment
 //				line.add(rs.getBigDecimal(8));		//  6/8-Multiplier
-				line.add(rs.getString(9));					//  6/9-BPartner JPIERE-0026
-				line.add(rs.getString(10));					//  7/10-Org JPIERE-0026
-				line.add(rs.getString(11));					//  8/11-Corporation JPIERE-0026
+				line.add(rs.getString(9));			//  6/9-BPartner JPIERE-0026
+				line.add(rs.getString(10));			//  7/10-Corporation JPIERE-0026
+				line.add(rs.getString(11));			//  8/11-Org JPIERE-0026
+				line.add(rs.getString(12));			//  9/12-OrgInfo Corporation JPIERE-0026
 				//
 				data.add(line);
 			}
@@ -221,9 +248,10 @@ public class Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "OpenAmt"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 //		columnNames.add(" ");	//	Multiplier
-		columnNames.add(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));//JPIERE-0026
-		columnNames.add(Msg.getElement(Env.getCtx(), "AD_Org_ID"));	//JPIERE-0026
-		columnNames.add(Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));				//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "JP_Corporation_ID"));			//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "AD_Org_ID"));					//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));	//JPIERE-0026
 		
 		return columnNames;
 	}
@@ -244,8 +272,9 @@ public class Allocation
 		paymentTable.setColumnClass(i++, BigDecimal.class, false);      //  7-Allocated
 //		paymentTable.setColumnClass(i++, BigDecimal.class, true);      	//  8-Multiplier
 		paymentTable.setColumnClass(i++, String.class, true);  	    //  8-BPartner Name JPIERE-0026
-		paymentTable.setColumnClass(i++, String.class, true);  	    //  9-Org Name JPIERE-0026
-		paymentTable.setColumnClass(i++, String.class, true);  	    // 10-Corporation Name JPIERE-0026
+		paymentTable.setColumnClass(i++, String.class, true);  	    //  9-Corporation Name JPIERE-0026
+		paymentTable.setColumnClass(i++, String.class, true);  	    // 10-Org Name JPIERE-0026
+		paymentTable.setColumnClass(i++, String.class, true);  	    // 11-OrgInfo Corporation Name JPIERE-0026
 		//
 		i_payment = isMultiCurrency ? 7 : 5;
 		
@@ -273,27 +302,37 @@ public class Allocation
 		 WHERE -- i.IsPaid='N' AND i.Processed='Y' AND i.C_BPartner_ID=1000001
 		 */
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		
+		if(m_C_BPartner_ID == 0 && m_C_BPartner2_ID == 0 && m_JP_Corporation_ID == 0)
+			return data;
+		
 		StringBuilder sql = new StringBuilder("SELECT i.DateInvoiced,i.DocumentNo,i.C_Invoice_ID," //  1..3
 			+ "c.ISO_Code,i.GrandTotal*i.MultiplierAP, "                            //  4..5    Orig Currency
 			+ "currencyConvertInvoice(i.C_Invoice_ID,?,i.GrandTotal*i.MultiplierAP,?), " //  6   #1  Converted, #2 Date
 			+ "currencyConvertInvoice(i.C_Invoice_ID,?,invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID),?)*i.MultiplierAP, "  //  7   #3, #4  Converted Open
 			+ "currencyConvertInvoice(i.C_Invoice_ID"                               //  8       AllowedDiscount
 			+ ",?,invoiceDiscount(i.C_Invoice_ID,?,C_InvoicePaySchedule_ID),i.DateInvoiced)*i.Multiplier*i.MultiplierAP,"               //  #5, #6
-			+ "i.MultiplierAP, bp.Name, o.Name, cp.Name "	//JPIERE-0026
+			+ "i.MultiplierAP, bp.Name, bc.Name, o.Name, cp.Name "	//JPIERE-0026
 			+ "FROM C_Invoice_v i"		//  corrected for CM/Split
 			+ " INNER JOIN C_Currency c ON (i.C_Currency_ID=c.C_Currency_ID) "
-			+ " INNER JOIN C_BPartner bp ON (i.C_BPartner_ID=bp.C_BPartner_ID) "	//JPIERE-0026
-			+ " INNER JOIN AD_Org o ON (i.AD_Org_ID=o.AD_Org_ID) "					//JPIERE-0026
-			+ " LEFT OUTER JOIN AD_OrgInfo oi ON (i.AD_Org_ID=oi.AD_Org_ID) "		//JPIERE-0026
-			+ " LEFT OUTER JOIN JP_Corporation cp ON (oi.JP_Corporation_ID=cp.JP_Corporation_ID) "//JPIERE-0026
-			+ "WHERE i.IsPaid='N' AND i.Processed='Y'"
-			+ " AND i.C_BPartner_ID in (?,?)");                    //  #7 JPIERE-0026
+			+ " INNER JOIN C_BPartner bp ON (i.C_BPartner_ID=bp.C_BPartner_ID) "	
+				+ " LEFT OUTER JOIN JP_Corporation bc ON (bp.JP_Corporation_ID = bc.JP_Corporation_ID) "
+			+ " INNER JOIN AD_Org o ON (i.AD_Org_ID=o.AD_Org_ID) "
+			+ " LEFT OUTER JOIN AD_OrgInfo oi ON (i.AD_Org_ID=oi.AD_Org_ID) "
+				+ " LEFT OUTER JOIN JP_Corporation cp ON (oi.JP_Corporation_ID=cp.JP_Corporation_ID) "
+			+ "WHERE i.IsPaid='N' AND i.Processed='Y'");
+		if(m_C_BPartner_ID != 0 || m_C_BPartner2_ID != 0)
+			sql.append(" AND i.C_BPartner_ID in (?,?)");
+		if (m_JP_Corporation_ID != 0 )
+			sql.append(" AND bp.JP_Corporation_ID=?");
 		if (!isMultiCurrency)
-			sql.append(" AND i.C_Currency_ID=?");                                   //  #8
-		if (m_AD_Org_ID != 0 ) 
-			sql.append(" AND i.AD_Org_ID=" + m_AD_Org_ID);
+			sql.append(" AND i.C_Currency_ID=?");
+		if (m_AD_Org_ID != 0 || m_AD_Org2_ID != 0)
+			sql.append(" AND i.AD_Org_ID in (?,?)");
 		if (m_JP_OrgInfo_Corporation_ID != 0 )
-			sql.append(" AND oi.JP_Corporation_ID=" + m_JP_OrgInfo_Corporation_ID);
+			sql.append(" AND oi.JP_Corporation_ID=?");
+		//JPIERE-0026
+		
 		sql.append(" ORDER BY i.DateInvoiced, i.DocumentNo");
 		if (log.isLoggable(Level.FINE)) log.fine("InvSQL=" + sql.toString());
 		
@@ -304,17 +343,31 @@ public class Allocation
 		ResultSet rs = null;
 		try
 		{
+			int i = 0;
 			pstmt = DB.prepareStatement(sql.toString(), null);
-			pstmt.setInt(1, m_C_Currency_ID);
-			pstmt.setTimestamp(2, (Timestamp)date);
-			pstmt.setInt(3, m_C_Currency_ID);
-			pstmt.setTimestamp(4, (Timestamp)date);
-			pstmt.setInt(5, m_C_Currency_ID);
-			pstmt.setTimestamp(6, (Timestamp)date);
-			pstmt.setInt(7, m_C_BPartner_ID);
-			pstmt.setInt(8, m_C_BPartner2_ID);//JPIERE-0026
+			pstmt.setInt(++i, m_C_Currency_ID);
+			pstmt.setTimestamp(++i, (Timestamp)date);
+			pstmt.setInt(++i, m_C_Currency_ID);
+			pstmt.setTimestamp(++i, (Timestamp)date);
+			pstmt.setInt(++i, m_C_Currency_ID);
+			pstmt.setTimestamp(++i, (Timestamp)date);
+			if(m_C_BPartner_ID != 0 || m_C_BPartner2_ID != 0)
+			{
+				pstmt.setInt(++i, m_C_BPartner_ID);
+				pstmt.setInt(++i, m_C_BPartner2_ID);//JPIERE-0026
+			}
+			if (m_JP_Corporation_ID != 0 )
+				pstmt.setInt(++i, m_JP_Corporation_ID);
 			if (!isMultiCurrency)
-				pstmt.setInt(9, m_C_Currency_ID);//JPIERE-0026
+				pstmt.setInt(++i, m_C_Currency_ID);
+			if (m_AD_Org_ID != 0 || m_AD_Org2_ID != 0)
+			{
+				pstmt.setInt(++i, m_AD_Org_ID);
+				pstmt.setInt(++i, m_AD_Org2_ID);
+			}
+			if (m_JP_OrgInfo_Corporation_ID != 0 )
+				pstmt.setInt(++i, m_JP_OrgInfo_Corporation_ID);
+				
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -342,8 +395,9 @@ public class Allocation
 				line.add(open);				    //  8/10-OverUnder
 //				line.add(rs.getBigDecimal(9));		//	8/10-Multiplier
 				line.add(rs.getString(10));			//  9/10 BPartner Name JPIERE-0026
-				line.add(rs.getString(11));			//  10/11 Org Name JPIERE-0026
-				line.add(rs.getString(12));			//  11/12 Corporation JPIERE-0026
+				line.add(rs.getString(11));			//  10/11 Corporation Name JPIERE-0026
+				line.add(rs.getString(12));			//  11/12 Org Name JPIERE-0026
+				line.add(rs.getString(13));			//  12/13 Org Corporation JPIERE-0026
 
 				//	Add when open <> 0 (i.e. not if no conversion rate)
 				if (Env.ZERO.compareTo(open) != 0)
@@ -381,9 +435,10 @@ public class Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "OverUnderAmt"));
 //		columnNames.add(" ");	//	Multiplier
-		columnNames.add(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));//JPIERE-0026
-		columnNames.add(Msg.getElement(Env.getCtx(), "AD_Org_ID"));//JPIERE-0026
-		columnNames.add(Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));				//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "JP_Corporation_ID"));			//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "AD_Org_ID"));					//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));	//JPIERE-0026
 		
 		return columnNames;
 	}
@@ -406,9 +461,10 @@ public class Allocation
 		invoiceTable.setColumnClass(i++, BigDecimal.class, false);      //  9-Conv OverUnder
 		invoiceTable.setColumnClass(i++, BigDecimal.class, true);		//	10-Conv Applied
 //		invoiceTable.setColumnClass(i++, BigDecimal.class, true);      	//  10-Multiplier
-		invoiceTable.setColumnClass(i++, String.class, true);		//	11-BPartner Name JPIERE-0026
-		invoiceTable.setColumnClass(i++, String.class, true);		//	12-Org Name JPIERE-0026
-		invoiceTable.setColumnClass(i++, String.class, true);		//	13-Corporation Name JPIERE-0026
+		invoiceTable.setColumnClass(i++, String.class, true);			//	11-BPartner Name JPIERE-0026
+		invoiceTable.setColumnClass(i++, String.class, true);			//	12-Corporation Name JPIERE-0026
+		invoiceTable.setColumnClass(i++, String.class, true);			//	13-Org Name JPIERE-0026
+		invoiceTable.setColumnClass(i++, String.class, true);			//	14-Org Info Corporation Name JPIERE-0026
 		//  Table UI
 		invoiceTable.autoSize();
 	}
