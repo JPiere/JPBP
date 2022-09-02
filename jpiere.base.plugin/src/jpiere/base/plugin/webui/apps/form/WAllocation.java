@@ -16,14 +16,21 @@
  *****************************************************************************/
 package jpiere.base.plugin.webui.apps.form;
 
+import static org.adempiere.webui.ClientInfo.*;
 import static org.compiere.model.SystemIDs.*;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
+import org.adempiere.webui.component.Column;
+import org.adempiere.webui.component.Columns;
+import org.adempiere.webui.component.DocumentLink;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Label;
@@ -47,6 +54,7 @@ import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MAllocationHdr;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.util.DisplayType;
@@ -55,65 +63,64 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.TrxRunnable;
 import org.compiere.util.Util;
-import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.A;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.North;
-import org.zkoss.zul.Separator;
 import org.zkoss.zul.South;
-import org.zkoss.zul.Space;
 
 /**
  * Allocation Form
  *
  * @author  Jorg Janke
  * @version $Id: VAllocation.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
- *
- * Contributor : Fabian Aguilar - Multi Business Partner
+ * 
+ * Contributor : Fabian Aguilar - OFBConsulting - Multiallocation
+ * 
+ * JPIERE-0022
+ * 
  */
 public class WAllocation extends Allocation
 	implements IFormController, EventListener<Event>, WTableModelListener, ValueChangeListener
 {
 
 	private CustomForm form = new CustomForm();
-
+	
 	/**
 	 *	Initialize Panel
-	 *  @param WindowNo window
-	 *  @param frame frame
 	 */
 	public WAllocation()
 	{
-		Env.setContext(Env.getCtx(), form.getWindowNo(), "IsSOTrx", "Y");   //  defaults to no
 		try
 		{
 			super.dynInit();
 			dynInit();
 			zkInit();
-			calculate();
-			southPanel.appendChild(new Separator());
-			southPanel.appendChild(statusBar);
+			calculate();			
 		}
 		catch(Exception e)
 		{
 			log.log(Level.SEVERE, "", e);
 		}
+		
+		if (ClientInfo.isMobile()) 
+		{
+			ClientInfo.onClientInfo(form, this::onClientInfo);
+		}
 	}	//	init
-
+	
 	//
 	private Borderlayout mainLayout = new Borderlayout();
 	private Panel parameterPanel = new Panel();
-	private Panel allocationPanel = new Panel();
+	private Panel allocationPanel = new Panel(); //footer
 	private Grid parameterLayout = GridFactory.newGridLayout();
 	private Label bpartnerLabel = new Label();
 	private WSearchEditor bpartnerSearch = null;
-	private Label bpartnerLabel2 = new Label();
-	private WSearchEditor bpartnerSearch2 = null;
 	private WListbox invoiceTable = ListboxFactory.newDataTable();
 	private WListbox paymentTable = ListboxFactory.newDataTable();
 	private Borderlayout infoPanel = new Borderlayout();
@@ -135,16 +142,23 @@ public class WAllocation extends Allocation
 	private Checkbox multiCurrency = new Checkbox();
 	private Label chargeLabel = new Label();
 	private WTableDirEditor chargePick = null;
+	private Label DocTypeLabel = new Label();
+	private WTableDirEditor DocTypePick = null;
 	private Label allocCurrencyLabel = new Label();
 	private Hlayout statusBar = new Hlayout();
 	private Label dateLabel = new Label();
 	private WDateEditor dateField = new WDateEditor();
 	private Checkbox autoWriteOff = new Checkbox();
 	private Label organizationLabel = new Label();
-	private WTableDirEditor organizationPick;
-
-	private Panel southPanel = new Panel();
-
+	private WSearchEditor organizationPick;
+	private Label docOrganizationLabel = new Label();		//JPIERE-0026
+	private WSearchEditor docOrganizationPick; 			//JPIERE-0026
+	private Label bpartnerLabel2 = new Label();   			//JPIERE-0026
+	private WSearchEditor bpartnerSearch2 = null; 			//JPIERE-0026
+	private Label orgCorporation = new Label();   			//JPIERE-0026
+	private WTableDirEditor orgCorporationSearch = null;		//JPIERE-0026
+	private int noOfColumn;
+	
 	/**
 	 *  Static Init
 	 *  @throws Exception
@@ -152,10 +166,17 @@ public class WAllocation extends Allocation
 	private void zkInit() throws Exception
 	{
 		//
-		form.appendChild(mainLayout);
-		ZKUpdateUtil.setWidth(mainLayout, "99%");
-		ZKUpdateUtil.setHeight(mainLayout, "100%");
-		dateLabel.setText(Msg.getMsg(Env.getCtx(), "Date"));
+		Div div = new Div();
+		div.setStyle("height: 100%; width: 100%; overflow: auto;");
+		div.appendChild(mainLayout);
+		form.appendChild(div);
+		ZKUpdateUtil.setWidth(mainLayout, "100%");
+		
+		/////
+		mainLayout.setStyle("min-height: 600px");
+		/////
+		
+		dateLabel.setText(Msg.getElement(Env.getCtx(), "DateDoc"));//JPIERE-0026
 		autoWriteOff.setSelected(false);
 		autoWriteOff.setText(Msg.getMsg(Env.getCtx(), "AutoWriteOff", true));
 		autoWriteOff.setTooltiptext(Msg.getMsg(Env.getCtx(), "AutoWriteOff", false));
@@ -163,7 +184,6 @@ public class WAllocation extends Allocation
 		parameterPanel.appendChild(parameterLayout);
 		allocationPanel.appendChild(allocationLayout);
 		bpartnerLabel.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
-		bpartnerLabel2.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
 		paymentLabel.setText(" " + Msg.translate(Env.getCtx(), "C_Payment_ID"));
 		invoiceLabel.setText(" " + Msg.translate(Env.getCtx(), "C_Invoice_ID"));
 		paymentPanel.appendChild(paymentLayout);
@@ -171,6 +191,7 @@ public class WAllocation extends Allocation
 		invoiceInfo.setText(".");
 		paymentInfo.setText(".");
 		chargeLabel.setText(" " + Msg.translate(Env.getCtx(), "C_Charge_ID"));
+		DocTypeLabel.setText(" " + Msg.translate(Env.getCtx(), "C_DocType_ID"));	
 		differenceLabel.setText(Msg.getMsg(Env.getCtx(), "Difference"));
 		differenceField.setText("0");
 		differenceField.setReadonly(true);
@@ -184,129 +205,261 @@ public class WAllocation extends Allocation
 		multiCurrency.setText(Msg.getMsg(Env.getCtx(), "MultiCurrency"));
 		multiCurrency.addActionListener(this);
 		allocCurrencyLabel.setText(".");
-
+		
 		organizationLabel.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
-
+		
+		//JPIERE-0026
+		bpartnerLabel2.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
+		docOrganizationLabel.setText(Msg.translate(Env.getCtx(), "AD_OrgDoc_ID"));
+		orgCorporation.setText(Msg.translate(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));
+		//JPIERE-0026
+		
+		// parameters layout
 		North north = new North();
-		north.setStyle("border: none");
+		north.setBorder("none");
+		north.setSplittable(true);
+		north.setCollapsible(true);
 		mainLayout.appendChild(north);
 		north.appendChild(parameterPanel);
-
-		Rows rows = null;
-		Row row = null;
-
-		ZKUpdateUtil.setWidth(parameterLayout, "80%");
-		rows = parameterLayout.newRows();
-		row = rows.newRow();
-		row.appendCellChild(dateLabel.rightAlign());
-		row.appendCellChild(dateField.getComponent());
-		row.appendCellChild(organizationLabel.rightAlign());
-		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
-		row.appendCellChild(organizationPick.getComponent(),1);
-
-		row = rows.newRow();
-		row.appendCellChild(bpartnerLabel.rightAlign());
-		ZKUpdateUtil.setHflex(bpartnerSearch.getComponent(), "true");
-		row.appendCellChild(bpartnerSearch.getComponent(),2);
-		row.appendCellChild(bpartnerLabel2.rightAlign());
-		ZKUpdateUtil.setHflex(bpartnerSearch2.getComponent(), "true");
-		row.appendCellChild(bpartnerSearch2.getComponent(),2);
-
-		row = rows.newRow();
-		row.appendCellChild(currencyLabel.rightAlign(),1);
-		ZKUpdateUtil.setHflex(currencyPick.getComponent(), "true");
-		row.appendCellChild(currencyPick.getComponent(),1);
-		row.appendCellChild(multiCurrency,1);
-		row.appendCellChild(autoWriteOff,2);
-		row.appendCellChild(new Space(),1);
-
-		South south = new South();
-		south.setStyle("border: none");
-		mainLayout.appendChild(south);
-		south.appendChild(southPanel);
-		southPanel.appendChild(allocationPanel);
-		allocationPanel.appendChild(allocationLayout);
-		ZKUpdateUtil.setHflex(allocationLayout, "min");
-		rows = allocationLayout.newRows();
-		row = rows.newRow();
-		row.appendCellChild(differenceLabel.rightAlign());
-		row.appendCellChild(allocCurrencyLabel.rightAlign());
-		ZKUpdateUtil.setHflex(differenceField, "true");
-		row.appendCellChild(differenceField);
-		row.appendCellChild(chargeLabel.rightAlign());
-		ZKUpdateUtil.setHflex(chargePick.getComponent(), "true");
-		row.appendCellChild(chargePick.getComponent());
-		ZKUpdateUtil.setHflex(allocateButton, "true");
-		row.appendCellChild(allocateButton);
-		row.appendCellChild(refreshButton);
-
+		
+		layoutParameterAndSummary();
+		
+		// payment layout
 		paymentPanel.appendChild(paymentLayout);
 		ZKUpdateUtil.setWidth(paymentPanel, "100%");
-		ZKUpdateUtil.setHeight(paymentPanel, "100%");
 		ZKUpdateUtil.setWidth(paymentLayout, "100%");
-		ZKUpdateUtil.setHeight(paymentLayout, "100%");
-		paymentLayout.setStyle("border: none");
-
+		ZKUpdateUtil.setVflex(paymentPanel, "1");
+		ZKUpdateUtil.setVflex(paymentLayout, "1");
+		
+		// invoice layout
 		invoicePanel.appendChild(invoiceLayout);
 		ZKUpdateUtil.setWidth(invoicePanel, "100%");
-		ZKUpdateUtil.setHeight(invoicePanel, "100%");
 		ZKUpdateUtil.setWidth(invoiceLayout, "100%");
-		ZKUpdateUtil.setHeight(invoiceLayout, "100%");
-		invoiceLayout.setStyle("border: none");
-
+		ZKUpdateUtil.setVflex(invoicePanel, "1");
+		ZKUpdateUtil.setVflex(invoiceLayout, "1");
+		
+		// payment layout north - label
 		north = new North();
-		north.setStyle("border: none");
+		north.setBorder("none");
 		paymentLayout.appendChild(north);
 		north.appendChild(paymentLabel);
-		south = new South();
-		south.setStyle("border: none");
+		ZKUpdateUtil.setVflex(paymentLabel, "min");
+		// payment layout south - sum
+		South south = new South();
+		south.setBorder("none");
 		paymentLayout.appendChild(south);
 		south.appendChild(paymentInfo.rightAlign());
+		ZKUpdateUtil.setVflex(paymentInfo, "min");
+		//payment layout center - payment list
 		Center center = new Center();
 		paymentLayout.appendChild(center);
 		center.appendChild(paymentTable);
-		ZKUpdateUtil.setWidth(paymentTable, "99%");
-		ZKUpdateUtil.setHeight(paymentTable, "99%");
-		center.setStyle("border: none");
-
+		ZKUpdateUtil.setWidth(paymentTable, "100%");
+		ZKUpdateUtil.setVflex(paymentTable, "1");
+		center.setBorder("none");
+		
+		// invoice layout north - label
 		north = new North();
-		north.setStyle("border: none");
+		north.setBorder("none");
 		invoiceLayout.appendChild(north);
 		north.appendChild(invoiceLabel);
+		ZKUpdateUtil.setVflex(invoiceLabel, "min");
+		// invoice layout south - sum
 		south = new South();
-		south.setStyle("border: none");
+		south.setBorder("none");
 		invoiceLayout.appendChild(south);
 		south.appendChild(invoiceInfo.rightAlign());
+		ZKUpdateUtil.setVflex(invoiceInfo, "min");
+		// invoice layout center - invoice list
 		center = new Center();
 		invoiceLayout.appendChild(center);
 		center.appendChild(invoiceTable);
-		ZKUpdateUtil.setWidth(invoiceTable, "99%");
-		ZKUpdateUtil.setHeight(invoiceTable, "99%");
+		ZKUpdateUtil.setWidth(invoiceTable, "100%");
+		ZKUpdateUtil.setVflex(invoiceTable, "1");
 		center.setStyle("border: none");
-		//
+		
+		// mainlayout center - payment + invoice 
 		center = new Center();
 		mainLayout.appendChild(center);
 		center.appendChild(infoPanel);
 		ZKUpdateUtil.setHflex(infoPanel, "1");
 		ZKUpdateUtil.setVflex(infoPanel, "1");
-
+		
 		infoPanel.setStyle("border: none");
 		ZKUpdateUtil.setWidth(infoPanel, "100%");
-		ZKUpdateUtil.setHeight(infoPanel, "100%");
-
+		
+		// north of mainlayout center - payment
 		north = new North();
-		north.setStyle("border: none");
-		ZKUpdateUtil.setHeight(north, "49%");
+		north.setBorder("none");
 		infoPanel.appendChild(north);
 		north.appendChild(paymentPanel);
+		north.setAutoscroll(true);
 		north.setSplittable(true);
+		north.setSize("50%");
+		north.setCollapsible(true);
+
+		// center of mainlayout center - invoice
 		center = new Center();
-		center.setStyle("border: none");
+		center.setBorder("none");
 		infoPanel.appendChild(center);
 		center.appendChild(invoicePanel);
-		ZKUpdateUtil.setHflex(invoicePanel, "1");
-		ZKUpdateUtil.setVflex(invoicePanel, "1");
+		center.setAutoscroll(true);
+		infoPanel.setStyle("min-height: 300px;");
 	}   //  jbInit
+
+	protected void layoutParameterAndSummary() {
+		Rows rows = null;
+		Row row = null;
+		
+		setupParameterColumns();
+		
+		rows = parameterLayout.newRows();
+		row = rows.newRow();
+		row.appendCellChild(bpartnerLabel.rightAlign());
+		ZKUpdateUtil.setHflex(bpartnerSearch.getComponent(), "true");
+		row.appendCellChild(bpartnerSearch.getComponent(),1);
+		bpartnerSearch.showMenu();
+		
+		//JPIERE-0026
+		row.appendCellChild(bpartnerLabel2.rightAlign(),1);
+		ZKUpdateUtil.setHflex(bpartnerSearch2.getComponent(), "true");
+		row.appendCellChild(bpartnerSearch2.getComponent(),1);		
+		bpartnerSearch2.showMenu();
+		
+		row = rows.newRow();
+		row.appendCellChild(organizationLabel.rightAlign());
+		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
+		row.appendCellChild(organizationPick.getComponent(),1);
+		organizationPick.showMenu();	
+		
+		row.appendCellChild(orgCorporation.rightAlign());
+		ZKUpdateUtil.setHflex(orgCorporationSearch.getComponent(), "true");
+		row.appendCellChild(orgCorporationSearch.getComponent(),1);
+		orgCorporationSearch.showMenu();	
+		
+		//JPIERE-0026
+		
+		row = rows.newRow();
+		row.appendCellChild(currencyLabel.rightAlign(),1);
+		ZKUpdateUtil.setHflex(currencyPick.getComponent(), "true");
+		row.appendCellChild(currencyPick.getComponent(),1);		
+		currencyPick.showMenu();
+		
+		//row.appendCellChild(new Label(""), 1);		
+		
+		Hbox cbox = new Hbox();
+		cbox.setWidth("100%");
+		if (noOfColumn == 6)
+			cbox.setPack("center");
+		else
+			cbox.setPack("end");
+		cbox.appendChild(multiCurrency);
+		cbox.appendChild(autoWriteOff);
+		row.appendCellChild(cbox, 2);		
+		if (noOfColumn < 6)		
+			LayoutUtils.compactTo(parameterLayout, noOfColumn);
+		else
+			LayoutUtils.expandTo(parameterLayout, noOfColumn, true);
+		
+		//JPIERE-0026
+		row = rows.newRow();
+		row.appendCellChild(docOrganizationLabel.rightAlign());
+		ZKUpdateUtil.setHflex(docOrganizationPick.getComponent(), "true");
+		row.appendCellChild(docOrganizationPick.getComponent(),1);
+		organizationPick.showMenu();	
+		
+		row.appendChild(dateLabel.rightAlign());
+		row.appendChild(dateField.getComponent());
+		//JPIERE-0026
+		
+		// footer/allocations layout
+		South south = new South();
+		south.setBorder("none");
+		mainLayout.appendChild(south);
+		south.appendChild(allocationPanel);
+		allocationPanel.appendChild(allocationLayout);
+		allocationPanel.appendChild(statusBar);
+		ZKUpdateUtil.setWidth(allocationLayout, "100%");
+		ZKUpdateUtil.setHflex(allocationPanel, "1");
+		ZKUpdateUtil.setVflex(allocationPanel, "min");
+		ZKUpdateUtil.setVflex(allocationLayout, "min");
+		ZKUpdateUtil.setVflex(statusBar, "min");
+		ZKUpdateUtil.setVflex(south, "min");
+		rows = allocationLayout.newRows();
+		row = rows.newRow();
+		if (maxWidth(SMALL_WIDTH-1))
+		{
+			Hbox box = new Hbox();
+			box.setWidth("100%");
+			box.setPack("end");
+			box.appendChild(differenceLabel.rightAlign());
+			box.appendChild(allocCurrencyLabel.rightAlign());
+			row.appendCellChild(box);
+		}
+		else
+		{
+			Hlayout box = new Hlayout();
+			box.setStyle("float: right");
+			box.appendChild(differenceLabel.rightAlign());
+			box.appendChild(allocCurrencyLabel.rightAlign());
+			row.appendCellChild(box);
+		}
+		ZKUpdateUtil.setHflex(differenceField, "true");
+		row.appendCellChild(differenceField);
+		if (maxWidth(SMALL_WIDTH-1))
+			row = rows.newRow();
+		row.appendCellChild(chargeLabel.rightAlign());
+		ZKUpdateUtil.setHflex(chargePick.getComponent(), "true");
+		row.appendCellChild(chargePick.getComponent());
+		if (maxWidth(SMALL_WIDTH-1))
+			row = rows.newRow();
+		row.appendCellChild(DocTypeLabel.rightAlign());
+		chargePick.showMenu();
+		ZKUpdateUtil.setHflex(DocTypePick.getComponent(), "true");
+		row.appendCellChild(DocTypePick.getComponent());
+		DocTypePick.showMenu();
+		if (maxWidth(SMALL_WIDTH-1))
+		{
+			row = rows.newRow();
+			Hbox box = new Hbox();
+			box.setWidth("100%");
+			box.setPack("end");
+			box.appendChild(allocateButton);
+			box.appendChild(refreshButton);
+			row.appendCellChild(box, 2);
+		}
+		else
+		{
+			Hbox box = new Hbox();
+			box.setPack("end");
+			box.appendChild(allocateButton);
+			box.appendChild(refreshButton);
+			ZKUpdateUtil.setHflex(box, "1");
+			row.appendCellChild(box, 2);
+		}
+	}
+
+	protected void setupParameterColumns() {
+		noOfColumn = 6;
+		if (maxWidth(MEDIUM_WIDTH-1))
+		{
+			if (maxWidth(SMALL_WIDTH-1))
+				noOfColumn = 2;
+			else
+				noOfColumn = 4;
+		}
+		if (noOfColumn == 2)
+		{
+			Columns columns = new Columns();
+			Column column = new Column();
+			column.setWidth("35%");
+			columns.appendChild(column);
+			column = new Column();
+			column.setWidth("65%");
+			columns.appendChild(column);
+			parameterLayout.appendChild(columns);
+		}
+	}
 
 	/**
 	 *  Dynamic Init (prepare dynamic fields)
@@ -324,39 +477,99 @@ public class WAllocation extends Allocation
 		// Organization filter selection
 		AD_Column_ID = COLUMN_C_PERIOD_AD_ORG_ID; //C_Period.AD_Org_ID (needed to allow org 0)
 		MLookup lookupOrg = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
-		organizationPick = new WTableDirEditor("AD_Org_ID", true, false, true, lookupOrg);
-		organizationPick.setValue(Env.getAD_Org_ID(Env.getCtx()));
+		organizationPick = new WSearchEditor("AD_Org_ID", true, false, true, lookupOrg);		//JPIERE-0026
+		organizationPick.setValue(0);															//JPIERE-0026
 		organizationPick.addValueChangeListener(this);
-
+		m_AD_Org_ID = 0;	//JPIERE-0026
+		
 		//  BPartner
 		AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
 		MLookup lookupBP = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
 		bpartnerSearch = new WSearchEditor("C_BPartner_ID", true, false, true, lookupBP);
 		bpartnerSearch.addValueChangeListener(this);
 
-	    //  BPartner2
+	    //  JPIERE-0026 - Start
+		AD_Column_ID = COLUMN_C_PERIOD_AD_ORG_ID; //C_Period.AD_Org_ID (needed not to allow org 0)
+		MLookup lookupDocOrg = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
+		docOrganizationPick = new WSearchEditor("Doc_AD_Org_ID", true, false, true, lookupDocOrg);
+		docOrganizationPick.setValue(Env.getAD_Org_ID(Env.getCtx()));
+		docOrganizationPick.addValueChangeListener(this);
+		m_Doc_AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());
+		
 		AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
 		MLookup lookupBP2 = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
 		bpartnerSearch2 = new WSearchEditor("C_BPartner_ID", true, false, true, lookupBP2);
 		bpartnerSearch2.addValueChangeListener(this);
 
+		AD_Column_ID = MColumn.getColumn_ID("AD_OrgInfo", "JP_Corporation_ID");        //  AD_OrgInfo.JP_Corporation_ID
+		MLookup lookupOrgCorporation = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), AD_Column_ID,0
+												, Env.getLanguage(Env.getCtx()),"JP_Corporation_ID",0, false, "JP_Corporation.JP_Corporation_ID IN (SELECT JP_Corporation_ID FROM AD_OrgInfo)");
+		//MLookup lookupOrgCorporation = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);e
+		orgCorporationSearch = new WTableDirEditor("JP_Org_Corporation_ID", false, false, true,lookupOrgCorporation);
+		orgCorporationSearch.addValueChangeListener(this);
+		//	JPIERE-0026 - end
+
 		//  Translation
 		statusBar.appendChild(new Label(Msg.getMsg(Env.getCtx(), "AllocateStatus")));
-		statusBar.setVflex("min");
-
+		ZKUpdateUtil.setVflex(statusBar, "min");
+		
 		//  Date set to Login Date
-		dateField.setValue(Env.getContextAsDate(Env.getCtx(), "#Date"));
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(Env.getContextAsDate(Env.getCtx(), Env.DATE));
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		dateField.setValue(new Timestamp(cal.getTimeInMillis()));
 		dateField.addValueChangeListener(this);
 
-
+		
 		//  Charge
 		AD_Column_ID = 61804;    //  C_AllocationLine.C_Charge_ID
 		MLookup lookupCharge = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
 		chargePick = new WTableDirEditor("C_Charge_ID", false, false, true, lookupCharge);
 		chargePick.setValue(Integer.valueOf(m_C_Charge_ID));
 		chargePick.addValueChangeListener(this);
+		
+	//  Charge
+			AD_Column_ID = 212213;    //  C_AllocationLine.C_Charge_ID
+			MLookup lookupDocType = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
+			DocTypePick = new WTableDirEditor("C_DocType_ID", false, false, true, lookupDocType);
+			DocTypePick.setValue(Integer.valueOf(m_C_DocType_ID));
+			DocTypePick.addValueChangeListener(this);
+			
 	}   //  dynInit
-
+	
+	protected void onClientInfo()
+	{
+		if (ClientInfo.isMobile() && form.getPage() != null) 
+		{
+			if (noOfColumn > 0 && parameterLayout.getRows() != null)
+			{
+				int t = 6;
+				if (maxWidth(MEDIUM_WIDTH-1))
+				{
+					if (maxWidth(SMALL_WIDTH-1))
+						t = 2;
+					else
+						t = 4;
+				}
+				if (t != noOfColumn)
+				{
+					parameterLayout.getRows().detach();
+					if (parameterLayout.getColumns() != null)
+						parameterLayout.getColumns().detach();
+					if (mainLayout.getSouth() != null)
+						mainLayout.getSouth().detach();
+					if (allocationLayout.getRows() != null)
+						allocationLayout.getRows().detach();
+					layoutParameterAndSummary();
+					form.invalidate();
+				}
+			}
+		}
+	}
+	
 	/**************************************************************************
 	 *  Action Listener.
 	 *  - MultiCurrency
@@ -367,44 +580,23 @@ public class WAllocation extends Allocation
 	{
 		log.config("");
 		if (e.getTarget().equals(multiCurrency))
-		{
 			loadBPartner();
-			loadBPartner2();
-		}
 		//	Allocate
 		else if (e.getTarget().equals(allocateButton))
 		{
 			allocateButton.setEnabled(false);
 			MAllocationHdr allocation = saveData();
 			loadBPartner();
-			loadBPartner2();
 			allocateButton.setEnabled(true);
-			if (allocation != null)
+			if (allocation != null) 
 			{
-				A link = new A(allocation.getDocumentNo());
-				link.setAttribute("Record_ID", allocation.get_ID());
-				link.setAttribute("AD_Table_ID", allocation.get_Table_ID());
-				link.addEventListener(Events.ON_CLICK, new EventListener<Event>()
-						{
-					@Override
-					public void onEvent(Event event) throws Exception
-					{
-						Component comp = event.getTarget();
-						Integer Record_ID = (Integer) comp.getAttribute("Record_ID");
-						Integer AD_Table_ID = (Integer) comp.getAttribute("AD_Table_ID");
-						if (Record_ID != null && Record_ID > 0 && AD_Table_ID != null && AD_Table_ID > 0)
-						{
-							AEnv.zoom(AD_Table_ID, Record_ID);
-						}
-					}
-				});
+				DocumentLink link = new DocumentLink(Msg.getElement(Env.getCtx(), MAllocationHdr.COLUMNNAME_C_AllocationHdr_ID) + ": " + allocation.getDocumentNo(), allocation.get_Table_ID(), allocation.get_ID());				
 				statusBar.appendChild(link);
-			}
+			}					
 		}
 		else if (e.getTarget().equals(refreshButton))
 		{
 			loadBPartner();
-			loadBPartner2();
 		}
 	}   //  actionPerformed
 
@@ -422,28 +614,28 @@ public class WAllocation extends Allocation
 			calculate();
 			return;
 		}
-
+		
 		int row = e.getFirstRow();
 		int col = e.getColumn();
-
+	
 		if (row < 0)
 			return;
-
+		
 		boolean isInvoice = (e.getModel().equals(invoiceTable.getModel()));
 		boolean isAutoWriteOff = autoWriteOff.isSelected();
-
+		
 		String msg = writeOff(row, col, isInvoice, paymentTable, invoiceTable, isAutoWriteOff);
-
+		
 		//render row
-		ListModelTable model = isInvoice ? invoiceTable.getModel() : paymentTable.getModel();
+		ListModelTable model = isInvoice ? invoiceTable.getModel() : paymentTable.getModel(); 
 		model.updateComponent(row);
-
+	    
 		if(msg != null && msg.length() > 0)
 			FDialog.warn(form.getWindowNo(), "AllocationWriteOffWarn");
-
+		
 		calculate();
 	}   //  tableChanged
-
+	
 	/**
 	 *  Vetoable Change Listener.
 	 *  - Business Partner
@@ -456,54 +648,65 @@ public class WAllocation extends Allocation
 		String name = e.getPropertyName();
 		Object value = e.getNewValue();
 		if (log.isLoggable(Level.CONFIG)) log.config(name + "=" + value);
-		if (value == null && !name.equals("C_Charge_ID"))
+		if (value == null && (!name.equals("C_Charge_ID")||!name.equals("C_DocType_ID") ))
 			return;
-
+		
 		// Organization
 		if (name.equals("AD_Org_ID"))
 		{
 			m_AD_Org_ID = ((Integer) value).intValue();
-
+			
 			loadBPartner();
-			loadBPartner2 ();
 		}
 		//		Charge
 		else if (name.equals("C_Charge_ID") )
 		{
 			m_C_Charge_ID = value!=null? ((Integer) value).intValue() : 0;
-
+			
 			setAllocateButton();
 		}
 
-		//  BPartner1
-		if (e.getSource().equals(bpartnerSearch))
+		else if (name.equals("C_DocType_ID") )
+		{
+			m_C_DocType_ID = value!=null? ((Integer) value).intValue() : 0;
+			
+		}
+		else if (name.equals("Doc_AD_Org_ID"))//JPIERE-0026 - Start
+		{
+			m_Doc_AD_Org_ID = ((Integer) value).intValue();
+		}
+		else if (name.equals("JP_Org_Corporation_ID"))
+		{
+			m_JP_OrgInfo_Corporation_ID = ((Integer) value).intValue();
+			loadBPartner();
+		}//JPIERE-0026 - end
+
+		//  BPartner
+		if (e.getSource().equals(bpartnerSearch))//JPIERE-0026
 		{
 			bpartnerSearch.setValue(value);
 			m_C_BPartner_ID = ((Integer)value).intValue();
 			loadBPartner();
 		}
-		//  BPartner2
+		//JPIERE-0026  BPartner2
 		else if (e.getSource().equals(bpartnerSearch2))
 		{
 			bpartnerSearch2.setValue(value);
 			m_C_BPartner2_ID = ((Integer)value).intValue();
-			loadBPartner2 ();
+			loadBPartner ();
 		}
 		//	Currency
 		else if (name.equals("C_Currency_ID"))
 		{
 			m_C_Currency_ID = ((Integer)value).intValue();
 			loadBPartner();
-			loadBPartner2 ();
 		}
+		
 		//	Date for Multi-Currency
 		else if (name.equals("Date") && multiCurrency.isSelected())
-		{
 			loadBPartner();
-			loadBPartner2 ();
-		}
 	}   //  vetoableChange
-
+	
 	private void setAllocateButton() {
 			if (totalDiff.signum() == 0 ^ m_C_Charge_ID > 0 )
 			{
@@ -524,19 +727,20 @@ public class WAllocation extends Allocation
 	/**
 	 *  Load Business Partner Info
 	 *  - Payments
+	 *  - Invoices
 	 */
 	private void loadBPartner ()
 	{
 		checkBPartner();
-
+		
 		Vector<Vector<Object>> data = getPaymentData(multiCurrency.isSelected(), dateField.getValue(), paymentTable);
 		Vector<String> columnNames = getPaymentColumnNames(multiCurrency.isSelected());
-
+		
 		paymentTable.clear();
-
+		
 		//  Remove previous listeners
 		paymentTable.getModel().removeTableModelListener(this);
-
+		
 		//  Set Model
 		ListModelTable modelP = new ListModelTable(data);
 		modelP.addTableModelListener(this);
@@ -544,64 +748,53 @@ public class WAllocation extends Allocation
 		setPaymentColumnClass(paymentTable, multiCurrency.isSelected());
 		//
 
-		calculate(multiCurrency.isSelected());
-
-		//  Calculate Totals
-		calculate();
-
-		statusBar.getChildren().clear();
-	}   //  loadBPartner
-
-	/**
-	 *  Load Business Partner Info
-	 *  - Invoices
-	 */
-	private void loadBPartner2 ()
-	{
-		checkBPartner();
-
-		Vector<Vector<Object>> data = getInvoiceData(multiCurrency.isSelected(), dateField.getValue(), invoiceTable);
-		Vector<String> columnNames = getInvoiceColumnNames(multiCurrency.isSelected());
-
+		data = getInvoiceData(multiCurrency.isSelected(), dateField.getValue(), invoiceTable);
+		columnNames = getInvoiceColumnNames(multiCurrency.isSelected());
+		
 		invoiceTable.clear();
-
+		
 		//  Remove previous listeners
 		invoiceTable.getModel().removeTableModelListener(this);
-
+		
 		//  Set Model
 		ListModelTable modelI = new ListModelTable(data);
 		modelI.addTableModelListener(this);
 		invoiceTable.setData(modelI, columnNames);
 		setInvoiceColumnClass(invoiceTable, multiCurrency.isSelected());
 		//
-
+		
 		calculate(multiCurrency.isSelected());
-
+		
 		//  Calculate Totals
 		calculate();
-
+		
 		statusBar.getChildren().clear();
 	}   //  loadBPartner
-
+	
 	public void calculate()
 	{
 		allocDate = null;
-
+		
 		paymentInfo.setText(calculatePayment(paymentTable, multiCurrency.isSelected()));
 		invoiceInfo.setText(calculateInvoice(invoiceTable, multiCurrency.isSelected()));
 
 		//	Set AllocationDate
-		if (allocDate != null)
-			dateField.setValue(allocDate);
+		if (allocDate != null) {
+			if (! allocDate.equals(dateField.getValue())) {
+                Clients.showNotification(Msg.getMsg(Env.getCtx(), "AllocationDateUpdated"), Clients.NOTIFICATION_TYPE_INFO, dateField.getComponent(), "start_before", -1, false);       
+                dateField.setValue(allocDate);
+			}
+		}
+
 		//  Set Allocation Currency
 		allocCurrencyLabel.setText(currencyPick.getDisplay());
 		//  Difference
 		totalDiff = totalPay.subtract(totalInv);
-		differenceField.setText(format.format(totalDiff));
+		differenceField.setText(format.format(totalDiff));		
 
 		setAllocateButton();
 	}
-
+	
 	/**************************************************************************
 	 *  Save Data
 	 */
@@ -614,16 +807,16 @@ public class WAllocation extends Allocation
 		try
 		{
 			final MAllocationHdr[] allocation = new MAllocationHdr[1];
-			Trx.run(new TrxRunnable()
+			Trx.run(new TrxRunnable() 
 			{
 				public void run(String trxName)
 				{
 					statusBar.getChildren().clear();
 					allocation[0] = saveData(form.getWindowNo(), dateField.getValue(), paymentTable, invoiceTable, trxName);
-
+					
 				}
 			});
-
+			
 			return allocation[0];
 		}
 		catch (Exception e)
@@ -632,7 +825,7 @@ public class WAllocation extends Allocation
 			return null;
 		}
 	}   //  saveData
-
+	
 	/**
 	 * Called by org.adempiere.webui.panel.ADForm.openForm(int)
 	 * @return

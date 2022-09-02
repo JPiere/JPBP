@@ -13,6 +13,7 @@
  *****************************************************************************/
 package jpiere.base.plugin.webui.apps.form;
 
+
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,7 +28,6 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
-import org.compiere.model.MBPartner;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
@@ -55,13 +55,13 @@ public class Allocation
 	public int         m_C_Charge_ID = 0;
 	public int         m_C_DocType_ID = 0;
 	public int         	m_C_BPartner_ID = 0;
-	public int         	m_C_BPartner2_ID = 0;
+	public int         	m_C_BPartner2_ID = 0;//JPIERE-0026
 	private int         m_noInvoices = 0;
 	private int         m_noPayments = 0;
 	public BigDecimal	totalInv = Env.ZERO;
 	public BigDecimal 	totalPay = Env.ZERO;
 	public BigDecimal	totalDiff = Env.ZERO;
-
+	
 	public Timestamp allocDate = null;
 
 	//  Index	changed if multi-currency
@@ -69,32 +69,35 @@ public class Allocation
 	//
 	private int         i_open = 6;
 	private int         i_discount = 7;
-	private int         i_writeOff = 8;
+	private int         i_writeOff = 8; 
 	private int         i_applied = 9;
 	private int 		i_overUnder = 10;
 //	private int			i_multiplier = 10;
-
+	
 	public int         	m_AD_Org_ID = 0;
+	public int         	m_Doc_AD_Org_ID = 0;			//JPIERE-0026
+	public int				m_JP_OrgInfo_Corporation_ID = 0;//JPIERE-0026
 
-	private ArrayList<Integer>	m_bpartnerCheck = new ArrayList<Integer>();
+	private ArrayList<Integer>	m_bpartnerCheck = new ArrayList<Integer>(); 
 
 	public void dynInit() throws Exception
 	{
-		m_C_Currency_ID = Env.getContextAsInt(Env.getCtx(), "$C_Currency_ID");   //  default
+		m_C_Currency_ID = Env.getContextAsInt(Env.getCtx(), Env.C_CURRENCY_ID);   //  default
 		//
 		if (log.isLoggable(Level.INFO)) log.info("Currency=" + m_C_Currency_ID);
-
+		
 		m_AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());
 		m_C_DocType_ID= MDocType.getDocType("CMA");
-
+		
 	}
-
+	
 	/**
 	 *  Load Business Partner Info
 	 *  - Payments
+	 *  - Invoices
 	 */
 	public void checkBPartner()
-	{
+	{		
 		if (log.isLoggable(Level.CONFIG)) log.config("BPartner=" + m_C_BPartner_ID + ", Cur=" + m_C_Currency_ID);
 		//  Need to have both values
 		if (m_C_BPartner_ID == 0 || m_C_Currency_ID == 0)
@@ -109,42 +112,15 @@ public class Allocation
 				public void run()
 				{
 					MPayment.setIsAllocated (Env.getCtx(), m_C_BPartner_ID, null);
-					MInvoice.setIsPaid (Env.getCtx(), m_C_BPartner2_ID, null);
+					MInvoice.setIsPaid (Env.getCtx(), m_C_BPartner_ID, null);
 				}
 			}.start();
 			m_bpartnerCheck.add(key);
 		}
 	}
-
-	/**
-	 *  Load Business Partner Info
-	 *  - Invoices
-	 */
-	public void checkBPartner2()
-	{
-		if (log.isLoggable(Level.CONFIG)) log.config("BPartner=" + m_C_BPartner2_ID + ", Cur=" + m_C_Currency_ID);
-		//  Need to have both values
-		if (m_C_BPartner2_ID == 0 || m_C_Currency_ID == 0)
-			return;
-
-		//	Async BPartner Test
-		Integer key = Integer.valueOf(m_C_BPartner2_ID);
-		if (!m_bpartnerCheck.contains(key))
-		{
-			new Thread()
-			{
-				public void run()
-				{
-					MPayment.setIsAllocated (Env.getCtx(), m_C_BPartner_ID, null);
-					MInvoice.setIsPaid (Env.getCtx(), m_C_BPartner2_ID, null);
-				}
-			}.start();
-			m_bpartnerCheck.add(key);
-		}
-	}
-
+	
 	public Vector<Vector<Object>> getPaymentData(boolean isMultiCurrency, Object date, IMiniTable paymentTable)
-	{
+	{		
 		/********************************
 		 *  Load unallocated Payments
 		 *      1-TrxDate, 2-DocumentNo, (3-Currency, 4-PayAmt,)
@@ -153,23 +129,29 @@ public class Allocation
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT p.DateTrx,p.DocumentNo,p.C_Payment_ID,"  //  1..3
 			+ "c.ISO_Code,p.PayAmt,"                            //  4..5
-			+ "currencyConvert(p.PayAmt,p.C_Currency_ID,?,?,p.C_ConversionType_ID,p.AD_Client_ID,p.AD_Org_ID),"//  6   #1, #2
-			+ "currencyConvert(paymentAvailable(C_Payment_ID),p.C_Currency_ID,?,?,p.C_ConversionType_ID,p.AD_Client_ID,p.AD_Org_ID),"  //  7   #3, #4
-			+ "p.MultiplierAP "
+			+ "currencyConvertPayment(p.C_Payment_ID,?,null,?),"//  6   #1, #2
+			+ "currencyConvertPayment(p.C_Payment_ID,?,paymentAvailable(p.C_Payment_ID),?),"  //  7   #3, #4
+			+ "p.MultiplierAP, bp.Name, o.Name, cp.Name "	//JPIERE-0026
 			+ "FROM C_Payment_v p"		//	Corrected for AP/AR
 			+ " INNER JOIN C_Currency c ON (p.C_Currency_ID=c.C_Currency_ID) "
+			+ " INNER JOIN C_BPartner bp ON (p.C_BPartner_ID=bp.C_BPartner_ID) "	//JPIERE-0026
+			+ " INNER JOIN AD_Org o ON (p.AD_Org_ID=o.AD_Org_ID) "					//JPIERE-0026
+			+ " LEFT OUTER JOIN AD_OrgInfo oi ON (p.AD_Org_ID=oi.AD_Org_ID) "		//JPIERE-0026
+			+ " LEFT OUTER JOIN JP_Corporation cp ON (oi.JP_Corporation_ID=cp.JP_Corporation_ID) "//JPIERE-0026
 			+ "WHERE p.IsAllocated='N' AND p.Processed='Y'"
 			+ " AND p.C_Charge_ID IS NULL"		//	Prepayments OK
-			+ " AND p.C_BPartner_ID=?");                   		//      #5
+			+ " AND p.C_BPartner_ID in (?,?)");                   		//      #5 JPIERE-0026
 		if (!isMultiCurrency)
 			sql.append(" AND p.C_Currency_ID=?");				//      #6
 		if (m_AD_Org_ID != 0 )
 			sql.append(" AND p.AD_Org_ID=" + m_AD_Org_ID);
+		if (m_JP_OrgInfo_Corporation_ID != 0 )
+			sql.append(" AND oi.JP_Corporation_ID=" + m_JP_OrgInfo_Corporation_ID);
 		sql.append(" ORDER BY p.DateTrx,p.DocumentNo");
-
+		
 		// role security
 		sql = new StringBuilder( MRole.getDefault(Env.getCtx(), false).addAccessSQL( sql.toString(), "p", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO ) );
-
+		
 		if (log.isLoggable(Level.FINE)) log.fine("PaySQL=" + sql.toString());
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -181,8 +163,9 @@ public class Allocation
 			pstmt.setInt(3, m_C_Currency_ID);
 			pstmt.setTimestamp(4, (Timestamp)date);
 			pstmt.setInt(5, m_C_BPartner_ID);
+			pstmt.setInt(6, m_C_BPartner2_ID);	//JPIERE-0026
 			if (!isMultiCurrency)
-				pstmt.setInt(6, m_C_Currency_ID);
+				pstmt.setInt(7, m_C_Currency_ID);	//JPIERE-0026
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -203,6 +186,9 @@ public class Allocation
 				line.add(available);				//  4/6-ConvOpen/Available
 				line.add(Env.ZERO);					//  5/7-Payment
 //				line.add(rs.getBigDecimal(8));		//  6/8-Multiplier
+				line.add(rs.getString(9));					//  6/9-BPartner JPIERE-0026
+				line.add(rs.getString(10));					//  7/10-Org JPIERE-0026
+				line.add(rs.getString(11));					//  8/11-Corporation JPIERE-0026
 				//
 				data.add(line);
 			}
@@ -215,12 +201,12 @@ public class Allocation
 		{
 			DB.close(rs, pstmt);
 		}
-
+		
 		return data;
 	}
-
+	
 	public Vector<String> getPaymentColumnNames(boolean isMultiCurrency)
-	{
+	{	
 		//  Header Info
 		Vector<String> columnNames = new Vector<String>();
 		columnNames.add(Msg.getMsg(Env.getCtx(), "Select"));
@@ -235,10 +221,13 @@ public class Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "OpenAmt"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 //		columnNames.add(" ");	//	Multiplier
-
+		columnNames.add(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "AD_Org_ID"));	//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));//JPIERE-0026
+		
 		return columnNames;
 	}
-
+	
 	public void setPaymentColumnClass(IMiniTable paymentTable, boolean isMultiCurrency)
 	{
 		int i = 0;
@@ -254,55 +243,63 @@ public class Allocation
 		paymentTable.setColumnClass(i++, BigDecimal.class, true);       //  6-ConvOpen
 		paymentTable.setColumnClass(i++, BigDecimal.class, false);      //  7-Allocated
 //		paymentTable.setColumnClass(i++, BigDecimal.class, true);      	//  8-Multiplier
-
+		paymentTable.setColumnClass(i++, String.class, true);  	    //  8-BPartner Name JPIERE-0026
+		paymentTable.setColumnClass(i++, String.class, true);  	    //  9-Org Name JPIERE-0026
+		paymentTable.setColumnClass(i++, String.class, true);  	    // 10-Corporation Name JPIERE-0026
 		//
 		i_payment = isMultiCurrency ? 7 : 5;
-
+		
 
 		//  Table UI
 		paymentTable.autoSize();
 	}
-
+	
 	public Vector<Vector<Object>> getInvoiceData(boolean isMultiCurrency, Object date, IMiniTable invoiceTable)
 	{
 		/********************************
 		 *  Load unpaid Invoices
 		 *      1-TrxDate, 2-Value, (3-Currency, 4-InvAmt,)
 		 *      5-ConvAmt, 6-ConvOpen, 7-ConvDisc, 8-WriteOff, 9-Applied
-		 *
+		 * 
 		 SELECT i.DateInvoiced,i.DocumentNo,i.C_Invoice_ID,c.ISO_Code,
-		 i.GrandTotal*i.MultiplierAP "GrandTotal",
-		 currencyConvert(i.GrandTotal*i.MultiplierAP,i.C_Currency_ID,i.C_Currency_ID,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID) "GrandTotal $",
+		 i.GrandTotal*i.MultiplierAP "GrandTotal", 
+		 currencyConvert(i.GrandTotal*i.MultiplierAP,i.C_Currency_ID,i.C_Currency_ID,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID) "GrandTotal $", 
 		 invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID) "Open",
-		 currencyConvert(invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID),i.C_Currency_ID,i.C_Currency_ID,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.MultiplierAP "Open $",
-		 invoiceDiscount(i.C_Invoice_ID,SysDate,C_InvoicePaySchedule_ID) "Discount",
-		 currencyConvert(invoiceDiscount(i.C_Invoice_ID,SysDate,C_InvoicePaySchedule_ID),i.C_Currency_ID,i.C_Currency_ID,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.Multiplier*i.MultiplierAP "Discount $",
-		 i.MultiplierAP, i.Multiplier
-		 FROM C_Invoice_v i INNER JOIN C_Currency c ON (i.C_Currency_ID=c.C_Currency_ID)
+		 currencyConvert(invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID),i.C_Currency_ID,i.C_Currency_ID,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.MultiplierAP "Open $", 
+		 invoiceDiscount(i.C_Invoice_ID,getDate(),C_InvoicePaySchedule_ID) "Discount",
+		 currencyConvert(invoiceDiscount(i.C_Invoice_ID,getDate(),C_InvoicePaySchedule_ID),i.C_Currency_ID,i.C_Currency_ID,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.Multiplier*i.MultiplierAP "Discount $",
+		 i.MultiplierAP, i.Multiplier 
+		 FROM C_Invoice_v i INNER JOIN C_Currency c ON (i.C_Currency_ID=c.C_Currency_ID) 
 		 WHERE -- i.IsPaid='N' AND i.Processed='Y' AND i.C_BPartner_ID=1000001
 		 */
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT i.DateInvoiced,i.DocumentNo,i.C_Invoice_ID," //  1..3
 			+ "c.ISO_Code,i.GrandTotal*i.MultiplierAP, "                            //  4..5    Orig Currency
-			+ "currencyConvert(i.GrandTotal*i.MultiplierAP,i.C_Currency_ID,?,?,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID), " //  6   #1  Converted, #2 Date
-			+ "currencyConvert(invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID),i.C_Currency_ID,?,?,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.MultiplierAP, "  //  7   #3, #4  Converted Open
-			+ "currencyConvert(invoiceDiscount"                               //  8       AllowedDiscount
-			+ "(i.C_Invoice_ID,?,C_InvoicePaySchedule_ID),i.C_Currency_ID,?,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.Multiplier*i.MultiplierAP,"               //  #5, #6
-			+ "i.MultiplierAP "
+			+ "currencyConvertInvoice(i.C_Invoice_ID,?,i.GrandTotal*i.MultiplierAP,?), " //  6   #1  Converted, #2 Date
+			+ "currencyConvertInvoice(i.C_Invoice_ID,?,invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID),?)*i.MultiplierAP, "  //  7   #3, #4  Converted Open
+			+ "currencyConvertInvoice(i.C_Invoice_ID"                               //  8       AllowedDiscount
+			+ ",?,invoiceDiscount(i.C_Invoice_ID,?,C_InvoicePaySchedule_ID),i.DateInvoiced)*i.Multiplier*i.MultiplierAP,"               //  #5, #6
+			+ "i.MultiplierAP, bp.Name, o.Name, cp.Name "	//JPIERE-0026
 			+ "FROM C_Invoice_v i"		//  corrected for CM/Split
 			+ " INNER JOIN C_Currency c ON (i.C_Currency_ID=c.C_Currency_ID) "
+			+ " INNER JOIN C_BPartner bp ON (i.C_BPartner_ID=bp.C_BPartner_ID) "	//JPIERE-0026
+			+ " INNER JOIN AD_Org o ON (i.AD_Org_ID=o.AD_Org_ID) "					//JPIERE-0026
+			+ " LEFT OUTER JOIN AD_OrgInfo oi ON (i.AD_Org_ID=oi.AD_Org_ID) "		//JPIERE-0026
+			+ " LEFT OUTER JOIN JP_Corporation cp ON (oi.JP_Corporation_ID=cp.JP_Corporation_ID) "//JPIERE-0026
 			+ "WHERE i.IsPaid='N' AND i.Processed='Y'"
-			+ " AND i.C_BPartner_ID=?");                                            //  #7
+			+ " AND i.C_BPartner_ID in (?,?)");                    //  #7 JPIERE-0026
 		if (!isMultiCurrency)
 			sql.append(" AND i.C_Currency_ID=?");                                   //  #8
-		if (m_AD_Org_ID != 0 )
+		if (m_AD_Org_ID != 0 ) 
 			sql.append(" AND i.AD_Org_ID=" + m_AD_Org_ID);
+		if (m_JP_OrgInfo_Corporation_ID != 0 )
+			sql.append(" AND oi.JP_Corporation_ID=" + m_JP_OrgInfo_Corporation_ID);
 		sql.append(" ORDER BY i.DateInvoiced, i.DocumentNo");
 		if (log.isLoggable(Level.FINE)) log.fine("InvSQL=" + sql.toString());
-
+		
 		// role security
 		sql = new StringBuilder( MRole.getDefault(Env.getCtx(), false).addAccessSQL( sql.toString(), "i", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO ) );
-
+		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -312,11 +309,12 @@ public class Allocation
 			pstmt.setTimestamp(2, (Timestamp)date);
 			pstmt.setInt(3, m_C_Currency_ID);
 			pstmt.setTimestamp(4, (Timestamp)date);
-			pstmt.setTimestamp(5, (Timestamp)date);
-			pstmt.setInt(6, m_C_Currency_ID);
-			pstmt.setInt(7, m_C_BPartner2_ID);
+			pstmt.setInt(5, m_C_Currency_ID);
+			pstmt.setTimestamp(6, (Timestamp)date);
+			pstmt.setInt(7, m_C_BPartner_ID);
+			pstmt.setInt(8, m_C_BPartner2_ID);//JPIERE-0026
 			if (!isMultiCurrency)
-				pstmt.setInt(8, m_C_Currency_ID);
+				pstmt.setInt(9, m_C_Currency_ID);//JPIERE-0026
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -342,8 +340,11 @@ public class Allocation
 				line.add(Env.ZERO);      			//  6/8-WriteOff
 				line.add(Env.ZERO);					// 7/9-Applied
 				line.add(open);				    //  8/10-OverUnder
-
 //				line.add(rs.getBigDecimal(9));		//	8/10-Multiplier
+				line.add(rs.getString(10));			//  9/10 BPartner Name JPIERE-0026
+				line.add(rs.getString(11));			//  10/11 Org Name JPIERE-0026
+				line.add(rs.getString(12));			//  11/12 Corporation JPIERE-0026
+
 				//	Add when open <> 0 (i.e. not if no conversion rate)
 				if (Env.ZERO.compareTo(open) != 0)
 					data.add(line);
@@ -357,7 +358,7 @@ public class Allocation
 		{
 			DB.close(rs, pstmt);
 		}
-
+		
 		return data;
 	}
 
@@ -380,10 +381,13 @@ public class Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "OverUnderAmt"));
 //		columnNames.add(" ");	//	Multiplier
-
+		columnNames.add(Msg.getElement(Env.getCtx(), "C_BPartner_ID"));//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "AD_Org_ID"));//JPIERE-0026
+		columnNames.add(Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID"));//JPIERE-0026
+		
 		return columnNames;
 	}
-
+	
 	public void setInvoiceColumnClass(IMiniTable invoiceTable, boolean isMultiCurrency)
 	{
 		int i = 0;
@@ -402,10 +406,13 @@ public class Allocation
 		invoiceTable.setColumnClass(i++, BigDecimal.class, false);      //  9-Conv OverUnder
 		invoiceTable.setColumnClass(i++, BigDecimal.class, true);		//	10-Conv Applied
 //		invoiceTable.setColumnClass(i++, BigDecimal.class, true);      	//  10-Multiplier
+		invoiceTable.setColumnClass(i++, String.class, true);		//	11-BPartner Name JPIERE-0026
+		invoiceTable.setColumnClass(i++, String.class, true);		//	12-Org Name JPIERE-0026
+		invoiceTable.setColumnClass(i++, String.class, true);		//	13-Corporation Name JPIERE-0026
 		//  Table UI
 		invoiceTable.autoSize();
 	}
-
+	
 	public void calculate(boolean isMultiCurrency)
 	{
 		i_open = isMultiCurrency ? 6 : 4;
@@ -415,7 +422,7 @@ public class Allocation
 		i_overUnder = isMultiCurrency ? 10 : 8;
 //		i_multiplier = isMultiCurrency ? 10 : 8;
 	}   //  loadBPartner
-
+	
 	public String writeOff(int row, int col, boolean isInvoice, IMiniTable payment, IMiniTable invoice, boolean isAutoWriteOff)
 	{
 		String msg = "";
@@ -425,16 +432,16 @@ public class Allocation
 		if (m_calculating)  //  Avoid recursive calls
 			return msg;
 		m_calculating = true;
-
-		if (log.isLoggable(Level.CONFIG)) log.config("Row=" + row
+		
+		if (log.isLoggable(Level.CONFIG)) log.config("Row=" + row 
 			+ ", Col=" + col + ", InvoiceTable=" + isInvoice);
-
+        
 		//  Payments
 		if (!isInvoice)
 		{
 			BigDecimal open = (BigDecimal)payment.getValueAt(row, i_open);
 			BigDecimal applied = (BigDecimal)payment.getValueAt(row, i_payment);
-
+			
 			if (col == 0)
 			{
 				// selection of payment row
@@ -444,28 +451,28 @@ public class Allocation
 					if (totalDiff.abs().compareTo(applied.abs()) < 0			// where less is available to allocate than open
 							&& totalDiff.signum() == -applied.signum() )    	// and the available amount has the opposite sign
 						applied = totalDiff.negate();						// reduce the amount applied to what's available
-
+					
 				}
 				else    //  de-selected
 					applied = Env.ZERO;
 			}
-
-
+			
+			
 			if (col == i_payment)
 			{
-				if (! MSysConfig.getBooleanValue(MSysConfig.ALLOW_APPLY_PAYMENT_TO_CREDITMEMO, false, Env.getAD_Client_ID(Env.getCtx()))
+				if (! MSysConfig.getBooleanValue(MSysConfig.ALLOW_APPLY_PAYMENT_TO_CREDITMEMO, false, Env.getAD_Client_ID(Env.getCtx())) 
 						&& open.signum() > 0 && applied.signum() == -open.signum() )
 					applied = applied.negate();
 				if (! MSysConfig.getBooleanValue(MSysConfig.ALLOW_OVER_APPLIED_PAYMENT, false, Env.getAD_Client_ID(Env.getCtx())))
 					if ( open.abs().compareTo( applied.abs() ) < 0 )
-							applied = open;
+						applied = open;
 			}
-
+			
 			payment.setValueAt(applied, row, i_payment);
 		}
 
 		//  Invoice
-		else
+		else 
 		{
 			boolean selected = ((Boolean) invoice.getValueAt(row, 0)).booleanValue();
 			BigDecimal open = (BigDecimal)invoice.getValueAt(row, i_open);
@@ -474,7 +481,7 @@ public class Allocation
 			BigDecimal writeOff = (BigDecimal) invoice.getValueAt(row, i_writeOff);
 			BigDecimal overUnder = (BigDecimal) invoice.getValueAt(row, i_overUnder);
 			int openSign = open.signum();
-
+			
 			if (col == 0)  //selection
 			{
 				//  selected - set applied amount
@@ -502,11 +509,11 @@ public class Allocation
 					overUnder = Env.ZERO;
 				}
 			}
-
+			
 			// check entered values are sensible and possibly auto write-off
 			if ( selected && col != 0 )
 			{
-
+				
 				// values should have same sign as open except possibly over/under
 				if ( discount.signum() == -openSign )
 					discount = discount.negate();
@@ -514,52 +521,52 @@ public class Allocation
 					writeOff = writeOff.negate();
 				if ( applied.signum() == -openSign )
 					applied = applied.negate();
-
+				
 				// discount and write-off must be less than open amount
 				if ( discount.abs().compareTo(open.abs()) > 0)
 					discount = open;
 				if ( writeOff.abs().compareTo(open.abs()) > 0)
 					writeOff = open;
-
-
+				
+				
 				/*
 				 * Two rules to maintain:
 				 *
-				 * 1) |writeOff + discount| < |open|
+				 * 1) |writeOff + discount| < |open| 
 				 * 2) discount + writeOff + overUnder + applied = 0
 				 *
 				 *   As only one column is edited at a time and the initial position was one of compliance
-				 *   with the rules, we only need to redistribute the increase/decrease in the edited column to
+				 *   with the rules, we only need to redistribute the increase/decrease in the edited column to 
 				 *   the others.
 				*/
 				BigDecimal newTotal = discount.add(writeOff).add(applied).add(overUnder);  // all have same sign
 				BigDecimal difference = newTotal.subtract(open);
-
+				
 				// rule 2
 				BigDecimal diffWOD = writeOff.add(discount).subtract(open);
-
+										
 				if ( diffWOD.signum() == open.signum() )  // writeOff and discount are too large
 				{
 					if ( col == i_discount )       // then edit writeoff
 					{
 						writeOff = writeOff.subtract(diffWOD);
-					}
+					} 
 					else                            // col = i_writeoff
 					{
 						discount = discount.subtract(diffWOD);
 					}
-
+					
 					difference = difference.subtract(diffWOD);
 				}
-
+				
 				// rule 1
 				if ( col == i_applied )
 					overUnder = overUnder.subtract(difference);
 				else
 					applied = applied.subtract(difference);
-
+				
 			}
-
+			
 			//	Warning if write Off > 30%
 			if (isAutoWriteOff && writeOff.doubleValue()/open.doubleValue() > .30)
 				msg = "AllocationWriteOffWarn";
@@ -571,10 +578,10 @@ public class Allocation
 		}
 
 		m_calculating = false;
-
+		
 		return msg;
 	}
-
+	
 	/**
 	 *  Calculate Allocation info
 	 */
@@ -602,9 +609,9 @@ public class Allocation
 		return String.valueOf(m_noPayments) + " - "
 			+ Msg.getMsg(Env.getCtx(), "Sum") + "  " + format.format(totalPay) + " ";
 	}
-
+	
 	public String calculateInvoice(IMiniTable invoice, boolean isMultiCurrency)
-	{
+	{		
 		//  Invoices
 		totalInv = Env.ZERO;
 		int rows = invoice.getRowCount();
@@ -626,7 +633,7 @@ public class Allocation
 		return String.valueOf(m_noInvoices) + " - "
 			+ Msg.getMsg(Env.getCtx(), "Sum") + "  " + format.format(totalInv) + " ";
 	}
-
+	
 	/**************************************************************************
 	 *  Save Data
 	 */
@@ -637,9 +644,8 @@ public class Allocation
 
 		//  fixed fields
 		int AD_Client_ID = Env.getContextAsInt(Env.getCtx(), m_WindowNo, "AD_Client_ID");
-		int AD_Org_ID = Env.getContextAsInt(Env.getCtx(), m_WindowNo, "AD_Org_ID");
+		int AD_Org_ID = m_Doc_AD_Org_ID;//JPIERE-0026
 		int C_BPartner_ID = m_C_BPartner_ID;
-		int C_BPartner2_ID = m_C_BPartner2_ID;
 		int C_Order_ID = 0;
 		int C_CashLine_ID = 0;
 		Timestamp DateTrx = (Timestamp)date;
@@ -674,7 +680,7 @@ public class Allocation
 				//
 				paymentAppliedAmt = paymentAppliedAmt.add(PaymentAmt);
 				//
-				if (log.isLoggable(Level.FINE)) log.fine("C_Payment_ID=" + C_Payment_ID
+				if (log.isLoggable(Level.FINE)) log.fine("C_Payment_ID=" + C_Payment_ID 
 					+ " - PaymentAmt=" + PaymentAmt); // + " * " + Multiplier + " = " + PaymentAmtAbs);
 			}
 		}
@@ -682,10 +688,10 @@ public class Allocation
 
 		//  Invoices - Loop and generate allocations
 		int iRows = invoice.getRowCount();
-
+		
 		//	Create Allocation
 		MAllocationHdr alloc = new MAllocationHdr (Env.getCtx(), true,	//	manual
-			DateTrx, C_Currency_ID, Env.getContext(Env.getCtx(), "#AD_User_Name"), trxName);
+			DateTrx, C_Currency_ID, Env.getContext(Env.getCtx(), Env.AD_USER_NAME), trxName);
 		alloc.setAD_Org_ID(AD_Org_ID);
 		alloc.setC_DocType_ID(m_C_DocType_ID);
 		alloc.setDescription(alloc.getDescriptionForManualAllocation(m_C_BPartner_ID, trxName));
@@ -707,10 +713,10 @@ public class Allocation
 				//	OverUnderAmt needs to be in Allocation Currency
 				BigDecimal OverUnderAmt = ((BigDecimal)invoice.getValueAt(i, i_open))
 					.subtract(AppliedAmt).subtract(DiscountAmt).subtract(WriteOffAmt);
-
+				
 				if (log.isLoggable(Level.CONFIG)) log.config("Invoice #" + i + " - AppliedAmt=" + AppliedAmt);// + " -> " + AppliedAbs);
 				//  loop through all payments until invoice applied
-
+				
 				for (int j = 0; j < paymentList.size() && AppliedAmt.signum() != 0; j++)
 				{
 					int C_Payment_ID = ((Integer)paymentList.get(j)).intValue();
@@ -718,15 +724,15 @@ public class Allocation
 					if (PaymentAmt.signum() == AppliedAmt.signum())	// only match same sign (otherwise appliedAmt increases)
 					{												// and not zero (appliedAmt was checked earlier)
 						if (log.isLoggable(Level.CONFIG)) log.config(".. with payment #" + j + ", Amt=" + PaymentAmt);
-
+						
 						BigDecimal amount = AppliedAmt;
 						if (amount.abs().compareTo(PaymentAmt.abs()) > 0)  // if there's more open on the invoice
 							amount = PaymentAmt;							// than left in the payment
-
+						
 						//	Allocation Line
-						MAllocationLine aLine = new MAllocationLine (alloc, amount,
+						MAllocationLine aLine = new MAllocationLine (alloc, amount, 
 							DiscountAmt, WriteOffAmt, OverUnderAmt);
-						aLine.setDocInfo(C_BPartner_ID, C_Order_ID, C_Invoice_ID);
+						aLine.setDocInfo(getC_BPartner_ID(C_Invoice_ID, C_Payment_ID), C_Order_ID, C_Invoice_ID);//JPIERE-0026
 						aLine.setPaymentInfo(C_Payment_ID, C_CashLine_ID);
 						aLine.saveEx();
 
@@ -740,16 +746,16 @@ public class Allocation
 						amountList.set(j, PaymentAmt);  //  update
 					}	//	for all applied amounts
 				}	//	loop through payments for invoice
-
+				
 				if ( AppliedAmt.signum() == 0 && DiscountAmt.signum() == 0 && WriteOffAmt.signum() == 0)
 					continue;
 				else {			// remainder will need to match against other invoices
 					int C_Payment_ID = 0;
-
+					
 					//	Allocation Line
-					MAllocationLine aLine = new MAllocationLine (alloc, AppliedAmt,
+					MAllocationLine aLine = new MAllocationLine (alloc, AppliedAmt, 
 						DiscountAmt, WriteOffAmt, OverUnderAmt);
-					aLine.setDocInfo(C_BPartner2_ID, C_Order_ID, C_Invoice_ID);
+					aLine.setDocInfo(getC_BPartner_ID(C_Invoice_ID, C_Payment_ID), C_Order_ID, C_Invoice_ID);//JPIERE-0026
 					aLine.setPaymentInfo(C_Payment_ID, C_CashLine_ID);
 					aLine.saveEx();
 					if (log.isLoggable(Level.FINE)) log.fine("Allocation Amount=" + AppliedAmt);
@@ -764,25 +770,25 @@ public class Allocation
 			if ( payAmt.signum() == 0 )
 					continue;
 			int C_Payment_ID = ((Integer)paymentList.get(i)).intValue();
-			if (log.isLoggable(Level.FINE)) log.fine("Payment=" + C_Payment_ID
+			if (log.isLoggable(Level.FINE)) log.fine("Payment=" + C_Payment_ID  
 					+ ", Amount=" + payAmt);
 
 			//	Allocation Line
-			MAllocationLine aLine = new MAllocationLine (alloc, payAmt,
+			MAllocationLine aLine = new MAllocationLine (alloc, payAmt, 
 				Env.ZERO, Env.ZERO, Env.ZERO);
-			aLine.setDocInfo(C_BPartner_ID, 0, 0);
+			aLine.setDocInfo(getC_BPartner_ID(0, C_Payment_ID), 0, 0);//JPIERE-0026
 			aLine.setPaymentInfo(C_Payment_ID, 0);
 			aLine.saveEx();
 			unmatchedApplied = unmatchedApplied.subtract(payAmt);
-		}
-
+		}		
+		
 		// check for charge amount
 		if ( m_C_Charge_ID > 0 && unmatchedApplied.compareTo(Env.ZERO) != 0 )
 		{
 			BigDecimal chargeAmt = totalDiff;
-
+	
 		//	Allocation Line
-			MAllocationLine aLine = new MAllocationLine (alloc, chargeAmt.negate(),
+			MAllocationLine aLine = new MAllocationLine (alloc, chargeAmt.negate(), 
 				Env.ZERO, Env.ZERO, Env.ZERO);
 			aLine.setC_Charge_ID(m_C_Charge_ID);
 			aLine.setC_BPartner_ID(m_C_BPartner_ID);
@@ -791,8 +797,8 @@ public class Allocation
 				throw new AdempiereException(msg.toString());
 			}
 			unmatchedApplied = unmatchedApplied.add(chargeAmt);
-		}
-
+		}	
+		
 		if ( unmatchedApplied.signum() != 0 )
 			throw new AdempiereException("Allocation not balanced -- out by " + unmatchedApplied);
 
@@ -803,7 +809,7 @@ public class Allocation
 				throw new AdempiereException("Cannot complete allocation: " + alloc.getProcessMsg());
 			alloc.saveEx();
 		}
-
+		
 		//  Test/Set IsPaid for Invoice - requires that allocation is posted
 		for (int i = 0; i < iRows; i++)
 		{
@@ -833,15 +839,29 @@ public class Allocation
 			MPayment pay = new MPayment (Env.getCtx(), C_Payment_ID, trxName);
 			if (pay.testAllocation())
 				pay.saveEx();
-			if (log.isLoggable(Level.CONFIG)) log.config("Payment #" + i + (pay.isAllocated() ? " not" : " is")
+			if (log.isLoggable(Level.CONFIG)) log.config("Payment #" + i + (pay.isAllocated() ? " not" : " is") 
 					+ " fully allocated");
 		}
-		MBPartner bpartner = new MBPartner(Env.getCtx(), m_C_BPartner_ID, trxName);
-		bpartner.setTotalOpenBalance();
-		bpartner.saveEx();
 		paymentList.clear();
 		amountList.clear();
-
+		
 		return alloc;
 	}   //  saveData
+	
+	private int getC_BPartner_ID(int C_Invoice_ID, int C_Payment_ID)
+	{
+		int C_BPartner_ID = 0;
+		
+		if(C_Payment_ID != 0) { //Payment first
+			C_BPartner_ID = new MPayment(Env.getCtx(),C_Payment_ID, null).getC_BPartner_ID();	
+		}else if(C_Invoice_ID != 0){
+			C_BPartner_ID = new MInvoice(Env.getCtx(),C_Invoice_ID, null).getC_BPartner_ID();	
+		}else {
+		
+			C_BPartner_ID = (m_C_BPartner_ID == 0 ? m_C_BPartner2_ID :m_C_BPartner_ID);
+		}
+		
+		return C_BPartner_ID;
+	}
 }
+
