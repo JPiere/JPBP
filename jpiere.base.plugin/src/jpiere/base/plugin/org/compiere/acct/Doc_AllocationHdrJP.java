@@ -1995,7 +1995,7 @@ public class Doc_AllocationHdrJP extends Doc
 			return ;
 		
 		
-		if(payment != null && MSysConfig.getBooleanValue("JP_APPLY_PAYMENT_RATE_TO_INVOICE", false, getAD_Client_ID()))
+		if(payment != null && MSysConfig.getBooleanValue("JP_APPLY_PAYMENT_RATE_TO_INVOICE", true, getAD_Client_ID()))
 		{
 			setPaymentCurrencyRate(docLine, payment);
 			return ;
