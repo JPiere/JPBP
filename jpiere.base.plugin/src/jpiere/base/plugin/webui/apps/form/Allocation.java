@@ -705,12 +705,15 @@ public class Allocation
 		int C_Order_ID = 0;
 		int C_CashLine_ID = 0;
 		Timestamp DateTrx = (Timestamp)date;
+		if(DateTrx == null)
+			DateTrx = Env.getContextAsDate(Env.getCtx(),"#Date");
 		int C_Currency_ID = m_C_Currency_ID;	//	the allocation currency
 		//
 		if (AD_Org_ID == 0)
 		{
 			//ADialog.error(m_WindowNo, this, "Org0NotAllowed", null);
-			throw new AdempiereException("@Org0NotAllowed@");
+			String msg = Msg.getElement(Env.getCtx(),"AD_OrgDoc_ID") + " : " + Msg.getMsg(Env.getCtx(),"Org0NotAllowed");
+			throw new AdempiereException(msg);
 		}
 		//
 		if (log.isLoggable(Level.CONFIG)) log.config("Client=" + AD_Client_ID + ", Org=" + AD_Org_ID

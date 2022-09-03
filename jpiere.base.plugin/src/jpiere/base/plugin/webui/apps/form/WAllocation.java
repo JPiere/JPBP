@@ -684,7 +684,10 @@ public class WAllocation extends Allocation
 			{
 				m_JP_OrgInfo_Corporation_ID = 0;
 				orgCorporationSearch.setValue(null);
-				Clients.showNotification("組織が入力されたのでグループ会社を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false); //TODO
+				
+				//Since the {0} has been entered, the {1} has been done blank.
+				Object[] objs =new Object[]{Msg.getElement(Env.getCtx(), "AD_Org_ID"),Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID")};
+				Clients.showNotification(Msg.getMsg(Env.getCtx(),"JP_Allocation_UpdateToBlank",objs), Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false);
 			}
 			loadBPartner();
 		}else if (name.equals("AD_Org2_ID"))//JPIERE-0026
@@ -694,7 +697,10 @@ public class WAllocation extends Allocation
 			{
 				m_JP_OrgInfo_Corporation_ID = 0;
 				orgCorporationSearch.setValue(null);
-				Clients.showNotification("組織が入力されたのでグループ会社を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false); //TODO
+				
+				//Since the {0} has been entered, the {1} has been done blank.
+				Object[] objs =new Object[]{Msg.getElement(Env.getCtx(), "AD_Org_ID"),Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID")};
+				Clients.showNotification(Msg.getMsg(Env.getCtx(),"JP_Allocation_UpdateToBlank",objs), Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false);
 			}
 			loadBPartner();
 		}else if (name.equals("JP_Org_Corporation_ID")){//JPIERE-0026
@@ -706,7 +712,10 @@ public class WAllocation extends Allocation
 				organizationPick.setValue(null);
 				m_AD_Org2_ID = 0;
 				organizationPick2.setValue(null);
-				Clients.showNotification("グループ会社が入力されたので組織を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false); //TODO
+				
+				//Since the {0} has been entered, the {1} has been done blank.
+				Object[] objs =new Object[]{Msg.getElement(Env.getCtx(), "JP_OrgInfo_Corporation_ID"),Msg.getElement(Env.getCtx(), "AD_Org_ID")};
+				Clients.showNotification(Msg.getMsg(Env.getCtx(),"JP_Allocation_UpdateToBlank",objs), Clients.NOTIFICATION_TYPE_INFO, orgCorporationSearch.getComponent(), "start_before", -1, false);
 			}
 			loadBPartner();
 		}
@@ -730,17 +739,14 @@ public class WAllocation extends Allocation
 			{
 				if(value == null)
 				{
-					Clients.showNotification("空欄はダメですよ！", Clients.NOTIFICATION_TYPE_ERROR, docOrganizationPick.getComponent(), "start_before", -1, false); //TODO
+					//{0} field  is mandatory.
+					Object[] objs =new Object[]{Msg.getElement(Env.getCtx(), "AD_OrgDoc_ID")};
+					Clients.showNotification(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs), Clients.NOTIFICATION_TYPE_ERROR, docOrganizationPick.getComponent(), "start_before", -1, false);
 				}else {
-					Clients.showNotification("*はダメですよ！", Clients.NOTIFICATION_TYPE_ERROR, docOrganizationPick.getComponent(), "start_before", -1, false); //TODO
+					String msg = Msg.getMsg(Env.getCtx(), "Invalid") + Msg.getElement(Env.getCtx(), "AD_OrgDoc_ID") +" = * ";
+					Clients.showNotification(msg, Clients.NOTIFICATION_TYPE_ERROR, docOrganizationPick.getComponent(), "start_before", -1, false);
 				}
 				
-//				Object obj =  e.getSource();
-//				if(obj instanceof WEditor)
-//				{
-//					WEditor editor = (WEditor)obj;
-//					throw new WrongValueException(editor.getComponent(), Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "AD_OrgDoc_ID"));
-//				}
 			}
 			
 		}else if (name.equals("C_BPartner_ID")){
@@ -750,7 +756,10 @@ public class WAllocation extends Allocation
 			{
 				m_JP_Corporation_ID = 0;
 				corporationSearch.setValue(null);
-				Clients.showNotification("取引先マスタが入力されたのでグループ法人を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false); //TODO
+				
+				//Since the {0} has been entered, the {1} has been done blank.
+				Object[] objs =new Object[]{Msg.getElement(Env.getCtx(), "C_BPartner_ID"),Msg.getElement(Env.getCtx(), "JP_Corporation_ID")};
+				Clients.showNotification(Msg.getMsg(Env.getCtx(),"JP_Allocation_UpdateToBlank",objs), Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false);
 			}
 			loadBPartner();
 		}
@@ -761,7 +770,10 @@ public class WAllocation extends Allocation
 			{
 				m_JP_Corporation_ID = 0;
 				corporationSearch.setValue(null);
-				Clients.showNotification("取引先マスタが入力されたのでグループ法人を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false); //TODO
+				
+				//Since the {0} has been entered, the {1} has been done blank.
+				Object[] objs =new Object[]{Msg.getElement(Env.getCtx(), "C_BPartner_ID"),Msg.getElement(Env.getCtx(), "JP_Corporation_ID")};
+				Clients.showNotification(Msg.getMsg(Env.getCtx(),"JP_Allocation_UpdateToBlank",objs), Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false);
 			}
 			loadBPartner ();
 		}else if (name.equals("JP_Corporation_ID")){//JPIERE-0026
@@ -773,7 +785,10 @@ public class WAllocation extends Allocation
 				bpartnerSearch.setValue(null);
 				m_C_BPartner2_ID = 0;
 				bpartnerSearch2.setValue(null);
-				Clients.showNotification("法人マスタが入力されたので取引先を空欄にしました。", Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false); //TODO
+				
+				//Since the {0} has been entered, the {1} has been done blank.
+				Object[] objs =new Object[]{Msg.getElement(Env.getCtx(), "JP_Corporation_ID"),Msg.getElement(Env.getCtx(), "C_BPartner_ID")};
+				Clients.showNotification(Msg.getMsg(Env.getCtx(),"JP_Allocation_UpdateToBlank",objs), Clients.NOTIFICATION_TYPE_INFO, corporationSearch.getComponent(), "start_before", -1, false);
 			}
 			loadBPartner();
 		//	Currency
@@ -796,6 +811,15 @@ public class WAllocation extends Allocation
 		//	Date for Multi-Currency
 		else if (name.equals("Date") && multiCurrency.isSelected())
 			loadBPartner();
+		else if (name.equals("Date")){
+			
+			if(value == null)
+			{	
+				//If you blank the Document Date, Allocation will be created logined date.
+				Clients.showNotification(Msg.getMsg(Env.getCtx(), "JP_Allocation_DocDate_Blank"), Clients.NOTIFICATION_TYPE_INFO, dateField.getComponent(), "start_before", -1, false);
+			}
+			
+		}
 	}   //  vetoableChange
 	
 	private void setAllocateButton() {
@@ -861,8 +885,11 @@ public class WAllocation extends Allocation
 		
 		statusBar.getChildren().clear();
 		
-		if(m_C_BPartner_ID == 0 && m_C_BPartner2_ID == 0 && m_JP_Corporation_ID == 0)//TODO
-			Clients.showNotification("取引先か法人マスタのどちらかを入力して下さい", Clients.NOTIFICATION_TYPE_WARNING, bpartnerSearch.getComponent(), "start_before", -1, false); //TODO
+		if(m_C_BPartner_ID == 0 && m_C_BPartner2_ID == 0 && m_JP_Corporation_ID == 0)
+		{
+			//Please Enter Business Partner or Corporation Master.
+			Clients.showNotification(Msg.getMsg(Env.getCtx(), "JP_Allocation_BPorCorp"), Clients.NOTIFICATION_TYPE_WARNING, bpartnerSearch.getComponent(), "start_before", -1, false); 
+		}
 		
 	}   //  loadBPartner
 	
