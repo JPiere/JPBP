@@ -73,6 +73,8 @@ public class Allocation
 	private int         i_applied = 9;
 	private int 		i_overUnder = 10;
 //	private int			i_multiplier = 10;
+	private int		i_Payment_OrgInfoCorp = 0;			//JPIERE-0026
+	private int		i_Invoice_OrgInfoCorp = 0;			//JPIERE-0026
 	
 	public int         	m_AD_Org_ID = 0;
 	public int				m_AD_Org2_ID = 0;				//JPIERE-0026
@@ -277,7 +279,7 @@ public class Allocation
 		paymentTable.setColumnClass(i++, String.class, true);  	    // 11-OrgInfo Corporation Name JPIERE-0026
 		//
 		i_payment = isMultiCurrency ? 7 : 5;
-		
+		i_Payment_OrgInfoCorp = isMultiCurrency ? 11 : 9;//JPIERE-0026
 
 		//  Table UI
 		paymentTable.autoSize();
@@ -467,6 +469,8 @@ public class Allocation
 		invoiceTable.setColumnClass(i++, String.class, true);			//	14-Org Info Corporation Name JPIERE-0026
 		//  Table UI
 		invoiceTable.autoSize();
+		
+		i_Invoice_OrgInfoCorp = isMultiCurrency ? 14 : 12;//JPIERE-0026
 	}
 	
 	public void calculate(boolean isMultiCurrency)
@@ -701,6 +705,8 @@ public class Allocation
 		//  fixed fields
 		int AD_Client_ID = Env.getContextAsInt(Env.getCtx(), m_WindowNo, "AD_Client_ID");
 		int AD_Org_ID = m_Doc_AD_Org_ID;//JPIERE-0026
+		String orgInfoCorporation = null;//JPIERE-0026
+		int i_CheckOrgInfoCorporationDiff = 0;//JPIERE-0026
 		int C_BPartner_ID = m_C_BPartner_ID;
 		int C_Order_ID = 0;
 		int C_CashLine_ID = 0;
@@ -741,12 +747,38 @@ public class Allocation
 				//
 				if (log.isLoggable(Level.FINE)) log.fine("C_Payment_ID=" + C_Payment_ID 
 					+ " - PaymentAmt=" + PaymentAmt); // + " * " + Multiplier + " = " + PaymentAmtAbs);
+						
+				//JPIERE-0026 - Check Corporation
+				String corporation = (String)payment.getValueAt(i, i_Payment_OrgInfoCorp);
+				if(i_CheckOrgInfoCorporationDiff == 0)
+				{
+					orgInfoCorporation = corporation;
+				}else {
+					
+					if(Util.isEmpty(orgInfoCorporation) != Util.isEmpty(corporation) ) 
+					{
+						//Allocation between different Group Corporation is forbidden.
+						String msg =Msg.getMsg(Env.getCtx(),"JP_Allocation_DiffCorp");
+						throw new AdempiereException(msg);
+						
+					}else if(!Util.isEmpty(orgInfoCorporation) && !orgInfoCorporation.equals(corporation)){
+						
+						//Allocation between different Group Corporation is forbidden.
+						String msg =Msg.getMsg(Env.getCtx(),"JP_Allocation_DiffCorp");
+						throw new AdempiereException(msg);
+					}
+				}
+				i_CheckOrgInfoCorporationDiff++;
+				//JPIERE - 0026		
 			}
+			
+
 		}
 		if (log.isLoggable(Level.CONFIG)) log.config("Number of Payments=" + paymentList.size() + " - Total=" + paymentAppliedAmt);
 
 		//  Invoices - Loop and generate allocations
 		int iRows = invoice.getRowCount();
+		i_CheckOrgInfoCorporationDiff = 0;//JPIERE-0026 - Check Corporation
 		
 		//	Create Allocation
 		MAllocationHdr alloc = new MAllocationHdr (Env.getCtx(), true,	//	manual
@@ -805,6 +837,29 @@ public class Allocation
 						amountList.set(j, PaymentAmt);  //  update
 					}	//	for all applied amounts
 				}	//	loop through payments for invoice
+			
+				//JPIERE-0026 - Check Corporation
+				String corporation = (String)invoice.getValueAt(i, i_Invoice_OrgInfoCorp);
+				if(i_CheckOrgInfoCorporationDiff == 0 && pRows == 0)
+				{
+					orgInfoCorporation = corporation;
+				}else {
+					
+					if(Util.isEmpty(orgInfoCorporation) != Util.isEmpty(corporation) )
+					{	
+						//Allocation between different Group Corporation is forbidden.
+						String msg =Msg.getMsg(Env.getCtx(),"JP_Allocation_DiffCorp");
+						throw new AdempiereException(msg);
+						
+					}else if(!Util.isEmpty(orgInfoCorporation) && !orgInfoCorporation.equals(corporation)){
+						
+						//Allocation between different Group Corporation is forbidden.
+						String msg =Msg.getMsg(Env.getCtx(),"JP_Allocation_DiffCorp");
+						throw new AdempiereException(msg);
+					}
+				}
+				i_CheckOrgInfoCorporationDiff++;
+				//JPIERE - 0026
 				
 				if ( AppliedAmt.signum() == 0 && DiscountAmt.signum() == 0 && WriteOffAmt.signum() == 0)
 					continue;
