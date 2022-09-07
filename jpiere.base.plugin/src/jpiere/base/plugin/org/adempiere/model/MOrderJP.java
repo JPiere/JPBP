@@ -35,7 +35,6 @@ import org.compiere.model.MOrderPaySchedule;
 import org.compiere.model.MOrg;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MProduct;
-import org.compiere.model.MProductBOM;
 import org.compiere.model.MProject;
 import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MSysConfig;
@@ -46,6 +45,8 @@ import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.eevolution.model.MPPProductBOM;
+import org.eevolution.model.MPPProductBOMLine;
 
 /**
  * JPIERE-0142
@@ -119,34 +120,15 @@ public class MOrderJP extends MOrder implements DocOptions {
 				if (log.isLoggable(Level.FINE)) log.fine(product.getName());
 				//	New Lines
 				int lineNo = line.getLine ();
-				//find default BOM with valid dates and to this product
-				/*/MPPProductBOM bom = MPPProductBOM.get(product, getAD_Org_ID(),getDatePromised(), get_TrxName());
-				if(bom != null)
-				{
-					MPPProductBOMLine[] bomlines = bom.getLines(getDatePromised());
-					for (int j = 0; j < bomlines.length; j++)
-					{
-						MPPProductBOMLine bomline = bomlines[j];
-						MOrderLine newLine = new MOrderLine (this);
-						newLine.setLine (++lineNo);
-						newLine.setM_Product_ID (bomline.getM_Product_ID ());
-						newLine.setC_UOM_ID (bomline.getC_UOM_ID ());
-						newLine.setQty (line.getQtyOrdered ().multiply (
-							bomline.getQtyBOM()));
-						if (bomline.getDescription () != null)
-							newLine.setDescription (bomline.getDescription ());
-						//
-						newLine.setPrice ();
-						newLine.save (get_TrxName());
-					}
-				}	*/
-
+				MPPProductBOM bom = MPPProductBOM.getDefault(product, get_TrxName());
+				if (bom == null)
+					continue;
 
 				boolean isRemain = MSysConfig.getBooleanValue("JP_REMAIN_EXPLODE_PRODUCT_LINE", false, getAD_Client_ID(), getAD_Org_ID());
 				boolean isFirstLine = true;
 				int JP_ProductExplodeBOM_ID = line.getM_Product_ID();
 
-				for (MProductBOM bom : MProductBOM.getBOMLines(product))
+				for (MPPProductBOMLine bomLine : bom.getLines())
 				{
 					if(isRemain || !isFirstLine)
 					{
@@ -156,8 +138,8 @@ public class MOrderJP extends MOrder implements DocOptions {
 						//JPIERE-0294
 						newLine.set_ValueNoCheck("JP_ProductExplodeBOM_ID", JP_ProductExplodeBOM_ID);
 
-						newLine.setM_Product_ID(bom.getM_ProductBOM_ID(), true);
-						newLine.setQty(line.getQtyOrdered().multiply(bom.getBOMQty()));
+						newLine.setM_Product_ID(bomLine.getM_Product_ID(), true);
+						newLine.setQty(line.getQtyOrdered().multiply(bomLine.getQtyBOM()));
 						if (bom.getDescription() != null)
 							newLine.setDescription(bom.getDescription());
 						newLine.setPrice();
@@ -168,7 +150,7 @@ public class MOrderJP extends MOrder implements DocOptions {
 						//JPIERE-0294
 						line.set_ValueNoCheck("JP_ProductExplodeBOM_ID", JP_ProductExplodeBOM_ID);
 
-						line.setM_Product_ID(bom.getM_ProductBOM_ID(), true);
+						line.setM_Product_ID(bomLine.getM_Product_ID(), true);
 
 						//Reset once
 						line.setM_AttributeSetInstance_ID (0);
@@ -179,7 +161,7 @@ public class MOrderJP extends MOrder implements DocOptions {
 						line.setFreightAmt (Env.ZERO);
 
 						//Set again
-						line.setQty(line.getQtyOrdered().multiply(bom.getBOMQty()));
+						line.setQty(line.getQtyOrdered().multiply(bomLine.getQtyBOM()));
 						String description  =line.getDescription ();
 						if (bom.getDescription() != null)
 							line.setDescription(description + " : " +bom.getDescription());
