@@ -21,6 +21,7 @@ import static org.compiere.model.SystemIDs.*;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -72,6 +73,8 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Listhead;
+import org.zkoss.zul.Listheader;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
@@ -863,6 +866,26 @@ public class WAllocation extends Allocation
 		setPaymentColumnClass(paymentTable, multiCurrency.isSelected());
 		//
 
+		//JPiere set width
+		Listhead listHead =  paymentTable.getListhead();
+		List<?> headers = listHead.getChildren();
+		Listheader header = null;
+		int i = 0;
+		for(Object obj : headers)
+		{
+			header = (Listheader) obj;
+			if(i == 0){
+				ZKUpdateUtil.setWidth(header, "40px");
+			}else if(i == 1){ 
+				ZKUpdateUtil.setWidth(header, "80px");
+			}else if(i >= 2 && i <= 5){ 
+				ZKUpdateUtil.setWidth(header, "120px");
+			}else {
+				ZKUpdateUtil.setWidth(header, "100%");
+			}
+			i++;
+		}//JPiere
+		
 		data = getInvoiceData(multiCurrency.isSelected(), dateField.getValue(), invoiceTable);
 		columnNames = getInvoiceColumnNames(multiCurrency.isSelected());
 		
@@ -877,6 +900,27 @@ public class WAllocation extends Allocation
 		invoiceTable.setData(modelI, columnNames);
 		setInvoiceColumnClass(invoiceTable, multiCurrency.isSelected());
 		//
+		
+		//JPiere set width
+		listHead =  invoiceTable.getListhead();
+		headers = listHead.getChildren();
+		header = null;
+		i = 0;
+		for(Object obj : headers)
+		{
+			header = (Listheader) obj;
+			if(i == 0){
+				ZKUpdateUtil.setWidth(header, "40px");
+			}else if(i == 1){ 
+				ZKUpdateUtil.setWidth(header, "80px");
+			}else if(i >= 2 && i <= 8){ 
+				ZKUpdateUtil.setWidth(header, "120px");
+			}else {
+				ZKUpdateUtil.setWidth(header, "100%");
+			}
+			i++;
+		}//JPiere
+		
 		
 		calculate(multiCurrency.isSelected());
 		
