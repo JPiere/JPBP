@@ -71,7 +71,7 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 		{
 			MBankAccount bankAcct = (MBankAccount)po;
 			String jp_RequesterName = (String)bankAcct.get_Value("JP_RequesterName");
-			if(!Util.isEmpty(jp_RequesterName))
+			if(!Util.isEmpty(jp_RequesterName) && !bankAcct.is_ValueChanged(MBankAccount.COLUMNNAME_CurrentBalance))
 			{
 				for(int i = 0; i < jp_RequesterName.length(); i++)
 				{
