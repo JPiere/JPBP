@@ -707,6 +707,7 @@ public class Allocation
 		int AD_Org_ID = m_Doc_AD_Org_ID;//JPIERE-0026
 		String orgInfoCorporation = null;//JPIERE-0026
 		int i_CheckOrgInfoCorporationDiff = 0;//JPIERE-0026
+		boolean isPaymentSelected = false;//JPIERE-0026
 		int C_BPartner_ID = m_C_BPartner_ID;
 		int C_Order_ID = 0;
 		int C_CashLine_ID = 0;
@@ -769,6 +770,7 @@ public class Allocation
 					}
 				}
 				i_CheckOrgInfoCorporationDiff++;
+				isPaymentSelected = true;
 				//JPIERE - 0026		
 			}
 			
@@ -840,7 +842,7 @@ public class Allocation
 			
 				//JPIERE-0026 - Check Corporation
 				String corporation = (String)invoice.getValueAt(i, i_Invoice_OrgInfoCorp);
-				if(i_CheckOrgInfoCorporationDiff == 0 && pRows == 0)
+				if(i_CheckOrgInfoCorporationDiff == 0 && !isPaymentSelected)
 				{
 					orgInfoCorporation = corporation;
 				}else {
