@@ -299,7 +299,10 @@ public class Doc_AllocationHdrJP extends Doc
 					acct_unallocated_cash =  getPaymentAcct(as, line.getC_Payment_ID());
 				else if (line.getC_CashLine_ID() != 0)
 					acct_unallocated_cash =  getCashAcct(as, line.getC_CashLine_ID());
+				
+				setC_BPartner_ID(invoice.getC_BPartner_ID());//JPIERE-0026,0052
 				MAccount acct_receivable = getReceivableAccount(contractAcct, as);//JPIERE-0363
+				setC_BPartner_ID(line.getC_BPartner_ID());//JPIERE-0026,0052
 
 				if ((!as.isPostIfClearingEqual()) && acct_unallocated_cash != null && acct_unallocated_cash.equals(acct_receivable) && (!isInterOrg)) {
 
@@ -363,6 +366,7 @@ public class Doc_AllocationHdrJP extends Doc
 				//	AR Invoice Amount	CR
 				if (as.isAccrual())
 				{
+					setC_BPartner_ID(invoice.getC_BPartner_ID());//JPIERE-0026,0052
 					bpAcct = getReceivableAccount(contractAcct, as); //JPIERE-0363
 					setInvoiceCurrencyRate(line, invoice, payment);//JPIERE-0052
 					fl = fact.createLine (line, bpAcct,
@@ -397,6 +401,8 @@ public class Doc_AllocationHdrJP extends Doc
 					acct_payment_select = getPaymentAcct(as, line.getC_Payment_ID());
 				else if (line.getC_CashLine_ID() != 0)
 					acct_payment_select = getCashAcct(as, line.getC_CashLine_ID());
+				
+				setC_BPartner_ID(invoice.getC_BPartner_ID());//JPIERE-0026,0052
 				MAccount acct_liability = getPayableAccount(contractAcct, as);//JPIERE-0363
 				boolean isUsingClearing = true;
 
@@ -439,6 +445,7 @@ public class Doc_AllocationHdrJP extends Doc
 					allocationAccountedForRGL = allocationAccounted;
 				}
 
+				setC_BPartner_ID(line.getC_BPartner_ID());//JPIERE-0026,0052
 				setPaymentCurrencyRate(line, payment);//JPIERE-0052
 				
 				//	Discount		CR
