@@ -102,7 +102,12 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 
 	     }else  if (formName.startsWith("AD_InfoWindow_ID=")){
 
-	    	 int AD_InfoWindow_ID = Integer.valueOf(formName.substring("AD_InfoWindow_ID=".length())).intValue();
+	    	 String[] para = formName.split(";");
+	    	 int AD_InfoWindow_ID = Integer.valueOf(para[0].substring("AD_InfoWindow_ID=".length())).intValue();
+	    	 String predefinedVariables = null;
+	    	 
+	    	 if(para.length > 1)
+	    		 predefinedVariables = para[1].replace(",", "\n");
 
 			ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			Class<?> clazz = null;
@@ -146,7 +151,7 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 			if (form != null) {
 				if (form instanceof AbstractJPiereFormInfoWindow ) {
 					AbstractJPiereFormInfoWindow  controller = (AbstractJPiereFormInfoWindow) form;
-					controller.createFormInfoWindow(AD_InfoWindow_ID);
+					controller.createFormInfoWindow(AD_InfoWindow_ID, predefinedVariables);
 					ADForm adForm = controller.getForm();
 					adForm.setICustomForm(controller);
 					return adForm;

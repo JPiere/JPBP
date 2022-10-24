@@ -27,6 +27,8 @@ public interface IJPiereFormInfoWindowController
 	 * @return
 	 */
 	public void createFormInfoWindow(int AD_InfoWindow_ID);
+	
+	public void createFormInfoWindow(int AD_InfoWindow_ID, String predefinedVariables);
 
 
 }

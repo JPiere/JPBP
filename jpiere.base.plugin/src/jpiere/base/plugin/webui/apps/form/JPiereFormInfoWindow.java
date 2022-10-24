@@ -39,7 +39,13 @@ public class JPiereFormInfoWindow extends AbstractJPiereFormInfoWindow {
     @Override
     public void createFormInfoWindow(int AD_InfoWindow_ID)
     {
-    	InfoPanel infoPanel = InfoManager.create(AD_InfoWindow_ID);
+    	createFormInfoWindow(AD_InfoWindow_ID, null);
+    }
+    
+    @Override
+    public void createFormInfoWindow(int AD_InfoWindow_ID, String predefinedVariables)
+    {
+    	InfoPanel infoPanel = InfoManager.create(AD_InfoWindow_ID, predefinedVariables);
     	infoPanel.setTitle(null);
     	infoPanel.onUserQuery();
 
