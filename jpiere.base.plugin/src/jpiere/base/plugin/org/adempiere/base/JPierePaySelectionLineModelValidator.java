@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import org.compiere.model.MBPBankAccount;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MPaySelection;
 import org.compiere.model.MPaySelectionLine;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -87,11 +88,26 @@ public class JPierePaySelectionLineModelValidator implements ModelValidator {
 					
 				}else {
 					
-					String sql = "SELECT bpbc.C_BP_BankAccount_ID FROM C_BP_BANKACCOUNT bpbc "
-							+ "WHERE bpbc.C_BPartner_ID= ? "
-							+ " and bpbc.IsActive='Y' "
-							+ " and bpbc.IsACH='Y' "
-							+ "order by bpbc.IsDefault DESC, bpbc.Created ASC ";
+					MPaySelection m_PaySelection =  new MPaySelection(Env.getCtx(),  m_paySelectionLine.getC_PaySelection_ID(),po.get_TrxName()); 
+					boolean IsReceiptJP = m_PaySelection.get_ValueAsBoolean("IsReceiptJP");
+					String sql = null;
+					if(IsReceiptJP)
+					{	
+						sql = "SELECT bpbc.C_BP_BankAccount_ID FROM C_BP_BANKACCOUNT bpbc "
+								+ "WHERE bpbc.C_BPartner_ID= ? "
+								+ " and bpbc.IsActive='Y' "
+								+ " and bpbc.IsACH='Y' "
+								+ " and bpbc.BPBankAcctUse IN ('B','D') "	//Both & Direct Debit
+								+ " order by bpbc.IsDefault DESC, bpbc.Created ASC ";
+					}else {
+					
+						sql = "SELECT bpbc.C_BP_BankAccount_ID FROM C_BP_BANKACCOUNT bpbc "
+								+ "WHERE bpbc.C_BPartner_ID= ? "
+								+ " and bpbc.IsActive='Y' "
+								+ " and bpbc.IsACH='Y' "
+								+ " and bpbc.BPBankAcctUse IN ('B','T') "	//Both & Direct Deposit
+								+ " order by bpbc.IsDefault DESC, bpbc.Created ASC ";
+					}
 					
 					PreparedStatement pstmt = null;
 					ResultSet rs = null;
