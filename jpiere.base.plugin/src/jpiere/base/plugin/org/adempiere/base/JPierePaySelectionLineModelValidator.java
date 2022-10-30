@@ -37,7 +37,7 @@ import org.compiere.util.Msg;
 * JPiere Payment Selection Lin Model Validator
 *
 * JPIERE-0580: Select BP Bank Account
-* JPIERE-0581: Auto Calculate Bank Account Fee at Payment Selection Line.
+* JPIERE-0581: Auto Calculate Bank Transfer Fee at Payment Selection Line.
 *
 * @author h.hagiwara
 *

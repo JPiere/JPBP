@@ -27,15 +27,18 @@ import org.compiere.model.X_C_Order;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereUserError;
+import org.compiere.util.Msg;
  
 
 /**
  *	JPIERE-0580: Select BP Bank Account
  *
  *  Create Checks from Payment Selection Line
+ *  
+ *  Ref: PaySelectionCreateCheck.java
  *	
  *  @author Jorg Janke
- *  @version $Id: PaySelectionCreateCheck.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
+ *  @author h.hagiwara
  */
 public class JPierePaySelectionCreateCheck extends SvrProcess
 {
@@ -86,8 +89,16 @@ public class JPierePaySelectionCreateCheck extends SvrProcess
 			throw new IllegalArgumentException("Not found C_PaySelection_ID=" + p_C_PaySelection_ID);
 		if (psel.isProcessed())
 			throw new IllegalArgumentException("@Processed@");
-		//
+		
+		//JPIERE-0580-Start
 		MPaySelectionLine[] lines = psel.getLines(false);
+		if(lines.length == 0)
+		{
+			//There are not Invoice that is targeted to create Payment Batch.
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "JP_NoInvoiceToPaymentBatch"));
+		}
+		//JPIERE-0580-End
+		
 		for (int i = 0; i < lines.length; i++)
 		{
 			MPaySelectionLine line = lines[i];
