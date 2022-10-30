@@ -166,6 +166,10 @@ public class JPierePaySelectionCreateCheck extends SvrProcess
 		if(JP_BP_BankAccount_ID > 0)
 		{
 			check.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, JP_BP_BankAccount_ID);
+			check.setC_BP_BankAccount_ID(0);
+		}else {
+			check.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, 0);
+			check.setC_BP_BankAccount_ID(0);
 		}
 		//JPIERE-0580: Select BP Bank Account - End
 		
