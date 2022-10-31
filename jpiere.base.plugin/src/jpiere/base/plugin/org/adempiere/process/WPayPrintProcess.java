@@ -97,15 +97,17 @@ public class WPayPrintProcess extends SvrProcess{
 			return Msg.getMsg(getCtx(), "FindZeroRecords");//No Records found
 		}
 
+		//Get Payment Export Class
+		int no = 0;
+		StringBuffer err = new StringBuffer("");
+		
 		try
 		{
 
 			//Create temporary file
 			File tempFile = File.createTempFile("paymentExport", ".txt");
 
-			//Get Payment Export Class
-			int no = 0;
-			StringBuffer err = new StringBuffer("");
+
 			if (m_PaymentExportClass == null || m_PaymentExportClass.trim().length() == 0) {
 				m_PaymentExportClass = "org.compiere.util.GenericPaymentExport";
 			}
@@ -129,6 +131,7 @@ public class WPayPrintProcess extends SvrProcess{
 				err.append(Msg.getMsg(getCtx(), "Error") + m_PaymentExportClass + " check log, " + e.toString());
 				log.log(Level.SEVERE, err.toString(), e);
 			}
+			
 			if (no >= 0) {
 
 				//Download the exported file
@@ -182,6 +185,11 @@ public class WPayPrintProcess extends SvrProcess{
 			System.out.println(e);
 			log.log(Level.SEVERE, e.getLocalizedMessage(), e);
 			return Msg.getMsg(getCtx(), "Error") + " : " +  e.toString();
+		}
+		
+		if(no == -1)
+		{
+			throw new Exception(err.toString());
 		}
 
 		return Msg.getMsg(getCtx(), "ProcessOK") + " : " + paySelection.getName();
