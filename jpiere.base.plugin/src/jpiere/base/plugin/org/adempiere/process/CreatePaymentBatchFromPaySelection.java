@@ -34,7 +34,11 @@ import org.compiere.util.Msg;
 
 /**
  * JPIERE-0273 : Create Payment Batch From Pay Selection
+ * JPIERE-0580: Select BP Bank Account
+ 
+ * 
  * @author BIT
+ * @author h.hagiwara
  *
  */
 public class CreatePaymentBatchFromPaySelection extends SvrProcess {
@@ -169,6 +173,7 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 			payment.setDateAcct(payment.getDateTrx());
 			payment.setC_BPartner_ID(check.getC_BPartner_ID());
 			payment.setC_PaymentBatch_ID(batch.getC_PaymentBatch_ID());
+			payment.setC_BP_BankAccount_ID(check.getC_BP_BankAccount_ID());
 
 			//	Link to Invoice
 			MPaySelectionLine[] psls = check.getPaySelectionLines(true);

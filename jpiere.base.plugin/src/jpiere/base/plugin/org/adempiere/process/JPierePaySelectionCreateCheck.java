@@ -132,7 +132,7 @@ public class JPierePaySelectionCreateCheck extends SvrProcess
 				MPaySelectionCheck check = (MPaySelectionCheck) m_list.get(i);
 				// Add to existing
 				if (check.getC_BPartner_ID() == line.getInvoice().getC_BPartner_ID()
-						&& check.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID) == line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID)) //JPIERE-0580: Select BP Bank Account
+						&& check.getC_BP_BankAccount_ID() == line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID)) //JPIERE-0580: Select BP Bank Account
 				{
 					check.addLine(line);
 					if (!check.save())
@@ -162,16 +162,7 @@ public class JPierePaySelectionCreateCheck extends SvrProcess
 		}
 		
 		//JPIERE-0580: Select BP Bank Account - Start
-		int JP_BP_BankAccount_ID = line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID);
-		if(JP_BP_BankAccount_ID > 0)
-		{
-			check.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, JP_BP_BankAccount_ID);
-			check.setC_BP_BankAccount_ID(0);
-		}else {
-			check.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, null);
-			check.setC_BP_BankAccount_ID(0);
-		}
-		//JPIERE-0580: Select BP Bank Account - End
+		check.setC_BP_BankAccount_ID(line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID));
 		
 		if (!check.save())
 			throw new IllegalStateException("Cannot save MPaySelectionCheck");
