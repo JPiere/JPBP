@@ -160,10 +160,23 @@ public class JPierePaySelectionLineModelValidator implements ModelValidator {
 			if(IsAutoCalBankTransferfeeJP)
 			{
 				MInvoice m_Invoice = new MInvoice(Env.getCtx(), m_paySelectionLine.getC_Invoice_ID(), po.get_TrxName());
-				if(m_Invoice.getDocStatus().equals(DocAction.STATUS_Completed))
+				
+				if(m_Invoice.getDocStatus().equals(DocAction.STATUS_Drafted)
+						|| m_Invoice.getDocStatus().equals(DocAction.STATUS_InProgress) )
 				{
-					boolean isOK = m_Invoice.processIt(DocAction.ACTION_Reverse_Correct);
-					if(isOK)
+					if(m_Invoice.processIt(DocAction.ACTION_Void))
+					{
+						m_Invoice.saveEx(po.get_TrxName());
+						
+					}else {
+						
+						//Could not reverse Invoice of Auto calculated bank transfer fee. Please reverse it before delete.
+						return Msg.getMsg(Env.getCtx(), "JP_Reverse_AutoCalBankTransferFeeInvoice") + " : " + m_Invoice.getDocumentNo();
+					}
+					
+				}else 	if(m_Invoice.getDocStatus().equals(DocAction.STATUS_Completed)) {
+					
+					if( m_Invoice.processIt(DocAction.ACTION_Reverse_Correct))
 					{
 						m_Invoice.saveEx(po.get_TrxName());
 					}else {

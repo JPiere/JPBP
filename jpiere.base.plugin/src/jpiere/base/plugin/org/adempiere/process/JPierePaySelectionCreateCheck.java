@@ -110,8 +110,9 @@ public class JPierePaySelectionCreateCheck extends SvrProcess
 		psel.setProcessed(true);
 		psel.saveEx();
 		
-		StringBuilder msgreturn = new StringBuilder("@C_PaySelectionCheck_ID@ - #").append(m_list.size());
-		return msgreturn.toString();
+		String returnMsg = Msg.getElement(getCtx(), "C_PaySelectionCheck_ID") + " : " + m_list.size();
+		addBufferLog(0, null, null, returnMsg, 0, 0);
+		return Msg.getMsg(getCtx(), "JP_Success");
 	}	//	doIt
 
 	
