@@ -194,21 +194,6 @@ public interface I_T_PaySelectionCheckJP
 	  */
 	public boolean isReceipt();
 
-    /** Column name JP_BP_BankAccount_ID */
-    public static final String COLUMNNAME_JP_BP_BankAccount_ID = "JP_BP_BankAccount_ID";
-
-	/** Set Partner Bank Account.
-	  * Bank Account of the Business Partner
-	  */
-	public void setJP_BP_BankAccount_ID (int JP_BP_BankAccount_ID);
-
-	/** Get Partner Bank Account.
-	  * Bank Account of the Business Partner
-	  */
-	public int getJP_BP_BankAccount_ID();
-
-	public org.compiere.model.I_C_BP_BankAccount getJP_BP_BankAccount() throws RuntimeException;
-
     /** Column name JP_BankTransferFee */
     public static final String COLUMNNAME_JP_BankTransferFee = "JP_BankTransferFee";
 

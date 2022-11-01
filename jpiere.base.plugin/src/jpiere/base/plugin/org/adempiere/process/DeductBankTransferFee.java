@@ -86,14 +86,14 @@ public class DeductBankTransferFee extends SvrProcess {
 		int count = 0;
 		for(MPaySelectionCheckJP tentativeCheck : m_list)
 		{
-			int JP_BP_BankAccount_ID = tentativeCheck.getJP_BP_BankAccount_ID();
-			if(JP_BP_BankAccount_ID == 0)
+			int C_BP_BankAccount_ID = tentativeCheck.getC_BP_BankAccount_ID();
+			if(C_BP_BankAccount_ID == 0)
 			{
 				continue;
 				
 			}else {
 				
-				bpba = new MBPBankAccount(getCtx(), JP_BP_BankAccount_ID, get_TrxName());
+				bpba = new MBPBankAccount(getCtx(), C_BP_BankAccount_ID, get_TrxName());
 				int JP_BankTransferFeeDeduct_ID = bpba.get_ValueAsInt(JP_BANK_TRANSFER_FEE_DEDUCT_ID);
 				if(JP_BankTransferFeeDeduct_ID ==0)
 				{
@@ -106,7 +106,7 @@ public class DeductBankTransferFee extends SvrProcess {
 					continue;
 				
 				//Check Already created or not.
-				if(isCreatedBankTansferFeeLine(tentativeCheck.getC_BPartner_ID(), tentativeCheck.getJP_BP_BankAccount_ID()))
+				if(isCreatedBankTansferFeeLine(tentativeCheck.getC_BPartner_ID(), tentativeCheck.getC_BP_BankAccount_ID()))
 					continue;
 				
 				line = line + 10;
@@ -165,7 +165,7 @@ public class DeductBankTransferFee extends SvrProcess {
 				MPaySelectionCheckJP check = (MPaySelectionCheckJP) m_list.get(i);
 				// Add to existing
 				if (check.getC_BPartner_ID() == line.getInvoice().getC_BPartner_ID()
-						&& check.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID) == line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID)) //JPIERE-0580: Select BP Bank Account
+						&& check.getC_BP_BankAccount_ID() == line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID)) //JPIERE-0580: Select BP Bank Account
 				{
 					check.addLine(line);
 					if (!check.save())
@@ -178,15 +178,8 @@ public class DeductBankTransferFee extends SvrProcess {
 		MPaySelectionCheckJP check = new MPaySelectionCheckJP(line);
 		check.setAD_PInstance_ID(getAD_PInstance_ID());
 		
-		//JPIERE-0580: Select BP Bank Account - Start
-		int JP_BP_BankAccount_ID = line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID);
-		if(JP_BP_BankAccount_ID > 0)
-		{
-			check.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, JP_BP_BankAccount_ID);
-		}else {
-			check.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, null);
-		}
-		//JPIERE-0580: Select BP Bank Account - End
+		//JPIERE-0580: Select BP Bank Account
+		check.setC_BP_BankAccount_ID(line.get_ValueAsInt(JP_BP_BANKkACCOUNT_ID));
 		
 		if (!check.save())
 			throw new IllegalStateException("Cannot save MPaySelectionCheckJP");
@@ -243,10 +236,10 @@ public class DeductBankTransferFee extends SvrProcess {
 		MBPartner bp = MBPartner.get(getCtx(), tentativeCheck.getC_BPartner_ID());
 		inv.setC_BPartner_ID(bp.getC_BPartner_ID());
 		inv.setC_BPartner_Location_ID(bp.getPrimaryC_BPartner_Location_ID());
-		if(tentativeCheck.getJP_BP_BankAccount_ID() == 0)
+		if(tentativeCheck.getC_BP_BankAccount_ID() == 0)
 			inv.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, null);
 		else
-			inv.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, tentativeCheck.getJP_BP_BankAccount_ID());
+			inv.set_ValueNoCheck(JP_BP_BANKkACCOUNT_ID, tentativeCheck.getC_BP_BankAccount_ID());
 
 		if(Util.isEmpty(m_BankTransferFeeDeduct.getDescription()))
 		{
@@ -283,6 +276,8 @@ public class DeductBankTransferFee extends SvrProcess {
 		
 		if(inv.processIt(DocAction.ACTION_Complete))
 		{
+			inv.saveEx(get_TrxName());
+			
 			MPaySelectionLine psl = new MPaySelectionLine(m_PaySelection, line, m_BankTransferFeeDeduct.getPaymentRule());
 			if(Util.isEmpty(m_BankTransferFeeDeduct.getDescription()))
 			{
@@ -301,6 +296,10 @@ public class DeductBankTransferFee extends SvrProcess {
 			}
 			psl.set_ValueNoCheck(IS_AUTO_CAL_BANK_TRANSFER_FEE, true);
 			psl.saveEx(get_TrxName());
+			
+			tentativeCheck.setC_Invoice_ID(inv.getC_Invoice_ID());
+			tentativeCheck.setJP_BankTransferFee(m_BankTransferFeeDeduct.getPriceEntered());
+			tentativeCheck.saveEx(get_TrxName());
 			
 			return true;
 		}else {

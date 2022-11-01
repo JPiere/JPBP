@@ -174,7 +174,7 @@ public class JPierePaySelectionLineModelValidator implements ModelValidator {
 						return Msg.getMsg(Env.getCtx(), "JP_Reverse_AutoCalBankTransferFeeInvoice") + " : " + m_Invoice.getDocumentNo();
 					}
 					
-				}else 	if(m_Invoice.getDocStatus().equals(DocAction.STATUS_Completed)) {
+				}else 	if(m_Invoice.getDocStatus().equals(DocAction.STATUS_Completed) && !m_Invoice.isPaid() ){
 					
 					if( m_Invoice.processIt(DocAction.ACTION_Reverse_Correct))
 					{

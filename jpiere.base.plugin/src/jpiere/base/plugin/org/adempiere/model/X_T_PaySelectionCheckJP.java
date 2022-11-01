@@ -33,7 +33,7 @@ public class X_T_PaySelectionCheckJP extends PO implements I_T_PaySelectionCheck
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221030L;
+	private static final long serialVersionUID = 20221101L;
 
     /** Standard Constructor */
     public X_T_PaySelectionCheckJP (Properties ctx, int T_PaySelectionCheckJP_ID, String trxName)
@@ -201,9 +201,9 @@ public class X_T_PaySelectionCheckJP extends PO implements I_T_PaySelectionCheck
 	public void setC_Invoice_ID (int C_Invoice_ID)
 	{
 		if (C_Invoice_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
+			set_Value (COLUMNNAME_C_Invoice_ID, null);
 		else
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
 	}
 
 	/** Get Invoice.
@@ -285,34 +285,6 @@ public class X_T_PaySelectionCheckJP extends PO implements I_T_PaySelectionCheck
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	public org.compiere.model.I_C_BP_BankAccount getJP_BP_BankAccount() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BP_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BP_BankAccount.Table_ID)
-			.getPO(getJP_BP_BankAccount_ID(), get_TrxName());
-	}
-
-	/** Set Partner Bank Account.
-		@param JP_BP_BankAccount_ID Bank Account of the Business Partner
-	*/
-	public void setJP_BP_BankAccount_ID (int JP_BP_BankAccount_ID)
-	{
-		if (JP_BP_BankAccount_ID < 1)
-			set_Value (COLUMNNAME_JP_BP_BankAccount_ID, null);
-		else
-			set_Value (COLUMNNAME_JP_BP_BankAccount_ID, Integer.valueOf(JP_BP_BankAccount_ID));
-	}
-
-	/** Get Partner Bank Account.
-		@return Bank Account of the Business Partner
-	  */
-	public int getJP_BP_BankAccount_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BP_BankAccount_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Bank Transfer Fee.
