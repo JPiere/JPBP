@@ -129,6 +129,8 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 			paySelection.saveEx(get_TrxName());
 		}
 
+		addBufferLog(0, null, null, batch.getDocumentNo(), MPaymentBatch.Table_ID, batch.getC_PaymentBatch_ID());
+		
 		return Msg.getMsg(getCtx(), "ProcessOK") + " : " + batch.getDocumentNo();
 	}
 
