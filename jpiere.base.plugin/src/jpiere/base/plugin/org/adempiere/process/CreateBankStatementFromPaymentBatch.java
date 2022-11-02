@@ -29,6 +29,7 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 
 /**
@@ -160,7 +161,14 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 				return Msg.getMsg(getCtx(), "JP_NoPaymentNeedToWriteBS");//There is no Payment that is need to write into Bank Statement
 			
 			}else{
-				m_bankStatement.processIt(p_DocAction);
+				
+				if(!Util.isEmpty(p_DocAction))
+				{
+					if(!m_bankStatement.processIt(p_DocAction))
+					{
+						throw new Exception(m_bankStatement.getProcessMsg());
+					}
+				}
 				m_bankStatement.saveEx(get_TrxName());
 			}
 
