@@ -21,6 +21,7 @@ import org.compiere.model.MMovement;
 import org.compiere.model.MMovementLine;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
@@ -123,6 +124,16 @@ public class CreateNextMovement extends SvrProcess {
 			return Msg.getMsg(getCtx(), "NoLines");
 		}
 		
+		if(!from.getDocStatus().equals((DocAction.STATUS_Drafted))
+				&& !from.getDocStatus().equals((DocAction.STATUS_InProgress))
+				&& !from.getDocStatus().equals((DocAction.STATUS_Completed))
+				&& !from.getDocStatus().equals((DocAction.STATUS_Closed))
+				)
+		{
+			addLog("");	//for popup window
+			return Msg.getMsg(getCtx(), "JP_InvalidDocStatus");
+		}
+		
 		
 		/** 
 		 * Get Parameter 
@@ -190,7 +201,7 @@ public class CreateNextMovement extends SvrProcess {
 		
 		if(p_M_Locator_ID == 0)
 		{
-			throw new Exception(Msg.getMsg(getCtx(), "NotFound")+ Msg.getElement(getCtx(), "M_Locator") );
+			throw new Exception(Msg.getMsg(getCtx(), "NotFound")+ Msg.getElement(getCtx(), "M_Locator_ID") );
 		}
 		
 		if(p_AD_Org_ID == 0)
@@ -315,10 +326,11 @@ public class CreateNextMovement extends SvrProcess {
 		to.set_ValueNoCheck(JP_MovementDateNext, null);
 		
 		to.set_ValueNoCheck(JP_MovementPre_ID, from.getM_Movement_ID());
+		to.set_ValueNoCheck(IsRecordRouteJP, from.get_ValueAsBoolean(IsRecordRouteJP));
 		to.saveEx(get_TrxName());
 		
 		from.set_ValueNoCheck(JP_Processing1, "Y");
-		from.set_ValueNoCheck(JP_MovementNext_ID,  to.getM_Movement_ID());
+		from.set_ValueNoCheck(JP_MovementNext_ID,  to.getM_Movement_ID());		
 		from.saveEx(get_TrxName());
 		
 		
