@@ -223,7 +223,7 @@ public class CreateNextMovement extends SvrProcess {
 		{
 			Object[] objs = new Object[]{Msg.getElement(getCtx(), "JP_WarehouseTo_ID") ,Msg.getElement(getCtx(), "JP_PhysicalWarehouseTo_ID")};
 			String msg = Msg.getMsg(Env.getCtx(), "JP_Set_Either", objs);
-			throw new Exception(msg);
+			throw new Exception(Msg.getElement(getCtx(), IsRecordRouteJP) + " = ON : "+ msg);
 		}
 		
 		
@@ -231,7 +231,7 @@ public class CreateNextMovement extends SvrProcess {
 		{
 			Object[] objs = new Object[]{Msg.getElement(getCtx(), "JP_WarehouseNext_ID") ,Msg.getElement(getCtx(), "JP_PhysicalWarehouseNext_ID")};
 			String msg = Msg.getMsg(Env.getCtx(), "JP_Set_Either", objs);
-			throw new Exception(msg);
+			throw new Exception(Msg.getElement(getCtx(), IsRecordRouteJP) + " = ON : "+ msg);
 		}
 		
 		if(p_JP_MovementDateNext.compareTo(from.getMovementDate()) < 0)

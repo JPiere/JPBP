@@ -62,6 +62,43 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 	
 	private static final String JP_MovementPre_ID = "JP_MovementPre_ID";
 
+	
+	public String setIsRecordRoute(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		if(!mTab.getValueAsBoolean(IsRecordRouteJP))
+		{
+			//Set Departure Warehouse
+			//mTab.setValue(JP_WarehouseDep_ID, null);
+			//mTab.setValue(JP_PhysicalWarehouseDep_ID, null);
+			
+			//Set Destination Warehouse
+			//mTab.setValue(JP_WarehouseDst_ID, null);
+			//mTab.setValue(JP_PhysicalWarehouseDst_ID, null);
+			
+		}else {
+			
+			//Set Departure Warehouse
+			Object obj_MovementPre_ID = mTab.getValue(JP_MovementPre_ID);
+			if(obj_MovementPre_ID == null)
+			{
+				Object  obj_WarehouseDep_ID = mTab.getValue(JP_WarehouseDep_ID);
+				if(obj_WarehouseDep_ID == null)
+				{
+					mTab.setValue(JP_WarehouseDep_ID, mTab.getValue(JP_WarehouseFrom_ID));
+				}
+				
+				Object  obj_PhysicalWarehouseDep_ID = mTab.getValue(JP_PhysicalWarehouseDep_ID);
+				if(obj_PhysicalWarehouseDep_ID == null)
+				{
+					mTab.setValue(JP_PhysicalWarehouseDep_ID, mTab.getValue(JP_PhysicalWarehouseFrom_ID));
+				}
+			}
+		}
+		
+		
+		return null;
+	}
+	
 	public String setJP_WarehouseFrom_ID(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
 		if(!mTab.getValueAsBoolean(IsRecordRouteJP))
@@ -70,11 +107,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 		Object obj_MovementPre_ID = mTab.getValue(JP_MovementPre_ID);
 		if(obj_MovementPre_ID == null)
 		{
-			Object  obj_WarehouseDep_ID = mTab.getValue(JP_WarehouseDep_ID);
-			if(obj_WarehouseDep_ID == null)
-			{
-				mTab.setValue(JP_WarehouseDep_ID, value);
-			}
+			mTab.setValue(JP_WarehouseDep_ID, value);			
 		}
 		
 		return null;
@@ -88,11 +121,8 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 		Object obj_MovementPre_ID = mTab.getValue(JP_MovementPre_ID);
 		if(obj_MovementPre_ID == null)
 		{
-			Object  obj_PhysicalWarehouseDep_ID = mTab.getValue(JP_PhysicalWarehouseDep_ID);
-			if(obj_PhysicalWarehouseDep_ID == null)
-			{
-				mTab.setValue(JP_PhysicalWarehouseDep_ID, value);
-			}
+			mTab.setValue(JP_PhysicalWarehouseDep_ID, value);
+
 		}
 		
 		return null;
