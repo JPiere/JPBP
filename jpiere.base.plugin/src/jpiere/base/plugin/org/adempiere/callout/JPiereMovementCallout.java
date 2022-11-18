@@ -25,7 +25,7 @@ import org.compiere.util.Msg;
 
 /**
 *
-* JPiere Order Line model Validator
+* JPiere Movement Callout
 *
 * JPIERE-0227: Common Warehouse
 * JPIERE-0582: Register Route of Movement
@@ -54,6 +54,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 	//Departure Warehouse
 	private static final String JP_WarehouseDep_ID = "JP_WarehouseDep_ID";
 	private static final String JP_PhysicalWarehouseDep_ID = "JP_PhysicalWarehouseDep_ID";
+	private static final String JP_MovementDateDep = "JP_MovementDateDep";
 	
 	//Destination warehouse
 	private static final String JP_WarehouseDst_ID = "JP_WarehouseDst_ID";
@@ -62,6 +63,20 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 	
 	private static final String JP_MovementPre_ID = "JP_MovementPre_ID";
 
+	
+	public String setMovementDate(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
+	{
+		if(!mTab.getValueAsBoolean(IsRecordRouteJP))
+			return null;
+		
+		Object obj_MovementPre_ID = mTab.getValue(JP_MovementPre_ID);
+		if(obj_MovementPre_ID == null)
+		{
+			mTab.setValue(JP_MovementDateDep, value);
+		}
+		
+		return null;
+	}
 	
 	public String setIsRecordRoute(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
@@ -92,6 +107,8 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 				{
 					mTab.setValue(JP_PhysicalWarehouseDep_ID, mTab.getValue(JP_PhysicalWarehouseFrom_ID));
 				}
+				
+				mTab.setValue(JP_MovementDateDep, mTab.getValue(MMovement.COLUMNNAME_MovementDate));
 			}
 		}
 		
@@ -107,7 +124,8 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 		Object obj_MovementPre_ID = mTab.getValue(JP_MovementPre_ID);
 		if(obj_MovementPre_ID == null)
 		{
-			mTab.setValue(JP_WarehouseDep_ID, value);			
+			mTab.setValue(JP_WarehouseDep_ID, value);
+			mTab.setValue(JP_MovementDateDep, mTab.getValue(MMovement.COLUMNNAME_MovementDate));
 		}
 		
 		return null;
@@ -122,7 +140,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 		if(obj_MovementPre_ID == null)
 		{
 			mTab.setValue(JP_PhysicalWarehouseDep_ID, value);
-
+			mTab.setValue(JP_MovementDateDep, mTab.getValue(MMovement.COLUMNNAME_MovementDate));
 		}
 		
 		return null;
@@ -283,6 +301,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 				mTab.setValue(JP_PhysicalWarehouseDep_ID, mm.get_ValueAsInt(JP_PhysicalWarehouseFrom_ID));
 			}
 			
+			mTab.setValue(JP_MovementDateDep, mm.get_Value(MMovement.COLUMNNAME_MovementDate));
 		}
 		
 		return null;

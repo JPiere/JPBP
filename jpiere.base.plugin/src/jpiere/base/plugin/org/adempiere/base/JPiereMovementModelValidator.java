@@ -94,11 +94,11 @@ public class JPiereMovementModelValidator implements ModelValidator {
 	//Departure Warehouse
 	private static final String JP_WarehouseDep_ID = "JP_WarehouseDep_ID";
 	private static final String JP_PhysicalWarehouseDep_ID = "JP_PhysicalWarehouseDep_ID";
+	private static final String JP_MovementDateDep = "JP_MovementDateDep";
 	
 	//Destination warehouse
 	private static final String JP_WarehouseDst_ID = "JP_WarehouseDst_ID";
 	private static final String JP_PhysicalWarehouseDst_ID = "JP_PhysicalWarehouseDst_ID";
-	@SuppressWarnings("unused")
 	private static final String JP_MovementDateDst = "JP_MovementDateDst";
 	
 	@SuppressWarnings("unused")
@@ -117,12 +117,14 @@ public class JPiereMovementModelValidator implements ModelValidator {
 			{
 				po.set_ValueNoCheck(JP_WarehouseDep_ID, null);
 				po.set_ValueNoCheck(JP_PhysicalWarehouseDep_ID, null);
+				po.set_ValueNoCheck(JP_MovementDateDep, null);
 				
 				//po.set_ValueNoCheck(JP_MovementPre_ID, null); Don't not clear.
 				//po.set_ValueNoCheck(JP_MovementNext_ID, null); Don't not clear.
 				
 				po.set_ValueNoCheck(JP_WarehouseDst_ID, null);
 				po.set_ValueNoCheck(JP_PhysicalWarehouseDst_ID, null);
+				po.set_ValueNoCheck(JP_MovementDateDst, null);
 			}
 		}
 		

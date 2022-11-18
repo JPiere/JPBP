@@ -61,6 +61,7 @@ public class CreateNextMovement extends SvrProcess {
 	//Departure Warehouse
 	private static final String JP_WarehouseDep_ID = "JP_WarehouseDep_ID";
 	private static final String JP_PhysicalWarehouseDep_ID = "JP_PhysicalWarehouseDep_ID";
+	private static final String JP_MovementDateDep = "JP_MovementDateDep";
 	
 	//Destination warehouse
 	private static final String JP_WarehouseDst_ID = "JP_WarehouseDst_ID";
@@ -263,6 +264,9 @@ public class CreateNextMovement extends SvrProcess {
 			to.set_ValueNoCheck(JP_PhysicalWarehouseDep_ID, from.get_ValueAsInt(JP_PhysicalWarehouseDep_ID)); 
 		}
 		
+		to.set_ValueNoCheck(JP_MovementDateDep, from.get_Value(JP_MovementDateDep));
+		
+		
 		//Copy Destination
 		if(from.get_ValueAsInt(JP_WarehouseDst_ID) == 0) 
 		{
@@ -277,6 +281,7 @@ public class CreateNextMovement extends SvrProcess {
 		}else {
 			to.set_ValueNoCheck(JP_PhysicalWarehouseDst_ID, from.get_ValueAsInt(JP_PhysicalWarehouseDst_ID)); 
 		}
+		
 		to.set_ValueNoCheck(JP_MovementDateDst, from.get_Value(JP_MovementDateDst));
 		
 		
