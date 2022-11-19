@@ -160,14 +160,14 @@ public class CreateNextMovement extends SvrProcess {
 		
 		if(p_JP_MovementDateNext == null)
 		{
-			Object obj__JP_MovementDateNext = from.get_Value(JP_MovementDateNext);
-			if(obj__JP_MovementDateNext == null)
+			Object obj_JP_MovementDateNext = from.get_Value(JP_MovementDateNext);
+			if(obj_JP_MovementDateNext == null)
 			{
 				p_JP_MovementDateNext = from.getMovementDate();
 				from.set_ValueNoCheck(JP_MovementDateNext, p_JP_MovementDateNext);
 			}else {
 				
-				p_JP_MovementDateNext = (Timestamp)obj__JP_MovementDateNext;
+				p_JP_MovementDateNext = (Timestamp)obj_JP_MovementDateNext;
 			}
 			
 		}else {
