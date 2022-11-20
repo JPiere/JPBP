@@ -51,7 +51,7 @@ public class DocLine_AllocationJP extends DocLine_Allocation {
 	 * 継承しているDocLine_Allocationが、trxNameをNullで処理しており、Invoiceの登録からAllocationの転記処理まで一連のトランザクションで処理している場合、
 	 * 正しい通貨が取得できず、為替差損益の処理が実行されてしまい、エラーが表示される。
 	 * POS受注などの場合が該当する。
-	 * iDempiereの本家が修正されるまの一時的なパッチとしてオーバーライド修正する。
+	 * iDempiereの本家が修正されるまでの一時的なパッチとしてオーバーライド修正する。
 	 * 
 	 *	@return 0 if no invoice -1 if not found
 	 */
