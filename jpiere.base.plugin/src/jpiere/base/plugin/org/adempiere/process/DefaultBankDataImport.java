@@ -398,6 +398,8 @@ public class DefaultBankDataImport extends SvrProcess{
 			}
 			finally
 			{
+				fs.close();
+				isr.close();
 				br.close();
 			}
 		}
