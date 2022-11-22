@@ -29,6 +29,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 
 /**
@@ -255,6 +256,7 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 		sql.append(sqlWhere.toString());
 		//
 		int lines = 0;
+		getMaxLineNo();
 		int C_CurrencyTo_ID = psel.getC_Currency_ID();
 		try (PreparedStatement pstmt = DB.prepareStatement (sql.toString(), get_TrxName());)
 		{
@@ -329,7 +331,7 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 				boolean isSOTrx = "Y".equals(rs.getString(5));
 				//
 				lines++;
-				MPaySelectionLine pselLine = new MPaySelectionLine (psel, lines*10, PaymentRule);
+				MPaySelectionLine pselLine = new MPaySelectionLine (psel, (lines*10+maxLineNo), PaymentRule);
 				pselLine.setInvoice (C_Invoice_ID, isSOTrx,
 					PayAmt, PayAmt.subtract(DiscountAmt).subtract(WriteOffAmt), DiscountAmt, WriteOffAmt);
 				if (!pselLine.save())
@@ -349,5 +351,37 @@ public class JPierePaySelectionCreateFrom extends SvrProcess
 		StringBuilder msgreturn = new StringBuilder("@C_PaySelectionLine_ID@  - #").append(lines);
 		return msgreturn.toString();
 	}	//	doIt
+	
+	private int maxLineNo = 0;
+	private int getMaxLineNo() throws Exception
+	{
+		if(p_C_PaySelection_ID == 0)
+			return maxLineNo;
+		
+		String sql = "SELECT NVL(MAX(Line),0) FROM C_PaySelectionLine WHERE C_PaySelection_ID=?";
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+			pstmt.setInt(1, p_C_PaySelection_ID);
+			rs = pstmt.executeQuery ();
+			if (rs.next ())
+			{
+				maxLineNo = rs.getInt(1);
+			}
+		}catch (Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "DBExecuteError"));
+		}finally {
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		
+		return maxLineNo;
+		
+	}
+	
 
 }	//	PaySelectionCreateFrom
