@@ -20,10 +20,12 @@ import org.adempiere.base.IColumnCallout;
 import org.adempiere.base.IColumnCalloutFactory;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLineMA;
+import org.compiere.model.MInventory;
 import org.compiere.model.MInventoryLineMA;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocation;
+import org.compiere.model.MMovement;
 import org.compiere.model.MMovementLineMA;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
@@ -60,6 +62,7 @@ import jpiere.base.plugin.org.adempiere.callout.JPiereRecognitionCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereReferenceTestCallout;
 import jpiere.base.plugin.org.adempiere.callout.JPiereRegionCallout;
 import jpiere.base.plugin.org.adempiere.callout.SupportToEnterAttributesTabColumnCallout;
+import jpiere.base.plugin.org.adempiere.callout.SupportToEnterPhysicalWarehouseCallout;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MContract;
@@ -350,6 +353,19 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 				)
 		{
 			list.add(new SupportToEnterAttributesTabColumnCallout());
+		}
+		
+		//JPIERE-0588 : Support to enter Physical Warehouse from Org Warehouse
+		if((tableName.equals(MInOut.Table_Name)
+				|| tableName.equals(MInventory.Table_Name)
+				|| tableName.equals(MMovement.Table_Name) )
+				&& (columnName.equals("M_Warehouse_ID")
+						|| columnName.equals("JP_Warehouse_ID")
+						|| columnName.equals("JP_WarehouseFrom_ID")
+						|| columnName.equals("JP_WarehouseTo_ID"))
+				)
+		{
+			list.add(new SupportToEnterPhysicalWarehouseCallout());
 		}
 
 		return list != null ? list.toArray(new IColumnCallout[0]) : new IColumnCallout[0];
