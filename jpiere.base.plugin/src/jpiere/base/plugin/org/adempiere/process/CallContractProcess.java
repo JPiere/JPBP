@@ -2038,7 +2038,7 @@ public class CallContractProcess extends SvrProcess {
 	 */
 	private Timestamp getLastServerRebootDate()
 	{
-		MSession currentSession = MSession.get(Env.getCtx(), false);
+		MSession currentSession = MSession.get(Env.getCtx());
 		if (currentSession == null)
 			return null;
 

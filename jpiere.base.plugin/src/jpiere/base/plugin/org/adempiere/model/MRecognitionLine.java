@@ -27,7 +27,7 @@ import java.util.logging.Level;
 import org.adempiere.base.Core;
 import org.adempiere.base.IProductPricing;
 import org.adempiere.exceptions.AdempiereException;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.MCharge;
 import org.compiere.model.MCurrency;
@@ -1158,7 +1158,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 					if(qtyInvoiced.compareTo(qtyToRecognize) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+							Dialog.info(0, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
 									+" : "+ oline.getParent().getDocumentNo() +  " - " + oline.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -1171,7 +1171,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 					if(qtyInvoiced.compareTo(qtyToRecognize) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+							Dialog.info(0, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
 									+" : "+ oline.getParent().getDocumentNo() +  " - " + oline.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -1192,7 +1192,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 					if(qtyInvoiced.compareTo(qtyToRecognize) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
 									+" : "+ rmaline.getParent().getDocumentNo() +  " - " + rmaline.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -1204,7 +1204,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 					if(qtyInvoiced.compareTo(qtyToRecognize) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(getCtx(), "JP_Over_QtyRecognized_Possibility")
 									+" : "+ rmaline.getParent().getDocumentNo() +  " - " + rmaline.getLine());
 						}catch(Exception e) {
 							;//ignore

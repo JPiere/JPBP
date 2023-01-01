@@ -20,7 +20,7 @@ import org.adempiere.util.Callback;
 import org.adempiere.webui.adwindow.validator.WindowValidator;
 import org.adempiere.webui.adwindow.validator.WindowValidatorEvent;
 import org.adempiere.webui.adwindow.validator.WindowValidatorEventType;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.util.Env;
@@ -78,8 +78,8 @@ public class JPiereContractDocumentWindowValidator implements WindowValidator {
 							MContract contract = MContract.get(Env.getCtx(), Record_ID);
 							if(contract.getContractContents(true,null).length > 0)
 							{
-								FDialog.info(event.getWindow().getADWindowContent().getWindowNo()
-										, event.getWindow().getComponent(), "JP_ToBeConfirmed", Msg.getMsg(Env.getCtx(), "JP_ConfirmContractProcessDateTo"));
+								Dialog.info(event.getWindow().getADWindowContent().getWindowNo()
+										, "JP_ToBeConfirmed", Msg.getMsg(Env.getCtx(), "JP_ConfirmContractProcessDateTo"));
 							}
 							
 						}else if(old_ContractPeriodDate_To.compareTo(new_ContractPeriodDate_To) != 0 ){
@@ -87,8 +87,8 @@ public class JPiereContractDocumentWindowValidator implements WindowValidator {
 							MContract contract = MContract.get(Env.getCtx(), Record_ID);
 							if(contract.getContractContents(true,null).length > 0)
 							{
-								FDialog.info(event.getWindow().getADWindowContent().getWindowNo()
-										, event.getWindow().getComponent(), "JP_ToBeConfirmed", Msg.getMsg(Env.getCtx(), "JP_ConfirmContractProcessDateTo"));
+								Dialog.info(event.getWindow().getADWindowContent().getWindowNo()
+										, "JP_ToBeConfirmed", Msg.getMsg(Env.getCtx(), "JP_ConfirmContractProcessDateTo"));
 							}
 						}
 						

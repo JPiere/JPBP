@@ -140,6 +140,7 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 	}
 	
 	/** Tax							*/
+	@SuppressWarnings("unused")
 	private MTax 		m_tax = null;
 	/** Cached Precision			*/
 	private Integer		m_precision = null;
@@ -149,6 +150,7 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 	 * 	Get Precision
 	 * 	@return Returns the precision or 2
 	 */
+	@SuppressWarnings("unused")
 	private int getPrecision ()
 	{
 		if (m_precision == null)

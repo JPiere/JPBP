@@ -46,7 +46,7 @@ import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MRole;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfo;
@@ -134,7 +134,7 @@ public class WFEditorJP extends ADForm {
 
 			//Please select one WF Activity for display Workflow.
 			Events.postEvent(Events.ON_CLOSE, this, null);
-			FDialog.error(getWindowNo(),"JP_WF_WFEditorSelectRecordError");//TODO メッセージを変更
+			Dialog.error(getWindowNo(),"JP_WF_WFEditorSelectRecordError");//TODO メッセージを変更
 			return ;
 		}
 

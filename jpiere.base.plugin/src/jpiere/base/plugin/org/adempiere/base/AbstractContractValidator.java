@@ -1,6 +1,6 @@
 package jpiere.base.plugin.org.adempiere.base;
 
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MColumn;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
@@ -98,7 +98,7 @@ public abstract class AbstractContractValidator {
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractContent + "," + contractPeriod + " -> " + toBeConfirmed + " : " + message);
 						}catch(Exception e) {
 							;//ignore
@@ -158,7 +158,7 @@ public abstract class AbstractContractValidator {
 						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 
 						try {
-							FDialog.info(0, null,"JP_ContractManagementInfo"
+							Dialog.info(0, null,"JP_ContractManagementInfo"
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+ spotContract);
 						}catch(Exception e) {
 							;//ignore
@@ -186,7 +186,7 @@ public abstract class AbstractContractValidator {
 						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
 						}catch(Exception e) {
 							;//ignore
@@ -241,7 +241,7 @@ public abstract class AbstractContractValidator {
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contract + "," + contractContent + "," + contractPeriod + " -> " + toBeConfirmed + " : " + message);
 						}catch(Exception e) {
 							;//ignore
@@ -277,7 +277,7 @@ public abstract class AbstractContractValidator {
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);
 						}catch(Exception e) {
 							;//ignore
@@ -360,7 +360,7 @@ public abstract class AbstractContractValidator {
 								String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
 
 								try {
-									FDialog.info(0, null, "JP_ContractManagementInfo"
+									Dialog.info(0, null, "JP_ContractManagementInfo"
 										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);
 								}catch(Exception e) {
 									;//ignore
@@ -392,7 +392,7 @@ public abstract class AbstractContractValidator {
 								String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
 
 								try {
-									FDialog.info(0, null, "JP_ContractManagementInfo"
+									Dialog.info(0, null, "JP_ContractManagementInfo"
 										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);
 								}catch(Exception e) {
 									;//ignore
@@ -419,7 +419,7 @@ public abstract class AbstractContractValidator {
 						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);
 						}catch(Exception e) {
 							;//ignore
@@ -445,7 +445,7 @@ public abstract class AbstractContractValidator {
 						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 
 						try {
-							FDialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
+							Dialog.info(0, null, Msg.getMsg(Env.getCtx(), "JP_ContractManagementInfo")
 								, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
 						}catch(Exception e) {
 							;//ignore

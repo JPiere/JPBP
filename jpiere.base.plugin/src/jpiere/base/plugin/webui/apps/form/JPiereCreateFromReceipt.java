@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.apps.IStatusBar;
 import org.compiere.grid.CreateFrom;
 import org.compiere.minigrid.IMiniTable;
@@ -367,7 +367,7 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 		int M_Locator_ID = shipLocator_ID;
 		if (!isShipFromScheduledShipLocator && M_Locator_ID == 0) 	//Check Locator
 		{
-			FDialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID"));
+			Dialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID"));
 			return false;
 
 		}else{
@@ -382,7 +382,7 @@ public abstract class JPiereCreateFromReceipt extends CreateFrom
 					{
 						pp = (KeyNamePair) miniTable.getValueAt(i, 1); // OrderLine
 
-						FDialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID")
+						Dialog.error(0, Msg.getMsg(Env.getCtx(), "FillMandatory") + Msg.getElement(Env.getCtx(), "M_Locator_ID")
 											+ System.lineSeparator()
 											+ Msg.getElement(Env.getCtx(), "Line")
 											+ " : " + pp.getName());

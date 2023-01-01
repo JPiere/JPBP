@@ -17,7 +17,7 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.math.BigDecimal;
 import java.util.logging.Level;
 
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOutConfirm;
@@ -270,7 +270,7 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					if(movementQty.compareTo(qtyToDelivere) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
 									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -283,7 +283,7 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					if(movementQty.compareTo(qtyToDelivere) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
 									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -303,7 +303,7 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					if(movementQty.compareTo(qtyToDeliver) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
 									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -315,7 +315,7 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					if(movementQty.compareTo(qtyToDeliver) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyDelivered_Possibility")
 									+" : "+ iol.getParent().getDocumentNo() +  " - " + iol.getLine());
 						}catch(Exception e) {
 							;//ignore

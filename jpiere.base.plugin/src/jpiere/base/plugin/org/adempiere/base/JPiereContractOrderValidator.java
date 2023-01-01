@@ -16,7 +16,7 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.math.BigDecimal;
 import java.util.logging.Level;
 
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
 import org.compiere.model.MDocType;
@@ -206,7 +206,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);//It is not input in {0}
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractContent + " , " + contractPeriod + " -> " + toBeConfirmed +" : " + message);
 						}catch(Exception e) {
 							;//ignore
@@ -373,7 +373,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+ spotContract);
 						}catch(Exception e) {
 							;//ignore
@@ -401,7 +401,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
 						}catch(Exception e) {
 							;//ignore
@@ -552,7 +552,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 							String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 
 							try {
-								FDialog.info(0, null, "JP_ContractManagementInfo"
+								Dialog.info(0, null, "JP_ContractManagementInfo"
 									, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);
 							}catch(Exception e) {
 								;//ignore
@@ -579,7 +579,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 							String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 
 							try {
-								FDialog.info(0, null, "JP_ContractManagementInfo"
+								Dialog.info(0, null, "JP_ContractManagementInfo"
 									, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
 							}catch(Exception e) {
 								;//ignore
@@ -604,7 +604,7 @@ public class JPiereContractOrderValidator implements ModelValidator {
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
 
 						try {
-							FDialog.info(0, null, "JP_ContractManagementInfo"
+							Dialog.info(0, null, "JP_ContractManagementInfo"
 								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);
 						}catch(Exception e) {
 							;//ignore

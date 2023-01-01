@@ -19,7 +19,7 @@ import java.util.Properties;
 
 import org.adempiere.base.IColumnCallout;
 import org.adempiere.util.Callback;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.util.Msg;
@@ -46,7 +46,7 @@ public class JPiereContractCallout implements IColumnCallout {
 		if(mField.getColumnName().equals("JP_ContractT_ID") && value != null)
 		{
 
-			FDialog.ask(WindowNo, null, "JP_UpdateContractByTemplate", new Callback<Boolean>() //Would you like to update contract document by template?
+			Dialog.ask(WindowNo, null, "JP_UpdateContractByTemplate", new Callback<Boolean>() //Would you like to update contract document by template?
 			{
 
 				@Override

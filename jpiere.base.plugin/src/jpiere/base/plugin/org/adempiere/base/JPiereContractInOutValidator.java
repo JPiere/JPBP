@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.FactsValidator;
@@ -583,7 +583,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 							String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
 
 							try {
-								FDialog.info(0, null, "JP_ContractManagementInfo"
+								Dialog.info(0, null, "JP_ContractManagementInfo"
 									, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);
 							}catch(Exception e) {
 								;//ignore

@@ -53,7 +53,7 @@ import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
@@ -559,12 +559,12 @@ public class WAllocation extends Allocation
 		chargePick.setValue(Integer.valueOf(m_C_Charge_ID));
 		chargePick.addValueChangeListener(this);
 		
-	//  Charge
-			AD_Column_ID = 212213;    //  C_AllocationLine.C_Charge_ID
-			MLookup lookupDocType = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
-			DocTypePick = new WTableDirEditor("C_DocType_ID", false, false, true, lookupDocType);
-			DocTypePick.setValue(Integer.valueOf(m_C_DocType_ID));
-			DocTypePick.addValueChangeListener(this);
+		//  Doc Type
+		AD_Column_ID = 212213;    //  C_AllocationLine.C_DocType_ID
+		MLookup lookupDocType = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
+		DocTypePick = new WTableDirEditor("C_DocType_ID", false, false, true, lookupDocType);
+		DocTypePick.setValue(Integer.valueOf(m_C_DocType_ID));
+		DocTypePick.addValueChangeListener(this);
 			
 	}   //  dynInit
 	
@@ -626,7 +626,7 @@ public class WAllocation extends Allocation
 		{
 			loadBPartner();
 		}
-	}   //  actionPerformed
+	}
 
 	/**
 	 *  Table Model Listener.
@@ -659,7 +659,7 @@ public class WAllocation extends Allocation
 		model.updateComponent(row);
 	    
 		if(msg != null && msg.length() > 0)
-			FDialog.warn(form.getWindowNo(), "AllocationWriteOffWarn");
+			Dialog.warn(form.getWindowNo(), "AllocationWriteOffWarn");
 		
 		calculate();
 	}   //  tableChanged
@@ -937,6 +937,9 @@ public class WAllocation extends Allocation
 		
 	}   //  loadBPartner
 	
+	/**
+	 * perform allocation calculation
+	 */
 	public void calculate()
 	{
 		allocDate = null;
@@ -987,14 +990,14 @@ public class WAllocation extends Allocation
 		}
 		catch (Exception e)
 		{
-			FDialog.error(form.getWindowNo(), form, "Error", e.getLocalizedMessage());
+			Dialog.error(form.getWindowNo(), "Error", e.getLocalizedMessage());
 			return null;
 		}
 	}   //  saveData
 	
 	/**
 	 * Called by org.adempiere.webui.panel.ADForm.openForm(int)
-	 * @return
+	 * @return {@link ADForm}
 	 */
 	public ADForm getForm()
 	{

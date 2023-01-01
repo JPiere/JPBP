@@ -17,7 +17,7 @@ import java.util.Collection;
 
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.panel.ADForm;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.Env;
@@ -83,7 +83,7 @@ public class WFActivityZoom extends ADForm{
 		}else {
 
 			//More than one zoom destination is selected. Please select one zoom destination.
-			FDialog.error(getWindowNo(), "JP_WF_ZoomOne");
+			Dialog.error(getWindowNo(), "JP_WF_ZoomOne");
 		}
 
 		addEventListener(Events.ON_CLOSE, this);

@@ -38,7 +38,7 @@ import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WStringEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.GridTab;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MColumn;
@@ -143,7 +143,7 @@ public class JPiereCreateFromStatementUI extends JPiereCreateFromStatement imple
 
 		if (getGridTab().getValue("C_BankStatement_ID") == null)
 		{
-			FDialog.error(0, window, "SaveErrorRowNotFound");
+			Dialog.error(0, "SaveErrorRowNotFound");
 			return false;
 		}
 

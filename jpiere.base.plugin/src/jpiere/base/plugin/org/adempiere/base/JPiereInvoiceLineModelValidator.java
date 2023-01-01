@@ -16,7 +16,7 @@ package jpiere.base.plugin.org.adempiere.base;
 import java.math.BigDecimal;
 import java.util.logging.Level;
 
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MCharge;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
@@ -333,7 +333,7 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
 									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -346,7 +346,7 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
 									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -366,7 +366,7 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) > 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
 									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore
@@ -378,7 +378,7 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					if(invoiceQtyInvoiced.compareTo(qtyToInvoice) < 0)
 					{
 						try {
-							FDialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
+							Dialog.info(0, null, "JP_ToBeConfirmed", Msg.getMsg(po.getCtx(), "JP_Over_QtyInvoiced_Possibility")
 									+" : "+ il.getParent().getDocumentNo() +  " - " + il.getLine());
 						}catch(Exception e) {
 							;//ignore

@@ -51,7 +51,7 @@ import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
@@ -1275,7 +1275,7 @@ public class JPARInvoiceAllocation implements IFormController, EventListener<Eve
 		}
 		catch (Exception e)
 		{
-			FDialog.error(form.getWindowNo(), form, "Error", e.getLocalizedMessage());
+			Dialog.error(form.getWindowNo(), "Error", e.getLocalizedMessage());
 			return null;
 		}
 	}
