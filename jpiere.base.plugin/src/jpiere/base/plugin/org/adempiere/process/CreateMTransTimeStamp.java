@@ -70,7 +70,7 @@ public class CreateMTransTimeStamp extends SvrProcess {
 		StringBuilder DateValue_00 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS')");
 		StringBuilder DateValue_24 = new StringBuilder("TO_DATE('").append(DateValue.substring(0,10)).append(" 00:00:00','YYYY-MM-DD HH24:MI:SS') + CAST('1Day' AS INTERVAL)");
 
-		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_MTrans_TimeStamp ")
+		StringBuilder sqlDelete = new StringBuilder ("DELETE FROM JP_MTrans_TimeStamp ")
 										.append(" WHERE DateValue=").append(DateValue_00)
 										.append(" AND AD_Client_ID=").append(p_AD_Client_ID);
 		int deleteNo = DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
