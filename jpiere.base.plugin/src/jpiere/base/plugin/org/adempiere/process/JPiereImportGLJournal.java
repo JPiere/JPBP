@@ -372,6 +372,13 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		else
 			return message;
 		
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_BankAccount_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_BankAccount_ID())
+			commitEx();
+		else
+			return message;
+		
 		
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
@@ -2131,6 +2138,48 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 	
 	
 	/**
+	 * Reverse lookup JP_BankAccount_ID From JP_BankAccount_Value
+	 *
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_BankAccount_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_GLJournalJP i ")
+			.append("SET JP_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
+			.append(" WHERE i.JP_BankAccount_Value=p.Value AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append(" WHERE i.JP_BankAccount_ID IS NULL AND i.JP_BankAccount_Value IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_BankAccount_Value
+		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_BankAccount_Value");
+		sql = new StringBuilder ("UPDATE I_GLJournalJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_BankAccount_ID IS NULL AND JP_BankAccount_Value IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " + e.toString() +" : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_BankAccount_ID
+	
+	
+	/**
 	 * Create Journal
 	 *
 	 * @param impCharge
@@ -2335,6 +2384,16 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 				}else {
 					journalLine.set_ValueNoCheck("JP_ContractProcPeriod_ID", null );
 				}
+			}
+		}
+		
+		if(journalLine.get_ColumnIndex("JP_BankAccount_ID") >= 0)//TODO
+		{
+			if(impJournal.get_ValueAsInt("JP_BankAccount_ID") > 0)//TODO
+			{
+				journalLine.set_ValueNoCheck("JP_BankAccount_ID", impJournal.get_ValueAsInt("JP_BankAccount_ID") );//TODO
+			}else {
+				journalLine.set_ValueNoCheck("JP_BankAccount_ID", null );
 			}
 		}
 

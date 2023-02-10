@@ -279,8 +279,12 @@ public class Doc_GLJournalJP extends Doc
 			for (int i = 0; i < p_lines.length; i++)
 			{
 				docLine = p_lines[i];
-				if(docLine.getAccount() != null)//JPIERE-0556
+				if(docLine.getPO().get_Value("JP_BankAccount_ID") != null)//JPIERE-0556
 				{
+					C_BankAccount_ID = ((Integer)docLine.getPO().get_Value("JP_BankAccount_ID")).intValue();
+					
+				}else if(docLine.getAccount() != null){ 
+					
 					elementValue = docLine.getAccount().getAccount();
 					if(elementValue != null)
 					{
@@ -288,6 +292,7 @@ public class Doc_GLJournalJP extends Doc
 					}else {
 						C_BankAccount_ID = 0;
 					}
+					
 				}else {
 					elementValue = null;
 					C_BankAccount_ID = 0;
