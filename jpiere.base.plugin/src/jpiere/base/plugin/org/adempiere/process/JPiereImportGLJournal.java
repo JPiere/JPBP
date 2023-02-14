@@ -2387,11 +2387,11 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 			}
 		}
 		
-		if(journalLine.get_ColumnIndex("JP_BankAccount_ID") >= 0)//TODO
+		if(journalLine.get_ColumnIndex("JP_BankAccount_ID") >= 0)
 		{
-			if(impJournal.get_ValueAsInt("JP_BankAccount_ID") > 0)//TODO
+			if(impJournal.getJP_BankAccount_ID() > 0)
 			{
-				journalLine.set_ValueNoCheck("JP_BankAccount_ID", impJournal.get_ValueAsInt("JP_BankAccount_ID") );//TODO
+				journalLine.set_ValueNoCheck("JP_BankAccount_ID", impJournal.getJP_BankAccount_ID());
 			}else {
 				journalLine.set_ValueNoCheck("JP_BankAccount_ID", null );
 			}

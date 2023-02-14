@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_GLJournalJP
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 10
  */
 @SuppressWarnings("all")
 public interface I_I_GLJournalJP 
@@ -46,8 +46,8 @@ public interface I_I_GLJournalJP
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -68,12 +68,12 @@ public interface I_I_GLJournalJP
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -648,6 +648,30 @@ public interface I_I_GLJournalJP
 	/** Get Business Partner(Search Key)	  */
 	public String getJP_BPartner_Value();
 
+    /** Column name JP_BankAccount_ID */
+    public static final String COLUMNNAME_JP_BankAccount_ID = "JP_BankAccount_ID";
+
+	/** Set Bank Account.
+	  * Account at the Bank
+	  */
+	public void setJP_BankAccount_ID (int JP_BankAccount_ID);
+
+	/** Get Bank Account.
+	  * Account at the Bank
+	  */
+	public int getJP_BankAccount_ID();
+
+	public org.compiere.model.I_C_BankAccount getJP_BankAccount() throws RuntimeException;
+
+    /** Column name JP_BankAccount_Value */
+    public static final String COLUMNNAME_JP_BankAccount_Value = "JP_BankAccount_Value";
+
+	/** Set Bank Account(Search Key)	  */
+	public void setJP_BankAccount_Value (String JP_BankAccount_Value);
+
+	/** Get Bank Account(Search Key)	  */
+	public String getJP_BankAccount_Value();
+
     /** Column name JP_Campaign_Value */
     public static final String COLUMNNAME_JP_Campaign_Value = "JP_Campaign_Value";
 
@@ -838,6 +862,19 @@ public interface I_I_GLJournalJP
 	/** Get Organization(Search Key)	  */
 	public String getJP_Org_Value();
 
+    /** Column name JP_PriceActual */
+    public static final String COLUMNNAME_JP_PriceActual = "JP_PriceActual";
+
+	/** Set Unit Price.
+	  * Actual Price 
+	  */
+	public void setJP_PriceActual (BigDecimal JP_PriceActual);
+
+	/** Get Unit Price.
+	  * Actual Price 
+	  */
+	public BigDecimal getJP_PriceActual();
+
     /** Column name JP_Product_Value */
     public static final String COLUMNNAME_JP_Product_Value = "JP_Product_Value";
 
@@ -982,12 +1019,12 @@ public interface I_I_GLJournalJP
     /** Column name PostingType */
     public static final String COLUMNNAME_PostingType = "PostingType";
 
-	/** Set PostingType.
+	/** Set Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public void setPostingType (String PostingType);
 
-	/** Get PostingType.
+	/** Get Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public String getPostingType();

@@ -26,7 +26,7 @@ import org.compiere.util.Env;
 
 /** Generated Model for I_GLJournalJP
  *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @version Release 10 - $Id$ */
 @org.adempiere.base.Model(table="I_GLJournalJP")
 public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent 
 {
@@ -34,7 +34,7 @@ public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220324L;
+	private static final long serialVersionUID = 20230214L;
 
     /** Standard Constructor */
     public X_I_GLJournalJP (Properties ctx, int I_GLJournalJP_ID, String trxName)
@@ -47,6 +47,8 @@ public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent
 			setAmtSourceCr (Env.ZERO);
 			setAmtSourceDr (Env.ZERO);
 			setI_GLJournalJP_ID (0);
+			setJP_PriceActual (Env.ZERO);
+// 0
         } */
     }
 
@@ -61,6 +63,8 @@ public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent
 			setAmtSourceCr (Env.ZERO);
 			setAmtSourceDr (Env.ZERO);
 			setI_GLJournalJP_ID (0);
+			setJP_PriceActual (Env.ZERO);
+// 0
         } */
     }
 
@@ -1052,6 +1056,49 @@ public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_BPartner_Value);
 	}
 
+	public org.compiere.model.I_C_BankAccount getJP_BankAccount() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
+			.getPO(getJP_BankAccount_ID(), get_TrxName());
+	}
+
+	/** Set Bank Account.
+		@param JP_BankAccount_ID Account at the Bank
+	*/
+	public void setJP_BankAccount_ID (int JP_BankAccount_ID)
+	{
+		if (JP_BankAccount_ID < 1)
+			set_Value (COLUMNNAME_JP_BankAccount_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_BankAccount_ID, Integer.valueOf(JP_BankAccount_ID));
+	}
+
+	/** Get Bank Account.
+		@return Account at the Bank
+	  */
+	public int getJP_BankAccount_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BankAccount_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Bank Account(Search Key).
+		@param JP_BankAccount_Value Bank Account(Search Key)
+	*/
+	public void setJP_BankAccount_Value (String JP_BankAccount_Value)
+	{
+		set_Value (COLUMNNAME_JP_BankAccount_Value, JP_BankAccount_Value);
+	}
+
+	/** Get Bank Account(Search Key).
+		@return Bank Account(Search Key)	  */
+	public String getJP_BankAccount_Value()
+	{
+		return (String)get_Value(COLUMNNAME_JP_BankAccount_Value);
+	}
+
 	/** Set Campaign(Search Key).
 		@param JP_Campaign_Value Campaign(Search Key)
 	*/
@@ -1389,6 +1436,25 @@ public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent
 		return (String)get_Value(COLUMNNAME_JP_Org_Value);
 	}
 
+	/** Set Unit Price.
+		@param JP_PriceActual Actual Price 
+	*/
+	public void setJP_PriceActual (BigDecimal JP_PriceActual)
+	{
+		set_Value (COLUMNNAME_JP_PriceActual, JP_PriceActual);
+	}
+
+	/** Get Unit Price.
+		@return Actual Price 
+	  */
+	public BigDecimal getJP_PriceActual()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_PriceActual);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Product(Search Key).
 		@param JP_Product_Value Product(Search Key)
 	*/
@@ -1635,7 +1701,7 @@ public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent
 	public static final String POSTINGTYPE_Reservation = "R";
 	/** Statistical = S */
 	public static final String POSTINGTYPE_Statistical = "S";
-	/** Set PostingType.
+	/** Set Posting Type.
 		@param PostingType The type of posted amount for the transaction
 	*/
 	public void setPostingType (String PostingType)
@@ -1644,7 +1710,7 @@ public class X_I_GLJournalJP extends PO implements I_I_GLJournalJP, I_Persistent
 		set_Value (COLUMNNAME_PostingType, PostingType);
 	}
 
-	/** Get PostingType.
+	/** Get Posting Type.
 		@return The type of posted amount for the transaction
 	  */
 	public String getPostingType()
