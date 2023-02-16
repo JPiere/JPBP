@@ -43,8 +43,18 @@ public class PPDocCallout extends CalloutEngine {
 
 	public String convertUom(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
-		int C_UOM_To_ID = Integer.valueOf(mTab.get_ValueAsString("C_UOM_ID")).intValue();
-		int M_Product_ID = Integer.valueOf(mTab.get_ValueAsString("M_Product_ID")).intValue();
+		int C_UOM_To_ID = 0;
+		if(mTab.getValue("C_UOM_ID") == null)
+			return "";
+		
+		C_UOM_To_ID = Integer.valueOf(mTab.get_ValueAsString("C_UOM_ID")).intValue();
+		
+		int M_Product_ID = 0;
+		if(mTab.getValue("M_Product_ID") == null)
+			return "";
+		
+		M_Product_ID = Integer.valueOf(mTab.get_ValueAsString("M_Product_ID")).intValue();
+		
 		BigDecimal QtyEntered = (BigDecimal)mTab.getValue("QtyEntered");
 
 		BigDecimal productionQty = MUOMConversion.convertProductFrom (ctx, M_Product_ID,C_UOM_To_ID, QtyEntered);
@@ -56,7 +66,11 @@ public class PPDocCallout extends CalloutEngine {
 
 	public String product(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value, Object oldValue)
 	{
-		int M_Product_ID = Integer.valueOf(mTab.get_ValueAsString("M_Product_ID")).intValue();
+		int M_Product_ID = 0;
+		
+		if(mTab.getValue("M_Product_ID") != null)
+			M_Product_ID = Integer.valueOf(mTab.get_ValueAsString("M_Product_ID")).intValue();
+		
 		if(M_Product_ID != 0)
 		{
 			MProduct m_Product = MProduct.get(M_Product_ID);
