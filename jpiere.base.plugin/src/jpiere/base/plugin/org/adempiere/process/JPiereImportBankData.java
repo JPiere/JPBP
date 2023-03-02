@@ -17,12 +17,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
-import org.compiere.model.MBankAccount;
+import org.compiere.model.MColumn;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfoParameter;
@@ -62,6 +63,7 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 	
 	private String p_JP_ImportSalesRepIdentifier = null;
 	
+	private ArrayList<MBankData> list_BankData = new ArrayList<MBankData>();
 	
 	@Override
 	protected void prepare() 
@@ -245,6 +247,9 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 		String createLine = Msg.getMsg(getCtx(), "JP_CreateLine");
 		String detail = Msg.getMsg(getCtx(), "JP_DetailLog");
 		
+		
+		boolean isError = false;
+		
 		try
 		{
 			pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
@@ -318,7 +323,8 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 						imp.setProcessed(false);
 						imp.saveEx(get_TrxName());
 						commitEx();
-						continue;
+						isError = true;
+						break;
 					}
 				}
 
@@ -326,13 +332,14 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 				{
 					rollback();
 					errorNum++;
-					String msg = Msg.getMsg(getCtx(), "JP_UnexpectedError");
-					imp.setI_ErrorMsg(msg);
+					message = Msg.getMsg(getCtx(), "JP_UnexpectedError");
+					imp.setI_ErrorMsg(message);
 					imp.setI_IsImported(false);
 					imp.setProcessed(false);
 					imp.saveEx(get_TrxName());
-					commitEx();;
-					continue;
+					commitEx();
+					isError = true;
+					break;
 				}
 
 
@@ -355,12 +362,14 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 					failureCreateDocLine++;
 					errorNum++;//Error of Line include number of Error.
 
+					imp.setJP_BankData_ID(0);
 					imp.setI_ErrorMsg(message);
 					imp.setI_IsImported(false);
 					imp.setProcessed(false);
 					imp.saveEx(get_TrxName());
 					commitEx();
-					continue;
+					isError = true;
+					break;
 
 				}
 
@@ -390,7 +399,15 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 			pstmt = null;
 		}
 		
-		return null;
+		if(isError)
+			throw new Exception(message);
+		
+		for(MBankData m_BankData : list_BankData)
+		{
+			addBufferLog(0, null, null, m_BankData.getName(), MBankData.Table_ID, m_BankData.getJP_BankData_ID());
+		}
+		
+		return Msg.getMsg(getCtx(), "OK");
 	}
 
 	@Override
@@ -755,8 +772,6 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 			pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
 			rs = pstmt.executeQuery ();
 			
-			
-			
 			while (rs.next ())
 			{
 				m_BankDataJP = new X_I_BankDataJP (getCtx (), rs, get_TrxName());
@@ -950,8 +965,9 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 			m_BankData.setDateAcct(imp.getDateAcct());
 		}
 		
-		String value = MBankAccount.get(imp.getC_BankAccount_ID()).getValue();
-		m_BankData.setName(value + " - " + m_BankData.getDateAcct().toString().substring(0,10));
+	
+		String name = LocalDateTime.now().toString();
+		m_BankData.setName(name);
 		
 		m_BankData.setJP_Processing1("Y");
 		m_BankData.setJP_ProcessedTime1(Timestamp.valueOf(LocalDateTime.now()));
@@ -973,7 +989,10 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 			return false;
 		}
 		
-		addBufferLog(0, null, null, m_BankData.getName(), MBankData.Table_ID, m_BankData.getJP_BankData_ID());
+		
+		list_BankData.add(m_BankData);
+		
+		//addBufferLog(0, null, null, m_BankData.getName(), MBankData.Table_ID, m_BankData.getJP_BankData_ID());
 		
 		return true;
 	}
@@ -1000,7 +1019,17 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 				m_line.setJP_BankAccountType(null);
 		}
 		
+		MColumn m_colmun = MColumn.get(getCtx(), MBankDataLine.Table_Name, MBankDataLine.COLUMNNAME_JP_A_Name_Kana);
+		int columnLength = m_colmun.getFieldLength();
 
+		String a_Name_Lana = imp.getJP_A_Name_Kana();
+		if(!Util.isEmpty(a_Name_Lana))
+		{
+			if(a_Name_Lana.length() > columnLength)
+			{
+				m_line.setJP_A_Name_Kana(a_Name_Lana.substring(0, columnLength));
+			}
+		}
 
 		ModelValidationEngine.get().fireImportValidate(this, imp, m_line, ImportValidator.TIMING_AFTER_IMPORT);
 
