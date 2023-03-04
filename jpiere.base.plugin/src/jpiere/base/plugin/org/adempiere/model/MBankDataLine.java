@@ -174,7 +174,7 @@ public class MBankDataLine extends X_JP_BankDataLine {
 	{
 		if(forced || (is_ValueChanged("StmtAmt") || is_ValueChanged("TrxAmt") || is_ValueChanged("ChargeAmt") || is_ValueChanged("InterestAmt")) )
 		{
-			String sql = "SELECT SUM(StmtAmt), SUM(TrxAmt), SUM(ChargeAmt), SUM(InterestAmt) From JP_BankDataLine WHERE JP_BankData_ID = ?";
+			String sql = "SELECT COALESCE(SUM(StmtAmt),0), COALESCE(SUM(TrxAmt),0), COALESCE(SUM(ChargeAmt),0), COALESCE(SUM(InterestAmt),0) From JP_BankDataLine WHERE JP_BankData_ID = ?";
 			BigDecimal StmtAmt = Env.ZERO;
 			BigDecimal TrxAmt = Env.ZERO;
 			BigDecimal ChargeAmt = Env.ZERO;
