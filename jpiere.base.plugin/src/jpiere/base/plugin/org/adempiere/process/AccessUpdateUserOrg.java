@@ -14,6 +14,9 @@
 package jpiere.base.plugin.org.adempiere.process;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.logging.Level;
 
 import org.compiere.process.ProcessInfoParameter;
@@ -33,14 +36,14 @@ import org.compiere.util.Msg;
 public class AccessUpdateUserOrg extends SvrProcess {
 
 	private int p_AD_Org_ID = 0;
-	private Timestamp now = null;
+	private Timestamp today = null;
 	private int activeNum = 0;
 	private int inActiveNum = 0;
 	
 	@Override
 	protected void prepare() 
 	{
-		now = new Timestamp(System.currentTimeMillis());
+		today = Timestamp.valueOf(LocalDateTime.of(LocalDate.now(), LocalTime.MIN));
 		
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
@@ -79,10 +82,10 @@ public class AccessUpdateUserOrg extends SvrProcess {
 		
 		if(p_AD_Org_ID == 0)
 		{
-			activeNum = DB.executeUpdate(sql.toString(), new Object[] {now,now,getAD_Client_ID()},false, get_TrxName(),0);
+			activeNum = DB.executeUpdate(sql.toString(), new Object[] {today,today,getAD_Client_ID()},false, get_TrxName(),0);
 		}else {
 			sql = sql.append(" AND AD_Org_ID = ?"); 
-			activeNum = DB.executeUpdate(sql.toString(), new Object[] {now,now,getAD_Client_ID(),p_AD_Org_ID},false, get_TrxName(),0);
+			activeNum = DB.executeUpdate(sql.toString(), new Object[] {today,today,getAD_Client_ID(),p_AD_Org_ID},false, get_TrxName(),0);
 		}
 	}
 	
@@ -90,16 +93,16 @@ public class AccessUpdateUserOrg extends SvrProcess {
 	{
 		StringBuilder sql = new StringBuilder("Update AD_User_OrgAccess")
 				.append(" SET IsActive = 'N' ")
-				.append(" WHERE ( JP_ValidFrom >= ? OR JP_ValidTo <= ? ) ")
+				.append(" WHERE ( JP_ValidFrom > ? OR JP_ValidTo < ? ) ")
 				.append(" AND AD_Client_ID = ? AND IsActive = 'Y' ")
 		;
 		
 		if(p_AD_Org_ID == 0)
 		{
-			inActiveNum = DB.executeUpdate(sql.toString(), new Object[] {now,now,getAD_Client_ID()},false, get_TrxName(),0);
+			inActiveNum = DB.executeUpdate(sql.toString(), new Object[] {today,today,getAD_Client_ID()},false, get_TrxName(),0);
 		}else {
 			sql = sql.append(" AND AD_Org_ID = ?"); 
-			inActiveNum = DB.executeUpdate(sql.toString(), new Object[] {now,now,getAD_Client_ID(),p_AD_Org_ID},false, get_TrxName(),0);
+			inActiveNum = DB.executeUpdate(sql.toString(), new Object[] {today,today,getAD_Client_ID(),p_AD_Org_ID},false, get_TrxName(),0);
 		}
 		
 		
