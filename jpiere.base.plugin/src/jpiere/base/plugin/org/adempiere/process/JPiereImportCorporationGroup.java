@@ -17,16 +17,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
-import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
-import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
-import jpiere.base.plugin.org.adempiere.model.X_I_CorporationGroupJP;
-
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 
+import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
+import jpiere.base.plugin.org.adempiere.model.MGroupCorporations;
+import jpiere.base.plugin.org.adempiere.model.X_I_CorporationGroupJP;
+
 /**
- * 	Import Corporation Group
+ * 	JPIERE-0094: Import Corporation Group
  *
  *  @author Hideaki Hagiwara
  *  @version $Id: ImportCorporationGroup.java,v 1.0 2015/05/06 $
@@ -73,7 +73,7 @@ public class JPiereImportCorporationGroup extends SvrProcess
 		//Delete Old Imported data
 		if (p_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_CorporationGroupJP ")
+			sql = new StringBuilder ("DELETE FROM I_CorporationGroupJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);

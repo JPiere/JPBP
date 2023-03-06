@@ -103,7 +103,7 @@ public class JPiereImportTableAndColumn extends SvrProcess  implements ImportPro
 		//Delete Old Imported data
 		if (p_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_TableColumnJP ")
+			sql = new StringBuilder ("DELETE FROM I_TableColumnJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);

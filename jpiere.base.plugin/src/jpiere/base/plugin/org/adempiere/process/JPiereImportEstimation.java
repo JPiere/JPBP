@@ -147,7 +147,7 @@ public class JPiereImportEstimation extends SvrProcess
 		if (processMonitor != null)	processMonitor.statusUpdate("インポート済みのデータの削除");
 		if (m_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_EstimationJP ")
+			sql = new StringBuilder ("DELETE FROM I_EstimationJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);

@@ -112,7 +112,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 		/** Delete Old Imported */
 		if (m_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_UserJP ")
+			sql = new StringBuilder ("DELETE FROM I_UserJP ")
 				.append("WHERE I_IsImported='Y'").append(clientCheck);
 			try {
 				no = DB.executeUpdate(sql.toString(), get_TrxName());

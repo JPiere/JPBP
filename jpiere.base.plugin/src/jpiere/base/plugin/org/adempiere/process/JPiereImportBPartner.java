@@ -129,7 +129,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		/**	Delete Old Imported */
 		if (p_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_BPartnerJP ")
+			sql = new StringBuilder ("DELETE FROM I_BPartnerJP ")
 					.append("WHERE I_IsImported='Y' AND Processed='Y' ").append(clientCheck);
 			try {
 				no = DB.executeUpdateEx(sql.toString(), get_TrxName());

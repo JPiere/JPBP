@@ -102,7 +102,7 @@ public class JPiereImportBPBankAccount extends SvrProcess implements ImportProce
 		//Delete Old Imported data
 		if (p_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_BP_BankAccountJP ")
+			sql = new StringBuilder ("DELETE FROM I_BP_BankAccountJP ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			try {
 				no = DB.executeUpdate(sql.toString(), get_TrxName());
