@@ -124,6 +124,7 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
 		}
 
+		
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
 		
 		
@@ -585,10 +586,11 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 	{
 		int no = 0;
 
+		//Match C_Bank_ID and (JP_BranchCode or JP_BranchName or JP_BranchName_Kana) and AccountNo and BankAccountType
 		StringBuilder sql = new StringBuilder ("UPDATE I_BankDataJP i ")
 				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
 				.append(" WHERE i.C_Bank_ID=p.C_Bank_ID AND (i.JP_BranchCode=p.JP_BranchCode OR i.JP_BranchName=p.JP_BranchName OR i.JP_BranchName_Kana=p.JP_BranchName_Kana) ")
-				.append(" AND i.AccountNo = p.AccountNo ")
+				.append(" AND i.AccountNo = p.AccountNo  AND i.BankAccountType = p.BankAccountType ")
 				.append(" AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
 				.append(" WHERE i.C_BankAccount_ID IS NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
@@ -598,7 +600,21 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : "+ e.toString() + " : "+ sql );
 		}
 		
-
+		//Match C_Bank_ID and (JP_BranchCode or JP_BranchName or JP_BranchName_Kana) and AccountNo
+		sql = new StringBuilder ("UPDATE I_BankDataJP i ")
+				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
+				.append(" WHERE i.C_Bank_ID=p.C_Bank_ID AND (i.JP_BranchCode=p.JP_BranchCode OR i.JP_BranchName=p.JP_BranchName OR i.JP_BranchName_Kana=p.JP_BranchName_Kana) ")
+				.append(" AND i.AccountNo = p.AccountNo ")
+				.append(" AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
+				.append(" WHERE i.C_BankAccount_ID IS NULL and i.BankAccountType IS NULL ")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message + " : "+ e.toString() + " : "+ sql );
+		}
+		
+		//Match C_Bank_ID and JP_BankAccount_Value
 		sql = new StringBuilder ("UPDATE I_BankDataJP i ")
 				.append("SET C_BankAccount_ID=(SELECT C_BankAccount_ID FROM C_BankAccount p")
 				.append(" WHERE  i.C_Bank_ID=p.C_Bank_ID AND i.JP_BankAccount_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
@@ -611,6 +627,7 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 		}
 		
 		
+		//set AD_Org_ID from Bank Account
 		sql = new StringBuilder ("UPDATE I_BankDataJP i ")
 				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM C_BankAccount p")
 				.append(" WHERE i.C_BankAccount_ID=p.C_BankAccount_ID ) ")
