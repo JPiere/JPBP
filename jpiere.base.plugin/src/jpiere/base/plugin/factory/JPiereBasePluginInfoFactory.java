@@ -39,7 +39,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
         	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup);
         	if (!info.loadedOK())
         	{
-	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup);
+	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, null);
 	        	if (!info.loadedOK()) {
 	        		info.dispose(false);
 	        		info = null;
@@ -75,6 +75,13 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	public InfoWindow create(int AD_InfoWindow_ID) {
 
 			return null;
+	}
+
+	@Override
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection,
+			String whereClause, int AD_InfoWindow_ID, boolean lookup, GridField field) {
+		
+		return null;
 	}
 
 }
