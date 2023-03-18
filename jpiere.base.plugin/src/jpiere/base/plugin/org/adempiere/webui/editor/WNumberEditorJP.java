@@ -51,7 +51,7 @@ import org.zkoss.zk.ui.event.Events;
  * @author Low Heng Sin
  * @author Cristina Ghita, www.arhipac.ro
  *  	   <li> BF [3058780] WNumberEditor allow only BigDecimal
- *  	   @see https://sourceforge.net/tracker/?func=detail&aid=3058780&group_id=176962&atid=955896
+ *  	   @see https://sourceforge.net/p/adempiere/zk-web-client/433/
  */
 /**
  * JPIERE-0003 Modify WNumberEditor#setValue()
@@ -75,7 +75,16 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 
     public WNumberEditorJP()
     {
-    	this("Number", false, false, true, DisplayType.Number, "");
+    	this(DisplayType.Number);
+    }
+
+    /**
+    *
+    * @param displayType
+    */
+    public WNumberEditorJP(int displayType)
+    {
+    	this("Number", false, false, true, displayType, "");
     }
 
     /**
@@ -148,6 +157,10 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     {
 		super(new NumberBox(displayType == DisplayType.Integer), columnName, title, null, mandatory,
 				readonly, updateable);
+
+		if (!DisplayType.isNumeric(displayType)) 
+			throw new IllegalArgumentException("DisplayType must be numeric");
+
 		this.displayType = displayType;
 		init();
 	}
