@@ -183,7 +183,8 @@ public class JPiereBankAccountModelValidator implements ModelValidator {
 					}
 				}
 
-				bankAcct.setPaymentExportClass(ZenginCheck.PAYMENT_EXPORT_CLASS);
+				if(Util.isEmpty(bankAcct.getPaymentExportClass()))
+					bankAcct.setPaymentExportClass(ZenginCheck.PAYMENT_EXPORT_CLASS);
 
 			}//if(characters != null)
 		}
