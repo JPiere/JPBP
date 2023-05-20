@@ -745,7 +745,7 @@ public interface IJPiereTaxProvider {
 	
 	
 	/**
-	 * JPIERE-05XX: Calculate GL Journal Tax
+	 * JPIERE-0544: Calculate GL Journal Tax
 	 *
 	 * @param provider
 	 * @param line
@@ -815,7 +815,7 @@ public interface IJPiereTaxProvider {
 	
 
 	/**
-	 * JPIERE-05XX: Calculate GL Journal Tax
+	 * JPIERE-0544: Calculate GL Journal Tax
 	 *
 	 * @param line
 	 * @param m_GLJournalTax
@@ -839,11 +839,11 @@ public interface IJPiereTaxProvider {
 		
 		if(JP_SOPOType.equals("S"))
 		{
-			sql = "SELECT AmtSourceCr - AmtSourceDr FROM GL_JournalLine WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=?";
+			sql = "SELECT AmtSourceCr - AmtSourceDr FROM GL_JournalLine WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=? AND AD_Org_ID = ?";
 			
 		}else if(JP_SOPOType.equals("P")){
 			
-			sql = "SELECT AmtSourceDr - AmtSourceCr FROM GL_JournalLine WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=?";
+			sql = "SELECT AmtSourceDr - AmtSourceCr FROM GL_JournalLine WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=? AND AD_Org_ID = ?";
 			
 		}
 		
@@ -855,6 +855,7 @@ public interface IJPiereTaxProvider {
 			pstmt.setInt (1,m_GLJournalTax.getGL_Journal_ID());
 			pstmt.setString(2, JP_SOPOType);
 			pstmt.setInt (3, m_GLJournalTax.getC_Tax_ID());
+			pstmt.setInt (4, m_GLJournalTax.getAD_Org_ID());
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{

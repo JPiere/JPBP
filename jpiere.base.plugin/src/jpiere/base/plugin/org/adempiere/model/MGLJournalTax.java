@@ -24,7 +24,7 @@ import org.compiere.util.Util;
 
 
 /**
- * JPIERE-05XX: GL Journal Tax
+ * JPIERE-0544: GL Journal Tax
  *
  * @author Hideaki Hagiwara
  *
@@ -89,7 +89,7 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 			return null;
 		}
 
-		String sql = "SELECT * FROM JP_GLJournalTax WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=? ";
+		String sql = "SELECT * FROM JP_GLJournalTax WHERE GL_Journal_ID=? AND JP_SOPOType=? AND C_Tax_ID=? AND AD_Org_ID =?";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -98,6 +98,7 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 			pstmt.setInt (1, line.getGL_Journal_ID());
 			pstmt.setString(2, JP_SOPOType);
 			pstmt.setInt (3, C_Tax_ID);
+			pstmt.setInt (4, line.getAD_Org_ID());
 			rs = pstmt.executeQuery ();
 			if (rs.next ())
 				retValue = new MGLJournalTax (line.getCtx(), rs, trxName);
