@@ -82,7 +82,7 @@ public class Doc_GLJournalJP extends Doc
 	protected int				m_C_AcctSchema_ID = 0;
 
 	/** Contained Optional Tax Lines    */
-	protected DocTax[]        m_taxes = null;
+	protected DocTaxJournal[]        m_taxes = null;
 	/** Currency Precision				*/
 	protected int				m_precision = -1;
 	
@@ -107,10 +107,10 @@ public class Doc_GLJournalJP extends Doc
 	 *	Load Invoice Taxes
 	 *  @return DocTax Array
 	 */
-	private DocTax[] loadTaxes()
+	private DocTaxJournal[] loadTaxes()
 	{
-		ArrayList<DocTax> list = new ArrayList<DocTax>();
-		String sql = "SELECT it.C_Tax_ID, t.Name, t.Rate, it.TaxBaseAmt, it.TaxAmt, it.JP_SOPOType "
+		ArrayList<DocTaxJournal> list = new ArrayList<DocTaxJournal>();
+		String sql = "SELECT it.C_Tax_ID, t.Name, t.Rate, it.TaxBaseAmt, it.TaxAmt, it.JP_SOPOType, it.AD_Org_ID "
 				+ "FROM C_Tax t, JP_GLJournalTax it "
 				+ "WHERE t.C_Tax_ID=it.C_Tax_ID AND it.GL_Journal_ID=?";
 		PreparedStatement pstmt = null;
@@ -129,9 +129,10 @@ public class Doc_GLJournalJP extends Doc
 				BigDecimal taxBaseAmt = rs.getBigDecimal(4);
 				BigDecimal amount = rs.getBigDecimal(5);
 				boolean salesTax = "S".equals(rs.getString(6));
+				int AD_Org_ID = rs.getInt(7);
 				//
-				DocTax taxLine = new DocTax(C_Tax_ID, name, rate,
-					taxBaseAmt, amount, salesTax);
+				DocTaxJournal taxLine = new DocTaxJournal(C_Tax_ID, name, rate,
+					taxBaseAmt, amount, salesTax, AD_Org_ID);
 				if (log.isLoggable(Level.FINE)) log.fine(taxLine.toString());
 				list.add(taxLine);
 			}
@@ -147,7 +148,7 @@ public class Doc_GLJournalJP extends Doc
 		}
 
 		//	Return Array
-		DocTax[] tl = new DocTax[list.size()];
+		DocTaxJournal[] tl = new DocTaxJournal[list.size()];
 		list.toArray(tl);
 		return tl;
 	}	//	loadTaxes
@@ -187,7 +188,7 @@ public class Doc_GLJournalJP extends Doc
 			{					
 				for (int t = 0; t < m_taxes.length; t++)
 				{
-					if (m_taxes[t].getC_Tax_ID() == C_Tax_ID)
+					if (m_taxes[t].getC_Tax_ID() == C_Tax_ID && m_taxes[t].getAD_Org_ID() == journalLine.getAD_Org_ID())
 					{
 						if( ("S".equals(JP_SOPOType) && m_taxes[t].isSalesTax())
 								|| ("P".equals(JP_SOPOType) && !m_taxes[t].isSalesTax()) )
@@ -272,7 +273,7 @@ public class Doc_GLJournalJP extends Doc
 			BigDecimal JP_TaxBaseAmt = Env.ZERO;
 			BigDecimal JP_TaxAmt = Env.ZERO;
 			FactLine fLine = null;
-			DocTax docTax = null;
+			DocTaxJournal docTax = null;
 			MElementValue  elementValue = null;//JPIERE-0556
 			int C_BankAccount_ID = 0;//JPIERE-0556
 			
@@ -312,7 +313,17 @@ public class Doc_GLJournalJP extends Doc
 				amtSourceDr = docLine.getAmtSourceDr();
 				//amtSourceCr = docLine.getAmtSourceCr();
 				
-				docTax = getDocTax(C_Tax_ID, JP_SOPOType);
+				docTax = getDocTax(C_Tax_ID,docLine.getAD_Org_ID(),JP_SOPOType);
+				if(docTax == null)
+				{
+					if(C_Tax_ID != 0 && ( "S".equals(JP_SOPOType) || "P".equals(JP_SOPOType) ))
+					{
+						MTax tax = MTax.get(C_Tax_ID);
+						docTax = new DocTaxJournal(C_Tax_ID, tax.getName(), tax.getRate()
+								,JP_TaxBaseAmt,JP_TaxAmt,"S".equals(JP_SOPOType)
+								,docLine.getAD_Org_ID());
+					}
+				}
 				
 				if(docTax != null && ("S".equals(JP_SOPOType) || "P".equals(JP_SOPOType) )
 						&& JP_TaxBaseAmt.compareTo(Env.ZERO) !=0 && JP_TaxAmt.compareTo(Env.ZERO) != 0 )
@@ -416,12 +427,14 @@ public class Doc_GLJournalJP extends Doc
 				if(m_taxes[i].isSalesTax())
 				{
 					FactLine fLine = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), null, differenceAmt);
+					fLine.setAD_Org_ID(m_taxes[i].getAD_Org_ID());
 					setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "S", differenceAmt.negate(), differenceAmt);
 					
 					AdjustTaxInfo[] adjustTaxInfos = getAdjustTaxInfo(m_taxes[i], "S");
 					for(AdjustTaxInfo adjustTaxInfo : adjustTaxInfos)
 					{
 						fLine = fact.createLine (null, adjustTaxInfo.getAccount(), getC_Currency_ID(), adjustTaxInfo.getAdjustTaxAmt(), null);
+						fLine.setAD_Org_ID(m_taxes[i].getAD_Org_ID());
 						setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "S", adjustTaxInfo.getAdjustTaxBaseAmt(), adjustTaxInfo.getAdjustTaxAmt());
 					}
 					
@@ -429,12 +442,14 @@ public class Doc_GLJournalJP extends Doc
 	
 					boolean isSalesTax = MTax.get(m_taxes[i].getC_Tax_ID()).isSalesTax();
 					FactLine fLine = fact.createLine(null, m_taxes[i].getAccount( isSalesTax ? DocTax.ACCTTYPE_TaxExpense : DocTax.ACCTTYPE_TaxCredit, as), getC_Currency_ID(),  differenceAmt, null);
+					fLine.setAD_Org_ID(m_taxes[i].getAD_Org_ID());
 					setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "P", differenceAmt.negate(), differenceAmt);
 					
 					AdjustTaxInfo[] adjustTaxInfos = getAdjustTaxInfo(m_taxes[i], "P");
 					for(AdjustTaxInfo adjustTaxInfo : adjustTaxInfos)
 					{
 						fLine = fact.createLine (null, adjustTaxInfo.getAccount(), getC_Currency_ID(), null, adjustTaxInfo.getAdjustTaxAmt());
+						fLine.setAD_Org_ID(m_taxes[i].getAD_Org_ID());
 						setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "P", adjustTaxInfo.getAdjustTaxBaseAmt(), adjustTaxInfo.getAdjustTaxAmt());
 					}
 					
@@ -447,11 +462,12 @@ public class Doc_GLJournalJP extends Doc
 		return facts;
 	}   //  createFact
 	
-	private DocTax getDocTax(int C_Tax_ID, String JP_SOPOType)
+	private DocTaxJournal getDocTax(int C_Tax_ID,int AD_Org_ID, String JP_SOPOType)
 	{
 		for (int i = 0; i < m_taxes.length; i++)
 		{
 			if(m_taxes[i].getC_Tax_ID() == C_Tax_ID
+					&& m_taxes[i].getAD_Org_ID() == AD_Org_ID
 					&&( (m_taxes[i].isSalesTax() && "S".equals(JP_SOPOType)) || (!m_taxes[i].isSalesTax() && "P".equals(JP_SOPOType)) ) )
 			{
 				return m_taxes[i];
@@ -509,12 +525,12 @@ public class Doc_GLJournalJP extends Doc
 	}
 	
 
-	private AdjustTaxInfo[] getAdjustTaxInfo(DocTax tax, String JP_SOPOType)
+	private AdjustTaxInfo[] getAdjustTaxInfo(DocTaxJournal tax, String JP_SOPOType)
 	{
 		ArrayList<AdjustTaxInfo> adjustTaxInfoList = new ArrayList<AdjustTaxInfo> ();
 		for (int i = 0; i < p_lines.length; i++)
 		{
-			if(JP_SOPOType.equals(p_lines[i].getPO().get_ValueAsString("JP_SOPOType")) && p_lines[i].getC_Tax_ID() == tax.getC_Tax_ID())
+			if(JP_SOPOType.equals(p_lines[i].getPO().get_ValueAsString("JP_SOPOType")) && p_lines[i].getC_Tax_ID() == tax.getC_Tax_ID() && p_lines[i].getAD_Org_ID() == tax.getAD_Org_ID())
 			{		
 				AdjustTaxInfo adjustTaxInfo = null;
 				for(AdjustTaxInfo ati : adjustTaxInfoList)
@@ -590,7 +606,7 @@ public class Doc_GLJournalJP extends Doc
 	class AdjustTaxInfo
 	{
 		private DocLine docLine = null;
-		private DocTax docTax = null;
+		private DocTaxJournal docTax = null;
 		private String JP_SOPOType;
 
 		private BigDecimal JP_TaxBaseAmt = Env.ZERO;
@@ -599,7 +615,7 @@ public class Doc_GLJournalJP extends Doc
 		private BigDecimal reCalculate_TaxBaseAmt = Env.ZERO;
 		private BigDecimal reCalculate_TaxAmt = Env.ZERO;
 		
-		public AdjustTaxInfo(DocLine docLine, DocTax docTax, String JP_SOPOType)
+		public AdjustTaxInfo(DocLine docLine, DocTaxJournal docTax, String JP_SOPOType)
 		{
 			this.docLine = docLine;
 			this.docTax = docTax;
