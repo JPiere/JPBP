@@ -755,7 +755,8 @@ public interface IJPiereTaxProvider {
 	default public boolean recalculateTax(MTaxProvider provider, MJournalLine line, boolean newRecord)
 	{
 		if (!newRecord && !line.getParent().isProcessed() &&
-				(line.is_ValueChanged(MGLJournalTax.COLUMNNAME_C_Tax_ID)
+				(line.is_ValueChanged(MGLJournalTax.COLUMNNAME_AD_Org_ID)
+				|| line.is_ValueChanged(MGLJournalTax.COLUMNNAME_C_Tax_ID)
 				|| line.is_ValueChanged(MGLJournalTax.COLUMNNAME_JP_SOPOType)
 				|| line.is_ValueChanged(MJournalLine.COLUMNNAME_AmtSourceDr)
 				|| line.is_ValueChanged(MJournalLine.COLUMNNAME_AmtSourceCr)

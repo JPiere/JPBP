@@ -57,6 +57,7 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 		
 		int C_Tax_ID = line.get_ValueAsInt(MGLJournalTax.COLUMNNAME_C_Tax_ID);
 		String JP_SOPOType = line.get_ValueAsString(MGLJournalTax.COLUMNNAME_JP_SOPOType);
+		int AD_Org_ID = line.getAD_Org_ID();
 		
 		if(C_Tax_ID == 0 || Util.isEmpty(JP_SOPOType))
 		{
@@ -81,7 +82,16 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 					return null;
 				
 				JP_SOPOType = (String)old_JP_SOPOType;
-			}	
+			}
+			
+			if(line.is_ValueChanged(MGLJournalTax.COLUMNNAME_AD_Org_ID))
+			{
+				Object old_AD_Org_ID = line.get_ValueOld(MGLJournalTax.COLUMNNAME_AD_Org_ID);
+				if(old_AD_Org_ID == null)
+					return null;
+				
+				AD_Org_ID = ((Integer)old_AD_Org_ID).intValue();
+			}
 		}
 		
 		if (C_Tax_ID == 0)
@@ -98,7 +108,7 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 			pstmt.setInt (1, line.getGL_Journal_ID());
 			pstmt.setString(2, JP_SOPOType);
 			pstmt.setInt (3, C_Tax_ID);
-			pstmt.setInt (4, line.getAD_Org_ID());
+			pstmt.setInt (4, AD_Org_ID);
 			rs = pstmt.executeQuery ();
 			if (rs.next ())
 				retValue = new MGLJournalTax (line.getCtx(), rs, trxName);

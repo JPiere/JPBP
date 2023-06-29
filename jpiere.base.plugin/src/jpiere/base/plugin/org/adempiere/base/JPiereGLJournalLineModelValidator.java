@@ -73,7 +73,7 @@ public class JPiereGLJournalLineModelValidator implements ModelValidator {
 		//JPIERE-0544: Calculate Tax at GL Journal Line.
 		if(type == ModelValidator.TYPE_BEFORE_NEW ||
 				(type == ModelValidator.TYPE_BEFORE_CHANGE && (po.is_ValueChanged("AmtSourceDr")|| po.is_ValueChanged("AmtSourceCr")
-																		|| po.is_ValueChanged("C_Tax_ID")|| po.is_ValueChanged("JP_SOPOType") )))
+																		|| po.is_ValueChanged("C_Tax_ID")|| po.is_ValueChanged("JP_SOPOType") || po.is_ValueChanged("AD_Org_ID") )))
 		{
 			MJournalLine jl = (MJournalLine)po;
 			int C_Tax_ID = jl.get_ValueAsInt("C_Tax_ID");
@@ -182,6 +182,7 @@ public class JPiereGLJournalLineModelValidator implements ModelValidator {
 			MJournalLine jl = (MJournalLine)po;
 			
 			if (type == ModelValidator.TYPE_AFTER_NEW 
+					|| jl.is_ValueChanged(MGLJournalTax.COLUMNNAME_AD_Org_ID)
 					|| jl.is_ValueChanged(MGLJournalTax.COLUMNNAME_C_Tax_ID)
 					|| jl.is_ValueChanged(MGLJournalTax.COLUMNNAME_JP_SOPOType)
 					|| jl.is_ValueChanged(MJournalLine.COLUMNNAME_AmtSourceDr)
