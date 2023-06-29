@@ -434,6 +434,8 @@ public class Doc_GLJournalJP extends Doc
 					for(AdjustTaxInfo adjustTaxInfo : adjustTaxInfos)
 					{
 						fLine = fact.createLine (null, adjustTaxInfo.getAccount(), getC_Currency_ID(), adjustTaxInfo.getAdjustTaxAmt(), null);
+						if(fLine == null)
+							continue;
 						fLine.setAD_Org_ID(m_taxes[i].getAD_Org_ID());
 						setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "S", adjustTaxInfo.getAdjustTaxBaseAmt(), adjustTaxInfo.getAdjustTaxAmt());
 					}
@@ -449,6 +451,8 @@ public class Doc_GLJournalJP extends Doc
 					for(AdjustTaxInfo adjustTaxInfo : adjustTaxInfos)
 					{
 						fLine = fact.createLine (null, adjustTaxInfo.getAccount(), getC_Currency_ID(), null, adjustTaxInfo.getAdjustTaxAmt());
+						if(fLine == null)
+							continue;
 						fLine.setAD_Org_ID(m_taxes[i].getAD_Org_ID());
 						setTaxInfo(fLine, m_taxes[i].getC_Tax_ID(), "P", adjustTaxInfo.getAdjustTaxBaseAmt(), adjustTaxInfo.getAdjustTaxAmt());
 					}
