@@ -34,7 +34,7 @@ import org.compiere.util.Util;
 
 /**
  * JPIERE-0280 Create Bank Statement From Payment Batch
- *
+ * JPIERE-0298 Create Bank Statement From Income Payment Batch
  *
  * ref:org.compiere.grid.CreateFromStatement.java
  */
@@ -43,6 +43,7 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 	private int C_PaymentBatch_ID = 0;
 	private String	   p_DocAction = null;
 	private Timestamp p_StatementDate = null;
+	private int	p_C_DocType_ID = 0;
 
 	@Override
 	protected void prepare() {
@@ -59,8 +60,9 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 				p_StatementDate = para[i].getParameterAsTimestamp();
 			}else if (name.equals("DocAction")){
 				p_DocAction = para[i].getParameterAsString();
-			}
-			else{
+			}else if (name.equals("C_DocType_ID")){
+				p_C_DocType_ID = para[i].getParameterAsInt();
+			}else{
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 			}
 
@@ -116,6 +118,8 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 				if(!isHeaderExists)
 				{
 					m_bankStatement = new MBankStatement( getCtx(), 0, get_TrxName() );
+					if(p_C_DocType_ID > 0)
+						m_bankStatement.setC_DocType_ID(p_C_DocType_ID);
 					MBankAccount bankAccount = MBankAccount.get(getCtx(),  m_Payment.getC_BankAccount_ID());
 					m_bankStatement.setC_BankAccount_ID(bankAccount.getC_BankAccount_ID());
 					m_bankStatement.setBeginningBalance(bankAccount.getCurrentBalance());
@@ -172,7 +176,7 @@ public class CreateBankStatementFromPaymentBatch extends SvrProcess {
 				m_bankStatement.saveEx(get_TrxName());
 			}
 
-			addBufferLog(0, null, null, m_bankStatement.getDocumentInfo(), m_bankStatement.get_Table_ID(), m_bankStatement.getC_BankStatement_ID());
+			addBufferLog(0, null, null, m_bankStatement.get_Value("DocumentNo").toString(), m_bankStatement.get_Table_ID(), m_bankStatement.getC_BankStatement_ID());
 			if(paymentBatch.get_ColumnIndex("JP_BankStatement_ID") != -1)
 			{
 				paymentBatch.set_ValueNoCheck("JP_BankStatement_ID", m_bankStatement.getC_BankStatement_ID());
