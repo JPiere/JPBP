@@ -40,15 +40,16 @@ import org.compiere.util.Util;
  **/
 public class BankTransferEasyWay extends SvrProcess
 {
+	private int 			p_C_DocType_ID = 0;				// Doc Type
 	private int 			p_From_C_BankAccount_ID = 0;	// Bank Account From
 	private int 			p_To_C_BankAccount_ID= 0;		// Bank Account To
 	private int			p_C_Charge_ID = 0;				// Charge to be used as bridge
-	private BigDecimal 	p_Amount = Env.ZERO;  			// Amount to be transfered between the accounts
+	private BigDecimal		p_Amount = Env.ZERO;  			// Amount to be transfered between the accounts
 	private int			p_HandlingCharge_ID = 0;		//
-	private BigDecimal 	p_HandlingChargeAmt = Env.ZERO;	//
+	private BigDecimal		p_HandlingChargeAmt = Env.ZERO;	//
 	private int			p_HandlingChargeTax_ID = 0;		//
 	private String			p_Name = "";
-	private String 		p_Description= "";				// Description
+	private String 			p_Description= "";				// Description
 	private Timestamp		p_StatementDate = null;  		// Date Statement
 	private Timestamp		p_DateAcct = null;  			// Date Account
 	private String			p_DocAction = null;
@@ -65,7 +66,9 @@ public class BankTransferEasyWay extends SvrProcess
 		for (int i = 0; i < para.length; i++)
 		{
 			String name = para[i].getParameterName();
-			if (name.equals("From_C_BankAccount_ID"))
+			if(name.equals("C_DocType_ID"))
+				p_C_DocType_ID = para[i].getParameterAsInt();
+			else if (name.equals("From_C_BankAccount_ID"))
 				p_From_C_BankAccount_ID = para[i].getParameterAsInt();
 			else if (name.equals("To_C_BankAccount_ID"))
 				p_To_C_BankAccount_ID = para[i].getParameterAsInt();
@@ -170,6 +173,8 @@ public class BankTransferEasyWay extends SvrProcess
 	{		
 		//From
 		MBankStatement mBSfrom = new MBankStatement(getCtx(), 0 ,  get_TrxName());
+		if(p_C_DocType_ID != 0)
+			mBSfrom.setC_DocType_ID(p_C_DocType_ID);
 		mBSfrom.setAD_Org_ID(mBankAccountFrom.getAD_Org_ID());
 		mBSfrom.setC_BankAccount_ID(p_From_C_BankAccount_ID);
 		mBSfrom.setName(p_Name);
@@ -217,6 +222,8 @@ public class BankTransferEasyWay extends SvrProcess
 
 		//To
 		MBankStatement mBSto = new MBankStatement(getCtx(), 0 ,  get_TrxName());
+		if(p_C_DocType_ID != 0)
+			mBSto.setC_DocType_ID(p_C_DocType_ID);
 		mBSto.setAD_Org_ID(mBankAccountTo.getAD_Org_ID());
 		mBSto.setC_BankAccount_ID(p_To_C_BankAccount_ID);
 		mBSto.setName(p_Name);
