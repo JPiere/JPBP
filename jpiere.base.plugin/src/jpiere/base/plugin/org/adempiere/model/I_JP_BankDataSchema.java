@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_BankDataSchema
  *  @author iDempiere (generated) 
- *  @version Release 4.1
+ *  @version Release 10
  */
 @SuppressWarnings("all")
 public interface I_JP_BankDataSchema 
@@ -46,8 +46,8 @@ public interface I_JP_BankDataSchema
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,14 +55,27 @@ public interface I_JP_BankDataSchema
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name BPartnerColumn */
+    public static final String COLUMNNAME_BPartnerColumn = "BPartnerColumn";
+
+	/** Set B.Partner Column.
+	  * Fully qualified Business Partner key column (C_BPartner_ID)
+	  */
+	public void setBPartnerColumn (String BPartnerColumn);
+
+	/** Get B.Partner Column.
+	  * Fully qualified Business Partner key column (C_BPartner_ID)
+	  */
+	public String getBPartnerColumn();
 
     /** Column name C_Charge_ID */
     public static final String COLUMNNAME_C_Charge_ID = "C_Charge_ID";
@@ -251,6 +264,17 @@ public interface I_JP_BankDataSchema
 
 	/** Get JP_BankDataSchema_UU	  */
 	public String getJP_BankDataSchema_UU();
+
+    /** Column name JP_BankStatementDocType_ID */
+    public static final String COLUMNNAME_JP_BankStatementDocType_ID = "JP_BankStatementDocType_ID";
+
+	/** Set Bank Statement Doc Type	  */
+	public void setJP_BankStatementDocType_ID (int JP_BankStatementDocType_ID);
+
+	/** Get Bank Statement Doc Type	  */
+	public int getJP_BankStatementDocType_ID();
+
+	public org.compiere.model.I_C_DocType getJP_BankStatementDocType() throws RuntimeException;
 
     /** Column name JP_BankStmt_DocAction */
     public static final String COLUMNNAME_JP_BankStmt_DocAction = "JP_BankStmt_DocAction";

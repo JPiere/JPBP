@@ -25,19 +25,35 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_BankDataSchema
  *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
+ *  @version Release 10 - $Id$ */
+@org.adempiere.base.Model(table="JP_BankDataSchema")
 public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170311L;
+	private static final long serialVersionUID = 20230714L;
 
     /** Standard Constructor */
     public X_JP_BankDataSchema (Properties ctx, int JP_BankDataSchema_ID, String trxName)
     {
       super (ctx, JP_BankDataSchema_ID, trxName);
+      /** if (JP_BankDataSchema_ID == 0)
+        {
+			setIsDefault (false);
+			setIsReceipt (false);
+			setJP_AcceptableDiffAmt (Env.ZERO);
+			setJP_BankDataSchema_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_BankDataSchema (Properties ctx, int JP_BankDataSchema_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_BankDataSchema_ID, trxName, virtualColumns);
       /** if (JP_BankDataSchema_ID == 0)
         {
 			setIsDefault (false);
@@ -72,32 +88,48 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_BankDataSchema[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_BankDataSchema[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
+	/** Set B.Partner Column.
+		@param BPartnerColumn Fully qualified Business Partner key column (C_BPartner_ID)
+	*/
+	public void setBPartnerColumn (String BPartnerColumn)
+	{
+		set_Value (COLUMNNAME_BPartnerColumn, BPartnerColumn);
+	}
+
+	/** Get B.Partner Column.
+		@return Fully qualified Business Partner key column (C_BPartner_ID)
+	  */
+	public String getBPartnerColumn()
+	{
+		return (String)get_Value(COLUMNNAME_BPartnerColumn);
+	}
+
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
-			.getPO(getC_Charge_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_ID)
+			.getPO(getC_Charge_ID(), get_TrxName());
+	}
 
 	/** Set Charge.
-		@param C_Charge_ID 
-		Additional document charges
-	  */
+		@param C_Charge_ID Additional document charges
+	*/
 	public void setC_Charge_ID (int C_Charge_ID)
 	{
-		if (C_Charge_ID < 1) 
+		if (C_Charge_ID < 1)
 			set_Value (COLUMNNAME_C_Charge_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
 	}
 
 	/** Get Charge.
 		@return Additional document charges
 	  */
-	public int getC_Charge_ID () 
+	public int getC_Charge_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
 		if (ii == null)
@@ -106,26 +138,26 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	}
 
 	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_Name)
-			.getPO(getC_Tax_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_ID)
+			.getPO(getC_Tax_ID(), get_TrxName());
+	}
 
 	/** Set Tax.
-		@param C_Tax_ID 
-		Tax identifier
-	  */
+		@param C_Tax_ID Tax identifier
+	*/
 	public void setC_Tax_ID (int C_Tax_ID)
 	{
-		if (C_Tax_ID < 1) 
+		if (C_Tax_ID < 1)
 			set_Value (COLUMNNAME_C_Tax_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Tax_ID, Integer.valueOf(C_Tax_ID));
 	}
 
 	/** Get Tax.
 		@return Tax identifier
 	  */
-	public int getC_Tax_ID () 
+	public int getC_Tax_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Tax_ID);
 		if (ii == null)
@@ -134,9 +166,8 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -145,15 +176,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Default.
-		@param IsDefault 
-		Default value
-	  */
+		@param IsDefault Default value
+	*/
 	public void setIsDefault (boolean IsDefault)
 	{
 		set_Value (COLUMNNAME_IsDefault, Boolean.valueOf(IsDefault));
@@ -162,7 +192,7 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	/** Get Default.
 		@return Default value
 	  */
-	public boolean isDefault () 
+	public boolean isDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
 		if (oo != null) 
@@ -175,9 +205,8 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	}
 
 	/** Set Receipt.
-		@param IsReceipt 
-		This is a sales transaction (receipt)
-	  */
+		@param IsReceipt This is a sales transaction (receipt)
+	*/
 	public void setIsReceipt (boolean IsReceipt)
 	{
 		set_Value (COLUMNNAME_IsReceipt, Boolean.valueOf(IsReceipt));
@@ -186,7 +215,7 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	/** Get Receipt.
 		@return This is a sales transaction (receipt)
 	  */
-	public boolean isReceipt () 
+	public boolean isReceipt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReceipt);
 		if (oo != null) 
@@ -199,7 +228,8 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	}
 
 	/** Set Acceptable Difference Amount.
-		@param JP_AcceptableDiffAmt Acceptable Difference Amount	  */
+		@param JP_AcceptableDiffAmt Acceptable Difference Amount
+	*/
 	public void setJP_AcceptableDiffAmt (BigDecimal JP_AcceptableDiffAmt)
 	{
 		set_Value (COLUMNNAME_JP_AcceptableDiffAmt, JP_AcceptableDiffAmt);
@@ -207,7 +237,7 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Acceptable Difference Amount.
 		@return Acceptable Difference Amount	  */
-	public BigDecimal getJP_AcceptableDiffAmt () 
+	public BigDecimal getJP_AcceptableDiffAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_AcceptableDiffAmt);
 		if (bd == null)
@@ -216,7 +246,8 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	}
 
 	/** Set Class of Bank Data create Doc.
-		@param JP_BankDataCreateDocClass Class of Bank Data create Doc	  */
+		@param JP_BankDataCreateDocClass Class of Bank Data create Doc
+	*/
 	public void setJP_BankDataCreateDocClass (String JP_BankDataCreateDocClass)
 	{
 		set_Value (COLUMNNAME_JP_BankDataCreateDocClass, JP_BankDataCreateDocClass);
@@ -224,13 +255,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Class of Bank Data create Doc.
 		@return Class of Bank Data create Doc	  */
-	public String getJP_BankDataCreateDocClass () 
+	public String getJP_BankDataCreateDocClass()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataCreateDocClass);
 	}
 
 	/** Set Class of Bank Data Import.
-		@param JP_BankDataImportClass Class of Bank Data Import	  */
+		@param JP_BankDataImportClass Class of Bank Data Import
+	*/
 	public void setJP_BankDataImportClass (String JP_BankDataImportClass)
 	{
 		set_Value (COLUMNNAME_JP_BankDataImportClass, JP_BankDataImportClass);
@@ -238,13 +270,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Class of Bank Data Import.
 		@return Class of Bank Data Import	  */
-	public String getJP_BankDataImportClass () 
+	public String getJP_BankDataImportClass()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataImportClass);
 	}
 
 	/** Set Class of Bank Data Match BP.
-		@param JP_BankDataMatchBPClass Class of Bank Data Match BP	  */
+		@param JP_BankDataMatchBPClass Class of Bank Data Match BP
+	*/
 	public void setJP_BankDataMatchBPClass (String JP_BankDataMatchBPClass)
 	{
 		set_Value (COLUMNNAME_JP_BankDataMatchBPClass, JP_BankDataMatchBPClass);
@@ -252,13 +285,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Class of Bank Data Match BP.
 		@return Class of Bank Data Match BP	  */
-	public String getJP_BankDataMatchBPClass () 
+	public String getJP_BankDataMatchBPClass()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataMatchBPClass);
 	}
 
 	/** Set Class of Bank Data Match Bill.
-		@param JP_BankDataMatchBillClass Class of Bank Data Match Bill	  */
+		@param JP_BankDataMatchBillClass Class of Bank Data Match Bill
+	*/
 	public void setJP_BankDataMatchBillClass (String JP_BankDataMatchBillClass)
 	{
 		set_Value (COLUMNNAME_JP_BankDataMatchBillClass, JP_BankDataMatchBillClass);
@@ -266,13 +300,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Class of Bank Data Match Bill.
 		@return Class of Bank Data Match Bill	  */
-	public String getJP_BankDataMatchBillClass () 
+	public String getJP_BankDataMatchBillClass()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataMatchBillClass);
 	}
 
 	/** Set Class of Bank Data Match Invoice.
-		@param JP_BankDataMatchInvClass Class of Bank Data Match Invoice	  */
+		@param JP_BankDataMatchInvClass Class of Bank Data Match Invoice
+	*/
 	public void setJP_BankDataMatchInvClass (String JP_BankDataMatchInvClass)
 	{
 		set_Value (COLUMNNAME_JP_BankDataMatchInvClass, JP_BankDataMatchInvClass);
@@ -280,13 +315,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Class of Bank Data Match Invoice.
 		@return Class of Bank Data Match Invoice	  */
-	public String getJP_BankDataMatchInvClass () 
+	public String getJP_BankDataMatchInvClass()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataMatchInvClass);
 	}
 
 	/** Set Class of Bank Data Match Order.
-		@param JP_BankDataMatchOrderClass Class of Bank Data Match Order	  */
+		@param JP_BankDataMatchOrderClass Class of Bank Data Match Order
+	*/
 	public void setJP_BankDataMatchOrderClass (String JP_BankDataMatchOrderClass)
 	{
 		set_Value (COLUMNNAME_JP_BankDataMatchOrderClass, JP_BankDataMatchOrderClass);
@@ -294,13 +330,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Class of Bank Data Match Order.
 		@return Class of Bank Data Match Order	  */
-	public String getJP_BankDataMatchOrderClass () 
+	public String getJP_BankDataMatchOrderClass()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataMatchOrderClass);
 	}
 
 	/** Set Class of Bank Data Match Payment.
-		@param JP_BankDataMatchPaymentClass Class of Bank Data Match Payment	  */
+		@param JP_BankDataMatchPaymentClass Class of Bank Data Match Payment
+	*/
 	public void setJP_BankDataMatchPaymentClass (String JP_BankDataMatchPaymentClass)
 	{
 		set_Value (COLUMNNAME_JP_BankDataMatchPaymentClass, JP_BankDataMatchPaymentClass);
@@ -308,24 +345,25 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Class of Bank Data Match Payment.
 		@return Class of Bank Data Match Payment	  */
-	public String getJP_BankDataMatchPaymentClass () 
+	public String getJP_BankDataMatchPaymentClass()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataMatchPaymentClass);
 	}
 
 	/** Set Import Bank Data Schema.
-		@param JP_BankDataSchema_ID Import Bank Data Schema	  */
+		@param JP_BankDataSchema_ID Import Bank Data Schema
+	*/
 	public void setJP_BankDataSchema_ID (int JP_BankDataSchema_ID)
 	{
-		if (JP_BankDataSchema_ID < 1) 
+		if (JP_BankDataSchema_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_BankDataSchema_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_BankDataSchema_ID, Integer.valueOf(JP_BankDataSchema_ID));
 	}
 
 	/** Get Import Bank Data Schema.
 		@return Import Bank Data Schema	  */
-	public int getJP_BankDataSchema_ID () 
+	public int getJP_BankDataSchema_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BankDataSchema_ID);
 		if (ii == null)
@@ -334,7 +372,8 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	}
 
 	/** Set JP_BankDataSchema_UU.
-		@param JP_BankDataSchema_UU JP_BankDataSchema_UU	  */
+		@param JP_BankDataSchema_UU JP_BankDataSchema_UU
+	*/
 	public void setJP_BankDataSchema_UU (String JP_BankDataSchema_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_BankDataSchema_UU, JP_BankDataSchema_UU);
@@ -342,43 +381,71 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get JP_BankDataSchema_UU.
 		@return JP_BankDataSchema_UU	  */
-	public String getJP_BankDataSchema_UU () 
+	public String getJP_BankDataSchema_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankDataSchema_UU);
 	}
 
+	public org.compiere.model.I_C_DocType getJP_BankStatementDocType() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getJP_BankStatementDocType_ID(), get_TrxName());
+	}
+
+	/** Set Bank Statement Doc Type.
+		@param JP_BankStatementDocType_ID Bank Statement Doc Type
+	*/
+	public void setJP_BankStatementDocType_ID (int JP_BankStatementDocType_ID)
+	{
+		if (JP_BankStatementDocType_ID < 1)
+			set_Value (COLUMNNAME_JP_BankStatementDocType_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_BankStatementDocType_ID, Integer.valueOf(JP_BankStatementDocType_ID));
+	}
+
+	/** Get Bank Statement Doc Type.
+		@return Bank Statement Doc Type	  */
+	public int getJP_BankStatementDocType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BankStatementDocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** JP_BankStmt_DocAction AD_Reference_ID=135 */
 	public static final int JP_BANKSTMT_DOCACTION_AD_Reference_ID=135;
-	/** Complete = CO */
-	public static final String JP_BANKSTMT_DOCACTION_Complete = "CO";
+	/** &lt;None&gt; = -- */
+	public static final String JP_BANKSTMT_DOCACTION_None = "--";
 	/** Approve = AP */
 	public static final String JP_BANKSTMT_DOCACTION_Approve = "AP";
-	/** Reject = RJ */
-	public static final String JP_BANKSTMT_DOCACTION_Reject = "RJ";
-	/** Post = PO */
-	public static final String JP_BANKSTMT_DOCACTION_Post = "PO";
-	/** Void = VO */
-	public static final String JP_BANKSTMT_DOCACTION_Void = "VO";
 	/** Close = CL */
 	public static final String JP_BANKSTMT_DOCACTION_Close = "CL";
-	/** Reverse - Correct = RC */
-	public static final String JP_BANKSTMT_DOCACTION_Reverse_Correct = "RC";
-	/** Reverse - Accrual = RA */
-	public static final String JP_BANKSTMT_DOCACTION_Reverse_Accrual = "RA";
+	/** Complete = CO */
+	public static final String JP_BANKSTMT_DOCACTION_Complete = "CO";
 	/** Invalidate = IN */
 	public static final String JP_BANKSTMT_DOCACTION_Invalidate = "IN";
-	/** Re-activate = RE */
-	public static final String JP_BANKSTMT_DOCACTION_Re_Activate = "RE";
-	/** <None> = -- */
-	public static final String JP_BANKSTMT_DOCACTION_None = "--";
+	/** Post = PO */
+	public static final String JP_BANKSTMT_DOCACTION_Post = "PO";
 	/** Prepare = PR */
 	public static final String JP_BANKSTMT_DOCACTION_Prepare = "PR";
-	/** Unlock = XL */
-	public static final String JP_BANKSTMT_DOCACTION_Unlock = "XL";
+	/** Reverse - Accrual = RA */
+	public static final String JP_BANKSTMT_DOCACTION_Reverse_Accrual = "RA";
+	/** Reverse - Correct = RC */
+	public static final String JP_BANKSTMT_DOCACTION_Reverse_Correct = "RC";
+	/** Re-activate = RE */
+	public static final String JP_BANKSTMT_DOCACTION_Re_Activate = "RE";
+	/** Reject = RJ */
+	public static final String JP_BANKSTMT_DOCACTION_Reject = "RJ";
+	/** Void = VO */
+	public static final String JP_BANKSTMT_DOCACTION_Void = "VO";
 	/** Wait Complete = WC */
 	public static final String JP_BANKSTMT_DOCACTION_WaitComplete = "WC";
+	/** Unlock = XL */
+	public static final String JP_BANKSTMT_DOCACTION_Unlock = "XL";
 	/** Set Bank Stmt Doc Action.
-		@param JP_BankStmt_DocAction Bank Stmt Doc Action	  */
+		@param JP_BankStmt_DocAction Bank Stmt Doc Action
+	*/
 	public void setJP_BankStmt_DocAction (String JP_BankStmt_DocAction)
 	{
 
@@ -387,29 +454,31 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Bank Stmt Doc Action.
 		@return Bank Stmt Doc Action	  */
-	public String getJP_BankStmt_DocAction () 
+	public String getJP_BankStmt_DocAction()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BankStmt_DocAction);
 	}
 
 	public org.compiere.model.I_C_DocType getJP_PaymentDocType() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_Name)
-			.getPO(getJP_PaymentDocType_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getJP_PaymentDocType_ID(), get_TrxName());
+	}
 
 	/** Set Payment Doc Type.
-		@param JP_PaymentDocType_ID Payment Doc Type	  */
+		@param JP_PaymentDocType_ID Payment Doc Type
+	*/
 	public void setJP_PaymentDocType_ID (int JP_PaymentDocType_ID)
 	{
-		if (JP_PaymentDocType_ID < 1) 
+		if (JP_PaymentDocType_ID < 1)
 			set_Value (COLUMNNAME_JP_PaymentDocType_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_PaymentDocType_ID, Integer.valueOf(JP_PaymentDocType_ID));
 	}
 
 	/** Get Payment Doc Type.
 		@return Payment Doc Type	  */
-	public int getJP_PaymentDocType_ID () 
+	public int getJP_PaymentDocType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_PaymentDocType_ID);
 		if (ii == null)
@@ -419,36 +488,37 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** JP_Payment_DocAction AD_Reference_ID=135 */
 	public static final int JP_PAYMENT_DOCACTION_AD_Reference_ID=135;
-	/** Complete = CO */
-	public static final String JP_PAYMENT_DOCACTION_Complete = "CO";
+	/** &lt;None&gt; = -- */
+	public static final String JP_PAYMENT_DOCACTION_None = "--";
 	/** Approve = AP */
 	public static final String JP_PAYMENT_DOCACTION_Approve = "AP";
-	/** Reject = RJ */
-	public static final String JP_PAYMENT_DOCACTION_Reject = "RJ";
-	/** Post = PO */
-	public static final String JP_PAYMENT_DOCACTION_Post = "PO";
-	/** Void = VO */
-	public static final String JP_PAYMENT_DOCACTION_Void = "VO";
 	/** Close = CL */
 	public static final String JP_PAYMENT_DOCACTION_Close = "CL";
-	/** Reverse - Correct = RC */
-	public static final String JP_PAYMENT_DOCACTION_Reverse_Correct = "RC";
-	/** Reverse - Accrual = RA */
-	public static final String JP_PAYMENT_DOCACTION_Reverse_Accrual = "RA";
+	/** Complete = CO */
+	public static final String JP_PAYMENT_DOCACTION_Complete = "CO";
 	/** Invalidate = IN */
 	public static final String JP_PAYMENT_DOCACTION_Invalidate = "IN";
-	/** Re-activate = RE */
-	public static final String JP_PAYMENT_DOCACTION_Re_Activate = "RE";
-	/** <None> = -- */
-	public static final String JP_PAYMENT_DOCACTION_None = "--";
+	/** Post = PO */
+	public static final String JP_PAYMENT_DOCACTION_Post = "PO";
 	/** Prepare = PR */
 	public static final String JP_PAYMENT_DOCACTION_Prepare = "PR";
-	/** Unlock = XL */
-	public static final String JP_PAYMENT_DOCACTION_Unlock = "XL";
+	/** Reverse - Accrual = RA */
+	public static final String JP_PAYMENT_DOCACTION_Reverse_Accrual = "RA";
+	/** Reverse - Correct = RC */
+	public static final String JP_PAYMENT_DOCACTION_Reverse_Correct = "RC";
+	/** Re-activate = RE */
+	public static final String JP_PAYMENT_DOCACTION_Re_Activate = "RE";
+	/** Reject = RJ */
+	public static final String JP_PAYMENT_DOCACTION_Reject = "RJ";
+	/** Void = VO */
+	public static final String JP_PAYMENT_DOCACTION_Void = "VO";
 	/** Wait Complete = WC */
 	public static final String JP_PAYMENT_DOCACTION_WaitComplete = "WC";
+	/** Unlock = XL */
+	public static final String JP_PAYMENT_DOCACTION_Unlock = "XL";
 	/** Set Payment Doc Action.
-		@param JP_Payment_DocAction Payment Doc Action	  */
+		@param JP_Payment_DocAction Payment Doc Action
+	*/
 	public void setJP_Payment_DocAction (String JP_Payment_DocAction)
 	{
 
@@ -457,15 +527,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 
 	/** Get Payment Doc Action.
 		@return Payment Doc Action	  */
-	public String getJP_Payment_DocAction () 
+	public String getJP_Payment_DocAction()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Payment_DocAction);
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -474,15 +543,14 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -491,7 +559,7 @@ public class X_JP_BankDataSchema extends PO implements I_JP_BankDataSchema, I_Pe
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}
