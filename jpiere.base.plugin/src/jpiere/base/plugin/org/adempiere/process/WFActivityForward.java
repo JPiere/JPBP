@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.compiere.model.MColumn;
+import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
@@ -113,6 +115,19 @@ public class WFActivityForward extends SvrProcess {
 				msg = m_PO.toString();
 			}
 
+			String wfState = m_activity.getWFState();
+			if(!MWFActivity.WFSTATE_Suspended.equals(wfState))
+			{
+				MColumn column = MColumn.get(getCtx(), "AD_WF_Activity", "WFState");
+				int AD_Reference_Value_ID = column.getAD_Reference_Value_ID();
+				if(AD_Reference_Value_ID == 0)
+					AD_Reference_Value_ID = 305; //WF_Instance State
+				
+				msg = msg + " - " + Msg.getMsg(getCtx(), "DocProcessed")
+						+ " - " + Msg.getElement(getCtx(), "WFState") + ":"+MRefList.getListName(getCtx(), AD_Reference_Value_ID, wfState);
+				addBufferLog(0, null, null, msg, m_activity.getAD_Table_ID(), m_activity.getRecord_ID());
+				continue;
+			}
 
 			/**
 			 * Forward
