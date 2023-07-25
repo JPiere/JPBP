@@ -17,6 +17,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
+import org.compiere.model.MColumn;
+import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
@@ -25,6 +27,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.StateEngine;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFProcess;
 
@@ -100,16 +103,38 @@ public class WFProcessAbort extends SvrProcess
 			{
 				p_AD_WF_Process_ID = rs.getInt(1);
 				process = new MWFProcess (getCtx(), p_AD_WF_Process_ID, get_TrxName());
+				m_Table = MTable.get(process.getAD_Table_ID());
+				m_PO = m_Table.getPO(process.getRecord_ID(), get_TrxName());
+				if(m_PO.columnExists("DocumentNo"))
+				{
+					msg = m_PO.get_ValueAsString("DocumentNo");
+				}else if(m_PO.columnExists("Name")) {
+					msg = m_PO.get_ValueAsString("Name");
+				}else {
+					msg = m_PO.toString();
+				}
+				
 				if(!process.isProcessed())
 				{
 					process.setTextMsg(p_Comments);
 					process.setAD_User_ID(getAD_User_ID());
 					process.setWFState(StateEngine.STATE_Aborted);
 					process.saveEx();
+					
+				}else {
+					
+					MColumn column = MColumn.get(getCtx(), "AD_WF_Process", "WFState");
+					int AD_Reference_Value_ID = column.getAD_Reference_Value_ID();
+					if(AD_Reference_Value_ID == 0)
+						AD_Reference_Value_ID = 305; //WF_Instance State
+					
+					msg = msg + " - " + Msg.getMsg(getCtx(), "DocProcessed")
+							+ " - " + Msg.getElement(getCtx(), "WFState") + ":"+MRefList.getListName(getCtx(), AD_Reference_Value_ID,process.getWFState());
+					addBufferLog(0, null, null, msg, process.getAD_Table_ID(), process.getRecord_ID());
+					continue;
 				}
 
-				m_Table = MTable.get(process.getAD_Table_ID());
-				m_PO = m_Table.getPO(process.getRecord_ID(), get_TrxName());
+
 				if(m_PO instanceof DocAction)
 				{
 					if(!m_PO.get_ValueAsBoolean(DocAction.DOC_COLUMNNAME_Processed))
@@ -136,15 +161,6 @@ public class WFProcessAbort extends SvrProcess
 						m_PO.set_ValueNoCheck(DocAction.DOC_COLUMNNAME_DocAction, DocAction.ACTION_Complete);
 						m_PO.saveEx(get_TrxName());
 					}
-				}
-
-				if(m_PO.columnExists("DocumentNo"))
-				{
-					msg = m_PO.get_ValueAsString("DocumentNo");
-				}else if(m_PO.columnExists("Name")) {
-					msg = m_PO.get_ValueAsString("Name");
-				}else {
-					msg = m_PO.toString();
 				}
 
 				addBufferLog(0, null, null, msg, process.getAD_Table_ID(), process.getRecord_ID());
