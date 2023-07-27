@@ -400,7 +400,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		else
 			return message;
 
-		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "User2_ID");
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Line_User2_ID");
 		if(processMonitor != null)	processMonitor.statusUpdate(message);
 		if(reverseLookupJP_Line_User2_ID())
 			commitEx();
@@ -800,7 +800,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
 		}
 
-		//Loolup - C_DocType_ID from DocTypeName
+		//Lookup - C_DocType_ID from DocTypeName
 		sql = new StringBuilder ("UPDATE I_OrderJP o ")
 			  .append("SET C_DocType_ID=(SELECT C_DocType_ID FROM C_DocType d WHERE d.Name=o.DocTypeName")
 			  .append(" AND d.DocBaseType IN ('SOO','POO') AND o.AD_Client_ID=d.AD_Client_ID) ")

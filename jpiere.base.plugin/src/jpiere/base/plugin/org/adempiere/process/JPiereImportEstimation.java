@@ -863,34 +863,6 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 			return false;
 		}
 
-		//Set Default DocType of SO When C_DocType_ID is null
-		sql = new StringBuilder ("UPDATE I_EstimationJP o ")
-			  .append("SET JP_DocTypeSO_ID=(SELECT MAX(C_DocType_ID) FROM C_DocType d WHERE d.IsDefault='Y'")
-			  .append(" AND d.DocBaseType='SOO' AND o.AD_Client_ID=d.AD_Client_ID) ")
-			  .append("WHERE JP_DocTypeSO_ID IS NULL AND I_IsImported<>'Y'").append (getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
-		}
-
-		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "JP_Null")+Msg.getElement(getCtx(), "JP_DocTypeSO_ID");
-		sql =  new StringBuilder ("UPDATE I_EstimationJP ")
-			  .append("SET I_ErrorMsg='"+ message + "'")
-			  .append(" WHERE C_DocType_ID IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (getWhereClause());
-		try {
-			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		}catch(Exception e) {
-			throw new Exception(Msg.getMsg(getCtx(), "Error")  + message + " : " + e.toString() + " : " + sql );
-		}
-
-		if(no > 0)
-		{
-			return false;
-		}
-
-
 		return true;
 	}
 	
