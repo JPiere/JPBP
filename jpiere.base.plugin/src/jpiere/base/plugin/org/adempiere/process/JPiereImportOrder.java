@@ -2880,8 +2880,8 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 		{
 			if(Util.isEmpty(bp.getFreightCostRule()))
 			{
-				impOrder.setFreightCostRule(X_I_OrderJP.FREIGHTCOSTRULE_FixPrice);
-				order.setFreightCostRule(X_I_OrderJP.FREIGHTCOSTRULE_FixPrice);
+				impOrder.setFreightCostRule(X_I_OrderJP.FREIGHTCOSTRULE_FreightIncluded);
+				order.setFreightCostRule(X_I_OrderJP.FREIGHTCOSTRULE_FreightIncluded);
 
 			}else {
 				impOrder.setFreightCostRule(bp.getFreightCostRule());
