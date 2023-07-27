@@ -1896,9 +1896,6 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 					.append(" WHERE i.AD_User_ID IS NULL AND i.Value IS NOT NULL AND i.ContactName IS NOT NULL AND i.EMail IS NULL ")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
-			if(p_I_BPartnerJP_ID > 0)
-				sql.append(" AND I_BPartnerJP_ID=? ");
-
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate)) {
 
 			return true;
