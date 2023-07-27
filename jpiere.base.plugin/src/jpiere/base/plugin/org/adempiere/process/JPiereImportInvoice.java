@@ -1752,7 +1752,7 @@ public class JPiereImportInvoice extends SvrProcess  implements ImportProcess
 					.append("SET AD_User_ID=(SELECT MAX(AD_User_ID) FROM AD_User p")
 					.append(" WHERE i.JP_User_Value=p.Value AND i.JP_User_Name=p.Name  AND i.JP_User_EMail IS NULL AND ( p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID=0 )")
 					.append(" AND i.C_BPartner_ID = p.C_BPartner_ID )")
-					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.JP_User_Name IS NOT NULL AND i.JP_User_EMail IS NULL AND i.AD_User_ID IS NOT NULL")
+					.append(" WHERE i.JP_User_Value IS NOT NULL AND i.JP_User_Name IS NOT NULL AND i.JP_User_EMail IS NULL AND i.AD_User_ID IS NULL")
 					.append(" AND i.I_IsImported='N'").append(getWhereClause());
 
 		}else if(p_JP_ImportUserIdentifier.equals(JPiereImportUser.JP_ImportUserIdentifier_NotCollate)){
@@ -2096,12 +2096,14 @@ public class JPiereImportInvoice extends SvrProcess  implements ImportProcess
 		ModelValidationEngine.get().fireImportValidate(this, impInvoice, line, ImportValidator.TIMING_BEFORE_IMPORT);
 
 		PO.copyValues(impInvoice, line);
+		line.setDescription(null);
 
 		line.setC_Invoice_ID(invoice.getC_Invoice_ID());
 
 		if(impInvoice.getLine()==0)
 		{
 			line.setLine(lineNo);
+			impInvoice.setLine(lineNo);
 
 		}else {
 			line.setLine(impInvoice.getLine());
