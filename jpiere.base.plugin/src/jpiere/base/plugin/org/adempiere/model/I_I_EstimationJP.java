@@ -333,6 +333,17 @@ public interface I_I_EstimationJP
 
 	public org.compiere.model.I_C_Location getC_Location() throws RuntimeException;
 
+    /** Column name C_Opportunity_ID */
+    public static final String COLUMNNAME_C_Opportunity_ID = "C_Opportunity_ID";
+
+	/** Set Sales Opportunity	  */
+	public void setC_Opportunity_ID (int C_Opportunity_ID);
+
+	/** Get Sales Opportunity	  */
+	public int getC_Opportunity_ID();
+
+	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException;
+
     /** Column name C_OrderSourceValue */
     public static final String COLUMNNAME_C_OrderSourceValue = "C_OrderSourceValue";
 
@@ -969,6 +980,15 @@ public interface I_I_EstimationJP
 	/** Get Drop Shipment Contact(Search Key)	  */
 	public String getJP_DropShip_User_Value();
 
+    /** Column name JP_EstimationDate */
+    public static final String COLUMNNAME_JP_EstimationDate = "JP_EstimationDate";
+
+	/** Set Estimation Date	  */
+	public void setJP_EstimationDate (Timestamp JP_EstimationDate);
+
+	/** Get Estimation Date	  */
+	public Timestamp getJP_EstimationDate();
+
     /** Column name JP_EstimationLine_ID */
     public static final String COLUMNNAME_JP_EstimationLine_ID = "JP_EstimationLine_ID";
 
@@ -1153,6 +1173,15 @@ public interface I_I_EstimationJP
 	  * Warehouse Locator
 	  */
 	public String getJP_Locator_Value();
+
+    /** Column name JP_Opportunity_DocumentNo */
+    public static final String COLUMNNAME_JP_Opportunity_DocumentNo = "JP_Opportunity_DocumentNo";
+
+	/** Set Sales Opportunity(Doc No)	  */
+	public void setJP_Opportunity_DocumentNo (String JP_Opportunity_DocumentNo);
+
+	/** Get Sales Opportunity(Doc No)	  */
+	public String getJP_Opportunity_DocumentNo();
 
     /** Column name JP_OrgTrx_Value */
     public static final String COLUMNNAME_JP_OrgTrx_Value = "JP_OrgTrx_Value";

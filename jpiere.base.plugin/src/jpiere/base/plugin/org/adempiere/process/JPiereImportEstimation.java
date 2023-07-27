@@ -179,6 +179,13 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 		else
 			return message;
 		
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Opportunity_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupC_Opportunity_ID())
+			commitEx();
+		else
+			return message;
+		
 		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "SalesRep_ID");
 		if(processMonitor != null)	processMonitor.statusUpdate(message);
 		if(reverseLookupSalesRep_ID())
@@ -439,7 +446,7 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 
 		sql = new StringBuilder ("SELECT * FROM I_EstimationJP ")
 			  .append("WHERE I_IsImported='N'").append (getWhereClause())
-			.append(" ORDER BY DateOrdered, C_BPartner_ID, BillTo_ID, C_BPartner_Location_ID, DocumentNo, I_EstimationJP_ID");
+			.append(" ORDER BY JP_EstimationDate, C_BPartner_ID, BillTo_ID, C_BPartner_Location_ID, DocumentNo, I_EstimationJP_ID");
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -885,6 +892,49 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 
 
 		return true;
+	}
+	
+	
+	/**
+	 * Reverse Lookup C_Opportunity_ID
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean reverseLookupC_Opportunity_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_EstimationJP i ")
+			.append("SET C_Opportunity_ID=(SELECT C_Opportunity_ID FROM C_Opportunity p")
+			.append(" WHERE i.JP_Opportunity_DocumentNo=p.DocumentNo AND i.AD_Client_ID=p.AD_Client_ID) ")
+			.append("WHERE i.C_Opportunity_ID IS NULL AND i.JP_Opportunity_DocumentNo IS NOT NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Opportunity_DocumentNo
+		message = Msg.getMsg(getCtx(), "Error")  + Msg.getMsg(getCtx(), "Invalid") + Msg.getElement(getCtx(), "JP_Opportunity_DocumentNo");
+		sql = new StringBuilder ("UPDATE I_EstimationJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append("WHERE C_Opportunity_ID IS NULL AND JP_Opportunity_DocumentNo IS NOT NULL")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception( message +" : " + e.toString() +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
 	}
 	
 	/**
@@ -2774,6 +2824,12 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 		estimation.setDocAction(DocAction.ACTION_Complete);
 
 		//Date
+		if(impEstimation.getJP_EstimationDate() == null)
+		{
+			impEstimation.setJP_EstimationDate(p_DateValue);
+			estimation.setJP_EstimationDate(p_DateValue);
+		}
+		
 		if(impEstimation.getDateOrdered() == null)
 		{
 			impEstimation.setDateOrdered(p_DateValue);
@@ -2873,8 +2929,8 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 		{
 			if(Util.isEmpty(bp.getFreightCostRule()))
 			{
-				impEstimation.setFreightCostRule(X_I_EstimationJP.FREIGHTCOSTRULE_FixPrice);
-				estimation.setFreightCostRule(X_I_EstimationJP.FREIGHTCOSTRULE_FixPrice);
+				impEstimation.setFreightCostRule(X_I_EstimationJP.FREIGHTCOSTRULE_FreightIncluded);
+				estimation.setFreightCostRule(X_I_EstimationJP.FREIGHTCOSTRULE_FreightIncluded);
 
 			}else {
 				impEstimation.setFreightCostRule(bp.getFreightCostRule());

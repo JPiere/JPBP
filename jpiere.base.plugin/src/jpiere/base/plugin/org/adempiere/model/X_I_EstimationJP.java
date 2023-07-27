@@ -555,6 +555,33 @@ public class X_I_EstimationJP extends PO implements I_I_EstimationJP, I_Persiste
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Opportunity)MTable.get(getCtx(), org.compiere.model.I_C_Opportunity.Table_ID)
+			.getPO(getC_Opportunity_ID(), get_TrxName());
+	}
+
+	/** Set Sales Opportunity.
+		@param C_Opportunity_ID Sales Opportunity
+	*/
+	public void setC_Opportunity_ID (int C_Opportunity_ID)
+	{
+		if (C_Opportunity_ID < 1)
+			set_Value (COLUMNNAME_C_Opportunity_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Opportunity_ID, Integer.valueOf(C_Opportunity_ID));
+	}
+
+	/** Get Sales Opportunity.
+		@return Sales Opportunity	  */
+	public int getC_Opportunity_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Opportunity_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Order Source Key.
 		@param C_OrderSourceValue Order Source Key
 	*/
@@ -1564,6 +1591,21 @@ public class X_I_EstimationJP extends PO implements I_I_EstimationJP, I_Persiste
 		return (String)get_Value(COLUMNNAME_JP_DropShip_User_Value);
 	}
 
+	/** Set Estimation Date.
+		@param JP_EstimationDate Estimation Date
+	*/
+	public void setJP_EstimationDate (Timestamp JP_EstimationDate)
+	{
+		set_Value (COLUMNNAME_JP_EstimationDate, JP_EstimationDate);
+	}
+
+	/** Get Estimation Date.
+		@return Estimation Date	  */
+	public Timestamp getJP_EstimationDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_JP_EstimationDate);
+	}
+
 	public I_JP_EstimationLine getJP_EstimationLine() throws RuntimeException
 	{
 		return (I_JP_EstimationLine)MTable.get(getCtx(), I_JP_EstimationLine.Table_ID)
@@ -1922,6 +1964,21 @@ public class X_I_EstimationJP extends PO implements I_I_EstimationJP, I_Persiste
 	public String getJP_Locator_Value()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Locator_Value);
+	}
+
+	/** Set Sales Opportunity(Doc No).
+		@param JP_Opportunity_DocumentNo Sales Opportunity(Doc No)
+	*/
+	public void setJP_Opportunity_DocumentNo (String JP_Opportunity_DocumentNo)
+	{
+		set_Value (COLUMNNAME_JP_Opportunity_DocumentNo, JP_Opportunity_DocumentNo);
+	}
+
+	/** Get Sales Opportunity(Doc No).
+		@return Sales Opportunity(Doc No)	  */
+	public String getJP_Opportunity_DocumentNo()
+	{
+		return (String)get_Value(COLUMNNAME_JP_Opportunity_DocumentNo);
 	}
 
 	/** Set Trx Organization(Search Key).
