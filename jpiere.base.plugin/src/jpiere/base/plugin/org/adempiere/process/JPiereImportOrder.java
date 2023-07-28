@@ -2940,6 +2940,11 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 			}
 		}
 
+		//BillTo_ID
+		if(impOrder.getBillTo_ID() > 0)
+		{
+			order.setBill_Location_ID(impOrder.getBillTo_ID());
+		}
 
 		//DocStatus
 		if(Util.isEmpty(impOrder.getDocStatus()))

@@ -2960,7 +2960,14 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 				estimation.setC_PaymentTerm_ID(bp.getC_PaymentTerm_ID());
 			}
 		}
-
+		
+		//BillTo_ID
+		if(impEstimation.getBillTo_ID() > 0)
+		{
+			estimation.setBill_Location_ID(impEstimation.getBillTo_ID());
+		}
+		
+		
 		ModelValidationEngine.get().fireImportValidate(this, impEstimation, estimation, ImportValidator.TIMING_AFTER_IMPORT);
 
 		try {
