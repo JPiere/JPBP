@@ -135,6 +135,15 @@ public class Doc_AllocationHdrJP extends Doc
 				MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
 				setPaymentCurrencyRate(docLine, payment);//JPIERE-0052 -set Payment rate basically
 			}
+			else if (line.getC_Invoice_ID() != 0)
+			{
+				//Ref: IDEMPIERE-5591 Payment allocation AP/AR GL postings not zero in alternative schema for invoice REVERSE/CORRECT (#1921)
+//				MInvoice invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
+//				int C_ConversionType_ID = invoice.getC_ConversionType_ID();
+//				docLine.setC_ConversionType_ID(C_ConversionType_ID);
+//				if (invoice.isOverrideCurrencyRate())
+//					docLine.setCurrencyRate(invoice.getCurrencyRate());
+			}
 			//
 			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
 			list.add (docLine);
