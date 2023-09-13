@@ -17,6 +17,7 @@ import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfoParameter;
+import org.compiere.util.Msg;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.WFProcessManage;
 
@@ -68,6 +69,17 @@ public class WFProcessManageExtendForCancelWF extends WFProcessManage {
 			MTable m_Table = MTable.get(AD_Table_ID);
 			int Record_ID = process.getRecord_ID();
 			PO po = m_Table.getPO(Record_ID, get_TrxName());
+			if(po == null)//JPIERE-0607 Cancel WF. In case of Delete Doc.
+			{
+				//The workflow ends because the target document cannot be found.
+				String msg = Msg.getMsg(getCtx(), "JP_CancelWF_NotFound");
+				process.setWFState(MWFProcess.WFSTATE_Terminated);
+				process.setTextMsg(msg);
+				process.save(get_TrxName());
+				return msg;
+			}
+			
+			
 			po.set_ValueNoCheck(COLUMNNAME_JP_CancelWFAction, null);
 			po.set_ValueNoCheck(COLUMNNAME_JP_CancelWFStatus, null);
 			po.saveEx(get_TrxName());

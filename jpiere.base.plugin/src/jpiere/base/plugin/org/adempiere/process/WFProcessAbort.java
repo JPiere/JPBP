@@ -108,6 +108,18 @@ public class WFProcessAbort extends SvrProcess
 				process = new MWFProcess (getCtx(), p_AD_WF_Process_ID, get_TrxName());
 				m_Table = MTable.get(process.getAD_Table_ID());
 				m_PO = m_Table.getPO(process.getRecord_ID(), get_TrxName());
+				if(m_PO == null)//JPIERE-0607 Cancel WF. In case of Delete Doc.
+				{
+					//The workflow ends because the target document cannot be found.
+					msg = Msg.getMsg(getCtx(), "JP_CancelWF_NotFound");
+					process.setWFState(MWFProcess.WFSTATE_Terminated);
+					process.setTextMsg(msg);
+					process.save(get_TrxName());
+					continue;
+				}
+				
+				
+				
 				if(m_PO.columnExists("DocumentNo"))
 				{
 					msg = m_PO.get_ValueAsString("DocumentNo");

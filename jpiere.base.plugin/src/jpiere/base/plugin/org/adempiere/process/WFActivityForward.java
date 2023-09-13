@@ -35,6 +35,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFEventAudit;
+import org.compiere.wf.MWFProcess;
 
 import jpiere.base.plugin.org.adempiere.base.JPiereWFActivityModelValidator;
 import jpiere.base.plugin.org.adempiere.model.MWFAutoForward;
@@ -105,6 +106,16 @@ public class WFActivityForward extends SvrProcess {
 		{
 			m_Table = MTable.get(m_activity.getAD_Table_ID());
 			m_PO = m_Table.getPO(m_activity.getRecord_ID(), get_TrxName());
+			if(m_PO == null)//JPIERE-0607 Cancel WF. In case of Delete Doc.
+			{
+				//The workflow ends because the target document cannot be found.
+				msg = Msg.getMsg(getCtx(), "JP_CancelWF_NotFound");
+				MWFProcess wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+				wfpr.setWFState(MWFProcess.WFSTATE_Terminated);
+				wfpr.setTextMsg(msg);
+				wfpr.save(get_TrxName());
+				continue;
+			}
 
 			if(m_PO.columnExists("DocumentNo"))
 			{
