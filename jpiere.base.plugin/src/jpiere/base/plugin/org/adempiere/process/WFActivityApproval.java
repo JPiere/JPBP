@@ -18,9 +18,12 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.logging.Level;
 
+import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
+import org.compiere.model.MNote;
 import org.compiere.model.MRefList;
 import org.compiere.model.MTable;
+import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
@@ -178,11 +181,41 @@ public class WFActivityApproval extends SvrProcess {
 						m_PO.set_ValueNoCheck(COLUMNNAME_JP_CancelWFAction, null);
 						m_PO.saveEx(get_TrxName());
 						
-						//TODO 否認メールの実装が多分必要。
+						//Send Mail or Note - Ref: MWFActivity#setUserChoice()
+						if(m_PO instanceof DocAction)
+						{
+							DocAction doc = (DocAction)m_PO;
+						
+							MUser to = new MUser(getCtx(), doc.getDoc_User_ID(), null);
 
+							// send email
+							if (to.isNotificationEMail()) 
+							{
+								MClient client = MClient.get(getCtx(), doc.getAD_Client_ID());
+								client.sendEMail(doc.getDoc_User_ID(), Msg.getMsg(getCtx(), "NotApproved")
+										+ ": " + doc.getDocumentNo(),
+										(doc.getSummary() != null ? doc.getSummary() + "\n" : "" )
+										+ (doc.getProcessMsg() != null ? doc.getProcessMsg() + "\n" : "")
+										+ (m_activity.getTextMsg() != null ? m_activity.getTextMsg() : ""), null);
+							}
+	
+							// Send Note
+							if (to.isNotificationNote()) 
+							{
+								MNote note = new MNote(getCtx(), "NotApproved", doc.getDoc_User_ID(), null);
+								note.setTextMsg((doc.getSummary() != null ? doc.getSummary() + "\n" : "" )
+										+ (doc.getProcessMsg() != null ? doc.getProcessMsg() + "\n" : "")
+										+ (m_activity.getTextMsg() != null ? m_activity.getTextMsg() : ""));
+								note.setRecord(m_PO.get_Table_ID(), m_PO.get_ID());
+								note.saveEx();
+							}
+						}
+						
+						m_activity.saveEx(get_TrxName());
+						
 					}else if(m_PO instanceof DocAction) {//Approved
 
-						//TODO 自己承認のチェックの実装が多分必要。
+						//TODO Check IsCanApproveOwnDoc(Self-Approval)
 						
 						m_activity.setWFState(MWFActivity.WFSTATE_Completed);
 						
