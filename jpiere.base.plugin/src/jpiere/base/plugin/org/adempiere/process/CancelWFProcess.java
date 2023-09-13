@@ -44,7 +44,6 @@ public class CancelWFProcess extends SvrProcess {
 		int AD_Table_ID = getTable_ID();
 		MTable m_Table = MTable.get(AD_Table_ID);
 		int Record_ID = getRecord_ID();
-		
 		PO po = m_Table.getPO(Record_ID, get_TrxName());
 		String  JP_CancelWFAction = po.get_ValueAsString(COLUMNNAME_JP_CancelWFAction) ;
 		if(po instanceof DocAction)
