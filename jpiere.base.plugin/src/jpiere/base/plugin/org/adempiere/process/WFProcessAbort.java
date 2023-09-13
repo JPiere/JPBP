@@ -32,7 +32,8 @@ import org.compiere.util.Util;
 import org.compiere.wf.MWFProcess;
 
 /**
- * JPIERE-0520 Workflow abort at Unprocessed Wrokflow Activity Info window
+ * JPIERE-0520: Workflow abort at Unprocessed Wrokflow Activity Info window
+ * JPIERE-0607: Cancel Workflow.
  *
  *  Ref: Manage Workflow Process(WFProcessManage.java)
  *
@@ -43,6 +44,8 @@ public class WFProcessAbort extends SvrProcess
 {
 
 	private String p_Comments = null;
+	private static final String COLUMNNAME_JP_CancelWFAction = "JP_CancelWFAction";
+	private static final String COLUMNNAME_JP_CancelWFStatus = "JP_CancelWFStatus";
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -159,6 +162,8 @@ public class WFProcessAbort extends SvrProcess
 							m_PO.set_ValueNoCheck(DocAction.DOC_COLUMNNAME_DocStatus, DocAction.STATUS_InProgress);
 
 						m_PO.set_ValueNoCheck(DocAction.DOC_COLUMNNAME_DocAction, DocAction.ACTION_Complete);
+						m_PO.set_ValueNoCheck(COLUMNNAME_JP_CancelWFStatus, null);
+						m_PO.set_ValueNoCheck(COLUMNNAME_JP_CancelWFAction, null);
 						m_PO.saveEx(get_TrxName());
 					}
 				}

@@ -29,6 +29,7 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFProcess;
@@ -36,6 +37,7 @@ import org.compiere.wf.MWFProcess;
 
 /**
  *  JPIERE-0513: Approval of Unprocessed Work flow Activity at Info Window.
+ *  JPIERE-0607: Cancel Workflow.
  *
  *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
  *
@@ -45,7 +47,9 @@ public class WFActivityApproval extends SvrProcess {
 	private String p_JP_IsApproval = "N";
 	private String p_Comments = null;
 	private Timestamp starTime = Timestamp.valueOf(LocalDateTime.now());
-
+	private static final String COLUMNNAME_JP_CancelWFAction = "JP_CancelWFAction";
+	private static final String COLUMNNAME_JP_CancelWFStatus = "JP_CancelWFStatus";
+	
 	@Override
 	protected void prepare()
 	{
@@ -117,31 +121,63 @@ public class WFActivityApproval extends SvrProcess {
 			MWFProcess wfpr = null;
 			if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
 			{
-				try
+				
+				String  JP_CancelWFAction = m_PO.get_ValueAsString(COLUMNNAME_JP_CancelWFAction);//JPIERE-0607
+				if(Util.isEmpty(JP_CancelWFAction))
 				{
+					try
+					{
+						m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
+						m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
+						if(!p_JP_IsApproval.equals("Y"))
+						{
+							wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+							wfpr.setWFState(MWFProcess.WFSTATE_Aborted);
+							wfpr.save(get_TrxName());
+	
+						}else if(m_PO instanceof DocAction) {
+	
+							m_PO.load(get_TrxName());
+							String docStatus = ((DocAction)m_PO).getDocStatus();
+							if(DocAction.STATUS_Completed.equals(docStatus))
+							{
+								wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
+								wfpr.setWFState(MWFProcess.WFSTATE_Completed);
+								wfpr.saveEx(get_TrxName());
+							}
+						}
+	
+					}catch (Exception e) {
+	
+						log.log(Level.SEVERE, node.getName(), e);
+						throw e;
+					}
+					
+				}else {
+					
+					//JPIERE-0607: Cancel WF 
 					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
-					m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
-					if(!p_JP_IsApproval.equals("Y"))
+					m_activity.setTextMsg(p_Comments);
+					if(!p_JP_IsApproval.equals("Y"))//Not Approved
 					{
 						wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
 						wfpr.setWFState(MWFProcess.WFSTATE_Aborted);
 						wfpr.save(get_TrxName());
+						
+						m_PO.set_ValueNoCheck(COLUMNNAME_JP_CancelWFStatus, DocAction.STATUS_NotApproved);
+						m_PO.set_ValueNoCheck(COLUMNNAME_JP_CancelWFAction, null);
+						m_PO.saveEx(get_TrxName());
+						
+						//TODO 否認メールの実装が多分必要。
 
-					}else if(m_PO instanceof DocAction) {
+					}else if(m_PO instanceof DocAction) {//Approved
 
-						m_PO.load(get_TrxName());
-						String docStatus = ((DocAction)m_PO).getDocStatus();
-						if(DocAction.STATUS_Completed.equals(docStatus))
-						{
-							wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
-							wfpr.checkCloseActivities(get_TrxName());
-						}
+						//TODO 自己承認のチェックの実装が多分必要。
+						
+						m_activity.setWFState(MWFActivity.WFSTATE_Completed);
+						
 					}
-
-				}catch (Exception e) {
-
-					log.log(Level.SEVERE, node.getName(), e);
-					throw e;
+					
 				}
 
 			}else {
