@@ -22,8 +22,10 @@ import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
 import org.compiere.model.MNote;
 import org.compiere.model.MRefList;
+import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
+import org.compiere.model.MUserRoles;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
@@ -36,6 +38,7 @@ import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFProcess;
+import org.compiere.wf.MWFResponsible;
 
 
 /**
@@ -136,19 +139,19 @@ public class WFActivityApproval extends SvrProcess {
 			{
 				
 				String  JP_CancelWFAction = m_PO.get_ValueAsString(COLUMNNAME_JP_CancelWFAction);//JPIERE-0607
-				if(Util.isEmpty(JP_CancelWFAction))
+				if(Util.isEmpty(JP_CancelWFAction))//Standard Work flow
 				{
 					try
 					{
 						m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 						m_activity.setUserChoice(Env.getAD_User_ID(getCtx()), p_JP_IsApproval, DisplayType.YesNo, p_Comments);
-						if(!p_JP_IsApproval.equals("Y"))
+						if(!p_JP_IsApproval.equals("Y"))//Not Approved
 						{
 							wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
 							wfpr.setWFState(MWFProcess.WFSTATE_Aborted);
 							wfpr.save(get_TrxName());
 	
-						}else if(m_PO instanceof DocAction) {
+						}else if(m_PO instanceof DocAction) {//Approved
 	
 							m_PO.load(get_TrxName());
 							String docStatus = ((DocAction)m_PO).getDocStatus();
@@ -166,12 +169,11 @@ public class WFActivityApproval extends SvrProcess {
 						throw e;
 					}
 					
-				}else {
+				}else {//JPIERE-0607: Cancel WF
 					
-					//JPIERE-0607: Cancel WF 
 					m_activity.setEndWaitTime(Timestamp.valueOf(LocalDateTime.now()));
 					m_activity.setTextMsg(p_Comments);
-					if(!p_JP_IsApproval.equals("Y"))//Not Approved
+					if(!p_JP_IsApproval.equals("Y"))//JPIERE-0607: Cancel WF - Not Approved
 					{
 						wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
 						wfpr.setWFState(MWFProcess.WFSTATE_Aborted);
@@ -188,7 +190,7 @@ public class WFActivityApproval extends SvrProcess {
 						
 							MUser to = new MUser(getCtx(), doc.getDoc_User_ID(), null);
 
-							// send email
+							// send EMail
 							if (to.isNotificationEMail()) 
 							{
 								MClient client = MClient.get(getCtx(), doc.getAD_Client_ID());
@@ -213,17 +215,116 @@ public class WFActivityApproval extends SvrProcess {
 						
 						m_activity.saveEx(get_TrxName());
 						
-					}else if(m_PO instanceof DocAction) {//Approved
+					}else if(m_PO instanceof DocAction) {//JPIERE-0607: Cancel WF - Approved
 
-						//TODO Check IsCanApproveOwnDoc(Self-Approval)
+						DocAction doc = (DocAction)m_PO;
+						wfpr = new MWFProcess(getCtx(), m_activity.getAD_WF_Process_ID(), get_TrxName());
 						
-						m_activity.setWFState(MWFActivity.WFSTATE_Completed);
+						boolean isOwnDoc = false;//Check Self-Approval
+						if(m_activity.isInvoker())
+						{
+							//JPIERE-0485 - Start
+							MWFResponsible resp = m_activity.getResponsible();
+							if(resp != null && resp.getResponsibleType().equals(MWFResponsible.RESPONSIBLETYPE_Organization))
+							{								
+								if(Env.getAD_User_ID(getCtx()) == wfpr.getCreatedBy()
+										|| Env.getAD_User_ID(getCtx()) == doc.getDoc_User_ID()) //self approval
+								{
+									if(!MRole.getDefault().isCanApproveOwnDoc())
+									{
+										isOwnDoc = true;
+									}
+
+								}
+								
+								if(!isOwnDoc)
+								{
+									m_activity.setWFState(MWFActivity.WFSTATE_Completed);
+								}else {
+									throw new Exception(Msg.getMsg(getCtx(), "JP_NotSelfApproveRole"));//Your role can not self-approve.
+								}
+
+							}else {//JPIERE-0485
+
+								int startAD_User_ID = Env.getAD_User_ID(getCtx());
+								if (startAD_User_ID == 0)
+									startAD_User_ID = doc.getDoc_User_ID();
+								int nextAD_User_ID = m_activity.getApprovalUser(startAD_User_ID,
+									doc.getC_Currency_ID(), doc.getApprovalAmt(),
+									doc.getAD_Org_ID(),
+									(startAD_User_ID == doc.getDoc_User_ID()
+										|| startAD_User_ID == wfpr.getCreatedBy()) //JPIER-0551
+									);	//	own doc
+								//	No Approver
+								if (nextAD_User_ID <= 0)
+								{									
+									wfpr.setWFState(MWFProcess.WFSTATE_Aborted);
+									wfpr.setTextMsg(Msg.getMsg(getCtx(), "NoApprover"));
+									wfpr.save(get_TrxName());
+									
+									m_PO.set_ValueNoCheck(COLUMNNAME_JP_CancelWFStatus, DocAction.STATUS_NotApproved);
+									m_PO.set_ValueNoCheck(COLUMNNAME_JP_CancelWFAction, null);
+									m_PO.saveEx(get_TrxName());
+								}
+								else if (startAD_User_ID != nextAD_User_ID)
+								{
+									m_activity.forwardTo(nextAD_User_ID, "Next Approver");
+								}
+								else	//	Approve
+								{
+									m_activity.setWFState(MWFActivity.WFSTATE_Completed);
+								}
+
+							}//JPIERE-0485 - End
+							
+						}else {//JPIERE-0487 & JPIERE-0488 - Start
+							
+							MWFResponsible resp = m_activity.getResponsible();
+
+							if(resp.isHuman())//JPIERE-0488
+							{
+								if(Env.getAD_User_ID(getCtx()) == wfpr.getCreatedBy()
+										|| Env.getAD_User_ID(getCtx()) == doc.getDoc_User_ID()) //self approval
+								{
+									if(!MRole.getDefault().isCanApproveOwnDoc())
+									{
+										isOwnDoc = true;
+									}
+
+								}
+
+							}else if(resp.isRole()) {//JPIERE-0487
+								
+								MUserRoles[] urs = MUserRoles.getOfRole(getCtx(), resp.getAD_Role_ID());
+								for(int i = 0; i < urs.length; i++)
+								{
+									if(Env.getAD_User_ID(getCtx()) == wfpr.getCreatedBy()
+											|| Env.getAD_User_ID(getCtx()) == doc.getDoc_User_ID()) //self approval
+									{
+										if(!MRole.getDefault().isCanApproveOwnDoc())
+										{
+											isOwnDoc = true;
+											break;
+										}
+
+									}
+								}
+							}
+
+							if(!isOwnDoc)
+							{
+								m_activity.setWFState(MWFActivity.WFSTATE_Completed);
+							}else {
+								throw new Exception(Msg.getMsg(getCtx(), "JP_NotSelfApproveRole"));////Your role can not self-approve.
+							}
+
+						}//JPIERE-0487 & JPIERE-0488 - End
 						
-					}
+					}//JPIERE-0607: Cancel WF - Approved
 					
-				}
+				}//JPIERE-0607: Cancel WF 
 
-			}else {
+			}else { //if (!MWFNode.ACTION_UserChoice.equals(node.getAction()))
 
 				try
 				{
