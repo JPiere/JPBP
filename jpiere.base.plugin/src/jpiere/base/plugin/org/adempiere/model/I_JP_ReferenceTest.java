@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_ReferenceTest
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 10
  */
 @SuppressWarnings("all")
 public interface I_JP_ReferenceTest 
@@ -46,8 +46,8 @@ public interface I_JP_ReferenceTest
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -81,14 +81,29 @@ public interface I_JP_ReferenceTest
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name AD_Table_ID */
+    public static final String COLUMNNAME_AD_Table_ID = "AD_Table_ID";
+
+	/** Set Table.
+	  * Database Table information
+	  */
+	public void setAD_Table_ID (int AD_Table_ID);
+
+	/** Get Table.
+	  * Database Table information
+	  */
+	public int getAD_Table_ID();
+
+	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
     /** Column name BP_Location_ID */
     public static final String COLUMNNAME_BP_Location_ID = "BP_Location_ID";
@@ -131,30 +146,15 @@ public interface I_JP_ReferenceTest
 	  */
 	public String getBroadcastMessage();
 
-    /** Column name C_BP_Group_ID */
-    public static final String COLUMNNAME_C_BP_Group_ID = "C_BP_Group_ID";
-
-	/** Set BPartner Group.
-	  * Business Partner Group
-	  */
-	public void setC_BP_Group_ID (int C_BP_Group_ID);
-
-	/** Get BPartner Group.
-	  * Business Partner Group
-	  */
-	public int getC_BP_Group_ID();
-
-	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException;
-
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -327,6 +327,19 @@ public interface I_JP_ReferenceTest
 	  * Date when business is not conducted
 	  */
 	public Timestamp getDate1();
+
+    /** Column name DateNextRun */
+    public static final String COLUMNNAME_DateNextRun = "DateNextRun";
+
+	/** Set Date Next Run.
+	  * Date the process will run next
+	  */
+	public void setDateNextRun (Timestamp DateNextRun);
+
+	/** Get Date Next Run.
+	  * Date the process will run next
+	  */
+	public Timestamp getDateNextRun();
 
     /** Column name DateTrx */
     public static final String COLUMNNAME_DateTrx = "DateTrx";
@@ -516,6 +529,15 @@ public interface I_JP_ReferenceTest
 
 	/** Get JP_ReferenceTest_UU	  */
 	public String getJP_ReferenceTest_UU();
+
+    /** Column name JP_Single_Grid */
+    public static final String COLUMNNAME_JP_Single_Grid = "JP_Single_Grid";
+
+	/** Set Single Selection Grid	  */
+	public void setJP_Single_Grid (String JP_Single_Grid);
+
+	/** Get Single Selection Grid	  */
+	public String getJP_Single_Grid();
 
     /** Column name LatestPickupTime */
     public static final String COLUMNNAME_LatestPickupTime = "LatestPickupTime";
@@ -770,16 +792,31 @@ public interface I_JP_ReferenceTest
 	  */
 	public BigDecimal getRate();
 
+    /** Column name Record_ID */
+    public static final String COLUMNNAME_Record_ID = "Record_ID";
+
+	/** Set Record ID.
+	  * Direct internal record ID
+	  */
+	public void setRecord_ID (int Record_ID);
+
+	/** Get Record ID.
+	  * Direct internal record ID
+	  */
+	public int getRecord_ID();
+
     /** Column name ReferenceNo */
     public static final String COLUMNNAME_ReferenceNo = "ReferenceNo";
 
 	/** Set Reference No.
-	  * Your customer or vendor number at the Business Partner's site
+	  * Your customer or vendor number at the Business Partner&#039;
+s site
 	  */
 	public void setReferenceNo (String ReferenceNo);
 
 	/** Get Reference No.
-	  * Your customer or vendor number at the Business Partner's site
+	  * Your customer or vendor number at the Business Partner&#039;
+s site
 	  */
 	public String getReferenceNo();
 
@@ -809,6 +846,19 @@ public interface I_JP_ReferenceTest
 	  */
 	public int getSalesVolume();
 
+    /** Column name SchedulerState */
+    public static final String COLUMNNAME_SchedulerState = "SchedulerState";
+
+	/** Set Scheduler State.
+	  * State of this scheduler record (not scheduled, started or stopped)
+	  */
+	public void setSchedulerState (Object SchedulerState);
+
+	/** Get Scheduler State.
+	  * State of this scheduler record (not scheduled, started or stopped)
+	  */
+	public Object getSchedulerState();
+
     /** Column name TenderType */
     public static final String COLUMNNAME_TenderType = "TenderType";
 
@@ -821,6 +871,19 @@ public interface I_JP_ReferenceTest
 	  * Method of Payment
 	  */
 	public String getTenderType();
+
+    /** Column name TimeZone */
+    public static final String COLUMNNAME_TimeZone = "TimeZone";
+
+	/** Set Time Zone.
+	  * Time zone name
+	  */
+	public void setTimeZone (String TimeZone);
+
+	/** Get Time Zone.
+	  * Time zone name
+	  */
+	public String getTimeZone();
 
     /** Column name URL */
     public static final String COLUMNNAME_URL = "URL";

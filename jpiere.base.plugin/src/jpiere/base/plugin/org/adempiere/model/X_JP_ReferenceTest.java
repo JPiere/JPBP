@@ -26,19 +26,40 @@ import org.compiere.util.Env;
 
 /** Generated Model for JP_ReferenceTest
  *  @author iDempiere (generated) 
- *  @version Release 8.2 - $Id$ */
+ *  @version Release 10 - $Id$ */
+@org.adempiere.base.Model(table="JP_ReferenceTest")
 public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20210501L;
+	private static final long serialVersionUID = 20231107L;
 
     /** Standard Constructor */
     public X_JP_ReferenceTest (Properties ctx, int JP_ReferenceTest_ID, String trxName)
     {
       super (ctx, JP_ReferenceTest_ID, trxName);
+      /** if (JP_ReferenceTest_ID == 0)
+        {
+			setInvoiceRule (null);
+// D
+			setIsCustomer (true);
+// Y
+			setJP_ReferenceTest_ID (0);
+			setM_PriceList_ID (0);
+			setM_Product_ID (0);
+			setProcessed (false);
+// N
+			setTenderType (null);
+// D
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_ReferenceTest (Properties ctx, int JP_ReferenceTest_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_ReferenceTest_ID, trxName, virtualColumns);
       /** if (JP_ReferenceTest_ID == 0)
         {
 			setInvoiceRule (null);
@@ -84,21 +105,20 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
     }
 
 	/** Set Image.
-		@param AD_Image_ID 
-		Image or Icon
-	  */
+		@param AD_Image_ID Image or Icon
+	*/
 	public void setAD_Image_ID (int AD_Image_ID)
 	{
-		if (AD_Image_ID < 1) 
+		if (AD_Image_ID < 1)
 			set_Value (COLUMNNAME_AD_Image_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_Image_ID, Integer.valueOf(AD_Image_ID));
 	}
 
 	/** Get Image.
 		@return Image or Icon
 	  */
-	public int getAD_Image_ID () 
+	public int getAD_Image_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Image_ID);
 		if (ii == null)
@@ -107,21 +127,20 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Trx Organization.
-		@param AD_OrgTrx_ID 
-		Performing or initiating organization
-	  */
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
 	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
 	{
-		if (AD_OrgTrx_ID < 1) 
+		if (AD_OrgTrx_ID < 1)
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
 	}
 
 	/** Get Trx Organization.
 		@return Performing or initiating organization
 	  */
-	public int getAD_OrgTrx_ID () 
+	public int getAD_OrgTrx_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
@@ -129,27 +148,55 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Table)MTable.get(getCtx(), org.compiere.model.I_AD_Table.Table_ID)
+			.getPO(getAD_Table_ID(), get_TrxName());
+	}
+
+	/** Set Table.
+		@param AD_Table_ID Database Table information
+	*/
+	public void setAD_Table_ID (int AD_Table_ID)
+	{
+		if (AD_Table_ID < 1)
+			set_Value (COLUMNNAME_AD_Table_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_Table_ID, Integer.valueOf(AD_Table_ID));
+	}
+
+	/** Get Table.
+		@return Database Table information
+	  */
+	public int getAD_Table_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Table_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_Location getBP_Location() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Location)MTable.get(getCtx(), org.compiere.model.I_C_Location.Table_Name)
-			.getPO(getBP_Location_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Location)MTable.get(getCtx(), org.compiere.model.I_C_Location.Table_ID)
+			.getPO(getBP_Location_ID(), get_TrxName());
+	}
 
 	/** Set BP Address.
-		@param BP_Location_ID 
-		Address of the Business Partner
-	  */
+		@param BP_Location_ID Address of the Business Partner
+	*/
 	public void setBP_Location_ID (int BP_Location_ID)
 	{
-		if (BP_Location_ID < 1) 
+		if (BP_Location_ID < 1)
 			set_Value (COLUMNNAME_BP_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_BP_Location_ID, Integer.valueOf(BP_Location_ID));
 	}
 
 	/** Get BP Address.
 		@return Address of the Business Partner
 	  */
-	public int getBP_Location_ID () 
+	public int getBP_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_BP_Location_ID);
 		if (ii == null)
@@ -158,9 +205,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Backup Folder.
-		@param BackupFolder 
-		Backup Folder
-	  */
+		@param BackupFolder Backup Folder
+	*/
 	public void setBackupFolder (String BackupFolder)
 	{
 		set_Value (COLUMNNAME_BackupFolder, BackupFolder);
@@ -169,15 +215,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Backup Folder.
 		@return Backup Folder
 	  */
-	public String getBackupFolder () 
+	public String getBackupFolder()
 	{
 		return (String)get_Value(COLUMNNAME_BackupFolder);
 	}
 
 	/** Set Broadcast Message.
-		@param BroadcastMessage 
-		Broadcast Message
-	  */
+		@param BroadcastMessage Broadcast Message
+	*/
 	public void setBroadcastMessage (String BroadcastMessage)
 	{
 		set_Value (COLUMNNAME_BroadcastMessage, BroadcastMessage);
@@ -186,56 +231,32 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Broadcast Message.
 		@return Broadcast Message
 	  */
-	public String getBroadcastMessage () 
+	public String getBroadcastMessage()
 	{
 		return (String)get_Value(COLUMNNAME_BroadcastMessage);
 	}
 
-	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BP_Group)MTable.get(getCtx(), org.compiere.model.I_C_BP_Group.Table_Name)
-			.getPO(getC_BP_Group_ID(), get_TrxName());	}
-
-	/** Set BPartner Group.
-		@param C_BP_Group_ID 
-		Business Partner Group
-	  */
-	public void setC_BP_Group_ID (int C_BP_Group_ID)
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
 	{
-		throw new IllegalArgumentException ("C_BP_Group_ID is virtual column");	}
-
-	/** Get BPartner Group.
-		@return Business Partner Group
-	  */
-	public int getC_BP_Group_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_Group_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
 	}
 
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_BPartner_ID(), get_TrxName());	}
-
-	/** Set Business Partner .
-		@param C_BPartner_ID 
-		Identifies a Business Partner
-	  */
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_BPartner_ID < 1) 
+		if (C_BPartner_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 		@return Identifies a Business Partner
 	  */
-	public int getC_BPartner_ID () 
+	public int getC_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
@@ -244,26 +265,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
-			.getPO(getC_BPartner_Location_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_ID)
+			.getPO(getC_BPartner_Location_ID(), get_TrxName());
+	}
 
 	/** Set Partner Location.
-		@param C_BPartner_Location_ID 
-		Identifies the (ship to) address for this Business Partner
-	  */
+		@param C_BPartner_Location_ID Identifies the (ship to) address for this Business Partner
+	*/
 	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID)
 	{
-		if (C_BPartner_Location_ID < 1) 
+		if (C_BPartner_Location_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
 	}
 
 	/** Get Partner Location.
 		@return Identifies the (ship to) address for this Business Partner
 	  */
-	public int getC_BPartner_Location_ID () 
+	public int getC_BPartner_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
 		if (ii == null)
@@ -272,26 +293,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_C_Calendar getC_Calendar() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Calendar)MTable.get(getCtx(), org.compiere.model.I_C_Calendar.Table_Name)
-			.getPO(getC_Calendar_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Calendar)MTable.get(getCtx(), org.compiere.model.I_C_Calendar.Table_ID)
+			.getPO(getC_Calendar_ID(), get_TrxName());
+	}
 
 	/** Set Calendar.
-		@param C_Calendar_ID 
-		Accounting Calendar Name
-	  */
+		@param C_Calendar_ID Accounting Calendar Name
+	*/
 	public void setC_Calendar_ID (int C_Calendar_ID)
 	{
-		if (C_Calendar_ID < 1) 
+		if (C_Calendar_ID < 1)
 			set_Value (COLUMNNAME_C_Calendar_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Calendar_ID, Integer.valueOf(C_Calendar_ID));
 	}
 
 	/** Get Calendar.
 		@return Accounting Calendar Name
 	  */
-	public int getC_Calendar_ID () 
+	public int getC_Calendar_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Calendar_ID);
 		if (ii == null)
@@ -300,26 +321,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
-			.getPO(getC_Currency_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
+			.getPO(getC_Currency_ID(), get_TrxName());
+	}
 
 	/** Set Currency.
-		@param C_Currency_ID 
-		The Currency for this record
-	  */
+		@param C_Currency_ID The Currency for this record
+	*/
 	public void setC_Currency_ID (int C_Currency_ID)
 	{
-		if (C_Currency_ID < 1) 
+		if (C_Currency_ID < 1)
 			set_Value (COLUMNNAME_C_Currency_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
 	}
 
 	/** Get Currency.
 		@return The Currency for this record
 	  */
-	public int getC_Currency_ID () 
+	public int getC_Currency_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
 		if (ii == null)
@@ -328,26 +349,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public I_C_Location getC_Location() throws RuntimeException
-    {
-		return (I_C_Location)MTable.get(getCtx(), I_C_Location.Table_Name)
-			.getPO(getC_Location_ID(), get_TrxName());	}
+	{
+		return (I_C_Location)MTable.get(getCtx(), I_C_Location.Table_ID)
+			.getPO(getC_Location_ID(), get_TrxName());
+	}
 
 	/** Set Address.
-		@param C_Location_ID 
-		Location or Address
-	  */
+		@param C_Location_ID Location or Address
+	*/
 	public void setC_Location_ID (int C_Location_ID)
 	{
-		if (C_Location_ID < 1) 
+		if (C_Location_ID < 1)
 			set_Value (COLUMNNAME_C_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Location_ID, Integer.valueOf(C_Location_ID));
 	}
 
 	/** Get Address.
 		@return Location or Address
 	  */
-	public int getC_Location_ID () 
+	public int getC_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Location_ID);
 		if (ii == null)
@@ -356,26 +377,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_C_Period getC_Period() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Period)MTable.get(getCtx(), org.compiere.model.I_C_Period.Table_Name)
-			.getPO(getC_Period_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Period)MTable.get(getCtx(), org.compiere.model.I_C_Period.Table_ID)
+			.getPO(getC_Period_ID(), get_TrxName());
+	}
 
 	/** Set Period.
-		@param C_Period_ID 
-		Period of the Calendar
-	  */
+		@param C_Period_ID Period of the Calendar
+	*/
 	public void setC_Period_ID (int C_Period_ID)
 	{
-		if (C_Period_ID < 1) 
+		if (C_Period_ID < 1)
 			set_Value (COLUMNNAME_C_Period_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Period_ID, Integer.valueOf(C_Period_ID));
 	}
 
 	/** Get Period.
 		@return Period of the Calendar
 	  */
-	public int getC_Period_ID () 
+	public int getC_Period_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Period_ID);
 		if (ii == null)
@@ -384,26 +405,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_C_Year getC_Year() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Year)MTable.get(getCtx(), org.compiere.model.I_C_Year.Table_Name)
-			.getPO(getC_Year_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Year)MTable.get(getCtx(), org.compiere.model.I_C_Year.Table_ID)
+			.getPO(getC_Year_ID(), get_TrxName());
+	}
 
 	/** Set Year.
-		@param C_Year_ID 
-		Calendar Year
-	  */
+		@param C_Year_ID Calendar Year
+	*/
 	public void setC_Year_ID (int C_Year_ID)
 	{
-		if (C_Year_ID < 1) 
+		if (C_Year_ID < 1)
 			set_Value (COLUMNNAME_C_Year_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Year_ID, Integer.valueOf(C_Year_ID));
 	}
 
 	/** Get Year.
 		@return Calendar Year
 	  */
-	public int getC_Year_ID () 
+	public int getC_Year_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Year_ID);
 		if (ii == null)
@@ -412,9 +433,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Classification.
-		@param Classification 
-		Classification for grouping
-	  */
+		@param Classification Classification for grouping
+	*/
 	public void setClassification (String Classification)
 	{
 		set_Value (COLUMNNAME_Classification, Classification);
@@ -423,13 +443,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Classification.
 		@return Classification for grouping
 	  */
-	public String getClassification () 
+	public String getClassification()
 	{
 		return (String)get_Value(COLUMNNAME_Classification);
 	}
 
 	/** Set Color.
-		@param Color Color	  */
+		@param Color Color
+	*/
 	public void setColor (String Color)
 	{
 		set_Value (COLUMNNAME_Color, Color);
@@ -437,15 +458,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Color.
 		@return Color	  */
-	public String getColor () 
+	public String getColor()
 	{
 		return (String)get_Value(COLUMNNAME_Color);
 	}
 
 	/** Set Number.
-		@param CreditCardNumber 
-		Credit Card Number 
-	  */
+		@param CreditCardNumber Credit Card Number 
+	*/
 	public void setCreditCardNumber (String CreditCardNumber)
 	{
 		set_Value (COLUMNNAME_CreditCardNumber, CreditCardNumber);
@@ -454,15 +474,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Number.
 		@return Credit Card Number 
 	  */
-	public String getCreditCardNumber () 
+	public String getCreditCardNumber()
 	{
 		return (String)get_Value(COLUMNNAME_CreditCardNumber);
 	}
 
 	/** Set Current Cost Price.
-		@param CurrentCostPrice 
-		The currently used cost price
-	  */
+		@param CurrentCostPrice The currently used cost price
+	*/
 	public void setCurrentCostPrice (BigDecimal CurrentCostPrice)
 	{
 		set_Value (COLUMNNAME_CurrentCostPrice, CurrentCostPrice);
@@ -471,7 +490,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Current Cost Price.
 		@return The currently used cost price
 	  */
-	public BigDecimal getCurrentCostPrice () 
+	public BigDecimal getCurrentCostPrice()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_CurrentCostPrice);
 		if (bd == null)
@@ -480,9 +499,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Date.
-		@param Date1 
-		Date when business is not conducted
-	  */
+		@param Date1 Date when business is not conducted
+	*/
 	public void setDate1 (Timestamp Date1)
 	{
 		set_Value (COLUMNNAME_Date1, Date1);
@@ -491,15 +509,30 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Date.
 		@return Date when business is not conducted
 	  */
-	public Timestamp getDate1 () 
+	public Timestamp getDate1()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_Date1);
 	}
 
-	/** Set Transaction Date.
-		@param DateTrx 
-		Transaction Date
+	/** Set Date Next Run.
+		@param DateNextRun Date the process will run next
+	*/
+	public void setDateNextRun (Timestamp DateNextRun)
+	{
+		set_Value (COLUMNNAME_DateNextRun, DateNextRun);
+	}
+
+	/** Get Date Next Run.
+		@return Date the process will run next
 	  */
+	public Timestamp getDateNextRun()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateNextRun);
+	}
+
+	/** Set Transaction Date.
+		@param DateTrx Transaction Date
+	*/
 	public void setDateTrx (Timestamp DateTrx)
 	{
 		set_Value (COLUMNNAME_DateTrx, DateTrx);
@@ -508,29 +541,28 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Transaction Date.
 		@return Transaction Date
 	  */
-	public Timestamp getDateTrx () 
+	public Timestamp getDateTrx()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateTrx);
 	}
 
 	/** DeliveryRule AD_Reference_ID=151 */
 	public static final int DELIVERYRULE_AD_Reference_ID=151;
-	/** After Payment = R */
-	public static final String DELIVERYRULE_AfterPayment = "R";
 	/** Availability = A */
 	public static final String DELIVERYRULE_Availability = "A";
-	/** Complete Line = L */
-	public static final String DELIVERYRULE_CompleteLine = "L";
-	/** Complete Order = O */
-	public static final String DELIVERYRULE_CompleteOrder = "O";
 	/** Force = F */
 	public static final String DELIVERYRULE_Force = "F";
+	/** Complete Line = L */
+	public static final String DELIVERYRULE_CompleteLine = "L";
 	/** Manual = M */
 	public static final String DELIVERYRULE_Manual = "M";
+	/** Complete Order = O */
+	public static final String DELIVERYRULE_CompleteOrder = "O";
+	/** After Payment = R */
+	public static final String DELIVERYRULE_AfterPayment = "R";
 	/** Set Delivery Rule.
-		@param DeliveryRule 
-		Defines the timing of Delivery
-	  */
+		@param DeliveryRule Defines the timing of Delivery
+	*/
 	public void setDeliveryRule (String DeliveryRule)
 	{
 
@@ -540,41 +572,40 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Delivery Rule.
 		@return Defines the timing of Delivery
 	  */
-	public String getDeliveryRule () 
+	public String getDeliveryRule()
 	{
 		return (String)get_Value(COLUMNNAME_DeliveryRule);
 	}
 
 	/** DocStatus AD_Reference_ID=131 */
 	public static final int DOCSTATUS_AD_Reference_ID=131;
-	/** Drafted = DR */
-	public static final String DOCSTATUS_Drafted = "DR";
-	/** Completed = CO */
-	public static final String DOCSTATUS_Completed = "CO";
-	/** Approved = AP */
-	public static final String DOCSTATUS_Approved = "AP";
-	/** Not Approved = NA */
-	public static final String DOCSTATUS_NotApproved = "NA";
-	/** Voided = VO */
-	public static final String DOCSTATUS_Voided = "VO";
-	/** Invalid = IN */
-	public static final String DOCSTATUS_Invalid = "IN";
-	/** Reversed = RE */
-	public static final String DOCSTATUS_Reversed = "RE";
-	/** Closed = CL */
-	public static final String DOCSTATUS_Closed = "CL";
 	/** Unknown = ?? */
 	public static final String DOCSTATUS_Unknown = "??";
+	/** Approved = AP */
+	public static final String DOCSTATUS_Approved = "AP";
+	/** Closed = CL */
+	public static final String DOCSTATUS_Closed = "CL";
+	/** Completed = CO */
+	public static final String DOCSTATUS_Completed = "CO";
+	/** Drafted = DR */
+	public static final String DOCSTATUS_Drafted = "DR";
+	/** Invalid = IN */
+	public static final String DOCSTATUS_Invalid = "IN";
 	/** In Progress = IP */
 	public static final String DOCSTATUS_InProgress = "IP";
-	/** Waiting Payment = WP */
-	public static final String DOCSTATUS_WaitingPayment = "WP";
+	/** Not Approved = NA */
+	public static final String DOCSTATUS_NotApproved = "NA";
+	/** Reversed = RE */
+	public static final String DOCSTATUS_Reversed = "RE";
+	/** Voided = VO */
+	public static final String DOCSTATUS_Voided = "VO";
 	/** Waiting Confirmation = WC */
 	public static final String DOCSTATUS_WaitingConfirmation = "WC";
+	/** Waiting Payment = WP */
+	public static final String DOCSTATUS_WaitingPayment = "WP";
 	/** Set Document Status.
-		@param DocStatus 
-		The current status of the document
-	  */
+		@param DocStatus The current status of the document
+	*/
 	public void setDocStatus (String DocStatus)
 	{
 
@@ -584,15 +615,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Document Status.
 		@return The current status of the document
 	  */
-	public String getDocStatus () 
+	public String getDocStatus()
 	{
 		return (String)get_Value(COLUMNNAME_DocStatus);
 	}
 
 	/** Set File Name.
-		@param FileName 
-		Name of the local file or URL
-	  */
+		@param FileName Name of the local file or URL
+	*/
 	public void setFileName (String FileName)
 	{
 		set_Value (COLUMNNAME_FileName, FileName);
@@ -601,15 +631,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get File Name.
 		@return Name of the local file or URL
 	  */
-	public String getFileName () 
+	public String getFileName()
 	{
 		return (String)get_Value(COLUMNNAME_FileName);
 	}
 
 	/** Set Grand Total.
-		@param GrandTotal 
-		Total amount of document
-	  */
+		@param GrandTotal Total amount of document
+	*/
 	public void setGrandTotal (BigDecimal GrandTotal)
 	{
 		set_Value (COLUMNNAME_GrandTotal, GrandTotal);
@@ -618,7 +647,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Grand Total.
 		@return Total amount of document
 	  */
-	public BigDecimal getGrandTotal () 
+	public BigDecimal getGrandTotal()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_GrandTotal);
 		if (bd == null)
@@ -627,7 +656,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set HTML.
-		@param HTML HTML	  */
+		@param HTML HTML
+	*/
 	public void setHTML (String HTML)
 	{
 		set_Value (COLUMNNAME_HTML, HTML);
@@ -635,15 +665,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get HTML.
 		@return HTML	  */
-	public String getHTML () 
+	public String getHTML()
 	{
 		return (String)get_Value(COLUMNNAME_HTML);
 	}
 
 	/** Set Comment/Help.
-		@param Help 
-		Comment or Hint
-	  */
+		@param Help Comment or Hint
+	*/
 	public void setHelp (String Help)
 	{
 		set_Value (COLUMNNAME_Help, Help);
@@ -652,25 +681,24 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Comment/Help.
 		@return Comment or Hint
 	  */
-	public String getHelp () 
+	public String getHelp()
 	{
 		return (String)get_Value(COLUMNNAME_Help);
 	}
 
 	/** InvoiceRule AD_Reference_ID=150 */
 	public static final int INVOICERULE_AD_Reference_ID=150;
-	/** After Order delivered = O */
-	public static final String INVOICERULE_AfterOrderDelivered = "O";
 	/** After Delivery = D */
 	public static final String INVOICERULE_AfterDelivery = "D";
-	/** Customer Schedule after Delivery = S */
-	public static final String INVOICERULE_CustomerScheduleAfterDelivery = "S";
 	/** Immediate = I */
 	public static final String INVOICERULE_Immediate = "I";
+	/** After Order delivered = O */
+	public static final String INVOICERULE_AfterOrderDelivered = "O";
+	/** Customer Schedule after Delivery = S */
+	public static final String INVOICERULE_CustomerScheduleAfterDelivery = "S";
 	/** Set Invoice Rule.
-		@param InvoiceRule 
-		Frequency and method of invoicing 
-	  */
+		@param InvoiceRule Frequency and method of invoicing 
+	*/
 	public void setInvoiceRule (String InvoiceRule)
 	{
 
@@ -680,15 +708,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Invoice Rule.
 		@return Frequency and method of invoicing 
 	  */
-	public String getInvoiceRule () 
+	public String getInvoiceRule()
 	{
 		return (String)get_Value(COLUMNNAME_InvoiceRule);
 	}
 
 	/** Set Customer.
-		@param IsCustomer 
-		Indicates if this Business Partner is a Customer
-	  */
+		@param IsCustomer Indicates if this Business Partner is a Customer
+	*/
 	public void setIsCustomer (boolean IsCustomer)
 	{
 		set_Value (COLUMNNAME_IsCustomer, Boolean.valueOf(IsCustomer));
@@ -697,7 +724,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Customer.
 		@return Indicates if this Business Partner is a Customer
 	  */
-	public boolean isCustomer () 
+	public boolean isCustomer()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCustomer);
 		if (oo != null) 
@@ -712,7 +739,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** JP_BPartner_Multi AD_Reference_ID=138 */
 	public static final int JP_BPARTNER_MULTI_AD_Reference_ID=138;
 	/** Set Business Partner(Multi Select).
-		@param JP_BPartner_Multi Business Partner(Multi Select)	  */
+		@param JP_BPartner_Multi Business Partner(Multi Select)
+	*/
 	public void setJP_BPartner_Multi (String JP_BPartner_Multi)
 	{
 
@@ -721,13 +749,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Business Partner(Multi Select).
 		@return Business Partner(Multi Select)	  */
-	public String getJP_BPartner_Multi () 
+	public String getJP_BPartner_Multi()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BPartner_Multi);
 	}
 
 	/** Set Multiple Selection Grid.
-		@param JP_Multi_Grid Multiple Selection Grid	  */
+		@param JP_Multi_Grid Multiple Selection Grid
+	*/
 	public void setJP_Multi_Grid (String JP_Multi_Grid)
 	{
 		set_Value (COLUMNNAME_JP_Multi_Grid, JP_Multi_Grid);
@@ -735,27 +764,28 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Multiple Selection Grid.
 		@return Multiple Selection Grid	  */
-	public String getJP_Multi_Grid () 
+	public String getJP_Multi_Grid()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Multi_Grid);
 	}
 
 	/** JP_Multi_List AD_Reference_ID=151 */
 	public static final int JP_MULTI_LIST_AD_Reference_ID=151;
-	/** After Payment = R */
-	public static final String JP_MULTI_LIST_AfterPayment = "R";
 	/** Availability = A */
 	public static final String JP_MULTI_LIST_Availability = "A";
-	/** Complete Line = L */
-	public static final String JP_MULTI_LIST_CompleteLine = "L";
-	/** Complete Order = O */
-	public static final String JP_MULTI_LIST_CompleteOrder = "O";
 	/** Force = F */
 	public static final String JP_MULTI_LIST_Force = "F";
+	/** Complete Line = L */
+	public static final String JP_MULTI_LIST_CompleteLine = "L";
 	/** Manual = M */
 	public static final String JP_MULTI_LIST_Manual = "M";
+	/** Complete Order = O */
+	public static final String JP_MULTI_LIST_CompleteOrder = "O";
+	/** After Payment = R */
+	public static final String JP_MULTI_LIST_AfterPayment = "R";
 	/** Set Multiple Selection List.
-		@param JP_Multi_List Multiple Selection List	  */
+		@param JP_Multi_List Multiple Selection List
+	*/
 	public void setJP_Multi_List (String JP_Multi_List)
 	{
 
@@ -764,13 +794,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Multiple Selection List.
 		@return Multiple Selection List	  */
-	public String getJP_Multi_List () 
+	public String getJP_Multi_List()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Multi_List);
 	}
 
 	/** Set Org Name(History).
-		@param JP_Org_History_Name Org Name(History)	  */
+		@param JP_Org_History_Name Org Name(History)
+	*/
 	public void setJP_Org_History_Name (String JP_Org_History_Name)
 	{
 		set_Value (COLUMNNAME_JP_Org_History_Name, JP_Org_History_Name);
@@ -778,13 +809,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Org Name(History).
 		@return Org Name(History)	  */
-	public String getJP_Org_History_Name () 
+	public String getJP_Org_History_Name()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Org_History_Name);
 	}
 
 	/** Set Product(Multi Select).
-		@param JP_Product_Multi Product(Multi Select)	  */
+		@param JP_Product_Multi Product(Multi Select)
+	*/
 	public void setJP_Product_Multi (String JP_Product_Multi)
 	{
 
@@ -793,24 +825,25 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Product(Multi Select).
 		@return Product(Multi Select)	  */
-	public String getJP_Product_Multi () 
+	public String getJP_Product_Multi()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Product_Multi);
 	}
 
 	/** Set JP_ReferenceTest.
-		@param JP_ReferenceTest_ID JP_ReferenceTest	  */
+		@param JP_ReferenceTest_ID JP_ReferenceTest
+	*/
 	public void setJP_ReferenceTest_ID (int JP_ReferenceTest_ID)
 	{
-		if (JP_ReferenceTest_ID < 1) 
+		if (JP_ReferenceTest_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_ReferenceTest_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_ReferenceTest_ID, Integer.valueOf(JP_ReferenceTest_ID));
 	}
 
 	/** Get JP_ReferenceTest.
 		@return JP_ReferenceTest	  */
-	public int getJP_ReferenceTest_ID () 
+	public int getJP_ReferenceTest_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_ReferenceTest_ID);
 		if (ii == null)
@@ -819,7 +852,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set JP_ReferenceTest_UU.
-		@param JP_ReferenceTest_UU JP_ReferenceTest_UU	  */
+		@param JP_ReferenceTest_UU JP_ReferenceTest_UU
+	*/
 	public void setJP_ReferenceTest_UU (String JP_ReferenceTest_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_ReferenceTest_UU, JP_ReferenceTest_UU);
@@ -827,13 +861,29 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get JP_ReferenceTest_UU.
 		@return JP_ReferenceTest_UU	  */
-	public String getJP_ReferenceTest_UU () 
+	public String getJP_ReferenceTest_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_ReferenceTest_UU);
 	}
 
+	/** Set Single Selection Grid.
+		@param JP_Single_Grid Single Selection Grid
+	*/
+	public void setJP_Single_Grid (String JP_Single_Grid)
+	{
+		set_Value (COLUMNNAME_JP_Single_Grid, JP_Single_Grid);
+	}
+
+	/** Get Single Selection Grid.
+		@return Single Selection Grid	  */
+	public String getJP_Single_Grid()
+	{
+		return (String)get_Value(COLUMNNAME_JP_Single_Grid);
+	}
+
 	/** Set Latest Pickup Time.
-		@param LatestPickupTime Latest Pickup Time	  */
+		@param LatestPickupTime Latest Pickup Time
+	*/
 	public void setLatestPickupTime (Timestamp LatestPickupTime)
 	{
 		set_Value (COLUMNNAME_LatestPickupTime, LatestPickupTime);
@@ -841,15 +891,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Latest Pickup Time.
 		@return Latest Pickup Time	  */
-	public Timestamp getLatestPickupTime () 
+	public Timestamp getLatestPickupTime()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_LatestPickupTime);
 	}
 
 	/** Set Line No.
-		@param Line 
-		Unique line for this document
-	  */
+		@param Line Unique line for this document
+	*/
 	public void setLine (int Line)
 	{
 		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
@@ -858,7 +907,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Line No.
 		@return Unique line for this document
 	  */
-	public int getLine () 
+	public int getLine()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Line);
 		if (ii == null)
@@ -867,26 +916,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException
-    {
-		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
-			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());	}
+	{
+		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_ID)
+			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());
+	}
 
 	/** Set Attribute Info.
-		@param M_AttributeSetInstance_ID 
-		Product Attribute Set Instance
-	  */
+		@param M_AttributeSetInstance_ID Product Attribute Set Instance
+	*/
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
 	{
-		if (M_AttributeSetInstance_ID < 0) 
+		if (M_AttributeSetInstance_ID < 0)
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
 	}
 
 	/** Get Attribute Info.
 		@return Product Attribute Set Instance
 	  */
-	public int getM_AttributeSetInstance_ID () 
+	public int getM_AttributeSetInstance_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
 		if (ii == null)
@@ -895,26 +944,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_M_Locator getM_LocatorTo() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_Name)
-			.getPO(getM_LocatorTo_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_ID)
+			.getPO(getM_LocatorTo_ID(), get_TrxName());
+	}
 
 	/** Set Locator To.
-		@param M_LocatorTo_ID 
-		Location inventory is moved to
-	  */
+		@param M_LocatorTo_ID Location inventory is moved to
+	*/
 	public void setM_LocatorTo_ID (int M_LocatorTo_ID)
 	{
-		if (M_LocatorTo_ID < 1) 
+		if (M_LocatorTo_ID < 1)
 			set_Value (COLUMNNAME_M_LocatorTo_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_LocatorTo_ID, Integer.valueOf(M_LocatorTo_ID));
 	}
 
 	/** Get Locator To.
 		@return Location inventory is moved to
 	  */
-	public int getM_LocatorTo_ID () 
+	public int getM_LocatorTo_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_LocatorTo_ID);
 		if (ii == null)
@@ -923,26 +972,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public I_M_Locator getM_Locator() throws RuntimeException
-    {
-		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_Name)
-			.getPO(getM_Locator_ID(), get_TrxName());	}
+	{
+		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
+			.getPO(getM_Locator_ID(), get_TrxName());
+	}
 
 	/** Set Locator.
-		@param M_Locator_ID 
-		Warehouse Locator
-	  */
+		@param M_Locator_ID Warehouse Locator
+	*/
 	public void setM_Locator_ID (int M_Locator_ID)
 	{
-		if (M_Locator_ID < 1) 
+		if (M_Locator_ID < 1)
 			set_Value (COLUMNNAME_M_Locator_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_Locator_ID, Integer.valueOf(M_Locator_ID));
 	}
 
 	/** Get Locator.
 		@return Warehouse Locator
 	  */
-	public int getM_Locator_ID () 
+	public int getM_Locator_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Locator_ID);
 		if (ii == null)
@@ -951,26 +1000,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_M_PriceList getM_PriceList() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_Name)
-			.getPO(getM_PriceList_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_ID)
+			.getPO(getM_PriceList_ID(), get_TrxName());
+	}
 
 	/** Set Price List.
-		@param M_PriceList_ID 
-		Unique identifier of a Price List
-	  */
+		@param M_PriceList_ID Unique identifier of a Price List
+	*/
 	public void setM_PriceList_ID (int M_PriceList_ID)
 	{
-		if (M_PriceList_ID < 1) 
+		if (M_PriceList_ID < 1)
 			set_Value (COLUMNNAME_M_PriceList_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
 	}
 
 	/** Get Price List.
 		@return Unique identifier of a Price List
 	  */
-	public int getM_PriceList_ID () 
+	public int getM_PriceList_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_PriceList_ID);
 		if (ii == null)
@@ -979,14 +1028,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_M_Product_Category getM_Product_Category() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Product_Category)MTable.get(getCtx(), org.compiere.model.I_M_Product_Category.Table_Name)
-			.getPO(getM_Product_Category_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Product_Category)MTable.get(getCtx(), org.compiere.model.I_M_Product_Category.Table_ID)
+			.getPO(getM_Product_Category_ID(), get_TrxName());
+	}
 
 	/** Set Product Category.
-		@param M_Product_Category_ID 
-		Category of a Product
-	  */
+		@param M_Product_Category_ID Category of a Product
+	*/
 	public void setM_Product_Category_ID (int M_Product_Category_ID)
 	{
 		throw new IllegalArgumentException ("M_Product_Category_ID is virtual column");	}
@@ -994,7 +1043,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Product Category.
 		@return Category of a Product
 	  */
-	public int getM_Product_Category_ID () 
+	public int getM_Product_Category_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_Category_ID);
 		if (ii == null)
@@ -1003,26 +1052,26 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_Name)
-			.getPO(getM_Product_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
+			.getPO(getM_Product_ID(), get_TrxName());
+	}
 
 	/** Set Product.
-		@param M_Product_ID 
-		Product, Service, Item
-	  */
+		@param M_Product_ID Product, Service, Item
+	*/
 	public void setM_Product_ID (int M_Product_ID)
 	{
-		if (M_Product_ID < 1) 
+		if (M_Product_ID < 1)
 			set_Value (COLUMNNAME_M_Product_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
 	}
 
 	/** Get Product.
 		@return Product, Service, Item
 	  */
-	public int getM_Product_ID () 
+	public int getM_Product_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
 		if (ii == null)
@@ -1031,9 +1080,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -1042,15 +1090,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Name 2.
-		@param Name2 
-		Additional Name
-	  */
+		@param Name2 Additional Name
+	*/
 	public void setName2 (String Name2)
 	{
 		set_Value (COLUMNNAME_Name2, Name2);
@@ -1059,15 +1106,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Name 2.
 		@return Additional Name
 	  */
-	public String getName2 () 
+	public String getName2()
 	{
 		return (String)get_Value(COLUMNNAME_Name2);
 	}
 
 	/** Set Note.
-		@param Note 
-		Optional additional user defined information
-	  */
+		@param Note Optional additional user defined information
+	*/
 	public void setNote (String Note)
 	{
 		set_Value (COLUMNNAME_Note, Note);
@@ -1076,20 +1122,20 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Note.
 		@return Optional additional user defined information
 	  */
-	public String getNote () 
+	public String getNote()
 	{
 		return (String)get_Value(COLUMNNAME_Note);
 	}
 
 	public I_C_ValidCombination getP_Revenue_A() throws RuntimeException
-    {
-		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
-			.getPO(getP_Revenue_Acct(), get_TrxName());	}
+	{
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_ID)
+			.getPO(getP_Revenue_Acct(), get_TrxName());
+	}
 
 	/** Set Product Revenue.
-		@param P_Revenue_Acct 
-		Account for Product Revenue (Sales Account)
-	  */
+		@param P_Revenue_Acct Account for Product Revenue (Sales Account)
+	*/
 	public void setP_Revenue_Acct (int P_Revenue_Acct)
 	{
 		set_Value (COLUMNNAME_P_Revenue_Acct, Integer.valueOf(P_Revenue_Acct));
@@ -1098,7 +1144,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Product Revenue.
 		@return Account for Product Revenue (Sales Account)
 	  */
-	public int getP_Revenue_Acct () 
+	public int getP_Revenue_Acct()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_P_Revenue_Acct);
 		if (ii == null)
@@ -1107,9 +1153,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Password.
-		@param Password 
-		Password of any length (case sensitive)
-	  */
+		@param Password Password of any length (case sensitive)
+	*/
 	public void setPassword (String Password)
 	{
 		set_Value (COLUMNNAME_Password, Password);
@@ -1118,7 +1163,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Password.
 		@return Password of any length (case sensitive)
 	  */
-	public String getPassword () 
+	public String getPassword()
 	{
 		return (String)get_Value(COLUMNNAME_Password);
 	}
@@ -1127,22 +1172,21 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public static final int PAYMENTRULE_AD_Reference_ID=195;
 	/** Cash = B */
 	public static final String PAYMENTRULE_Cash = "B";
-	/** Credit Card = K */
-	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
-	/** Check = S */
-	public static final String PAYMENTRULE_Check = "S";
-	/** On Credit = P */
-	public static final String PAYMENTRULE_OnCredit = "P";
 	/** Direct Debit = D */
 	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** Direct Deposit = T */
+	public static final String PAYMENTRULE_DirectDeposit = "T";
 	/** Set Payment Rule.
-		@param PaymentRule 
-		How you pay the invoice
-	  */
+		@param PaymentRule How you pay the invoice
+	*/
 	public void setPaymentRule (String PaymentRule)
 	{
 
@@ -1152,15 +1196,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Payment Rule.
 		@return How you pay the invoice
 	  */
-	public String getPaymentRule () 
+	public String getPaymentRule()
 	{
 		return (String)get_Value(COLUMNNAME_PaymentRule);
 	}
 
 	/** Set Processed.
-		@param Processed 
-		The document has been processed
-	  */
+		@param Processed The document has been processed
+	*/
 	public void setProcessed (boolean Processed)
 	{
 		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
@@ -1169,7 +1212,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Processed.
 		@return The document has been processed
 	  */
-	public boolean isProcessed () 
+	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
 		if (oo != null) 
@@ -1182,7 +1225,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Process Now.
-		@param Processing Process Now	  */
+		@param Processing Process Now
+	*/
 	public void setProcessing (boolean Processing)
 	{
 		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
@@ -1190,7 +1234,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public boolean isProcessing () 
+	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
 		if (oo != null) 
@@ -1203,9 +1247,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Promotion Code.
-		@param PromotionCode 
-		User entered promotion code at sales time
-	  */
+		@param PromotionCode User entered promotion code at sales time
+	*/
 	public void setPromotionCode (String PromotionCode)
 	{
 		set_Value (COLUMNNAME_PromotionCode, PromotionCode);
@@ -1214,15 +1257,14 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Promotion Code.
 		@return User entered promotion code at sales time
 	  */
-	public String getPromotionCode () 
+	public String getPromotionCode()
 	{
 		return (String)get_Value(COLUMNNAME_PromotionCode);
 	}
 
 	/** Set Quantity.
-		@param QtyEntered 
-		The Quantity Entered is based on the selected UoM
-	  */
+		@param QtyEntered The Quantity Entered is based on the selected UoM
+	*/
 	public void setQtyEntered (BigDecimal QtyEntered)
 	{
 		set_Value (COLUMNNAME_QtyEntered, QtyEntered);
@@ -1231,7 +1273,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Quantity.
 		@return The Quantity Entered is based on the selected UoM
 	  */
-	public BigDecimal getQtyEntered () 
+	public BigDecimal getQtyEntered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyEntered);
 		if (bd == null)
@@ -1240,9 +1282,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Rate.
-		@param Rate 
-		Rate or Tax or Exchange
-	  */
+		@param Rate Rate or Tax or Exchange
+	*/
 	public void setRate (BigDecimal Rate)
 	{
 		set_Value (COLUMNNAME_Rate, Rate);
@@ -1251,7 +1292,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Rate.
 		@return Rate or Tax or Exchange
 	  */
-	public BigDecimal getRate () 
+	public BigDecimal getRate()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Rate);
 		if (bd == null)
@@ -1259,39 +1300,59 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return bd;
 	}
 
-	/** Set Reference No.
-		@param ReferenceNo 
-		Your customer or vendor number at the Business Partner's site
+	/** Set Record ID.
+		@param Record_ID Direct internal record ID
+	*/
+	public void setRecord_ID (int Record_ID)
+	{
+		if (Record_ID < 0)
+			set_Value (COLUMNNAME_Record_ID, null);
+		else
+			set_Value (COLUMNNAME_Record_ID, Integer.valueOf(Record_ID));
+	}
+
+	/** Get Record ID.
+		@return Direct internal record ID
 	  */
+	public int getRecord_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Record_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Reference No.
+		@param ReferenceNo Your customer or vendor number at the Business Partner&#039;s site
+	*/
 	public void setReferenceNo (String ReferenceNo)
 	{
 		set_Value (COLUMNNAME_ReferenceNo, ReferenceNo);
 	}
 
 	/** Get Reference No.
-		@return Your customer or vendor number at the Business Partner's site
+		@return Your customer or vendor number at the Business Partner&#039;s site
 	  */
-	public String getReferenceNo () 
+	public String getReferenceNo()
 	{
 		return (String)get_Value(COLUMNNAME_ReferenceNo);
 	}
 
 	/** Set Resource Assign.
-		@param S_ResourceAssignment_ID 
-		Resource Assignment
-	  */
+		@param S_ResourceAssignment_ID Resource Assignment
+	*/
 	public void setS_ResourceAssignment_ID (int S_ResourceAssignment_ID)
 	{
-		if (S_ResourceAssignment_ID < 1) 
+		if (S_ResourceAssignment_ID < 1)
 			set_Value (COLUMNNAME_S_ResourceAssignment_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_S_ResourceAssignment_ID, Integer.valueOf(S_ResourceAssignment_ID));
 	}
 
 	/** Get Resource Assign.
 		@return Resource Assignment
 	  */
-	public int getS_ResourceAssignment_ID () 
+	public int getS_ResourceAssignment_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_S_ResourceAssignment_ID);
 		if (ii == null)
@@ -1300,9 +1361,8 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	}
 
 	/** Set Sales Volume in 1.000.
-		@param SalesVolume 
-		Total Volume of Sales in Thousands of Currency
-	  */
+		@param SalesVolume Total Volume of Sales in Thousands of Currency
+	*/
 	public void setSalesVolume (int SalesVolume)
 	{
 		throw new IllegalArgumentException ("SalesVolume is virtual column");	}
@@ -1310,7 +1370,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Sales Volume in 1.000.
 		@return Total Volume of Sales in Thousands of Currency
 	  */
-	public int getSalesVolume () 
+	public int getSalesVolume()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SalesVolume);
 		if (ii == null)
@@ -1318,24 +1378,39 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 		return ii.intValue();
 	}
 
+	/** Set Scheduler State.
+		@param SchedulerState State of this scheduler record (not scheduled, started or stopped)
+	*/
+	public void setSchedulerState (Object SchedulerState)
+	{
+		set_Value (COLUMNNAME_SchedulerState, SchedulerState);
+	}
+
+	/** Get Scheduler State.
+		@return State of this scheduler record (not scheduled, started or stopped)
+	  */
+	public Object getSchedulerState()
+	{
+				return get_Value(COLUMNNAME_SchedulerState);
+	}
+
 	/** TenderType AD_Reference_ID=214 */
 	public static final int TENDERTYPE_AD_Reference_ID=214;
-	/** Credit Card = C */
-	public static final String TENDERTYPE_CreditCard = "C";
-	/** Check = K */
-	public static final String TENDERTYPE_Check = "K";
 	/** Direct Deposit = A */
 	public static final String TENDERTYPE_DirectDeposit = "A";
+	/** Credit Card = C */
+	public static final String TENDERTYPE_CreditCard = "C";
 	/** Direct Debit = D */
 	public static final String TENDERTYPE_DirectDebit = "D";
+	/** Check = K */
+	public static final String TENDERTYPE_Check = "K";
 	/** Account = T */
 	public static final String TENDERTYPE_Account = "T";
 	/** Cash = X */
 	public static final String TENDERTYPE_Cash = "X";
 	/** Set Tender type.
-		@param TenderType 
-		Method of Payment
-	  */
+		@param TenderType Method of Payment
+	*/
 	public void setTenderType (String TenderType)
 	{
 
@@ -1345,15 +1420,30 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get Tender type.
 		@return Method of Payment
 	  */
-	public String getTenderType () 
+	public String getTenderType()
 	{
 		return (String)get_Value(COLUMNNAME_TenderType);
 	}
 
-	/** Set URL.
-		@param URL 
-		Full URL address - e.g. http://www.idempiere.org
+	/** Set Time Zone.
+		@param TimeZone Time zone name
+	*/
+	public void setTimeZone (String TimeZone)
+	{
+		set_Value (COLUMNNAME_TimeZone, TimeZone);
+	}
+
+	/** Get Time Zone.
+		@return Time zone name
 	  */
+	public String getTimeZone()
+	{
+		return (String)get_Value(COLUMNNAME_TimeZone);
+	}
+
+	/** Set URL.
+		@param URL Full URL address - e.g. http://www.idempiere.org
+	*/
 	public void setURL (String URL)
 	{
 		set_Value (COLUMNNAME_URL, URL);
@@ -1362,7 +1452,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	/** Get URL.
 		@return Full URL address - e.g. http://www.idempiere.org
 	  */
-	public String getURL () 
+	public String getURL()
 	{
 		return (String)get_Value(COLUMNNAME_URL);
 	}
