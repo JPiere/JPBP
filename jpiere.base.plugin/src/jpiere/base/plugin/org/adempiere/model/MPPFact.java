@@ -59,7 +59,8 @@ import org.compiere.util.Util;
 
 /**
  * JPIERE-0501:JPiere PP Fact
- *
+ * JPIERE-0609 Work Process Management and Create Movement doc from PP Doc
+ * 
  * @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
  *
  */
@@ -1018,6 +1019,12 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 				if(getParent().getJP_PhysicalWarehouseDst_ID() > 0)
 					mm.set_ValueNoCheck("JP_PhysicalWarehouseDst_ID", getParent().getJP_PhysicalWarehouseDst_ID());
 				mm.set_ValueNoCheck("IsRecordRouteJP", getParent().isRecordRouteJP()?"Y":"N");
+				if(getParent().isRecordRouteJP())
+				{
+					mm.set_ValueNoCheck("JP_WarehouseDep_ID", getParent().getJP_WarehouseFrom_ID());
+					mm.set_ValueNoCheck("JP_PhysicalWarehouseDep_ID", getParent().getJP_PhysicalWarehouseFrom_ID());
+					mm.set_ValueNoCheck("JP_MovementDateDst", getMovementDate());
+				}
 				mm.setIsActive(true);
 				mm.set_ValueNoCheck("Processed", "N");
 				mm.set_ValueNoCheck("Posted","N");

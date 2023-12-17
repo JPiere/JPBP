@@ -80,6 +80,8 @@ import jpiere.base.plugin.org.adempiere.model.MInvValAdjust;
 import jpiere.base.plugin.org.adempiere.model.MInvValCal;
 import jpiere.base.plugin.org.adempiere.model.MInvValProfile;
 import jpiere.base.plugin.org.adempiere.model.MPPFactLineMA;
+import jpiere.base.plugin.org.adempiere.model.MPPMMFactLineMA;
+import jpiere.base.plugin.org.adempiere.model.MPPPlan;
 import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
 
@@ -343,11 +345,14 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 		}
 
 		//JPIERE-0503 : Support to enter DateMaterialPolicy
+		//JPIERE-0609 : Workprocess & Create Material Movement From PP Fact Doc.
 		if((tableName.equals(MPPFactLineMA.Table_Name)
 				|| tableName.equals(MInOutLineMA.Table_Name)
 				|| tableName.equals(MProductionLineMA.Table_Name)
 				|| tableName.equals(MMovementLineMA.Table_Name)
-				|| tableName.equals(MInventoryLineMA.Table_Name))
+				|| tableName.equals(MInventoryLineMA.Table_Name)
+				|| tableName.equals(MPPFactLineMA.Table_Name)
+				|| tableName.equals(MPPMMFactLineMA.Table_Name))
 				&& (columnName.equals("M_AttributeSetInstance_ID")
 						|| columnName.equals("DateMaterialPolicy"))
 				)
@@ -356,9 +361,11 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 		}
 		
 		//JPIERE-0588 : Support to enter Physical Warehouse from Org Warehouse
+		//JPIERE-0609 : Workprocess & Create Material Movement From PP Fact Doc.
 		if((tableName.equals(MInOut.Table_Name)
 				|| tableName.equals(MInventory.Table_Name)
-				|| tableName.equals(MMovement.Table_Name) )
+				|| tableName.equals(MMovement.Table_Name)
+				|| tableName.equals(MPPPlan.Table_Name) )
 				&& (columnName.equals("M_Warehouse_ID")
 						|| columnName.equals("JP_Warehouse_ID")
 						|| columnName.equals("JP_WarehouseFrom_ID")
