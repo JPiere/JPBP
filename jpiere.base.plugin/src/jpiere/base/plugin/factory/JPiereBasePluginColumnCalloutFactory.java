@@ -346,8 +346,7 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 		//JPIERE-0503 : Support to enter DateMaterialPolicy
 		//JPIERE-0609 : Workprocess & Create Material Movement From PP Fact Doc.
-		if((tableName.equals(MPPFactLineMA.Table_Name)
-				|| tableName.equals(MInOutLineMA.Table_Name)
+		if((tableName.equals(MInOutLineMA.Table_Name)
 				|| tableName.equals(MProductionLineMA.Table_Name)
 				|| tableName.equals(MMovementLineMA.Table_Name)
 				|| tableName.equals(MInventoryLineMA.Table_Name)

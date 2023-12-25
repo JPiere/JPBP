@@ -39,6 +39,8 @@ import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MPPFactLine;
 import jpiere.base.plugin.org.adempiere.model.MPPFactLineMA;
+import jpiere.base.plugin.org.adempiere.model.MPPMMFactLine;
+import jpiere.base.plugin.org.adempiere.model.MPPMMFactLineMA;
 
 
 /**
@@ -88,7 +90,7 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 
 		String tableName = mTab.getTableName();
 
-		//JPiere PP Doc
+		//JPiere PP Doc - Production
 		if(tableName.equals(MPPFactLineMA.Table_Name))
 		{
 			int JP_PP_FactLine_ID = Integer.valueOf(mTab.get_ValueAsString(MPPFactLineMA.COLUMNNAME_JP_PP_FactLine_ID)).intValue();
@@ -128,6 +130,48 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 				}
 			}
 
+			return null;
+		
+		//JPiere PP Doc - Movement
+		}else if(tableName.equals(MPPMMFactLineMA.Table_Name)){
+			
+			int JP_PP_MM_FactLine_ID = Integer.valueOf(mTab.get_ValueAsString(MPPMMFactLineMA.COLUMNNAME_JP_PP_MM_FactLine_ID)).intValue();
+			MPPMMFactLine line = new MPPMMFactLine(ctx, JP_PP_MM_FactLine_ID, null);
+			M_Product_ID = line.getM_Product_ID();
+			M_Locator_ID = line.getM_Locator_ID();
+
+			//MovementQty(+)
+			if(line.getMovementQty().signum() > 0)
+			{
+				MStorageOnHand storageOnHand = MStorageOnHand.get(ctx, M_Locator_ID, M_Product_ID, M_AttributeSetInstance_ID, DateMaterialPolicy, null);
+				if(storageOnHand == null)
+				{
+					MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+					return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription()
+									+ " - "+  Msg.getElement(ctx, MMovementLineMA.COLUMNNAME_DateMaterialPolicy) +" : "+ DateMaterialPolicy.toString().substring(0, 10)
+									+ " - " +  Msg.getElement(ctx, "QtyOnHand") +" : "+ 0;
+				}else {
+
+					BigDecimal qtyOnHand = storageOnHand.getQtyOnHand();
+					if(qtyOnHand.compareTo(line.getMovementQty()) >= 0)
+					{
+						mTab.setValue(MMovementLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
+					}else {
+
+						mTab.setValue(MMovementLineMA.COLUMNNAME_MovementQty, qtyOnHand);
+						MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+						return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription()
+									+ " - "+  Msg.getElement(ctx, MMovementLineMA.COLUMNNAME_DateMaterialPolicy) +" : "+ DateMaterialPolicy.toString().substring(0, 10)
+									+ " - "+  Msg.getElement(ctx, "QtyOnHand") + " : " + qtyOnHand.toString();
+					}
+				}
+
+			//MovementQty(-)
+			}else {
+
+				mTab.setValue(MMovementLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
+			}
+			
 			return null;
 
 		//MProduction
@@ -380,7 +424,7 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 
 		String tableName = mTab.getTableName();
 
-		//JPiere PP Doc
+		//JPiere PP Doc - Production
 		if(tableName.equals(MPPFactLineMA.Table_Name))
 		{
 
@@ -425,7 +469,64 @@ public class SupportToEnterAttributesTabColumnCallout implements IColumnCallout 
 			}
 
 			return null;
+		
+		//JPiere PP Doc - Movement
+		}else if(tableName.equals(MPPMMFactLineMA.Table_Name)){
+		
+			int JP_PP_MM_FactLine_ID = Integer.valueOf(mTab.get_ValueAsString(MPPMMFactLineMA.COLUMNNAME_JP_PP_MM_FactLine_ID)).intValue();
+			MPPMMFactLine line = new MPPMMFactLine(ctx, JP_PP_MM_FactLine_ID, null);
+			M_Product_ID = line.getM_Product_ID();
+			M_Locator_ID = line.getM_Locator_ID();
 
+			//MovementQty(+)
+			if(line.getMovementQty().signum() > 0)
+			{
+				DateMaterialPolicy = MStorageOnHand.getDateMaterialPolicy(M_Product_ID, M_AttributeSetInstance_ID, M_Locator_ID, null);
+				if(DateMaterialPolicy == null)
+				{
+					mTab.setValue(MPPMMFactLineMA.COLUMNNAME_DateMaterialPolicy, line.getParent().getMovementDate());
+					mTab.setValue(MPPMMFactLineMA.COLUMNNAME_MovementQty, line.getMovementQty());
+					MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+					return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription() + " : " +  Msg.getElement(ctx, "QtyOnHand") +" 0 ";
+
+				}else {
+
+					mTab.setValue(MPPMMFactLineMA.COLUMNNAME_DateMaterialPolicy, DateMaterialPolicy);
+					MStorageOnHand storageOnHand = MStorageOnHand.get(ctx, M_Locator_ID, M_Product_ID, M_AttributeSetInstance_ID, DateMaterialPolicy, null);
+					BigDecimal qtyOnHand = storageOnHand.getQtyOnHand();
+					if(qtyOnHand.compareTo(line.getMovementQty()) >= 0)
+					{
+						mTab.setValue(MPPMMFactLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
+					}else {
+
+						mTab.setValue(MPPMMFactLineMA.COLUMNNAME_MovementQty,qtyOnHand);
+						MAttributeSetInstance asi =   new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, null);
+						return Msg.getMsg(ctx, "InsufficientQtyAvailable") +  asi.getDescription()
+											+ " - "+  Msg.getElement(ctx, MInOutLineMA.COLUMNNAME_DateMaterialPolicy) + " : " + DateMaterialPolicy.toString().substring(0, 10)
+											+ " - "+  Msg.getElement(ctx, "QtyOnHand") + " : " + qtyOnHand.toString();
+					}
+				}
+
+			//MovementQty(-)
+			}else {
+
+				DateMaterialPolicy = MStorageOnHand.getDateMaterialPolicy(M_Product_ID, M_AttributeSetInstance_ID, M_Locator_ID, null);
+				if(DateMaterialPolicy == null)
+				{
+					mTab.setValue(MPPMMFactLineMA.COLUMNNAME_DateMaterialPolicy, line.getParent().getMovementDate());
+
+				}else {
+
+					mTab.setValue(MPPMMFactLineMA.COLUMNNAME_DateMaterialPolicy, DateMaterialPolicy);
+
+				}
+
+				mTab.setValue(MPPMMFactLineMA.COLUMNNAME_MovementQty,line.getMovementQty());
+
+				return null;
+
+			}
+			
 		//MProduction
 		}else if(tableName.equals(MProductionLineMA.Table_Name)) {
 
