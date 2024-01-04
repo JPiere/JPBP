@@ -566,7 +566,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public void setDeliveryRule (String DeliveryRule)
 	{
 
-		set_Value (COLUMNNAME_DeliveryRule, DeliveryRule);
+		set_ValueNoCheck(COLUMNNAME_DeliveryRule, DeliveryRule);
 	}
 
 	/** Get Delivery Rule.

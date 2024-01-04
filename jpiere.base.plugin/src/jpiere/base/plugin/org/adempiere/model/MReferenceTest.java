@@ -16,6 +16,13 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+/**
+ * 
+ * JPIERE-0084 All Reference Window for Test
+ * 
+ * @author h.hagiwara
+ *
+ */
 public class MReferenceTest extends X_JP_ReferenceTest {
 
 	public MReferenceTest(Properties ctx, int JP_ReferenceTest_ID,String trxName) {
@@ -26,9 +33,15 @@ public class MReferenceTest extends X_JP_ReferenceTest {
 		super(ctx, rs, trxName);
 	}
 
+    public MReferenceTest (Properties ctx, int JP_ReferenceTest_ID, String trxName, String ... virtualColumns)
+    {
+    	 super(ctx, JP_ReferenceTest_ID, trxName, virtualColumns);
+    }
+	
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		
 		return super.beforeSave(newRecord);
 	}
 
