@@ -245,7 +245,7 @@ public class DefaultCreateBill implements I_CreateBill{
 
 	private String createOrderByClause()
 	{
-		StringBuilder orderByClause = new StringBuilder("ORDER BY C_Invoice.C_BPartner_ID, C_Invoice.C_Currency_ID "
+		StringBuilder orderByClause = new StringBuilder("ORDER BY C_BPartner.Value, C_Invoice.C_Currency_ID "
 				+ ",C_Invoice.PaymentRule"
 				+ ",C_Invoice.C_BPartner_Location_ID"
 				+ ",C_Invoice.AD_User_ID"
@@ -397,7 +397,7 @@ public class DefaultCreateBill implements I_CreateBill{
 		
 		if(Util.isEmpty(p_DocAction))
 		{
-			process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+			process.addBufferLog(0, null, null, bill.getDocumentNo()+":"+ bill.getC_BPartner().getValue() + "_" + bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 			return true;
 		}
 		
@@ -422,7 +422,7 @@ public class DefaultCreateBill implements I_CreateBill{
 		}
 		
 		bill.saveEx(trxName);
-		process.addBufferLog(0, null, null, bill.getDocumentNo()+" : "+ bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
+		process.addBufferLog(0, null, null, bill.getDocumentNo()+" : "+ bill.getC_BPartner().getValue() + "_" + bill.getC_BPartner().getName(), bill.get_Table_ID(), bill.getJP_Bill_ID());
 		
 		return true;
 	}
