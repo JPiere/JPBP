@@ -139,7 +139,12 @@ public class DefaultCreateBill implements I_CreateBill{
 			List<MInvoice> selectedInvoices = new Query(ctx, "C_Invoice", whereClause, trxName)
 							.setClient_ID()
 							.setParameters(new Object[]{AD_PInstance_ID})
-							.setOrderBy(createOrderByClause())
+							.setOrderBy("ORDER BY C_Invoice.C_BPartner_ID, C_Invoice.C_Currency_ID"
+									+ ",C_Invoice.PaymentRule"
+									+ ",C_Invoice.C_BPartner_Location_ID"
+									+ ",C_Invoice.AD_User_ID"
+									+ ",C_Invoice.AD_Org_ID"
+									+ ",C_Invoice.DocumentNo")
 							.list();
 			
 			invoiceList = (ArrayList<MInvoice>) selectedInvoices;
