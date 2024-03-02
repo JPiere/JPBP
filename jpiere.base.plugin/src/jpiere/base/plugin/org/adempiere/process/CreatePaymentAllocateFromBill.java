@@ -26,6 +26,9 @@ import jpiere.base.plugin.org.adempiere.model.MBillLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPaymentAllocate;
+import org.compiere.model.MRefList;
+import org.compiere.process.DocAction;
+import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -44,37 +47,137 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 	MPayment payment = null;
 	int C_Payment_ID = 0;
 	
-	MBill bill = null;
-	int JP_Bill_ID = 0;
-
+	int[] p_JP_Bill_IDs = null;
 	
 	@Override
-	protected void prepare() {
-		
+	protected void prepare()
+	{	
 		C_Payment_ID = getRecord_ID();
 		payment = new MPayment(getCtx(), C_Payment_ID, get_TrxName());
 		
-		JP_Bill_ID = payment.get_ValueAsInt("JP_Bill_ID");
-		bill = new MBill(getCtx(), JP_Bill_ID, get_TrxName());
-		
+		ProcessInfoParameter[] para = getParameter();
+		for (int i = 0; i < para.length; i++)
+		{
+			String name = para[i].getParameterName();
+			if (para[i].getParameter() == null){
+				;
+			}else if (name.equals("JP_Bill_ID")){
+				p_JP_Bill_IDs = para[i].getParameterAsIntArray();
+			}else{
+				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+			}//if
+
+		}//for	
 	}
 	
 	@Override
-	protected String doIt() throws Exception {
+	protected String doIt() throws Exception
+	{
+		//Check Payment
+		if(DocAction.STATUS_Completed.equals(payment.getDocStatus()) 
+				|| DocAction.STATUS_Closed.equals(payment.getDocStatus()) 
+				|| DocAction.STATUS_Voided.equals(payment.getDocStatus()) 
+				|| DocAction.STATUS_Reversed.equals(payment.getDocStatus()) )
+		{
+			error_msg = Msg.getElement(getCtx(), "C_Payment_ID", true) + " : " +payment.getDocumentNo()
+			+ " - "+ Msg.getElement(getCtx(), "DocStatus") +" : " + MRefList.getListName(getCtx(), 131, payment.getDocStatus());
+			throw new Exception(error_msg);
+		}
+		
+		if(!payment.isReceipt())
+		{
+			error_msg = Msg.getMsg(getCtx(), "JP_Process_Cannot_Perform") + " - " + Msg.getElement(getCtx(), "C_Payment_ID", false);
+			throw new Exception(error_msg);
+		}
+		
+		if(payment.getC_Invoice_ID() > 0)
+		{
+			error_msg = Msg.getMsg(getCtx(), "JP_Process_Cannot_Perform") + " - " + Msg.getElement(getCtx(), "C_Invoice_ID", true);
+			throw new Exception(error_msg);
+		}
+
+		if(payment.getC_Order_ID() > 0)
+		{
+			error_msg = Msg.getMsg(getCtx(), "JP_Process_Cannot_Perform") + " - " + Msg.getElement(getCtx(), "C_Order_ID", true);
+			throw new Exception(error_msg);
+		}
+		
+		//Allocation JP_Bill_ID
+		int JP_Bill_ID = payment.get_ValueAsInt("JP_Bill_ID");
+		if(JP_Bill_ID > 0)
+		{
+			MBill bill = new MBill(getCtx(), JP_Bill_ID, get_TrxName());		
+			if(!doAllocation(bill))
+			{
+				throw new Exception(error_msg);
+			}
+		}
+		
+		//Allocation Multiple Selection Search
+		int last_JP_Bill_ID = 0;
+		if(p_JP_Bill_IDs != null)
+		{
+			for(int Bill_ID : p_JP_Bill_IDs)
+			{
+				MBill bill = new MBill(getCtx(), Bill_ID, get_TrxName());		
+				if(!doAllocation(bill))
+				{
+					throw new Exception(error_msg);
+				}else {
+					last_JP_Bill_ID = Bill_ID;
+				}
+			}
+		}
+		
+		//Update PayAmt
+		MPaymentAllocate[] pAllocs = MPaymentAllocate.get(payment);
+		BigDecimal payAmt = Env.ZERO;
+		for(MPaymentAllocate pAlloc : pAllocs)
+		{
+			payAmt = payAmt.add(pAlloc.getAmount());
+		}
+		payment.setPayAmt(payAmt);
+		
+		//Update JP_Bill_ID field.
+		if(JP_Bill_ID == 0 && last_JP_Bill_ID != 0)
+		{
+			payment.set_ValueNoCheck("JP_Bill_ID", last_JP_Bill_ID);
+		}
+		payment.saveEx(get_TrxName());
+		
+		return Msg.getMsg(getCtx(),"Created") + " - " + Msg.getElement(getCtx(), "C_PaymentAllocate_ID", true)  + " : " + counter;
+	}
+	
+	private String error_msg = null;
+	private int counter = 0;
+	
+	private boolean doAllocation(MBill bill)
+	{
+		//Check Bill
+		if(DocAction.STATUS_Completed.equals(bill.getDocStatus()) || DocAction.STATUS_Closed.equals(bill.getDocStatus()) )
+		{
+			;//OK
+		}else {
+			error_msg = Msg.getElement(getCtx(), "JP_Bill_ID", true) + " : " +bill.getDocumentNo()
+						+ " - "+ Msg.getElement(getCtx(), "DocStatus") +" : " + MRefList.getListName(getCtx(), 131, bill.getDocStatus());
+			return false;
+		}
+		
+		if(!bill.isSOTrx())
+		{
+			error_msg = Msg.getElement(getCtx(), "JP_Bill_ID", false) + " : " +bill.getDocumentNo();
+			return false;
+		}
 		
 		if(payment.getC_Currency_ID() != bill.getC_Currency_ID())
 		{
-			return Msg.getMsg(getCtx(), "JP_DifferentCurrency");
+			error_msg = Msg.getMsg(getCtx(), "JP_DifferentCurrency") +" - " + Msg.getElement(getCtx(), "JP_Bill_ID", true) + " : " +bill.getDocumentNo();
+			return false;
 		}
 		
-		
-		payment.setPayAmt(bill.getJPBillAmt());
-		payment.saveEx(get_TrxName());
-
 		MPaymentAllocate[] pAllocs = MPaymentAllocate.get(payment);
 		
 		MBillLine[] billLines = bill.getLines();
-		int counter = 0;
 		for(int i = 0; i < billLines.length; i++)
 		{
 			//Check Paid
@@ -140,7 +243,7 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 			catch (SQLException e)
 			{
 				log.log(Level.SEVERE, sql, e);
-				return e.getLocalizedMessage();
+				return false;
 			}
 			finally
 			{
@@ -151,7 +254,7 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 			counter++;
 		}
 		
-		return Msg.getMsg(getCtx(), "Created") +" : " + counter;
+		return true;
 	}
 	
 }
