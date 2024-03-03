@@ -120,10 +120,17 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 		int JP_Bill_ID = payment.get_ValueAsInt("JP_Bill_ID");
 		if(JP_Bill_ID > 0)
 		{
-			MBill bill = new MBill(getCtx(), JP_Bill_ID, get_TrxName());		
-			if(!doAllocation(bill))
+			MBill bill = new MBill(getCtx(), JP_Bill_ID, get_TrxName());
+			BigDecimal openAmt = bill.getCurrentOpenAmt();
+			if(openAmt.compareTo(Env.ZERO) == 0)
 			{
-				throw new Exception(error_msg);
+				addBufferLog(0, null, null, Msg.getElement(getCtx(), MInvoice.COLUMNNAME_IsPaid, true) + " : " + bill.getDocumentNo(), MBill.Table_ID, bill.getJP_Bill_ID());
+			}else {
+			
+				if(!doAllocation(bill))
+				{
+					throw new Exception(error_msg);
+				}
 			}
 		}
 		
@@ -133,12 +140,21 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 		{
 			for(int Bill_ID : p_JP_Bill_IDs)
 			{
-				MBill bill = new MBill(getCtx(), Bill_ID, get_TrxName());		
-				if(!doAllocation(bill))
+				if(Bill_ID == JP_Bill_ID)
+					continue;
+				
+				MBill bill = new MBill(getCtx(), Bill_ID, get_TrxName());
+				BigDecimal openAmt = bill.getCurrentOpenAmt();
+				if(openAmt.compareTo(Env.ZERO) == 0)
 				{
-					throw new Exception(error_msg);
+					addBufferLog(0, null, null, Msg.getElement(getCtx(), MInvoice.COLUMNNAME_IsPaid, true) + " : " + bill.getDocumentNo(), MBill.Table_ID, bill.getJP_Bill_ID());
 				}else {
-					last_JP_Bill_ID = Bill_ID;
+					if(!doAllocation(bill))
+					{
+						throw new Exception(error_msg);
+					}else {
+						last_JP_Bill_ID = Bill_ID;
+					}
 				}
 			}
 		}
