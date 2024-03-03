@@ -22,7 +22,10 @@ import java.util.logging.Level;
 
 import jpiere.base.plugin.org.adempiere.model.MBill;
 import jpiere.base.plugin.org.adempiere.model.MBillLine;
+import jpiere.base.plugin.org.adempiere.model.MCorporation;
+import jpiere.base.plugin.org.adempiere.model.MCorporationGroup;
 
+import org.compiere.model.MBPartner;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPaymentAllocate;
@@ -37,24 +40,25 @@ import org.compiere.util.Msg;
 
 /**
  * 
- * JPIERE-0216
+ * JPIERE-0216: Bills Allocation at Income payment.
  * 
  * @author h.hagiwara
  *
  */
 public class CreatePaymentAllocateFromBill extends SvrProcess {
 	
-	MPayment payment = null;
-	int C_Payment_ID = 0;
+	private MPayment payment = null;
+	private int C_Payment_ID = 0;
 	
-	int[] p_JP_Bill_IDs = null;
+	private int[] p_JP_Bill_IDs = null;
+	
+	private MBPartner m_BPartner = null;
+	private MCorporation m_Corporation = null;
+	private MCorporationGroup[] m_CorporationGroups = null;
 	
 	@Override
 	protected void prepare()
-	{	
-		C_Payment_ID = getRecord_ID();
-		payment = new MPayment(getCtx(), C_Payment_ID, get_TrxName());
-		
+	{			
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
 		{
@@ -73,6 +77,16 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
+		C_Payment_ID = getRecord_ID();
+		payment = new MPayment(getCtx(), C_Payment_ID, get_TrxName());
+		m_BPartner = new MBPartner(getCtx(), payment.getC_BPartner_ID(), get_TrxName());
+		int JP_Corporation_ID = m_BPartner.get_ValueAsInt(MCorporation.COLUMNNAME_JP_Corporation_ID);
+		if(JP_Corporation_ID > 0)
+		{
+			m_Corporation = new MCorporation(getCtx(), JP_Corporation_ID, get_TrxName());
+			m_CorporationGroups = m_Corporation.getCorporationGroups();
+		}
+		
 		//Check Payment
 		if(DocAction.STATUS_Completed.equals(payment.getDocStatus()) 
 				|| DocAction.STATUS_Closed.equals(payment.getDocStatus()) 
@@ -175,13 +189,64 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 			return false;
 		}
 		
-		MPaymentAllocate[] pAllocs = MPaymentAllocate.get(payment);
+		//Check Corporation & Corporation Group
+		if(m_Corporation != null)
+		{
+			MBPartner bii_BP = new MBPartner(getCtx(), bill.getC_BPartner_ID(), get_TrxName());
+			int bill_Corporation_ID = bii_BP.get_ValueAsInt(MCorporation.COLUMNNAME_JP_Corporation_ID);
+			if(bill_Corporation_ID == 0)
+			{
+				//Allocation between different Group Corporation is forbidden.
+				error_msg = Msg.getMsg(getCtx(), "JP_Allocation_DiffCorp")
+								+ " - " + bii_BP.getValue() + "_" + bii_BP.getName()
+								+ " : " + Msg.getMsg(getCtx(), "JP_Null") + Msg.getElement(getCtx(), MCorporation.COLUMNNAME_JP_Corporation_ID);
+				return false;
+			}
+			
+			if(bill_Corporation_ID == m_Corporation.getJP_Corporation_ID())
+			{
+				;//OK - Same Corporation.
+				
+			}else {
+				
+				MCorporation bill_Corporation = new MCorporation(getCtx(), bill_Corporation_ID, get_TrxName());
+				MCorporationGroup[] bill_CorporationGroups = bill_Corporation.getCorporationGroups();
+				boolean isOK = false;
+				for(MCorporationGroup bill_CorporationGroup : bill_CorporationGroups)
+				{
+					for(MCorporationGroup payment_CorporationGroup : m_CorporationGroups)
+					{
+						if(bill_CorporationGroup.getJP_CorporationGroup_ID() == payment_CorporationGroup.getJP_CorporationGroup_ID() )
+						{
+							isOK = true;
+							break;
+						}
+					}
+					
+					if(isOK)
+					{
+						break;
+					}
+				}
+				
+				if(!isOK)
+				{
+					//Allocation between different Group Corporation is forbidden.
+					error_msg = Msg.getMsg(getCtx(), "JP_Allocation_DiffCorp")
+									+ " : " + bii_BP.getValue() + "_" + bii_BP.getName();
+					return false;
+				}
+			}
+		}
 		
+		
+		//Allocation
+		MPaymentAllocate[] pAllocs = MPaymentAllocate.get(payment);
 		MBillLine[] billLines = bill.getLines();
 		for(int i = 0; i < billLines.length; i++)
 		{
 			//Check Paid
-			MInvoice inv = MInvoice.get(getCtx(), billLines[i].getC_Invoice_ID());
+			MInvoice inv = new MInvoice(getCtx(), billLines[i].getC_Invoice_ID(), get_TrxName());
 			if(inv.isPaid())
 				continue;
 			
