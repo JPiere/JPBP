@@ -25,7 +25,9 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MRefList;
 import org.compiere.model.PO;
+import org.compiere.model.X_C_DocType;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
@@ -280,7 +282,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 	private MPayment createPayment (int C_Invoice_ID, int C_Order_ID, int C_BPartner_ID,
 		int C_Currency_ID, BigDecimal StmtAmt, BigDecimal TrxAmt,
 		int C_BankAccount_ID, Timestamp DateTrx, Timestamp DateAcct,
-		String Description, int AD_Org_ID)
+		String Description, int AD_Org_ID) throws Exception
 	{
 		//	Trx Amount = Payment overwrites Statement Amount if defined
 		BigDecimal PayAmt = TrxAmt;
@@ -308,20 +310,44 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		//
 		if (C_Invoice_ID != 0)
 		{
-			MInvoice invoice = new MInvoice (getCtx(), C_Invoice_ID,  get_TrxName());
-			payment.setC_DocType_ID(invoice.isSOTrx());		//	Receipt
+			MInvoice invoice = new MInvoice (getCtx(), C_Invoice_ID,  get_TrxName());	
+			if(BDSchema.getJP_PaymentDocType_ID() > 0)
+			{
+				MDocType m_DocType = MDocType.get(getCtx(), BDSchema.getJP_PaymentDocType_ID());
+				if(invoice.isSOTrx())
+				{
+					if(m_DocType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_ARReceipt))
+						payment.setC_DocType_ID(BDSchema.getJP_PaymentDocType_ID());
+					else
+						payment.setC_DocType_ID(true);
+					
+				}else {
+					
+					throw new Exception(Msg.getElement(getCtx(), MDocType.COLUMNNAME_DocBaseType) 
+											+ " : " + MRefList.getListName(getCtx(), 183, invoice.getC_DocType().getDocBaseType()) 
+											+ " " + invoice.getDocumentNo());
+				}
+				
+			}else {
+				payment.setC_DocType_ID(invoice.isSOTrx());//	Receipt
+			}
+			
 			payment.setC_Invoice_ID(invoice.getC_Invoice_ID());
 			payment.setC_BPartner_ID (invoice.getC_BPartner_ID());
 			if (PayAmt.signum() != 0)	//	explicit Amount
 			{
 				payment.setC_Currency_ID(C_Currency_ID);
 				if (invoice.isSOTrx())
+				{
 					payment.setPayAmt(PayAmt);
-				else	//	payment is likely to be negative
-					payment.setPayAmt(PayAmt.negate());
+				}else {
+					throw new Exception(Msg.getElement(getCtx(), MDocType.COLUMNNAME_DocBaseType) 
+							+ " : " + MRefList.getListName(getCtx(), 183, invoice.getC_DocType().getDocBaseType()) 
+							+ " " + invoice.getDocumentNo());
+				}
 				payment.setOverUnderAmt(invoice.getOpenAmt().subtract(payment.getPayAmt()));
 			}
-			else	// set Pay Amout from Invoice
+			else	// set Pay Amount from Invoice
 			{
 				payment.setC_Currency_ID(invoice.getC_Currency_ID());
 				payment.setPayAmt(invoice.getOpenAmt());
@@ -331,15 +357,33 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		{
 			payment.setC_BPartner_ID(C_BPartner_ID);
 			payment.setC_Currency_ID(C_Currency_ID);
-			if (PayAmt.signum() < 0)	//	Payment
+			if (PayAmt.signum() < 0)	//Outgoings	Payment
 			{
 				payment.setPayAmt(PayAmt.abs());
-				payment.setC_DocType_ID(false);
+				if(BDSchema.getJP_PaymentDocType_ID() > 0)
+				{
+					MDocType m_DocType = MDocType.get(getCtx(), BDSchema.getJP_PaymentDocType_ID());
+					if(m_DocType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_APPayment))
+						payment.setC_DocType_ID(BDSchema.getJP_PaymentDocType_ID());
+					else
+						payment.setC_DocType_ID(false);
+				}else {
+					payment.setC_DocType_ID(false);
+				}
 			}
 			else	//	Receipt
 			{
 				payment.setPayAmt(PayAmt);
-				payment.setC_DocType_ID(true);
+				if(BDSchema.getJP_PaymentDocType_ID() > 0)
+				{
+					MDocType m_DocType = MDocType.get(getCtx(), BDSchema.getJP_PaymentDocType_ID());
+					if(m_DocType.getDocBaseType().equals(X_C_DocType.DOCBASETYPE_ARReceipt))
+						payment.setC_DocType_ID(BDSchema.getJP_PaymentDocType_ID());
+					else
+						payment.setC_DocType_ID(true);
+				}else {
+					payment.setC_DocType_ID(true);
+				}
 			}
 
 			if(C_Order_ID != 0)
