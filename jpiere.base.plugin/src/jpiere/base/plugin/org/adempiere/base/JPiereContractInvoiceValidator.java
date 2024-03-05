@@ -1334,6 +1334,15 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 		{
 			glLine.set_ValueNoCheck("C_Tax_ID" , iTax.getC_Tax_ID());
 			glLine.set_ValueNoCheck("JP_SOPOType" , "N");
+			
+		}else {
+			
+			Object obj_Tax_ID = factLine.get_Value("C_Tax_ID");
+			if(obj_Tax_ID != null)
+			{
+				glLine.set_ValueNoCheck("C_Tax_ID" , obj_Tax_ID);
+				glLine.set_ValueNoCheck("JP_SOPOType" , "N");
+			}
 		}
 		
 		
@@ -1349,6 +1358,16 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			{
 				glLine.set_ValueNoCheck("JP_TaxBaseAmt" , iTax.getTaxBaseAmt().negate());
 				glLine.set_ValueNoCheck("JP_TaxAmt" , iTax.getTaxAmt().negate());
+				
+			}else {
+				
+				Object obj_TaxBaseAmt = factLine.get_Value("JP_TaxBaseAmt");
+				if(obj_TaxBaseAmt != null)
+					glLine.set_ValueNoCheck("JP_TaxBaseAmt" , ((BigDecimal)obj_TaxBaseAmt).negate());
+				
+				Object obj_TaxAmt = factLine.get_Value("JP_TaxAmt");
+				if(obj_TaxAmt != null)
+					glLine.set_ValueNoCheck("JP_TaxAmt" , ((BigDecimal)obj_TaxAmt).negate());
 			}
 
 		}else {
@@ -1363,6 +1382,16 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			{
 				glLine.set_ValueNoCheck("JP_TaxBaseAmt" , iTax.getTaxBaseAmt());
 				glLine.set_ValueNoCheck("JP_TaxAmt" , iTax.getTaxAmt());
+			
+			}else {
+				
+				Object obj_TaxBaseAmt = factLine.get_Value("JP_TaxBaseAmt");
+				if(obj_TaxBaseAmt != null)
+					glLine.set_ValueNoCheck("JP_TaxBaseAmt" , obj_TaxBaseAmt);
+				
+				Object obj_TaxAmt = factLine.get_Value("JP_TaxAmt");
+				if(obj_TaxAmt != null)
+					glLine.set_ValueNoCheck("JP_TaxAmt" , obj_TaxAmt);			
 			}
 
 		}
