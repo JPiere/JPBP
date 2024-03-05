@@ -129,6 +129,35 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 			}
 		}
 
+		//JPIERE-0539:　Reversal Doc - Inherit header of original Doc.
+		if( type == ModelValidator.TYPE_BEFORE_NEW)
+		{
+			if(po instanceof I_GL_Journal)
+			{
+				int Reversal_ID = po.get_ValueAsInt("Reversal_ID");
+				if(Reversal_ID > 0)
+				{
+					MJournal originalJournal = new MJournal(po.getCtx(), Reversal_ID, po.get_TrxName());
+					int JP_Contract_ID = originalJournal.get_ValueAsInt("JP_Contract_ID");
+					int JP_ContractContent_ID = originalJournal.get_ValueAsInt("JP_ContractContent_ID");
+					int JP_ContractProcPeriod_ID = originalJournal.get_ValueAsInt("JP_ContractProcPeriod_ID");
+					int JP_Order_ID = originalJournal.get_ValueAsInt("JP_Order_ID");
+					int JP_Invoice_ID = originalJournal.get_ValueAsInt("JP_Invoice_ID");
+					
+					if(JP_Contract_ID != 0)
+						po.set_ValueNoCheck("JP_Contract_ID", JP_Contract_ID);
+					if(JP_ContractContent_ID != 0)
+						po.set_ValueNoCheck("JP_ContractContent_ID", JP_ContractContent_ID);
+					if(JP_ContractProcPeriod_ID != 0)
+						po.set_ValueNoCheck("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
+					if(JP_Order_ID != 0)
+						po.set_ValueNoCheck("JP_Order_ID", JP_Order_ID);
+					if(JP_Invoice_ID != 0)
+						po.set_ValueNoCheck("JP_Invoice_ID", JP_Invoice_ID);
+				}
+			}
+		}
+						
 		return null;
 	}
 
