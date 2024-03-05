@@ -154,7 +154,7 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 			}
 		}
 		
-		//JPIERE-0533: GL Journal Tax Auto Calculate.
+		//JPIERE-0544: GL Journal Tax Auto Calculate.
 		//In case of Auto Tax Calculation not applicable, JP_TaxBaseAmt and JP_TaxAmt at Reversal doc copy from Origin doc.
 		if(timing == ModelValidator.TIMING_BEFORE_CLOSE)
 		{
