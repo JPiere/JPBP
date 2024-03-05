@@ -1,5 +1,6 @@
 package jpiere.base.plugin.org.adempiere.base;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -149,6 +150,56 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 					{
 						return Msg.getMsg(Env.getCtx(), "UnbalancedJornal");
 					}
+				}
+			}
+		}
+		
+		//JPIERE-0533: GL Journal Tax Auto Calculate.
+		//In case of Auto Tax Calculation not applicable, JP_TaxBaseAmt and JP_TaxAmt at Reversal doc copy from Origin doc.
+		if(timing == ModelValidator.TIMING_BEFORE_CLOSE)
+		{
+			if(po instanceof I_GL_Journal)
+			{
+				MJournal reversalGLJournal = (MJournal)po;
+				int reversal_ID = reversalGLJournal.getReversal_ID();
+				if(reversal_ID > 0)
+				{
+					MJournalLine[] reverse_glLines = reversalGLJournal.getLines(true);
+					MJournal originalGLJournal = new MJournal(po.getCtx(),reversal_ID, po.get_TrxName());
+					MJournalLine[] original_glLines = originalGLJournal.getLines(true);
+					for(int i = 0; i < original_glLines.length; i++)
+					{
+						String JP_SOPOType = original_glLines[i].get_ValueAsString("JP_SOPOType");
+						if("N".equals(JP_SOPOType))//Auto Tax Calculation not applicable
+						{
+							int C_Tax_ID = original_glLines[i].get_ValueAsInt("C_Tax_ID");
+							if(C_Tax_ID > 0)
+							{
+								reverse_glLines[i].set_ValueNoCheck("C_Tax_ID", C_Tax_ID);
+							}
+							
+							reverse_glLines[i].set_ValueNoCheck("JP_SOPOType", "N");
+							
+							Object obj_TaxBaseAmt =	original_glLines[i].get_Value("JP_TaxBaseAmt");
+							if(obj_TaxBaseAmt != null)
+							{
+								BigDecimal JP_TaxBaseAmt = (BigDecimal)obj_TaxBaseAmt;
+								reverse_glLines[i].set_ValueNoCheck("JP_TaxBaseAmt", JP_TaxBaseAmt.negate());
+							}else {
+								reverse_glLines[i].set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
+							}
+							
+							Object obj_TaxAmt =	original_glLines[i].get_Value("JP_TaxAmt");
+							if(obj_TaxAmt != null)
+							{
+								BigDecimal JP_TaxAmt = (BigDecimal)obj_TaxAmt;
+								reverse_glLines[i].set_ValueNoCheck("JP_TaxAmt", JP_TaxAmt.negate());						
+							}else {
+								reverse_glLines[i].set_ValueNoCheck("JP_TaxAmt", Env.ZERO);	
+							}
+							reverse_glLines[i].saveEx(po.get_TrxName());
+						}
+					}//for
 				}
 			}
 		}
