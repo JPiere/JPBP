@@ -226,6 +226,19 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 							}else {
 								reverse_glLines[i].set_ValueNoCheck("JP_TaxAmt", Env.ZERO);	
 							}
+							
+							BigDecimal qty = original_glLines[i].getQty();
+							if(qty != null)
+								reverse_glLines[i].setQty(qty.negate());
+							
+							Object obj_PriceActual = original_glLines[i].get_Value("JP_PriceActual");
+							if(obj_PriceActual != null)
+							{
+								reverse_glLines[i].set_ValueNoCheck("JP_PriceActual", obj_PriceActual);						
+							}else {
+								reverse_glLines[i].set_ValueNoCheck("JP_PriceActual", Env.ZERO);	
+							}
+							
 							reverse_glLines[i].saveEx(po.get_TrxName());
 						}
 					}//for
