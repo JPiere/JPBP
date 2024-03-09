@@ -159,16 +159,19 @@ public class CreatePaymentAllocateFromBill extends SvrProcess {
 			}
 		}
 		
-		//Update PayAmt
-		MPaymentAllocate[] pAllocs = MPaymentAllocate.get(payment);
-		BigDecimal payAmt = Env.ZERO;
-		for(MPaymentAllocate pAlloc : pAllocs)
+		//Update PayAmt in case of 0.
+		if(payment.getPayAmt().compareTo(Env.ZERO) == 0)
 		{
-			payAmt = payAmt.add(pAlloc.getAmount());
+			MPaymentAllocate[] pAllocs = MPaymentAllocate.get(payment);
+			BigDecimal payAmt = Env.ZERO;
+			for(MPaymentAllocate pAlloc : pAllocs)
+			{
+				payAmt = payAmt.add(pAlloc.getAmount());
+			}
+			payment.setPayAmt(payAmt);
 		}
-		payment.setPayAmt(payAmt);
 		
-		//Update JP_Bill_ID field.
+		//Update JP_Bill_ID field in case of blank.
 		if(JP_Bill_ID == 0 && last_JP_Bill_ID != 0)
 		{
 			payment.set_ValueNoCheck("JP_Bill_ID", last_JP_Bill_ID);
