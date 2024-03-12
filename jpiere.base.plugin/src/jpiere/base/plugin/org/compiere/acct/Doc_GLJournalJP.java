@@ -398,10 +398,13 @@ public class Doc_GLJournalJP extends Doc
 				}else {
 					
 					fLine = fact.createLine (docLine, docLine.getAccount (), docLine.getC_Currency_ID(), docLine.getAmtSourceDr (), docLine.getAmtSourceCr ());
-					setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
-					fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
-					if(C_BankAccount_ID > 0)
-						fLine.set_ValueNoCheck("JP_BankAccount_ID" ,C_BankAccount_ID);//JPIERE-0556
+					if(fLine != null)
+					{
+						setTaxInfo(fLine, C_Tax_ID, JP_SOPOType,JP_TaxBaseAmt, JP_TaxAmt);
+						fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("JP_PriceActual"));//JPIERE-0556
+						if(C_BankAccount_ID > 0)
+							fLine.set_ValueNoCheck("JP_BankAccount_ID" ,C_BankAccount_ID);//JPIERE-0556
+					}
 					
 				}
 				
