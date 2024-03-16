@@ -57,24 +57,27 @@ public class DefaultBankDataMatchInv extends SvrProcess {
 	{
 		BigDecimal acceptableDiffAmt = BDSchema.getJP_AcceptableDiffAmt();
 		
-		
 		MBankDataLine[] lines =  m_BankData.getLines();
-		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE IsPaid='N' AND AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL') ORDER BY DateInvoiced ASC;";
+		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE IsPaid='N' AND AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL') "
+					+ " AND C_Invoice_ID NOT IN (SELECT DISTINCT COALESCE(C_Invoice_ID,0) FROM JP_BankDataLine WHERE JP_BankData_ID = ? )  ORDER BY DateInvoiced ASC;";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
 		{
+			if(lines[i].isMatchedJP())
+				continue;
+			
+			if(lines[i].getC_BPartner_ID() == 0)
+				continue;
 			try
 			{
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				pstmt.setInt(1, p_AD_Client_ID);
 				pstmt.setInt(2, lines[i].getC_BPartner_ID());
+				pstmt.setInt(3, p_JP_BankData_ID);
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
-					if(lines[i].isMatchedJP())
-						break;
-					
 					int C_Invoice_ID = rs.getInt(1);
 					MInvoice inv = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
 					BigDecimal openAmt = inv.getOpenAmt();
