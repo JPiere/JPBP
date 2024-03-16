@@ -80,7 +80,7 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		if(promisedPayDate_From == null || promisedPayDate_To== null)
-			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "promisedPayDate"));
+			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "JP_PromisedPayDate"));
 
 		LocalDateTime localDateTime_To = promisedPayDate_To.toLocalDateTime();
 		LocalDate localDate_To = localDateTime_To.toLocalDate().plusDays(1);

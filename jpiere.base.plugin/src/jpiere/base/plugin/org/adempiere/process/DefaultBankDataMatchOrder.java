@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
@@ -24,6 +26,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
@@ -78,29 +81,38 @@ public class DefaultBankDataMatchOrder extends SvrProcess {
 	protected String doIt() throws Exception 
 	{
 		if(dateOrdered_From == null || dateOrdered_To== null)
-			throw new Exception("FillMandatory");
+			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "DateOrdered"));
+		
+		LocalDateTime localDateTime_To = dateOrdered_To.toLocalDateTime();
+		LocalDate localDate_To = localDateTime_To.toLocalDate().plusDays(1);
+		Timestamp searchCondition_dateOrdered_To =  Timestamp.valueOf(localDate_To.atStartOfDay());
 		
 		BigDecimal acceptableDiffAmt = BDSchema.getJP_AcceptableDiffAmt();
 		MBankDataLine[] lines =  m_BankData.getLines();
 		String sql = "SELECT C_Order_ID FROM C_Order WHERE AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND DocStatus ='CO' "
-						+" AND DateOrdered >= ? AND DateOrdered <= ?  ORDER BY DateOrdered ASC";
+						+ " AND DateOrdered >= ? AND DateOrdered < ?  "
+						+ " AND C_Order_ID NOT IN (SELECT DISTINCT COALESCE(C_Order_ID,0) FROM JP_BankDataLine WHERE JP_BankData_ID = ? ) ORDER BY DateOrdered ASC";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
 		{
+			if(lines[i].isMatchedJP())
+				continue;
+			
+			if(lines[i].getC_BPartner_ID() == 0)
+				continue;
+			
 			try
 			{
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				pstmt.setInt(1, p_AD_Client_ID);
 				pstmt.setInt(2, lines[i].getC_BPartner_ID());
 				pstmt.setTimestamp(3, dateOrdered_From);
-				pstmt.setTimestamp(4, dateOrdered_To);
+				pstmt.setTimestamp(4, searchCondition_dateOrdered_To);
+				pstmt.setInt(5, p_JP_BankData_ID);
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
-					if(lines[i].isMatchedJP())
-						break;
-					
 					int C_Order_ID = rs.getInt(1);
 					MOrder order = new MOrder(getCtx(), C_Order_ID, get_TrxName());
 					if(order.getC_Payment_ID() > 0)
