@@ -43,7 +43,7 @@ import org.compiere.util.Msg;
  *	MBill
  *
  *	JPIERE-0106: Bill
- *	JPIERE-0507: Set Las Bill and Payment Info
+ *	JPIERE-0507: Set Last Bill and Payment Info
  *	JPIERE-0508: Recalculate Tax
  *
  *  @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
@@ -803,7 +803,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		for(int i = 0 ; i < m_lines.length; i++)
 		{
 			inv = new MInvoice(getCtx(), m_lines[i].getC_Invoice_ID(), get_TrxName());
-			openAmt = openAmt.add(inv.getOpenAmt(true, null));
+			openAmt = openAmt.add(inv.getOpenAmt(false, null));
 		}
 
 		return openAmt;
