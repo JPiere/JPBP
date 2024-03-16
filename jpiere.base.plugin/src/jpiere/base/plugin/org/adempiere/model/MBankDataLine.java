@@ -16,6 +16,7 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -34,6 +35,8 @@ import org.compiere.util.Msg;
  *
  */
 public class MBankDataLine extends X_JP_BankDataLine {
+
+	private static final long serialVersionUID = 2797462017646651234L;
 
 	public MBankDataLine(Properties ctx, int JP_BankDataLine_ID, String trxName)
 	{
@@ -81,6 +84,13 @@ public class MBankDataLine extends X_JP_BankDataLine {
 
 		if(is_ValueChanged("C_Invoice_ID") && getC_Invoice_ID() > 0)
 		{
+			MBankDataLine[] lines = checkDuplicateRegistration("C_Invoice_ID", getC_Invoice_ID());
+			if(lines.length > 0)
+			{
+				log.saveError("JP_AlreadyRegistered", Msg.getElement(getCtx(), COLUMNNAME_Line)+ " : " + lines[0].getLine()+ " _ " + getC_Invoice().getDocumentNo());
+				return false;
+			}
+			
 			setJP_Bill_ID(0);
 			setC_Payment_ID(0);
 			setC_Order_ID(0);
@@ -96,6 +106,13 @@ public class MBankDataLine extends X_JP_BankDataLine {
 
 		if(is_ValueChanged("JP_Bill_ID") && getJP_Bill_ID() > 0)
 		{
+			MBankDataLine[] lines = checkDuplicateRegistration("JP_Bill_ID", getJP_Bill_ID());
+			if(lines.length > 0)
+			{
+				log.saveError("JP_AlreadyRegistered", Msg.getElement(getCtx(), COLUMNNAME_Line)+ " : " + lines[0].getLine()+ " _ " + getJP_Bill().getDocumentNo());
+				return false;
+			}
+			
 			setC_Invoice_ID(0);
 			setC_Payment_ID(0);
 			setC_Order_ID(0);
@@ -112,6 +129,13 @@ public class MBankDataLine extends X_JP_BankDataLine {
 
 		if(is_ValueChanged("C_Payment_ID") && getC_Payment_ID() > 0)
 		{
+			MBankDataLine[] lines = checkDuplicateRegistration("C_Payment_ID", getC_Payment_ID());
+			if(lines.length > 0)
+			{
+				log.saveError("JP_AlreadyRegistered", Msg.getElement(getCtx(), COLUMNNAME_Line)+ " : " + lines[0].getLine()+ " _ " + getC_Payment().getDocumentNo());
+				return false;
+			}
+			
 			setC_Invoice_ID(0);
 			setJP_Bill_ID(0);
 			setC_Order_ID(0);
@@ -126,6 +150,13 @@ public class MBankDataLine extends X_JP_BankDataLine {
 
 		if(is_ValueChanged("C_Order_ID") && getC_Order_ID() > 0)
 		{
+			MBankDataLine[] lines = checkDuplicateRegistration("C_Order_ID", getC_Order_ID());
+			if(lines.length > 0)
+			{
+				log.saveError("JP_AlreadyRegistered", Msg.getElement(getCtx(), COLUMNNAME_Line)+ " : " + lines[0].getLine()+ " _ " + getC_Order().getDocumentNo());
+				return false;
+			}
+			
 			setC_Invoice_ID(0);
 			setJP_Bill_ID(0);
 			setC_Payment_ID(0);
@@ -146,6 +177,38 @@ public class MBankDataLine extends X_JP_BankDataLine {
 		return true;
 	}
 
+	
+	private MBankDataLine[] checkDuplicateRegistration(String columnName, int record_ID )
+	{
+		ArrayList<MBankDataLine> list = new ArrayList<MBankDataLine>();
+		String sql = " SELECT * FROM JP_BankDataLine WHERE JP_BankData_ID = ? AND " + columnName + " =? ";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, getJP_BankData_ID());
+			pstmt.setInt(2, record_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MBankDataLine (getCtx(), rs, get_TrxName()));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		
+		MBankDataLine[] m_BankDataLines = new MBankDataLine[list.size()];
+		list.toArray(m_BankDataLines);
+		return m_BankDataLines;
+	}
+	
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
