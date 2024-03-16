@@ -56,27 +56,32 @@ public class DefaultBankDataMatchPayment extends SvrProcess {
 	{
 		BigDecimal acceptableDiffAmt = BDSchema.getJP_AcceptableDiffAmt();
 		
-		
 		MBankDataLine[] lines =  m_BankData.getLines();
 		String sql = "SELECT C_Payment_ID FROM C_Payment WHERE IsReconciled='N' AND AD_Client_ID = ? AND IsReceipt = 'Y' AND  C_BPartner_ID = ? "
 				+" AND DocStatus NOT IN ('VO','RE','NA','IN') "
-				+" AND C_BankAccount_ID = ? ORDER BY DateTrx ASC;";
+				+" AND C_BankAccount_ID = ? "
+				+" AND C_Payment_ID NOT IN (SELECT DISTINCT COALESCE(C_Payment_ID,0) FROM JP_BankDataLine WHERE JP_BankData_ID = ? ) "
+				+" ORDER BY DateTrx ASC;";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
 		{
+			if(lines[i].isMatchedJP())
+				continue;
+			
+			if(lines[i].getC_BPartner_ID() == 0)
+				continue;
+			
 			try
 			{
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				pstmt.setInt(1, p_AD_Client_ID);
 				pstmt.setInt(2, lines[i].getC_BPartner_ID());
 				pstmt.setInt(3, m_BankData.getC_BankAccount_ID());
+				pstmt.setInt(4, p_JP_BankData_ID);
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
-					if(lines[i].isMatchedJP())
-						break;
-					
 					int C_Payment_ID = rs.getInt(1);
 					MPayment payment = new MPayment(getCtx(), C_Payment_ID, get_TrxName());
 					BigDecimal openAmt = payment.getPayAmt();
