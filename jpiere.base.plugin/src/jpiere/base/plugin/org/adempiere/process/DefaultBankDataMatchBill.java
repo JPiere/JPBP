@@ -17,12 +17,15 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.logging.Level;
 
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MBankData;
 import jpiere.base.plugin.org.adempiere.model.MBankDataLine;
@@ -77,16 +80,27 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 	protected String doIt() throws Exception
 	{
 		if(promisedPayDate_From == null || promisedPayDate_To== null)
-			throw new Exception("FillMandatory");
+			throw new Exception(Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), "promisedPayDate"));
 
+		LocalDateTime localDateTime_To = promisedPayDate_To.toLocalDateTime();
+		LocalDate localDate_To = localDateTime_To.toLocalDate().plusDays(1);
+		Timestamp searchCondition_promisedPayDate_To =  Timestamp.valueOf(localDate_To.atStartOfDay());
+		
 		BigDecimal acceptableDiffAmt = BDSchema.getJP_AcceptableDiffAmt();
 		MBankDataLine[] lines =  m_BankData.getLines();
 		String sql = "SELECT JP_Bill_ID FROM JP_Bill WHERE AD_Client_ID = ? AND IsSOTrx = 'Y' AND  C_BPartner_ID = ? AND ( DocStatus ='CO' or DocStatus ='CL' )"
-						+" AND C_BankAccount_ID = ? AND JP_PromisedPayDate >= ? AND JP_PromisedPayDate <= ?  ORDER BY JP_PromisedPayDate ASC";
+						+ " AND C_BankAccount_ID = ? AND JP_PromisedPayDate >= ? AND JP_PromisedPayDate < ?  "
+						+ " AND JP_Bill_ID NOT IN (SELECT DISTINCT COALESCE(JP_Bill_ID,0) FROM JP_BankDataLine WHERE JP_BankData_ID = ? ) ORDER BY JP_PromisedPayDate ASC";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		for(int i = 0 ; i < lines.length; i++)
 		{
+			if(lines[i].isMatchedJP())
+				continue;
+			
+			if(lines[i].getC_BPartner_ID() == 0)
+				continue;
+			
 			try
 			{
 				pstmt = DB.prepareStatement(sql, get_TrxName());
@@ -94,16 +108,17 @@ public class DefaultBankDataMatchBill extends SvrProcess {
 				pstmt.setInt(2, lines[i].getC_BPartner_ID());
 				pstmt.setInt(3, m_BankData.getC_BankAccount_ID());
 				pstmt.setTimestamp(4, promisedPayDate_From);
-				pstmt.setTimestamp(5, promisedPayDate_To);
+				pstmt.setTimestamp(5, searchCondition_promisedPayDate_To);
+				pstmt.setInt(6, p_JP_BankData_ID);
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
-					if(lines[i].isMatchedJP())
-						break;
-
 					int JP_Bill_ID = rs.getInt(1);
 					MBill bill = new MBill(getCtx(), JP_Bill_ID, get_TrxName());
 					BigDecimal openAmt = bill.getCurrentOpenAmt();
+					if(openAmt.compareTo(Env.ZERO) == 0)
+						continue;
+					
 					BigDecimal diffAmt = lines[i].getTrxAmt().subtract(openAmt);
 					if(diffAmt.abs().compareTo(acceptableDiffAmt.abs()) <= 0)
 					{
