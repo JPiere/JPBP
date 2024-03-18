@@ -197,7 +197,37 @@ public class ReCreateGLJournalTax extends SvrProcess {
 			isPosting = true;
 		}
 		
-		message = "税額計算タブのレコードを " + deleteNum + " 件削除して再作成しています。";
+		MGLJournalTax[] taxs = getGLJournalTaxs(m_GLJournal.getGL_Journal_ID());
+		int AD_Org_ID = 0;
+		boolean isOrgs = false;
+		for(int i = 0; i < taxs.length; i++)
+		{
+			if(i==0)
+			{
+				AD_Org_ID = taxs[0].getAD_Org_ID();
+			}else {
+				
+				if(AD_Org_ID != taxs[i].getAD_Org_ID())
+				{
+					isOrgs = true;
+					break;
+				}
+			}
+		}
+		
+		if(taxs.length == deleteNum )
+		{
+			if(isOrgs)
+				message = "税額計算タブのレコードを " + deleteNum + " 件削除して "+ taxs.length +" 件再作成しています。**要確認** 複数組織の税額計算を行っています。";
+			else
+				message = "税額計算タブのレコードを " + deleteNum + " 件削除して "+ taxs.length +" 件再作成しています。";
+		}else {
+			if(isOrgs)
+				message = "税額計算タブのレコードを " + deleteNum + " 件削除して "+ taxs.length +" 件再作成しています。**要確認** 複数組織の税額計算を行っています。削除と再作成したレコード件数が異なります。";
+			else
+				message = "税額計算タブのレコードを " + deleteNum + " 件削除して "+ taxs.length +" 件再作成しています。**要確認** 削除と再作成したレコード件数が異なります。";
+		}
+		
 		if(isPosting)
 			message = message + " 再転記済みです。";
 		return true;
@@ -244,6 +274,39 @@ public class ReCreateGLJournalTax extends SvrProcess {
 		}
 
 		MJournal[] m_Journals = new MJournal[list.size()];
+		list.toArray(m_Journals);
+		return m_Journals;
+
+	}
+	
+	private MGLJournalTax[] getGLJournalTaxs(int GL_Journal_ID)
+	{
+		ArrayList<MGLJournalTax> list = new ArrayList<MGLJournalTax>();
+		String sql = "SELECT * FROM JP_GLJournalTax WHERE GL_Journal_ID = ?"
+							+ " ORDER BY JP_GLJournalTax ASC";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, get_TrxName());
+			pstmt.setInt(1, GL_Journal_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				list.add(new MGLJournalTax (getCtx(), rs, get_TrxName()));
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		MGLJournalTax[] m_Journals = new MGLJournalTax[list.size()];
 		list.toArray(m_Journals);
 		return m_Journals;
 
