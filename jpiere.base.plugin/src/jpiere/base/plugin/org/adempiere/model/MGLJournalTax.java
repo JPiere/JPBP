@@ -31,6 +31,8 @@ import org.compiere.util.Util;
  */
 public class MGLJournalTax extends X_JP_GLJournalTax {
 
+	private static final long serialVersionUID = -7815647134919839216L;
+
 	public MGLJournalTax(Properties ctx, int JP_GLJournalTax_ID, String trxName)
 	{
 		super(ctx, JP_GLJournalTax_ID, trxName);
@@ -58,11 +60,6 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 		int C_Tax_ID = line.get_ValueAsInt(MGLJournalTax.COLUMNNAME_C_Tax_ID);
 		String JP_SOPOType = line.get_ValueAsString(MGLJournalTax.COLUMNNAME_JP_SOPOType);
 		int AD_Org_ID = line.getAD_Org_ID();
-		
-		if(C_Tax_ID == 0 || Util.isEmpty(JP_SOPOType))
-		{
-			return null;
-		}
 		
 		if(oldTax)
 		{
@@ -94,7 +91,7 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 			}
 		}
 		
-		if (C_Tax_ID == 0)
+		if (C_Tax_ID == 0|| Util.isEmpty(JP_SOPOType))
 		{
 			return null;
 		}
@@ -177,5 +174,16 @@ public class MGLJournalTax extends X_JP_GLJournalTax {
 	{
 		m_precision = Integer.valueOf(precision);
 	}	//	setPrecision
+
+	
+	@Override
+	public String toString() 
+	{
+		StringBuilder sb = new StringBuilder ("MGLJournalTax[GL_Journal_ID=").append(getGL_Journal_ID())
+	    	        			.append(" / C_Tax_ID=").append(getC_Tax_ID())
+	    	        			.append(" / AD_Org_ID=").append(getAD_Org_ID())
+	    	        			.append("]")	;
+	      return sb.toString();
+	}
 
 }
