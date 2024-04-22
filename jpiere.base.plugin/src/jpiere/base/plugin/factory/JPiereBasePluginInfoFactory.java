@@ -23,8 +23,9 @@ import org.compiere.model.MSysConfig;
 import org.compiere.util.Env;
 
 /**
- * JPIERE-0230
- *
+ * JPIERE-0230 - Product Info Window Single Selection
+ * JPIERE-0614(v11) - Single Selection Info Window
+ * 
  * @author HideakiHagiwara
  *
  */
@@ -48,6 +49,23 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 
         	return info;
         }
+		
+		//JPIERE-0614(v11) - Single Selection Info Window
+		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
+		{
+        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup);
+        	if (!info.loadedOK())
+        	{
+	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, null);
+	        	if (!info.loadedOK()) {
+	        		info.dispose(false);
+	        		info = null;
+	        	}
+        	}
+
+        	return info;			
+		}
+		
         //
         return null;
 	}
@@ -68,6 +86,12 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 			return info;
 		}
 
+		//JPIERE-0614(v11) - Single Selection Info Window
+		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
+		{
+			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, false, whereClause, AD_InfoWindow_ID, true);
+			return info;
+		}
 		return null;
 	}
 
