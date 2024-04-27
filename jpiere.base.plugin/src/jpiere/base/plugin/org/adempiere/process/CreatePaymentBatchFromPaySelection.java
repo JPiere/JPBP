@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.IProcessUI;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPaySelection;
 import org.compiere.model.MPaySelectionCheck;
@@ -75,6 +76,8 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 	protected String doIt() throws Exception {
 
 		MPaySelection paySelection = new MPaySelection(getCtx(), p_C_PaySelection_ID, get_TrxName());
+		addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_PaySelection_ID", paySelection.get_ValueAsBoolean("IsReceiptJP")) + " : " + paySelection.getName()
+																			, MPaySelection.Table_ID, paySelection.getC_PaySelection_ID());
 
 		if( paySelection.get_ColumnIndex("JP_PaymentBatch_ID") > 0)
 		{
@@ -117,11 +120,20 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 		batch.setProcessingDate(paySelection.getPayDate());
 		batch.set_ValueOfColumnReturningBoolean("IsReceiptJP", paySelection.get_ValueAsBoolean("IsReceiptJP"));//JPIERE-0298
 		batch.saveEx(get_TrxName());
+		
+		IProcessUI processUI = Env.getProcessUI(getCtx());
 		for(MPaySelectionCheck check : checks)
 		{
-			createAndAllocatePayment(check, batch);
+			if(processUI != null)
+				processUI.statusUpdate(check.getDocumentNo());
+			
+			try 
+			{
+				createAndAllocatePayment(check, batch);				
+			}catch (Exception e) {
+				throw new Exception(Msg.getMsg(getCtx(), "Error") + check.getDocumentNo()+ " - " + e.toString());
+			}
 		}
-
 
 		if( paySelection.get_ColumnIndex("JP_PaymentBatch_ID") > 0)
 		{
@@ -129,7 +141,8 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 			paySelection.saveEx(get_TrxName());
 		}
 
-		//addBufferLog(0, null, null, batch.getDocumentNo(), MPaymentBatch.Table_ID, batch.getC_PaymentBatch_ID());
+		addBufferLog(0, null, null, Msg.getElement(getCtx(), "C_PaymentBatch_ID", paySelection.get_ValueAsBoolean("IsReceiptJP")) + " : " + batch.getDocumentNo()
+																					, MPaymentBatch.Table_ID, batch.getC_PaymentBatch_ID());
 		
 		return Msg.getMsg(getCtx(), "ProcessOK") + " : " + batch.getDocumentNo();
 	}
