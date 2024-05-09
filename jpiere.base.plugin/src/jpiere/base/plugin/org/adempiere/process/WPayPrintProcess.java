@@ -25,14 +25,19 @@ import org.adempiere.util.IProcessUI;
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MPaySelection;
 import org.compiere.model.MPaySelectionCheck;
+import org.compiere.model.MSysConfig;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.PaymentExport;
+import org.compiere.util.Util;
+
+import jpiere.base.plugin.org.adempiere.model.MPaymentExportClass;
 
 /**
- * JPIERE-0272 :Payment Data Export by Process at Pay Selection Window
+ * JPIERE-0272: Payment Data Export by Process at Pay Selection Window
+ * JPIERE-0615: Payment Export Class
  *
  * @author Hiroshi Iwama
  *
@@ -50,10 +55,12 @@ public class WPayPrintProcess extends SvrProcess{
 	//Payment Rule
 	private String p_PaymentRule = null;
 	private int p_C_BankAccount_ID = 0;
+	private int p_JP_PaymentExportClass_ID = 0;
+	private String JP_LineEnd = null;
 	IProcessUI processUI = null;
 
 	//Target PaymentExportClass
-	public String m_PaymentExportClass = null;
+	public String paymentExportClass = null;
 
 	//Target PaySelectionCheck(s)
 	public MPaySelectionCheck[]     m_checks = null;
@@ -69,6 +76,9 @@ public class WPayPrintProcess extends SvrProcess{
 			}
 			else if(name.equals("PaymentRule")){
 				p_PaymentRule = para[i].getParameterAsString();
+			}
+			else if(name.equals("JP_PaymentExportClass_ID")){
+				p_JP_PaymentExportClass_ID = para[i].getParameterAsInt();
 			}
 			else{
 				log.log(Level.SEVERE, "Unknown Paramtere :" + name);
@@ -88,9 +98,51 @@ public class WPayPrintProcess extends SvrProcess{
 		MPaySelection paySelection = new MPaySelection(getCtx(), p_C_PaySelection_ID, get_TrxName());
 		//get the relevant BankAccount
 		p_C_BankAccount_ID = paySelection.getC_BankAccount_ID();
-		//get the target PaymentExportClass corresponding to the relevant BankAccount
 		MBankAccount bankAccount = new MBankAccount(getCtx(), p_C_BankAccount_ID, get_TrxName());
-		m_PaymentExportClass = bankAccount.getPaymentExportClass();
+		
+		if(p_JP_PaymentExportClass_ID > 0)
+		{
+			MPaymentExportClass m_PEC =new MPaymentExportClass(getCtx(), p_JP_PaymentExportClass_ID, get_TrxName());
+			paymentExportClass = m_PEC.getPaymentExportClass();
+			if(!Util.isEmpty(m_PEC.getJP_LineEnd()))
+			{
+				if(MPaymentExportClass.JP_LINEEND_CRLF.equals(m_PEC.getJP_LineEnd()))
+				{
+					JP_LineEnd = "\r\n";
+				}else if(MPaymentExportClass.JP_LINEEND_CR.equals(m_PEC.getJP_LineEnd())) {
+					JP_LineEnd = "\r";
+				}else if(MPaymentExportClass.JP_LINEEND_LF.equals(m_PEC.getJP_LineEnd())) {
+					JP_LineEnd = "\n";
+				}
+			}
+			
+		}else {
+		
+			//get the target PaymentExportClass from the relevant BankAccount
+			paymentExportClass = bankAccount.getPaymentExportClass();
+		
+		}
+		
+		if(Util.isEmpty(JP_LineEnd))
+		{
+			String line_end = MSysConfig.getValue("JP_JAPAN_PAYMENT_EXPORT_LINE_END", Env.NL,  Env.getAD_Client_ID(Env.getCtx()), 0);
+			if(Util.isEmpty(line_end))
+			{
+				JP_LineEnd = Env.NL;
+			}else {
+				
+				if(line_end.equalsIgnoreCase("CRLF") || line_end.equalsIgnoreCase("\\r\\n")){
+					JP_LineEnd = "\r\n";
+				}else if(line_end.equalsIgnoreCase("CR") || line_end.equalsIgnoreCase("\\r")) {
+					JP_LineEnd = "\r";
+				}else if(line_end.equalsIgnoreCase("LF") || line_end.equalsIgnoreCase("\\n")) {
+					JP_LineEnd = "\n";
+				}else {
+					JP_LineEnd = Env.NL;
+				}
+			}
+		}
+		
 
 		//checking the variables and get the relevant PaySelectionChecks
 		if(!getChecks(p_PaymentRule)){
@@ -99,7 +151,7 @@ public class WPayPrintProcess extends SvrProcess{
 
 		//Get Payment Export Class
 		int no = 0;
-		StringBuffer err = new StringBuffer("");
+		StringBuffer err = new StringBuffer(JP_LineEnd);
 		
 		try
 		{
@@ -108,27 +160,27 @@ public class WPayPrintProcess extends SvrProcess{
 			File tempFile = File.createTempFile("paymentExport", ".txt");
 
 
-			if (m_PaymentExportClass == null || m_PaymentExportClass.trim().length() == 0) {
-				m_PaymentExportClass = "org.compiere.util.GenericPaymentExport";
+			if (paymentExportClass == null || paymentExportClass.trim().length() == 0) {
+				paymentExportClass = "org.compiere.util.GenericPaymentExport";
 			}
 			//	Get the instance
 			PaymentExport custom = null;
 			try
 			{
-				Class<?> clazz = Class.forName(m_PaymentExportClass);
+				Class<?> clazz = Class.forName(paymentExportClass);
 				custom = (PaymentExport)clazz.getDeclaredConstructor().newInstance();
 				no = custom.exportToFile(m_checks, tempFile, err);
 			}
 			catch (ClassNotFoundException e)
 			{
 				no = -1;
-				err.append(Msg.getMsg(getCtx(), "JP_ClassNotFound") + m_PaymentExportClass + " - " + e.toString());
+				err.append(Msg.getMsg(getCtx(), "JP_ClassNotFound") + paymentExportClass + " - " + e.toString());
 				log.log(Level.SEVERE, err.toString(), e);
 			}
 			catch (Exception e)
 			{
 				no = -1;
-				err.append(Msg.getMsg(getCtx(), "Error") + m_PaymentExportClass + " check log, " + e.toString());
+				err.append(Msg.getMsg(getCtx(), "Error") + paymentExportClass + " check log, " + e.toString());
 				log.log(Level.SEVERE, err.toString(), e);
 			}
 			
