@@ -84,7 +84,7 @@ import org.supercsv.prefs.CsvPreference;
  *
  * JPiere CSV Importer for GridTab (Copy from GridTabCSVImporter)
  * @author Carlos Ruiz
- * @author Juan David Arboleda
+ * @author Juan David Arboleda 
  * @author Hideaki Hagiwara
  */
 public class JPiereGridTabCSVImporter implements IGridTabImporter
@@ -94,10 +94,10 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	private static final String IMPORT_MODE_MERGE = "M";
 	private static final String IMPORT_MODE_UPDATE = "U";
 	private static final String IMPORT_MODE_INSERT = "I";
-
+	
 	private boolean m_isError = false;
 	private String m_import_mode = null;
-	private List<String> header;
+	private List<String> header;  
     private List<CellProcessor> readProcArray;
     private List<GridField> locationFields;
 	private boolean isThereKey;
@@ -107,21 +107,20 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
     private ICsvMapReader mapReader;
     private TreeMap<GridTab,Integer> sortedtTabMapIndexes;
     private List<String> rawData;
-    private boolean isMasterok = true;
+    private boolean isMasterok = true; 
 	private boolean isDetailok = true;
 	private boolean error = false;
 	private List<String>  rowsTmpResult;
 	private PO masterRecord;
-
+    
     //Files management
 	private File errFile;
 	private File logFile;
 	private PrintWriter errFileW;
 	private PrintWriter logFileW;
 
-	private CsvPreference csvpref = CsvPreference.STANDARD_PREFERENCE;
-	private String delimiter = String.valueOf((char) csvpref.getDelimiterChar());
-	private String quoteChar = String.valueOf((char) csvpref.getQuoteChar());
+	private String delimiterChar = ",";
+	private String quoteChar = "\"";
 
 	//Trx
 	private Trx trx;
@@ -131,12 +130,18 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(JPiereGridTabCSVImporter.class);
 
+	@Override
 	public File fileImport(GridTab gridTab, List<GridTab> childs, InputStream filestream, Charset charset , String importMode) {
-		return fileImport(gridTab, childs, filestream, charset, importMode, null);
+		return fileImport(gridTab, childs, filestream, charset, importMode, null, null, null);
 	}//fileImport
 
 	@Override
 	public File fileImport(GridTab gridTab, List<GridTab> childs, InputStream filestream, Charset charset, String importMode, IProcessUI processUI) {
+		return fileImport(gridTab, childs, filestream, charset, importMode, null, null, processUI);
+	}
+
+	@Override
+	public File fileImport(GridTab gridTab, List<GridTab> childs, InputStream filestream, Charset charset, String importMode, String p_delimiterChar, String p_quoteChar, IProcessUI processUI) {
 
 		if(!gridTab.isInsertRecord() && isInsertMode())
 			throwAdempiereException("Insert record disabled for Tab");
@@ -147,8 +152,15 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			m_import_mode = importMode;
 			errFile = new File(errFileName);
 			errFileW = new PrintWriter(errFile, charset.name());
+
+			if (p_delimiterChar != null)
+				delimiterChar = p_delimiterChar;
+			if (p_quoteChar != null)
+				quoteChar = p_quoteChar;
+			CsvPreference csvpref = new CsvPreference.Builder(quoteChar.charAt(0), delimiterChar.charAt(0), "\r\n" /* ignored */).build();
+
 			mapReader = new CsvMapReader(new InputStreamReader(filestream, charset), csvpref);
-			header =  Arrays.asList(mapReader.getHeader(true));
+			header =  Arrays.asList(mapReader.getHeader(true));  
 
 			//Mapping header
 			int indxDetail = mapCSVHeader(gridTab);
@@ -160,7 +172,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			isThereKey = false;
 			locationFields = null;
 
-			//Mapping details
+			//Mapping details 
 			mapCSVDetail(indxDetail, childs);
 
 			sortedtTabMapIndexes = null;
@@ -179,7 +191,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			m_isError = false;
 			// write the header
 			String rawHeader = mapReader.getUntokenizedRow();
-			errFileW.write(rawHeader + delimiter + ERROR_HEADER + "\n");
+			errFileW.write(rawHeader + delimiterChar + ERROR_HEADER + "\n");
 			data = new ArrayList<Map<String, Object>>();
 			rawData = new ArrayList<String>();
 
@@ -192,9 +204,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				logFile = new File(logFileName);
 				logFileW = new PrintWriter(logFile, charset.name());
 				// write the header
-				logFileW.write(rawHeader + delimiter + LOG_HEADER + "\n");
-				// no errors found - process header and then details
-				isMasterok = true;
+				logFileW.write(rawHeader + delimiterChar + LOG_HEADER + "\n");
+				// no errors found - process header and then details 
+				isMasterok = true; 
 				isDetailok = true;
 				error = false;
 				trx = null;
@@ -216,9 +228,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 
 					if (rawLine.charAt(0)==','){
 						isDetail=true;
-						//check out if master row comes empty
+						//check out if master row comes empty  
 						Map<String, Object> rowMap = data.get(idx);
-						for(int i=0; i < indxDetail-1; i++){
+						for(int i=0; i < indxDetail-1; i++){	
 							if(rowMap.get(header.get(i))!=null){
 								isDetail=false;
 								break;
@@ -227,15 +239,15 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					}
 
 					if (!isMasterok && isDetail){
-						rawLine = rawLine + delimiter + quoteChar + Msg.getMsg(Env.getCtx(),"NotProcessed") + quoteChar + "\n";
+						rawLine = rawLine + delimiterChar + quoteChar + Msg.getMsg(Env.getCtx(),"NotProcessed") + quoteChar + "\n";
 						rowsTmpResult.add(rawLine);
-						continue;
+						continue;		 
 					}else if(isMasterok && isDetail && !isDetailok){
-						rawLine = rawLine + delimiter + quoteChar + "Record not proccesed due to detail record failure" + quoteChar + "\n";
+						rawLine = rawLine + delimiterChar + quoteChar + "Record not processed due to detail record failure" + quoteChar + "\n";
 						rowsTmpResult.add(rawLine);
-						continue;
+						continue;	 
 					}
-
+					
 					if( isSingleTrx() && trx == null )
 						createTrx(gridTab);
 
@@ -250,9 +262,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					rowResult.append(recordResult);
 
 					// write
-					rawLine = rawLine + delimiter + quoteChar + rowResult.toString().replaceAll(delimiter, "") + quoteChar + "\n";
+					rawLine = rawLine + delimiterChar + quoteChar + rowResult.toString().replaceAll(delimiterChar, "") + quoteChar + "\n";
 					rowsTmpResult.add(rawLine);
-
+					
 					if( isSingleTrx() && isError() )
 						break;
 
@@ -287,13 +299,13 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			}
 			gridTab.dataRefreshAll();
 
-		}
+		}		
 		if (logFile != null)
 			return logFile;
 		else
 			return errFile;
 	}//fileImport
-
+	
 	private void initValues(){
 		mapReader = null;
 		errFile = null;
@@ -307,9 +319,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		isThereKey = false;
 		isThereDocAction = false;
 	}
-
+	
 	/**
-	 * Rollsback the trx and update the text in the file
+	 * Rollback trx and update the text in log file
 	 */
 	private void rollbackTrx(){
 		trx.rollback();
@@ -319,9 +331,10 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			logFileW.write(row);
 		}
 	}
-
+	
 	/**
-	 * Commit the trx and writes in the file
+	 * Commit trx and writes in log file
+	 * @return error message or null
 	 */
 	private String commitTrx(){
 		try {
@@ -334,16 +347,16 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			logFileW.write(row);
 		return null;
 	}
-
+	
 	/**
 	 * Map the header and returns the index where the detail starts
 	 * @param gridTab
-	 * @return
+	 * @return index where detail start
 	 */
 	private int mapCSVHeader(GridTab gridTab){
-
+		
 		int indxDetail = 0;
-
+		
 		for(int idx = 0; idx < header.size(); idx++) {
 			String headName = header.get(idx);
 
@@ -359,10 +372,10 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			if (headName.indexOf(">") > 0) {
 				if(idx==0){
 					throwAdempiereException(Msg.getMsg(Env.getCtx(),"WrongHeader", new Object[] {headName}));
-				}else if (headName.contains(MTable.getTableName(Env.getCtx(), MLocation.Table_ID)) && locationFields==null){
+				}else if (headName.contains(MTable.getTableName(Env.getCtx(), MLocation.Table_ID)) && locationFields==null){ 
 					locationFields = getSpecialMColumn(header,MTable.getTableName(Env.getCtx(), MLocation.Table_ID),idx);
 					for(GridField sField:locationFields){
-						readProcArray.add(getProccesorFromColumn(sField));
+						readProcArray.add(getProccesorFromColumn(sField)); 
 						indxDetail++;
 					}
 					idx=indxDetail;
@@ -376,45 +389,46 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				GridField field 	= gridTab.getField(columnName);
 
 				if (field == null)
-					throwAdempiereException(Msg.getMsg(Env.getCtx(), "FieldNotFound" , new Object[] {columnName}) );
+					throwAdempiereException(Msg.getMsg(Env.getCtx(), "FieldNotFoundInTab" , new Object[] {columnName, gridTab.getName()}) );
 				else if(isKeyColumn && !isThereKey)
 					isThereKey =true;
 				else if (!isThereDocAction &&
 						MColumn.get(Env.getCtx(),field.getAD_Column_ID()).getAD_Reference_Value_ID() == REFERENCE_DOCUMENTACTION )
 					isThereDocAction= true;
 
-				readProcArray.add(getProccesorFromColumn(field));
+				readProcArray.add(getProccesorFromColumn(field)); 
 				indxDetail++;
 			}
 		}
-
+		
 		return indxDetail;
-	}//mapFileHeader
-
+	}//mapCSVHeader
+	
 	/**
 	 * Map details fields in the csv file
 	 * @param indxDetail
+	 * @param childs
 	 */
 	private void mapCSVDetail(int indxDetail, List<GridTab> childs){
 
 		String  childTableName = null;
 		GridTab currentDetailTab = null;
 
-		for(int idx = indxDetail; idx < header.size(); idx++) {
+		for(int idx = indxDetail; idx < header.size(); idx++) {	
 			String detailName = header.get(idx);
 			if(detailName!=null && detailName.indexOf(">") > 0){
-				childTableName = detailName.substring(0,detailName.indexOf(">"));
-				if (currentDetailTab==null ||
+				childTableName = detailName.substring(0,detailName.indexOf(">"));  
+				if (currentDetailTab==null || 
 						(currentDetailTab!=null && !childTableName.equals(currentDetailTab.getTableName()))){
 
-					if(currentDetailTab!=null){
-						//check out key per Tab
+					if(currentDetailTab!=null){ 
+						//check out key per Tab   
 						if(isUpdateOrMergeMode() && !isThereKey){
 							throwAdempiereException(currentDetailTab.getTableName()+": "+Msg.getMsg(Env.getCtx(), "NoKeyFound"));
 						}else{
-							tabMapIndexes.put(currentDetailTab,idx-1);
-							isThereKey =false;
-						}
+							tabMapIndexes.put(currentDetailTab,idx-1); 	
+							isThereKey =false; 
+						} 
 					}
 
 					for(GridTab detail: childs){
@@ -422,17 +436,17 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 							currentDetailTab = detail;
 							break;
 						}
-					}
+					} 
 				}
 
-				if(currentDetailTab == null)
+				if(currentDetailTab == null) 
 					throwAdempiereException(Msg.getMsg(Env.getCtx(),"NoChildTab",new Object[] {childTableName}));
 
 				String columnName = detailName;
 				if (columnName.contains(MTable.getTableName(Env.getCtx(), MLocation.Table_ID)) && locationFields==null){
 					locationFields = getSpecialMColumn(header,MTable.getTableName(Env.getCtx(), MLocation.Table_ID),idx);
 					for(GridField sField:locationFields){
-						readProcArray.add(getProccesorFromColumn(sField));
+						readProcArray.add(getProccesorFromColumn(sField)); 
 						idx++;
 					}
 					idx--;
@@ -447,8 +461,8 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					else if(isKeyColumn && !isThereKey)
 						isThereKey =true;
 
-					readProcArray.add(getProccesorFromColumn(field));
-				}
+					readProcArray.add(getProccesorFromColumn(field));  
+				}				   
 			}else
 				throwAdempiereException(Msg.getMsg(Env.getCtx(),"WrongDetailName",new Object[] {" col("+idx+") ",detailName}));
 
@@ -457,20 +471,20 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			if(isUpdateOrMergeMode() && !isThereKey)
 				throwAdempiereException(currentDetailTab.getTableName()+": "+Msg.getMsg(Env.getCtx(), "NoKeyFound"));
 
-			tabMapIndexes.put(currentDetailTab,header.size()-1);
+			tabMapIndexes.put(currentDetailTab,header.size()-1); 	   
 		}
 
-	}//mapFileDetail
-
+	}//mapCSVDetail
+	
 	/**
-	 * Pre process te file lookign for errors
+	 * Pre-process the input csv file and look for errors
 	 * @param processUI
 	 * @param gridTab
 	 * @param indxDetail
 	 */
 	private void preProcess(IProcessUI processUI, GridTab gridTab, int indxDetail){
 
-		CellProcessor[] processors = readProcArray.toArray(new CellProcessor[readProcArray.size()]);
+		CellProcessor[] processors = readProcArray.toArray(new CellProcessor[readProcArray.size()]);	
 		long lastOutput = new Date().getTime();
 
 		while (true) {
@@ -480,10 +494,10 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			}
 
 			Map<String, Object> map = null;
-			boolean isLineError = false;
+			boolean isLineError = false; 
 			StringBuilder errMsg = new StringBuilder();
 
-			try {
+			try {			
 				// devCoffee #6141 - IDEMPIERE-3832
 				String[] hdrs = new String[header.size()];
 				header.toArray(hdrs);
@@ -502,15 +516,15 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					break;
 
 				//Re-order information coming from map
-				List<Object> tmpRow = getOrderedRowFromMap(header,map);
+				List<Object> tmpRow = getOrderedRowFromMap(header,map);	  					
 				//read master and detail
 				int initIndx= 0;
 				for(Map.Entry<GridTab, Integer> tabIndex : sortedtTabMapIndexes.entrySet()) {
-					GridTab tmpGrid = tabIndex.getKey();
+					GridTab tmpGrid = tabIndex.getKey(); 						
 					if(gridTab.equals(tmpGrid) && tmpRow.get(0)==null){
 						initIndx = indxDetail;
-						continue;
-					}
+						continue;	
+					}						
 					int endindx = tabIndex.getValue();
 					StringBuilder lineError = preprocessRow (tmpGrid,header,tmpRow,initIndx,endindx);
 					if( lineError!= null && lineError.length() > 0 ){
@@ -529,11 +543,11 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				rawData.add(rawLine);
 			}
 			// write
-			rawLine = rawLine + delimiter + quoteChar + errMsg.toString().replaceAll(quoteChar, "") + quoteChar + "\n";
+			rawLine = rawLine + delimiterChar + quoteChar + errMsg.toString().replaceAll(quoteChar, "") + quoteChar + "\n";
 			errFileW.write(rawLine);
 		}
 	}//preProcess
-
+	
 	/**
 	 * Manage the trx
 	 * if the trx exists - commits when no errors, rollback when errors.
@@ -541,45 +555,43 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	 * @param childs
 	 */
 	private void manageMasterTrx(GridTab gridTab, List<GridTab> childs){
-
-		if( trx != null ){
+		if (trx != null) {
 			try {
-				if( isError() ) {
+				if (isError()) {
 					gridTab.dataDelete();
 					rollbackTrx();
 					setError(false);
-				}else {
-
+				} else {
 					boolean commit = false;
-					if( isThereDocAction ){
-
+					if (isThereDocAction) {
+	
 						boolean isError = false;
-						int AD_Process_ID = MColumn.get(Env.getCtx(), gridTab.getField("DocAction").getAD_Column_ID()).getAD_Process_ID();
-
-						if( AD_Process_ID > 0 ){
-							String docResult = processDocAction(masterRecord, AD_Process_ID);
-
-							if(docResult.contains("error"))
-								isError = true;
-
-							rowsTmpResult.set(0,rowsTmpResult.get(0).replace(quoteChar + "\n",docResult + quoteChar + "\n"));
-						}else {
-							throwAdempiereException("No Process found for document action.");
+						int AD_Process_ID = MColumn.get(Env.getCtx(), gridTab.getField("DocAction").getAD_Column_ID()).getAD_Process_ID(); 
+	
+						if (AD_Process_ID > 0){
+							String docResult = processDocAction(masterRecord, AD_Process_ID); 
+	
+							if (docResult.contains("error")) 
+								isError = true; 
+	
+							rowsTmpResult.set(0,rowsTmpResult.get(0).replace(quoteChar + "\n",docResult + quoteChar + "\n")); 
+						} else {
+							throwAdempiereException("No Process found for document action.");	  
 						}
-
-						if( isError ){
+	
+						if (isError){
 							gridTab.dataDelete();
 							rollbackTrx();
-						}else{
+						} else {
 							commit = true;
 						}
-					}else{
+					} else {
 						commit = true;
 					}
 					if (commit) {
 						String commitResult = commitTrx();
 						if (isError()) {
-							rowsTmpResult.set(0,rowsTmpResult.get(0).replace(quoteChar + "\n",commitResult + quoteChar + "\n"));
+							rowsTmpResult.set(0,rowsTmpResult.get(0).replace(quoteChar + "\n",commitResult + quoteChar + "\n")); 
 							gridTab.dataDelete();
 							rollbackTrx();
 						}
@@ -592,36 +604,36 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		}
 
 	}//manageMasterTrx
-
+	
 	/**
 	 * Create a new Trx with a random Name
 	 * @param gridTab
 	 */
 	private void createTrx(GridTab gridTab){
 		trxName = Trx.createTrxName("CSVImport");
-		gridTab.getTableModel().setImportingMode(true,trxName);
+		gridTab.getTableModel().setImportingMode(true,trxName);	
 		trx = Trx.get(trxName,true);
 		masterRecord = null;
 		rowsTmpResult.clear();
 		isMasterok = true;
 		isDetailok = true;
-
+		
 	} //createTrx
-
+	
 	/**
-	 * Process the record for each row
-	 * First insert the master tab - if no errors found proceeds with the details tabs when existing
-	 * Stops at the first error found in the row
+	 * Process the record for each row.<br/>
+	 * First insert the master tab - if no errors found proceeds with the details tabs when existing.<br/>
+	 * Stops at the first error found in the row.
 	 * @param importMode
 	 * @param gridTab
 	 * @param indxDetail
 	 * @param isDetail
 	 * @param idx
 	 * @param rowResult
-	 * @return
+	 * @return message or empty string
 	 */
 	private String processRecord(String importMode, GridTab gridTab, int indxDetail, boolean isDetail, int idx, StringBuilder rowResult, List<GridTab> childs){
-
+		
 		String logMsg = null;
 		GridTab currentGridTab = null;
 		int currentColumn = 0;
@@ -630,20 +642,20 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 
 			for( Map.Entry<GridTab, Integer> tabIndex : sortedtTabMapIndexes.entrySet() ) {
 
-				currentGridTab = tabIndex.getKey();
+				currentGridTab = tabIndex.getKey(); 			
 
 				if( isDetail && gridTab.equals(currentGridTab) ){
 					currentColumn = indxDetail;
-					continue;
+					continue;			
 				}
 
 				//Assign master trx to its children
 				if( !gridTab.equals(currentGridTab) ){
-					currentGridTab.getTableModel().setImportingMode(true,trxName);
+					currentGridTab.getTableModel().setImportingMode(true,trxName);	
 					isDetail=true;
 				}
 
-				int j = tabIndex.getValue();
+				int j = tabIndex.getValue();	
 				logMsg = areValidKeysAndColumns(currentGridTab,data.get(idx),header,currentColumn,j,masterRecord,trx);
 
 				if (logMsg == null){
@@ -662,19 +674,19 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 								}
 							}
 						}
-					}
+					} 
 
 					if( logMsg==null )
 						logMsg = proccessRow(currentGridTab,header,data.get(idx),currentColumn,j,masterRecord,trx);
 
 					currentColumn = j + 1;
 					if( !(logMsg == null) ){
-						m_import_mode = importMode;
-						//Ignore row since there is no data
+						m_import_mode = importMode;   
+						//Ignore row since there is no data 
 						if("NO_DATA_TO_IMPORT".equals(logMsg)){
 							logMsg = "";
 							continue;
-						}else
+						}else 
 							setError(true);
 					}
 
@@ -684,9 +696,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				}
 
 				if ( !isError() ) {
-					if ( currentGridTab.dataSave(false) ){
-						PO po = currentGridTab.getTableModel().getPO(currentGridTab.getCurrentRow());
-						//Keep master record for details validation
+					if ( currentGridTab.dataSave(false) ){						
+						PO po = currentGridTab.getTableModel().getPO(currentGridTab.getCurrentRow());		
+						//Keep master record for details validation 
 						if(currentGridTab.equals(gridTab))
 							masterRecord = po;
 
@@ -701,13 +713,13 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 								}
 							}
 						} else {
-							logMsg = Msg.getMsg(Env.getCtx(), "Updated") + " " + po.toString();
+							logMsg = Msg.getMsg(Env.getCtx(), "Updated") + " " + po.toString(); 
 							if( currentGridTab.equals(gridTab) && sortedtTabMapIndexes.size()>1 )
-								currentGridTab.dataRefresh(true);
+								currentGridTab.dataRefresh(true); 
 						}
 					} else {
 						ValueNamePair ppE = CLogger.retrieveWarning();
-						if (ppE==null)
+						if (ppE==null)   
 							ppE = CLogger.retrieveError();
 
 						String info = null;
@@ -738,7 +750,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 							break;
 						}
 					}
-
+					
 					rowResult.append( "<" + currentGridTab.getTableName() + ">: " );
 					rowResult.append(logMsg);
 					rowResult.append(" / ");
@@ -750,19 +762,19 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					rowResult.append(logMsg);
 					rowResult.append(" / ");
 
-					//Master Failed, thus details cannot be imported
+					//Master Failed, thus details cannot be imported 
 					if( currentGridTab.equals(gridTab) && masterRecord == null ){
 						isMasterok = false;
 						break;
 					}
-
+					
 					//Detail failed
 					if( !currentGridTab.equals(gridTab) && masterRecord != null ){
 						isDetailok = false;
 						break;
 					}
-				}
-				m_import_mode = importMode;
+				}	
+				m_import_mode = importMode;	
 			}
 		} catch (Exception e) {
 
@@ -773,7 +785,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 
 			setError(true);
 
-			//Master Failed, thus details cannot be imported
+			//Master Failed, thus details cannot be imported 
 			if( currentGridTab.equals(gridTab) && masterRecord == null )
 				isMasterok = false;
 
@@ -783,22 +795,27 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		} finally {
 			m_import_mode = importMode;
 		}
-
+		
 		return rowResult.toString();
 
 	}//processRecord
-
+	
 	private void throwAdempiereException(String msg){
 	    throw new AdempiereException(msg);
 	}
-
+	
+	/**
+	 * @param currentRecord
+	 * @param total
+	 * @return status text
+	 */
 	private String refreshImportStatus(int currentRecord, int total){
 		int percent = currentRecord * 100;
 		if (total > 0)
 			percent = percent / total;
 		else
 			percent = 0;
-
+		
 		if( percent == 0 ){
 			Object[] args = new Object[] {currentRecord};
 			return Msg.getMsg(Env.getCtx(), "PreProcessingCVSProgress", args);
@@ -808,28 +825,34 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		}
 	}
 
+	/**
+	 * 
+	 * @param document
+	 * @param AD_Process_ID
+	 * @return message
+	 */
 	private String processDocAction(PO document, int AD_Process_ID){
-		int AD_Workflow_ID = MProcess.get(Env.getCtx(),AD_Process_ID).getAD_Workflow_ID();
-
+		int AD_Workflow_ID = MProcess.get(Env.getCtx(),AD_Process_ID).getAD_Workflow_ID();  
+		
 		if (AD_Workflow_ID > 0){
 			ProcessInfo wfProcess = new ProcessInfo (document.get_TrxName(),AD_Process_ID,document.get_Table_ID(),document.get_ID());
-			wfProcess.setTransactionName(document.get_TrxName());
+			wfProcess.setTransactionName(document.get_TrxName());  
 			MWFProcess wdPro = ProcessUtil.startWorkFlow(Env.getCtx(),wfProcess, AD_Workflow_ID);
-			if(wdPro == null)
-			   return "Document action could not be proccesed";
+			if(wdPro == null) 
+			   return "Document action could not be processed"; 
 			else if (wfProcess.isError())
 			   return "Document action error: "+wfProcess.getSummary();
-			else
+			else  	
 			   return "Document action processed ["+wfProcess.getSummary()+"]";
 		}else {
-		   return "No workflow was found";
+		   return "No workflow was found";	
 		}
 	}
-
+	
 	private boolean isInsertMode() {
 		return IMPORT_MODE_INSERT.equals(m_import_mode);
 	}
-
+	
 	private boolean isUpdateMode() {
 		return IMPORT_MODE_UPDATE.equals(m_import_mode);
 	}
@@ -842,8 +865,15 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		return isUpdateMode() || isMergeMode();
 	}
 
-	private String getColumnName(boolean isKey ,boolean isForeing ,boolean isDetail , String headName){
-
+	/**
+	 * @param isKey
+	 * @param isForeing
+	 * @param isDetail
+	 * @param headName
+	 * @return column name
+	 */
+	private String getColumnName(boolean isKey ,boolean isForeing ,boolean isDetail , String headName){		
+		
 		if(isKey){
 		   if(headName.indexOf("/") > 0){
 			  if(headName.endsWith("K"))
@@ -854,12 +884,12 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			  }
 			  else
 				 throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ColumnKey")+" "+headName);
-		   }
+		   } 
 		}
-
+		
 		if(isForeing)
-		   headName = headName.substring(0, headName.indexOf("["));
-
+		   headName = headName.substring(0, headName.indexOf("["));		
+		
         if(isDetail){
            headName = headName.substring(headName.indexOf(">")+ 1,headName.length());
            if (headName.indexOf(">")>0)
@@ -867,12 +897,19 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
         }
         return headName;
 	}
-
+	
+	/**
+	 * Get extra fields for Location display type
+	 * @param header
+	 * @param tableName
+	 * @param idx
+	 * @return Extra fields for Location display type
+	 */
 	private List<GridField> getSpecialMColumn(List<String> header, String tableName, int idx) {
-
-		List<GridField> lsField = new ArrayList<GridField>();
+		
+		List<GridField> lsField = new ArrayList<GridField>();		
 		if (tableName.equals(MTable.getTableName(Env.getCtx(), MLocation.Table_ID))){
-			GridWindowVO gWindowVO = Env.getMWindowVO(0,121,0);
+			GridWindowVO gWindowVO = Env.getMWindowVO(0,121,0); 
 			GridWindow m_mWindow = new GridWindow (gWindowVO);
 			GridTab m_mTab = m_mWindow.getTab(0);
 			m_mWindow.initTab(0);
@@ -880,11 +917,11 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				if (header.get(i).contains(MTable.getTableName(Env.getCtx(), MLocation.Table_ID))) {
 					boolean isKeyColumn = header.get(i).indexOf("/") > 0;
 					boolean isForeing 	= header.get(i).indexOf("[") > 0 && header.get(i).indexOf("]")>0;
-					String  columnName  = getColumnName (isKeyColumn,isForeing,true,header.get(i));
+					String  columnName  = getColumnName (isKeyColumn,isForeing,true,header.get(i)); 
 					GridField field  = m_mTab.getField(columnName);
 					if (field == null)
 						throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FieldNotFound", new Object[] {header.get(i)}));
-
+					
 					lsField.add(field);
 				}else
 					break;
@@ -893,28 +930,43 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		return lsField;
 	}
 
+	/**
+	 * Get column value from map, order by header 
+	 * @param header
+	 * @param map
+	 * @return Value list for row
+	 */
 	private List<Object> getOrderedRowFromMap (List<String> header,Map<String, Object> map){
-		List<Object> tmpRow= new ArrayList<Object>();
+		List<Object> tmpRow= new ArrayList<Object>();  
 		for (int i = 0; i < header.size(); i++)
 			tmpRow.add(null);
-
+		
 		for(Map.Entry<String, Object> record : map.entrySet()) {
 			String Column =record.getKey();
 			Object value  = record.getValue();
 		    int toIndx= header.indexOf(Column);
 		    tmpRow.set(toIndx, value);
-        }
-		return tmpRow;
+        }	
+		return tmpRow;	
 	}
-
+	
+	/**
+	 * Pre-process tmpRow and looks for error
+	 * @param gridTab
+	 * @param header
+	 * @param tmpRow
+	 * @param startindx
+	 * @param endindx
+	 * @return error message or null
+	 */
 	private StringBuilder preprocessRow (GridTab gridTab,List<String> header,List<Object> tmpRow,int startindx,int endindx){
-
+		
 	    boolean isEmptyRow = true;
 	    boolean isAddressValidated = false ;
 	    StringBuilder  mandatoryColumns = new StringBuilder();
 	    for(int i = startindx;  i < endindx +1; i++){
-			String columnName = header.get(i);
-			Object value = tmpRow.get(i);
+			String columnName = header.get(i);	
+			Object value = tmpRow.get(i); 	
 			//Validate Address
 			if (!"C_Location".equals(gridTab.getTableName()))
 			{
@@ -924,37 +976,37 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				   specialColumns = validateSpecialFields(gridTab,header,tmpRow,i,"C_Location_ID");
 				   isAddressValidated = true;
 				   if(specialColumns==null)
-					  continue;
+					  continue;   
 				   else
-					  return specialColumns;
+					  return specialColumns;     
 				}else if (header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)) && isAddressValidated){
 					continue;
 				}
 			}
-
+			
 			if(value!=null)
 			   isEmptyRow=false;
-
+			
 			if (log.isLoggable(Level.FINE)) log.fine("Setting " + columnName + " to " + value);
 
 			boolean isKeyColumn = columnName.indexOf("/") > 0;
 			boolean isForeing 	= columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
 			boolean isDetail    = columnName.indexOf(">") > 0;
 			columnName = getColumnName(isKeyColumn,isForeing,isDetail,columnName);
-			String foreignColumn=null;
-			if(isForeing)
+			String foreignColumn=null; 
+			if(isForeing) 
 			   foreignColumn = header.get(i).substring(header.get(i).indexOf("[")+1, header.get(i).indexOf("]"));
-
-			GridField field=gridTab.getField(columnName);
-			if (field == null)
+		
+			GridField field=gridTab.getField(columnName);					
+			if (field == null) 
 				return new StringBuilder(Msg.getMsg(Env.getCtx(), "NotAWindowField" , new Object[] {header.get(i)}));
 
 			if (field.isParentValue())
 				continue;
-
-			if (!(field.isDisplayed() || field.isDisplayedGrid()))
+			
+			if (!(field.isDisplayed() || field.isDisplayedGrid())) 
 				return new StringBuilder(Msg.getMsg(Env.getCtx(), "FieldNotDisplayed",new Object[] {header.get(i)}));
-
+			
 			MColumn column = MColumn.get(Env.getCtx(), field.getAD_Column_ID());
 			boolean isWrongValueForMandatory = false;
 			if (field.isMandatory(false) || column.isMandatory()){
@@ -964,23 +1016,23 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					isWrongValueForMandatory = true;
 				}
 			}
-
-			if(isWrongValueForMandatory){
+			
+			if(isWrongValueForMandatory){ 
 				mandatoryColumns.append(" / ");
 				mandatoryColumns.append(header.get(i));
-			}
-
+			} 
+			
 			if (isForeing && value != null && !"(null)".equals(value)){
 				String foreignTable = column.getReferenceTableName();
 				String idS = null;
 				int id = -1;
 				if("AD_Ref_List".equals(foreignTable))
 				   idS= resolveForeignList(column,foreignColumn,value,null);
-				else
+				else 
 				   id = resolveForeign(foreignTable,foreignColumn,value,field,null);
-
-				if(idS == null && id < 0){
-				   //it could be that record still doesn't exist if import mode is inserting or merging
+				
+				if(idS == null && id < 0){	
+				   //it could be that record still doesn't exist if import mode is inserting or merging   	
 				   if(isUpdateMode())
 				     return new StringBuilder(Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value}));
 				}
@@ -988,91 +1040,111 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				// TODO: we could validate length of string or min/max
 			}
 		}
-
-		if(mandatoryColumns.length()>1 && !isEmptyRow)
+	    
+		if(mandatoryColumns.length()>1 && !isEmptyRow) 
 		   return new StringBuilder(Msg.getMsg(Env.getCtx(), "FillMandatory")+" "+mandatoryColumns);
 		else
-		   return null;
+		   return null;		
 	}
-
+	
+	/**
+	 * Validate extra fields for DisplayType.Location.
+	 * @param gridTab
+	 * @param header
+	 * @param tmpRow
+	 * @param i
+	 * @param sField
+	 * @return error message or null
+	 */
 	private StringBuilder validateSpecialFields(GridTab gridTab,List<String> header,List<Object> tmpRow,int i,String sField){
 
 	   GridField field = gridTab.getField(sField);
-	   if(field == null)
+	   if(field == null) 
 		  return new StringBuilder(Msg.getMsg(Env.getCtx(), "NotAWindowField",new Object[] {sField}));
-
-	   if(!(field.isDisplayed() || field.isDisplayedGrid()))
+	    
+	   if(!(field.isDisplayed() || field.isDisplayedGrid())) 
 		  return new StringBuilder(Msg.getMsg(Env.getCtx(), "FieldNotDisplayed",new Object[] {field.getColumnName()}));
-
+	   
 	   if (header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)))
 	   {
-		   //without Country any address would be invalid
+		   //without Country any address would be invalid 
 		   boolean thereIsCountry = false ;
 		   boolean isEmptyRow = true;
 		   for(int j= i;j< header.size();j++){
 			   if(!header.get(j).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)))
 			       break;
-			    //validate if location contains its parent table
+			    //validate if location contains its parent table 
 				if(!header.get(j).contains(gridTab.getTableName()))
 				    return new StringBuilder().append("Invalid location column's name, it must contain its parent table: ")
 				    		   .append(gridTab.getTableName().toString())
 				    		   .append("[").append(header.get(j)).append("]");
-
-			   String columnName = header.get(j);
-			   Object value = tmpRow.get(j);
-			   if(value!=null){
+				
+			   String columnName = header.get(j);	
+			   Object value = tmpRow.get(j);   
+			   if(value!=null){ 
 				  if(columnName.contains("C_Country_ID"))
 					 thereIsCountry= true;
 			   }else
 				  continue;
-
+			   			    
 			   boolean isKeyColumn = columnName.indexOf("/") > 0;
 			   boolean isForeing   = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
 			   boolean isDetail    = columnName.indexOf(">") > 0;
-			   String  foreignColumn = null;
+			   String  foreignColumn = null; 
 			   columnName = getColumnName(isKeyColumn,isForeing,isDetail,columnName);
-			   if(isForeing)
+			   if(isForeing) 
 				  foreignColumn = header.get(j).substring(header.get(j).indexOf("[")+1, header.get(j).indexOf("]"));
-
-			   if(isForeing && !"(null)".equals(value)){
+			   
+			   if(isForeing && !"(null)".equals(value)){ 
 			      String foreignTable = columnName.substring(0,columnName.length()-3);
 			      int id = resolveForeign(foreignTable,foreignColumn,value,field,null);
 				  if (id < 0)
-					  return new StringBuilder(Msg.getMsg(Env.getCtx(), id==-2?"ForeignMultipleResolved":"ForeignNotResolved" ,new Object[]{header.get(j),value}));
-			   }
+					  return new StringBuilder(Msg.getMsg(Env.getCtx(), id==-2?"ForeignMultipleResolved":"ForeignNotResolved" ,new Object[]{header.get(j),value}));   
+			   }	   
 			   isEmptyRow=false;
-	      }
-		  MColumn column = MColumn.get(Env.getCtx(), field.getAD_Column_ID());
-		  if((field.isMandatory(true) || column.isMandatory()) && !isEmptyRow && !thereIsCountry)
+	      }	   
+		  MColumn column = MColumn.get(Env.getCtx(), field.getAD_Column_ID());		
+		  if((field.isMandatory(true) || column.isMandatory()) && !isEmptyRow && !thereIsCountry) 
 			  return new StringBuilder(Msg.getMsg(Env.getCtx(), "FillMandatory")+" "+field.getColumnName()+"["+"C_Country_ID]");
 	   }
 	   return null;
-	}
-
+	}	
+	
+	/**
+	 * Process row for import
+	 * @param gridTab
+	 * @param header
+	 * @param map
+	 * @param startindx
+	 * @param endindx
+	 * @param masterRecord
+	 * @param trx
+	 * @return error message or null
+	 */
 	private String proccessRow(GridTab gridTab,List<String> header, Map<String, Object> map,int startindx,int endindx,PO masterRecord,Trx trx){
-
-		String logMsg = null;
+		
+		String logMsg = null;	
 		boolean isThereRow = false;
 		MLocation address = null;
-		List<String> parentColumns = new ArrayList<String>();
+		List<String> parentColumns = new ArrayList<String>(); 
 		for(int i = startindx ; i < endindx + 1 ; i++){
 			String columnName = header.get(i);
 			Object value = map.get(header.get(i));
 			boolean isDetail = false;
 			if(value == null)
 			   continue;
-
+				
 			if (columnName.endsWith("_ID") && "0".equals(value) && ! MTable.isZeroIDTable(gridTab.getTableName()))
 			   continue;
-
+				
 			boolean isKeyColumn= columnName.indexOf("/") > 0;
 			boolean isForeing  = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
 			isDetail   = columnName.indexOf(">") > 0;
 			columnName = getColumnName(isKeyColumn,isForeing,isDetail,columnName);
 			String foreignColumn = null;
 			Object setValue = null;
-
-			if(isForeing)
+			
+			if(isForeing) 
 			   foreignColumn = header.get(i).substring(header.get(i).indexOf("[")+1,header.get(i).indexOf("]"));
 			if(!isForeing && !isKeyColumn && ("AD_Language".equals(columnName) || "EntityType".equals(columnName))) {
 				setValue = value;
@@ -1081,14 +1153,14 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			    if(logMsg!=null && logMsg.equals(""))
 			    	logMsg= null;
 			}else if(!"C_Location".equals(gridTab.getTableName()) && header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID))){
-
+		    
 				if(address == null){
 				    if(isInsertMode()){
-					   address = new MLocation (Env.getCtx(),0,trx.getTrxName());
+					   address = new MLocation (Env.getCtx(),0,trx.getTrxName());	   
 				    }else{
 				       Object location = gridTab.getValue("C_Location_ID")==null?0:gridTab.getValue("C_Location_ID").toString();
-					   int C_Location_ID = Integer.parseInt(location.toString());
-					   address =  new MLocation (Env.getCtx(),C_Location_ID,trx.getTrxName());
+					   int C_Location_ID = Integer.parseInt(location.toString());  
+					   address =  new MLocation (Env.getCtx(),C_Location_ID,trx.getTrxName());	
 				    }
 				}
 				GridField field = gridTab.getField(columnName);
@@ -1097,23 +1169,23 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					  String foreignTable = columnName.substring(0,columnName.length()-3);
 					  setValue = resolveForeign(foreignTable,foreignColumn,value,field,trx);
 					  if("C_City".equals(foreignTable))
-						 address.setCity(value.toString());
+						 address.setCity(value.toString());  
 					}else
-					  setValue = value;
+					  setValue = value;			
 				}
 				address.set_ValueOfColumn(columnName,setValue);
 			}else{
 				if(isKeyColumn && isUpdateMode())
 				   continue;
-
+				
 				GridField field = gridTab.getField(columnName);
 				if (field.isParentValue()){
-
+					
 					if("(null)".equals(value.toString())){
-					   logMsg = Msg.getMsg(Env.getCtx(),"NoParentDelete", new Object[] {header.get(i)});
+					   logMsg = Msg.getMsg(Env.getCtx(),"NoParentDelete", new Object[] {header.get(i)}); 
 					   break;
 					}
-
+					
 					if(isForeing && masterRecord!=null){
 					   if (masterRecord.get_Value(foreignColumn).toString().equals(value)){
 						   logMsg = gridTab.setValue(field,masterRecord.get_ID());
@@ -1121,68 +1193,68 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 							  logMsg= null;
 						   else break;
 					   }else{
-						   if(value!=null){
+						   if(value!=null){					      
 						      logMsg = header.get(i)+" - "+Msg.getMsg(Env.getCtx(),"DiffParentValue", new Object[] {masterRecord.get_Value(foreignColumn).toString(),value});
 						      break;
-						   }
+						   }   
 					   }
 					}else if(isForeing && masterRecord==null && gridTab.getTabLevel()>0){
 						Object master =gridTab.getParentTab().getValue(foreignColumn);
 						if (master!=null && value!=null && !master.toString().equals(value)){
 							logMsg = header.get(i)+" - "+Msg.getMsg(Env.getCtx(),"DiffParentValue", new Object[] {master.toString(),value});
 							break;
-						}
+						}			
 					}else if (masterRecord==null && isDetail){
 						MColumn column = MColumn.get(Env.getCtx(),field.getAD_Column_ID());
 						String foreignTable = column.getReferenceTableName();
 						String idS = null;
 						int id = -1;
-
-						if ("AD_Ref_List".equals(foreignTable))
+						
+						if ("AD_Ref_List".equals(foreignTable)) 
 							idS= resolveForeignList(column, foreignColumn, value,trx);
-						else
+						else 
 							id = resolveForeign(foreignTable,foreignColumn,value, field, trx);
-
-						if(idS == null && id < 0)
+						
+						if(idS == null && id < 0)	
 						   return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
-
+						
 						if(id >= 0)
 						   logMsg = gridTab.setValue(field,id);
 						else if (idS != null)
 						   logMsg = gridTab.setValue(field,idS);
-
+						
 						if(logMsg !=null && logMsg.equals(""))
 						   logMsg = null;
 						else break;
 					}
-					parentColumns.add(columnName);
+					parentColumns.add(columnName);	
 					continue;
 				}
-				//this field should not be inserted or updated
-				if(!field.isDisplayed(true))
+				//this field should not be inserted or updated 
+				if(!field.isDisplayed(true)) 
 					continue;
-
+					
 				if("(null)".equals(value.toString().trim())){
-				   logMsg = gridTab.setValue(field,null);
+				   logMsg = gridTab.setValue(field,null);	
 				   if(logMsg.equals(""))
 					  logMsg= null;
 				   else break;
 				}else{
-
+				   
 				   MColumn column = MColumn.get(Env.getCtx(),field.getAD_Column_ID());
 				   if (isForeing){
 						String foreignTable = column.getReferenceTableName();
 						if ("AD_Ref_List".equals(foreignTable)) {
 							String idS = resolveForeignList(column, foreignColumn, value,trx);
-							if(idS == null)
+							if(idS == null)	
 							   return Msg.getMsg(Env.getCtx(),"ForeignNotResolved",new Object[]{header.get(i),value});
-
+							
 							setValue = idS;
 							isThereRow =true;
 						} else {
-
+							
 							int id = resolveForeign(foreignTable, foreignColumn, value,field,trx);
-							if(id < 0)
+							if(id < 0)	
 								return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
 
 							setValue = id;
@@ -1199,35 +1271,35 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					   if(value != null) {
 						  if(value instanceof java.util.Date)
 							 value = new Timestamp(((java.util.Date)value).getTime());
-
+							
 						  if(DisplayType.Payment == field.getDisplayType()){
-   							 String oldValue = value.toString();
+   							 String oldValue = value.toString(); 
 							 for(ValueNamePair pList: MRefList.getList(Env.getCtx(),REFERENCE_PAYMENTRULE,false)){
 								 if(pList.getName().equals(oldValue.toString())){
-									oldValue = pList.getValue();
+									oldValue = pList.getValue(); 
 									break;
 								 }
 							 }
-							 if(!value.toString().equals(oldValue))
+							 if(!value.toString().equals(oldValue)) 
 							     value = oldValue;
 							 else
-								 return Msg.getMsg(Env.getCtx(),"ForeignNotResolved",new Object[]{header.get(i),value});
+								 return Msg.getMsg(Env.getCtx(),"ForeignNotResolved",new Object[]{header.get(i),value}); 
 						  }else if(DisplayType.Button == field.getDisplayType()){
 							 if(column.getAD_Reference_Value_ID()== REFERENCE_DOCUMENTACTION){
-								String oldValue = value.toString();
+								String oldValue = value.toString(); 
 							    for(ValueNamePair pList: MRefList.getList(Env.getCtx(),REFERENCE_DOCUMENTACTION,false)){
 								    if(pList.getName().equals(oldValue.toString())){
-									   oldValue = pList.getValue();
+									   oldValue = pList.getValue(); 
 									   break;
 									}
 								}
-								if(!value.toString().equals(oldValue))
+								if(!value.toString().equals(oldValue)) 
 									value = oldValue;
 							    else
-								    return Msg.getMsg(Env.getCtx(),"ForeignNotResolved",new Object[]{header.get(i),value});
+								    return Msg.getMsg(Env.getCtx(),"ForeignNotResolved",new Object[]{header.get(i),value});  
 							 }else{
-								 return Msg.getMsg(Env.getCtx(),"Invalid") + " Column ["+column.getColumnName()+"]";
-							 }
+								 return Msg.getMsg(Env.getCtx(),"Invalid") + " Column ["+column.getColumnName()+"]";   
+							 } 
 						  }  else if (DisplayType.isNumeric(field.getDisplayType()) || DisplayType.isID(field.getDisplayType())) {
 							  if (columnName.endsWith("_ID")) {
 								  if (!(value instanceof Integer)) {
@@ -1243,7 +1315,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 						  isThereRow =true;
 					   }
 				   }
-
+									   
 				   if(setValue != null) {
 					  Object oldValue = gridTab.getValue(field);
 					  if (isValueChanged(oldValue, setValue)) {
@@ -1255,34 +1327,34 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 						  logMsg = "";
 					  }
 				   }
-
+				   
 				   if(logMsg!=null && logMsg.equals(""))
 					  logMsg= null;
 				   else break;
 			   }
-			}
+			}	
 		}
-
-		if(address!=null){
+			 
+		if(address!=null){  
 			if (!address.save()){
 			    logMsg = CLogger.retrieveError()+" Address : "+address;
 			}else {
 				logMsg = gridTab.setValue("C_Location_ID",address.getC_Location_ID());
 				if(logMsg.equals(""))
 				   logMsg= null;
-				else
+				else 
 				   return logMsg;
-
-				isThereRow =true;
+				
+				isThereRow =true;	
 			}
-		}
-
+		}	
+	    
 		boolean checkParentKey = parentColumns.size()!=gridTab.getParentColumnNames().size();
-		if(isThereRow && logMsg==null && masterRecord!=null && checkParentKey){
+		if(isThereRow && logMsg==null && (masterRecord!=null||gridTab.getParentTab()!=null) && checkParentKey){
 			for(String linkColumn : gridTab.getParentColumnNames()){
 				String columnName = linkColumn;
-				Object setValue   = masterRecord.get_Value(linkColumn);
-		        //resolve missing key
+				Object setValue   = masterRecord != null ? masterRecord.get_Value(linkColumn) : gridTab.getParentTab().getValue(linkColumn);
+		        //resolve missing key 
 				if(setValue==null){
 			       columnName = null;
 		           for(int j = startindx;j < endindx + 1;j++){
@@ -1293,11 +1365,11 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		        	   }
 		           }
 		           if( columnName!=null ){
-					   String foreignColumn = null;
+					   String foreignColumn = null;						
 					   boolean isForeing = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
-					   if(isForeing)
-						  foreignColumn  = columnName.substring(columnName.indexOf("[")+1,columnName.indexOf("]"));
-
+					   if(isForeing) 
+						  foreignColumn  = columnName.substring(columnName.indexOf("[")+1,columnName.indexOf("]"));   
+			           
 					   columnName = getColumnName(false,isForeing,true,columnName);
 					   GridField field = gridTab.getField(columnName);
 					   MColumn column = MColumn.get(Env.getCtx(),field.getAD_Column_ID());
@@ -1305,36 +1377,40 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 							String foreignTable = column.getReferenceTableName();
 							if ("AD_Ref_List".equals(foreignTable)) {
 								String idS = resolveForeignList(column,foreignColumn,setValue,trx);
-								if(idS == null)
+								if(idS == null)	
 								   return Msg.getMsg(Env.getCtx(),"ForeignNotResolved",new Object[]{columnName,setValue});
-
+								
 								setValue = idS;
 							} else {
 								int id = resolveForeign(foreignTable, foreignColumn, setValue, field, trx);
 								if (id < 0)
 								   return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{columnName,setValue});
-
+								
 								setValue = id;
 							}
-					   }
-		           }else{
-		    	       logMsg = "Key: "+linkColumn+" "+ Msg.getMsg(Env.getCtx(),"NotFound");
-		    	       break;
+					   }	   
+		           }else{ 
+		    	       logMsg = "Key: "+linkColumn+" "+ Msg.getMsg(Env.getCtx(),"NotFound"); 
+		    	       break; 
 		           }
 			    }
-				logMsg = gridTab.setValue(linkColumn,setValue);
+				logMsg = gridTab.setValue(linkColumn,setValue);		   
 			    if(logMsg.equals(""))
 			       logMsg= null;
 			    else continue;
 		   }
 		}
-
+		
 		if(logMsg == null && !isThereRow)
 		   logMsg ="NO_DATA_TO_IMPORT";
-
+		
 		return logMsg;
 	}
-
+	
+	/**
+	 * @param field
+	 * @return CellProcessor
+	 */
 	private CellProcessor getProccesorFromColumn(GridField field) {
 		// TODO: List columns can use RequireSubStr constraint
 		if (DisplayType.Date == field.getDisplayType()) {	//JPIERE-0462
@@ -1375,36 +1451,46 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			return null;
 		}
 	}
-
+	
+	/**
+	 * @param gridTab
+	 * @param map
+	 * @param header
+	 * @param startindx
+	 * @param endindx
+	 * @param masterRecord
+	 * @param trx
+	 * @return error message or null
+	 */
 	private String areValidKeysAndColumns(GridTab gridTab, Map<String, Object> map,List<String> header,int startindx,int endindx,PO masterRecord,Trx trx){
 		MQuery pquery = new MQuery(gridTab.getAD_Table_ID());
 		String logMsg= null;
 		Object tmpValue=null;
 		String columnwithKey=null;
 		Object setValue = null;
-		List<String> parentColumns = new ArrayList<String>();
+		List<String> parentColumns = new ArrayList<String>(); 
 		//Process columnKeys + Foreign to add restrictions.
-		for (int i = startindx ; i < endindx + 1 ; i++){
-		    boolean isKeyColumn = header.get(i).indexOf("/") > 0 && ( header.get(i).endsWith("K") || header.get(i).endsWith("KT"));
-		    if(isKeyColumn && ("C_Location".equals(gridTab.getTableName()) || !header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)))){
+		for (int i = startindx ; i < endindx + 1 ; i++){					  
+		    boolean isKeyColumn = header.get(i).indexOf("/") > 0 && ( header.get(i).endsWith("K") || header.get(i).endsWith("KT"));	
+		    if(isKeyColumn && ("C_Location".equals(gridTab.getTableName()) || !header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)))){  
 			   boolean isForeing = header.get(i).indexOf("[") > 0 && header.get(i).indexOf("]")>0;
 			   boolean isDetail  = header.get(i).indexOf(">") > 0;
 			   columnwithKey = getColumnName(isKeyColumn,isForeing,isDetail,header.get(i));
-
+			   
 			   if(map.get(header.get(i)) instanceof java.util.Date)
 				  tmpValue = new Timestamp(((java.util.Date)map.get(header.get(i))).getTime());
-			   else
+			   else 
 				  tmpValue = map.get(header.get(i));
-
+				
 			   if (tmpValue==null)
 				   continue;
-
+			   
 			   GridField field = gridTab.getField(columnwithKey);
 			   MColumn column  = MColumn.get(Env.getCtx(), field.getAD_Column_ID());
 			   if(field.isParentValue()){
 				  parentColumns.add(column.getColumnName());
 			   }
-			   String foreignColumn = null;
+			   String foreignColumn = null;		   
 			   if(isForeing){
 				  foreignColumn  = header.get(i).substring(header.get(i).indexOf("[")+1,header.get(i).indexOf("]"));
 				  String foreignTable = column.getReferenceTableName();
@@ -1421,13 +1507,15 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			   pquery.addRestriction(columnwithKey,MQuery.EQUAL,setValue);
 		   }
 		}
-
+		
 		if (pquery.getRestrictionCount() > 0){
-			//check out if parent keys were completed properly
+			//check out if parent keys were completed properly 
 			if (gridTab.isDetail()){
 				for(String linkColumn : gridTab.getParentColumnNames()){
 					if(!pquery.getWhereClause().contains(linkColumn)){
-						Object value = masterRecord!=null?masterRecord.get_Value(linkColumn):null;
+						Object value = masterRecord!=null
+								    ? masterRecord.get_Value(linkColumn)
+									: gridTab.getParentTab() != null ? gridTab.getParentTab().getValue(linkColumn) : null;
 						//resolve key
 						if(value==null){
 						   String columnName = null;
@@ -1443,7 +1531,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 							   columnwithKey     = getColumnName(false,isForeing,true,columnName);
 							   GridField field = gridTab.getField(columnwithKey);
 							   MColumn column    = MColumn.get(Env.getCtx(), field.getAD_Column_ID());
-							   String foreignColumn = null;
+							   String foreignColumn = null;		   
 							   if(isForeing){
 								  foreignColumn       = columnName.substring(columnName.indexOf("[")+1,columnName.indexOf("]"));
 								  String foreignTable = column.getReferenceTableName();
@@ -1455,21 +1543,21 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 									  value = id;
 					             }
 							   }
-				           }else{ //mandatory key not found
-				    	       return Msg.getMsg(Env.getCtx(),"FillMandatory")+" "+linkColumn;
+				           }else{ //mandatory key not found 
+				    	       return Msg.getMsg(Env.getCtx(),"FillMandatory")+" "+linkColumn;   
 				           }
 					    }
 						if(value!=null)
-						   pquery.addRestriction(linkColumn,MQuery.EQUAL,value);
+						   pquery.addRestriction(linkColumn,MQuery.EQUAL,value);  	
 					}
-				}
+				}	
 			}
 			gridTab.getTableModel().dataRequery(pquery.getWhereClause(), false, 0, false);
 	    	if (isInsertMode()){
 				if(gridTab.getTableModel().getRowCount()>=1)
 				   logMsg = Msg.getMsg(Env.getCtx(), "AlreadyExists")+" "+pquery;
-				else
-				  return null;
+				else  
+				  return null;	
 			}
 			if (isUpdateMode()){
 				if(gridTab.getTableModel().getRowCount()==1){
@@ -1477,9 +1565,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				   return null;
 				}
 				else if(gridTab.getTableModel().getRowCount()<=0)
-				   logMsg = Msg.getMsg(Env.getCtx(), "not.found")+" "+pquery;
+				   logMsg = Msg.getMsg(Env.getCtx(), "not.found")+" "+pquery; 
 				else if(gridTab.getTableModel().getRowCount()>1)
-			       logMsg = Msg.getMsg(Env.getCtx(),"TooManyRows")+" "+pquery;
+			       logMsg = Msg.getMsg(Env.getCtx(),"TooManyRows")+" "+pquery; 
 			}
 		    if (isMergeMode()){
 			   if(gridTab.getTableModel().getRowCount()==1){
@@ -1488,13 +1576,20 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			   }else if(gridTab.getTableModel().getRowCount()<=0)
 				  m_import_mode = IMPORT_MODE_INSERT;
 			   else if(gridTab.getTableModel().getRowCount()>1)
-				  logMsg = Msg.getMsg(Env.getCtx(),"TooManyRows")+" "+pquery;
+				  logMsg = Msg.getMsg(Env.getCtx(),"TooManyRows")+" "+pquery; 	
 		   }
 	   }
-
+		
 	   return logMsg;
 	}
-
+	
+	/**
+	 * @param column
+	 * @param foreignColumn
+	 * @param value
+	 * @param trx
+	 * @return value from matching ad_ref_list record
+	 */
 	private String resolveForeignList(MColumn column, String foreignColumn, Object value ,Trx trx) {
 		String idS = null;
 		String trxName = (trx!=null?trx.getTrxName():null);
@@ -1515,6 +1610,14 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		return idS;
 	}
 
+	/**
+	 * @param foreignTable
+	 * @param foreignColumn
+	 * @param value
+	 * @param field
+	 * @param trx
+	 * @return -3 for not found, -2 for more than 1 match and > 0 for foreign id
+	 */
 	private int resolveForeign(String foreignTable, String foreignColumn, Object value, GridField field, Trx trx) {
 		boolean systemAccess = false;
 		if (!"AD_Client".equals(foreignTable)) {
@@ -1528,7 +1631,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		}
 		int thisClientId = Env.getAD_Client_ID(Env.getCtx());
 
-		String trxName = (trx!=null?trx.getTrxName():null);
+		String trxName = (trx!=null?trx.getTrxName():null); 
 
 		StringBuilder postSelect = new StringBuilder(" FROM ")
 			.append(foreignTable).append(" WHERE ")
@@ -1592,7 +1695,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			value = null;
 		}
 
-		boolean bChanged = (oldValue == null && value != null)
+		boolean bChanged = (oldValue == null && value != null) 
 							|| (oldValue != null && value == null);
 
 		if (!bChanged && oldValue != null)
@@ -1613,15 +1716,18 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				bChanged = !(oldValue.toString().equals(value.toString()));
 			}
 		}
-		return bChanged;
+		return bChanged;	
 	}
-
-	//Copy from GridTable
+	
+	/**
+	 * @param value
+	 * @return true if value is not null and not an empty string
+	 */
 	private boolean isNotNullAndIsEmpty (Object value) {
-		if (value != null
-				&& (value instanceof String)
+		if (value != null 
+				&& (value instanceof String) 
 				&& value.toString().equals("")
-			)
+			) 
 		{
 			return true;
 		} else {
@@ -1629,7 +1735,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		}
 
 	}
-
+	
 	@Override
 	public String getFileExtension() {
 		return "csv";
@@ -1655,7 +1761,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				+ "." + getFileExtension();
 		return localFile;
 	}
-
+	
     public boolean isError() {
 		return error;
 	}
@@ -1677,7 +1783,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		public ValueComparator(Map<GridTab,Integer> base) {
 		    this.base = base;
 		}
-		// Note: this comparator imposes orderings that are inconsistent with equals.
+		// Note: this comparator imposes orderings that are inconsistent with equals.    
 		public int compare(GridTab a, GridTab b) {
 		    if(base.get(a) >= base.get(b))
 		       return 1;
@@ -1685,4 +1791,5 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		       return -1;
 		}
     }
+
 }
