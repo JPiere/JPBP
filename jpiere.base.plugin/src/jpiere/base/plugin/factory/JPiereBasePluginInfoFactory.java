@@ -108,11 +108,4 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 		return null;
 	}
 
-	@Override
-	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection,
-			String whereClause, int AD_InfoWindow_ID, Lookup lookup) {
-	
-		return null;
-	}
-
 }
