@@ -93,7 +93,12 @@ public class DefaultBankDataCreateDoc2 extends SvrProcess {
 				PO.copyValues(m_BankData, bs);
 				bs.setAD_Org_ID(m_BankData.getAD_Org_ID());
 				if(BDSchema.getJP_BankStatementDocType_ID() > 0)
+				{
 					bs.setC_DocType_ID(BDSchema.getJP_BankStatementDocType_ID());
+					MDocType m_DocType = MDocType.get(bs.getC_DocType_ID());
+					if(m_DocType.isDocNoControlled())
+						bs.setDocumentNo(DB.getDocumentNo(bs.getC_DocType_ID(), null, false, bs));
+				}
 				bs.saveEx(get_TrxName());
 
 				m_BankData.setC_BankStatement_ID(bs.getC_BankStatement_ID());
