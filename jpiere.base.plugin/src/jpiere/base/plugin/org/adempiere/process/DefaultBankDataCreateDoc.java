@@ -32,6 +32,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.AdempiereUserError;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
@@ -385,7 +386,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 					payment.setC_DocType_ID(true);
 				}
 			}
-
+			
 			if(C_Order_ID != 0)
 				payment.setC_Order_ID(C_Order_ID);
 
@@ -393,6 +394,10 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 		else
 			return null;
 
+		MDocType m_DocType = MDocType.get(payment.getC_DocType_ID());
+		if(m_DocType.isDocNoControlled())
+			payment.setDocumentNo(DB.getDocumentNo(payment.getC_DocType_ID(), null, false, payment));
+		
 		payment.saveEx();
 
 //		if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
