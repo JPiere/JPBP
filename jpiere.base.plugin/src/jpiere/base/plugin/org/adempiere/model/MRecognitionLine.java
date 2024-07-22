@@ -44,7 +44,6 @@ import org.compiere.model.MTaxProvider;
 import org.compiere.model.MUOM;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
-import org.compiere.model.Tax;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
@@ -488,7 +487,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 		} else if (getParent().getC_Order_ID() > 0) {
 			deliveryViaRule = new MOrder(getCtx(), getParent().getC_Order_ID(), get_TrxName()).getDeliveryViaRule();
 		}
-		int C_Tax_ID = Tax.get(getCtx(), getM_Product_ID(), getC_Charge_ID() , m_DateInvoiced, m_DateInvoiced,
+		int C_Tax_ID = Core.getTaxLookup().get(getCtx(), getM_Product_ID(), getC_Charge_ID() , m_DateInvoiced, m_DateInvoiced,
 			getAD_Org_ID(), M_Warehouse_ID,
 			m_C_BPartner_Location_ID,		//	should be bill to
 			m_C_BPartner_Location_ID, dropShipLocationId, m_IsSOTrx, deliveryViaRule, get_TrxName());
