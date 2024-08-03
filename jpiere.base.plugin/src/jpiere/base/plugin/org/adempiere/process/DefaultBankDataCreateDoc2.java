@@ -33,7 +33,6 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.AdempiereUserError;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
@@ -95,9 +94,9 @@ public class DefaultBankDataCreateDoc2 extends SvrProcess {
 				if(BDSchema.getJP_BankStatementDocType_ID() > 0)
 				{
 					bs.setC_DocType_ID(BDSchema.getJP_BankStatementDocType_ID());
-					MDocType m_DocType = MDocType.get(bs.getC_DocType_ID());
-					if(m_DocType.isDocNoControlled())
-						bs.setDocumentNo(DB.getDocumentNo(bs.getC_DocType_ID(), null, false, bs));
+//					MDocType m_DocType = MDocType.get(bs.getC_DocType_ID()); /** Move to JPIERE-0619: DB Transaction of Auto control DocumentNo */
+//					if(m_DocType.isDocNoControlled())
+//						bs.setDocumentNo(DB.getDocumentNo(bs.getC_DocType_ID(), null, false, bs));
 				}
 				bs.saveEx(get_TrxName());
 
@@ -173,7 +172,7 @@ public class DefaultBankDataCreateDoc2 extends SvrProcess {
 				
 			}else {//ver2
 				
-				if(bsl.getC_BPartner_ID() != 0)
+				if(bsl.getC_BPartner_ID() != 0 && Env.ZERO.compareTo(bsl.getTrxAmt()) != 0)
 				{
 					MPayment payment = createPayment(bsl, lines[i]);
 					if(!Util.isEmpty(BDSchema.getJP_Payment_DocAction()))
@@ -409,9 +408,9 @@ public class DefaultBankDataCreateDoc2 extends SvrProcess {
 		else
 			return null;
 
-		MDocType m_DocType = MDocType.get(payment.getC_DocType_ID());
-		if(m_DocType.isDocNoControlled())
-			payment.setDocumentNo(DB.getDocumentNo(payment.getC_DocType_ID(), null, false, payment));
+//		MDocType m_DocType = MDocType.get(payment.getC_DocType_ID());/** Move to JPIERE-0619: DB Transaction of Auto control DocumentNo */
+//		if(m_DocType.isDocNoControlled())
+//			payment.setDocumentNo(DB.getDocumentNo(payment.getC_DocType_ID(), null, false, payment));
 		
 		payment.saveEx();
 
