@@ -19,7 +19,6 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.IProcessUI;
-import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPaySelection;
 import org.compiere.model.MPaySelectionCheck;
@@ -31,7 +30,6 @@ import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.CLogger;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -214,9 +212,9 @@ public class CreatePaymentBatchFromPaySelection extends SvrProcess {
 				payment.setDiscountAmt(Env.ZERO);
 			}
 			payment.setC_DocType_ID(p_C_DocTYpe_ID);
-			MDocType m_DocType = MDocType.get(p_C_DocTYpe_ID);
-			if(m_DocType.isDocNoControlled())
-				payment.setDocumentNo(DB.getDocumentNo(p_C_DocTYpe_ID, null, false, payment));
+//			MDocType m_DocType = MDocType.get(p_C_DocTYpe_ID);/** Move to JPIERE-0619: DB Transaction of Auto control DocumentNo */
+//			if(m_DocType.isDocNoControlled())
+//				payment.setDocumentNo(DB.getDocumentNo(p_C_DocTYpe_ID, null, false, payment));
 			payment.saveEx(get_TrxName());
 			//
 			int C_Payment_ID = payment.get_ID();
