@@ -1024,17 +1024,16 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			
 			if (isForeing && value != null && !"(null)".equals(value)){
 				String foreignTable = column.getReferenceTableName();
-				String idS = null;
-				int id = -1;
+				Object idS = null;
 				if("AD_Ref_List".equals(foreignTable))
 				   idS= resolveForeignList(column,foreignColumn,value,null);
 				else 
-				   id = resolveForeign(foreignTable,foreignColumn,value,field,null);
+				   idS = resolveForeign(foreignTable,foreignColumn,value,field,null);
 				
-				if(idS == null && id < 0){	
+				if(idS == null){	
 				   //it could be that record still doesn't exist if import mode is inserting or merging   	
 				   if(isUpdateMode())
-				     return new StringBuilder(Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value}));
+				     return new StringBuilder(Msg.getMsg(Env.getCtx(),(idS instanceof Integer && (int)idS==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value}));
 				}
 			} else {
 				// TODO: we could validate length of string or min/max
@@ -1070,6 +1069,8 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		   //without Country any address would be invalid 
 		   boolean thereIsCountry = false ;
 		   boolean isEmptyRow = true;
+		   Object countryId = null;
+		   int regionIndex = -1;
 		   for(int j= i;j< header.size();j++){
 			   if(!header.get(j).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)))
 			       break;
@@ -1082,30 +1083,59 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			   String columnName = header.get(j);	
 			   Object value = tmpRow.get(j);   
 			   if(value!=null){ 
-				  if(columnName.contains("C_Country_ID"))
+				  if(columnName.contains("C_Country_ID")) {
 					 thereIsCountry= true;
+					 countryId = value;
+				  }
 			   }else
 				  continue;
 			   			    
 			   boolean isKeyColumn = columnName.indexOf("/") > 0;
-			   boolean isForeing   = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
+			   boolean isForeign   = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
 			   boolean isDetail    = columnName.indexOf(">") > 0;
 			   String  foreignColumn = null; 
-			   columnName = getColumnName(isKeyColumn,isForeing,isDetail,columnName);
-			   if(isForeing) 
+			   columnName = getColumnName(isKeyColumn,isForeign,isDetail,columnName);
+			   if(isForeign) 
 				  foreignColumn = header.get(j).substring(header.get(j).indexOf("[")+1, header.get(j).indexOf("]"));
 			   
-			   if(isForeing && !"(null)".equals(value)){ 
+			   if(isForeign && !"(null)".equals(value)){ 
 			      String foreignTable = columnName.substring(0,columnName.length()-3);
-			      int id = resolveForeign(foreignTable,foreignColumn,value,field,null);
-				  if (id < 0)
-					  return new StringBuilder(Msg.getMsg(Env.getCtx(), id==-2?"ForeignMultipleResolved":"ForeignNotResolved" ,new Object[]{header.get(j),value}));   
+			      if ("C_Region".equals(foreignTable)) {
+			    	  regionIndex = j;
+			      } else {
+			    	  Object id = resolveForeign(foreignTable,foreignColumn,value,field,null);
+					  if (id == null || (id instanceof Integer && (int)id < 0))
+						  return new StringBuilder(Msg.getMsg(Env.getCtx(),(id instanceof Integer && (int)id==-2)?"ForeignMultipleResolved":"ForeignNotResolved" ,new Object[]{header.get(j),value}));   
+					  if (columnName.contains("C_Country_ID")) {
+						  countryId = id;
+					  }
+			      }
 			   }	   
 			   isEmptyRow=false;
 	      }	   
 		  MColumn column = MColumn.get(Env.getCtx(), field.getAD_Column_ID());		
 		  if((field.isMandatory(true) || column.isMandatory()) && !isEmptyRow && !thereIsCountry) 
 			  return new StringBuilder(Msg.getMsg(Env.getCtx(), "FillMandatory")+" "+field.getColumnName()+"["+"C_Country_ID]");
+		  
+		  if (countryId != null && regionIndex != -1) {
+			  String columnName = header.get(regionIndex);	
+			  Object value = tmpRow.get(regionIndex);
+			  
+			  boolean isKeyColumn = columnName.indexOf("/") > 0;
+			  boolean isForeign = columnName.indexOf("[") > 0 && columnName.indexOf("]") > 0;
+			  boolean isDetail = columnName.indexOf(">") > 0;
+			  String foreignColumn = null;
+			  columnName = getColumnName(isKeyColumn, isForeign, isDetail, columnName);
+			  if (isForeign)
+				foreignColumn = header.get(regionIndex).substring(header.get(regionIndex).indexOf("[") + 1, header.get(regionIndex).indexOf("]"));
+
+			  if (isForeign && !"(null)".equals(value)) {
+				int id = resolveForeignRegionByCountry(foreignColumn, value, field, null, (Integer) countryId);
+				if (id < 0)
+					return new StringBuilder(Msg.getMsg(Env.getCtx(), id == -2 ? "ForeignMultipleResolved" : "ForeignNotResolved",new Object[] { header.get(regionIndex), value }));
+			  }
+		  }
+			
 	   }
 	   return null;
 	}	
@@ -1127,6 +1157,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		boolean isThereRow = false;
 		MLocation address = null;
 		List<String> parentColumns = new ArrayList<String>(); 
+		int regionIndex = -1;
 		for(int i = startindx ; i < endindx + 1 ; i++){
 			String columnName = header.get(i);
 			Object value = map.get(header.get(i));
@@ -1138,15 +1169,15 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			   continue;
 				
 			boolean isKeyColumn= columnName.indexOf("/") > 0;
-			boolean isForeing  = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
+			boolean isForeign  = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
 			isDetail   = columnName.indexOf(">") > 0;
-			columnName = getColumnName(isKeyColumn,isForeing,isDetail,columnName);
+			columnName = getColumnName(isKeyColumn,isForeign,isDetail,columnName);
 			String foreignColumn = null;
 			Object setValue = null;
 			
-			if(isForeing) 
+			if(isForeign) 
 			   foreignColumn = header.get(i).substring(header.get(i).indexOf("[")+1,header.get(i).indexOf("]"));
-			if(!isForeing && !isKeyColumn && ("AD_Language".equals(columnName) || "EntityType".equals(columnName))) {
+			if(!isForeign && !isKeyColumn && ("AD_Language".equals(columnName) || "EntityType".equals(columnName))) {
 				setValue = value;
 				GridField field = gridTab.getField(columnName);
 			    logMsg = gridTab.setValue(field,setValue);
@@ -1165,8 +1196,11 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				}
 				GridField field = gridTab.getField(columnName);
 				if(!"(null)".equals(value.toString().trim())){
-				   if(isForeing) {
+				   if(isForeign) {
 					  String foreignTable = columnName.substring(0,columnName.length()-3);
+					  if("C_Region".equals(foreignTable))
+						  regionIndex = i;
+					  else
 					  setValue = resolveForeign(foreignTable,foreignColumn,value,field,trx);
 					  if("C_City".equals(foreignTable))
 						 address.setCity(value.toString());  
@@ -1186,7 +1220,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					   break;
 					}
 					
-					if(isForeing && masterRecord!=null){
+					if(isForeign && masterRecord!=null){
 					   if (masterRecord.get_Value(foreignColumn).toString().equals(value)){
 						   logMsg = gridTab.setValue(field,masterRecord.get_ID());
 						   if(logMsg.equals(""))
@@ -1198,7 +1232,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 						      break;
 						   }   
 					   }
-					}else if(isForeing && masterRecord==null && gridTab.getTabLevel()>0){
+					}else if(isForeign && masterRecord==null && gridTab.getTabLevel()>0){
 						Object master =gridTab.getParentTab().getValue(foreignColumn);
 						if (master!=null && value!=null && !master.toString().equals(value)){
 							logMsg = header.get(i)+" - "+Msg.getMsg(Env.getCtx(),"DiffParentValue", new Object[] {master.toString(),value});
@@ -1207,19 +1241,18 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					}else if (masterRecord==null && isDetail){
 						MColumn column = MColumn.get(Env.getCtx(),field.getAD_Column_ID());
 						String foreignTable = column.getReferenceTableName();
-						String idS = null;
-						int id = -1;
+						Object idS = null;
 						
 						if ("AD_Ref_List".equals(foreignTable)) 
 							idS= resolveForeignList(column, foreignColumn, value,trx);
 						else 
-							id = resolveForeign(foreignTable,foreignColumn,value, field, trx);
+							idS = resolveForeign(foreignTable,foreignColumn,value, field, trx);
 						
-						if(idS == null && id < 0)	
-						   return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
+					    if (idS == null || (idS instanceof Integer && (int)idS < 0))
+						   return Msg.getMsg(Env.getCtx(),(idS instanceof Integer && (int)idS==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
 						
-						if(id >= 0)
-						   logMsg = gridTab.setValue(field,id);
+						if (idS instanceof Integer && (int)idS >= 0)
+						   logMsg = gridTab.setValue(field,idS);
 						else if (idS != null)
 						   logMsg = gridTab.setValue(field,idS);
 						
@@ -1242,7 +1275,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				}else{
 				   
 				   MColumn column = MColumn.get(Env.getCtx(),field.getAD_Column_ID());
-				   if (isForeing){
+				   if (isForeign){
 						String foreignTable = column.getReferenceTableName();
 						if ("AD_Ref_List".equals(foreignTable)) {
 							String idS = resolveForeignList(column, foreignColumn, value,trx);
@@ -1253,14 +1286,14 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 							isThereRow =true;
 						} else {
 							
-							int id = resolveForeign(foreignTable, foreignColumn, value,field,trx);
-							if(id < 0)	
-								return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
+							Object id = resolveForeign(foreignTable, foreignColumn, value,field,trx);
+						    if (id == null || (id instanceof Integer && (int)id < 0))
+								return Msg.getMsg(Env.getCtx(),(id instanceof Integer && (int)id==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
 
 							setValue = id;
 							if (field.isParentValue()) {
-								int actualId = (Integer) field.getValue();
-								if (actualId != id) {
+								Object actualId = field.getValue();
+								if (actualId != null && ! actualId.equals(id)) {
 									logMsg = Msg.getMsg(Env.getCtx(), "ParentCannotChange",new Object[]{header.get(i)});
 									break;
 								}
@@ -1336,6 +1369,29 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		}
 			 
 		if(address!=null){  
+			if (regionIndex != -1 && address.getC_Country_ID() > 0) {
+				String columnName = header.get(regionIndex);
+				Object value = map.get(header.get(regionIndex));
+				boolean isDetail = false;
+				boolean isKeyColumn= columnName.indexOf("/") > 0;
+				boolean isForeign  = columnName.indexOf("[") > 0 && columnName.indexOf("]")>0;
+				isDetail   = columnName.indexOf(">") > 0;
+				columnName = getColumnName(isKeyColumn,isForeign,isDetail,columnName);
+				String foreignColumn = null;
+				Object setValue = null;
+				
+				if(isForeign) 
+				   foreignColumn = header.get(regionIndex).substring(header.get(regionIndex).indexOf("[")+1,header.get(regionIndex).indexOf("]"));
+				
+					GridField field = gridTab.getField(columnName);
+					if(!"(null)".equals(value.toString().trim())){
+					   if(isForeign) {
+						  setValue = resolveForeignRegionByCountry(foreignColumn, value, field, trx, address.getC_Country_ID());
+						}else
+						  setValue = value;			
+					}
+					address.set_ValueOfColumn(columnName,setValue);
+				}
 			if (!address.save()){
 			    logMsg = CLogger.retrieveError()+" Address : "+address;
 			}else {
@@ -1382,9 +1438,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 								
 								setValue = idS;
 							} else {
-								int id = resolveForeign(foreignTable, foreignColumn, setValue, field, trx);
-								if (id < 0)
-								   return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{columnName,setValue});
+								Object id = resolveForeign(foreignTable, foreignColumn, setValue, field, trx);
+							    if (id == null || (id instanceof Integer && (int)id < 0))
+								   return Msg.getMsg(Env.getCtx(),(id instanceof Integer && (int)id==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{columnName,setValue});
 								
 								setValue = id;
 							}
@@ -1443,7 +1499,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			return (new Optional(new ParseBigDecimal(new DecimalFormatSymbols(Language.getLoginLanguage().getLocale()))));
 		} else if (DisplayType.YesNo == field.getDisplayType()) {
 			return (new Optional(new ParseBool("y", "n")));
-		} else if (DisplayType.TextLong == field.getDisplayType()) {
+		} else if (DisplayType.TextLong == field.getDisplayType() || DisplayType.JSON == field.getDisplayType()) {
 			return (new Optional(new StrMinMax(1, Long.MAX_VALUE)));
 		} else if (DisplayType.isText(field.getDisplayType())) {
 			return (new Optional(new StrMinMax(1, field.getFieldLength())));
@@ -1498,7 +1554,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					  String idS = resolveForeignList(column, foreignColumn, tmpValue,trx);
 					  setValue = idS;
 				  }else {
-					  int id = resolveForeign(foreignTable, foreignColumn, tmpValue,field,trx);
+					  Object id = resolveForeign(foreignTable, foreignColumn, tmpValue,field,trx);
 					  setValue = id;
 	             }
 			   }else{
@@ -1539,8 +1595,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 									  String idS = resolveForeignList(column,foreignColumn,value,trx);
 									  value = idS;
 								  }else {
-									  int id = resolveForeign(foreignTable,foreignColumn,value,field,trx);
-									  value = id;
+									  value = resolveForeign(foreignTable,foreignColumn,value,field,trx);
 					             }
 							   }
 				           }else{ //mandatory key not found 
@@ -1618,7 +1673,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	 * @param trx
 	 * @return -3 for not found, -2 for more than 1 match and > 0 for foreign id
 	 */
-	private int resolveForeign(String foreignTable, String foreignColumn, Object value, GridField field, Trx trx) {
+	private Object resolveForeign(String foreignTable, String foreignColumn, Object value, GridField field, Trx trx) {
 		boolean systemAccess = false;
 		if (!"AD_Client".equals(foreignTable)) {
 			MTable ft = MTable.get(Env.getCtx(), foreignTable);
@@ -1663,10 +1718,14 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		}
 	  }
 		StringBuilder selectCount = new StringBuilder("SELECT COUNT(*)").append(postSelect);
-		StringBuilder selectId = new StringBuilder("SELECT ").append(foreignTable).append("_ID").append(postSelect);
+		MTable forTab = MTable.get(Env.getCtx(), foreignTable);
+		StringBuilder selectId = new StringBuilder("SELECT ").append(forTab.getKeyColumns()[0]).append(postSelect);
 		int count = DB.getSQLValueEx(trxName, selectCount.toString(), value, thisClientId);
 		if (count == 1) { // single value found, OK
-			return DB.getSQLValueEx(trxName, selectId.toString(), value, thisClientId);
+			if (forTab.isUUIDKeyTable())
+				return DB.getSQLValueStringEx(trxName, selectId.toString(), value, thisClientId);
+			else
+				return DB.getSQLValueEx(trxName, selectId.toString(), value, thisClientId);
 		} else if (count > 1) { // multiple values found, error ForeignMultipleResolved
 			return -2;
 		} else if (count == 0) { // no values found, error ForeignNotResolved
@@ -1674,6 +1733,9 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				// not found in client, try with System
 				count = DB.getSQLValueEx(trxName, selectCount.toString(), value, 0 /* System */);
 				if (count == 1) { // single value found, OK
+					if (forTab.isUUIDKeyTable())
+						return DB.getSQLValueStringEx(trxName, selectId.toString(), value,  0 /* System */);
+					else
 					return DB.getSQLValueEx(trxName, selectId.toString(), value,  0 /* System */);
 				} else if (count > 1) { // multiple values found, error ForeignMultipleResolved
 					return -2;
@@ -1683,6 +1745,36 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		return -3;   // no values found, error ForeignNotResolved
 	}
 
+	private int resolveForeignRegionByCountry(String foreignColumn, Object regionValue, GridField field, Trx trx, int countryId) {
+		String foreignTable = "C_Region";
+		boolean systemAccess = true;
+		int thisClientId = Env.getAD_Client_ID(Env.getCtx());
+		
+		StringBuilder postSelect = new StringBuilder(" FROM ")
+				.append(foreignTable).append(" WHERE ")
+				.append(foreignColumn).append("=? AND C_Country_ID=? AND IsActive='Y' AND AD_Client_ID=?");
+		
+		StringBuilder selectCount = new StringBuilder("SELECT COUNT(*)").append(postSelect);
+		StringBuilder selectId = new StringBuilder("SELECT ").append(foreignTable).append("_ID").append(postSelect);
+		int count = DB.getSQLValueEx(trxName, selectCount.toString(), regionValue, countryId, thisClientId);
+		if (count == 1) { // single value found, OK
+			return DB.getSQLValueEx(trxName, selectId.toString(), regionValue, countryId, thisClientId);
+		} else if (count > 1) { // multiple values found, error ForeignMultipleResolved
+			return -2;
+		} else if (count == 0) { // no values found, error ForeignNotResolved
+			if (systemAccess && thisClientId != 0) {
+				// not found in client, try with System
+				count = DB.getSQLValueEx(trxName, selectCount.toString(), regionValue, countryId, 0 /* System */);
+				if (count == 1) { // single value found, OK
+					return DB.getSQLValueEx(trxName, selectId.toString(), regionValue, countryId, 0 /* System */);
+				} else if (count > 1) { // multiple values found, error ForeignMultipleResolved
+					return -2;
+				}
+			}
+		}
+		return -3;   // no values found, error ForeignNotResolved
+	}
+	
 	//Copy from GridTable
 	@SuppressWarnings("unchecked")
 	private boolean	isValueChanged(Object oldValue, Object value)
