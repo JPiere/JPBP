@@ -367,14 +367,14 @@ public class BulkUpdateProcess extends SvrProcess {
 				
 				po_ErrorLog = m_PO;
 				oldValue = m_PO.get_ValueAsString(columnName);
-				newValue = line.getJP_ReplacementString();
+				newValue = null;
 				
-				if(Util.isEmpty(line.getJP_TargetString()))
+				if(Util.isEmpty(line.getJP_TargetString()))//All characters is replaced if target string is blank.
 				{
-					if(!m_PO.set_ValueNoCheck(columnName, newValue))
+					if(!m_PO.set_ValueNoCheck(columnName, line.getJP_ReplacementString()))
 						throw new Exception(Msg.getMsg(getCtx(), "JP_CouldNotSetNewValue") + " : " + newValue);//Could not set new value
 					
-				}else {
+				}else { // Replace a part of a string.
 
 					if(Util.isEmpty(oldValue))
 					{
@@ -382,7 +382,7 @@ public class BulkUpdateProcess extends SvrProcess {
 						
 					}else {
 						
-						newValue = oldValue.replace(line.getJP_TargetString(), line.getJP_ReplacementString());
+						newValue = oldValue.replace(line.getJP_TargetString(), Util.isEmpty(line.getJP_ReplacementString())? "" : line.getJP_ReplacementString());
 						if(!m_PO.set_ValueNoCheck(columnName, newValue))
 							throw new Exception(Msg.getMsg(getCtx(), "JP_CouldNotSetNewValue") + " : " + newValue);//Could not set new value
 					}
@@ -468,7 +468,7 @@ public class BulkUpdateProcess extends SvrProcess {
 				
 				po_ErrorLog = m_PO;
 				oldValue = m_PO.get_ValueAsString(columnName);
-				newValue = line.getJP_ReplacementString();
+				newValue = null;
 				
 				if(Util.isEmpty(oldValue))
 				{
@@ -476,7 +476,7 @@ public class BulkUpdateProcess extends SvrProcess {
 					
 				}else {
 					
-					newValue = oldValue.replaceAll(line.getJP_TargetString(), Util.isEmpty(newValue)? "" : line.getJP_ReplacementString());
+					newValue = oldValue.replaceAll(line.getJP_TargetString(), Util.isEmpty(line.getJP_ReplacementString())? "" : line.getJP_ReplacementString());
 					if(!m_PO.set_ValueNoCheck(columnName, newValue))
 						throw new Exception(Msg.getMsg(getCtx(), "JP_CouldNotSetNewValue") + " : " + newValue);//Could not set new value
 				}
@@ -606,8 +606,8 @@ public class BulkUpdateProcess extends SvrProcess {
 	
 	private boolean judgementLoging(MBulkUpdateProfileLine m_Line, MTable m_Table, MColumn m_Column)
 	{
-		//if("Password".equals(m_Column.getColumnName()))
-		//	return false;
+		if(m_Column.isSecure())
+			return false;
 		
 		MColumn et = m_Table.getColumn(MTable.COLUMNNAME_EntityType);
 		if(et != null)

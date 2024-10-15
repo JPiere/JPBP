@@ -100,6 +100,9 @@ public class MBulkUpdateProfileLine extends X_JP_BulkUpdateProfileLine {
 				return false; 
 			}
 			
+			if(m_Column.isSecure())
+				setIsChangeLog(false);
+			
 			setJP_MaskingString(null);
 			setJP_MaskingType(null);
 			setJP_NumOfCharExcludeMasking(0);
@@ -126,6 +129,9 @@ public class MBulkUpdateProfileLine extends X_JP_BulkUpdateProfileLine {
 				return false; 
 			}
 			
+			if(m_Column.isSecure())
+				setIsChangeLog(false);
+			
 			setJP_MaskingString(null);
 			setJP_MaskingType(null);
 			setJP_NumOfCharExcludeMasking(0);
@@ -147,6 +153,9 @@ public class MBulkUpdateProfileLine extends X_JP_BulkUpdateProfileLine {
 				log.saveError("Error", Msg.getElement(getCtx(), "ColumnSQL"));
 				return false; 
 			}
+			
+			if(m_Column.isSecure())
+				setIsChangeLog(false);
 			
 			if(Util.isEmpty(getJP_MaskingString()))
 			{
