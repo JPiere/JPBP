@@ -169,6 +169,12 @@ public class MBulkUpdateProfileLine extends X_JP_BulkUpdateProfileLine {
 				return false; 
 			}
 			
+			if(getJP_NumOfCharExcludeMasking() < 0)
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "Minus") +" "+ Msg.getElement(getCtx(), COLUMNNAME_JP_NumOfCharExcludeMasking));
+				return false; 				
+			}
+			
 			setJP_TargetString(null);
 			setJP_ReplacementString(null);
 			setJP_UpdateSetClause(null);
