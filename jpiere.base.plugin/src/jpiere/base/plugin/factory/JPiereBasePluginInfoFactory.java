@@ -35,7 +35,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
 			String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup) {
 
-		if (tableName.equals("M_Product") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
+		if (tableName.equals("M_Product") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())) && lookup)
 		{
         	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup);
         	if (!info.loadedOK())
@@ -51,7 +51,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
         }
 		
 		//JPIERE-0614(v11) - Single Selection Info Window
-		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
+		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())) && lookup)
 		{
         	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup);
         	if (!info.loadedOK())
