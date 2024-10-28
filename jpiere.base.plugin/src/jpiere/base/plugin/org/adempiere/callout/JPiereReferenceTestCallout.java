@@ -20,6 +20,8 @@ import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MProduct;
 import org.compiere.process.DocAction;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 import jpiere.base.plugin.org.adempiere.model.MReferenceTest;
@@ -83,6 +85,69 @@ public class JPiereReferenceTestCallout implements IColumnCallout {
 				mTab.setValue("M_Product_Category_ID", product.getM_Product_Category_ID());
 			}
 
+		}else if(mField.getColumnName().equals(MReferenceTest.COLUMNNAME_JP_BPartner_Multi)){
+
+			int numLines = mField.getNumLines();
+			if(numLines==1)
+				numLines = 9;
+			
+			if(value != null)
+			{
+				String[] lists = value.toString().split(",");
+				if(lists.length > numLines && numLines > 1)
+				{
+					String JP_Multi_List = "";
+					for(int i = 0 ; i < numLines; i++)
+					{
+						JP_Multi_List = JP_Multi_List+lists[i]+",";
+					}
+					mTab.setValue(MReferenceTest.COLUMNNAME_JP_BPartner_Multi, JP_Multi_List);
+					mTab.fireDataStatusEEvent("Warning", Msg.getMsg(Env.getCtx(), "JP_SelectUpTo", new Object[] {String.valueOf(numLines)} ), false);
+				}
+			}
+			
+		}else if(mField.getColumnName().equals(MReferenceTest.COLUMNNAME_JP_Product_Multi)){
+			
+			int numLines = mField.getNumLines();
+			if(numLines==1)
+				numLines = 9;
+			
+			if(value != null)
+			{
+				String[] lists = value.toString().split(",");
+				if(lists.length > numLines && numLines > 1)
+				{
+					String JP_Multi_List = "";
+					for(int i = 0 ; i < numLines; i++)
+					{
+						JP_Multi_List = JP_Multi_List+lists[i]+",";
+					}
+					mTab.setValue(MReferenceTest.COLUMNNAME_JP_Product_Multi, JP_Multi_List);
+					mTab.fireDataStatusEEvent("Warning", Msg.getMsg(Env.getCtx(), "JP_SelectUpTo", new Object[] {String.valueOf(numLines)} ), false);
+				}
+			}
+			
+		}else if(mField.getColumnName().equals(MReferenceTest.COLUMNNAME_JP_Multi_List)){
+
+			int numLines = mField.getNumLines();
+			if(numLines==1)
+				numLines = 5;
+			
+			if(value != null)
+			{
+				String[] lists = value.toString().split(",");
+				if(lists.length > numLines && numLines > 1)
+				{
+					String JP_Multi_List = "";
+					for(int i = 0 ; i < numLines; i++)
+					{
+						JP_Multi_List = JP_Multi_List+lists[i]+",";
+					}
+					mTab.setValue(MReferenceTest.COLUMNNAME_JP_Multi_List, JP_Multi_List);
+					mTab.fireDataStatusEEvent("Warning", Msg.getMsg(Env.getCtx(), "JP_SelectUpTo", new Object[] {String.valueOf(numLines)} ), false);
+				}
+			}
+			
 		}
 
 		return null;

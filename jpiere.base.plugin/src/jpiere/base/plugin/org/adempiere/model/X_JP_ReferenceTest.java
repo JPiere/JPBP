@@ -25,16 +25,16 @@ import org.compiere.model.*;
 import org.compiere.util.Env;
 
 /** Generated Model for JP_ReferenceTest
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="JP_ReferenceTest")
-public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Persistent 
+public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231107L;
+	private static final long serialVersionUID = 20241026L;
 
     /** Standard Constructor */
     public X_JP_ReferenceTest (Properties ctx, int JP_ReferenceTest_ID, String trxName)
@@ -76,6 +76,46 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
         } */
     }
 
+    /** Standard Constructor */
+    public X_JP_ReferenceTest (Properties ctx, String JP_ReferenceTest_UU, String trxName)
+    {
+      super (ctx, JP_ReferenceTest_UU, trxName);
+      /** if (JP_ReferenceTest_UU == null)
+        {
+			setInvoiceRule (null);
+// D
+			setIsCustomer (true);
+// Y
+			setJP_ReferenceTest_ID (0);
+			setM_PriceList_ID (0);
+			setM_Product_ID (0);
+			setProcessed (false);
+// N
+			setTenderType (null);
+// D
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_ReferenceTest (Properties ctx, String JP_ReferenceTest_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_ReferenceTest_UU, trxName, virtualColumns);
+      /** if (JP_ReferenceTest_UU == null)
+        {
+			setInvoiceRule (null);
+// D
+			setIsCustomer (true);
+// Y
+			setJP_ReferenceTest_ID (0);
+			setM_PriceList_ID (0);
+			setM_Product_ID (0);
+			setProcessed (false);
+// N
+			setTenderType (null);
+// D
+        } */
+    }
+
     /** Load Constructor */
     public X_JP_ReferenceTest (Properties ctx, ResultSet rs, String trxName)
     {
@@ -83,7 +123,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -566,7 +606,7 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public void setDeliveryRule (String DeliveryRule)
 	{
 
-		set_ValueNoCheck(COLUMNNAME_DeliveryRule, DeliveryRule);
+		set_Value (COLUMNNAME_DeliveryRule, DeliveryRule);
 	}
 
 	/** Get Delivery Rule.
@@ -727,10 +767,10 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public boolean isCustomer()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCustomer);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1215,10 +1255,10 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1237,10 +1277,10 @@ public class X_JP_ReferenceTest extends PO implements I_JP_ReferenceTest, I_Pers
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

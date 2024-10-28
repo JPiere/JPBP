@@ -266,7 +266,10 @@ public class JPiereBasePluginColumnCalloutFactory implements IColumnCalloutFacto
 
 				if(columnName.equals(MReferenceTest.COLUMNNAME_JP_ReferenceTest_ID)
 						|| columnName.equals(MReferenceTest.COLUMNNAME_DocStatus)
-						|| columnName.equals(MReferenceTest.COLUMNNAME_M_Product_ID) )
+						|| columnName.equals(MReferenceTest.COLUMNNAME_M_Product_ID)
+						|| columnName.equals(MReferenceTest.COLUMNNAME_JP_BPartner_Multi) 
+						|| columnName.equals(MReferenceTest.COLUMNNAME_JP_Product_Multi) 
+						|| columnName.equals(MReferenceTest.COLUMNNAME_JP_Multi_List) )
 				{
 					list.add(new JPiereReferenceTestCallout());
 				}

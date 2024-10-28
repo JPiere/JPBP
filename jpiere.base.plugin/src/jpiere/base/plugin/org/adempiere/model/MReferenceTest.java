@@ -16,6 +16,8 @@ package jpiere.base.plugin.org.adempiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.Util;
+
 /**
  * 
  * JPIERE-0084 All Reference Window for Test
@@ -41,6 +43,19 @@ public class MReferenceTest extends X_JP_ReferenceTest {
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		if(newRecord || is_ValueChanged(MReferenceTest.COLUMNNAME_JP_Multi_List))
+		{
+			String JP_Multi_List = getJP_Multi_List();
+			if(!Util.isEmpty(JP_Multi_List))
+			{
+				String[] lists =JP_Multi_List.split(",");
+				if(lists.length > 5)
+				{
+					log.saveError("Error", "〇●〇の選択は5語までにして下さい。");
+					return false;
+				}
+			}
+		}
 		
 		return super.beforeSave(newRecord);
 	}
