@@ -20,6 +20,7 @@ import org.adempiere.webui.panel.InfoPanel;
 import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
 import org.compiere.model.MSysConfig;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 
 /**
@@ -82,14 +83,26 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 
 		if (col.equals("M_Product_ID") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
 		{
-			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, false, whereClause, AD_InfoWindow_ID, true);
+			if(field != null)
+			{
+				if(field.getDisplayType() != DisplayType.ChosenMultipleSelectionSearch)
+					multiSelection = false;
+			}
+			
+			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, true);
 			return info;
 		}
 
 		//JPIERE-0614(v11) - Single Selection Info Window
 		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
 		{
-			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, false, whereClause, AD_InfoWindow_ID, true);
+			if(field != null)
+			{
+				if(field.getDisplayType() != DisplayType.ChosenMultipleSelectionSearch)
+					multiSelection = false;
+			}
+			
+			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, true);
 			return info;
 		}
 		return null;
