@@ -293,7 +293,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 						oldQty = line.getQtyUsed();
 						if(oldQty.compareTo(Env.ZERO) == 0)
 						{
-							;//Noting to do because 0 * X = 0;
+							;//Nothing to do because 0 * X = 0;
 						}else {
 							newQty = oldQty.multiply(rate).setScale(isStdPrecision ? uom.getStdPrecision() : uom.getCostingPrecision(), RoundingMode.HALF_UP);
 							line.setQtyUsed(newQty);
@@ -810,7 +810,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 							movementQtyMA = movementQtyMA.negate();
 							if(qtyOnhand.compareTo(movementQtyMA) >=0 )
 							{
-								;//Noting to do;
+								;//Nothing to do;
 								
 							}else {
 								
@@ -837,7 +837,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 								if(storageOnHand.getQtyOnHand().compareTo(line.getQtyUsed()) >=0 )
 								{
-									;//Noting to do;
+									;//Nothing to do;
 								}else {
 									
 									MAttributeSetInstance asi =   new MAttributeSetInstance(getCtx(), line.getM_AttributeSetInstance_ID(), get_TrxName());
@@ -1315,7 +1315,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 		}else if(getDocStatus().equals(DocAction.STATUS_Closed)) {
 
-			;//Noting to do;
+			;//Nothing to do;
 
 		}else {
 
@@ -1354,7 +1354,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 
 		}else if(getDocStatus().equals(DocAction.STATUS_Closed)) {
 
-			;//Noting to do;
+			;//Nothing to do;
 
 		}else {
 
@@ -1380,7 +1380,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 		String JP_PP_WorkProcessType = getJP_PP_WorkProcessType();
 		if(MPPWorkProcess.JP_PP_WORKPROCESSTYPE_NotCreateDocument.equals(JP_PP_WorkProcessType))
 		{
-			return true; //Noting to do.
+			return true; //Nothing to do.
 			
 		}else if(MPPWorkProcess.JP_PP_WORKPROCESSTYPE_MaterialProduction.equals(JP_PP_WorkProcessType)) {
 			
@@ -1543,7 +1543,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 							
 						}else if(m_confirm.getDocStatus().equals(STATUS_Voided) || m_confirm.getDocStatus().equals(STATUS_Reversed) ) {
 							
-							;//Noting to do.
+							;//Nothing to do.
 						
 						}else {
 							

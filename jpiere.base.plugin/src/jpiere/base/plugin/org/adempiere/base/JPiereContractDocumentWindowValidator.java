@@ -71,7 +71,7 @@ public class JPiereContractDocumentWindowValidator implements WindowValidator {
 						if(old_ContractPeriodDate_To == null && new_ContractPeriodDate_To == null)
 						{
 							
-							;//Noting to do;
+							;//Notihng to do;
 							
 						}else if(old_ContractPeriodDate_To == null || new_ContractPeriodDate_To == null){
 							

@@ -1813,7 +1813,7 @@ public class MContractLine extends X_JP_ContractLine {
 
 		}else if(getJP_DerivativeDocPolicy_InOut().equals("DD") && getJP_DerivativeDocPolicy_Inv().equals("DD")){
 
-			;//Noting to do;
+			;//Nothing to do;
 
 		}else{
 

@@ -289,7 +289,7 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 				String docAction = content.getJP_Contract_Acct().getDocAction();
 				if(docAction == null)
 				{
-					;//Noting to do. DocStatus is Draft
+					;//Nothing to do. DocStatus is Draft
 				}else{
 
 					if (!recognition.processIt(docAction))

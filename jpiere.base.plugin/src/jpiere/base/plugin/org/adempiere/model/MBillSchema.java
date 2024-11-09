@@ -71,11 +71,11 @@ public class MBillSchema extends X_JP_BillSchema {
 				I_C_DocType docType = MDocType.get(getJP_TaxAdjust_DocType_ID());
 				if(isSOTrx() && (docType.getDocBaseType().equals("ARI") || docType.getDocBaseType().equals("ARC")) )
 				{
-					;//Noting to do;
+					;//Nothing to do;
 
 				}else if(!isSOTrx() && (docType.getDocBaseType().equals("API") || docType.getDocBaseType().equals("APC")) ){
 
-					;//Noting to do;
+					;//Nothing to do;
 
 				}else {
 

@@ -234,7 +234,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 						&& oLines[i].getQtyDelivered().compareTo(JP_QtyRecognized) == 0
 						&& oLines[i].getQtyInvoiced().compareTo(Env.ZERO) == 0 )
 				{
-					;//Noting to do
+					;//Nothing to do
 				}else{
 
 					if(oLines[i].getQtyInvoiced().compareTo(Env.ZERO) != 0)
@@ -458,7 +458,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 		/** Check traceLevel */
 		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information))
 		{
-			;//Noting to do. All create contract log.
+			;//Nothing to do. All create contract log.
 
 		}else if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed)){
 			

@@ -2672,7 +2672,7 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 				impEstimation = new X_I_EstimationJP (getCtx (), rs, get_TrxName());
 				if(preValue != null && preValue.equals(impEstimation.getBPartnerValue()))
 				{
-					;//Noting to do
+					;//Nothing to do
 				}else {
 					estimationlist.add(impEstimation);
 					preValue = impEstimation.getBPartnerValue();
@@ -3078,7 +3078,7 @@ public class JPiereImportEstimation extends SvrProcess implements ImportProcess
 
 			if(isEntryToPriceList(estimation,line))
 			{
-				;//Noting to do
+				;//Nothing to do
 			}else {
 				message = Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "JP_EstimationLine_ID") +" : " + e.toString();
 				return false;

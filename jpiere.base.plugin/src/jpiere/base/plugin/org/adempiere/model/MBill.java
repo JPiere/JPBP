@@ -662,7 +662,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		{
 			if(getJP_LastBill_ID() == 0)
 			{
-				;//Noting to do;
+				;//Nothing to do;
 
 			}else {
 
@@ -685,7 +685,7 @@ public class MBill extends X_JP_Bill implements DocAction,DocOptions
 		{
 			if(getC_Payment_ID() == 0)
 			{
-				;//Noting to do;
+				;//Nothing to do;
 
 			}else {
 

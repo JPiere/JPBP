@@ -148,11 +148,11 @@ public class Doc_InOutJP extends Doc_InOut {
 
 			if (getDocumentType().equals(DOCTYPE_MatShipment) && isSOTrx()) //Sales - Shipment
 			{
-				;//Noting to do;
+				;//Nothing to do;
 
 			}else if ( getDocumentType().equals(DOCTYPE_MatReceipt) && isSOTrx() ){//Sales - Return
 
-				;//Noting to do;
+				;//Nothing to do;
 
 			}else if (getDocumentType().equals(DOCTYPE_MatReceipt) && !isSOTrx()){//Purchasing - Receipt
 

@@ -853,7 +853,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 					if(rLine_QtyInvoiced.abs().compareTo(iLine_QtyInvoiced.abs()) == 0
 							|| iLine_QtyInvoiced.compareTo(Env.ZERO) == 0)
 					{
-						;//Noting to do
+						;//Nothing to do
 					}else{
 						//Different Quantity between {0} and {1}
 						String msg0 = Msg.getElement(Env.getCtx(), "C_InvoiceLine_ID")+" - " + Msg.getElement(Env.getCtx(), "QtyInvoiced");

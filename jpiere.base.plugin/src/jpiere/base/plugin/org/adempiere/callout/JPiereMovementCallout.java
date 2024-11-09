@@ -193,7 +193,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 			Object  obj_WarehouseTo_ID = mTab.getValue(JP_WarehouseTo_ID);
 			if(obj_WarehouseTo_ID == null)
 			{
-				;//Noting to do;
+				;//Nothing to do;
 			}else {
 				
 				int int_WarehouseTo_ID = ((Integer)obj_WarehouseTo_ID).intValue();
@@ -203,7 +203,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 				{
 					mTab.setValue(JP_WarehouseDst_ID, value);
 				}else {
-					;//Noting to do
+					;//Nothing to do
 				}
 			}
 		}		
@@ -226,7 +226,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 			Object  obj_PhysicalWarehouseTo_ID = mTab.getValue(JP_PhysicalWarehouseTo_ID);
 			if(obj_PhysicalWarehouseTo_ID == null)
 			{
-				;//Noting to do;
+				;//Nothing to do;
 			}else {
 				
 				int int_PhysicalWarehouseTo_ID = ((Integer)obj_PhysicalWarehouseTo_ID).intValue();
@@ -236,7 +236,7 @@ public class JPiereMovementCallout  extends CalloutEngine  {
 				{
 					mTab.setValue(JP_PhysicalWarehouseDst_ID, value);
 				}else {
-					;//Noting to do
+					;//Nothing to do
 				}
 			}
 		}		

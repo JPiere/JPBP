@@ -563,7 +563,7 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 			int C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), impWarehouse.getJP_Location_Label(), get_TrxName());
 			if(C_Location_ID > 0)
 			{
-				;//Noting to do;
+				;//Nothing to do;
 			}else {
 				C_Location_ID = JPiereLocationUtil.createLocation(
 						getCtx()
@@ -663,7 +663,7 @@ public class JPiereImportWarehouse extends SvrProcess  implements ImportProcess
 		{
 			updateWarehouse.setC_Location_ID(impWarehouse.getC_Location_ID());
 		}else {
-			;//Noting to do;
+			;//Nothing to do;
 		}
 
 		updateWarehouse.setIsActive(impWarehouse.isI_IsActiveJP());

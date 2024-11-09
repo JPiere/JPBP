@@ -375,7 +375,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 					if(JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS_Invalid)
 							|| JP_ContractProcStatus.equals(MContractContent.JP_CONTRACTPROCSTATUS___) )
 					{
-						;//Noting to do;
+						;//Nothing to do;
 					}else {
 
 						String JP_ContractC_AutoUpdatePolicy = (String) mTab.getValue("JP_ContractC_AutoUpdatePolicy");
@@ -385,7 +385,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 						{
 							if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
 							{
-								;//Noting to do;
+								;//Nothing to do;
 
 							}else {
 								mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
@@ -395,9 +395,9 @@ public class JPiereContractContentCallout implements IColumnCallout {
 
 							if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
 							{
-								;//Noting to do;
+								;//Nothing to do;
 							}else if(mTab.getValueAsBoolean("IsRenewedContractContentJP")) {
-								;//Noting to do;
+								;//Nothing to do;
 							}else {
 								mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());
 							}
@@ -406,7 +406,7 @@ public class JPiereContractContentCallout implements IColumnCallout {
 
 							if(DocStatus.equals(DocAction.STATUS_Closed) || DocStatus.equals(DocAction.STATUS_Reversed) || DocStatus.equals(DocAction.STATUS_Voided))
 							{
-								;//Noting to do;
+								;//Nothing to do;
 
 							}else {
 								mTab.setValue("JP_ContractProcDate_To", contract.getJP_ContractPeriodDate_To());

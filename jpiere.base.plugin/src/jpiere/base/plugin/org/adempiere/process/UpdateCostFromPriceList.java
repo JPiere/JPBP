@@ -127,7 +127,7 @@ public class UpdateCostFromPriceList extends SvrProcess {
 
 		}else if (m_InvValProfile.getCostingLevel().equals(MInvValCalLine.COSTINGLEVEL_BatchLot)){
 
-			;//Noting to do;
+			;//Nothing to do;
 
 		}
 

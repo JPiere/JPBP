@@ -56,7 +56,7 @@ public class JPiereContractCallout implements IColumnCallout {
 					{
 						updateContract(ctx, WindowNo, mTab, mField, value, oldValue) ;
 					}else{
-						;//Noting to do
+						;//Nothing to do
 					}
 		        }
 
@@ -99,7 +99,7 @@ public class JPiereContractCallout implements IColumnCallout {
 
 			}else if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) == 0 ) {
 
-				;//Noting to do
+				;//Nothing to do
 
 			}else if(JP_ContractCancelDate.compareTo(JP_ContractPeriodDate_To) > 0 ) {
 

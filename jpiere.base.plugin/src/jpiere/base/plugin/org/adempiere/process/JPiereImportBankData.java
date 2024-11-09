@@ -164,7 +164,7 @@ public class JPiereImportBankData extends SvrProcess implements ImportProcess{
 			return message;
 		
 		//Bank Account Type
-		//Noting to do;
+		//Nothing to do;
 		
 		//SalesRep_ID
 		if(p_JP_ImportSalesRepIdentifier != null)

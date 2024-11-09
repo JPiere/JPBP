@@ -317,7 +317,7 @@ public class AdjustAccountingBookQtyFromLogistics extends SvrProcess {
 					rs2 = pstmt2.executeQuery ();
 					if (rs2.next ())
 					{
-						//Noting to do;
+						//Nothing to do;
 
 					}else {
 

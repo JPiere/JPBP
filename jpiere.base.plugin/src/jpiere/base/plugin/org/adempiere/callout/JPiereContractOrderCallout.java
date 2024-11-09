@@ -87,7 +87,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 							{
 								updateByContractContent(ctx, WindowNo, mTab, mField, value, oldValue) ;
 							}else{
-								;//Noting to do
+								;//Nothing to do
 							}
 				        }
 	
@@ -124,7 +124,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 						{
 							updateByContractContent(ctx, WindowNo, mTab, mField, value, oldValue) ;
 						}else{
-							;//Noting to do
+							;//Nothing to do
 						}
 			        }
 
@@ -153,7 +153,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 						{
 							updateByContractLine(ctx, WindowNo, mTab, mField, value, oldValue) ;
 						}else{
-							;//Noting to do
+							;//Nothing to do
 						}
 			        }
 

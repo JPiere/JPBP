@@ -116,7 +116,7 @@ public class JPiereGLJournalLineModelValidator implements ModelValidator {
 				{
 					if(m_tax.getSOPOType().equals("B") || m_tax.getSOPOType().equals("S"))
 					{
-						;//Noting to do
+						;//Nothing to do
 					}else {
 						//Different between SO/PO Type of Journal and SO/PO Type of Tax.
 						return Msg.getMsg(Env.getCtx(), "JP_GLJournalTax_SOPOType");
@@ -126,7 +126,7 @@ public class JPiereGLJournalLineModelValidator implements ModelValidator {
 					
 					if(m_tax.getSOPOType().equals("B") || m_tax.getSOPOType().equals("P"))
 					{
-						;//Noting to do
+						;//Nothing to do
 					}else {
 						//Different between SO/PO Type of Journal and SO/PO Type of Tax.
 						return Msg.getMsg(Env.getCtx(), "JP_GLJournalTax_SOPOType");

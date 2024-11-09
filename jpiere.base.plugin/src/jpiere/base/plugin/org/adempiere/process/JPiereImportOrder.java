@@ -2659,7 +2659,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 				impOrder = new X_I_OrderJP (getCtx (), rs, get_TrxName());
 				if(preValue != null && preValue.equals(impOrder.getBPartnerValue()))
 				{
-					;//Noting to do
+					;//Nothing to do
 				}else {
 					orderlist.add(impOrder);
 					preValue = impOrder.getBPartnerValue();
@@ -3136,7 +3136,7 @@ public class JPiereImportOrder extends SvrProcess  implements ImportProcess
 
 			if(isEntryToPriceList(order,line))
 			{
-				;//Noting to do
+				;//Nothing to do
 			}else {
 				message = Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "C_OrderLine_ID") +" : " + e.toString();
 				return false;

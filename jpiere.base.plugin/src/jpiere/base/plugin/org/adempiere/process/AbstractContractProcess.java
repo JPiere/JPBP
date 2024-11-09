@@ -744,7 +744,7 @@ public abstract class AbstractContractProcess extends SvrProcess
 		/** Check traceLevel */
 		if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_Information))
 		{
-			;//Noting to do. All create contract log.
+			;//Nothing to do. All create contract log.
 
 		}else if(p_JP_ContractProcessTraceLevel.equals(MContractLog.JP_CONTRACTPROCESSTRACELEVEL_ToBeConfirmed)){
 

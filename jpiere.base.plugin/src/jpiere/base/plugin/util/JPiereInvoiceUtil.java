@@ -46,7 +46,7 @@ public class JPiereInvoiceUtil {
 
 			if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARI"))
 			{
-				;//Noting to do;
+				;//Nothing to do;
 
 			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARC")) {
 
@@ -62,7 +62,7 @@ public class JPiereInvoiceUtil {
 
 			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("APC")) {
 
-				;//Noting to do;
+				;//Nothing to do;
 
 			}
 
@@ -126,7 +126,7 @@ public class JPiereInvoiceUtil {
 
 			if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARI"))
 			{
-				;//Noting to do;
+				;//Nothing to do;
 
 			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("ARC")) {
 
@@ -141,7 +141,7 @@ public class JPiereInvoiceUtil {
 
 			}else if(MDocType.get(ctx, invoice.getC_DocType_ID()).getDocBaseType().equals("APC")) {
 
-				;//Noting to do;
+				;//Nothing to do;
 			}
 
 		}

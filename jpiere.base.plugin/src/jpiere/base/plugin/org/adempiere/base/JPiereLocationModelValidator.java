@@ -88,7 +88,7 @@ public class JPiereLocationModelValidator implements ModelValidator {
 			int C_Location_ID = JPiereLocationUtil.searchLocationByLabel(location.getCtx(), JP_Location_Label, location.get_TrxName());
 			if(C_Location_ID == 0)
 			{
-				;//Noting to do;
+				;//Nothing to do;
 			}else if(C_Location_ID > 0) {
 
 				int i = 1;

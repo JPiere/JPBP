@@ -518,7 +518,7 @@ public class JPiereImportOrg extends SvrProcess implements ImportProcess
 			C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), importOrg.getJP_Location_Label(), get_TrxName());
 			if(C_Location_ID > 0)
 			{
-				;//Noting to do;
+				;//Nothing to do;
 			}else {
 
 				C_Location_ID = JPiereLocationUtil.createLocation(

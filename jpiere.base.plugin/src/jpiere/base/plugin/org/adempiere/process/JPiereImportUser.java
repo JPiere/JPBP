@@ -694,28 +694,28 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_EMail))
 			{
 				if(EMail==null)
-					;//Noting
+					;//Nothing
 				else
 					pstmt.setString(2, EMail);
 
 			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Name)) {
 
 				if(Name == null)
-					;//Noting
+					;//Nothing
 				else
 					pstmt.setString(2, Name);
 
 			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_Value)) {
 
 				if(Value == null)
-					;//Noting
+					;//Nothing
 				else
 					pstmt.setString(2, Value);
 
 			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueEMail)) {
 
 				if(Value == null && EMail == null) {
-					;//Noting
+					;//Nothing
 				}else if (Value != null && EMail == null) {
 					pstmt.setString(2, Value);
 				}else if (Value == null && EMail != null) {
@@ -728,7 +728,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueName)) {
 
 				if(Value == null && Name == null) {
-					;//Noting
+					;//Nothing
 				}else if (Value != null && Name == null) {
 					pstmt.setString(2, Value);
 				}else if (Value == null && Name != null) {
@@ -740,7 +740,7 @@ public class JPiereImportUser extends SvrProcess implements ImportProcess
 			}else if(JP_ImportUserIdentifier.equals(JP_ImportUserIdentifier_ValueNameEmail)) {
 
 				if(Value == null && Name == null && EMail == null) {
-					;//Noting to do;
+					;//Nothing to do;
 				}else if (Value == null && Name == null  && EMail != null) {
 					pstmt.setString(2, EMail);
 				}else if(Value == null && Name != null && EMail == null) {

@@ -491,7 +491,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 		if(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_ForTheDurationOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_InOut()))
 		{
-			;//Noting to do;
+			;//Nothing to do;
 
 		}else if(MContractLine.JP_DERIVATIVEDOCPOLICY_INOUT_LumpOnACertainPointOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_InOut())) {
 
@@ -614,7 +614,7 @@ public class CreateContractProcessPeriod extends SvrProcess {
 
 		if(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_ForTheDurationOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_Inv()))
 		{
-			;//Noting to do;
+			;//Nothing to do;
 
 		}else if(MContractLine.JP_DERIVATIVEDOCPOLICY_INV_LumpOnACertainPointOfContractProcessPeriod.equals(cLine.getJP_DerivativeDocPolicy_Inv())) {
 

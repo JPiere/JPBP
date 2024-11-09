@@ -76,7 +76,7 @@ public class PaymentBatchReverse extends SvrProcess {
 				}else if(m_BankStatement.getDocStatus().equals(DocAction.STATUS_Voided)
 						|| m_BankStatement.getDocStatus().equals(DocAction.STATUS_Reversed) ){
 					
-					;//Noting to do;
+					;//Nothing to do;
 					
 				}else if(m_BankStatement.getDocStatus().equals(DocAction.STATUS_Closed)){
 					

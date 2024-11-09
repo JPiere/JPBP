@@ -54,7 +54,7 @@ public class MBankTransferFeeDeduct extends X_JP_BankTransferFeeDeduct {
 			if(getC_DocType().getDocBaseType().equals("API")
 					|| getC_DocType().getDocBaseType().equals("APC"))
 			{
-				;//Noting to do
+				;//Nothing to do
 			}else{
 				
 				//Incorrect Document Type

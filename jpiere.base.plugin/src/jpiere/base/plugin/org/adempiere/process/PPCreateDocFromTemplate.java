@@ -369,7 +369,7 @@ public class PPCreateDocFromTemplate extends SvrProcess {
 				{
 					if(offset == 0)
 					{
-						;//Noting to do;
+						;//Nothing to do;
 					}else {
 						startDay = startDay.plusDays(1);
 					}

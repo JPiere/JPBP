@@ -67,7 +67,7 @@ public class DefaultAutoRenewContractContent extends DefaultCreateContractByCopy
 		if(m_Contract.getJP_ContractPeriodDate_To().compareTo(m_ContractContent.getJP_ContractProcDate_To()) == 0)
 		{
 
-			;//Noting to do;
+			;//Nothing to do;
 
 		}else {
 

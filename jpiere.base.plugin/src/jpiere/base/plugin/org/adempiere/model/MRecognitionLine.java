@@ -911,7 +911,7 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			{
 				if(getJP_RecogLine_SplitFrom_ID() > 0 || getJP_TargetQtyRecognized().signum() != 0)
 				{
-					;//Noting to do;
+					;//Nothing to do;
 				}else if(getJP_TargetQtyRecognized().signum() == 0 && getM_InOutLine_ID() > 0 ) {
 
 					BigDecimal qtyRecognized = Env.ZERO;

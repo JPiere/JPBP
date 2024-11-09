@@ -555,7 +555,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 			{
 				if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) == 0 )
 				{
-					;//Noting to do
+					;//Nothing to do
 				}else {
 
 					//You can not update Contract Period Data(To) because Contract Period Data(To) is different from Contract Cancel date.
@@ -582,7 +582,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 
 			}else if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) == 0 ){
 
-				;//Noting to do
+				;//Nothing to do
 
 			}else if(getJP_ContractCancelDate().compareTo(getJP_ContractPeriodDate_To()) < 0 ){
 
@@ -769,7 +769,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 //
 //						if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_ExtendContractProcessDate) )
 //						{
-//							;//Noting to do;
+//							;//Nothing to do;
 //
 //						}else if(content.getJP_ContractC_AutoUpdatePolicy().equals(MContractContent.JP_CONTRACTC_AUTOUPDATEPOLICY_RenewTheContractContent)) {
 //
@@ -823,7 +823,7 @@ public class MContract extends X_JP_Contract implements DocAction,DocOptions
 //					}else if(new_ContractPeriodDate_To != null && JP_ContractProcDate_To.compareTo(new_ContractPeriodDate_To) < 0){
 //
 //
-//						;//Noting to do
+//						;//Nothing to do
 //
 //					}
 //

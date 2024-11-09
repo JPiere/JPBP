@@ -404,7 +404,7 @@ public class BulkUpdateProcess extends SvrProcess {
 					
 				}else {
 					
-					;//Noting to do
+					;//Nothing to do
 					
 				}
 				
@@ -488,7 +488,7 @@ public class BulkUpdateProcess extends SvrProcess {
 					
 				}else {
 					
-					;//Noting to do
+					;//Nothing to do
 					
 				}
 				

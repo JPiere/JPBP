@@ -246,7 +246,7 @@ public class JPiereInOutModelValidator implements ModelValidator {
 						|| orderDocType.getDocSubTypeSO().equals(MOrder.DocSubTypeSO_Prepay))
 				{
 
-					;//Noting to DO
+					;//Nothing to do.
 
 				}else{//Create invoice
 

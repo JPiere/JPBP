@@ -163,7 +163,7 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 						if(iol.getParent().isDropShip() && iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder)
 								&& iol.getC_OrderLine().getLink_OrderLine_ID() > 0) //Progress on Dropship process.
 						{
-							;//Noting to do. besause This check is not covered Dropship process. - 2018/6/8
+							;//Nothing to do. besause This check is not covered Dropship process. - 2018/6/8
 
 						}else {
 

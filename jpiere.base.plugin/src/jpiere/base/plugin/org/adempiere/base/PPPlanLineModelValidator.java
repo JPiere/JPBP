@@ -80,7 +80,7 @@ public class PPPlanLineModelValidator implements ModelValidator {
 			{
 				if(type == ModelValidator.TYPE_AFTER_CHANGE && !po.is_ValueChanged(I_JP_PP_PlanLine.COLUMNNAME_PlannedQty))
 				{
-					;//Noting to do;
+					;//Nothing to do;
 				}else {
 
 					I_JP_PP_PlanLine i_PO = (I_JP_PP_PlanLine)po;
