@@ -632,19 +632,18 @@ public class GenericExportProcess extends SvrProcess {
 						if(MGenericExpFormat.FORMATTYPE_CommaSeparated.equals(m_MGenericExpFormat.getFormatType()))//CSV
 						{
 							if(m_GEFRow.isEscapSeparatorCharJP() && stringData.contains(","))
-								stringData = stringData.replace("," , "\\,");//TODO エスケープ処理になっているか要確認
+								stringData = stringData.replace("," , "\\,");
 							
 						}else if(MGenericExpFormat.FORMATTYPE_TabSeparated.equals(m_MGenericExpFormat.getFormatType())){ //Tab
 							
 							
 							if(m_GEFRow.isEscapSeparatorCharJP() && stringData.contains("\t"))
-								stringData = stringData.replace("\t" , "\\t");//TODO エスケープ処理になっているか要確認
+								stringData = stringData.replace("\t" , "\\t");
 							
 						}else if(MGenericExpFormat.FORMATTYPE_CustomSeparatorChar.equals(m_MGenericExpFormat.getFormatType())){ //Custom
 							
-							String regex =  "["+m_MGenericExpFormat.getSeparatorChar()+ "]";
-							if(m_GEFRow.isEscapSeparatorCharJP() && stringData.matches(regex))
-								stringData = stringData.replaceAll(regex , "\\"+regex );//TODO エスケープ処理になっているか要確認
+							if(m_GEFRow.isEscapSeparatorCharJP() && stringData.contains(m_MGenericExpFormat.getSeparatorChar()))
+								stringData = stringData.replace(m_MGenericExpFormat.getSeparatorChar() , "\\"+m_MGenericExpFormat.getSeparatorChar() );
 							
 						}else if(MGenericExpFormat.FORMATTYPE_FixedPosition.equals(m_MGenericExpFormat.getFormatType())){ //Fix Position
 							
