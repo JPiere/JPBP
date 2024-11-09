@@ -12,7 +12,9 @@ Require-Bundle: org.adempiere.base;bundle-version="2.1.0",
  org.adempiere.ui,
  zhtml
 Bundle-Vendor: OSS ERP Solutions
-Import-Package: org.compiere.apps,
+Import-Package: org.apache.tools.ant;version="1.10.10",
+ org.apache.tools.ant.taskdefs;version="1.10.10",
+ org.compiere.apps,
  org.compiere.grid,
  org.compiere.minigrid,
  org.compiere.model,

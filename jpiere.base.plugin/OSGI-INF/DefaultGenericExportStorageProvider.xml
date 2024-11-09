@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="DefaultGenericExportStorageProvider">
+   <implementation class="jpiere.base.plugin.org.adempiere.process.DefaultGenericExportStorageProvider"/>
+   <service>
+      <provide interface="jpiere.base.plugin.org.adempiere.process.I_GenericExportStorageProvider"/>
+   </service>
+</scr:component>
