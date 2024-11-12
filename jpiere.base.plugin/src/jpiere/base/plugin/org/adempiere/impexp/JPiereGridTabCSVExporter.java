@@ -92,7 +92,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		MTable tableDetail = null;
 		try {
 			FileOutputStream fileOut = new FileOutputStream (file);
-			OutputStreamWriter oStrW = null;
+			OutputStreamWriter oStrW =  new OutputStreamWriter(fileOut, Ini.getCharset());
 			
 			//JPIERE-0451[5] set Character Code -- e.g. UTF-8 , SHIFT_JIS and so on・・・
 			String charaCode = MSysConfig.getValue("JP_EXPORT_CSV_CHARACTER_CODE", String.valueOf(Ini.getCharset()), Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));		
@@ -139,6 +139,8 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 				   continue;
 				} else if (! (field.isDisplayed() || field.isDisplayedGrid())) {
 				   continue;
+				} else if (DisplayType.Binary == field.getDisplayType()) {
+				   continue;	
 				}
 				String headName = resolveColumnName(table, column, gridTab);//JPIERE-0451 add argument GridTab
 				headArray.add(headName);
@@ -270,7 +272,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 
 					   continue;
 					}else if (DisplayType.Payment == field.getDisplayType()){
-					   value = MRefList.getListName(Env.getCtx(),REFERENCE_PAYMENTRULE, gridTab.getValue(idxrow, header[idxfld]).toString());
+					   value = MRefList.getListName(Env.getCtx(),REFERENCE_PAYMENTRULE, gridTab.getValue(idxrow, column.getColumnName()).toString());//JPIERE-0451
 					}else{
 					   value = resolveValue(gridTab, table, column, idxrow, headName);
 					}
@@ -354,7 +356,10 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		}
 	}
 
-	//add constraints to not allow certain tabs
+	/**
+	 * @param gridTab
+	 * @return error message or null
+	 */
 	private String isValidTabToExport(GridTab gridTab){
 	    String result=null;
 
@@ -366,6 +371,13 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		return result;
 	}
 
+	/**
+	 * @param currentDetRow current detail row number
+	 * @param tabMapDetails
+	 * @param headArray column headers
+	 * @param idxfld
+	 * @return Detail Row(Map{Column Header, Value})
+	 */
 	private Map<String, Object> resolveMasterDetailRow(int currentDetRow,Map<GridTab,GridField[]> tabMapDetails,List<String>headArray,int idxfld){
 		Map<String,Object> activeRow = new HashMap<String,Object>();
 		Object value = null;
@@ -461,6 +473,14 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 	    return whereClau;
 	}
 
+	/**
+	 * @param gridTab
+	 * @param table
+	 * @param column
+	 * @param i row index
+	 * @param headName
+	 * @return column value
+	 */
 	private Object resolveValue(GridTab gridTab, MTable table, MColumn column, int i, String headName) {
 		Object value = null;
 
@@ -475,15 +495,16 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 						String ref = (String) idO;
 						value = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), ref);
 					} else {
-						int id = (Integer) idO;
+						MTable forTab = MTable.get(Env.getCtx(), foreignTable);
+						String foreignKeyCol = forTab.getKeyColumns()[0];
 						int start = headName.indexOf("[")+1;
 						int end = headName.length()-1;
 						String foreignColumn = headName.substring(start, end);
 						StringBuilder select = new StringBuilder("SELECT ")
 								.append(foreignColumn).append(" FROM ")
 								.append(foreignTable).append(" WHERE ")
-								.append(foreignTable).append("_ID=?");
-						value = DB.getSQLValueStringEx(null, select.toString(), id);
+							.append(foreignKeyCol).append("=?");
+						value = DB.getSQLValueStringEx(null, select.toString(), idO);
 					}
 				}
 			} else {
@@ -511,6 +532,12 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		return value;
 	}
 
+	/**
+	 * @param selectColumn
+	 * @param tableName
+	 * @param record_id
+	 * @return value of selectColumn
+	 */
 	private Object queryExecute(String selectColumn,String tableName,Object record_id){
 
 		StringBuilder select = new StringBuilder("SELECT ")
@@ -527,7 +554,7 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		if(!MSysConfig.getBooleanValue("JP_EXPORT_CSV_DISPLAY_VALUE", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))//iDempiere original
 		{
 			StringBuilder name = new StringBuilder(column.getColumnName());
-			if (DisplayType.isLookup(column.getAD_Reference_ID())) {
+			if (DisplayType.isLookup(column.getAD_Reference_ID()) && !DisplayType.isMultiID(column.getAD_Reference_ID())) {
 				// resolve to identifier - search for value first, if not search for name - if not use the ID
 				String foreignTable = column.getReferenceTableName();
 				if ("AD_EntityType".equals(foreignTable) && I_AD_EntityType.COLUMNNAME_AD_EntityType_ID.equals(column.getColumnName())){
@@ -556,6 +583,11 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		}
 	}
 
+	/**
+	 * Resolve extra columns for displayType. Implemented for DisplayType.Location.   
+	 * @param displayType
+	 * @return list of extra columns to export
+	 */
 	private ArrayList<String> resolveSpecialColumnName(int displayType){
 
 		ArrayList<String> specialColumnNames = new ArrayList<String>();
@@ -597,6 +629,11 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 		return "application/csv";
 	}
 
+	/**
+	 * Get fields for export.
+	 * @param gridTab
+	 * @return fields for gridTab
+	 */
 	private GridField[] getFields (GridTab gridTab) {
 		GridTable tableModel = gridTab.getTableModel();
 		GridField[] tmpFields = tableModel.getFields();
@@ -623,7 +660,8 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 							|| gridField.isEncryptedColumn()
 							|| !(gridField.isDisplayed() || gridField.isDisplayedGrid())
 							//|| gridField.isReadOnly() JPIER-0451-[3]
-							|| (DisplayType.Button == MColumn.get(Env.getCtx(),gridField.getAD_Column_ID()).getAD_Reference_ID())
+							|| DisplayType.Button == gridField.getDisplayType()
+							|| DisplayType.Binary == gridField.getDisplayType()
 						   )
 							continue;
 
@@ -642,7 +680,8 @@ public class JPiereGridTabCSVExporter implements IGridTabExporter
 			{
 				if ("AD_Client_ID".equals(field.getColumnName()))
 					continue;
-				if (DisplayType.Button == MColumn.get(Env.getCtx(),field.getAD_Column_ID()).getAD_Reference_ID())
+				if (   DisplayType.Button == field.getDisplayType()
+					|| DisplayType.Binary == field.getDisplayType())
 					continue;
 				if (   field.isVirtualColumn()
 						|| field.isEncrypted()
