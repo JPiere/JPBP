@@ -2,10 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         id="jpiere.base.plugin.factory.JPiereBasePluginTaxProviderFactory"
-         point="org.adempiere.model.ITaxProvider">
-   </extension>
-   <extension
          id="jpiere.base.plugin.org.adempiere.impexp.JPiereGridTabCSVExporter"
          name="JPiere Grid data CSV exporter"
          point="org.adempiere.base.IGridTabExporter">
@@ -14,13 +10,13 @@
             priority="1">
       </exporter>
    </extension>
-      <extension
+   <extension
          id="jpiere.base.plugin.org.adempiere.impexp.JPiereGridTabCSVImporter"
          name="JPiere Grid data CSV Importer"
          point="org.adempiere.base.IGridTabImporter">
-      <exporter
+      <importer
             class="jpiere.base.plugin.org.adempiere.impexp.JPiereGridTabCSVImporter"
             priority="1">
-      </exporter>
+      </importer>
    </extension>
 </plugin>
