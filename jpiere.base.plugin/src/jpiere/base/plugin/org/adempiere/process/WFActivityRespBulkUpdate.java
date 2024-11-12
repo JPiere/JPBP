@@ -166,7 +166,7 @@ public class WFActivityRespBulkUpdate extends SvrProcess
 		for(int i = 0; i < activities.length; i++)
 		{
 			MProcess process = MProcess.get(getCtx(), PROCESS_Manage_Activity);
-			MPInstance pInstance = new MPInstance(process, 0);
+			MPInstance pInstance = new MPInstance(process, -1, 0, null);
 
 			ProcessInfo pi = new ProcessInfo(process.getName(), PROCESS_Manage_Activity, MWFActivity.Table_ID, activities[i].getAD_WF_Activity_ID());
 			pi.setParameter(pipParams);
