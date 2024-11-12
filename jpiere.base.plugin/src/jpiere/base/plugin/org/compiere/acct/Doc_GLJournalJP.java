@@ -58,6 +58,15 @@ import jpiere.base.plugin.org.adempiere.model.JPiereTaxProvider;
 import jpiere.base.plugin.util.JPiereUtil;
 
 /**
+ *  Post GL Journal Documents.
+ *  <pre>
+ *  Table:              GL_Journal (224)
+ *  Document Types:     GLJ
+ *  </pre>
+ *  @author Jorg Janke
+ *  @version  $Id: Doc_GLJournal.java,v 1.3 2006/07/30 00:53:33 jjanke Exp $
+ */
+/**
  *  JPIERE-0544: Calculate Tax Amount automatically at GL Journal.
  *  JPIERE-0553: Qualified　Invoice　Issuer
  *  JPIERE-0556: Add column to the Journal For legal compliance.
@@ -90,6 +99,7 @@ public class Doc_GLJournalJP extends Doc
 	 *  Load Specific Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails ()
 	{
 		MJournal journal = (MJournal)getPO();
@@ -220,11 +230,11 @@ public class Doc_GLJournalJP extends Doc
 		return dls;
 	}	//	loadLines
 
-
-	/**************************************************************************
+	/**
 	 *  Get Source Currency Balance - subtracts line and tax amounts from total - no rounding
 	 *  @return positive amount, if total invoice is bigger than lines
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -251,6 +261,7 @@ public class Doc_GLJournalJP extends Doc
 	 *  @param as acct schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
