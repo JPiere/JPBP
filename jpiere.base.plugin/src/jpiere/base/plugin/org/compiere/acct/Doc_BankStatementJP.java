@@ -40,21 +40,19 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
- *  Post Bank Statement Documents with Calculate Tax.
- *  Refer:Doc_BankStatement.java
- *
+ *  Post {@link MBankStatement} Documents.
+ *  <pre>
  *  Table:              C_BankStatement (392)
  *  Document Types:     CMB
  *  </pre>
  *  @author Jorg Janke
  *  @version  $Id: Doc_Bank.java,v 1.3 2006/07/30 00:53:33 jjanke Exp $
- *
- *  FR [ 1840016 ] Avoid usage of clearing accounts - subject to C_AcctSchema.IsPostIfClearingEqual
- *  Avoid posting if both accounts BankAsset and BankInTransit are equal
+ *  <p>
+ *  FR [ 1840016 ] Avoid usage of clearing accounts - subject to C_AcctSchema.IsPostIfClearingEqual.<br/>
+ *  Avoid posting if both accounts BankAsset and BankInTransit are equal.
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
- *  @author Hideaki Hagiwara（h.hagiwara@oss-erp.co.jp）
- *  @version  $Id: Doc_JPiereBankStatementTax.java,v 1.0 2014/08/20
- *
+ * 				<li>FR [ 2520591 ] Support multiples calendar for Org
+ * 				@see https://sourceforge.net/p/adempiere/feature-requests/631/
  *
  *  JPIERE-0012: Tax of Bank Statement
  *  JPIERE-0543: Tax Base Amt & Tax Amt To the Fact_Acct
@@ -87,6 +85,7 @@ public class Doc_BankStatementJP extends Doc
 	 *  Load Specific Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails ()
 	{
 		MBankStatement bs = (MBankStatement)getPO();
@@ -110,13 +109,15 @@ public class Doc_BankStatementJP extends Doc
 	}   //  loadDocumentDetails
 
 	/**
-	 *	Load Bank Statement Line.
+	 *	Load bank statement lines.
 	 *	@param bs bank statement
+	 *  <pre>
 	 *  4 amounts
 	 *  AMTTYPE_Payment
 	 *  AMTTYPE_Statement2
 	 *  AMTTYPE_Charge
 	 *  AMTTYPE_Interest
+	 *  </pre>
 	 *  @return DocLine Array
 	 */
 	protected DocLine[] loadLines(MBankStatement bs)
@@ -158,7 +159,7 @@ public class Doc_BankStatementJP extends Doc
 
 
 	/**
-	 *	Load Invoice Taxes
+	 *	Load Taxes
 	 *  @return DocTax Array
 	 */
 	private DocTax[] loadTaxes()
@@ -221,6 +222,7 @@ public class Doc_BankStatementJP extends Doc
 	 *  Get Source Currency Balance - subtracts line amounts from total - no rounding
 	 *  @return positive amount, if total invoice is bigger than lines
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -253,6 +255,7 @@ public class Doc_BankStatementJP extends Doc
 	 *  @param as accounting schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		//  create Fact Header
@@ -277,7 +280,6 @@ public class Doc_BankStatementJP extends Doc
 			MAccount acct_bank_asset =  getAccount(Doc.ACCTTYPE_BankAsset, as);
 			MAccount acct_bank_in_transit = getAccount(Doc.ACCTTYPE_BankInTransit, as);
 
-			// if ((!as.isPostIfClearingEqual()) && acct_bank_asset.equals(acct_bank_in_transit) && (!isInterOrg)) {
 			// don't validate interorg on banks for this - normally banks are balanced by orgs
 			if ((!as.isPostIfClearingEqual()) && acct_bank_asset.equals(acct_bank_in_transit)) {
 				// Not using clearing accounts
