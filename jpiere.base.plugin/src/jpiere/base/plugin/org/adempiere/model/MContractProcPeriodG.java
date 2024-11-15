@@ -29,6 +29,8 @@ import org.compiere.util.CCache;
  */
 public class MContractProcPeriodG extends X_JP_ContractProcPeriodG {
 
+	private static final long serialVersionUID = 8442303198843500693L;
+
 	public MContractProcPeriodG(Properties ctx, int JP_ContractProcPeriodG_ID, String trxName)
 	{
 		super(ctx, JP_ContractProcPeriodG_ID, trxName);

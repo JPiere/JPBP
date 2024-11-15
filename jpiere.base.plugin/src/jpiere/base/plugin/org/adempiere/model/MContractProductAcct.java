@@ -30,6 +30,8 @@ import org.compiere.util.Msg;
  **/
 public class MContractProductAcct extends X_JP_Contract_Product_Acct {
 
+	private static final long serialVersionUID = -7387240178554773363L;
+
 	public MContractProductAcct(Properties ctx, int JP_Contract_Product_Acct_ID, String trxName)
 	{
 		super(ctx, JP_Contract_Product_Acct_ID, trxName);

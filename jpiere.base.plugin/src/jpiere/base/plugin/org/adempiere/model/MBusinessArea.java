@@ -31,6 +31,8 @@ import org.compiere.util.DB;
  */
 public class MBusinessArea extends X_JP_BusinessArea {
 
+	private static final long serialVersionUID = -2391924532836814480L;
+
 	public MBusinessArea(Properties ctx, int JP_BusinessArea_ID, String trxName)
 	{
 		super(ctx, JP_BusinessArea_ID, trxName);

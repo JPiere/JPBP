@@ -25,6 +25,8 @@ import java.util.Properties;
  */
 public class MBankDataSchema extends X_JP_BankDataSchema {
 	
+	private static final long serialVersionUID = 3926648678809998286L;
+
 	public MBankDataSchema(Properties ctx, int JP_BankDataSchema_ID, String trxName) 
 	{
 		super(ctx, JP_BankDataSchema_ID, trxName);

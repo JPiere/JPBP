@@ -11,6 +11,8 @@ import java.util.Properties;
  */
 public class MProductGroupLine extends X_JP_ProductGroupLine {
 
+	private static final long serialVersionUID = 6915547857850228963L;
+
 	public MProductGroupLine(Properties ctx, int JP_ProductGroupLine_ID, String trxName) {
 		super(ctx, JP_ProductGroupLine_ID, trxName);
 	}

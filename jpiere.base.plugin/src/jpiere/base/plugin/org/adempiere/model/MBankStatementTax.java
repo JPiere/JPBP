@@ -33,6 +33,8 @@ import org.compiere.util.Env;
 
 public class MBankStatementTax extends X_JP_BankStatementTax {
 
+	private static final long serialVersionUID = -2424842672331133012L;
+
 	public MBankStatementTax(Properties ctx, int JP_BankStatementTax_ID,
 			String trxName) {
 		super(ctx, JP_BankStatementTax_ID, trxName);

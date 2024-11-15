@@ -18,6 +18,8 @@ import java.util.Properties;
 
 public class MReferenceTestLine extends X_JP_ReferenceTestLine {
 
+	private static final long serialVersionUID = -8291221075130671069L;
+
 	public MReferenceTestLine(Properties ctx, int JP_ReferenceTestLine_ID, String trxName)
 	{
 		super(ctx, JP_ReferenceTestLine_ID, trxName);

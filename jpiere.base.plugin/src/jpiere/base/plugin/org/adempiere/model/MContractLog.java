@@ -6,6 +6,8 @@ import java.util.Properties;
 
 public class MContractLog extends X_JP_ContractLog {
 	
+	private static final long serialVersionUID = -8595781347877132507L;
+
 	//Info
 	public int createDocNum = 0;
 	

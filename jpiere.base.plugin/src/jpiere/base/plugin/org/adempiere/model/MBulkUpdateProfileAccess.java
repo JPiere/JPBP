@@ -24,6 +24,8 @@ import java.util.Properties;
  */
 public class MBulkUpdateProfileAccess extends X_JP_BulkUpdateProfileAccess {
 
+	private static final long serialVersionUID = 2328198021131650808L;
+
 	public MBulkUpdateProfileAccess(Properties ctx, int JP_BulkUpdateProfileAccess_ID, String trxName) 
 	{
 		super(ctx, JP_BulkUpdateProfileAccess_ID, trxName);

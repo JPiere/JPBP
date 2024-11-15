@@ -34,6 +34,9 @@ import org.compiere.util.Msg;
 */
 public class MContractProcessRef extends X_JP_ContractProcessRef {
 
+	private static final long serialVersionUID = 5426659875990092715L;
+
+
 	public MContractProcessRef(Properties ctx, int JP_ContractProcessRef_ID, String trxName)
 	{
 		super(ctx, JP_ContractProcessRef_ID, trxName);

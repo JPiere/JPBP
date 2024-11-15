@@ -34,6 +34,8 @@ import org.zkoss.zk.ui.event.Events;
  */
 public class WFActivityZoom extends ADForm{
 
+	private static final long serialVersionUID = -7607646657311968743L;
+
 	@Override
 	protected void initForm()
 	{

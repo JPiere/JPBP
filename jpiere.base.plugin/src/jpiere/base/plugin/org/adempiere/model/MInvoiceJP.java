@@ -25,6 +25,8 @@ import org.eevolution.model.MPPProductBOMLine;
 
 public class MInvoiceJP extends MInvoice implements DocOptions {
 	
+	private static final long serialVersionUID = 1721489545075501605L;
+
 	public MInvoiceJP(Properties ctx, int C_Invoice_ID, String trxName) 
 	{
 		super(ctx, C_Invoice_ID, trxName);

@@ -31,6 +31,7 @@ import org.compiere.util.DB;
  */
 public class MIndustryType extends X_JP_IndustryType {
 
+	private static final long serialVersionUID = 2649976596445780267L;
 
 	public MIndustryType(Properties ctx, int JP_IndustryType_ID, String trxName)
 	{

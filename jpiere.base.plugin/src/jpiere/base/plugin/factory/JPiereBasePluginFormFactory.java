@@ -83,6 +83,8 @@ public class JPiereBasePluginFormFactory implements IFormFactory{
 
 	    	 ADForm adForm = new ADForm()
 	    	 {
+				private static final long serialVersionUID = -3093630842771067772L;
+
 				@Override
 				protected void initForm()
 				{

@@ -24,6 +24,8 @@ import java.util.Properties;
  */
 public class MDataMigrationLine extends X_JP_DataMigrationLine {
 
+	private static final long serialVersionUID = -1099802394789555542L;
+
 	public MDataMigrationLine(Properties ctx, int JP_DataMigrationLine_ID, String trxName)
 	{
 		super(ctx, JP_DataMigrationLine_ID, trxName);

@@ -57,6 +57,9 @@ import org.eevolution.model.MPPProductBOMLine;
  */
 public class MOrderJP extends MOrder implements DocOptions {
 
+	private static final long serialVersionUID = 8328831068486581458L;
+
+
 	public MOrderJP(Properties ctx, int C_Order_ID, String trxName) {
 		super(ctx, C_Order_ID, trxName);
 	}

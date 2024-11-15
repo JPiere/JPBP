@@ -30,6 +30,8 @@ import org.compiere.util.Msg;
  */
 public class MContractPSInvoiceLine extends X_JP_ContractPSInvoiceLine {
 
+	private static final long serialVersionUID = -3958667629564787975L;
+
 	public MContractPSInvoiceLine(Properties ctx, int JP_ContractPSInvoiceLine_ID, String trxName)
 	{
 		super(ctx, JP_ContractPSInvoiceLine_ID, trxName);

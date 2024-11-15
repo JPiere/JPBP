@@ -27,6 +27,8 @@ import org.compiere.util.Env;
  */
 public class MInvValCalLine extends X_JP_InvValCalLine {
 
+	private static final long serialVersionUID = 3906392868487384701L;
+
 	public MInvValCalLine(Properties ctx, int JP_InvValCalLine_ID, String trxName)
 	{
 		super(ctx, JP_InvValCalLine_ID, trxName);

@@ -31,6 +31,8 @@ import org.compiere.util.Util;
  */
 public class MGenericExpFormatRow extends X_JP_GenericExpFormat_Row {
 
+	private static final long serialVersionUID = -352872272796089468L;
+
 	public MGenericExpFormatRow(Properties ctx, int JP_GenericExpFormat_Row_ID, String trxName) 
 	{
 		super(ctx, JP_GenericExpFormat_Row_ID, trxName);

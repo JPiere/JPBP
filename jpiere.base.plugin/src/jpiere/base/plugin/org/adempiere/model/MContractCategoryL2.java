@@ -31,6 +31,8 @@ import org.compiere.util.DB;
  */
 public class MContractCategoryL2 extends X_JP_ContractCategoryL2 {
 
+	private static final long serialVersionUID = -9040908570393841023L;
+
 	public MContractCategoryL2(Properties ctx, int JP_ContractCategoryL2_ID, String trxName)
 	{
 		super(ctx, JP_ContractCategoryL2_ID, trxName);

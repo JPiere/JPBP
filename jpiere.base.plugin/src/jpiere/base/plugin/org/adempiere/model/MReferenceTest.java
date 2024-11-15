@@ -27,6 +27,8 @@ import org.compiere.util.Util;
  */
 public class MReferenceTest extends X_JP_ReferenceTest {
 
+	private static final long serialVersionUID = 8872567427573896024L;
+
 	public MReferenceTest(Properties ctx, int JP_ReferenceTest_ID,String trxName) {
 		super(ctx, JP_ReferenceTest_ID, trxName);
 	}

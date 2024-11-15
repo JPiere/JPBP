@@ -32,6 +32,8 @@ import org.compiere.util.Msg;
  */
 public class MContractPSInOutLine extends X_JP_ContractPSInOutLine {
 
+	private static final long serialVersionUID = -3294246767512461063L;
+
 	public MContractPSInOutLine(Properties ctx, int JP_ContractPSInOutLine_ID, String trxName)
 	{
 		super(ctx, JP_ContractPSInOutLine_ID, trxName);

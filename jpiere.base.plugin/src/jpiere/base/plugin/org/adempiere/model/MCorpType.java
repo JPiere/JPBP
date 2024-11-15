@@ -31,6 +31,8 @@ import org.compiere.util.DB;
 
 public class MCorpType extends X_JP_CorpType {
 
+	private static final long serialVersionUID = -3469459050891556921L;
+
 	public MCorpType(Properties ctx, int JP_CorpType_ID, String trxName)
 	{
 		super(ctx, JP_CorpType_ID, trxName);

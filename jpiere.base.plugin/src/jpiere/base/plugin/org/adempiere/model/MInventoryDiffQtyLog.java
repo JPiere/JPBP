@@ -24,6 +24,8 @@ import java.util.Properties;
  */
 public class MInventoryDiffQtyLog extends X_JP_InventoryDiffQtyLog {
 	
+	private static final long serialVersionUID = -9054384776215649302L;
+
 	public MInventoryDiffQtyLog(Properties ctx, int JP_InventoryDiffQtyLog_ID, String trxName)
 	{
 		super(ctx, JP_InventoryDiffQtyLog_ID, trxName);

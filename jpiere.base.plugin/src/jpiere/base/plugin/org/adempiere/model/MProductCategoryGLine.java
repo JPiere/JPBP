@@ -11,6 +11,8 @@ import java.util.Properties;
  */
 public class MProductCategoryGLine extends X_JP_ProductCategoryGLine {
 
+	private static final long serialVersionUID = -40201083214983240L;
+
 	public MProductCategoryGLine(Properties ctx, int JP_ProductCategoryGLine_ID, String trxName) {
 		super(ctx, JP_ProductCategoryGLine_ID, trxName);
 	}

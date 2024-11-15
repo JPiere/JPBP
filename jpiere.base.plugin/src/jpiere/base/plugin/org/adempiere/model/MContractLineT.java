@@ -41,6 +41,8 @@ import org.compiere.util.Util;
  */
 public class MContractLineT extends X_JP_ContractLineT {
 
+	private static final long serialVersionUID = 6079588302679432869L;
+	
 	/** Parent					*/
 	protected MContractContentT			m_parent = null;
 	protected Integer			m_precision = null;

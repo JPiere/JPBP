@@ -56,6 +56,8 @@ import jpiere.base.plugin.util.JPiereUtil;
  */
 public class MContractLine extends X_JP_ContractLine {
 
+	private static final long serialVersionUID = -5626232236867448513L;
+	
 	/** Parent					*/
 	protected MContractContent			m_parent = null;
 	protected Integer			m_precision = null;

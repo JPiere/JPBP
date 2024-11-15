@@ -36,6 +36,8 @@ import org.compiere.util.Msg;
  */
 public class MTaxHistory extends X_JP_Tax_History {
 
+	private static final long serialVersionUID = 130903526657333237L;
+
 	public MTaxHistory(Properties ctx, int JP_Tax_History_ID, String trxName) 
 	{
 		super(ctx, JP_Tax_History_ID, trxName);

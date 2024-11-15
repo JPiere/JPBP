@@ -23,6 +23,8 @@ import org.compiere.util.Env;
 
 public class MInvoiceTaxJP extends MInvoiceTax {
 
+	private static final long serialVersionUID = -9061252735645032092L;
+
 	public MInvoiceTaxJP(Properties ctx, int ignored, String trxName) {
 		super(ctx, ignored, trxName);
 	}

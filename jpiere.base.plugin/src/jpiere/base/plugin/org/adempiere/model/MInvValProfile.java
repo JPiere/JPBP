@@ -30,6 +30,8 @@ import org.compiere.util.Msg;
  */
 public class MInvValProfile extends X_JP_InvValProfile {
 
+	private static final long serialVersionUID = 266612104666146421L;
+	
 	private MInvValProfileOrg[] orgs = null;
 
 	public MInvValProfile(Properties ctx, int JP_InvValProfile_ID, String trxName) {

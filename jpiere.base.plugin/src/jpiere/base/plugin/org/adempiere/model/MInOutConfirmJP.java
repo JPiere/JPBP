@@ -39,6 +39,8 @@ import org.compiere.util.Msg;
  */
 public class MInOutConfirmJP extends MInOutConfirm implements DocOptions {
 	
+	private static final long serialVersionUID = 7171942661957658488L;
+
 	public MInOutConfirmJP(Properties ctx, int M_InOutConfirm_ID, String trxName) {
 		super(ctx, M_InOutConfirm_ID, trxName);
 	}

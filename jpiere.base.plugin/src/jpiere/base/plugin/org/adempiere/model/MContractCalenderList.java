@@ -26,6 +26,8 @@ import java.util.Properties;
 */
 public class MContractCalenderList extends X_JP_ContractCalenderList {
 	
+	private static final long serialVersionUID = 677904568392394004L;
+
 	public MContractCalenderList(Properties ctx, int JP_ContractCalenderList_ID, String trxName) 
 	{
 		super(ctx, JP_ContractCalenderList_ID, trxName);

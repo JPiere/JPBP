@@ -25,6 +25,8 @@ import java.util.Properties;
  */
 public class MGenericExpFormatReplace extends X_JP_GenericExpFormat_Replace {
 
+	private static final long serialVersionUID = 4850058454308356291L;
+
 	public MGenericExpFormatReplace(Properties ctx, int JP_GenericExpFormat_Replace_ID, String trxName) 
 	{
 		super(ctx, JP_GenericExpFormat_Replace_ID, trxName);

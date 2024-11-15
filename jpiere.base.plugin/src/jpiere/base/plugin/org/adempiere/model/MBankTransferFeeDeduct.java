@@ -31,6 +31,8 @@ import org.compiere.util.Msg;
 */
 public class MBankTransferFeeDeduct extends X_JP_BankTransferFeeDeduct {
 
+	private static final long serialVersionUID = 3807774226784549860L;
+
 	public MBankTransferFeeDeduct(Properties ctx, int JP_BankTransferFeeDeduct_ID, String trxName)
 	{
 		super(ctx, JP_BankTransferFeeDeduct_ID, trxName);

@@ -37,6 +37,8 @@ import org.compiere.util.Msg;
  */
 public class MOrgHistory extends X_JP_Org_History {
 
+	private static final long serialVersionUID = -7046614828473062154L;
+
 	public MOrgHistory(Properties ctx, int JP_Org_History_ID, String trxName)
 	{
 		super(ctx, JP_Org_History_ID, trxName);

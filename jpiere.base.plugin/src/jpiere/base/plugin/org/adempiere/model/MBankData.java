@@ -29,6 +29,8 @@ import org.compiere.util.Util;
  */
 public class MBankData extends X_JP_BankData {
 	
+	private static final long serialVersionUID = 456285359247595710L;
+
 	public MBankData(Properties ctx, int JP_BankData_ID, String trxName) 
 	{
 		super(ctx, JP_BankData_ID, trxName);

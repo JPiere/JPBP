@@ -26,6 +26,8 @@ import java.util.Properties;
  */
 public class MDataMigration extends X_JP_DataMigration {
 
+	private static final long serialVersionUID = 5274272058185361527L;
+
 	public MDataMigration(Properties ctx, int JP_DataMigration_ID, String trxName)
 	{
 		super(ctx, JP_DataMigration_ID, trxName);

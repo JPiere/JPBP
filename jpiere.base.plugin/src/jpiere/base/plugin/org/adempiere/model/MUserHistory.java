@@ -37,6 +37,8 @@ import org.compiere.util.Msg;
  */
 public class MUserHistory extends X_JP_User_History {
 
+	private static final long serialVersionUID = 1941051717057810158L;
+
 	public MUserHistory(Properties ctx, int JP_User_History_ID, String trxName) 
 	{
 		super(ctx, JP_User_History_ID, trxName);

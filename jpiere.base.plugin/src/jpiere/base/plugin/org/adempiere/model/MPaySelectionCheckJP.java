@@ -16,6 +16,8 @@ import org.compiere.model.MPaySelectionLine;
 */
 public class MPaySelectionCheckJP extends X_T_PaySelectionCheckJP {
 
+	private static final long serialVersionUID = -7999759021428758196L;
+
 	public MPaySelectionCheckJP(Properties ctx, int T_PaySelectionCheckJP_ID, String trxName) 
 	{
 		super(ctx, T_PaySelectionCheckJP_ID, trxName);

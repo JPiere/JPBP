@@ -32,6 +32,9 @@ import org.compiere.util.DB;
 */
 public class MContractCalenderRef extends X_JP_ContractCalenderRef {
 
+	private static final long serialVersionUID = 1137107105052095236L;
+
+
 	public MContractCalenderRef(Properties ctx, int JP_ContractCalenderRef_ID, String trxName)
 	{
 		super(ctx, JP_ContractCalenderRef_ID, trxName);

@@ -25,6 +25,8 @@ import org.compiere.util.DB;
 
 public class MContractCategoryL1 extends X_JP_ContractCategoryL1 {
 
+	private static final long serialVersionUID = -6916426056670598290L;
+	
 	/**	Categopry Cache				*/
 	private static CCache<Integer,MContractCategoryL1>	s_cache = new CCache<Integer,MContractCategoryL1>(Table_Name, 20);
 

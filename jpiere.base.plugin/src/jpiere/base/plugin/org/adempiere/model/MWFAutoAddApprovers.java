@@ -36,6 +36,8 @@ import org.compiere.wf.MWorkflow;
  */
 public class MWFAutoAddApprovers extends X_JP_WF_AutoAddApprovers {
 
+	private static final long serialVersionUID = 6771252304627426329L;
+
 	public MWFAutoAddApprovers(Properties ctx, int JP_WF_AutoAddApprovers_ID, String trxName)
 	{
 		super(ctx, JP_WF_AutoAddApprovers_ID, trxName);

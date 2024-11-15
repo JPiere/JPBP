@@ -29,6 +29,8 @@ import org.compiere.util.Util;
  */
 public class MBulkUpdateProfileLine extends X_JP_BulkUpdateProfileLine {
 
+	private static final long serialVersionUID = 2511731918803805125L;
+
 	public MBulkUpdateProfileLine(Properties ctx, int JP_BulkUpdateProfileLine_ID, String trxName) 
 	{
 		super(ctx, JP_BulkUpdateProfileLine_ID, trxName);

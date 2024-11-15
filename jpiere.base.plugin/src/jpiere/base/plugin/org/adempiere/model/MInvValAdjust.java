@@ -38,9 +38,6 @@ import org.compiere.util.Util;
  */
 public class MInvValAdjust extends X_JP_InvValAdjust implements DocAction, DocOptions
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7588955558162632796L;
 	
 	private MInvValAdjustLine[] m_lines =null;

@@ -18,6 +18,8 @@ import org.compiere.util.DB;
  */
 public class MProductCategoryL1 extends X_JP_ProductCategoryL1 {
 
+	private static final long serialVersionUID = 810760130568853850L;
+
 	public MProductCategoryL1(Properties ctx, int JP_ProductCategoryL1_ID, String trxName) {
 		super(ctx, JP_ProductCategoryL1_ID, trxName);
 	}

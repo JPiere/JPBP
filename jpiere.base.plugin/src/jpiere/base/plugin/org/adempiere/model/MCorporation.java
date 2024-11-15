@@ -34,6 +34,8 @@ import org.compiere.util.Util;
  */
 public class MCorporation extends X_JP_Corporation {
 
+	private static final long serialVersionUID = -2378977030529718528L;
+
 	public MCorporation(Properties ctx, int JP_Corporation_ID, String trxName) {
 		super(ctx, JP_Corporation_ID, trxName);
 	}

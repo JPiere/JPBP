@@ -66,6 +66,7 @@ import org.compiere.util.Util;
  */
 public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 {
+	private static final long serialVersionUID = -5285143002075296884L;
 
 	public MPPFact(Properties ctx, int JP_PP_Fact_ID, String trxName)
 	{

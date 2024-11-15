@@ -37,6 +37,8 @@ import org.compiere.util.Msg;
  */
 public class MBPartnerHistory extends X_JP_BPartner_History {
 
+	private static final long serialVersionUID = -1287296956798428767L;
+
 	public MBPartnerHistory(Properties ctx, int JP_BPartner_History_ID, String trxName) 
 	{
 		super(ctx, JP_BPartner_History_ID, trxName);

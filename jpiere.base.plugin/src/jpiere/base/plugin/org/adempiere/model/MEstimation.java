@@ -69,9 +69,6 @@ import jpiere.base.plugin.util.JPiereUtil;
  */
 public class MEstimation extends X_JP_Estimation implements DocAction,DocOptions
 {
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -7588955558162632796L;
 
 	/**	Estimation Lines					*/

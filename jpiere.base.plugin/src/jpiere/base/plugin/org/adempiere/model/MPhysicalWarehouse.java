@@ -32,6 +32,8 @@ import org.compiere.util.CCache;
  */
 public class MPhysicalWarehouse extends X_JP_PhysicalWarehouse {
 
+	private static final long serialVersionUID = -3378177714811974901L;
+
 	/**	Physical Warehouse Locators				*/
 	private MLocator[]	m_locators = null;
 

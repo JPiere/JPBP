@@ -11,6 +11,8 @@ import java.util.Properties;
  */
 public class MSalesRegionL2 extends X_JP_SalesRegionL2 {
 
+	private static final long serialVersionUID = -6552287459254664339L;
+
 	public MSalesRegionL2(Properties ctx, int JP_SalesRegionL2_ID, String trxName) {
 		super(ctx, JP_SalesRegionL2_ID, trxName);
 	}

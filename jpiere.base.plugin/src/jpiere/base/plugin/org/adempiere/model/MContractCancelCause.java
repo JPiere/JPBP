@@ -24,6 +24,8 @@ import java.util.Properties;
 */
 public class MContractCancelCause extends X_JP_ContractCancelCause {
 	
+	private static final long serialVersionUID = 1029510404559982350L;
+
 	public MContractCancelCause(Properties ctx, int JP_ContractCancelCause_ID, String trxName) 
 	{
 		super(ctx, JP_ContractCancelCause_ID, trxName);

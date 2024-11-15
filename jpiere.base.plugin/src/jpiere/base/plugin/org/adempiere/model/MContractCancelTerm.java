@@ -31,6 +31,8 @@ import org.compiere.util.Msg;
 */
 public class MContractCancelTerm extends X_JP_ContractCancelTerm {
 
+	private static final long serialVersionUID = 5383388285777608254L;
+
 	public MContractCancelTerm(Properties ctx, int JP_ContractCancelTerm_ID, String trxName)
 	{
 		super(ctx, JP_ContractCancelTerm_ID, trxName);

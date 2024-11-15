@@ -36,6 +36,8 @@ import org.compiere.util.Msg;
  */
 public class MBankAccountHistory extends X_JP_BankAccount_History {
 
+	private static final long serialVersionUID = 1351708264863948467L;
+
 	public MBankAccountHistory(Properties ctx, int JP_BankAccount_History_ID, String trxName)
 	{
 		super(ctx, JP_BankAccount_History_ID, trxName);

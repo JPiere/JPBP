@@ -10,6 +10,9 @@ import org.compiere.util.DB;
 
 public class MBillTax extends X_JP_BillTax {
 
+	private static final long serialVersionUID = -2813443463838961288L;
+
+
 	public MBillTax(Properties ctx, int JP_BillTax_ID, String trxName)
 	{
 		super(ctx, JP_BillTax_ID, trxName);

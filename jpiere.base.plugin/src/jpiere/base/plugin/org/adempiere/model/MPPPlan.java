@@ -54,6 +54,7 @@ import org.compiere.util.Util;
  */
 public class MPPPlan extends X_JP_PP_Plan implements DocAction,DocOptions
 {
+	private static final long serialVersionUID = 4835129020359545183L;
 
 	public MPPPlan(Properties ctx, int JP_PP_Plan_ID, String trxName)
 	{

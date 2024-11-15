@@ -70,9 +70,6 @@ import jpiere.base.plugin.util.JPiereUtil;
 */
 public class MContractContent extends X_JP_ContractContent implements DocAction,DocOptions
 {
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -7588955558162632796L;
 
 

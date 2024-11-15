@@ -25,6 +25,8 @@ import java.util.Properties;
 */
 public class MContractBPAcct extends X_JP_Contract_BP_Acct {
 
+	private static final long serialVersionUID = 2410180164152443931L;
+
 	public MContractBPAcct(Properties ctx, int JP_Contract_BP_Acct_ID, String trxName)
 	{
 		super(ctx, JP_Contract_BP_Acct_ID, trxName);

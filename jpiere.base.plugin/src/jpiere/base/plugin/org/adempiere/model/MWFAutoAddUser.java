@@ -24,6 +24,8 @@ import java.util.Properties;
  */
 public class MWFAutoAddUser extends X_JP_WF_AutoAddUser {
 
+	private static final long serialVersionUID = -6567789658422241735L;
+
 	public MWFAutoAddUser(Properties ctx, int JP_WF_AutoAddUser_ID, String trxName)
 	{
 		super(ctx, JP_WF_AutoAddUser_ID, trxName);

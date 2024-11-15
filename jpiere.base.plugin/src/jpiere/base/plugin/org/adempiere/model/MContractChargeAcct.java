@@ -31,6 +31,8 @@ import org.compiere.util.Msg;
  **/
 public class MContractChargeAcct extends X_JP_Contract_Charge_Acct {
 
+	private static final long serialVersionUID = 712562843844124237L;
+
 	public MContractChargeAcct(Properties ctx, int JP_Contract_Charge_Acct_ID, String trxName)
 	{
 		super(ctx, JP_Contract_Charge_Acct_ID, trxName);

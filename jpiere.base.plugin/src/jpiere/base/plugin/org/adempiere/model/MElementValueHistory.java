@@ -37,6 +37,8 @@ import org.compiere.util.Msg;
  */
 public class MElementValueHistory extends X_JP_ElementValue_History {
 
+	private static final long serialVersionUID = 8157209610311606106L;
+
 	public MElementValueHistory(Properties ctx, int JP_ElementValue_History_ID, String trxName) 
 	{
 		super(ctx, JP_ElementValue_History_ID, trxName);

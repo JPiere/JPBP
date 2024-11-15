@@ -21,6 +21,8 @@ import org.compiere.util.Env;
  */
 public class MRMATaxJP extends MRMATax {
 
+	private static final long serialVersionUID = -6039507265768739745L;
+
 	public MRMATaxJP(Properties ctx, int ignored, String trxName)
 	{
 		super(ctx, ignored, trxName);

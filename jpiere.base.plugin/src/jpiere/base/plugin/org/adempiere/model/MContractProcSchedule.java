@@ -61,9 +61,6 @@ import org.compiere.util.Util;
  */
 public class MContractProcSchedule extends X_JP_ContractProcSchedule implements DocAction,DocOptions
 {
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -7588955558162632796L;
 
     /** Standard Constructor */

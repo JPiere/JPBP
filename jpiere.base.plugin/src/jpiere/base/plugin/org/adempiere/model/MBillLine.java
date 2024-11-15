@@ -43,6 +43,8 @@ import jpiere.base.plugin.util.JPiereUtil;
 
 public class MBillLine extends X_JP_BillLine {
 
+	private static final long serialVersionUID = 4686349868461924544L;
+
 	public MBillLine(Properties ctx, int JP_BillLine_ID, String trxName) {
 		super(ctx, JP_BillLine_ID, trxName);
 	}

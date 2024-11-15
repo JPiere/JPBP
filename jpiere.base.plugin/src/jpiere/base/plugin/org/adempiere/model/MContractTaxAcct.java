@@ -30,6 +30,8 @@ import org.compiere.util.Msg;
  **/
 public class MContractTaxAcct extends X_JP_Contract_Tax_Acct {
 
+	private static final long serialVersionUID = -6582174870834027615L;
+
 	public MContractTaxAcct(Properties ctx, int JP_Contract_Tax_Acct_ID, String trxName)
 	{
 		super(ctx, JP_Contract_Tax_Acct_ID, trxName);

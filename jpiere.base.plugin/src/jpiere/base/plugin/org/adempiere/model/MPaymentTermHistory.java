@@ -36,6 +36,8 @@ import org.compiere.util.Msg;
  */
 public class MPaymentTermHistory extends X_JP_PaymentTerm_History {
 
+	private static final long serialVersionUID = -6200853092354310203L;
+
 	public MPaymentTermHistory(Properties ctx, int JP_PaymentTerm_History_ID, String trxName) 
 	{
 		super(ctx, JP_PaymentTerm_History_ID, trxName);

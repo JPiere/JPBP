@@ -51,9 +51,6 @@ import org.compiere.util.Util;
 */
 public class MContract extends X_JP_Contract implements DocAction,DocOptions
 {
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -7588955558162632796L;
 
 

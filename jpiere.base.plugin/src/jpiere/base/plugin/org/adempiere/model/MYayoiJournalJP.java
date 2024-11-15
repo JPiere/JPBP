@@ -24,6 +24,8 @@ import java.util.Properties;
  */
 public class MYayoiJournalJP extends X_T_Yayoi_JournalJP {
 
+	private static final long serialVersionUID = 930565551401764401L;
+
 	public MYayoiJournalJP(Properties ctx, int T_Yayoi_JournalJP_ID, String trxName)
 	{
 		super(ctx, T_Yayoi_JournalJP_ID, trxName);

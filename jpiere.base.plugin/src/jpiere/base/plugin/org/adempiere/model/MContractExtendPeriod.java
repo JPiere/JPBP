@@ -31,6 +31,8 @@ import org.compiere.util.Msg;
 */
 public class MContractExtendPeriod extends X_JP_ContractExtendPeriod {
 
+	private static final long serialVersionUID = 4459407024636353742L;
+
 	public MContractExtendPeriod(Properties ctx, int JP_ContractExtendPeriod_ID, String trxName)
 	{
 		super(ctx, JP_ContractExtendPeriod_ID, trxName);

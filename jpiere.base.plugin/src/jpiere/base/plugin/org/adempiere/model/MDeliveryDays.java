@@ -26,6 +26,8 @@ import org.compiere.util.Env;
  */
 public class MDeliveryDays extends X_JP_DeliveryDays {
 
+	private static final long serialVersionUID = 8255196587733199110L;
+	
 	static MDeliveryDays[] m_deliveryDays = null;
 
 	public MDeliveryDays(Properties ctx, int JP_DeliveryDays_ID, String trxName) {

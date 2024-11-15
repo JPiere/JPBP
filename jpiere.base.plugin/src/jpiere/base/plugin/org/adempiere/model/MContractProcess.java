@@ -29,6 +29,8 @@ import org.compiere.util.CCache;
 */
 public class MContractProcess extends X_JP_ContractProcess {
 
+	private static final long serialVersionUID = -8759349865931888772L;
+
 	public MContractProcess(Properties ctx, int JP_ContractProcess_ID, String trxName)
 	{
 		super(ctx, JP_ContractProcess_ID, trxName);

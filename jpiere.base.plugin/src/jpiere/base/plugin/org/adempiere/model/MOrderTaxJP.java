@@ -21,6 +21,8 @@ import org.compiere.util.Env;
  */
 public class MOrderTaxJP extends MOrderTax {
 
+	private static final long serialVersionUID = 8431766493223431760L;
+
 	public MOrderTaxJP(Properties ctx, int ignored, String trxName)
 	{
 		super(ctx, ignored, trxName);

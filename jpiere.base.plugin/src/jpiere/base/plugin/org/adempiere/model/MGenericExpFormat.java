@@ -31,6 +31,8 @@ import org.compiere.util.Util;
  */
 public class MGenericExpFormat extends X_JP_GenericExpFormat {
 
+	private static final long serialVersionUID = -7891277435351547234L;
+
 	public MGenericExpFormat(Properties ctx, int JP_GenericExpFormat_ID, String trxName) 
 	{
 		super(ctx, JP_GenericExpFormat_ID, trxName);

@@ -34,6 +34,8 @@ import org.compiere.util.Util;
  */
 public class MContractPSLine extends X_JP_ContractPSLine {
 
+	private static final long serialVersionUID = -3900379544044789253L;
+
 	public MContractPSLine(Properties ctx, int JP_ContractPSLine_ID, String trxName)
 	{
 		super(ctx, JP_ContractPSLine_ID, trxName);

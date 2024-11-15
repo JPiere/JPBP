@@ -24,6 +24,8 @@ import java.util.Properties;
  */
 public class MInvValProfileOrg extends X_JP_InvValProfileOrg {
 
+	private static final long serialVersionUID = -1875486493235482966L;
+	
 	MInvValProfile parent = null;
 
 	public MInvValProfileOrg(Properties ctx, int JP_InvValProfileOrg_ID, String trxName)

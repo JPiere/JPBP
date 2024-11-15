@@ -23,6 +23,8 @@ import org.compiere.util.Env;
 
 public class MEstimationTax extends X_JP_EstimationTax {
 
+	private static final long serialVersionUID = 3167592348807822783L;
+	
 	/** Cached Precision			*/
 	private Integer		m_precision = null;
 

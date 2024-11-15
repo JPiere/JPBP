@@ -39,6 +39,8 @@ import org.compiere.wf.MWorkflow;
  */
 public class MWFAutoForward extends X_JP_WF_AutoForward {
 
+	private static final long serialVersionUID = -8700685430797351394L;
+
 	public MWFAutoForward(Properties ctx, int JP_WF_AutoForward_ID, String trxName)
 	{
 		super(ctx, JP_WF_AutoForward_ID, trxName);

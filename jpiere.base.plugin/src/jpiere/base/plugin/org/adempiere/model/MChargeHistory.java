@@ -36,6 +36,8 @@ import org.compiere.util.Msg;
  */
 public class MChargeHistory extends X_JP_Charge_History {
 
+	private static final long serialVersionUID = 476402552856829211L;
+
 	public MChargeHistory(Properties ctx, int JP_Charge_History_ID, String trxName)
 	{
 		super(ctx, JP_Charge_History_ID, trxName);

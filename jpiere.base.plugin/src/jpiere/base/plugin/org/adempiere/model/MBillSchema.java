@@ -36,6 +36,8 @@ import org.compiere.util.Msg;
  */
 public class MBillSchema extends X_JP_BillSchema {
 
+	private static final long serialVersionUID = -3982523802541478925L;
+
 	public MBillSchema(Properties ctx, int JP_BillSchema_ID, String trxName) {
 		super(ctx, JP_BillSchema_ID, trxName);
 	}

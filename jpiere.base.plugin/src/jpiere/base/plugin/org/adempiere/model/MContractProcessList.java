@@ -27,6 +27,8 @@ import java.util.Properties;
 */
 public class MContractProcessList extends X_JP_ContractProcessList {
 	
+	private static final long serialVersionUID = -6726525077090390262L;
+
 	public MContractProcessList(Properties ctx, int JP_ContractProcessList_ID, String trxName) 
 	{
 		super(ctx, JP_ContractProcessList_ID, trxName);

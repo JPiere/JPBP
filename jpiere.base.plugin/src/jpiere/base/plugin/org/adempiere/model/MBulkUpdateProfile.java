@@ -27,6 +27,9 @@ import org.compiere.model.Query;
  */
 public class MBulkUpdateProfile extends X_JP_BulkUpdateProfile {
 
+	private static final long serialVersionUID = -1995859719381746297L;
+
+
 	public MBulkUpdateProfile(Properties ctx, int JP_BulkUpdateProfile_ID, String trxName) 
 	{
 		super(ctx, JP_BulkUpdateProfile_ID, trxName);

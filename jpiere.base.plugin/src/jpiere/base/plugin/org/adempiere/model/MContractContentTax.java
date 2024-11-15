@@ -30,6 +30,8 @@ import org.compiere.util.Env;
 */
 public class MContractContentTax extends X_JP_ContractContentTax {
 
+	private static final long serialVersionUID = 5087977554474079364L;
+	
 	/** Cached Precision			*/
 	private Integer		m_precision = null;
 

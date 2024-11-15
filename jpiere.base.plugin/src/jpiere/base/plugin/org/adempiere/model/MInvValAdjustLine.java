@@ -9,6 +9,8 @@ import org.compiere.util.Util;
 
 public class MInvValAdjustLine extends X_JP_InvValAdjustLine {
 	
+	private static final long serialVersionUID = 4499038460019407903L;
+	
 	MInvValAdjust parent = null;
 	MInventoryDiffQtyLog[] diffLogs = null;
 	

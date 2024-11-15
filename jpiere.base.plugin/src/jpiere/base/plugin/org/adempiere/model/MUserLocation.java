@@ -30,6 +30,8 @@ import org.compiere.util.Util;
  */
 public class MUserLocation extends X_JP_User_Location {
 
+	private static final long serialVersionUID = -3335684968266184209L;
+
 	public MUserLocation(Properties ctx, int JP_User_Location_ID, String trxName)
 	{
 		super(ctx, JP_User_Location_ID, trxName);

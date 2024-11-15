@@ -25,6 +25,8 @@ import java.util.Properties;
  */
 public class MGroupCorporations extends X_JP_GroupCorporations {
 
+	private static final long serialVersionUID = -3281740474321633542L;
+
 	public MGroupCorporations(Properties ctx, int JP_GroupCorporations_ID,
 			String trxName) {
 		super(ctx, JP_GroupCorporations_ID, trxName);

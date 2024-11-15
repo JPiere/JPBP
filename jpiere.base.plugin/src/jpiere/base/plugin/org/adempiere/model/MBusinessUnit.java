@@ -32,6 +32,8 @@ import org.compiere.util.DB;
  */
 public class MBusinessUnit extends X_JP_BusinessUnit {
 
+	private static final long serialVersionUID = 7434005716157514606L;
+
 	public MBusinessUnit(Properties ctx, int JP_BusinessUnit_ID, String trxName)
 	{
 		super(ctx, JP_BusinessUnit_ID, trxName);
