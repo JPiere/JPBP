@@ -27,6 +27,7 @@ import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MColumn;
 import org.compiere.model.MExpenseType;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPO;
 import org.compiere.model.MResource;
@@ -95,7 +96,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			else if (name.equals("JP_ImportSalesRepIdentifier"))
 				p_JP_ImportSalesRepIdentifier = para[i].getParameterAsString();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 
@@ -173,6 +174,13 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_UOM_ID");
 		if(processMonitor != null)	processMonitor.statusUpdate(message);
 		if(reverseLookupC_UOM_ID())
+			commitEx();
+		else
+			return message;
+		
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_VendorUOM_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);
+		if(reverseLookupJP_VendorUOM_ID())
 			commitEx();
 		else
 			return message;
@@ -376,7 +384,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 						}
 					}
 					
-				}else{//if(!isNew)
+				}else{//Update
 
 					if(updateProduct(imp,product))
 					{
@@ -627,7 +635,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 			throw new Exception(Msg.getMsg(getCtx(), "Error") + message  +" : " +  e.toString() +" : " + sql );
 		}
 
-		//Invalid ProuctCategory_Value
+		//Invalid Product Category_Value
 		message = Msg.getMsg(getCtx(), "Error") + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "ProductCategory_Value");
 		sql = new StringBuilder ("UPDATE I_ProductJP ")
 			.append("SET I_ErrorMsg='"+ message + "'")
@@ -747,6 +755,46 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 
 	}//reverseLookupC_UOM_ID
 
+	/**
+	 * Reverse Look up JP_VendorUOM_ID From JP_VendorX12DE355
+	 *
+	 * @throws Exception
+	 */
+	private boolean reverseLookupJP_VendorUOM_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_ProductJP i ")
+				.append("SET JP_VendorUOM_ID=(SELECT C_UOM_ID FROM C_UOM p")
+				.append(" WHERE i.JP_VendorX12DE355=p.X12DE355 AND (i.AD_Client_ID=p.AD_Client_ID OR p.AD_Client_ID = 0) ) ")
+				.append("WHERE JP_VendorX12DE355 IS NOT NULL")
+				.append(" AND I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " +  e.toString() +" : " + sql );
+		}
+
+		//Invalid X12DE355
+		message = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_VendorX12DE355");
+		sql = new StringBuilder ("UPDATE I_ProductJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_VendorX12DE355 IS NOT NULL AND JP_VendorUOM_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		}catch(Exception e) {
+			throw new Exception(message +" : " +  e.toString() +" : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_VendorUOM_ID
 
 	/**
 	 * Reverse Look up Freight Category From JP_FreightCategory_Value
