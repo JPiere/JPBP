@@ -22,21 +22,58 @@ import java.util.Properties;
 import org.compiere.model.*;
 
 /** Generated Model for JP_CorpType
- *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
-public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent 
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
+@org.adempiere.base.Model(table="JP_CorpType")
+public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170219L;
+	private static final long serialVersionUID = 20241204L;
 
     /** Standard Constructor */
     public X_JP_CorpType (Properties ctx, int JP_CorpType_ID, String trxName)
     {
       super (ctx, JP_CorpType_ID, trxName);
       /** if (JP_CorpType_ID == 0)
+        {
+			setJP_CorpType_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_CorpType (Properties ctx, int JP_CorpType_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_CorpType_ID, trxName, virtualColumns);
+      /** if (JP_CorpType_ID == 0)
+        {
+			setJP_CorpType_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_CorpType (Properties ctx, String JP_CorpType_UU, String trxName)
+    {
+      super (ctx, JP_CorpType_UU, trxName);
+      /** if (JP_CorpType_UU == null)
+        {
+			setJP_CorpType_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_CorpType (Properties ctx, String JP_CorpType_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_CorpType_UU, trxName, virtualColumns);
+      /** if (JP_CorpType_UU == null)
         {
 			setJP_CorpType_ID (0);
 			setName (null);
@@ -51,7 +88,7 @@ public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -67,15 +104,14 @@ public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_CorpType[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_CorpType[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -84,24 +120,25 @@ public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Corp Type.
-		@param JP_CorpType_ID Corp Type	  */
+		@param JP_CorpType_ID Corp Type
+	*/
 	public void setJP_CorpType_ID (int JP_CorpType_ID)
 	{
-		if (JP_CorpType_ID < 1) 
+		if (JP_CorpType_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_CorpType_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_CorpType_ID, Integer.valueOf(JP_CorpType_ID));
 	}
 
 	/** Get Corp Type.
 		@return Corp Type	  */
-	public int getJP_CorpType_ID () 
+	public int getJP_CorpType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CorpType_ID);
 		if (ii == null)
@@ -110,7 +147,8 @@ public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
 	}
 
 	/** Set JP_CorpType_UU.
-		@param JP_CorpType_UU JP_CorpType_UU	  */
+		@param JP_CorpType_UU JP_CorpType_UU
+	*/
 	public void setJP_CorpType_UU (String JP_CorpType_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_CorpType_UU, JP_CorpType_UU);
@@ -118,15 +156,14 @@ public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
 
 	/** Get JP_CorpType_UU.
 		@return JP_CorpType_UU	  */
-	public String getJP_CorpType_UU () 
+	public String getJP_CorpType_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_CorpType_UU);
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -135,15 +172,14 @@ public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -152,7 +188,7 @@ public class X_JP_CorpType extends PO implements I_JP_CorpType, I_Persistent
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}
