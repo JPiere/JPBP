@@ -22,21 +22,58 @@ import java.util.Properties;
 import org.compiere.model.*;
 
 /** Generated Model for JP_BusinessUnit
- *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
-public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persistent 
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
+@org.adempiere.base.Model(table="JP_BusinessUnit")
+public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170219L;
+	private static final long serialVersionUID = 20241204L;
 
     /** Standard Constructor */
     public X_JP_BusinessUnit (Properties ctx, int JP_BusinessUnit_ID, String trxName)
     {
       super (ctx, JP_BusinessUnit_ID, trxName);
       /** if (JP_BusinessUnit_ID == 0)
+        {
+			setJP_BusinessUnit_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_BusinessUnit (Properties ctx, int JP_BusinessUnit_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_BusinessUnit_ID, trxName, virtualColumns);
+      /** if (JP_BusinessUnit_ID == 0)
+        {
+			setJP_BusinessUnit_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_BusinessUnit (Properties ctx, String JP_BusinessUnit_UU, String trxName)
+    {
+      super (ctx, JP_BusinessUnit_UU, trxName);
+      /** if (JP_BusinessUnit_UU == null)
+        {
+			setJP_BusinessUnit_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_BusinessUnit (Properties ctx, String JP_BusinessUnit_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_BusinessUnit_UU, trxName, virtualColumns);
+      /** if (JP_BusinessUnit_UU == null)
         {
 			setJP_BusinessUnit_ID (0);
 			setName (null);
@@ -51,7 +88,7 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -67,15 +104,14 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_BusinessUnit[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_BusinessUnit[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -84,29 +120,31 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	public I_JP_BusinessArea getJP_BusinessArea() throws RuntimeException
-    {
-		return (I_JP_BusinessArea)MTable.get(getCtx(), I_JP_BusinessArea.Table_Name)
-			.getPO(getJP_BusinessArea_ID(), get_TrxName());	}
+	{
+		return (I_JP_BusinessArea)MTable.get(getCtx(), I_JP_BusinessArea.Table_ID)
+			.getPO(getJP_BusinessArea_ID(), get_TrxName());
+	}
 
 	/** Set Business Area.
-		@param JP_BusinessArea_ID Business Area	  */
+		@param JP_BusinessArea_ID Business Area
+	*/
 	public void setJP_BusinessArea_ID (int JP_BusinessArea_ID)
 	{
-		if (JP_BusinessArea_ID < 1) 
+		if (JP_BusinessArea_ID < 1)
 			set_Value (COLUMNNAME_JP_BusinessArea_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_BusinessArea_ID, Integer.valueOf(JP_BusinessArea_ID));
 	}
 
 	/** Get Business Area.
 		@return Business Area	  */
-	public int getJP_BusinessArea_ID () 
+	public int getJP_BusinessArea_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BusinessArea_ID);
 		if (ii == null)
@@ -115,18 +153,19 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 	}
 
 	/** Set Business Unit.
-		@param JP_BusinessUnit_ID Business Unit	  */
+		@param JP_BusinessUnit_ID Business Unit
+	*/
 	public void setJP_BusinessUnit_ID (int JP_BusinessUnit_ID)
 	{
-		if (JP_BusinessUnit_ID < 1) 
+		if (JP_BusinessUnit_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_BusinessUnit_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_BusinessUnit_ID, Integer.valueOf(JP_BusinessUnit_ID));
 	}
 
 	/** Get Business Unit.
 		@return Business Unit	  */
-	public int getJP_BusinessUnit_ID () 
+	public int getJP_BusinessUnit_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_BusinessUnit_ID);
 		if (ii == null)
@@ -135,7 +174,8 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 	}
 
 	/** Set JP_BusinessUnit_UU.
-		@param JP_BusinessUnit_UU JP_BusinessUnit_UU	  */
+		@param JP_BusinessUnit_UU JP_BusinessUnit_UU
+	*/
 	public void setJP_BusinessUnit_UU (String JP_BusinessUnit_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_BusinessUnit_UU, JP_BusinessUnit_UU);
@@ -143,24 +183,25 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 
 	/** Get JP_BusinessUnit_UU.
 		@return JP_BusinessUnit_UU	  */
-	public String getJP_BusinessUnit_UU () 
+	public String getJP_BusinessUnit_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BusinessUnit_UU);
 	}
 
 	/** Set Org HQ.
-		@param JP_OrgHQ_ID Org HQ	  */
+		@param JP_OrgHQ_ID Org HQ
+	*/
 	public void setJP_OrgHQ_ID (int JP_OrgHQ_ID)
 	{
-		if (JP_OrgHQ_ID < 1) 
+		if (JP_OrgHQ_ID < 1)
 			set_Value (COLUMNNAME_JP_OrgHQ_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_OrgHQ_ID, Integer.valueOf(JP_OrgHQ_ID));
 	}
 
 	/** Get Org HQ.
 		@return Org HQ	  */
-	public int getJP_OrgHQ_ID () 
+	public int getJP_OrgHQ_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_OrgHQ_ID);
 		if (ii == null)
@@ -169,9 +210,8 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -180,15 +220,14 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -197,7 +236,7 @@ public class X_JP_BusinessUnit extends PO implements I_JP_BusinessUnit, I_Persis
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}
