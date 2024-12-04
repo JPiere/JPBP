@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_BPartnerJP
  *  @author iDempiere (generated) 
- *  @version Release 5.1
+ *  @version Release 11
  */
 @SuppressWarnings("all")
 public interface I_I_BPartnerJP 
@@ -37,17 +37,17 @@ public interface I_I_BPartnerJP
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 3 - Client - Org 
+    /** AccessLevel = 7 - System - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(3);
+    BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
 
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -68,12 +68,12 @@ public interface I_I_BPartnerJP
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -227,12 +227,12 @@ public interface I_I_BPartnerJP
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -483,12 +483,14 @@ public interface I_I_BPartnerJP
     public static final String COLUMNNAME_DUNS = "DUNS";
 
 	/** Set D-U-N-S.
-	  * Dun & Bradstreet Number
+	  * Dun &amp;
+ Bradstreet Number
 	  */
 	public void setDUNS (String DUNS);
 
 	/** Get D-U-N-S.
-	  * Dun & Bradstreet Number
+	  * Dun &amp;
+ Bradstreet Number
 	  */
 	public String getDUNS();
 
@@ -844,12 +846,14 @@ public interface I_I_BPartnerJP
     public static final String COLUMNNAME_IsPayFrom = "IsPayFrom";
 
 	/** Set Pay-From Address.
-	  * Business Partner pays from that address and we'll send dunning letters there
+	  * Business Partner pays from that address and we&#039;
+ll send dunning letters there
 	  */
 	public void setIsPayFrom (boolean IsPayFrom);
 
 	/** Get Pay-From Address.
-	  * Business Partner pays from that address and we'll send dunning letters there
+	  * Business Partner pays from that address and we&#039;
+ll send dunning letters there
 	  */
 	public boolean isPayFrom();
 
@@ -1396,12 +1400,12 @@ public interface I_I_BPartnerJP
     /** Column name PO_PriceList_ID */
     public static final String COLUMNNAME_PO_PriceList_ID = "PO_PriceList_ID";
 
-	/** Set Purchase Pricelist.
+	/** Set Purchase Price List.
 	  * Price List used by this Business Partner
 	  */
 	public void setPO_PriceList_ID (int PO_PriceList_ID);
 
-	/** Get Purchase Pricelist.
+	/** Get Purchase Price List.
 	  * Price List used by this Business Partner
 	  */
 	public int getPO_PriceList_ID();
@@ -1566,12 +1570,14 @@ public interface I_I_BPartnerJP
     public static final String COLUMNNAME_ReferenceNo = "ReferenceNo";
 
 	/** Set Reference No.
-	  * Your customer or vendor number at the Business Partner's site
+	  * Your customer or vendor number at the Business Partner&#039;
+s site
 	  */
 	public void setReferenceNo (String ReferenceNo);
 
 	/** Get Reference No.
-	  * Your customer or vendor number at the Business Partner's site
+	  * Your customer or vendor number at the Business Partner&#039;
+s site
 	  */
 	public String getReferenceNo();
 
@@ -1659,12 +1665,14 @@ public interface I_I_BPartnerJP
     public static final String COLUMNNAME_ShareOfCustomer = "ShareOfCustomer";
 
 	/** Set Share.
-	  * Share of Customer's business as a percentage
+	  * Share of Customer&#039;
+s business as a percentage
 	  */
 	public void setShareOfCustomer (int ShareOfCustomer);
 
 	/** Get Share.
-	  * Share of Customer's business as a percentage
+	  * Share of Customer&#039;
+s business as a percentage
 	  */
 	public int getShareOfCustomer();
 

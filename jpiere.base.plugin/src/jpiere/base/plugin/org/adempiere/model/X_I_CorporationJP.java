@@ -22,21 +22,52 @@ import java.util.Properties;
 import org.compiere.model.*;
 
 /** Generated Model for I_CorporationJP
- *  @author iDempiere (generated) 
- *  @version Release 8.2 - $Id$ */
-public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persistent 
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
+@org.adempiere.base.Model(table="I_CorporationJP")
+public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220102L;
+	private static final long serialVersionUID = 20241204L;
 
     /** Standard Constructor */
     public X_I_CorporationJP (Properties ctx, int I_CorporationJP_ID, String trxName)
     {
       super (ctx, I_CorporationJP_ID, trxName);
       /** if (I_CorporationJP_ID == 0)
+        {
+			setI_CorporationJP_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_CorporationJP (Properties ctx, int I_CorporationJP_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_CorporationJP_ID, trxName, virtualColumns);
+      /** if (I_CorporationJP_ID == 0)
+        {
+			setI_CorporationJP_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_CorporationJP (Properties ctx, String I_CorporationJP_UU, String trxName)
+    {
+      super (ctx, I_CorporationJP_UU, trxName);
+      /** if (I_CorporationJP_UU == null)
+        {
+			setI_CorporationJP_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_CorporationJP (Properties ctx, String I_CorporationJP_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_CorporationJP_UU, trxName, virtualColumns);
+      /** if (I_CorporationJP_UU == null)
         {
 			setI_CorporationJP_ID (0);
         } */
@@ -49,7 +80,7 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -71,9 +102,8 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
     }
 
 	/** Set BP Search Key.
-		@param BPValue 
-		Business Partner Key Value
-	  */
+		@param BPValue Business Partner Key Value
+	*/
 	public void setBPValue (String BPValue)
 	{
 		set_Value (COLUMNNAME_BPValue, BPValue);
@@ -82,32 +112,32 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get BP Search Key.
 		@return Business Partner Key Value
 	  */
-	public String getBPValue () 
+	public String getBPValue()
 	{
 		return (String)get_Value(COLUMNNAME_BPValue);
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_BPartner_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
+	}
 
-	/** Set Business Partner .
-		@param C_BPartner_ID 
-		Identifies a Business Partner
-	  */
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_BPartner_ID < 1) 
+		if (C_BPartner_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 		@return Identifies a Business Partner
 	  */
-	public int getC_BPartner_ID () 
+	public int getC_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
@@ -116,26 +146,24 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	}
 
 	/** Set D-U-N-S.
-		@param DUNS 
-		Dun & Bradstreet Number
-	  */
+		@param DUNS Dun &amp; Bradstreet Number
+	*/
 	public void setDUNS (String DUNS)
 	{
 		set_Value (COLUMNNAME_DUNS, DUNS);
 	}
 
 	/** Get D-U-N-S.
-		@return Dun & Bradstreet Number
+		@return Dun &amp; Bradstreet Number
 	  */
-	public String getDUNS () 
+	public String getDUNS()
 	{
 		return (String)get_Value(COLUMNNAME_DUNS);
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -144,24 +172,25 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set I_CorporationJP.
-		@param I_CorporationJP_ID I_CorporationJP	  */
+		@param I_CorporationJP_ID I_CorporationJP
+	*/
 	public void setI_CorporationJP_ID (int I_CorporationJP_ID)
 	{
-		if (I_CorporationJP_ID < 1) 
+		if (I_CorporationJP_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_I_CorporationJP_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_I_CorporationJP_ID, Integer.valueOf(I_CorporationJP_ID));
 	}
 
 	/** Get I_CorporationJP.
 		@return I_CorporationJP	  */
-	public int getI_CorporationJP_ID () 
+	public int getI_CorporationJP_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_I_CorporationJP_ID);
 		if (ii == null)
@@ -170,7 +199,8 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	}
 
 	/** Set I_CorporationJP_UU.
-		@param I_CorporationJP_UU I_CorporationJP_UU	  */
+		@param I_CorporationJP_UU I_CorporationJP_UU
+	*/
 	public void setI_CorporationJP_UU (String I_CorporationJP_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_I_CorporationJP_UU, I_CorporationJP_UU);
@@ -178,15 +208,14 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 
 	/** Get I_CorporationJP_UU.
 		@return I_CorporationJP_UU	  */
-	public String getI_CorporationJP_UU () 
+	public String getI_CorporationJP_UU()
 	{
 		return (String)get_Value(COLUMNNAME_I_CorporationJP_UU);
 	}
 
 	/** Set Import Error Message.
-		@param I_ErrorMsg 
-		Messages generated from import process
-	  */
+		@param I_ErrorMsg Messages generated from import process
+	*/
 	public void setI_ErrorMsg (String I_ErrorMsg)
 	{
 		set_Value (COLUMNNAME_I_ErrorMsg, I_ErrorMsg);
@@ -195,15 +224,14 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get Import Error Message.
 		@return Messages generated from import process
 	  */
-	public String getI_ErrorMsg () 
+	public String getI_ErrorMsg()
 	{
 		return (String)get_Value(COLUMNNAME_I_ErrorMsg);
 	}
 
 	/** Set Imported.
-		@param I_IsImported 
-		Has this import been processed
-	  */
+		@param I_IsImported Has this import been processed
+	*/
 	public void setI_IsImported (boolean I_IsImported)
 	{
 		set_Value (COLUMNNAME_I_IsImported, Boolean.valueOf(I_IsImported));
@@ -212,36 +240,38 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get Imported.
 		@return Has this import been processed
 	  */
-	public boolean isI_IsImported () 
+	public boolean isI_IsImported()
 	{
 		Object oo = get_Value(COLUMNNAME_I_IsImported);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	public I_JP_Corporation getJP_Corporation() throws RuntimeException
-    {
-		return (I_JP_Corporation)MTable.get(getCtx(), I_JP_Corporation.Table_Name)
-			.getPO(getJP_Corporation_ID(), get_TrxName());	}
+	{
+		return (I_JP_Corporation)MTable.get(getCtx(), I_JP_Corporation.Table_ID)
+			.getPO(getJP_Corporation_ID(), get_TrxName());
+	}
 
 	/** Set Corporation.
-		@param JP_Corporation_ID Corporation	  */
+		@param JP_Corporation_ID Corporation
+	*/
 	public void setJP_Corporation_ID (int JP_Corporation_ID)
 	{
-		if (JP_Corporation_ID < 1) 
+		if (JP_Corporation_ID < 1)
 			set_Value (COLUMNNAME_JP_Corporation_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_Corporation_ID, Integer.valueOf(JP_Corporation_ID));
 	}
 
 	/** Get Corporation.
 		@return Corporation	  */
-	public int getJP_Corporation_ID () 
+	public int getJP_Corporation_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Corporation_ID);
 		if (ii == null)
@@ -250,9 +280,8 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -261,15 +290,14 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Name 2.
-		@param Name2 
-		Additional Name
-	  */
+		@param Name2 Additional Name
+	*/
 	public void setName2 (String Name2)
 	{
 		set_Value (COLUMNNAME_Name2, Name2);
@@ -278,15 +306,14 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get Name 2.
 		@return Additional Name
 	  */
-	public String getName2 () 
+	public String getName2()
 	{
 		return (String)get_Value(COLUMNNAME_Name2);
 	}
 
 	/** Set Processed.
-		@param Processed 
-		The document has been processed
-	  */
+		@param Processed The document has been processed
+	*/
 	public void setProcessed (boolean Processed)
 	{
 		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
@@ -295,20 +322,21 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get Processed.
 		@return The document has been processed
 	  */
-	public boolean isProcessed () 
+	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Process Now.
-		@param Processing Process Now	  */
+		@param Processing Process Now
+	*/
 	public void setProcessing (boolean Processing)
 	{
 		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
@@ -316,22 +344,21 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 
 	/** Get Process Now.
 		@return Process Now	  */
-	public boolean isProcessing () 
+	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -340,7 +367,7 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}
