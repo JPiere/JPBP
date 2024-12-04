@@ -22,15 +22,16 @@ import java.util.Properties;
 import org.compiere.model.*;
 
 /** Generated Model for JP_CorporationGroup
- *  @author iDempiere (generated) 
- *  @version Release 2.1 - $Id$ */
-public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, I_Persistent 
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
+@org.adempiere.base.Model(table="JP_CorporationGroup")
+public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20141230L;
+	private static final long serialVersionUID = 20241204L;
 
     /** Standard Constructor */
     public X_JP_CorporationGroup (Properties ctx, int JP_CorporationGroup_ID, String trxName)
@@ -39,7 +40,42 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
       /** if (JP_CorporationGroup_ID == 0)
         {
 			setJP_CorporationGroup_ID (0);
-			setJP_Corporation_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_CorporationGroup (Properties ctx, int JP_CorporationGroup_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_CorporationGroup_ID, trxName, virtualColumns);
+      /** if (JP_CorporationGroup_ID == 0)
+        {
+			setJP_CorporationGroup_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_CorporationGroup (Properties ctx, String JP_CorporationGroup_UU, String trxName)
+    {
+      super (ctx, JP_CorporationGroup_UU, trxName);
+      /** if (JP_CorporationGroup_UU == null)
+        {
+			setJP_CorporationGroup_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_CorporationGroup (Properties ctx, String JP_CorporationGroup_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_CorporationGroup_UU, trxName, virtualColumns);
+      /** if (JP_CorporationGroup_UU == null)
+        {
+			setJP_CorporationGroup_ID (0);
 			setName (null);
 			setValue (null);
         } */
@@ -52,7 +88,7 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -68,15 +104,14 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_CorporationGroup[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_CorporationGroup[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -85,24 +120,25 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	/** Set JP_CorporationGroup.
-		@param JP_CorporationGroup_ID JP_CorporationGroup	  */
+	/** Set Corporation Group.
+		@param JP_CorporationGroup_ID Corporation Group
+	*/
 	public void setJP_CorporationGroup_ID (int JP_CorporationGroup_ID)
 	{
-		if (JP_CorporationGroup_ID < 1) 
+		if (JP_CorporationGroup_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_CorporationGroup_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_CorporationGroup_ID, Integer.valueOf(JP_CorporationGroup_ID));
 	}
 
-	/** Get JP_CorporationGroup.
-		@return JP_CorporationGroup	  */
-	public int getJP_CorporationGroup_ID () 
+	/** Get Corporation Group.
+		@return Corporation Group	  */
+	public int getJP_CorporationGroup_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CorporationGroup_ID);
 		if (ii == null)
@@ -111,7 +147,8 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 	}
 
 	/** Set JP_CorporationGroup_UU.
-		@param JP_CorporationGroup_UU JP_CorporationGroup_UU	  */
+		@param JP_CorporationGroup_UU JP_CorporationGroup_UU
+	*/
 	public void setJP_CorporationGroup_UU (String JP_CorporationGroup_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_CorporationGroup_UU, JP_CorporationGroup_UU);
@@ -119,29 +156,31 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 
 	/** Get JP_CorporationGroup_UU.
 		@return JP_CorporationGroup_UU	  */
-	public String getJP_CorporationGroup_UU () 
+	public String getJP_CorporationGroup_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_CorporationGroup_UU);
 	}
 
 	public I_JP_Corporation getJP_Corporation() throws RuntimeException
-    {
-		return (I_JP_Corporation)MTable.get(getCtx(), I_JP_Corporation.Table_Name)
-			.getPO(getJP_Corporation_ID(), get_TrxName());	}
+	{
+		return (I_JP_Corporation)MTable.get(getCtx(), I_JP_Corporation.Table_ID)
+			.getPO(getJP_Corporation_ID(), get_TrxName());
+	}
 
-	/** Set JP_Corporation.
-		@param JP_Corporation_ID JP_Corporation	  */
+	/** Set Corporation.
+		@param JP_Corporation_ID Corporation
+	*/
 	public void setJP_Corporation_ID (int JP_Corporation_ID)
 	{
-		if (JP_Corporation_ID < 1) 
+		if (JP_Corporation_ID < 1)
 			set_Value (COLUMNNAME_JP_Corporation_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_Corporation_ID, Integer.valueOf(JP_Corporation_ID));
 	}
 
-	/** Get JP_Corporation.
-		@return JP_Corporation	  */
-	public int getJP_Corporation_ID () 
+	/** Get Corporation.
+		@return Corporation	  */
+	public int getJP_Corporation_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Corporation_ID);
 		if (ii == null)
@@ -150,9 +189,8 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -161,15 +199,14 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Name 2.
-		@param Name2 
-		Additional Name
-	  */
+		@param Name2 Additional Name
+	*/
 	public void setName2 (String Name2)
 	{
 		set_Value (COLUMNNAME_Name2, Name2);
@@ -178,15 +215,14 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 	/** Get Name 2.
 		@return Additional Name
 	  */
-	public String getName2 () 
+	public String getName2()
 	{
 		return (String)get_Value(COLUMNNAME_Name2);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -195,7 +231,7 @@ public class X_JP_CorporationGroup extends PO implements I_JP_CorporationGroup, 
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}

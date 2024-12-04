@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for JP_CorporationGroup
  *  @author iDempiere (generated) 
- *  @version Release 2.1
+ *  @version Release 11
  */
 @SuppressWarnings("all")
 public interface I_JP_CorporationGroup 
@@ -37,17 +37,17 @@ public interface I_JP_CorporationGroup
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 3 - Client - Org 
+    /** AccessLevel = 7 - System - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(3);
+    BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
 
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_JP_CorporationGroup
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -109,10 +109,10 @@ public interface I_JP_CorporationGroup
     /** Column name JP_CorporationGroup_ID */
     public static final String COLUMNNAME_JP_CorporationGroup_ID = "JP_CorporationGroup_ID";
 
-	/** Set JP_CorporationGroup	  */
+	/** Set Corporation Group	  */
 	public void setJP_CorporationGroup_ID (int JP_CorporationGroup_ID);
 
-	/** Get JP_CorporationGroup	  */
+	/** Get Corporation Group	  */
 	public int getJP_CorporationGroup_ID();
 
     /** Column name JP_CorporationGroup_UU */
@@ -127,10 +127,10 @@ public interface I_JP_CorporationGroup
     /** Column name JP_Corporation_ID */
     public static final String COLUMNNAME_JP_Corporation_ID = "JP_Corporation_ID";
 
-	/** Set JP_Corporation	  */
+	/** Set Corporation	  */
 	public void setJP_Corporation_ID (int JP_Corporation_ID);
 
-	/** Get JP_Corporation	  */
+	/** Get Corporation	  */
 	public int getJP_Corporation_ID();
 
 	public I_JP_Corporation getJP_Corporation() throws RuntimeException;

@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.model.*;
 
 /** Generated Model for JP_Corporation_History
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="JP_Corporation_History")
-public class X_JP_Corporation_History extends PO implements I_JP_Corporation_History, I_Persistent 
+public class X_JP_Corporation_History extends PO implements I_JP_Corporation_History, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220723L;
+	private static final long serialVersionUID = 20241204L;
 
     /** Standard Constructor */
     public X_JP_Corporation_History (Properties ctx, int JP_Corporation_History_ID, String trxName)
@@ -62,6 +62,34 @@ public class X_JP_Corporation_History extends PO implements I_JP_Corporation_His
         } */
     }
 
+    /** Standard Constructor */
+    public X_JP_Corporation_History (Properties ctx, String JP_Corporation_History_UU, String trxName)
+    {
+      super (ctx, JP_Corporation_History_UU, trxName);
+      /** if (JP_Corporation_History_UU == null)
+        {
+			setDateFrom (new Timestamp( System.currentTimeMillis() ));
+			setDateTo (new Timestamp( System.currentTimeMillis() ));
+			setJP_Corporation_History_ID (0);
+			setJP_Corporation_ID (0);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_Corporation_History (Properties ctx, String JP_Corporation_History_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_Corporation_History_UU, trxName, virtualColumns);
+      /** if (JP_Corporation_History_UU == null)
+        {
+			setDateFrom (new Timestamp( System.currentTimeMillis() ));
+			setDateTo (new Timestamp( System.currentTimeMillis() ));
+			setJP_Corporation_History_ID (0);
+			setJP_Corporation_ID (0);
+			setName (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_JP_Corporation_History (Properties ctx, ResultSet rs, String trxName)
     {
@@ -69,7 +97,7 @@ public class X_JP_Corporation_History extends PO implements I_JP_Corporation_His
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {

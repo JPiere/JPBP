@@ -25,21 +25,58 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for JP_Corporation
- *  @author iDempiere (generated) 
- *  @version Release 4.1 - $Id$ */
-public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persistent 
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
+@org.adempiere.base.Model(table="JP_Corporation")
+public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170219L;
+	private static final long serialVersionUID = 20241204L;
 
     /** Standard Constructor */
     public X_JP_Corporation (Properties ctx, int JP_Corporation_ID, String trxName)
     {
       super (ctx, JP_Corporation_ID, trxName);
       /** if (JP_Corporation_ID == 0)
+        {
+			setJP_Corporation_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_Corporation (Properties ctx, int JP_Corporation_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_Corporation_ID, trxName, virtualColumns);
+      /** if (JP_Corporation_ID == 0)
+        {
+			setJP_Corporation_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_Corporation (Properties ctx, String JP_Corporation_UU, String trxName)
+    {
+      super (ctx, JP_Corporation_UU, trxName);
+      /** if (JP_Corporation_UU == null)
+        {
+			setJP_Corporation_ID (0);
+			setName (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_JP_Corporation (Properties ctx, String JP_Corporation_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, JP_Corporation_UU, trxName, virtualColumns);
+      /** if (JP_Corporation_UU == null)
         {
 			setJP_Corporation_ID (0);
 			setName (null);
@@ -54,7 +91,7 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -70,32 +107,32 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_JP_Corporation[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_JP_Corporation[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_BPartner_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
+	}
 
-	/** Set Business Partner .
-		@param C_BPartner_ID 
-		Identifies a Business Partner
-	  */
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_BPartner_ID < 1) 
+		if (C_BPartner_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 		@return Identifies a Business Partner
 	  */
-	public int getC_BPartner_ID () 
+	public int getC_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
@@ -104,26 +141,26 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	}
 
 	public org.compiere.model.I_C_Greeting getC_Greeting() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Greeting)MTable.get(getCtx(), org.compiere.model.I_C_Greeting.Table_Name)
-			.getPO(getC_Greeting_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Greeting)MTable.get(getCtx(), org.compiere.model.I_C_Greeting.Table_ID)
+			.getPO(getC_Greeting_ID(), get_TrxName());
+	}
 
 	/** Set Greeting.
-		@param C_Greeting_ID 
-		Greeting to print on correspondence
-	  */
+		@param C_Greeting_ID Greeting to print on correspondence
+	*/
 	public void setC_Greeting_ID (int C_Greeting_ID)
 	{
-		if (C_Greeting_ID < 1) 
+		if (C_Greeting_ID < 1)
 			set_Value (COLUMNNAME_C_Greeting_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Greeting_ID, Integer.valueOf(C_Greeting_ID));
 	}
 
 	/** Get Greeting.
 		@return Greeting to print on correspondence
 	  */
-	public int getC_Greeting_ID () 
+	public int getC_Greeting_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Greeting_ID);
 		if (ii == null)
@@ -132,26 +169,24 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	}
 
 	/** Set D-U-N-S.
-		@param DUNS 
-		Dun & Bradstreet Number
-	  */
+		@param DUNS Dun &amp; Bradstreet Number
+	*/
 	public void setDUNS (String DUNS)
 	{
 		set_Value (COLUMNNAME_DUNS, DUNS);
 	}
 
 	/** Get D-U-N-S.
-		@return Dun & Bradstreet Number
+		@return Dun &amp; Bradstreet Number
 	  */
-	public String getDUNS () 
+	public String getDUNS()
 	{
 		return (String)get_Value(COLUMNNAME_DUNS);
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -160,13 +195,14 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Capital.
-		@param JP_Capital Capital	  */
+		@param JP_Capital Capital
+	*/
 	public void setJP_Capital (BigDecimal JP_Capital)
 	{
 		set_Value (COLUMNNAME_JP_Capital, JP_Capital);
@@ -174,7 +210,7 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 
 	/** Get Capital.
 		@return Capital	  */
-	public BigDecimal getJP_Capital () 
+	public BigDecimal getJP_Capital()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_Capital);
 		if (bd == null)
@@ -183,23 +219,25 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	}
 
 	public I_JP_CorpType getJP_CorpType() throws RuntimeException
-    {
-		return (I_JP_CorpType)MTable.get(getCtx(), I_JP_CorpType.Table_Name)
-			.getPO(getJP_CorpType_ID(), get_TrxName());	}
+	{
+		return (I_JP_CorpType)MTable.get(getCtx(), I_JP_CorpType.Table_ID)
+			.getPO(getJP_CorpType_ID(), get_TrxName());
+	}
 
 	/** Set Corp Type.
-		@param JP_CorpType_ID Corp Type	  */
+		@param JP_CorpType_ID Corp Type
+	*/
 	public void setJP_CorpType_ID (int JP_CorpType_ID)
 	{
-		if (JP_CorpType_ID < 1) 
+		if (JP_CorpType_ID < 1)
 			set_Value (COLUMNNAME_JP_CorpType_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_CorpType_ID, Integer.valueOf(JP_CorpType_ID));
 	}
 
 	/** Get Corp Type.
 		@return Corp Type	  */
-	public int getJP_CorpType_ID () 
+	public int getJP_CorpType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CorpType_ID);
 		if (ii == null)
@@ -208,18 +246,19 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	}
 
 	/** Set Corporation.
-		@param JP_Corporation_ID Corporation	  */
+		@param JP_Corporation_ID Corporation
+	*/
 	public void setJP_Corporation_ID (int JP_Corporation_ID)
 	{
-		if (JP_Corporation_ID < 1) 
+		if (JP_Corporation_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_JP_Corporation_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_JP_Corporation_ID, Integer.valueOf(JP_Corporation_ID));
 	}
 
 	/** Get Corporation.
 		@return Corporation	  */
-	public int getJP_Corporation_ID () 
+	public int getJP_Corporation_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Corporation_ID);
 		if (ii == null)
@@ -228,7 +267,8 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	}
 
 	/** Set JP_Corporation_UU.
-		@param JP_Corporation_UU JP_Corporation_UU	  */
+		@param JP_Corporation_UU JP_Corporation_UU
+	*/
 	public void setJP_Corporation_UU (String JP_Corporation_UU)
 	{
 		set_ValueNoCheck (COLUMNNAME_JP_Corporation_UU, JP_Corporation_UU);
@@ -236,29 +276,31 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 
 	/** Get JP_Corporation_UU.
 		@return JP_Corporation_UU	  */
-	public String getJP_Corporation_UU () 
+	public String getJP_Corporation_UU()
 	{
 		return (String)get_Value(COLUMNNAME_JP_Corporation_UU);
 	}
 
 	public I_JP_IndustryType getJP_IndustryType() throws RuntimeException
-    {
-		return (I_JP_IndustryType)MTable.get(getCtx(), I_JP_IndustryType.Table_Name)
-			.getPO(getJP_IndustryType_ID(), get_TrxName());	}
+	{
+		return (I_JP_IndustryType)MTable.get(getCtx(), I_JP_IndustryType.Table_ID)
+			.getPO(getJP_IndustryType_ID(), get_TrxName());
+	}
 
 	/** Set Industry Type.
-		@param JP_IndustryType_ID Industry Type	  */
+		@param JP_IndustryType_ID Industry Type
+	*/
 	public void setJP_IndustryType_ID (int JP_IndustryType_ID)
 	{
-		if (JP_IndustryType_ID < 1) 
+		if (JP_IndustryType_ID < 1)
 			set_Value (COLUMNNAME_JP_IndustryType_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_JP_IndustryType_ID, Integer.valueOf(JP_IndustryType_ID));
 	}
 
 	/** Get Industry Type.
 		@return Industry Type	  */
-	public int getJP_IndustryType_ID () 
+	public int getJP_IndustryType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_JP_IndustryType_ID);
 		if (ii == null)
@@ -267,9 +309,8 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -278,7 +319,7 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
@@ -286,15 +327,14 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
 
 	/** Set Name 2.
-		@param Name2 
-		Additional Name
-	  */
+		@param Name2 Additional Name
+	*/
 	public void setName2 (String Name2)
 	{
 		set_Value (COLUMNNAME_Name2, Name2);
@@ -303,15 +343,14 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/** Get Name 2.
 		@return Additional Name
 	  */
-	public String getName2 () 
+	public String getName2()
 	{
 		return (String)get_Value(COLUMNNAME_Name2);
 	}
 
 	/** Set URL.
-		@param URL 
-		Full URL address - e.g. http://www.idempiere.org
-	  */
+		@param URL Full URL address - e.g. http://www.idempiere.org
+	*/
 	public void setURL (String URL)
 	{
 		set_Value (COLUMNNAME_URL, URL);
@@ -320,15 +359,14 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/** Get URL.
 		@return Full URL address - e.g. http://www.idempiere.org
 	  */
-	public String getURL () 
+	public String getURL()
 	{
 		return (String)get_Value(COLUMNNAME_URL);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -337,7 +375,7 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}
