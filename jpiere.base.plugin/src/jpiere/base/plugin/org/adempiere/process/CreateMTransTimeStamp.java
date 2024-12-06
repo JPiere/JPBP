@@ -80,13 +80,14 @@ public class CreateMTransTimeStamp extends SvrProcess {
 		{
 			StringBuilder sql = new StringBuilder ("INSERT INTO JP_MTrans_TimeStamp ")
 			.append("(AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy,")
-			.append(" DateValue, M_Locator_ID, M_Product_ID, QtyBook) ")
+			.append(" DateValue, M_Locator_ID, M_Product_ID, QtyBook, JP_MTrans_TimeStamp_UU) ")
 			.append("SELECT t.AD_Client_ID, l.AD_Org_ID, 'Y',")		//AD_Client_ID, AD_Org_ID, IsActive,
 			.append("TO_DATE('").append(sdf.format(calendar.getTime()) + "' ,'YYYY-MM-DD HH24:MI:SS')")	//Created
 			.append("," + p_AD_User_ID + ",")															//CreatedBy
 			.append("TO_DATE('").append(sdf.format(calendar.getTime()) + "' ,'YYYY-MM-DD HH24:MI:SS')")	//Updated
 			.append("," + p_AD_User_ID + ",")															//UpdatedBy
 			.append(DateValue_00).append(", t.M_Locator_ID, t.M_Product_ID, SUM(t.MovementQty) ")	//DateValue, M_Product_ID, QtyBook
+			.append(",generate_uuid() " )
 			.append("FROM M_Transaction t")
 			.append(" INNER JOIN M_Locator l ON (t.M_Locator_ID=l.M_Locator_ID) ")
 			.append("WHERE t.AD_Client_ID=").append(p_AD_Client_ID)
