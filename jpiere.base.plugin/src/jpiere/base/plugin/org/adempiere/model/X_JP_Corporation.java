@@ -34,7 +34,7 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241204L;
+	private static final long serialVersionUID = 20241224L;
 
     /** Standard Constructor */
     public X_JP_Corporation (Properties ctx, int JP_Corporation_ID, String trxName)
@@ -198,6 +198,34 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	public I_JP_CM_CorpType getJP_CM_CorpType() throws RuntimeException
+	{
+		return (I_JP_CM_CorpType)MTable.get(getCtx(), I_JP_CM_CorpType.Table_ID)
+			.getPO(getJP_CM_CorpType_ID(), get_TrxName());
+	}
+
+	/** Set Consolidated Corp Type.
+		@param JP_CM_CorpType_ID JPIERE-0635:JPPS
+	*/
+	public void setJP_CM_CorpType_ID (int JP_CM_CorpType_ID)
+	{
+		if (JP_CM_CorpType_ID < 1)
+			set_Value (COLUMNNAME_JP_CM_CorpType_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_CM_CorpType_ID, Integer.valueOf(JP_CM_CorpType_ID));
+	}
+
+	/** Get Consolidated Corp Type.
+		@return JPIERE-0635:JPPS
+	  */
+	public int getJP_CM_CorpType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CM_CorpType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Capital.
