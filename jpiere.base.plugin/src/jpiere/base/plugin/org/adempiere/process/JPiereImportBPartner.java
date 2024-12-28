@@ -335,6 +335,13 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		else
 			return message;
 
+		message = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_Bill_PrintFormat_ID");
+		if(processMonitor != null)	processMonitor.statusUpdate(message);		
+		if(reverseLookupJP_Bill_PrintFormat_ID())
+			commitEx();
+		else
+			return message;
+		
 		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
 
 		commitEx();
@@ -348,7 +355,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "C_BPartner_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		sql = new StringBuilder ("SELECT * FROM I_BPartnerJP WHERE I_IsImported='N' OR Processed='N' ")
+		sql = new StringBuilder ("SELECT * FROM I_BPartnerJP WHERE (I_IsImported='N' OR Processed='N') ")
 				.append(clientCheck);
 				if(p_I_BPartnerJP_ID > 0)
 					sql.append(" AND I_BPartnerJP_ID=? ");
@@ -578,7 +585,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 				.append("SET JP_Corporation_ID=(SELECT JP_Corporation_ID FROM JP_Corporation p")
-				.append(" WHERE i.JP_CorporationValue=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.JP_CorporationValue=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
 				.append(" WHERE i.JP_CorporationValue IS NOT NULL")
 				.append(" AND i.I_IsImported='N'").append(getWhereClause());
 		if(p_I_BPartnerJP_ID > 0)
@@ -1999,7 +2006,7 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 	 */
 	private boolean reverseLookupInvoice_PrintFormat_ID() throws Exception
 	{
-		//int no = 0;
+		int no = 0;
 
 		StringBuilder sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
 				.append("SET Invoice_PrintFormat_ID=(SELECT AD_PrintFormat_ID FROM AD_PrintFormat p")
@@ -2024,36 +2031,92 @@ public class JPiereImportBPartner extends SvrProcess implements ImportProcess
 		}
 
 		//Invalid JP_Invoice_PrintFormat_Name
-//		message = Msg.getMsg(getCtx(), "Error")  + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Invoice_PrintFormat_Name");
-//		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
-//			.append("SET I_ErrorMsg='"+ message + "'")
-//			.append(" WHERE JP_Invoice_PrintFormat_Name IS NOT NULL AND Invoice_PrintFormat_ID IS NULL ")
-//			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
-//		if(p_I_BPartnerJP_ID > 0)
-//			sql.append(" AND I_BPartnerJP_ID=? ");
-//
-//		try {
-//			if(p_I_BPartnerJP_ID > 0)
-//			{
-//				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
-//				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
-//			}else {
-//				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-//			}
-//		}catch(Exception e) {
-//			throw new Exception( message + " : " + e.toString() + " : " + sql);
-//		}
-//
-//		if(no > 0)
-//		{
-//			return false;
-//		}
+		message = Msg.getMsg(getCtx(), "Error")  + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Invoice_PrintFormat_Name");
+		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_Invoice_PrintFormat_Name IS NOT NULL AND Invoice_PrintFormat_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
 
+		try {
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+		}catch(Exception e) {
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
+		}
 
+		if(no > 0)
+		{
+			return false;
+		}
 
 		return true;
 
 	}//reverseLookupInvoice_PrintFormat_ID
+	
+	
+	private boolean reverseLookupJP_Bill_PrintFormat_ID() throws Exception
+	{
+		int no = 0;
+
+		StringBuilder sql = new StringBuilder ("UPDATE I_BPartnerJP i ")
+				.append("SET JP_Bill_PrintFormat_ID=(SELECT AD_PrintFormat_ID FROM AD_PrintFormat p")
+				.append(" WHERE i.JP_Bill_PrintFormat_Name=p.Name AND (p.AD_Client_ID=i.AD_Client_ID OR p.AD_Client_ID= 0) )")
+				.append(" WHERE i.JP_Bill_PrintFormat_Name IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try {
+
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + message +" : " + e.toString() +" : " + sql );
+		}
+
+		//Invalid JP_Bill_PrintFormat_Name
+		message = Msg.getMsg(getCtx(), "Error")  + Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Bill_PrintFormat_Name");
+		sql = new StringBuilder ("UPDATE I_BPartnerJP ")
+			.append("SET I_ErrorMsg='"+ message + "'")
+			.append(" WHERE JP_Bill_PrintFormat_Name IS NOT NULL AND JP_Bill_PrintFormat_ID IS NULL ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		if(p_I_BPartnerJP_ID > 0)
+			sql.append(" AND I_BPartnerJP_ID=? ");
+
+		try 
+		{
+			if(p_I_BPartnerJP_ID > 0)
+			{
+				Object[] objs = new Object[]{p_I_BPartnerJP_ID};
+				no =DB.executeUpdateEx(sql.toString(), objs, get_TrxName());
+			}else {
+				no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			}
+		}catch(Exception e) {
+			throw new Exception( message + " : " + e.toString() + " : " + sql);
+		}
+
+		if(no > 0)
+		{
+			return false;
+		}
+
+		return true;
+
+	}//reverseLookupJP_Bill_PrintFormat_ID
 
 
 	/**

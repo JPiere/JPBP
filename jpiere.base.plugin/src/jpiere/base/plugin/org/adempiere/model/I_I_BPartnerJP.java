@@ -997,6 +997,60 @@ ll send dunning letters there
 	/** Get Bill Schema(Search Key)	  */
 	public String getJP_BillSchema_Value();
 
+    /** Column name JP_Bill_PrintFormat_ID */
+    public static final String COLUMNNAME_JP_Bill_PrintFormat_ID = "JP_Bill_PrintFormat_ID";
+
+	/** Set Bill Print Format.
+	  * Print Format for printing Bills
+	  */
+	public void setJP_Bill_PrintFormat_ID (int JP_Bill_PrintFormat_ID);
+
+	/** Get Bill Print Format.
+	  * Print Format for printing Bills
+	  */
+	public int getJP_Bill_PrintFormat_ID();
+
+	public org.compiere.model.I_AD_PrintFormat getJP_Bill_PrintFormat() throws RuntimeException;
+
+    /** Column name JP_Bill_PrintFormat_Name */
+    public static final String COLUMNNAME_JP_Bill_PrintFormat_Name = "JP_Bill_PrintFormat_Name";
+
+	/** Set Bill Print Format(Name)	  */
+	public void setJP_Bill_PrintFormat_Name (String JP_Bill_PrintFormat_Name);
+
+	/** Get Bill Print Format(Name)	  */
+	public String getJP_Bill_PrintFormat_Name();
+
+    /** Column name JP_CM_BPartner_ID */
+    public static final String COLUMNNAME_JP_CM_BPartner_ID = "JP_CM_BPartner_ID";
+
+	/** Set Consolidated Business Partner.
+	  * JPIERE-0636:JPPS
+	  */
+	public void setJP_CM_BPartner_ID (int JP_CM_BPartner_ID);
+
+	/** Get Consolidated Business Partner.
+	  * JPIERE-0636:JPPS
+	  */
+	public int getJP_CM_BPartner_ID();
+
+	public I_JP_CM_BPartner getJP_CM_BPartner() throws RuntimeException;
+
+    /** Column name JP_CM_BPartner_Location_ID */
+    public static final String COLUMNNAME_JP_CM_BPartner_Location_ID = "JP_CM_BPartner_Location_ID";
+
+	/** Set Consolidated Partner Location.
+	  * JPIERE-0636:JPPS
+	  */
+	public void setJP_CM_BPartner_Location_ID (int JP_CM_BPartner_Location_ID);
+
+	/** Get Consolidated Partner Location.
+	  * JPIERE-0636:JPPS
+	  */
+	public int getJP_CM_BPartner_Location_ID();
+
+	public I_JP_CM_BPartner_Location getJP_CM_BPartner_Location() throws RuntimeException;
+
     /** Column name JP_City_Name */
     public static final String COLUMNNAME_JP_City_Name = "JP_City_Name";
 

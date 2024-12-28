@@ -35,7 +35,7 @@ public class X_I_BPartnerJP extends PO implements I_I_BPartnerJP, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241204L;
+	private static final long serialVersionUID = 20241228L;
 
     /** Standard Constructor */
     public X_I_BPartnerJP (Properties ctx, int I_BPartnerJP_ID, String trxName)
@@ -1599,6 +1599,105 @@ public class X_I_BPartnerJP extends PO implements I_I_BPartnerJP, I_Persistent
 	public String getJP_BillSchema_Value()
 	{
 		return (String)get_Value(COLUMNNAME_JP_BillSchema_Value);
+	}
+
+	public org.compiere.model.I_AD_PrintFormat getJP_Bill_PrintFormat() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_PrintFormat)MTable.get(getCtx(), org.compiere.model.I_AD_PrintFormat.Table_ID)
+			.getPO(getJP_Bill_PrintFormat_ID(), get_TrxName());
+	}
+
+	/** Set Bill Print Format.
+		@param JP_Bill_PrintFormat_ID Print Format for printing Bills
+	*/
+	public void setJP_Bill_PrintFormat_ID (int JP_Bill_PrintFormat_ID)
+	{
+		if (JP_Bill_PrintFormat_ID < 1)
+			set_Value (COLUMNNAME_JP_Bill_PrintFormat_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_Bill_PrintFormat_ID, Integer.valueOf(JP_Bill_PrintFormat_ID));
+	}
+
+	/** Get Bill Print Format.
+		@return Print Format for printing Bills
+	  */
+	public int getJP_Bill_PrintFormat_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_Bill_PrintFormat_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Bill Print Format(Name).
+		@param JP_Bill_PrintFormat_Name Bill Print Format(Name)
+	*/
+	public void setJP_Bill_PrintFormat_Name (String JP_Bill_PrintFormat_Name)
+	{
+		set_Value (COLUMNNAME_JP_Bill_PrintFormat_Name, JP_Bill_PrintFormat_Name);
+	}
+
+	/** Get Bill Print Format(Name).
+		@return Bill Print Format(Name)	  */
+	public String getJP_Bill_PrintFormat_Name()
+	{
+		return (String)get_Value(COLUMNNAME_JP_Bill_PrintFormat_Name);
+	}
+
+	public I_JP_CM_BPartner getJP_CM_BPartner() throws RuntimeException
+	{
+		return (I_JP_CM_BPartner)MTable.get(getCtx(), I_JP_CM_BPartner.Table_ID)
+			.getPO(getJP_CM_BPartner_ID(), get_TrxName());
+	}
+
+	/** Set Consolidated Business Partner.
+		@param JP_CM_BPartner_ID JPIERE-0636:JPPS
+	*/
+	public void setJP_CM_BPartner_ID (int JP_CM_BPartner_ID)
+	{
+		if (JP_CM_BPartner_ID < 1)
+			set_Value (COLUMNNAME_JP_CM_BPartner_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_CM_BPartner_ID, Integer.valueOf(JP_CM_BPartner_ID));
+	}
+
+	/** Get Consolidated Business Partner.
+		@return JPIERE-0636:JPPS
+	  */
+	public int getJP_CM_BPartner_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CM_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_JP_CM_BPartner_Location getJP_CM_BPartner_Location() throws RuntimeException
+	{
+		return (I_JP_CM_BPartner_Location)MTable.get(getCtx(), I_JP_CM_BPartner_Location.Table_ID)
+			.getPO(getJP_CM_BPartner_Location_ID(), get_TrxName());
+	}
+
+	/** Set Consolidated Partner Location.
+		@param JP_CM_BPartner_Location_ID JPIERE-0636:JPPS
+	*/
+	public void setJP_CM_BPartner_Location_ID (int JP_CM_BPartner_Location_ID)
+	{
+		if (JP_CM_BPartner_Location_ID < 1)
+			set_Value (COLUMNNAME_JP_CM_BPartner_Location_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_CM_BPartner_Location_ID, Integer.valueOf(JP_CM_BPartner_Location_ID));
+	}
+
+	/** Get Consolidated Partner Location.
+		@return JPIERE-0636:JPPS
+	  */
+	public int getJP_CM_BPartner_Location_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CM_BPartner_Location_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set City(Name).
