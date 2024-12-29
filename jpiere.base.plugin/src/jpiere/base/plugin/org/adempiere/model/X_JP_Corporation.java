@@ -34,7 +34,7 @@ public class X_JP_Corporation extends PO implements I_JP_Corporation, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241224L;
+	private static final long serialVersionUID = 20241229L;
 
     /** Standard Constructor */
     public X_JP_Corporation (Properties ctx, int JP_Corporation_ID, String trxName)

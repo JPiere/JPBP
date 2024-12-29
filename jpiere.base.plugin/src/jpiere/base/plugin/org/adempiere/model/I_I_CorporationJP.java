@@ -92,6 +92,21 @@ public interface I_I_CorporationJP
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
+    /** Column name C_Greeting_ID */
+    public static final String COLUMNNAME_C_Greeting_ID = "C_Greeting_ID";
+
+	/** Set Greeting.
+	  * Greeting to print on correspondence
+	  */
+	public void setC_Greeting_ID (int C_Greeting_ID);
+
+	/** Get Greeting.
+	  * Greeting to print on correspondence
+	  */
+	public int getC_Greeting_ID();
+
+	public org.compiere.model.I_C_Greeting getC_Greeting() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -193,6 +208,63 @@ public interface I_I_CorporationJP
 	  */
 	public boolean isActive();
 
+    /** Column name JP_CM_CorpType_ID */
+    public static final String COLUMNNAME_JP_CM_CorpType_ID = "JP_CM_CorpType_ID";
+
+	/** Set Consolidated Corp Type.
+	  * JPIERE-0635:JPPS
+	  */
+	public void setJP_CM_CorpType_ID (int JP_CM_CorpType_ID);
+
+	/** Get Consolidated Corp Type.
+	  * JPIERE-0635:JPPS
+	  */
+	public int getJP_CM_CorpType_ID();
+
+	public I_JP_CM_CorpType getJP_CM_CorpType() throws RuntimeException;
+
+    /** Column name JP_CM_CorpType_Value */
+    public static final String COLUMNNAME_JP_CM_CorpType_Value = "JP_CM_CorpType_Value";
+
+	/** Set Consolidated Corp Type(Search Key).
+	  * JPIERE-0635:JPPS
+	  */
+	public void setJP_CM_CorpType_Value (String JP_CM_CorpType_Value);
+
+	/** Get Consolidated Corp Type(Search Key).
+	  * JPIERE-0635:JPPS
+	  */
+	public String getJP_CM_CorpType_Value();
+
+    /** Column name JP_Capital */
+    public static final String COLUMNNAME_JP_Capital = "JP_Capital";
+
+	/** Set Capital	  */
+	public void setJP_Capital (BigDecimal JP_Capital);
+
+	/** Get Capital	  */
+	public BigDecimal getJP_Capital();
+
+    /** Column name JP_CorpType_ID */
+    public static final String COLUMNNAME_JP_CorpType_ID = "JP_CorpType_ID";
+
+	/** Set Corp Type	  */
+	public void setJP_CorpType_ID (int JP_CorpType_ID);
+
+	/** Get Corp Type	  */
+	public int getJP_CorpType_ID();
+
+	public I_JP_CorpType getJP_CorpType() throws RuntimeException;
+
+    /** Column name JP_CorpType_Value */
+    public static final String COLUMNNAME_JP_CorpType_Value = "JP_CorpType_Value";
+
+	/** Set Corp Type(Search Key)	  */
+	public void setJP_CorpType_Value (String JP_CorpType_Value);
+
+	/** Get Corp Type(Search Key)	  */
+	public String getJP_CorpType_Value();
+
     /** Column name JP_Corporation_ID */
     public static final String COLUMNNAME_JP_Corporation_ID = "JP_Corporation_ID";
 
@@ -203,6 +275,44 @@ public interface I_I_CorporationJP
 	public int getJP_Corporation_ID();
 
 	public I_JP_Corporation getJP_Corporation() throws RuntimeException;
+
+    /** Column name JP_Greeting_Name */
+    public static final String COLUMNNAME_JP_Greeting_Name = "JP_Greeting_Name";
+
+	/** Set Greeting(Name)	  */
+	public void setJP_Greeting_Name (String JP_Greeting_Name);
+
+	/** Get Greeting(Name)	  */
+	public String getJP_Greeting_Name();
+
+    /** Column name JP_IndustryType_ID */
+    public static final String COLUMNNAME_JP_IndustryType_ID = "JP_IndustryType_ID";
+
+	/** Set Industry Type	  */
+	public void setJP_IndustryType_ID (int JP_IndustryType_ID);
+
+	/** Get Industry Type	  */
+	public int getJP_IndustryType_ID();
+
+	public I_JP_IndustryType getJP_IndustryType() throws RuntimeException;
+
+    /** Column name JP_IndustryType_Value */
+    public static final String COLUMNNAME_JP_IndustryType_Value = "JP_IndustryType_Value";
+
+	/** Set Industry Type(Search Key)	  */
+	public void setJP_IndustryType_Value (String JP_IndustryType_Value);
+
+	/** Get Industry Type(Search Key)	  */
+	public String getJP_IndustryType_Value();
+
+    /** Column name JP_Org_Value */
+    public static final String COLUMNNAME_JP_Org_Value = "JP_Org_Value";
+
+	/** Set Organization(Search Key)	  */
+	public void setJP_Org_Value (String JP_Org_Value);
+
+	/** Get Organization(Search Key)	  */
+	public String getJP_Org_Value();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
@@ -251,6 +361,19 @@ public interface I_I_CorporationJP
 
 	/** Get Process Now	  */
 	public boolean isProcessing();
+
+    /** Column name URL */
+    public static final String COLUMNNAME_URL = "URL";
+
+	/** Set URL.
+	  * Full URL address - e.g. http://www.idempiere.org
+	  */
+	public void setURL (String URL);
+
+	/** Get URL.
+	  * Full URL address - e.g. http://www.idempiere.org
+	  */
+	public String getURL();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

@@ -17,9 +17,11 @@
 /** Generated Model - DO NOT CHANGE */
 package jpiere.base.plugin.org.adempiere.model;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
+import org.compiere.util.Env;
 
 /** Generated Model for I_CorporationJP
  *  @author iDempiere (generated)
@@ -31,7 +33,7 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241204L;
+	private static final long serialVersionUID = 20241229L;
 
     /** Standard Constructor */
     public X_I_CorporationJP (Properties ctx, int I_CorporationJP_ID, String trxName)
@@ -145,6 +147,34 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Greeting getC_Greeting() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Greeting)MTable.get(getCtx(), org.compiere.model.I_C_Greeting.Table_ID)
+			.getPO(getC_Greeting_ID(), get_TrxName());
+	}
+
+	/** Set Greeting.
+		@param C_Greeting_ID Greeting to print on correspondence
+	*/
+	public void setC_Greeting_ID (int C_Greeting_ID)
+	{
+		if (C_Greeting_ID < 1)
+			set_Value (COLUMNNAME_C_Greeting_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Greeting_ID, Integer.valueOf(C_Greeting_ID));
+	}
+
+	/** Get Greeting.
+		@return Greeting to print on correspondence
+	  */
+	public int getC_Greeting_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Greeting_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set D-U-N-S.
 		@param DUNS Dun &amp; Bradstreet Number
 	*/
@@ -252,6 +282,110 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 		return false;
 	}
 
+	public I_JP_CM_CorpType getJP_CM_CorpType() throws RuntimeException
+	{
+		return (I_JP_CM_CorpType)MTable.get(getCtx(), I_JP_CM_CorpType.Table_ID)
+			.getPO(getJP_CM_CorpType_ID(), get_TrxName());
+	}
+
+	/** Set Consolidated Corp Type.
+		@param JP_CM_CorpType_ID JPIERE-0635:JPPS
+	*/
+	public void setJP_CM_CorpType_ID (int JP_CM_CorpType_ID)
+	{
+		if (JP_CM_CorpType_ID < 1)
+			set_Value (COLUMNNAME_JP_CM_CorpType_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_CM_CorpType_ID, Integer.valueOf(JP_CM_CorpType_ID));
+	}
+
+	/** Get Consolidated Corp Type.
+		@return JPIERE-0635:JPPS
+	  */
+	public int getJP_CM_CorpType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CM_CorpType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Consolidated Corp Type(Search Key).
+		@param JP_CM_CorpType_Value JPIERE-0635:JPPS
+	*/
+	public void setJP_CM_CorpType_Value (String JP_CM_CorpType_Value)
+	{
+		set_Value (COLUMNNAME_JP_CM_CorpType_Value, JP_CM_CorpType_Value);
+	}
+
+	/** Get Consolidated Corp Type(Search Key).
+		@return JPIERE-0635:JPPS
+	  */
+	public String getJP_CM_CorpType_Value()
+	{
+		return (String)get_Value(COLUMNNAME_JP_CM_CorpType_Value);
+	}
+
+	/** Set Capital.
+		@param JP_Capital Capital
+	*/
+	public void setJP_Capital (BigDecimal JP_Capital)
+	{
+		set_Value (COLUMNNAME_JP_Capital, JP_Capital);
+	}
+
+	/** Get Capital.
+		@return Capital	  */
+	public BigDecimal getJP_Capital()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_JP_Capital);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public I_JP_CorpType getJP_CorpType() throws RuntimeException
+	{
+		return (I_JP_CorpType)MTable.get(getCtx(), I_JP_CorpType.Table_ID)
+			.getPO(getJP_CorpType_ID(), get_TrxName());
+	}
+
+	/** Set Corp Type.
+		@param JP_CorpType_ID Corp Type
+	*/
+	public void setJP_CorpType_ID (int JP_CorpType_ID)
+	{
+		if (JP_CorpType_ID < 1)
+			set_Value (COLUMNNAME_JP_CorpType_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_CorpType_ID, Integer.valueOf(JP_CorpType_ID));
+	}
+
+	/** Get Corp Type.
+		@return Corp Type	  */
+	public int getJP_CorpType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_CorpType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Corp Type(Search Key).
+		@param JP_CorpType_Value Corp Type(Search Key)
+	*/
+	public void setJP_CorpType_Value (String JP_CorpType_Value)
+	{
+		set_Value (COLUMNNAME_JP_CorpType_Value, JP_CorpType_Value);
+	}
+
+	/** Get Corp Type(Search Key).
+		@return Corp Type(Search Key)	  */
+	public String getJP_CorpType_Value()
+	{
+		return (String)get_Value(COLUMNNAME_JP_CorpType_Value);
+	}
+
 	public I_JP_Corporation getJP_Corporation() throws RuntimeException
 	{
 		return (I_JP_Corporation)MTable.get(getCtx(), I_JP_Corporation.Table_ID)
@@ -277,6 +411,78 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Greeting(Name).
+		@param JP_Greeting_Name Greeting(Name)
+	*/
+	public void setJP_Greeting_Name (String JP_Greeting_Name)
+	{
+		set_Value (COLUMNNAME_JP_Greeting_Name, JP_Greeting_Name);
+	}
+
+	/** Get Greeting(Name).
+		@return Greeting(Name)	  */
+	public String getJP_Greeting_Name()
+	{
+		return (String)get_Value(COLUMNNAME_JP_Greeting_Name);
+	}
+
+	public I_JP_IndustryType getJP_IndustryType() throws RuntimeException
+	{
+		return (I_JP_IndustryType)MTable.get(getCtx(), I_JP_IndustryType.Table_ID)
+			.getPO(getJP_IndustryType_ID(), get_TrxName());
+	}
+
+	/** Set Industry Type.
+		@param JP_IndustryType_ID Industry Type
+	*/
+	public void setJP_IndustryType_ID (int JP_IndustryType_ID)
+	{
+		if (JP_IndustryType_ID < 1)
+			set_Value (COLUMNNAME_JP_IndustryType_ID, null);
+		else
+			set_Value (COLUMNNAME_JP_IndustryType_ID, Integer.valueOf(JP_IndustryType_ID));
+	}
+
+	/** Get Industry Type.
+		@return Industry Type	  */
+	public int getJP_IndustryType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_JP_IndustryType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Industry Type(Search Key).
+		@param JP_IndustryType_Value Industry Type(Search Key)
+	*/
+	public void setJP_IndustryType_Value (String JP_IndustryType_Value)
+	{
+		set_Value (COLUMNNAME_JP_IndustryType_Value, JP_IndustryType_Value);
+	}
+
+	/** Get Industry Type(Search Key).
+		@return Industry Type(Search Key)	  */
+	public String getJP_IndustryType_Value()
+	{
+		return (String)get_Value(COLUMNNAME_JP_IndustryType_Value);
+	}
+
+	/** Set Organization(Search Key).
+		@param JP_Org_Value Organization(Search Key)
+	*/
+	public void setJP_Org_Value (String JP_Org_Value)
+	{
+		set_Value (COLUMNNAME_JP_Org_Value, JP_Org_Value);
+	}
+
+	/** Get Organization(Search Key).
+		@return Organization(Search Key)	  */
+	public String getJP_Org_Value()
+	{
+		return (String)get_Value(COLUMNNAME_JP_Org_Value);
 	}
 
 	/** Set Name.
@@ -354,6 +560,22 @@ public class X_I_CorporationJP extends PO implements I_I_CorporationJP, I_Persis
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set URL.
+		@param URL Full URL address - e.g. http://www.idempiere.org
+	*/
+	public void setURL (String URL)
+	{
+		set_Value (COLUMNNAME_URL, URL);
+	}
+
+	/** Get URL.
+		@return Full URL address - e.g. http://www.idempiere.org
+	  */
+	public String getURL()
+	{
+		return (String)get_Value(COLUMNNAME_URL);
 	}
 
 	/** Set Search Key.
