@@ -261,7 +261,7 @@ public class JPiereImportProduct extends SvrProcess implements ImportProcess
 		String msg = Msg.getMsg(getCtx(), "Register") +" & "+ Msg.getMsg(getCtx(), "Update")  + " " + Msg.getElement(getCtx(), "M_Product_ID");
 		if (processMonitor != null)	processMonitor.statusUpdate(msg);
 
-		sql = new StringBuilder ("SELECT * FROM I_ProductJP WHERE I_IsImported='N' OR Processed='N' ")
+		sql = new StringBuilder ("SELECT * FROM I_ProductJP WHERE (I_IsImported='N' OR Processed='N') ")
 				.append(clientCheck).append(" ORDER BY Value ");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
