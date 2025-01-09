@@ -60,7 +60,10 @@ public class Doc_InOutJP extends Doc_InOut {
 	private String			m_DocStatus = "";
 //	private boolean 			m_deferPosting = false; //JPIERE comment out
 
-
+	/**
+	 *  Load Document Details
+	 *  @return error message or null
+	 */
 	@Override
 	protected String loadDocumentDetails()
 	{

@@ -52,16 +52,13 @@ import org.idempiere.print.IPrintHeaderFooter;
  * 
  * JPIERE-0571 : JPiere Original Report Header & Footer
  * 
- * Ref: StandardHeaderFooter.java
- * 
+ * Default report header and footer implementation
  * @author hengsin
  * @author H.Hagiwara
- * 
- *
  */
 public class JPiereStandardHeaderFooter implements IPrintHeaderFooter {
 
-	/**************************************************************************
+	/**
 	 *	Create Standard Header/Footer
 	 *  <pre>{@code
 	 *  title           C        Page x of x
@@ -97,8 +94,6 @@ public class JPiereStandardHeaderFooter implements IPrintHeaderFooter {
 		element.layout (m_header.width, 0, true, MPrintFormatItem.FIELDALIGNMENTTYPE_TrailingRight);
 		element.setLocation(m_header.getLocation());
 		m_headerFooter.addElement(element);
-		
-		
 		
 		//	Footer
 //		font = tf.getPageFooter_Font();

@@ -157,7 +157,6 @@ public class Doc_BankStatementJP extends Doc
 		return dls;
 	}	//	loadLines
 
-
 	/**
 	 *	Load Taxes
 	 *  @return DocTax Array
@@ -248,7 +247,7 @@ public class Doc_BankStatementJP extends Doc
 	 *  CMB.
 	 *  <pre>
 	 *      BankAsset       DR      CR  (Statement)
-	 *      BankInTransit   DR      CR              (Payment)
+	 *      BankInTransit   DR      CR  (Payment)
 	 *      Charge          DR          (Charge)
 	 *      Interest        DR      CR  (Interest)
 	 *  </pre>
@@ -266,7 +265,6 @@ public class Doc_BankStatementJP extends Doc
 
 		FactLine fl = null;
 		int AD_Org_ID = getBank_Org_ID();	//	Bank Account Org
-
 		//  Lines
 		for (int i = 0; i < p_lines.length; i++)
 		{

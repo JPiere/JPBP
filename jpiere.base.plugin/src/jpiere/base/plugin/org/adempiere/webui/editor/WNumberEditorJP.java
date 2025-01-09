@@ -45,7 +45,7 @@ import org.zkoss.zk.ui.event.Events;
 /**
  * Default editor for {@link DisplayType#ID} and {@link DisplayType#isNumeric(int)}.<br/>
  * Implemented with {@link NumberBox}.  
- *
+ * 
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 11, 2007
  * @version $Revision: 0.10 $
@@ -85,25 +85,25 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     }
 
     /**
-    *
-    * @param displayType
-    */
+     *
+     * @param displayType
+     */
     public WNumberEditorJP(int displayType)
     {
     	this("Number", false, false, true, displayType, "");
     }
 
     /**
-    *
-    * @param gridField
-    */
+     *
+     * @param gridField
+     */
     public WNumberEditorJP(GridField gridField)
     {
     	this(gridField, false, null);
     }
-
+   
     /**
-     *
+     * 
      * @param gridField
      * @param tableEditor
      * @param editorConfiguration
@@ -118,7 +118,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 			if (config.getIntegral() != null) {
 				if (config.getIntegral())
 					this.displayType = DisplayType.Integer;
-				else
+				else 
 					this.displayType = DisplayType.Number;
 			}
         }
@@ -153,7 +153,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
         	public Boolean getIntegral() {
         		return Boolean.valueOf(integral);
         	}
-		});
+		});        
     }
 
     /**
@@ -196,7 +196,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	        	getComponent().getDecimalbox().setCols(displayLength);
 		}
 
-		if (DisplayType.isID(displayType))
+		if (DisplayType.isID(displayType)) 
 			displayType = DisplayType.Integer;
 		else if (!DisplayType.isNumeric(displayType))
 			displayType = DisplayType.Number;
@@ -209,10 +209,10 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 			getComponent().getDecimalbox().setFormat(format.toPattern());
 		getComponent().getDecimalbox().setLocale(lang.getLocale());
 		getComponent().setFormat(format);
-
+		
 		popupMenu = new WEditorPopupMenu(false, false, isShowPreference());
     	addChangeLogMenu(popupMenu);
-
+    	
     	originalStyle = getComponent().getDecimalbox().getStyle();
     	if (ClientInfo.isMobile())
     		getComponent().getButton().setVisible(false);
@@ -220,7 +220,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     	if (gridField != null)
     		getComponent().getDecimalbox().setPlaceholder(gridField.getPlaceholder());
     }
-
+	
 	/**
 	 * Event handler
 	 * @param event
@@ -234,7 +234,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	        if (oldValue == null && newValue == null) {
 	        	return;
 	        }
-
+	        
 	        if (displayType == DisplayType.Integer) {
 		        if (newValue != null && newValue instanceof BigDecimal) {
 		        	newValue = Integer.valueOf(((BigDecimal)newValue).intValue());
@@ -243,25 +243,25 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		        	oldValue = Integer.valueOf(((BigDecimal)oldValue).intValue());
 		        }
 	        }
-
-	        if (oldValue != null && newValue != null && oldValue.equals(newValue))
+	        
+	        if (oldValue != null && newValue != null && oldValue.equals(newValue)) 
 	        {
 	    	    return;
 	    	}
-
+	        
 	        //IDEMPIERE-2553 - Enter amounts without decimal separator
 	        if(displayType == DisplayType.Amount || displayType == DisplayType.CostPrice){
 	        	if (newValue != null && newValue instanceof BigDecimal) {
 	        		newValue = addDecimalPlaces((BigDecimal)newValue);
-		        }
+		        }	        
 	        }
-
+	        
 	        ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), oldValue, newValue);
 	        super.fireValueChange(changeEvent);
 	        oldValue = getComponent().getValue(); // IDEMPIERE-963 - check again the value could be changed by callout
     	}
     }
-
+    
     /**
      * IDEMPIERE-2553 - Enter amounts without decimal separator
      * @param oldValue
@@ -272,7 +272,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
     public BigDecimal addDecimalPlaces(BigDecimal oldValue){
     	if(oldValue.toString().contains("."))
     		return oldValue;
-
+    	
     	int decimalPlaces = Env.getContextAsInt(Env.getCtx(), "AutomaticDecimalPlacesForAmoun");
     	if(decimalPlaces <= 0)
     		return oldValue;
