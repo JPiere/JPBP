@@ -210,6 +210,8 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		getComponent().getDecimalbox().setLocale(lang.getLocale());
 		getComponent().setFormat(format);
 		
+		getComponent().getDecimalbox().setClientAttribute("inputmode", "decimal");//JPIERE-0003
+
 		popupMenu = new WEditorPopupMenu(false, false, isShowPreference());
     	addChangeLogMenu(popupMenu);
     	
