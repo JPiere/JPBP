@@ -39,7 +39,9 @@ import java.util.logging.Level;
 
 import org.adempiere.model.GridTabWrapper;
 import org.compiere.model.GridTab;
+import org.compiere.model.I_C_Invoice;
 import org.compiere.model.I_C_InvoiceLine;
+import org.compiere.model.I_C_Order;
 import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.I_C_ProjectLine;
 import org.compiere.model.I_M_RMALine;
@@ -1023,9 +1025,10 @@ public class JPiereProductPricing extends MProductPricing
 		if (qty != null && Env.ZERO.compareTo(qty) != 0)
 			m_Qty = qty;
 
-		if(orderLine.getC_Order() != null)
+		I_C_Order order = orderLine.getC_Order();
+		if(order != null)
 		{
-			m_isSOTrx = orderLine.getC_Order().isSOTrx();
+			m_isSOTrx = order.isSOTrx();
 		}else {
 
 			GridTabWrapper gtw = (GridTabWrapper)java.lang.reflect.Proxy.getInvocationHandler(orderLine);
@@ -1048,11 +1051,12 @@ public class JPiereProductPricing extends MProductPricing
 			m_Qty = qty;
 
 
-		if(invoiceLine.getC_Invoice() != null)
+		I_C_Invoice invoice = invoiceLine.getC_Invoice();
+		if(invoice != null)
 		{
-			m_C_BPartner_ID = invoiceLine.getC_Invoice().getC_BPartner_ID();
-			m_isSOTrx = invoiceLine.getC_Invoice().isSOTrx();
-			m_PriceDate = invoiceLine.getC_Invoice().getDateInvoiced();
+			m_C_BPartner_ID = invoice.getC_BPartner_ID();
+			m_isSOTrx = invoice.isSOTrx();
+			m_PriceDate = invoice.getDateInvoiced();
 
 		}else {
 
