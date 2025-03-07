@@ -171,14 +171,15 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				amt = m_taxes[i].getAmount();
 				if (amt != null && amt.signum() != 0)
 				{
-					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), null, amt);
-					if (tl != null)
+					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as), 
+							getC_Currency_ID(), null, amt);
+					if (tl != null)//JPIERE
 					{
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 						tl.set_ValueNoCheck("JP_SOPOType", "S");
 						tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
 						tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
-					}
+					}//JPIERE
 				}
 			}
 			//  Revenue                 CR
@@ -211,8 +212,10 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								getC_Currency_ID(), dAmt, null);
 					}
 				}
-				FactLine fLine = fact.createLine (p_lines[i], p_lines[i].getAccount(ProductCost.ACCTTYPE_P_Revenue, as), getC_Currency_ID(), null, amt);
-				if(fLine != null)
+				FactLine fLine = fact.createLine (p_lines[i], 
+						p_lines[i].getAccount(ProductCost.ACCTTYPE_P_Revenue, as),
+						getC_Currency_ID(), null, amt);
+				if(fLine != null)//JPIERE
 				{
 					if(C_Charge_ID != 0)
 						fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -220,8 +223,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					fLine.setC_Tax_ID(p_lines[i].getC_Tax_ID());
 					fLine.set_ValueNoCheck("JP_SOPOType", "S");
 					fLine.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
-					fLine.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));
-				}
+					fLine.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));	
+				}//JPIERE
 				
 				if (!p_lines[i].isItem())
 				{
@@ -280,13 +283,13 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				if (amt != null && amt.signum() != 0)
 				{
 					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), amt, null);
-					if (tl != null)
+					if (tl != null)//JPIERE
 					{
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 						tl.set_ValueNoCheck("JP_SOPOType", "S");
 						tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
 						tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
-					}
+					}//JPIERE
 				}
 			}
 			//  Revenue         CR
@@ -319,8 +322,10 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								getC_Currency_ID(), null, dAmt);
 					}
 				}
-				FactLine fLine = fact.createLine (p_lines[i], p_lines[i].getAccount (ProductCost.ACCTTYPE_P_Revenue, as), getC_Currency_ID(), amt, null);
-				if(fLine != null)
+				FactLine fLine = fact.createLine (p_lines[i], 
+						p_lines[i].getAccount (ProductCost.ACCTTYPE_P_Revenue, as), 
+						getC_Currency_ID(), amt, null);
+				if(fLine != null)//JPIERE
 				{
 					if(C_Charge_ID != 0)
 						fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -335,7 +340,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						fLine.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
 						fLine.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
 					}
-				}
+				}//JPIERE
 				
 				if (!p_lines[i].isItem())
 				{
@@ -380,6 +385,12 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		//  ** API
 		else if (getDocumentType().equals(DOCTYPE_APInvoice))
 		{
+			MInvoice invoice = (MInvoice)getPO();
+			MInvoice originalInvoice = null;
+			if (invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+			{
+				originalInvoice = new MInvoice(Env.getCtx(), invoice.getReversal_ID(), invoice.get_TrxName());
+			}
 			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
 			BigDecimal serviceAmt = Env.ZERO;
 			
@@ -393,8 +404,9 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			//  TaxCredit       DR
 			for (int i = 0; i < m_taxes.length; i++)
 			{
-				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as), getC_Currency_ID(), m_taxes[i].getAmount(), null);
-				if (tl != null)
+				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as), 
+						getC_Currency_ID(), m_taxes[i].getAmount(), null);
+				if (tl != null)//JPIERE
 				{
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 					tl.set_ValueNoCheck("JP_SOPOType", "P");
@@ -420,6 +432,10 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						}
 					}//JPIERE-0553: 
 				}
+				if (tl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+				{
+					tl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE);
+				}
 			}
 			//  Expense         DR
 			for (int i = 0; i < p_lines.length; i++)
@@ -439,6 +455,17 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					else
 						desc += " 100%";
 					fl.setDescription(desc);
+					if (invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+					{
+						int lineId = 0;
+						if (originalInvoice != null)
+						{
+							MInvoiceLine[] lines = originalInvoice.getLines();
+							if (lines.length > i)
+								lineId = lines[i].getC_InvoiceLine_ID();
+						}
+						fl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), lineId, BigDecimal.ONE);
+					}
 				}
 				if (!landedCost)
 				{
@@ -468,41 +495,63 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 							amt = amt.add(discount);
 							dAmt = discount;
 							MAccount tradeDiscountReceived = line.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
-							fact.createLine (line, tradeDiscountReceived,
+							FactLine fl = fact.createLine (line, tradeDiscountReceived,
 									getC_Currency_ID(), null, dAmt);
+							if (fl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+							{
+								int lineId = 0;
+								if (originalInvoice != null)
+								{
+									MInvoiceLine[] lines = originalInvoice.getLines();
+									if (lines.length > i)
+										lineId = lines[i].getC_InvoiceLine_ID();
+								}
+								fl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), lineId, BigDecimal.ONE);
+							}
 						}
 					}
-					FactLine fLine = fact.createLine (line, expense, getC_Currency_ID(), amt, null);
-					if(fLine != null)
+					FactLine fl = fact.createLine (line, expense,
+							getC_Currency_ID(), amt, null);
+					if(fl != null)//JPIERE
 					{
 						if(C_Charge_ID != 0)
-							fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
-						fLine.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
-						fLine.setC_Tax_ID(p_lines[i].getC_Tax_ID());
-						fLine.set_ValueNoCheck("JP_SOPOType", "P");
-						fLine.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
-						fLine.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));
+							fl.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
+						fl.set_ValueNoCheck("JP_PriceActual" ,p_lines[i].getPO().get_Value("PriceActual"));
+						fl.setC_Tax_ID(p_lines[i].getC_Tax_ID());
+						fl.set_ValueNoCheck("JP_SOPOType", "P");
+						fl.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
+						fl.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));
 						
 						//JPIERE-0553: Qualified　Invoice　Issuer
-						fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
+						fl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", false);	
 						if(IsQualifiedInvoiceIssuerJP)
 						{
 							Object obj_RegisteredDateOfQII = bp.get_Value("JP_RegisteredDateOfQII");
 							if(obj_RegisteredDateOfQII == null)
 							{
-								fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
-								fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+								fl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+								fl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 							}else {
 								Timestamp JP_RegisteredDateOfQII = (Timestamp)obj_RegisteredDateOfQII;
 								if(getDateAcct().compareTo(JP_RegisteredDateOfQII) >= 0)
 								{
-									fLine.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
-									fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
+									fl.set_ValueNoCheck("IsQualifiedInvoiceIssuerJP", IsQualifiedInvoiceIssuerJP);
+									fl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 								}
 							}
 						}//JPIERE-0553: 
-					}
-					
+					}//JPIERE
+					if (fl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+					{
+						int lineId = 0;
+						if (originalInvoice != null)
+						{
+							MInvoiceLine[] lines = originalInvoice.getLines();
+							if (lines.length > i)
+								lineId = lines[i].getC_InvoiceLine_ID();
+						}
+						fl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), lineId, BigDecimal.ONE);
+					}					
 					if (!line.isItem())
 					{
 						grossAmt = grossAmt.subtract(amt);
@@ -512,13 +561,23 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
 					{
 						if (line.getM_Product_ID() != 0
-							&& line.getProduct().isService())	//	otherwise Inv Matching
+							&& line.getProduct().isService()) {	//	otherwise Inv Matching
+							int Ref_CostDetail_ID = 0;
+							if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+							{
+								MInvoiceLine reversalLine = new MInvoiceLine(getCtx(), line.getReversalLine_ID(), getTrxName());
+								MCostDetail cd = MCostDetail.getInvoice(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+										reversalLine.get_ID(), 0, reversalLine.getParent().getDateAcct(), getTrxName());
+								if (cd != null)
+									Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+							}
 							MCostDetail.createInvoice(as, line.getAD_Org_ID(),
 								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 								line.get_ID(), 0,		//	No Cost Element
 								line.getAmtSource(), line.getQty(),
-								line.getDescription(), getTrxName());
-					}
+								line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
+						}
+					}//JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT"
 				}
 			}
 
@@ -526,7 +585,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
 			int payablesServices_ID = payables_ID; // Liability Services account Deprecated IDEMPIERE-362
 			if (m_allLinesItem || !as.isPostServices()
-				|| payables_ID == payablesServices_ID)
+					|| payables_ID == payablesServices_ID)
 			{
 				grossAmt = getAmount(Doc.AMTTYPE_Gross);
 				serviceAmt = Env.ZERO;
@@ -536,13 +595,23 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
 				grossAmt = Env.ZERO;
 			}
-			if (grossAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), payables_ID),
+			FactLine fl = null;
+			if (grossAmt.signum() > 0)
+				fl = fact.createLine(null, MAccount.get(getCtx(), payables_ID),
 					getC_Currency_ID(), null, grossAmt);
-			if (serviceAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
+			else if (grossAmt.signum() < 0)
+				fl = fact.createLine(null, MAccount.get(getCtx(), payables_ID),
+						getC_Currency_ID(), grossAmt.negate(), null);
+			if (serviceAmt.signum() > 0)
+				fl = fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
 					getC_Currency_ID(), null, serviceAmt);
-
+			else if (serviceAmt.signum() < 0)
+				fl = fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
+						getC_Currency_ID(), serviceAmt.negate(), null);
+			if (fl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+			{
+				fl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE);
+			}
 			//  Set Locations
 			FactLine[] fLines = fact.getLines();
 			for (int i = 0; i < fLines.length; i++)
@@ -573,8 +642,9 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			//  TaxCredit               CR
 			for (int i = 0; i < m_taxes.length; i++)
 			{
-				FactLine tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as), getC_Currency_ID(), null, m_taxes[i].getAmount());
-				if (tl != null)
+				FactLine tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as), 
+						getC_Currency_ID(), null, m_taxes[i].getAmount());
+				if (tl != null)//JPIERE
 				{
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 					tl.set_ValueNoCheck("JP_SOPOType", "P");
@@ -599,7 +669,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 							}
 						}
 					}//JPIERE-0553: 
-				}
+				}//JPIERE
 			}
 			//  Expense                 CR
 			for (int i = 0; i < p_lines.length; i++)
@@ -652,8 +722,9 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 									getC_Currency_ID(), dAmt, null);
 						}
 					}
-					FactLine fLine = fact.createLine (line, expense, getC_Currency_ID(), null, amt);
-					if(fLine != null)
+					FactLine fLine = fact.createLine (line, expense, 
+							getC_Currency_ID(), null, amt);
+					if(fLine != null)//JPIERE
 					{
 						if(C_Charge_ID != 0)
 							fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -687,7 +758,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								}
 							}
 						}//JPIERE-0553: 
-					}
+					}//JPIERE
 					
 					if (!line.isItem())
 					{
@@ -698,12 +769,22 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
 					{
 						if (line.getM_Product_ID() != 0
-							&& line.getProduct().isService())	//	otherwise Inv Matching
+							&& line.getProduct().isService()) {	//	otherwise Inv Matching
+							int Ref_CostDetail_ID = 0;
+							if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+							{
+								MInvoiceLine reversalLine = new MInvoiceLine(getCtx(), line.getReversalLine_ID(), getTrxName());
+								MCostDetail cd = MCostDetail.getInvoice(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+										reversalLine.get_ID(), 0, reversalLine.getParent().getDateAcct(), getTrxName());
+								if (cd != null)
+									Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+							}
 							MCostDetail.createInvoice(as, line.getAD_Org_ID(),
 								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 								line.get_ID(), 0,		//	No Cost Element
 								line.getAmtSource().negate(), line.getQty(),
-								line.getDescription(), getTrxName());
+								line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
+						}
 					}
 				}
 			}
@@ -1064,12 +1145,22 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
 				{
 					if (line.getM_Product_ID() != 0
-						&& line.getProduct().isService())	//	otherwise Inv Matching
+						&& line.getProduct().isService()) {	//	otherwise Inv Matching
+						int Ref_CostDetail_ID = 0;
+						if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+						{
+							MInvoiceLine reversalLine = new MInvoiceLine(getCtx(), line.getReversalLine_ID(), getTrxName());
+							MCostDetail cd = MCostDetail.getInvoice(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+									reversalLine.get_ID(), 0, reversalLine.getParent().getDateAcct(), getTrxName());
+							if (cd != null)
+								Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+						}
 						MCostDetail.createInvoice(as, line.getAD_Org_ID(),
 							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 							line.get_ID(), 0,		//	No Cost Element
 							line.getAmtSource(), line.getQty(),
-							line.getDescription(), getTrxName());
+							line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
+					}
 				}
 			}
 		}
@@ -1230,12 +1321,22 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
 				{
 					if (line.getM_Product_ID() != 0
-						&& line.getProduct().isService())	//	otherwise Inv Matching
+						&& line.getProduct().isService()) {	//	otherwise Inv Matching
+						int Ref_CostDetail_ID = 0;
+						if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+						{
+							MInvoiceLine reversalLine = new MInvoiceLine(getCtx(), line.getReversalLine_ID(), getTrxName());
+							MCostDetail cd = MCostDetail.getInvoice(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+									reversalLine.get_ID(), 0, reversalLine.getParent().getDateAcct(), getTrxName());
+							if (cd != null)
+								Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+						}
 						MCostDetail.createInvoice(as, line.getAD_Org_ID(),
 							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 							line.get_ID(), 0,		//	No Cost Element
 							line.getAmtSource().negate(), line.getQty(),
-							line.getDescription(), getTrxName());
+							line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
+					}
 				}
 			}
 		}
