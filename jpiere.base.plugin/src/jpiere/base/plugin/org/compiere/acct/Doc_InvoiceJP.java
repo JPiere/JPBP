@@ -48,11 +48,13 @@ import jpiere.base.plugin.org.adempiere.model.MContractTaxAcct;
 
 /**
 *  JPIERE-0363: Contract Management
-*  JPIERE-0543: Tax Base Amt & Tax Amt To the Fact_Acct
-*  JPIERE-0553: Qualified　Invoice　Issuer
+*  JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
+*  JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
+*  JPIERE-0553: Qualified Invoice Issuer
 *  JPIERE-0556: Add column to the Journal For legal compliance.
+*  JPIERE-0620: Don't create Cost Detail
 *
-* @author Hideaki Hagiwara
+* @author Hideaki Hagiwara(h.hagiwara@oss-erp.co.jp)
 *
 */
 public class Doc_InvoiceJP extends Doc_Invoice {
@@ -173,13 +175,13 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				{
 					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as), 
 							getC_Currency_ID(), null, amt);
-					if (tl != null)//JPIERE
+					if (tl != null)//JPIERE-0543:Tax Base Amount & Tax Amount To the Fact_Acct
 					{
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 						tl.set_ValueNoCheck("JP_SOPOType", "S");
 						tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
 						tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
-					}//JPIERE
+					}//JPIERE-0543
 				}
 			}
 			//  Revenue                 CR
@@ -187,7 +189,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				amt = p_lines[i].getAmtSource();
 
-				//JPIERE-369:Start
+				//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 				int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 				if(C_Charge_ID != 0)
 				{
@@ -197,7 +199,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 					}
 				}
-				//JPiere-0369:finish
+				//JPIERE-0369
 
 				BigDecimal dAmt = null;
 				if (as.isTradeDiscountPosted())
@@ -215,7 +217,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				FactLine fLine = fact.createLine (p_lines[i], 
 						p_lines[i].getAccount(ProductCost.ACCTTYPE_P_Revenue, as),
 						getC_Currency_ID(), null, amt);
-				if(fLine != null)//JPIERE
+				if(fLine != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					if(C_Charge_ID != 0)
 						fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -224,7 +226,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					fLine.set_ValueNoCheck("JP_SOPOType", "S");
 					fLine.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
 					fLine.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));	
-				}//JPIERE
+				}//JPIERE-0543
 				
 				if (!p_lines[i].isItem())
 				{
@@ -282,14 +284,15 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				amt = m_taxes[i].getAmount();
 				if (amt != null && amt.signum() != 0)
 				{
-					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as), getC_Currency_ID(), amt, null);
-					if (tl != null)//JPIERE
+					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
+							getC_Currency_ID(), amt, null);
+					if (tl != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 					{
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 						tl.set_ValueNoCheck("JP_SOPOType", "S");
 						tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
 						tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
-					}//JPIERE
+					}//JPIERE-0543
 				}
 			}
 			//  Revenue         CR
@@ -297,7 +300,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				amt = p_lines[i].getAmtSource();
 
-				//JPIERE-369:Start
+				//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 				int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 				if(C_Charge_ID != 0)
 				{
@@ -307,7 +310,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 					}
 				}
-				//JPiere-0369:finish
+				//JPIERE-0369
 
 				BigDecimal dAmt = null;
 				if (as.isTradeDiscountPosted())
@@ -325,7 +328,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				FactLine fLine = fact.createLine (p_lines[i], 
 						p_lines[i].getAccount (ProductCost.ACCTTYPE_P_Revenue, as), 
 						getC_Currency_ID(), amt, null);
-				if(fLine != null)//JPIERE
+				if(fLine != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					if(C_Charge_ID != 0)
 						fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -340,7 +343,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						fLine.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
 						fLine.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
 					}
-				}//JPIERE
+				}//JPIERE-0543
 				
 				if (!p_lines[i].isItem())
 				{
@@ -406,7 +409,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as), 
 						getC_Currency_ID(), m_taxes[i].getAmount(), null);
-				if (tl != null)//JPIERE
+				if (tl != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 					tl.set_ValueNoCheck("JP_SOPOType", "P");
@@ -430,8 +433,9 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								tl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 							}
 						}
-					}//JPIERE-0553: 
-				}
+					}//JPIERE-0553
+				}//JPIERE-0543
+				
 				if (tl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
 				{
 					tl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE);
@@ -474,7 +478,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
 					BigDecimal amt = line.getAmtSource();
 
-					//JPIERE-369:Start
+					//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 					int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 					if(C_Charge_ID != 0)
 					{
@@ -484,7 +488,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 							amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 						}
 					}
-					//JPiere-0369:finish
+					//JPIERE-0369
 
 					BigDecimal dAmt = null;
 					if (as.isTradeDiscountPosted() && !line.isItem())
@@ -512,7 +516,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					}
 					FactLine fl = fact.createLine (line, expense,
 							getC_Currency_ID(), amt, null);
-					if(fl != null)//JPIERE
+					if(fl != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 					{
 						if(C_Charge_ID != 0)
 							fl.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -539,8 +543,9 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 									fl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 								}
 							}
-						}//JPIERE-0553: 
-					}//JPIERE
+						}//JPIERE-0553
+					}//JPIERE-0543
+					
 					if (fl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
 					{
 						int lineId = 0;
@@ -558,7 +563,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						serviceAmt = serviceAmt.add(amt);
 					}
 					//
-					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))//JPIERE-0620: Don't create Cost Detail
 					{
 						if (line.getM_Product_ID() != 0
 							&& line.getProduct().isService()) {	//	otherwise Inv Matching
@@ -577,7 +582,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								line.getAmtSource(), line.getQty(),
 								line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
 						}
-					}//JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT"
+					}//JPIERE-0620
 				}
 			}
 
@@ -644,7 +649,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				FactLine tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as), 
 						getC_Currency_ID(), null, m_taxes[i].getAmount());
-				if (tl != null)//JPIERE
+				if (tl != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 					tl.set_ValueNoCheck("JP_SOPOType", "P");
@@ -668,8 +673,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								tl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 							}
 						}
-					}//JPIERE-0553: 
-				}//JPIERE
+					}//JPIERE-0553
+				}//JPIERE-0543
 			}
 			//  Expense                 CR
 			for (int i = 0; i < p_lines.length; i++)
@@ -697,7 +702,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
 					BigDecimal amt = line.getAmtSource();
 
-					//JPIERE-369:Start
+					//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 					int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 					if(C_Charge_ID != 0)
 					{
@@ -707,7 +712,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 							amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 						}
 					}
-					//JPiere-0369:finish
+					//JPIERE-0369
 
 					BigDecimal dAmt = null;
 					if (as.isTradeDiscountPosted() && !line.isItem())
@@ -724,7 +729,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					}
 					FactLine fLine = fact.createLine (line, expense, 
 							getC_Currency_ID(), null, amt);
-					if(fLine != null)//JPIERE
+					if(fLine != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 					{
 						if(C_Charge_ID != 0)
 							fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -757,8 +762,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 									fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 								}
 							}
-						}//JPIERE-0553: 
-					}//JPIERE
+						}//JPIERE-0553
+					}//JPIERE-0543
 					
 					if (!line.isItem())
 					{
@@ -766,7 +771,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						serviceAmt = serviceAmt.add(amt);
 					}
 					//
-					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+					if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))//JPIERE-0620: Don't create Cost Detail
 					{
 						if (line.getM_Product_ID() != 0
 							&& line.getProduct().isService()) {	//	otherwise Inv Matching
@@ -785,7 +790,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								line.getAmtSource().negate(), line.getQty(),
 								line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
 						}
-					}
+					}//JPIERE-0620
 				}
 			}
 
@@ -846,13 +851,13 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				//CR
 				FactLine tl = null;
 				tl = fact.createLine(null, getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), null, amt);
-				if (tl != null)
+				if (tl != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 					tl.set_ValueNoCheck("JP_SOPOType", "S");
 					tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt());
 					tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount());
-				}
+				}//JPIERE-0543
 			}//if
 		}//for
 
@@ -861,7 +866,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		{
 			amt = p_lines[i].getAmtSource();
 
-			//JPIERE-369:Start
+			//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 			int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 			if(C_Charge_ID != 0)
 			{
@@ -871,7 +876,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 				}
 			}
-			//JPiere-0369:finish
+			//JPIERE-0369
 
 			BigDecimal dAmt = null;
 			//DR : Posting Trade Discount
@@ -890,7 +895,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 
 			//CR : Revenue
 			FactLine fLine = fact.createLine (p_lines[i], getInvoiceRevenueAccount(p_lines[i], contractAcct,  as), getC_Currency_ID(), null, amt);
-			if(fLine != null)
+			if(fLine != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 			{
 				if(C_Charge_ID != 0)
 					fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -899,7 +904,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				fLine.set_ValueNoCheck("JP_SOPOType", "S");
 				fLine.set_ValueNoCheck("JP_TaxBaseAmt", p_lines[i].getPO().get_Value("JP_TaxBaseAmt"));
 				fLine.set_ValueNoCheck("JP_TaxAmt", p_lines[i].getPO().get_Value("JP_TaxAmt"));
-			}
+			}//JPIERE-0543
 
 		}//For
 
@@ -935,13 +940,13 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				//DR
 				FactLine tl = null;
 				tl = fact.createLine(null,getInvoiceTaxDueAccount(m_taxes[i], contractAcct, as), getC_Currency_ID(), amt, null);
-				if (tl != null)
+				if (tl != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 					tl.set_ValueNoCheck("JP_SOPOType", "S");
 					tl.set_ValueNoCheck("JP_TaxBaseAmt", m_taxes[i].getTaxBaseAmt().negate());
 					tl.set_ValueNoCheck("JP_TaxAmt", m_taxes[i].getAmount().negate());
-				}
+				}//JPIERE-0543
 			}//if
 		}//for
 
@@ -950,7 +955,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		{
 			amt = p_lines[i].getAmtSource();
 
-			//JPIERE-369:Start
+			//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 			int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 			if(C_Charge_ID != 0)
 			{
@@ -960,7 +965,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 				}
 			}
-			//JPiere-0369:finish
+			//JPIERE-0369
 
 			BigDecimal dAmt = null;
 			//CR:Posting Trade Discount
@@ -979,7 +984,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 
 			//DR : Revenue
 			FactLine fLine = fact.createLine (p_lines[i], getInvoiceRevenueAccount(p_lines[i], contractAcct,  as), getC_Currency_ID(), amt, null);
-			if(fLine != null)
+			if(fLine != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 			{
 				if(C_Charge_ID != 0)
 					fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -994,7 +999,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					fLine.set_ValueNoCheck("JP_TaxBaseAmt", Env.ZERO);
 					fLine.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
 				}
-			}
+			}//JPIERE-0543
 
 		}//For
 
@@ -1030,7 +1035,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		{
 			FactLine tl = fact.createLine(null, getInvoiceTaxCreditAccount(m_taxes[i], contractAcct, as),
 				getC_Currency_ID(), m_taxes[i].getAmount(), null);
-			if (tl != null)
+			if (tl != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 			{
 				tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 				tl.set_ValueNoCheck("JP_SOPOType", "P");
@@ -1054,8 +1059,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 							tl.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 						}
 					}
-				}//JPIERE-0553: 
-			}
+				}//JPIERE-0553
+			}//JPIERE-0543
 		}
 		//  Expense         DR
 		for (int i = 0; i < p_lines.length; i++)
@@ -1081,7 +1086,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				MAccount expense =  getInvoiceExpenseAccount(line, contractAcct, as);
 				BigDecimal amt = line.getAmtSource();
 
-				//JPIERE-369:Start
+				//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 				int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 				if(C_Charge_ID != 0)
 				{
@@ -1091,7 +1096,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 					}
 				}
-				//JPiere-0369:finish
+				//JPIERE-0369
 
 				BigDecimal dAmt = null;
 				if (as.isTradeDiscountPosted() && !line.isItem())
@@ -1107,7 +1112,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					}
 				}
 				FactLine fLine = fact.createLine (line, expense, getC_Currency_ID(), amt, null);
-				if(fLine != null)
+				if(fLine != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					if(C_Charge_ID != 0)
 						fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -1134,15 +1139,16 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 							}
 						}
-					}//JPIERE-0553: 
-				}
+					}//JPIERE-0553
+				}//JPIERE-0543
+				
 				if (!line.isItem())
 				{
 					grossAmt = grossAmt.subtract(amt);
 					serviceAmt = serviceAmt.add(amt);
 				}
 				//
-				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))//JPIERE-0620: Don't create Cost Detail
 				{
 					if (line.getM_Product_ID() != 0
 						&& line.getProduct().isService()) {	//	otherwise Inv Matching
@@ -1161,7 +1167,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 							line.getAmtSource(), line.getQty(),
 							line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
 					}
-				}
+				}//JPIERE-0620
 			}
 		}
 
@@ -1251,7 +1257,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 				MAccount expense = getInvoiceExpenseAccount(line, contractAcct, as);
 				BigDecimal amt = line.getAmtSource();
 
-				//JPIERE-369:Start
+				//JPIERE-0369: Mixed support for tax-exclusive and tax-inclusive by Charge
 				int C_Charge_ID = p_lines[i].getPO().get_ValueAsInt("C_Charge_ID");
 				if(C_Charge_ID != 0)
 				{
@@ -1261,7 +1267,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 						amt = (BigDecimal)p_lines[i].getPO().get_Value("JP_TaxBaseAmt");
 					}
 				}
-				//JPiere-0369:finish
+				//JPIERE-0369
 
 				BigDecimal dAmt = null;
 				if (as.isTradeDiscountPosted() && !line.isItem())
@@ -1277,7 +1283,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 					}
 				}
 				FactLine fLine = fact.createLine (line, expense, getC_Currency_ID(), null, amt);
-				if(fLine != null)
+				if(fLine != null)//JPIERE-0543: Tax Base Amount & Tax Amount To the Fact_Acct
 				{
 					if(C_Charge_ID != 0)
 						fLine.set_ValueNoCheck("JP_Charge_ID", C_Charge_ID);
@@ -1310,15 +1316,16 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 								fLine.set_ValueNoCheck("JP_RegisteredNumberOfQII", bp.get_Value("JP_RegisteredNumberOfQII"));
 							}
 						}
-					}//JPIERE-0553: 
-				}
+					}//JPIERE-0553
+				}//JPIERE-0543
+				
 				if (!line.isItem())
 				{
 					grossAmt = grossAmt.subtract(amt);
 					serviceAmt = serviceAmt.add(amt);
 				}
 				//
-				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))
+				if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))//JPIERE-0620: Don't create Cost Detail
 				{
 					if (line.getM_Product_ID() != 0
 						&& line.getProduct().isService()) {	//	otherwise Inv Matching
@@ -1337,7 +1344,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 							line.getAmtSource().negate(), line.getQty(),
 							line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName());
 					}
-				}
+				}//JPIERE-0620
 			}
 		}
 
