@@ -59,10 +59,16 @@ import jpiere.base.plugin.org.adempiere.model.MContractTaxAcct;
 */
 public class Doc_InvoiceJP extends Doc_Invoice {
 
+	/**
+	 *  Constructor
+	 * 	@param as accounting schemata
+	 * 	@param rs record
+	 * 	@param trxName trx
+	 */
 	public Doc_InvoiceJP(MAcctSchema as, ResultSet rs, String trxName)
 	{
 		super(as, rs, trxName);
-	}
+	}	//	Doc_InvoiceJP
 
 
 	@Override
@@ -141,7 +147,6 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	/**
 	 * JPIERE Comment
 	 * createFactsStandard method is iDempiere Standard createFacts function.
-	 * And JPIERE-369 Charge Tax function
 	 *
 	 */
 	private ArrayList<Fact> createFacts_Standard (MAcctSchema as)
