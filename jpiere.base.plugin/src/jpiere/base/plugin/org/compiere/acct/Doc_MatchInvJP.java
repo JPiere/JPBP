@@ -53,7 +53,6 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MProduct;
-import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.MUOM;
 import org.compiere.model.ProductCost;
@@ -86,7 +85,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
 /**
 *  JPIERE-0363: Contract Management
 *  JPIERE-0552: JPiere original Doc_MatchInv
-*  JPIERE-0620: Don't create Cost Detail*  
+*  
 *
 * @author Hideaki Hagiwara
 *
@@ -543,22 +542,19 @@ public class Doc_MatchInvJP extends Doc
 		try {
 			savepoint = trx.setSavepoint(null);
 			int Ref_CostDetail_ID = 0;
-			if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))//JPIERE-0620: Don't create Cost Detail
+			if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
 			{
-				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
-				{
-					MCostDetail cd = MCostDetail.getMatchInvoice(as, m_invoiceLine.getM_Product_ID(), m_invoiceLine.getM_AttributeSetInstance_ID(),
-							matchInv.getReversal_ID(), 0, getTrxName());
-					if (cd != null)
-						Ref_CostDetail_ID = cd.getM_CostDetail_ID();
-				}
-				if (!MCostDetail.createMatchInvoice(as, m_invoiceLine.getAD_Org_ID(),
-						m_invoiceLine.getM_Product_ID(), m_invoiceLine.getM_AttributeSetInstance_ID(),
-						matchInv.getM_MatchInv_ID(), 0,
-						isStockCoverage ? amtAsset: ipv, BigDecimal.ZERO, "Invoice Price Variance", getDateAcct(), Ref_CostDetail_ID, getTrxName())) {
-					throw new RuntimeException("Failed to create cost detail record.");
-				}
+				MCostDetail cd = MCostDetail.getMatchInvoice(as, m_invoiceLine.getM_Product_ID(), m_invoiceLine.getM_AttributeSetInstance_ID(),
+						matchInv.getReversal_ID(), 0, getTrxName());
+				if (cd != null)
+					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
 			}
+			if (!MCostDetail.createMatchInvoice(as, m_invoiceLine.getAD_Org_ID(),
+					m_invoiceLine.getM_Product_ID(), m_invoiceLine.getM_AttributeSetInstance_ID(),
+					matchInv.getM_MatchInv_ID(), 0,
+					isStockCoverage ? amtAsset: ipv, BigDecimal.ZERO, "Invoice Price Variance", getDateAcct(), Ref_CostDetail_ID, getTrxName())) {
+				throw new RuntimeException("Failed to create cost detail record.");
+			}				
 		} catch (SQLException e) {
 			throw new RuntimeException(e.getLocalizedMessage(), e);
 		} catch (AverageCostingZeroQtyException e) {
@@ -767,27 +763,22 @@ public class Doc_MatchInvJP extends Doc
 				tQty = tQty.add(getQty().negate()); //	Qty is set to negative value
 			else
 				tQty = tQty.add(getQty());
-			
 			int Ref_CostDetail_ID = 0;
-			if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))//JPIERE-0620: Don't create Cost Detail
+			if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
 			{
-				
-				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
-				{
-					MCostDetail cd = MCostDetail.getInvoice(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
-							matchInv.getReversal().getC_InvoiceLine_ID(), 0, matchInv.getReversal().getDateAcct(), getTrxName());
-					if (cd != null)
-						Ref_CostDetail_ID = cd.getM_CostDetail_ID();
-				}		
-				// Set Total Amount and Total Quantity from Matched Invoice //TODO DateAcct
-				if (!MCostDetail.createInvoice(as, getAD_Org_ID(), 
-						getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
-						m_invoiceLine.getC_InvoiceLine_ID(), 0,		//	No cost element
-						tAmt, tQty,	getDescription(), getDateAcct(), Ref_CostDetail_ID, getTrxName()))
-				{
-					return "Failed to create cost detail record";
-				}
-			}//JPIERE-0620
+				MCostDetail cd = MCostDetail.getInvoice(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+						matchInv.getReversal().getC_InvoiceLine_ID(), 0, matchInv.getReversal().getDateAcct(), getTrxName());
+				if (cd != null)
+					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+			}		
+			// Set Total Amount and Total Quantity from Matched Invoice //TODO DateAcct
+			if (!MCostDetail.createInvoice(as, getAD_Org_ID(), 
+					getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+					m_invoiceLine.getC_InvoiceLine_ID(), 0,		//	No cost element
+					tAmt, tQty,	getDescription(), getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+			{
+				return "Failed to create cost detail record";
+			}
 			
 			Map<Integer, BigDecimal> landedCostMap = new LinkedHashMap<Integer, BigDecimal>();
 			I_C_OrderLine orderLine = m_receiptLine.getC_OrderLine();
@@ -831,28 +822,25 @@ public class Doc_MatchInvJP extends Doc
 				landedCostMap.put(elementId, elementAmt);
 			}
 			
-			if(MSysConfig.getBooleanValue("JP_CREATE_COSTDETAIL_OF_SERVICE_PRODUCT", false, getAD_Client_ID()))//JPIERE-0620: Don't create Cost Detail
+			for(Integer elementId : landedCostMap.keySet())
 			{
-				for(Integer elementId : landedCostMap.keySet())
+				BigDecimal amt = landedCostMap.get(elementId);
+				Ref_CostDetail_ID = 0;
+				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
 				{
-					BigDecimal amt = landedCostMap.get(elementId);
-					Ref_CostDetail_ID = 0;
-					if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
-					{
-						MCostDetail cd = MCostDetail.getShipment(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
-								matchInv.getReversal().getM_InOutLine_ID(), 0, getTrxName());
-						if (cd != null)
-							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
-					}
-					if (!MCostDetail.createShipment(as, getAD_Org_ID(), 
-						getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
-						m_receiptLine.getM_InOutLine_ID(), elementId,
-						amt, tQty,	getDescription(), false, getDateAcct(), Ref_CostDetail_ID, getTrxName()))
-					{
-						return "Failed to create cost detail record";
-					}
+					MCostDetail cd = MCostDetail.getShipment(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+							matchInv.getReversal().getM_InOutLine_ID(), 0, getTrxName());
+					if (cd != null)
+						Ref_CostDetail_ID = cd.getM_CostDetail_ID();
 				}
-			}//JPIERE-0620
+				if (!MCostDetail.createShipment(as, getAD_Org_ID(), 
+					getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+					m_receiptLine.getM_InOutLine_ID(), elementId,
+					amt, tQty,	getDescription(), false, getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+				{
+					return "Failed to create cost detail record";
+				}
+			}
 			// end MZ
 		}
 		
