@@ -78,10 +78,9 @@ import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
  */
 
 /**
-*  
+*  JPIERE-0363: Contract Management
 *  JPIERE-0552: JPiere original Doc_MatchInv
 *  
-*  ref: JPIERE-0363 : Contract Management
 *
 * @author Hideaki Hagiwara
 *
@@ -110,7 +109,7 @@ public class Doc_MatchInvJP extends Doc
 	private ProductCost		m_pc = null;
 	private MMatchInv m_matchInv;
 
-	private MContractAcct m_contractAcct = null; //JPIERE-0363
+	private MContractAcct m_contractAcct = null; //JPIERE-0363: Contract Management
 
 	/** Commitments			*/
 //	private DocLine[]		m_commitments = null;
@@ -140,7 +139,7 @@ public class Doc_MatchInvJP extends Doc
 			getM_Product_ID(), m_matchInv.getM_AttributeSetInstance_ID(), getTrxName());
 		m_pc.setQty(getQty());
 
-		//JPIERE-0363-Start
+		//JPIERE-0363: Contract Management
 		int JP_ContractContent_ID = m_invoiceLine.getParent().get_ValueAsInt("JP_ContractContent_ID");
 		if(JP_ContractContent_ID > 0)
 		{
@@ -149,7 +148,7 @@ public class Doc_MatchInvJP extends Doc
 			if(JP_Contract_Acct_ID > 0)
 				m_contractAcct = MContractAcct.get(getCtx(), JP_Contract_Acct_ID);
 		}
-		//JPIERE-0363-End
+		//JPIERE-0363
 
 		return null;
 	}   //  loadDocumentDetails
@@ -303,7 +302,7 @@ public class Doc_MatchInvJP extends Doc
 			{
 				cr.setQty(getQty().negate());
 
-				//JPIERE-0363 -- Start : Override Account //TODO
+				//JPIERE-0363: Contract Management - Override Account
 				if(m_pc.isService() && m_contractAcct != null)
 					cr.setAccount(as, getInvoiceExpenseAccount(as));
 
@@ -317,7 +316,7 @@ public class Doc_MatchInvJP extends Doc
 
 				if(m_pc.isService() && m_contractAcct != null)
 					cr.setAccount(as,expense);
-				//JPIERE-0363 -- finish : Override Account
+				//JPIERE-0363
 
 			}
 			if (log.isLoggable(Level.FINE)) log.fine("DR - Amt(" + temp + "->" + cr.getAcctBalance()
@@ -470,7 +469,7 @@ public class Doc_MatchInvJP extends Doc
 		if (ipv.signum() == 0) return;
 
 		FactLine pv = null;
-		if (m_pc.isService())//JPIERE-0363
+		if (m_pc.isService())//JPIERE-0363: Contract Management
 		{
 			 pv = fact.createLine(null,
 					 m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as),//JPIERE-0363
@@ -480,7 +479,7 @@ public class Doc_MatchInvJP extends Doc
 					 m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					 as.getC_Currency_ID(), ipv);
 		}
-		updateFactLineByReceiptLine(pv);//JPIERE-0552
+		updateFactLineByReceiptLine(pv);//JPIERE-0552: JPiere original Doc_MatchInv
 
 		MMatchInv matchInv = (MMatchInv)getPO();
 		Trx trx = Trx.get(getTrxName(), false);
@@ -523,20 +522,20 @@ public class Doc_MatchInvJP extends Doc
 			FactLine line = fact.createLine(null,
 					m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					as.getC_Currency_ID(), ipv.negate());
-			updateFactLineByReceiptLine(line);//JPIERE-0552
+			updateFactLineByReceiptLine(line);//JPIERE-0552: JPiere original Doc_MatchInv
 			line.setQty(getQty().negate());
 
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
-			updateFactLineByReceiptLine(line);//JPIERE-0552
+			updateFactLineByReceiptLine(line);//JPIERE-0552: JPiere original Doc_MatchInv
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
 			FactLine line = fact.createLine(null,
 					m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					as.getC_Currency_ID(), ipv.negate());
-			updateFactLineByReceiptLine(line);//JPIERE-0552
+			updateFactLineByReceiptLine(line);//JPIERE-0552: JPiere original Doc_MatchInv
 			line.setQty(getQty().negate());
 
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
-			updateFactLineByReceiptLine(line);//JPIERE-0552
+			updateFactLineByReceiptLine(line);//JPIERE-0552: JPiere original Doc_MatchInv
 		}
 	}
 
@@ -785,7 +784,7 @@ public class Doc_MatchInvJP extends Doc
 			{
 				cr.setQty(getQty().negate());
 
-				//JPIERE-0363 -- Start : Override Account //TODO
+				//JPIERE-0363: Contract Management - Override Account
 				if(m_pc.isService() && m_contractAcct != null)
 					cr.setAccount(as, getInvoiceExpenseAccount(as));
 
@@ -799,7 +798,7 @@ public class Doc_MatchInvJP extends Doc
 
 				if(m_pc.isService() && m_contractAcct != null)
 					cr.setAccount(as,expense);
-				//JPIERE-0363 -- finish : Override Account
+				//JPIERE-0363
 			}
 			if (log.isLoggable(Level.FINE)) log.fine("DR - Amt(" + temp + "->" + cr.getAcctBalance()
 				+ ") - " + cr.toString());
@@ -1014,7 +1013,7 @@ public class Doc_MatchInvJP extends Doc
 			{
 				dr.setQty(getQty().negate());
 
-				//JPIERE-0363 -- Start : Override Account //TODO
+				//JPIERE-0363: Contract Management - Override Account
 				if(m_pc.isService() && m_contractAcct != null)
 					dr.setAccount(as, getInvoiceExpenseAccount(as));
 
@@ -1028,7 +1027,7 @@ public class Doc_MatchInvJP extends Doc
 
 				if(m_pc.isService() && m_contractAcct != null)
 					dr.setAccount(as,expense);
-				//JPIERE-0363 -- finish : Override Account
+				//JPIERE-0363
 			}
 			if (log.isLoggable(Level.FINE)) log.fine("DR - Amt(" + temp + "->" + dr.getAcctBalance()
 				+ ") - " + dr.toString());
