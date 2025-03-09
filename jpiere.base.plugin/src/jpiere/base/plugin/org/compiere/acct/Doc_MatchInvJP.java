@@ -293,7 +293,7 @@ public class Doc_MatchInvJP extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -336,7 +336,7 @@ public class Doc_MatchInvJP extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -775,7 +775,7 @@ public class Doc_MatchInvJP extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -817,7 +817,7 @@ public class Doc_MatchInvJP extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -943,7 +943,7 @@ public class Doc_MatchInvJP extends Doc
 
 		return facts;
 	}
-
+	
 	/**
 	 * Create Facts for credit memo
 	 * @param as accounting schema
@@ -1102,7 +1102,7 @@ public class Doc_MatchInvJP extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -1136,7 +1136,7 @@ public class Doc_MatchInvJP extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -2198,7 +2198,7 @@ public class Doc_MatchInvJP extends Doc
 		mrFactLines.add(fl);
 		return null;
 	}	//	createReceiptGainLoss
-
+	
 	/**
 	 * Create Gain/Loss and Rounding Correction for reverse receipt
 	 * @param as accounting schema
@@ -2551,7 +2551,7 @@ public class Doc_MatchInvJP extends Doc
 	{
 		BigDecimal mrLineSource = null;
 		BigDecimal mrLineAccounted = null;
-
+			
 		StringBuilder sqlMRLine = new StringBuilder()
 				.append("SELECT SUM(AmtSourceDr)-SUM(AmtSourceCr), SUM(AmtAcctDr)-SUM(AmtAcctCr)")
 				.append(" FROM Fact_Acct ")
@@ -2722,7 +2722,7 @@ public class Doc_MatchInvJP extends Doc
 			else
 				isLineFullyMatched = false;
 		}
-
+		
 		return isLineFullyMatched;
 	}
 
