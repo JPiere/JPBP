@@ -41,6 +41,7 @@ import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.MCharge;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
@@ -49,6 +50,7 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTax;
 import org.compiere.model.MUOM;
 import org.compiere.model.ProductCost;
 import org.compiere.model.Query;
@@ -563,7 +565,7 @@ public class Doc_MatchInvJP extends Doc
 	 */
 	private String createMatchInvCostDetail(MAcctSchema as)
 	{
-		if (m_invoiceLine != null && m_invoiceLine.get_ID() > 0
+		if (m_invoiceLine != null && m_invoiceLine.get_ID() > 0 
 			&& m_receiptLine != null && m_receiptLine.get_ID() > 0)
 		{
 			MMatchInv matchInv = (MMatchInv)getPO();
@@ -590,12 +592,62 @@ public class Doc_MatchInvJP extends Doc
 				}
 			}
 			tAmt = tAmt.add(LineNetAmt); //Invoice Price
-
+			// adjust for tax
+			MTax tax = MTax.get(getCtx(), m_invoiceLine.getC_Tax_ID());
+			int stdPrecision = MCurrency.getStdPrecision(getCtx(), m_invoiceLine.getParent().getC_Currency_ID());
+			if (m_invoiceLine.isTaxIncluded())
+			{
+				BigDecimal tAmtTax = tax.calculateTax(tAmt, true, stdPrecision);
+				if (tax.isSummary())
+				{
+					tAmt = tAmt.subtract(tAmtTax);
+					BigDecimal base = tAmt;
+					for (MTax childTax : tax.getChildTaxes(false)) 
+					{
+						if (!childTax.isZeroTax())
+						{
+							if (childTax.isDistributeTaxWithLineItem())
+							{
+								BigDecimal taxAmt = childTax.calculateTax(base, false, stdPrecision);
+								tAmt = tAmt.add(taxAmt);
+							}
+						}
+					}
+				}
+				else if (!tax.isDistributeTaxWithLineItem())
+				{
+					tAmt = tAmt.subtract(tAmtTax);
+				}
+			}
+			else
+			{
+				if (tax.isSummary())
+				{
+					BigDecimal base = tAmt;
+					for (MTax childTax : tax.getChildTaxes(false)) 
+					{
+						if (!childTax.isZeroTax())
+						{
+							if (childTax.isDistributeTaxWithLineItem())
+							{
+								BigDecimal taxAmt = childTax.calculateTax(base, false, stdPrecision);
+								tAmt = tAmt.add(taxAmt);
+							}
+						}
+					}
+				}
+				else if (tax.isDistributeTaxWithLineItem())
+				{					
+					BigDecimal taxAmt = tax.calculateTax(tAmt, false, stdPrecision);
+					tAmt = tAmt.add(taxAmt);
+				}
+			}
+			
 			// 	Different currency
 			MInvoice invoice = m_invoiceLine.getParent();
 			if (as.getC_Currency_ID() != invoice.getC_Currency_ID())
 			{
-				tAmt = MConversionRate.convert(getCtx(), tAmt,
+				tAmt = MConversionRate.convert(getCtx(), tAmt, 
 					invoice.getC_Currency_ID(), as.getC_Currency_ID(),
 					invoice.getDateAcct(), invoice.getC_ConversionType_ID(),
 					invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
@@ -628,11 +680,11 @@ public class Doc_MatchInvJP extends Doc
 			
 			int C_OrderLine_ID = orderLine.getC_OrderLine_ID();
 			MOrderLandedCostAllocation[] allocations = MOrderLandedCostAllocation.getOfOrderLine(C_OrderLine_ID, getTrxName());
-			for(MOrderLandedCostAllocation allocation : allocations)
+			for(MOrderLandedCostAllocation allocation : allocations) 
 			{
 				BigDecimal totalAmt = allocation.getAmt();
 				BigDecimal totalQty = allocation.getQty();
-				BigDecimal amt = totalAmt.multiply(tQty).divide(totalQty, 12, RoundingMode.HALF_UP);
+				BigDecimal amt = totalAmt.multiply(tQty).divide(totalQty, 12, RoundingMode.HALF_UP);			
 				if (orderLine.getC_Currency_ID() != as.getC_Currency_ID())
 				{
 					I_C_Order order = orderLine.getC_Order();
@@ -652,9 +704,9 @@ public class Doc_MatchInvJP extends Doc
 				}
 				int elementId = allocation.getC_OrderLandedCost().getM_CostElement_ID();
 				BigDecimal elementAmt = landedCostMap.get(elementId);
-				if (elementAmt == null)
+				if (elementAmt == null) 
 				{
-					elementAmt = amt;
+					elementAmt = amt;								
 				}
 				else
 				{
@@ -2128,7 +2180,7 @@ public class Doc_MatchInvJP extends Doc
 	 * @param mrFactLines fact lines for receipt
 	 * @return error message or null
 	 */
-	private String createReceiptGainLoss(MAcctSchema as, Fact fact, MAccount acct,
+	private String createReceiptGainLoss(MAcctSchema as, Fact fact, MAccount acct, 
 			MInOut receipt, BigDecimal matchInvSource, BigDecimal matchInvAccounted,
 			ArrayList<FactLine> mrGainLossFactLines, ArrayList<FactLine> mrFactLines)
 	{
@@ -2222,7 +2274,7 @@ public class Doc_MatchInvJP extends Doc
 				.append(" AND Description LIKE 'InOut%'");
 		
 		List<MFactAcct> list = new Query(getCtx(), MFactAcct.Table_Name, whereClause.toString(), getTrxName())
-				.setParameters(MMatchInv.Table_ID, m_matchInv.getReversal_ID(), as.getC_AcctSchema_ID(),
+				.setParameters(MMatchInv.Table_ID, m_matchInv.getReversal_ID(), as.getC_AcctSchema_ID(), 
 						acct.getAccount_ID(), gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID())
 				.setOrderBy(MFactAcct.COLUMNNAME_Fact_Acct_ID)
 				.list();
@@ -2244,8 +2296,8 @@ public class Doc_MatchInvJP extends Doc
 	 * @param mrFactLines fact lines for receipt
 	 * @return error message or null
 	 */
-	private String createReceiptRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct,
-			ArrayList<FactLine> mrGainLossFactLines, ArrayList<FactLine> mrFactLines)
+	private String createReceiptRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct, 
+			ArrayList<FactLine> mrGainLossFactLines, ArrayList<FactLine> mrFactLines) 
 	{
 		if (m_matchInv.isReversal())
 			return null;
@@ -2430,7 +2482,7 @@ public class Doc_MatchInvJP extends Doc
 			
 			// For Match Inv
 			valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
-					MMatchInv.Table_ID, matchInv.get_ID(),
+					MMatchInv.Table_ID, matchInv.get_ID(), 
 					as.getC_AcctSchema_ID(), gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID());
 			if (valuesMatchInv != null) {
 				totalAmtSourceDr = (BigDecimal) valuesMatchInv.get(0);
@@ -2488,8 +2540,8 @@ public class Doc_MatchInvJP extends Doc
 		
 		if (as.isCurrencyBalancing() && as.getC_Currency_ID() != m_invoiceLine.getParent().getC_Currency_ID())
 			fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
-		else
-			fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+		else 
+			fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());	
 		fl.setDescription(description.toString());
 		updateFactLine(fl);
 		mrRoundingLines.add(fl);
@@ -2545,8 +2597,8 @@ public class Doc_MatchInvJP extends Doc
 	 * @param mrRoundingLines rounding correction fact lines for receipt
 	 * @return error message or null
 	 */
-	private boolean createReceiptLineRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct,
-			ArrayList<FactLine> mrGainLossFactLines, ArrayList<FactLine> mrFactLines, ArrayList<FactLine> mrRoundingLines)
+	private boolean createReceiptLineRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct, 
+			ArrayList<FactLine> mrGainLossFactLines, ArrayList<FactLine> mrFactLines, ArrayList<FactLine> mrRoundingLines) 
 	{
 		BigDecimal mrLineSource = null;
 		BigDecimal mrLineAccounted = null;
@@ -2557,7 +2609,7 @@ public class Doc_MatchInvJP extends Doc
 				.append("WHERE AD_Table_ID=? AND Record_ID=? AND Line_ID=?")
 				.append(" AND C_AcctSchema_ID=?")
 				.append(" AND Account_ID=?")
-				.append(" AND PostingType='A'");
+				.append(" AND PostingType='A'");		
 		// For MR Line
 		List<Object> valuesMR = DB.getSQLValueObjectsEx(getTrxName(), sqlMRLine.toString(),
 				MInOut.Table_ID, m_receiptLine.getM_InOut_ID(), m_receiptLine.getM_InOutLine_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
@@ -2663,7 +2715,7 @@ public class Doc_MatchInvJP extends Doc
 			
 			// For Match Inv
 			valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
-					MMatchInv.Table_ID, matchInv.get_ID(), as.getC_AcctSchema_ID(),
+					MMatchInv.Table_ID, matchInv.get_ID(), as.getC_AcctSchema_ID(), 
 					gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID());
 			if (valuesMatchInv != null) {
 				BigDecimal totalAmtSourceDr = (BigDecimal) valuesMatchInv.get(0);
@@ -2707,8 +2759,8 @@ public class Doc_MatchInvJP extends Doc
 				
 				if (as.isCurrencyBalancing() && as.getC_Currency_ID() != m_invoiceLine.getParent().getC_Currency_ID())
 					fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
-				else
-					fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+				else 
+					fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());	
 				fl.setDescription(description.toString());
 				updateFactLine(fl);
 				mrRoundingLines.add(fl);
