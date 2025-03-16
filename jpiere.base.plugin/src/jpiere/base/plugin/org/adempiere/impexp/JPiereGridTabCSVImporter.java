@@ -79,10 +79,11 @@ import org.supercsv.io.ICsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
 /**
+ * JPiere CSV Importer for GridTab (Copy from GridTabCSVImporter)
+ * 
  * JPIERE-0462 - CSV Import file loader - format of Date
  * JPIERE-0468 - Import Value of List by Translation Name
  *
- * JPiere CSV Importer for GridTab (Copy from GridTabCSVImporter)
  * @author Carlos Ruiz
  * @author Juan David Arboleda 
  * @author Hideaki Hagiwara
@@ -131,7 +132,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	private static final CLogger log = CLogger.getCLogger(JPiereGridTabCSVImporter.class);
 
 	@Override
-	public File fileImport(GridTab gridTab, List<GridTab> childs, InputStream filestream, Charset charset , String importMode) {
+	public File fileImport(GridTab gridTab, List<GridTab> childs, InputStream filestream, Charset charset , String importMode) {		
 		return fileImport(gridTab, childs, filestream, charset, importMode, null, null, null);
 	}//fileImport
 
@@ -326,8 +327,8 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	private void rollbackTrx(){
 		trx.rollback();
 		for( String row : rowsTmpResult ){
-			row = row.replaceAll("Updated","RolledBack");
-			row = row.replaceAll("Inserted","RolledBack");
+			row = row.replace("Updated","RolledBack");
+			row = row.replace("Inserted","RolledBack");
 			logFileW.write(row);
 		}
 	}
@@ -1026,7 +1027,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 				String foreignTable = column.getReferenceTableName();
 				Object idS = null;
 				if("AD_Ref_List".equals(foreignTable))
-				   idS= resolveForeignList(column,foreignColumn,value,null);
+				   idS = resolveForeignList(column,foreignColumn,value,null);
 				else 
 				   idS = resolveForeign(foreignTable,foreignColumn,value,field,null);
 				
@@ -1201,7 +1202,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					  if("C_Region".equals(foreignTable))
 						  regionIndex = i;
 					  else
-					  setValue = resolveForeign(foreignTable,foreignColumn,value,field,trx);
+						  setValue = resolveForeign(foreignTable,foreignColumn,value,field,trx);
 					  if("C_City".equals(foreignTable))
 						 address.setCity(value.toString());  
 					}else
@@ -1244,7 +1245,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 						Object idS = null;
 						
 						if ("AD_Ref_List".equals(foreignTable)) 
-							idS= resolveForeignList(column, foreignColumn, value,trx);
+							idS = resolveForeignList(column, foreignColumn, value,trx);
 						else 
 							idS = resolveForeign(foreignTable,foreignColumn,value, field, trx);
 						
@@ -1647,7 +1648,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 	 */
 	private String resolveForeignList(MColumn column, String foreignColumn, Object value ,Trx trx) {
 		String idS = null;
-		String trxName = (trx!=null?trx.getTrxName():null);
+		String trxName = (trx!=null?trx.getTrxName():null); 
 		StringBuilder select = new StringBuilder("SELECT Value FROM AD_Ref_List WHERE ")
 			.append(foreignColumn).append("=? AND AD_Reference_ID=? AND IsActive='Y'");
 		idS = DB.getSQLValueStringEx(trxName, select.toString(), value, column.getAD_Reference_Value_ID());
@@ -1736,7 +1737,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					if (forTab.isUUIDKeyTable())
 						return DB.getSQLValueStringEx(trxName, selectId.toString(), value,  0 /* System */);
 					else
-					return DB.getSQLValueEx(trxName, selectId.toString(), value,  0 /* System */);
+						return DB.getSQLValueEx(trxName, selectId.toString(), value,  0 /* System */);
 				} else if (count > 1) { // multiple values found, error ForeignMultipleResolved
 					return -2;
 				}
