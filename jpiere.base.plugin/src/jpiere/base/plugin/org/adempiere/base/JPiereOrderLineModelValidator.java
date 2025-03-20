@@ -257,10 +257,20 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 				}
 
 			}else if(QTY_CHECK.equals(ALLOW_INCREASE_QTY)){
+				
+				BigDecimal qtyOrdered = ol.getQtyOrdered();
+				if(qtyOrdered.signum() >= 0)
+				{
+					if(ol.is_ValueChanged("QtyOrdered") && !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close) &&
+							( qtyOrdered.compareTo(ol.getQtyDelivered()) < 0 || qtyOrdered.compareTo(ol.getQtyInvoiced()) < 0 ))
+						return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyLessThanQtyDeliveredOrQtyInvoiced");//You can not change Qty less than Delivered or Invoiced Qty.
 
-				if(ol.is_ValueChanged("QtyOrdered") && !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close) &&
-						( ol.getQtyOrdered().compareTo(ol.getQtyDelivered()) < 0 || ol.getQtyOrdered().compareTo(ol.getQtyInvoiced()) < 0 ))
-					return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyLessThanQtyDeliveredOrQtyInvoiced");//You can not change Qty less than Delivered or Invoiced Qty.
+				}else {
+
+					if(ol.is_ValueChanged("QtyOrdered") && !ol.getParent().getDocAction().equals(DocAction.ACTION_Void) && !ol.getParent().getDocAction().equals(DocAction.ACTION_Close) &&
+							( qtyOrdered.compareTo(ol.getQtyDelivered()) > 0 || qtyOrdered.compareTo(ol.getQtyInvoiced()) > 0 ))
+						return Msg.getMsg(Env.getCtx(), "JP_CanNotChangeQtyLessThanQtyDeliveredOrQtyInvoiced");//You can not change Qty less than Delivered or Invoiced Qty.
+				}
 
 			}else if(QTY_CHECK.equals(ALLOW_CHANGE_QTY_WHEN_RESERVED)){
 
