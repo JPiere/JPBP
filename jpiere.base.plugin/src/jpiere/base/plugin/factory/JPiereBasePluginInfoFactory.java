@@ -33,15 +33,44 @@ import org.compiere.util.Env;
 public class JPiereBasePluginInfoFactory implements IInfoFactory {
 
 	@Override
-	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
-			String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup) {
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection,
+			String whereClause, int AD_InfoWindow_ID, boolean lookup) {
 
+		return create(WindowNo, tableName, keyColumn,
+				value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, null, null);
+	}
+	
+	@Override
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
+			String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, GridField field) {
+		
+		return create(WindowNo, tableName, keyColumn,
+				value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, null, field);
+	}
+	
+	/**
+	 * @param WindowNo
+	 * @param tableName
+	 * @param keyColumn
+	 * @param value
+	 * @param multiSelection
+	 * @param whereClause
+	 * @param AD_InfoWindow_ID
+	 * @param lookup
+	 * @param predefinedContextVariables
+	 * @param field
+	 * @return InfoPanel
+	 */
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
+				String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, String predefinedContextVariables, GridField field) {
+	
+	
 		if (tableName.equals("M_Product") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())) && lookup)
 		{
-        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup);
+        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, field, predefinedContextVariables);
         	if (!info.loadedOK())
         	{
-	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, null);
+	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, field);
 	        	if (!info.loadedOK()) {
 	        		info.dispose(false);
 	        		info = null;
@@ -54,10 +83,10 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 		//JPIERE-0614(v11) - Single Selection Info Window
 		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())) && lookup)
 		{
-        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup);
+        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, field, predefinedContextVariables);
         	if (!info.loadedOK())
         	{
-	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, null);
+	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, field);
 	        	if (!info.loadedOK()) {
 	        		info.dispose(false);
 	        		info = null;
@@ -89,7 +118,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 					multiSelection = false;
 			}
 			
-			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, true);
+			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, true, null, field);
 			return info;
 		}
 
@@ -102,7 +131,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 					multiSelection = false;
 			}
 			
-			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, true);
+			InfoPanel info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, true, null, field);
 			return info;
 		}
 		return null;
@@ -114,11 +143,6 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 			return null;
 	}
 
-	@Override
-	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection,
-			String whereClause, int AD_InfoWindow_ID, boolean lookup, GridField field) {
-		
-		return null;
-	}
+
 
 }
