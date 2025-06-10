@@ -1,15 +1,18 @@
 /******************************************************************************
  * Product: JPiere                                                            *
  * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
- *                                                                            *
- * This program is free software, you can redistribute it and/or modify it    *
+ * This program is free software; you can redistribute it and/or modify it    *
  * under the terms version 2 of the GNU General Public License as published   *
  * by the Free Software Foundation. This program is distributed in the hope   *
- * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
  * See the GNU General Public License for more details.                       *
- *                                                                            *
- * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
- * (http://www.oss-erp.co.jp)                                                 *
+ * You should have received a copy of the GNU General Public License along    *
+ * with this program; if not, write to the Free Software Foundation, Inc.,    *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ * For the text or an alternative of this public license, you may reach us    *
+ * ComPiere, Inc., 2620 Augustine Dr. #245, Santa Clara, CA 95054, USA        *
+ * or via info@compiere.org or http://www.compiere.org/license.html           *
  *****************************************************************************/
 package jpiere.base.plugin.org.compiere.acct;
 
@@ -99,7 +102,7 @@ public class Doc_AllocationHdrJP extends Doc
 	private static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
 	/** Facts						*/
 	private ArrayList<Fact>		m_facts = null;
-
+	
 	private ArrayList<FactLine>		invGainLossFactLines = null;
 	private ArrayList<FactLine>		payGainLossFactLines = null;
 
@@ -1050,11 +1053,10 @@ public class Doc_AllocationHdrJP extends Doc
 				fl.setDescription(description.toString());
 				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 			}
-			
 		}
 		return null;
 	}
-
+	
 	/**
 	 * 	Create Realized Gain & Loss.<br/>
 	 * 	Compares the Accounted Amount of the Payment to the
@@ -1244,7 +1246,7 @@ public class Doc_AllocationHdrJP extends Doc
 				htInvAccounted.put(invoice.getC_Invoice_ID(), invoiceAccounted);
 			}
 		}
-
+		
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
 
@@ -1274,12 +1276,12 @@ public class Doc_AllocationHdrJP extends Doc
 						BigDecimal totalAmtAcctCr = htTotalAmtAcctCr.get(allocationLine.getC_Invoice_ID());
 						if (totalAmtAcctCr == null)
 							totalAmtAcctCr = Env.ZERO;
-
+						
 						totalAmtSourceDr = totalAmtSourceDr.add(factLine.getAmtSourceDr());
 						totalAmtAcctDr = totalAmtAcctDr.add(factLine.getAmtAcctDr());
 						totalAmtSourceCr = totalAmtSourceCr.add(factLine.getAmtSourceCr());
 						totalAmtAcctCr = totalAmtAcctCr.add(factLine.getAmtAcctCr());
-
+						
 						htTotalAmtSourceDr.put(allocationLine.getC_Invoice_ID(), totalAmtSourceDr);
 						htTotalAmtAcctDr.put(allocationLine.getC_Invoice_ID(), totalAmtAcctDr);
 						htTotalAmtSourceCr.put(allocationLine.getC_Invoice_ID(), totalAmtSourceCr);
@@ -1289,17 +1291,17 @@ public class Doc_AllocationHdrJP extends Doc
 					{
 						if (!invGainLossFactLines.contains(factLine))
 							continue;
-
+						
 						BigDecimal totalAmtSourceDr = htTotalAmtSourceDr.get(allocationLine.getC_Invoice_ID());
 						if (totalAmtSourceDr == null)
 							totalAmtSourceDr = Env.ZERO;
 						BigDecimal totalAmtSourceCr = htTotalAmtSourceCr.get(allocationLine.getC_Invoice_ID());
 						if (totalAmtSourceCr == null)
 							totalAmtSourceCr = Env.ZERO;
-
+						
 						totalAmtSourceDr = totalAmtSourceDr.subtract(factLine.getAmtSourceCr());
 						totalAmtSourceCr = totalAmtSourceCr.subtract(factLine.getAmtSourceDr());
-
+						
 						htTotalAmtSourceDr.put(allocationLine.getC_Invoice_ID(), totalAmtSourceDr);
 						htTotalAmtSourceCr.put(allocationLine.getC_Invoice_ID(), totalAmtSourceCr);
 					}
@@ -1326,7 +1328,7 @@ public class Doc_AllocationHdrJP extends Doc
 			BigDecimal totalAmtAcctCr = htTotalAmtAcctCr.get(invoice.getC_Invoice_ID());
 			if (totalAmtAcctCr == null)
 				totalAmtAcctCr = Env.ZERO;
-
+			
 			if (totalAmtSourceDr.signum() == 0 && totalAmtAcctDr.signum() == 0)
 			{
 				allocateSource = allocateSource.add(totalAmtSourceCr);
@@ -1499,7 +1501,7 @@ public class Doc_AllocationHdrJP extends Doc
 							fl = fact.createLine (null, loss, gain,as.getC_Currency_ID(), acctDifference.negate());
 						fl.setDescription(description.toString());
 						fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
-					}
+					}				
 				}
 				else
 				{
@@ -1570,7 +1572,7 @@ public class Doc_AllocationHdrJP extends Doc
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			MPayment payment = null;
-			DocLine_Allocation line = (DocLine_Allocation) p_lines[i];
+			DocLine_Allocation line = (DocLine_Allocation) p_lines[i];			
 			if (line.getC_Payment_ID() != 0)
 			{
 				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
@@ -1910,7 +1912,7 @@ public class Doc_AllocationHdrJP extends Doc
 				totalAmtAcctDr = totalAmtAcctDr.add(factLine.getAmtAcctDr());
 				totalAmtAcctCr = totalAmtAcctCr.add(factLine.getAmtAcctCr());
 			}
-
+			
 			BigDecimal acctDifference = totalAmtAcctDr.subtract(totalAmtAcctCr);
 			if(acctDifference.compareTo(Env.ZERO) != 0)
 			{
@@ -1922,7 +1924,7 @@ public class Doc_AllocationHdrJP extends Doc
 		//}
 		return line;
 	}
-
+	
 	/**
 	 * Has Debit Receivables/Payables Trade Amount
 	 * @param invoice
