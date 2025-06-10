@@ -217,6 +217,24 @@ public class Doc_AllocationHdrJP extends Doc
 		invGainLossFactLines = new ArrayList<FactLine>();
 		payGainLossFactLines = new ArrayList<FactLine>();
 
+		// Do not create fact lines for reversal of invoice
+		if (p_lines.length == 2)
+		{
+			DocLine_Allocation line1 = (DocLine_Allocation)p_lines[0];
+			DocLine_Allocation line2 = (DocLine_Allocation)p_lines[1];
+			if (line1.getC_Payment_ID() == 0 && line1.getC_Order_ID() == 0 && line1.getC_CashLine_ID() == 0 && line1.getC_Invoice_ID() > 0
+				&& line2.getC_Payment_ID() == 0 && line2.getC_Order_ID() == 0 && line2.getC_CashLine_ID() == 0 && line2.getC_Invoice_ID() > 0)
+			{
+				MInvoice invoice1 = new MInvoice(Env.getCtx(), line1.getC_Invoice_ID(), getTrxName());
+				MInvoice invoice2 = new MInvoice(Env.getCtx(), line2.getC_Invoice_ID(), getTrxName());
+				if (invoice1.getGrandTotal().equals(invoice2.getGrandTotal().negate()) 
+					&& invoice2.getReversal_ID() == invoice1.getC_Invoice_ID())
+				{
+					return m_facts;
+				}
+			}
+		}
+		
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		Fact factForRGL = new Fact(this, as, Fact.POST_Actual); // dummy fact (not posted) to calculate Realized Gain & Loss
@@ -1937,6 +1955,31 @@ public class Doc_AllocationHdrJP extends Doc
 				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() >= 0 && invoice.isCreditMemo())
 				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() < 0 && !invoice.isCreditMemo());
 	}
+	
+	/**
+	 * Is the allocation created as a result of the invoice reversal?
+	 * @return true
+	 */
+	private boolean isReversedInvoice()
+	{
+		if (p_lines.length != 2)
+			return false;
+		int invoiceId1 = ((DocLine_Allocation) p_lines[1]).getC_Invoice_ID();
+		int invoiceId2 = ((DocLine_Allocation) p_lines[0]).getC_Invoice_ID();
+		if (invoiceId1 > 0 && invoiceId2 > 0) {
+			MInvoice invoice1 = new MInvoice(getCtx(), invoiceId1, getTrxName());
+			MInvoice invoice2 = new MInvoice(getCtx(), invoiceId2, getTrxName());
+			int Reversal_ID = invoice1.getReversal_ID();
+			if (Reversal_ID > 0)
+				return Reversal_ID == invoice2.get_ID();
+			else {
+				Reversal_ID = invoice2.getReversal_ID();
+				if (Reversal_ID > 0)
+					return Reversal_ID == invoice1.get_ID();
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * JPIERE-0363
@@ -2122,7 +2165,6 @@ public class Doc_AllocationHdrJP extends Doc
 
 	
 }   //  Doc_Allocation
-
 
 /**
  * 	Allocation Document Tax Handing
