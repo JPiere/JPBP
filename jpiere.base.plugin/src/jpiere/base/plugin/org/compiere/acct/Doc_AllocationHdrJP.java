@@ -21,8 +21,9 @@ import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.compiere.acct.Doc;
@@ -1016,6 +1017,13 @@ public class Doc_AllocationHdrJP extends Doc
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
 		//
+		// If the allocation is created as a result of the invoice reversal, 
+		// do not use RLG/RLL, as this will cause the AP balance to not be zero
+		boolean isReversedInvoice = isReversedInvoice();
+		if (isReversedInvoice) {
+			gain = acct;
+			loss = acct;
+		}
 
 		MAllocationHdr alloc = (MAllocationHdr) getPO();
 		if (alloc.getReversal_ID() == 0 || alloc.get_ID() < alloc.getReversal_ID())
@@ -1026,7 +1034,8 @@ public class Doc_AllocationHdrJP extends Doc
 				fl.setDescription(description.toString());
 				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 				setPaymentInfo(fl, line, false);//JPIERE-0052
-				invGainLossFactLines.add(fl);
+				if (!isReversedInvoice)
+					invGainLossFactLines.add(fl);
 				
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
@@ -1042,7 +1051,8 @@ public class Doc_AllocationHdrJP extends Doc
 				fl.setDescription(description.toString());
 				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 				setPaymentInfo(fl, line, false);//JPIERE-0052
-				invGainLossFactLines.add(fl);	
+				if (!isReversedInvoice)
+					invGainLossFactLines.add(fl);	
 			}
 		}
 		else
@@ -1057,7 +1067,8 @@ public class Doc_AllocationHdrJP extends Doc
 				fl.setDescription(description.toString());
 				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 				setPaymentInfo(fl, line, false);//JPIERE-0052
-				invGainLossFactLines.add(fl);
+				if (!isReversedInvoice)
+					invGainLossFactLines.add(fl);
 			}
 			else
 			{
@@ -1065,8 +1076,8 @@ public class Doc_AllocationHdrJP extends Doc
 				fl.setDescription(description.toString());
 				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
 				setPaymentInfo(fl, line, false);//JPIERE-0052
-				invGainLossFactLines.add(fl);
-				
+				if (!isReversedInvoice)
+					invGainLossFactLines.add(fl);
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
 				setInvoiceInfo(fl, invoice, true);//JPIERE-0052
@@ -1205,26 +1216,33 @@ public class Doc_AllocationHdrJP extends Doc
 	 *	@return Error Message or null if OK
 	 */
 	@SuppressWarnings("unused")//JPIERE-0052
-	private String createInvoiceRoundingCorrection (MAcctSchema as, Fact fact, MAccount acct)
+	private String createInvoiceRoundingCorrection (MAcctSchema as, Fact fact, MAccount acctAr, MAccount acctAp) 
 	{
-		ArrayList<MInvoice> invList = new ArrayList<MInvoice>();
-		Hashtable<Integer, Integer> htInvAllocLine = new Hashtable<Integer, Integer>();
+		if (isReversedInvoice())
+			return null;
+		
+		Map<Integer, MInvoice> invList = new HashMap<>();
+		Map<Integer, Integer> htInvAllocLine = new HashMap<>();
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			MInvoice invoice = null;
 			DocLine_Allocation line = (DocLine_Allocation)p_lines[i];
-			if (line.getC_Invoice_ID() != 0)
-			{
+			
+			if (line.getC_Invoice_ID() == 0)
+				continue;
+
+			if (invList.containsKey(line.getC_Invoice_ID())){
+				log.severe(line.getC_Invoice_ID() + ":same invoice included in more than one allocation line");
+			} else {
 				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
-				if (!invList.contains(invoice))
-					invList.add(invoice);
+				invList.put(invoice.getC_Invoice_ID(), invoice);
 				htInvAllocLine.put(invoice.getC_Invoice_ID(), line.get_ID());
 			}
 		}
 
-		Hashtable<Integer, BigDecimal> htInvSource = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htInvAccounted = new Hashtable<Integer, BigDecimal>();
-		for (MInvoice invoice : invList)
+		Map<Integer, BigDecimal> htInvSource = new HashMap<>();
+		Map<Integer, BigDecimal> htInvAccounted = new HashMap<>();
+		for (MInvoice invoice : invList.values())
 		{
 			StringBuilder sql = new StringBuilder()
 				.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
@@ -1233,7 +1251,7 @@ public class Doc_AllocationHdrJP extends Doc
 				.append(" AND C_AcctSchema_ID=?")
 				.append(" AND Account_ID=?")
 				.append(" AND PostingType='A'");
-
+			MAccount acct = invoice.isSOTrx() ? acctAr : acctAp;
 			// For Invoice
 			List<Object> valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 					MInvoice.Table_ID, invoice.getC_Invoice_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
@@ -1242,23 +1260,23 @@ public class Doc_AllocationHdrJP extends Doc
 				BigDecimal invoiceAccounted = null;
 				if (invoice.getReversal_ID() == 0 || invoice.get_ID() < invoice.getReversal_ID())
 				{
-						if (hasDebitTradeAmt(invoice)) {
-							invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
-							invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
-						} else {
-							invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
-							invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
-						}
+					if (hasDebitTradeAmt(invoice)) {
+						invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
+						invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
+					} else {
+						invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
+						invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
+					}
 				}
 				else
 				{
-						if (hasDebitTradeAmt(invoice)) {
-							invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
-							invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
-						} else {
-							invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
-							invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
-						}
+					if (hasDebitTradeAmt(invoice)) {
+						invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
+						invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
+					} else {
+						invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
+						invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
+					}
 				}
 				htInvSource.put(invoice.getC_Invoice_ID(), invoiceSource);
 				htInvAccounted.put(invoice.getC_Invoice_ID(), invoiceAccounted);
@@ -1267,11 +1285,11 @@ public class Doc_AllocationHdrJP extends Doc
 		
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
-
-		Hashtable<Integer, BigDecimal> htTotalAmtSourceDr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtAcctDr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtSourceCr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtAcctCr = new Hashtable<Integer, BigDecimal>();
+		
+		Map<Integer, BigDecimal> htTotalAmtSourceDr = new HashMap<>();
+		Map<Integer, BigDecimal> htTotalAmtAcctDr = new HashMap<>();
+		Map<Integer, BigDecimal> htTotalAmtSourceCr = new HashMap<>();
+		Map<Integer, BigDecimal> htTotalAmtAcctCr = new HashMap<>();
 		FactLine[] factlines = fact.getLines();
 		for (FactLine factLine : factlines)
 		{
@@ -1280,6 +1298,8 @@ public class Doc_AllocationHdrJP extends Doc
 				MAllocationLine allocationLine = new MAllocationLine(getCtx(), factLine.getLine_ID(), getTrxName());
 				if (allocationLine.getC_Invoice_ID() > 0)
 				{
+					MInvoice invoice = invList.get(allocationLine.getC_Invoice_ID());
+					MAccount acct = invoice.isSOTrx() ? acctAr : acctAp;
 					if (factLine.getAccount_ID() == acct.getAccount_ID())
 					{
 						BigDecimal totalAmtSourceDr = htTotalAmtSourceDr.get(allocationLine.getC_Invoice_ID());
@@ -1326,10 +1346,10 @@ public class Doc_AllocationHdrJP extends Doc
 				}
 			}
 		}
-
-		Hashtable<Integer, BigDecimal> htAllocInvSource = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htAllocInvAccounted = new Hashtable<Integer, BigDecimal>();
-		for (MInvoice invoice : invList)
+		
+		Map<Integer, BigDecimal> htAllocInvSource = new HashMap<>();
+		Map<Integer, BigDecimal> htAllocInvAccounted = new HashMap<>();
+		for (MInvoice invoice : invList.values())
 		{
 			BigDecimal allocateSource = Env.ZERO;
 			BigDecimal allocateAccounted = Env.ZERO;
@@ -1380,13 +1400,14 @@ public class Doc_AllocationHdrJP extends Doc
 				BigDecimal currencyAdjustment = Env.ZERO;
 				StringBuilder sql = new StringBuilder()
 					.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
-						.append(" FROM Fact_Acct ")
-						.append("WHERE AD_Table_ID=? AND Record_ID=?")	//	allocation
-						.append(" AND C_AcctSchema_ID=?")
-						.append(" AND PostingType='A'")
-						.append(" AND Account_ID=?")
-						.append(" AND Line_ID IN (SELECT C_AllocationLine_ID FROM C_AllocationLine WHERE C_AllocationHdr_ID=? AND C_Invoice_ID=?)");
-		
+					.append(" FROM Fact_Acct ")
+					.append("WHERE AD_Table_ID=? AND Record_ID=?")	//	allocation
+					.append(" AND C_AcctSchema_ID=?")
+					.append(" AND PostingType='A'")
+					.append(" AND Account_ID=?")
+					.append(" AND Line_ID IN (SELECT C_AllocationLine_ID FROM C_AllocationLine WHERE C_AllocationHdr_ID=? AND C_Invoice_ID=?)");
+				
+				MAccount acct = invoice.isSOTrx() ? acctAr : acctAp;
 				// For Allocation
 				List<Object> valuesAlloc = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 						MAllocationHdr.Table_ID, alloc.get_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID(), alloc.get_ID(), invoice.getC_Invoice_ID());
@@ -1467,9 +1488,10 @@ public class Doc_AllocationHdrJP extends Doc
 			htAllocInvSource.put(invoice.getC_Invoice_ID(), allocateSource);
 			htAllocInvAccounted.put(invoice.getC_Invoice_ID(), allocateAccounted);
 		}
-
-		for (MInvoice invoice : invList)
+		
+		for (MInvoice invoice : invList.values())
 		{
+			MAccount acct = invoice.isSOTrx() ? acctAr : acctAp;
 			BigDecimal invSource = htInvSource.get(invoice.getC_Invoice_ID());
 			if (invSource == null)
 				invSource = Env.ZERO;
@@ -1514,9 +1536,9 @@ public class Doc_AllocationHdrJP extends Doc
 					if (!fact.isAcctBalanced())
 					{
 						if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID())
-							fl = fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference.negate());
-						else
-							fl = fact.createLine (null, loss, gain,as.getC_Currency_ID(), acctDifference.negate());
+							fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
+						else 
+							fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());	
 						fl.setDescription(description.toString());
 						fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
 					}				
@@ -1529,7 +1551,7 @@ public class Doc_AllocationHdrJP extends Doc
 					if (!fact.isAcctBalanced())
 					{
 						if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID())
-							fl = fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference);
+							fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference);
 						else
 							fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference);
 						fl.setDescription(description.toString());
@@ -1584,9 +1606,9 @@ public class Doc_AllocationHdrJP extends Doc
 	 */
 	@SuppressWarnings("unused") //JPIERE-0052
 	private String createPaymentRoundingCorrection (MAcctSchema as, Fact fact)
-	{
-		ArrayList<MPayment> payList = new ArrayList<MPayment>();
-		Hashtable<Integer, Integer> htPayAllocLine = new Hashtable<Integer, Integer>();
+	{	
+		List<MPayment> payList = new ArrayList<MPayment>();
+		Map<Integer, Integer> htPayAllocLine = new HashMap<>();
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			MPayment payment = null;
@@ -1599,10 +1621,10 @@ public class Doc_AllocationHdrJP extends Doc
 				htPayAllocLine.put(payment.getC_Payment_ID(), line.get_ID());
 			}
 		}
-
-		Hashtable<Integer, MAccount> htPayAcct = new Hashtable<Integer, MAccount>();
-		Hashtable<Integer, BigDecimal> htPaySource = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htPayAccounted = new Hashtable<Integer, BigDecimal>();
+		
+		Map<Integer, MAccount> htPayAcct = new HashMap<>();
+		Map<Integer, BigDecimal> htPaySource = new HashMap<>();
+		Map<Integer, BigDecimal> htPayAccounted = new HashMap<>();
 		for (MPayment payment : payList)
 		{
 			htPayAcct.put(payment.getC_Payment_ID(), getPaymentAcct(as, payment.getC_Payment_ID()));
@@ -1634,11 +1656,11 @@ public class Doc_AllocationHdrJP extends Doc
 		
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
-
-		Hashtable<Integer, BigDecimal> htTotalAmtSourceDr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtAcctDr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtSourceCr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtAcctCr = new Hashtable<Integer, BigDecimal>();
+		
+		Map<Integer, BigDecimal> htTotalAmtSourceDr = new HashMap<>();
+		Map<Integer, BigDecimal> htTotalAmtAcctDr = new HashMap<>();
+		Map<Integer, BigDecimal> htTotalAmtSourceCr = new HashMap<>();
+		Map<Integer, BigDecimal> htTotalAmtAcctCr = new HashMap<>();
 		FactLine[] factlines = fact.getLines();
 		for (FactLine factLine : factlines)
 		{
@@ -1693,9 +1715,9 @@ public class Doc_AllocationHdrJP extends Doc
 				}
 			}
 		}
-
-		Hashtable<Integer, BigDecimal> htAllocPaySource = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htAllocPayAccounted = new Hashtable<Integer, BigDecimal>();
+		
+		Map<Integer, BigDecimal> htAllocPaySource = new HashMap<>();
+		Map<Integer, BigDecimal> htAllocPayAccounted = new HashMap<>();
 		for (MPayment payment : payList)
 		{
 			BigDecimal allocateSource = Env.ZERO;
@@ -1939,7 +1961,7 @@ public class Doc_AllocationHdrJP extends Doc
 				else
 					line = fact.createLine(null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
 			}
-		//}
+		//}JPIERE-0052
 		return line;
 	}
 	
