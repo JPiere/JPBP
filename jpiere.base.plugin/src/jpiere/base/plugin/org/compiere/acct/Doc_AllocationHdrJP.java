@@ -1959,7 +1959,13 @@ public class Doc_AllocationHdrJP extends Doc
 				if (as.isCurrencyBalancing() && acctDifference.abs().compareTo(TOLERANCE) < 0)
 					line = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
 				else
+				{
 					line = fact.createLine(null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+					
+					//JPIERE-0052 ZERO is to balance source amount
+					line.setAmtSourceDr(Env.ZERO);
+					line.setAmtSourceCr(Env.ZERO);
+				}
 			}
 		//}JPIERE-0052
 		return line;
