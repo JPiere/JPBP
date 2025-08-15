@@ -77,7 +77,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 						mTab.setValue("JP_ContractProcPeriod_ID", period.getJP_ContractProcPeriod_ID());
 					}
 					
-					Dialog.ask(WindowNo, null, "JP_UpdateDocumentInContract", new Callback<Boolean>() 
+					Dialog.ask(WindowNo, "JP_UpdateDocumentInContract", null, new Callback<Boolean>() 
 					{
 	
 						@Override
@@ -114,7 +114,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 					mTab.setValue("JP_ContractProcPeriod_ID", period.getJP_ContractProcPeriod_ID());
 				}
 				
-				Dialog.ask(WindowNo, null, "JP_UpdateDocumentInContract", new Callback<Boolean>() //Would you like to update document in Contract content?
+				Dialog.ask(WindowNo, "JP_UpdateDocumentInContract", null, new Callback<Boolean>() //Would you like to update document in Contract content?
 				{
 
 					@Override
@@ -143,7 +143,7 @@ public class JPiereContractOrderCallout implements IColumnCallout {
 				if(JP_ContractProcPeriod_ID > 0)
 					mTab.setValue("JP_ContractProcPeriod_ID", JP_ContractProcPeriod_ID);
 				
-				Dialog.ask(WindowNo, null, "JP_UpdateDocumentInContract", new Callback<Boolean>() //Would you like to update document in Contract content?
+				Dialog.ask(WindowNo, "JP_UpdateDocumentInContract", null, new Callback<Boolean>() //Would you like to update document in Contract content?
 				{
 
 					@Override
