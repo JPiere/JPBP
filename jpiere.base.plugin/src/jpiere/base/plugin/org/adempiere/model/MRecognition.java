@@ -1609,6 +1609,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		{
 			MRecognitionLine rLine = rLines[i];
 			rLine.setReversalLine_ID(sLines[i].getJP_RecognitionLine_ID());
+			rLine.setM_AttributeSetInstance_ID(sLines[i].getM_AttributeSetInstance_ID());
 			rLine.setQtyEntered(rLine.getQtyEntered().negate());
 			rLine.setQtyInvoiced(rLine.getQtyInvoiced().negate());
 			rLine.setJP_QtyRecognized(rLine.getJP_QtyRecognized().negate());

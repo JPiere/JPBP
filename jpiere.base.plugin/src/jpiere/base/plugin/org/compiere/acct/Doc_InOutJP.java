@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import org.compiere.acct.DocLine;
 import org.compiere.acct.DocLine_InOut;
 import org.compiere.acct.Doc_InOut;
+import org.compiere.acct.Doc_Order;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.MAccount;
@@ -36,6 +37,7 @@ import org.compiere.model.MInOutLine;
 import org.compiere.model.MInOutLineMA;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -45,6 +47,7 @@ import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
+import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
 *  JPIERE-0363: Contract Management
@@ -155,12 +158,34 @@ public class Doc_InOutJP extends Doc_InOut {
 
 			if (getDocumentType().equals(DOCTYPE_MatShipment) && isSOTrx()) //Sales - Shipment
 			{
-				;//Nothing to do;
-
+				if(MSysConfig.getBooleanValue("JP_CREATE_COST_DETAIL", true, as.getAD_Client_ID()))
+				{
+					//Delete Journal. Because Remain cost detail only.
+					//Journal will be created by Doc_JPRecongnition. 
+					costDetailForJPR(as, contractAcct, fact);
+					if(fact != null)
+					{
+						FactLine[] fLines = fact.getLines();
+						for(FactLine fl : fLines)
+							fact.remove(fl);
+					}
+				}
+				
 			}else if ( getDocumentType().equals(DOCTYPE_MatReceipt) && isSOTrx() ){//Sales - Return
 
-				;//Nothing to do;
-
+				if(MSysConfig.getBooleanValue("JP_CREATE_COST_DETAIL", true, as.getAD_Client_ID()))
+				{
+					//Delete Journal. Because Remain cost detail only.
+					//Journal will be created by Doc_JPRecongnition. 
+					costDetailForJPS(as, contractAcct, fact);
+					if(fact != null)
+					{
+						FactLine[] fLines = fact.getLines();
+						for(FactLine fl : fLines)
+							fact.remove(fl);
+					}
+				}
+				
 			}else if (getDocumentType().equals(DOCTYPE_MatReceipt) && !isSOTrx()){//Purchasing - Receipt
 
 				return super.createFacts(as);
@@ -675,7 +700,378 @@ public class Doc_InOutJP extends Doc_InOut {
 
 		return null;
 	}
+	
+	private Fact costDetailForJPR(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{		
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			Map<String, BigDecimal> batchLotCostMap = null;
+			DocLine_InOut line = (DocLine_InOut) p_lines[i];				
+			MProduct product = line.getProduct();
+			BigDecimal costs = null;
+			if (!isReversal(line))
+			{
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
+				{	
+					if (line.getM_AttributeSetInstance_ID() == 0 ) 
+					{
+						MInOutLine ioLine = (MInOutLine) line.getPO();
+						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
+						if (mas != null && mas.length > 0 )
+						{
+							batchLotCostMap = new HashMap<>();
+							costs  = BigDecimal.ZERO;
+							for (int j = 0; j < mas.length; j++)
+							{
+								MInOutLineMA ma = mas[j];
+								BigDecimal QtyMA = ma.getMovementQty();
+								ProductCost pc = line.getProductCost();
+								pc.setQty(QtyMA);
+								pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
+								BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+								batchLotCostMap.put(ma.getM_InOutLineMA_UU(), maCosts);
+								costs = costs.add(maCosts);
+							}						
+						}
+					} 
+					else 
+					{							
+						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");				
+					}
+				} 
+				else
+				{
+					// MZ Goodwill
+					// if Shipment CostDetail exist then get Cost from Cost Detail
+					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");			
+				}
+		
+				// end MZ
+				if (costs == null || costs.signum() == 0)	//	zero costs OK
+				{
+					if (product.isStocked())
+					{
+						//ok if we have purchased zero cost item from vendor before
+						int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)", 
+								product.getM_Product_ID());
+						if (count > 0)
+						{
+							costs = BigDecimal.ZERO;
+						}
+						else
+						{
+							p_Error = Msg.getMsg(getCtx(), "No Costs for") + " " + line.getProduct().getName();
+							log.log(Level.WARNING, p_Error);
+							return null;
+						}
+					}
+					else	//	ignore service
+						continue;
+				}
+			}
+			else//Reversal
+			{
+				if(line.getReversalLine_ID() > 0)
+				{
+					MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.getReversalLine_ID(), 0, getTrxName());
+					costs = cd.getAmt().negate();
+				}else {
+					//TODO エラー
+				}
+			}
+			
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
+			{	
+				if (line.getM_AttributeSetInstance_ID() == 0 ) 
+				{
+					MInOutLine ioLine = (MInOutLine) line.getPO();
+					MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
+					if (mas != null && mas.length > 0 )
+					{
+						for (int j = 0; j < mas.length; j++)
+						{
+							MInOutLineMA ma = mas[j];
+							BigDecimal qty = ma.getMovementQty();
+							if (qty.signum() != line.getQty().signum())
+								qty = qty.negate();
+							BigDecimal amt = batchLotCostMap != null ? batchLotCostMap.get(ma.getM_InOutLineMA_UU()) : null;
+							if (amt == null && isReversal(line))
+							{
+								amt = findReversalCostDetailAmt(as, line.getM_Product_ID(), ma, line.getReversalLine_ID());
+								if (amt != null)
+									amt = amt.negate();
+							}
+							if (amt == null) 
+							{
+								amt = costs.divide(line.getProductCost().getQty(), RoundingMode.HALF_UP);
+								amt = amt.multiply(qty);
+							}
+							else if (!isReversal(line) && line.getProductCost().getQty().signum() != line.getQty().signum())
+							{
+								if (amt.signum() != (costs.signum() * -1)) {
+									amt = amt.negate();
+								}
+							}
+							int Ref_CostDetail_ID = 0;
+							if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+							{
+								MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+										line.getReversalLine_ID(), 0, getTrxName());
+								if (cd != null)
+									Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+							}
+							if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+									line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+									line.get_ID(), 0,
+									amt, qty,
+									line.getDescription(), true, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+							{
+								p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
+								return null;
+							}							
+						}						
+					}
+				} 
+				else
+				{
+					//
+					if (line.getM_Product_ID() != 0)
+					{
+						BigDecimal amt = costs;
+						if (line.getProductCost().getQty().signum() != line.getQty().signum() && !isReversal(line))
+							amt = amt.negate();
+						int Ref_CostDetail_ID = 0;
+						if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+						{
+							MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+									line.getReversalLine_ID(), 0, getTrxName());
+							if (cd != null)
+								Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+						}
+						if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,
+							amt, line.getQty(),
+							line.getDescription(), true, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+						{
+							p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
+							return null;
+						}
+					}
+				}
+			} 
+			else
+			{
+				//
+				if (line.getM_Product_ID() != 0)
+				{
+					BigDecimal amt = costs;
+					if (line.getProductCost().getQty().signum() != line.getQty().signum() && !isReversal(line))
+						amt = amt.negate();
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
+					if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,
+						amt, line.getQty(),
+						line.getDescription(), true, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+					{
+						p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
+						return null;
+					}
+				}
+			}
+		}	//	for all lines
+	
+		return fact;
+	}
 
+	private Fact costDetailForJPS(MAcctSchema as, MContractAcct contractAcct, Fact fact)
+	{		
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			DocLine_InOut line = (DocLine_InOut) p_lines[i];
+			MProduct product = line.getProduct();
+			BigDecimal costs = null;
+			Map<String, BigDecimal> batchLotCostMap = null;
+			if (!isReversal(line)) 
+			{
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
+				{	
+					if (line.getM_AttributeSetInstance_ID() == 0 ) 
+					{
+						MInOutLine ioLine = (MInOutLine) line.getPO();
+						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
+						costs = BigDecimal.ZERO;
+						if (mas != null && mas.length > 0 )
+						{
+							batchLotCostMap = new HashMap<>();
+							for (int j = 0; j < mas.length; j++)
+							{
+								MInOutLineMA ma = mas[j];
+								BigDecimal QtyMA = ma.getMovementQty();
+								ProductCost pc = line.getProductCost();
+								pc.setQty(QtyMA);
+								pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
+								BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+								batchLotCostMap.put(ma.getM_InOutLineMA_UU(), maCosts);
+								costs = costs.add(maCosts);
+							}
+						}
+					} 
+					else
+					{
+						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+					}
+				}
+				else
+				{
+					// MZ Goodwill
+					// if Shipment CostDetail exist then get Cost from Cost Detail
+					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+					// end MZ
+				}
+				if (costs == null || costs.signum() == 0)	//	zero costs OK
+				{
+					if (product.isStocked())
+					{
+						p_Error = Msg.getMsg(getCtx(),"No Costs for") + " " + line.getProduct().getName();  
+						log.log(Level.WARNING, p_Error);
+						return null;
+					}
+					else	//	ignore service
+						continue;
+				}
+			} 
+			else//Reversal
+			{
+				if(line.getReversalLine_ID() > 0)
+				{
+					MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.getReversalLine_ID(), 0, getTrxName());
+					costs = cd.getAmt().negate();
+				}else {
+					//TODO エラー
+				}
+			}
+
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
+			{	
+				if (line.getM_AttributeSetInstance_ID() == 0 ) 
+				{
+					MInOutLine ioLine = (MInOutLine) line.getPO();
+					MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
+					if (mas != null && mas.length > 0 )
+					{
+						for (int j = 0; j < mas.length; j++)
+						{
+							MInOutLineMA ma = mas[j];
+							BigDecimal qty = ma.getMovementQty();
+							if (qty.signum() != line.getQty().signum())
+								qty = qty.negate();
+							BigDecimal amt = batchLotCostMap != null ? batchLotCostMap.get(ma.getM_InOutLineMA_UU()) : null;
+							if (amt == null && isReversal(line))
+							{
+								amt = findReversalCostDetailAmt(as, line.getM_Product_ID(), ma, line.getReversalLine_ID());
+								if (amt != null)
+									amt = amt.negate();
+							}
+							if (amt == null) 
+							{
+								amt = costs.divide(line.getProductCost().getQty(), RoundingMode.HALF_UP);
+								amt = amt.multiply(qty);
+							}
+							else if (!isReversal(line) && line.getProductCost().getQty().signum() != line.getQty().signum())
+							{
+								if (amt.signum() != (costs.signum() * -1)) {
+									amt = amt.negate();
+								}
+							}
+							int Ref_CostDetail_ID = 0;
+							if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+							{
+								MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+										line.getReversalLine_ID(), 0, getTrxName());
+								if (cd != null)
+									Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+							}
+							if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+									line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+									line.get_ID(), 0,
+									amt, qty,
+									line.getDescription(), true, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+							{
+								p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
+								return null;
+							}
+						}
+					}
+				} else
+				{
+					if (line.getM_Product_ID() != 0)
+					{
+						BigDecimal amt = costs;
+						if (line.getProductCost().getQty().signum() != line.getQty().signum() && !isReversal(line))
+							amt = amt.negate();
+						int Ref_CostDetail_ID = 0;
+						if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+						{
+							MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+									line.getReversalLine_ID(), 0, getTrxName());
+							if (cd != null)
+								Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+						}
+						if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,
+							amt, line.getQty(),
+							line.getDescription(), true, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+						{
+							p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
+							return null;
+						}
+					}
+				}
+			} else
+			{
+				//
+				if (line.getM_Product_ID() != 0)
+				{
+					BigDecimal amt = costs;
+					if (line.getProductCost().getQty().signum() != line.getQty().signum() && !isReversal(line))
+						amt = amt.negate();
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getShipment(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
+					if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,
+						amt, line.getQty(),
+						line.getDescription(), true, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+					{
+						p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
+						return null;
+					}
+				}
+			}
+			
+		}	//	for all lines
+	
+		return fact;
+	}
+	
 	/**
 	 * @param as
 	 * @param M_Product_ID
