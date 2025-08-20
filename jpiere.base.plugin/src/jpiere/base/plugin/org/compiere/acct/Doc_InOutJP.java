@@ -777,7 +777,9 @@ public class Doc_InOutJP extends Doc_InOut {
 							line.getReversalLine_ID(), 0, getTrxName());
 					costs = cd.getAmt().negate();
 				}else {
-					//TODO エラー
+					p_Error = "Could not find original Cost Detail for reversal. ";
+					log.log(Level.SEVERE, p_Error);
+					return null;
 				}
 			}
 			
@@ -958,7 +960,9 @@ public class Doc_InOutJP extends Doc_InOut {
 							line.getReversalLine_ID(), 0, getTrxName());
 					costs = cd.getAmt().negate();
 				}else {
-					//TODO エラー
+					p_Error = "Could not find original Cost Detail for reversal. ";
+					log.log(Level.SEVERE, p_Error);
+					return null;
 				}
 			}
 
