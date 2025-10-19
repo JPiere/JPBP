@@ -450,7 +450,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			for (int i = 0; i < p_lines.length; i++)
 			{
 				DocLine line = p_lines[i];
-				boolean landedCost = landedCost(as, fact, line, true);
+				boolean landedCost = landedCost(as, fact, line, true, false);
 				if (landedCost && as.isExplicitCostAdjustment())
 				{
 					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
@@ -685,7 +685,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			for (int i = 0; i < p_lines.length; i++)
 			{
 				DocLine line = p_lines[i];
-				boolean landedCost = landedCost(as, fact, line, false);
+				boolean landedCost = landedCost(as, fact, line, false, true);
 				if (landedCost && as.isExplicitCostAdjustment())
 				{
 					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
@@ -1071,7 +1071,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			DocLine line = p_lines[i];
-			boolean landedCost = landedCost(as, fact, line, true);
+			boolean landedCost = landedCost(as, fact, line, true, false);
 			if (landedCost && as.isExplicitCostAdjustment())
 			{
 				fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct, as),
@@ -1242,7 +1242,7 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			DocLine line = p_lines[i];
-			boolean landedCost = landedCost(as, fact, line, false);
+			boolean landedCost = landedCost(as, fact, line, false, true);
 			if (landedCost && as.isExplicitCostAdjustment())
 			{
 				fact.createLine (line, getInvoiceExpenseAccount(line, contractAcct, as),
