@@ -1024,11 +1024,11 @@ public class X_JP_EstimationLine extends PO implements I_JP_EstimationLine, I_Pe
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Promotion getM_Promotion() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Promotion)MTable.get(getCtx(), org.compiere.model.I_M_Promotion.Table_ID)
-			.getPO(getM_Promotion_ID(), get_TrxName());
-	}
+//	public org.compiere.model.I_M_Promotion getM_Promotion() throws RuntimeException
+//	{
+//		return (org.compiere.model.I_M_Promotion)MTable.get(getCtx(), org.compiere.model.I_M_Promotion.Table_ID)
+//			.getPO(getM_Promotion_ID(), get_TrxName());
+//	}
 
 	/** Set Promotion.
 		@param M_Promotion_ID Promotion

@@ -588,7 +588,7 @@ public interface I_JP_EstimationLine
 	/** Get Promotion	  */
 	public int getM_Promotion_ID();
 
-	public org.compiere.model.I_M_Promotion getM_Promotion() throws RuntimeException;
+//	public org.compiere.model.I_M_Promotion getM_Promotion() throws RuntimeException;
 
     /** Column name M_Shipper_ID */
     public static final String COLUMNNAME_M_Shipper_ID = "M_Shipper_ID";
