@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCharge;
 import org.compiere.model.MClient;
+import org.compiere.model.MClientInfo;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
@@ -496,7 +497,10 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 	//JPIERE-0202
 	private void setScheduledCost(MOrderLine ol)
 	{
-		MAcctSchema as = MAcctSchema.get(Env.getCtx(), Env.getContextAsInt(Env.getCtx(), "$C_AcctSchema_ID"));
+		int C_AcctSchema_ID = Env.getContextAsInt(Env.getCtx(), "$C_AcctSchema_ID");
+		if(C_AcctSchema_ID == 0 )
+			C_AcctSchema_ID = MClientInfo.get().getC_AcctSchema1_ID();
+		MAcctSchema as = MAcctSchema.get(Env.getCtx(), C_AcctSchema_ID);
 		BigDecimal cost = getProductCosts(ol, as, ol.getAD_Org_ID(), true);
 		ol.set_ValueNoCheck("JP_ScheduledCost", cost);
 	}
