@@ -180,7 +180,7 @@ public abstract class JPiereCreateFromRecognition extends CreateFrom
 				+ "l.C_UOM_ID, COALESCE(uom.UOMSymbol, uom.Name), "
 				+ "l.M_Product_ID, p.Name, po.VendorProductNo, l.M_InOutLine_ID, l.Line, l.C_OrderLine_ID ");
 		sql.append(" HAVING l.MovementQty-SUM(COALESCE(rl.QtyInvoiced,0)) <>0");
-		sql.append("ORDER BY l.Line");
+		sql.append(" ORDER BY l.Line");
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
