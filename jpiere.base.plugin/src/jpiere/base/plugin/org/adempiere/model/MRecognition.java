@@ -925,7 +925,7 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 		}
 
 		//	Document Type
-		if(!newRecord || is_ValueChanged("C_DocTypeTarget_ID"))
+		if(newRecord || is_ValueChanged("C_DocTypeTarget_ID"))
 		{
 			setC_DocType_ID(getC_DocTypeTarget_ID());
 		}
