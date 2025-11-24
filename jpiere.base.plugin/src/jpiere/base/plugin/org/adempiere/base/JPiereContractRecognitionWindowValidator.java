@@ -12,6 +12,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 import jpiere.base.plugin.org.adempiere.model.MContractLine;
+import jpiere.base.plugin.org.adempiere.model.MRecognition;
 import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 public class JPiereContractRecognitionWindowValidator implements WindowValidator {
@@ -131,6 +132,17 @@ public class JPiereContractRecognitionWindowValidator implements WindowValidator
 			}//if(gf_ContractProcPeriod_ID != null)
 			
 		}//BEFORE_SAVE
+		else if(event.getName().equals(WindowValidatorEventType.AFTER_COPY.getName()))
+		{
+			//For save before processing "Create from" in spite of no field change.
+			GridTab gridTab =event.getWindow().getADWindowContent().getActiveGridTab();
+			if(gridTab.getAD_Table_ID() == MRecognition.Table_ID)
+			{
+				Object obj_DocTypeTarget_ID = gridTab.getValue("C_DocTypeTarget_ID");
+				if(obj_DocTypeTarget_ID != null)
+					gridTab.setValue("C_DocType_ID", obj_DocTypeTarget_ID);
+			}
+		}
 		
 		callback.onCallback(true);
 	}
