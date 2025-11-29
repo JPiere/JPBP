@@ -60,6 +60,10 @@ public class MReportCubeJP extends X_PA_ReportCubeJP {
 		super(ctx, PA_ReportCubeJP_ID, trxName);
 	}
 
+	public MReportCubeJP(Properties ctx, String PA_ReportCubeJP_UU, String trxName) {
+		super(ctx, PA_ReportCubeJP_UU, trxName);
+	}
+	
 	public MReportCubeJP(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}

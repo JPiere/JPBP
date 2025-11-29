@@ -45,6 +45,10 @@ public class MInOutConfirmJP extends MInOutConfirm implements DocOptions {
 		super(ctx, M_InOutConfirm_ID, trxName);
 	}
 	
+	public MInOutConfirmJP(Properties ctx, String M_InOutConfirm_UU, String trxName) {
+		super(ctx, M_InOutConfirm_UU, trxName);
+	}
+	
 	public MInOutConfirmJP(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}

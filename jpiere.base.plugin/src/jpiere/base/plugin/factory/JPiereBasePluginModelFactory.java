@@ -184,6 +184,77 @@ public class JPiereBasePluginModelFactory implements IModelFactory {
 
 		return null;
 	}
+	
+	@Override
+	public PO getPO(String tableName, String Record_UU, String trxName) {
+
+		if(tableName.startsWith("JP"))
+		{
+			Class<?> clazz = getClass(tableName);
+			if (clazz == null)
+			{
+				return null;
+			}
+
+			boolean errorLogged = false;
+			try
+			{
+				Constructor<?> constructor = null;
+				try
+				{
+					constructor = clazz.getDeclaredConstructor(new Class[]{Properties.class, String.class, String.class});
+				}
+				catch (Exception e)
+				{
+					String msg = e.getMessage();
+					if (msg == null)
+						msg = e.toString();
+					s_log.warning("No transaction Constructor for " + clazz + " (" + msg + ")");
+				}
+
+				PO po = constructor!=null ? (PO)constructor.newInstance(new Object[] {Env.getCtx(), Record_UU, trxName}) : null;
+				return po;
+			}
+			catch (Exception e)
+			{
+				if (e.getCause() != null)
+				{
+					Throwable t = e.getCause();
+					s_log.log(Level.SEVERE, "(id) - Table=" + tableName + ",Class=" + clazz, t);
+					errorLogged = true;
+					if (t instanceof Exception)
+						s_log.saveError("Error", (Exception)e.getCause());
+					else
+						s_log.saveError("Error", "Table=" + tableName + ",Class=" + clazz);
+				}
+				else
+				{
+					s_log.log(Level.SEVERE, "(id) - Table=" + tableName + ",Class=" + clazz, e);
+					errorLogged = true;
+					s_log.saveError("Error", "Table=" + tableName + ",Class=" + clazz);
+				}
+			}
+			if (!errorLogged)
+				s_log.log(Level.SEVERE, "(id) - Not found - Table=" + tableName
+					+ ", Record_UU=" + Record_UU);
+			return null;
+
+
+		}else{
+			if(tableName.equals(MOrder.Table_Name)){
+				return  new MOrderJP(Env.getCtx(), Record_UU, trxName);
+			}else if(tableName.equals(MInOutConfirm.Table_Name)){
+				return new MInOutConfirmJP(Env.getCtx(), Record_UU, trxName);			//JPIERE-0208
+			}else if(tableName.equals(MInvoice.Table_Name)){
+				return new MInvoiceJP(Env.getCtx(), Record_UU, trxName);			//JPIERE-0295
+			}else if(tableName.equals(MReportCubeJP.Table_Name)) {
+				return new MReportCubeJP(Env.getCtx(), Record_UU, trxName);	//JPIERE-0458
+			}
+		}
+
+		return null;
+	}
+
 
 	@Override
 	public PO getPO(String tableName, ResultSet rs, String trxName) {

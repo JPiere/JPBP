@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import org.compiere.acct.DocLine;
 import org.compiere.acct.DocLine_InOut;
 import org.compiere.acct.Doc_InOut;
-import org.compiere.acct.Doc_Order;
 import org.compiere.acct.Fact;
 import org.compiere.acct.FactLine;
 import org.compiere.model.MAccount;
@@ -47,7 +46,6 @@ import jpiere.base.plugin.org.adempiere.model.MContractAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractChargeAcct;
 import jpiere.base.plugin.org.adempiere.model.MContractContent;
 import jpiere.base.plugin.org.adempiere.model.MContractProductAcct;
-import jpiere.base.plugin.org.adempiere.model.MRecognitionLine;
 
 /**
 *  JPIERE-0363: Contract Management

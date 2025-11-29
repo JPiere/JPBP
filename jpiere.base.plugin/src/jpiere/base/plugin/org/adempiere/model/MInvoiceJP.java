@@ -32,6 +32,11 @@ public class MInvoiceJP extends MInvoice implements DocOptions {
 		super(ctx, C_Invoice_ID, trxName);
 	}
 	
+	public MInvoiceJP(Properties ctx, String C_Invoice_UU, String trxName) 
+	{
+		super(ctx, C_Invoice_UU, trxName);
+	}
+	
 	public MInvoiceJP(Properties ctx, ResultSet rs, String trxName) 
 	{
 		super(ctx, rs, trxName);

@@ -63,6 +63,10 @@ public class MOrderJP extends MOrder implements DocOptions {
 	public MOrderJP(Properties ctx, int C_Order_ID, String trxName) {
 		super(ctx, C_Order_ID, trxName);
 	}
+	
+	public MOrderJP(Properties ctx, String C_Order_UU, String trxName) {
+		super(ctx, C_Order_UU, trxName);
+	}
 
 	public MOrderJP(MProject project, boolean IsSOTrx, String DocSubTypeSO) {
 		super(project, IsSOTrx, DocSubTypeSO);
