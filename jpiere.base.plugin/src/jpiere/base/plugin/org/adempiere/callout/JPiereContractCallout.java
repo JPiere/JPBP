@@ -46,7 +46,7 @@ public class JPiereContractCallout implements IColumnCallout {
 		if(mField.getColumnName().equals("JP_ContractT_ID") && value != null)
 		{
 
-			Dialog.ask(WindowNo, null, "JP_UpdateContractByTemplate", new Callback<Boolean>() //Would you like to update contract document by template?
+			Dialog.ask(WindowNo, "JP_UpdateContractByTemplate", null,  new Callback<Boolean>() //Would you like to update contract document by template?
 			{
 
 				@Override
@@ -60,7 +60,7 @@ public class JPiereContractCallout implements IColumnCallout {
 					}
 		        }
 
-			});//FDialog.
+			});//Dialog.
 
 		}else if(mField.getColumnName().equals("JP_ContractPeriodDate_To") && value != null){
 
