@@ -583,8 +583,8 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 							String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
 
 							try {
-								Dialog.info(0, null, "JP_ContractManagementInfo"
-									, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);
+								Dialog.info(0, "JP_ContractManagementInfo"
+									, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy, null);
 							}catch(Exception e) {
 								;//ignore
 							}

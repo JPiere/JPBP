@@ -316,8 +316,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);//It is not input in {0}
 
 						try {
-							Dialog.info(0, null, "JP_ContractManagementInfo"
-								, nonEnterable + " " + contractContent + " , " + contractPeriod + " -> " + toBeConfirmed +" : " + message);
+							Dialog.info(0, "JP_ContractManagementInfo"
+								, nonEnterable + " " + contractContent + " , " + contractPeriod + " -> " + toBeConfirmed +" : " + message, null);
 						}catch(Exception e) {
 							;//ignore
 						}
@@ -482,8 +482,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 
 						try {
-							Dialog.info(0, null, "JP_ContractManagementInfo"
-								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+  spotContract);
+							Dialog.info(0, "JP_ContractManagementInfo"
+								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : "+  spotContract, null);
 						}catch(Exception e) {
 							;//ignore
 						}
@@ -510,8 +510,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 
 						try {
-							Dialog.info(0, null, "JP_ContractManagementInfo"
-								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
+							Dialog.info(0, "JP_ContractManagementInfo"
+								, nonEnterable + " " +contractContent + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract, null);
 						}catch(Exception e) {
 							;//ignore
 						}
@@ -700,8 +700,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 								String createDerivativeDocPolicy = Msg.getElement(Env.getCtx(), "JP_CreateDerivativeDocPolicy");
 
 								try {
-									Dialog.info(0, null, "JP_ContractManagementInfo"
-										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy);
+									Dialog.info(0, "JP_ContractManagementInfo"
+										, nonEnterable + " " + contractPeriod + " -> "+ toBeConfirmed + " : " +createDerivativeDocPolicy, null);
 								}catch(Exception e) {
 									;//ignore
 								}
@@ -769,8 +769,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 							String spotContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_SpotContract);
 
 							try {
-								Dialog.info(0, null, "JP_ContractManagementInfo"
-									, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract);
+								Dialog.info(0, "JP_ContractManagementInfo"
+									, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " +  spotContract, null);
 							}catch(Exception e) {
 								;//ignore
 							}
@@ -796,8 +796,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 							String generalContract = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), MContract.JP_CONTRACTTYPE_GeneralContract);
 
 							try {
-								Dialog.info(0, null, "JP_ContractManagementInfo"
-									, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract);
+								Dialog.info(0, "JP_ContractManagementInfo"
+									, nonEnterable + " " +cLine + " , " + contractPeriod + " -> " + toBeConfirmed + " : " + generalContract, null);
 							}catch(Exception e) {
 								;//ignore
 							}
@@ -821,8 +821,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 						String message = Msg.getMsg(Env.getCtx(), "JP_NOT-INOUT", objs);
 
 						try {
-							Dialog.info(0, null, "JP_ContractManagementInfo"
-								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message);
+							Dialog.info(0, "JP_ContractManagementInfo"
+								, nonEnterable + " " + contractPeriod + " -> " + toBeConfirmed + " : " + message, null);
 						}catch(Exception e) {
 							;//ignore
 						}
