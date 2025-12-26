@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.adempiere.base.IDisplayTypeFactory;
 import org.adempiere.base.Service;
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.apps.AEnv;
@@ -38,6 +39,7 @@ import org.compiere.model.MCurrency;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
@@ -56,7 +58,8 @@ import org.zkoss.zk.ui.event.Events;
  *  	   @see https://sourceforge.net/p/adempiere/zk-web-client/433/
  */
 /**
- * JPIERE-0003 Modify WNumberEditor#setValue()
+ * JPIERE-0003: Modify WNumberEditor#setValue()
+ * JPIERE-0654(v12): Discarded non-numeric characters.
  *
  *
  * @author h.hagiwara
@@ -211,6 +214,7 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 		getComponent().setFormat(format);
 		
 		getComponent().getDecimalbox().setClientAttribute("inputmode", "decimal");//JPIERE-0003
+		getComponent().getDecimalbox().addEventListener(Events.ON_BLUR, this);//JPIERE-0654
 
 		popupMenu = new WEditorPopupMenu(false, false, isShowPreference());
     	addChangeLogMenu(popupMenu);
@@ -230,6 +234,21 @@ public class WNumberEditorJP extends WEditor implements ContextMenuListener
 	@Override
     public void onEvent(Event event)
     {
+		if(Events.ON_BLUR.equals(event.getName()))//JPIERE-0654-Start
+		{
+			try 
+			{
+				getComponent().getValue();
+			}catch (Exception e) {
+				setValue(oldValue);
+				if(getGridField() == null || getGridField().getGridTab() == null)
+					throw new AdempiereException(Msg.getMsg(Env.getCtx(), "JP_Discard_Non-Num"));//The edit was discarded because non-numeric characters were entered
+				else
+					getGridField().getGridTab().fireDataStatusEEvent("Warning", Msg.getMsg(Env.getCtx(), "JP_Discard_Non-Num"), false);
+			}
+			return;
+		}//JPIERE-0654-end
+		
     	if (Events.ON_CHANGE.equalsIgnoreCase(event.getName()) || Events.ON_OK.equalsIgnoreCase(event.getName()))
     	{
 	        Object newValue = getComponent().getValue();
