@@ -139,7 +139,7 @@ public class WFActivityApproval extends SvrProcess {
 			{
 				
 				String  JP_CancelWFAction = m_PO.get_ValueAsString(COLUMNNAME_JP_CancelWFAction);//JPIERE-0607
-				if(Util.isEmpty(JP_CancelWFAction))//Standard Work flow
+				if(Util.isEmpty(JP_CancelWFAction) || "N".equals(JP_CancelWFAction.trim()))//Standard Work flow
 				{
 					try
 					{
