@@ -22,6 +22,8 @@ import org.compiere.model.Lookup;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
+import org.idempiere.db.util.SQLFragment;
 
 /**
  * JPIERE-0230 - Product Info Window Single Selection
@@ -67,7 +69,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	
 		if (tableName.equals("M_Product") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())) && lookup)
 		{
-        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, field, predefinedContextVariables);
+        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, AD_InfoWindow_ID, lookup, field, predefinedContextVariables, (!Util.isEmpty(whereClause, true) ? new SQLFragment(whereClause) : null));
         	if (!info.loadedOK())
         	{
 	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, field);
@@ -83,7 +85,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 		//JPIERE-0614(v11) - Single Selection Info Window
 		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())) && lookup)
 		{
-        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, field, predefinedContextVariables);
+        	InfoPanel info = new InfoWindow(WindowNo, tableName, keyColumn, value, multiSelection, AD_InfoWindow_ID, lookup, field, predefinedContextVariables, (!Util.isEmpty(whereClause, true) ? new SQLFragment(whereClause) : null));
         	if (!info.loadedOK())
         	{
 	            info = new InfoGeneralPanel (value, WindowNo, tableName, keyColumn, multiSelection, whereClause, lookup, field);
@@ -141,6 +143,18 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	public InfoWindow create(int AD_InfoWindow_ID) {
 
 			return null;
+	}
+
+	@Override
+	public InfoPanel create(Lookup lookup, GridField field, String tableName, String keyColumn, String value, boolean multiSelection, int AD_InfoWindow_ID, SQLFragment sqlFilter) 
+	{
+		return null;
+	}
+
+	@Override
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection,	int AD_InfoWindow_ID, boolean lookup, GridField field, SQLFragment sqlFilter) 
+	{
+		return null;
 	}
 
 
