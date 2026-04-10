@@ -35,19 +35,15 @@ import org.idempiere.db.util.SQLFragment;
 public class JPiereBasePluginInfoFactory implements IInfoFactory {
 
 	@Override
-	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection,
-			String whereClause, int AD_InfoWindow_ID, boolean lookup) {
-
-		return create(WindowNo, tableName, keyColumn,
-				value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, null, null);
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection,	String whereClause, int AD_InfoWindow_ID, boolean lookup) 
+	{
+		return create(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, null, null);
 	}
 	
 	@Override
-	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
-			String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, GridField field) {
-		
-		return create(WindowNo, tableName, keyColumn,
-				value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, null, field);
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, GridField field) 
+	{	
+		return create(WindowNo, tableName, keyColumn, value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, null, field);
 	}
 	
 	/**
@@ -63,8 +59,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	 * @param field
 	 * @return InfoPanel
 	 */
-	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
-				String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, String predefinedContextVariables, GridField field) {
+	public InfoPanel create(int WindowNo, String tableName, String keyColumn, String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, String predefinedContextVariables, GridField field) {
 	
 	
 		if (tableName.equals("M_Product") && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())) && lookup)
@@ -103,9 +98,7 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	}
 
 	@Override
-	public InfoPanel create(Lookup lookup, GridField field, String tableName,
-			String keyColumn, String queryValue, boolean multiSelection,
-			String whereClause, int AD_InfoWindow_ID) {
+	public InfoPanel create(Lookup lookup, GridField field, String tableName, String keyColumn, String queryValue, boolean multiSelection, String whereClause, int AD_InfoWindow_ID) {
 
 		String col = lookup.getColumnName();		//	fully qualified name
 
@@ -148,6 +141,56 @@ public class JPiereBasePluginInfoFactory implements IInfoFactory {
 	@Override
 	public InfoPanel create(Lookup lookup, GridField field, String tableName, String keyColumn, String value, boolean multiSelection, int AD_InfoWindow_ID, SQLFragment sqlFilter) 
 	{
+		String col = lookup.getColumnName();		//	fully qualified name
+
+		if (col.indexOf('.') != -1)
+			col = col.substring(col.indexOf('.')+1);
+		
+		if ( (col.equals("M_Product_ID") || tableName.equals("M_Product")) && AD_InfoWindow_ID > 0 && MSysConfig.getBooleanValue("JP_PRODUCT_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
+		{
+			if(field != null)
+			{
+				if(field.getDisplayType() != DisplayType.ChosenMultipleSelectionSearch)
+					multiSelection = false;
+			}else {
+				multiSelection = false;
+			}
+			
+			InfoPanel info = new InfoWindow(lookup.getWindowNo(), tableName, keyColumn, value, multiSelection, AD_InfoWindow_ID, true, sqlFilter);
+        	if (!info.loadedOK())
+        	{
+	            info = new InfoGeneralPanel (value, lookup.getWindowNo(), tableName, keyColumn, multiSelection, sqlFilter.toSQLWithParameters(), true, field);
+	        	if (!info.loadedOK()) {
+	        		info.dispose(false);
+	        		info = null;
+	        	}
+        	}
+			return info;
+		}
+		
+		//JPIERE-0614(v11) - Single Selection Info Window
+		if(MSysConfig.getBooleanValue("JP_SINGLESELECTION_INFOWINDOW", true, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx())))
+		{
+			if(field != null)
+			{
+				if(field.getDisplayType() != DisplayType.ChosenMultipleSelectionSearch)
+					multiSelection = false;
+			}else {
+				multiSelection = false;
+			}
+			
+        	InfoPanel info = new InfoWindow(lookup.getWindowNo(), tableName, keyColumn, value, multiSelection, AD_InfoWindow_ID, true, sqlFilter);
+        	if (!info.loadedOK())
+        	{
+	            info = new InfoGeneralPanel (value, lookup.getWindowNo(), tableName, keyColumn, multiSelection, sqlFilter.toSQLWithParameters(), true, field);
+	        	if (!info.loadedOK()) {
+	        		info.dispose(false);
+	        		info = null;
+	        	}
+        	}
+        	return info;			
+		}
+		
 		return null;
 	}
 
