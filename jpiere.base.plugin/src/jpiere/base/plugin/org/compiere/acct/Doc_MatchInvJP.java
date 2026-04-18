@@ -311,7 +311,7 @@ public class Doc_MatchInvJP extends Doc
 				if(m_pc.isService() && m_contractAcct != null)
 					cr.setAccount(as, getInvoiceExpenseAccount(as));
 
-				//Set AmtAcctCr/Dr from Invoice (sets also Project)
+				//	Set AmtAcctCr/Dr from Invoice (sets also Project)
 				if (!cr.updateReverseLine (MInvoice.Table_ID, 		//	Amt updated
 					m_invoiceLine.getC_Invoice_ID(), m_invoiceLine.getC_InvoiceLine_ID(), multiplier))
 				{
