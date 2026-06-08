@@ -162,7 +162,8 @@ public class CreateARInvoiceAdjustPaymentDiff extends SvrProcess {
 		//Check Payment Term
 		if(p_C_PaymentTerm_ID == 0)
 		{
-			p_C_PaymentTerm_ID = m_Payment.getC_BPartner().getC_PaymentTerm_ID();
+			MBPartner m_BPartner = MBPartner.get(getCtx(), m_Payment.getC_BPartner_ID());
+			p_C_PaymentTerm_ID = m_BPartner.getC_PaymentTerm_ID();
 			if(p_C_PaymentTerm_ID == 0)
 			{
 				throw new Exception(Msg.getMsg(getCtx(), "NotFound") + Msg.getElement(getCtx(), "C_PaymentTerm_ID"));
