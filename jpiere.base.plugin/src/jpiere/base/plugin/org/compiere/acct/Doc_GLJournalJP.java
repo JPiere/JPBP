@@ -49,6 +49,7 @@ import org.compiere.model.MElementValue;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
@@ -707,9 +708,10 @@ public class Doc_GLJournalJP extends Doc
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 			if(taxCalculater != null)
 			{
+				MTaxProvider m_TaxProvider= new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), null);
 				reCalculate_TaxAmt = taxCalculater.calculateTax(m_tax, IncludeTaxAmt, true
 						, MCurrency.getStdPrecision(Env.getCtx(), docLine.getC_Currency_ID())
-						, JPiereTaxProvider.getRoundingMode(docLine.getC_BPartner_ID(), JP_SOPOType == "S"? true : false, m_tax.getC_TaxProvider()));
+						, JPiereTaxProvider.getRoundingMode(docLine.getC_BPartner_ID(), JP_SOPOType == "S"? true : false, m_TaxProvider));
 			}else{
 				reCalculate_TaxAmt = m_tax.calculateTax(IncludeTaxAmt, true, MCurrency.getStdPrecision(Env.getCtx(), docLine.getC_Currency_ID()));
 			}
