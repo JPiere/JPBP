@@ -29,6 +29,7 @@ import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
@@ -68,10 +69,11 @@ public class MInOutConfirmJP extends MInOutConfirm implements DocOptions {
 		if (m_processMsg != null)
 			return false;	
 		
-		if(getM_InOut().getDocStatus().equals(DocumentEngine.STATUS_Completed) || getM_InOut().getDocStatus().equals(DocumentEngine.STATUS_Closed)
-				|| getM_InOut().getDocStatus().equals(DocumentEngine.STATUS_Voided) || getM_InOut().getDocStatus().equals(DocumentEngine.STATUS_Reversed))
+		MInOut io = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+		if(io.getDocStatus().equals(DocumentEngine.STATUS_Completed) || io.getDocStatus().equals(DocumentEngine.STATUS_Closed)
+				|| io.getDocStatus().equals(DocumentEngine.STATUS_Voided) || io.getDocStatus().equals(DocumentEngine.STATUS_Reversed))
 		{
-			//for erroe message
+			//for error message
 			setDescription(Msg.getMsg(getCtx(), "JP_CanNotReActivateInOutConfirm"));//You can not ReActivate. Because Shipment of Receipt was completed.
 			return false;
 		}
