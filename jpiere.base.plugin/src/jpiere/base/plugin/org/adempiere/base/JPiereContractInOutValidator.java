@@ -27,6 +27,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
@@ -510,12 +511,14 @@ public class JPiereContractInOutValidator extends AbstractContractValidator  imp
 			if(ioLine.getC_OrderLine_ID() > 0)
 			{
 				//You can not bundle different Order document.
-				if(ioLine.getC_OrderLine().getC_Order_ID() != ioLine.getParent().getC_Order_ID())
+				MOrderLine m_OLine = new MOrderLine(Env.getCtx(), ioLine.getC_OrderLine_ID(), null);
+				if(m_OLine.getC_Order_ID() != ioLine.getParent().getC_Order_ID())
 					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentOrder");
 
 			}else if(ioLine.getM_RMALine_ID() > 0){
 
-				if(ioLine.getM_RMALine().getM_RMA_ID() != ioLine.getParent().getM_RMA_ID())
+				MRMALine m_RMALine = new MRMALine(Env.getCtx(), ioLine.getM_RMALine_ID(), null);
+				if(m_RMALine.getM_RMA_ID() != ioLine.getParent().getM_RMA_ID())
 					return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentRMA");
 			}
 
