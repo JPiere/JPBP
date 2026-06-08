@@ -20,6 +20,7 @@ import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -161,9 +162,10 @@ public class JPiereGLJournalLineModelValidator implements ModelValidator {
 					IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 					if(taxCalculater != null)
 					{
+				        MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), null);//TODO get from Cache
 						taxAmt = taxCalculater.calculateTax(m_tax, amt, true
 								, MCurrency.getStdPrecision(po.getCtx(), jl.getParent().getC_Currency_ID())
-								, JPiereTaxProvider.getRoundingMode(jl.getC_BPartner_ID(), JP_SOPOType == "S"? true : false, m_tax.getC_TaxProvider()));
+								, JPiereTaxProvider.getRoundingMode(jl.getC_BPartner_ID(), JP_SOPOType == "S"? true : false, m_TaxProvider));
 					}else{
 						taxAmt = m_tax.calculateTax(amt, true, MCurrency.getStdPrecision(jl.getCtx(), jl.getParent().getC_Currency_ID()));
 					}
