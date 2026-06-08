@@ -23,7 +23,11 @@ import jpiere.base.plugin.org.adempiere.base.IJPiereTaxProviderFactory;
 
 import org.adempiere.base.Service;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
+import org.compiere.model.MTaxProviderCfg;
 import org.compiere.util.Env;
 
 /**
@@ -58,7 +62,9 @@ public class MInvValCalLog extends X_JP_InvValCalLog {
 	public BigDecimal calculateTax(String JP_ApplyAmtList)
 	{
 		MTax m_tax = MTax.get(getCtx(), getC_Tax_ID());
-		String className = m_tax.getC_TaxProvider().getC_TaxProviderCfg().getTaxProviderClass();
+        MTaxProvider m_TaxProvider = new MTaxProvider(getCtx(), m_tax.getC_TaxProvider_ID(), get_TrxName());//TODO get from Cache
+        MTaxProviderCfg m_TaxProviderCfg = new MTaxProviderCfg(getCtx(), m_TaxProvider.getC_TaxProviderCfg_ID(), get_TrxName());
+		String className = m_TaxProviderCfg.getTaxProviderClass();
 		IJPiereTaxProvider calculator = null;
 		BigDecimal taxAmt = Env.ZERO;
 		List<IJPiereTaxProviderFactory> factoryList = Service.locator().list(IJPiereTaxProviderFactory.class).getServices();
@@ -71,13 +77,16 @@ public class MInvValCalLog extends X_JP_InvValCalLog {
 				{
 					int C_BPatner_ID = 0;
 					if(getC_OrderLine() != null && JP_ApplyAmtList.equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))
-						C_BPatner_ID = getC_OrderLine().getC_Order().getC_BPartner_ID();
-					else if(getC_InvoiceLine() != null && JP_ApplyAmtList.equals(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor))
-						C_BPatner_ID = getC_InvoiceLine().getC_Invoice().getC_BPartner_ID();
-
+					{
+						MOrderLine m_oLine = new MOrderLine(getCtx(),getC_OrderLine_ID(),get_TrxName() );
+						C_BPatner_ID = m_oLine.getParent().getC_BPartner_ID();
+					}else if(getC_InvoiceLine() != null && JP_ApplyAmtList.equals(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor)) {
+						MInvoiceLine m_iLine = new MInvoiceLine(getCtx(),getC_InvoiceLine_ID(),get_TrxName() );
+						C_BPatner_ID = m_iLine.getParent().getC_BPartner_ID();
+					}
 					taxAmt = calculator.calculateTax(m_tax, getJP_ExchangedAmt()
 							, isTaxIncluded(), MCurrency.getStdPrecision(getCtx(), getC_Currency_ID())
-							, JPiereTaxProvider.getRoundingMode(C_BPatner_ID, false, m_tax.getC_TaxProvider()));
+							, JPiereTaxProvider.getRoundingMode(C_BPatner_ID, false, m_TaxProvider));
 					break;
 				}
 
