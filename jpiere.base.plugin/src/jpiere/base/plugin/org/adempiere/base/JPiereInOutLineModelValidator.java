@@ -23,7 +23,10 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOutConfirm;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MLocator;
+import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MRMA;
+import org.compiere.model.MRMALine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -88,7 +91,8 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 			MInOutLine iol = (MInOutLine)po;
 			if(iol.getC_OrderLine_ID() > 0 && (iol.is_ValueChanged("M_Product_ID") || iol.is_ValueChanged("C_OrderLine_ID")))
 			{
-				if(iol.getM_Product_ID() != iol.getC_OrderLine().getM_Product_ID())
+				MOrderLine m_oLine = new MOrderLine(Env.getCtx(), iol.getC_OrderLine_ID(), iol.get_TrxName());
+				if(iol.getM_Product_ID() != m_oLine.getM_Product_ID())
 				{
 					return Msg.getMsg(iol.getCtx(), "JP_ProductOfOrderAndInOutDiffer");//Product of Ship/Receipt Line is different from Product of Order Line
 				}
@@ -109,7 +113,8 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 					} else if(type == ModelValidator.TYPE_BEFORE_CHANGE && iol.is_ValueChanged("QtyEntered")
 							&& !iol.getParent().getDocAction().equals(DocAction.ACTION_Void)){
 
-						if(iol.getParent().getC_DocType().isSplitWhenDifference())
+						MDocType m_DocType = MDocType.get(iol.getParent().getC_DocType_ID());
+						if(m_DocType.isSplitWhenDifference())
 						{
 							;// Can not check. Because, In Case of Split , InOut Cnfirm update QtyEntered When Complete. JPBP #108 -  2017/9/30
 						}else{
@@ -148,20 +153,26 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 			MInOutLine iol = (MInOutLine)po;
 			if(iol.getC_OrderLine_ID() > 0)
 			{
-				if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+				MDocType m_ioDocType = MDocType.get(iol.getParent().getC_DocType_ID());
+				if(m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
 				{
-					if(!iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+					MOrderLine m_OLine = new MOrderLine(Env.getCtx(),iol.getC_OrderLine_ID(), iol.get_TrxName());
+					MOrder m_Order = new MOrder(Env.getCtx(),m_OLine.getC_Order_ID(), iol.get_TrxName());
+					MDocType m_OrderDocType = MDocType.get(m_Order.getC_DocType_ID());
+					if(!m_OrderDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
 					{
 						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(iol.getCtx(), "JP_MMR_MATCH_POO_ONLY");//MMR of Doc Base Type can match POO of Doc Base type only.
 					}
-				}else if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)){//MMS
-
-					if(!iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
+				}else if(m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)){//MMS
+					MOrderLine m_OLine = new MOrderLine(Env.getCtx(),iol.getC_OrderLine_ID(), iol.get_TrxName());
+					MOrder m_Order = new MOrder(Env.getCtx(),m_OLine.getC_Order_ID(), iol.get_TrxName());
+					MDocType m_OrderDocType = MDocType.get(m_Order.getC_DocType_ID());
+					if(!m_OrderDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
 					{
 
-						if(iol.getParent().isDropShip() && iol.getC_OrderLine().getC_Order().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder)
-								&& iol.getC_OrderLine().getLink_OrderLine_ID() > 0) //Progress on Dropship process.
+						if(iol.getParent().isDropShip() && m_OrderDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder)
+								&& m_OLine.getLink_OrderLine_ID() > 0) //Progress on Dropship process.
 						{
 							;//Nothing to do. besause This check is not covered Dropship process. - 2018/6/8
 
@@ -184,17 +195,24 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 			MInOutLine iol = (MInOutLine)po;
 			if(iol.getM_RMALine_ID() > 0)
 			{
-				if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+				MDocType m_ioDocType = MDocType.get(iol.getParent().getC_DocType_ID());
+				if(m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
 				{
-					if( !(iol.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder) //SOO
-							&& iol.getM_RMALine().getM_RMA().getC_DocType().getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
+					MRMALine m_RMALine = new MRMALine(Env.getCtx(), iol.getM_RMALine_ID(), iol.get_TrxName());
+					MRMA m_RMA = new MRMA(Env.getCtx(), m_RMALine.getM_RMA_ID(), iol.get_TrxName());
+					MDocType m_RMADocType = MDocType.get(m_RMA.getC_DocType_ID());
+					if( !(m_RMADocType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder) //SOO
+							&& m_RMADocType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
 					{
 						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType");//You can not Match Because of wrong Doc Type.
 					}
-				}else if(iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)){//MMS
-
-					if( !(iol.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder) //POO
-							&& iol.getM_RMALine().getM_RMA().getC_DocType().getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
+				}else if(m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)){//MMS
+					
+					MRMALine m_RMALine = new MRMALine(Env.getCtx(), iol.getM_RMALine_ID(), iol.get_TrxName());
+					MRMA m_RMA = new MRMA(Env.getCtx(), m_RMALine.getM_RMA_ID(), iol.get_TrxName());
+					MDocType m_RMADocType = MDocType.get(m_RMA.getC_DocType_ID());
+					if( !(m_RMADocType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder) //POO
+							&& m_RMADocType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
 					{
 						return Msg.getMsg(iol.getCtx(), "JP_Can_Not_Match_Because_DocType");//You can not Match Because of wrong Doc Type.
 					}
@@ -231,7 +249,8 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 
 			}else if(iol.getM_RMALine_ID() > 0) {
 
-				MInOutLine originalIOLine = new MInOutLine(iol.getCtx(), iol.getM_RMALine().getM_InOutLine_ID(),iol.get_TrxName());
+				MRMALine m_RMALine = new MRMALine(Env.getCtx(), iol.getM_RMALine_ID(), iol.get_TrxName());
+				MInOutLine originalIOLine = new MInOutLine(iol.getCtx(), m_RMALine.getM_InOutLine_ID(), iol.get_TrxName());
 				if(originalIOLine.get_Value("JP_ProductExplodeBOM_ID") != null)
 				{
 
@@ -261,8 +280,9 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 			if(pInfo == null && iol.getC_OrderLine_ID() > 0)
 			{
 				BigDecimal movementQty  = iol.getMovementQty();
-				BigDecimal qtyDelivered = iol.getC_OrderLine().getQtyDelivered();
-				BigDecimal qtyOrdered = iol.getC_OrderLine().getQtyOrdered();
+				MOrderLine m_OrderLine = new MOrderLine(Env.getCtx(),iol.getC_OrderLine_ID(), iol.get_TrxName());
+				BigDecimal qtyDelivered = m_OrderLine.getQtyDelivered();
+				BigDecimal qtyOrdered = m_OrderLine.getQtyOrdered();
 				BigDecimal qtyToDelivere = qtyOrdered.subtract(qtyDelivered);
 				if(qtyOrdered.signum() >= 0)
 				{
@@ -294,8 +314,9 @@ public class JPiereInOutLineModelValidator implements ModelValidator {
 			}else if(pInfo == null && iol.getM_RMALine_ID() > 0) {
 
 				BigDecimal movementQty  = iol.getMovementQty();
-				BigDecimal qtyDelivered = iol.getM_RMALine().getQtyDelivered();
-				BigDecimal qtyRMA = iol.getM_RMALine().getQty();
+				MRMALine m_RMALine = new MRMALine(Env.getCtx(), iol.getM_RMALine_ID(), iol.get_TrxName());
+				BigDecimal qtyDelivered = m_RMALine.getQtyDelivered();
+				BigDecimal qtyRMA = m_RMALine.getQty();
 				BigDecimal qtyToDeliver = qtyRMA.subtract(qtyDelivered);
 
 				if(qtyRMA.signum() >= 0)
