@@ -36,10 +36,13 @@ import org.compiere.model.MInvoiceTax;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
+import org.compiere.model.MRMALine;
 import org.compiere.model.MRefList;
+import org.compiere.model.MTax;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -627,13 +630,15 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 				if(invoiceLine.getParent().getC_Order_ID() > 0 && invoiceLine.getC_OrderLine_ID() > 0)
 				{
 					//You can not bundle different Order document.
-					if(invoiceLine.getC_OrderLine().getC_Order_ID() != invoiceLine.getParent().getC_Order_ID())
+					MOrderLine m_OLine = new MOrderLine(Env.getCtx(), invoiceLine.getC_OrderLine_ID(), null);
+					if(m_OLine.getC_Order_ID() != invoiceLine.getParent().getC_Order_ID())
 						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentOrder");
 
 				}else if(invoiceLine.getParent().getM_RMA_ID() > 0 && invoiceLine.getM_RMALine_ID() > 0){
 
 					//You can not bundle different RMA document.
-					if(invoiceLine.getM_RMALine().getM_RMA_ID() != invoiceLine.getParent().getM_RMA_ID())
+					MRMALine m_RMALine = new MRMALine(Env.getCtx(), invoiceLine.getM_RMALine_ID(), null);
+					if(m_RMALine.getM_RMA_ID() != invoiceLine.getParent().getM_RMA_ID())
 						return Msg.getMsg(Env.getCtx(), "JP_InCaseOfPeriodContractAndSpotContract") + Msg.getMsg(Env.getCtx(),"JP_CanNotBundleDifferentRMA");
 				}
 
@@ -1238,7 +1243,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 
 				}else {
 
-					if(iTax.getC_Tax().isSalesTax())
+					MTax m_Tax = MTax.get(iTax.getC_Tax_ID());
+					if(m_Tax.isSalesTax())
 					{
 						m_AccountTransfer = getJP_GL_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 						if(m_AccountTransfer == null)
@@ -1251,7 +1257,7 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 							continue;
 					}
 
-					if(iTax.getC_Tax().isSalesTax()){
+					if(m_Tax.isSalesTax()){
 						m_AccountReverse = getT_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 					}else {
 						m_AccountReverse = getT_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
@@ -1469,7 +1475,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 			if(m_Invoice.isSOTrx()){
 				m_Account = getJP_GL_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 			}else {
-				if(iTax.getC_Tax().isSalesTax()) {
+				MTax m_Tax = MTax.get(iTax.getC_Tax_ID());
+				if(m_Tax.isSalesTax()) {
 					m_Account = getJP_GL_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 				}else {
 					m_Account = getJP_GL_TaxCredit_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
@@ -1574,7 +1581,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 	{
 		if(m_InvoiceLine.getM_Product_ID() > 0)
 		{
-			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_InvoiceLine.getM_Product().getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			MProduct m_Product = MProduct.get(m_InvoiceLine.getM_Product_ID());
+			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountGrant_Acct() > 0)
 			{
 				return MAccount.get(m_Invoice.getCtx(),contractProductAcct.getP_TradeDiscountGrant_Acct());
@@ -1649,7 +1657,8 @@ public class JPiereContractInvoiceValidator extends AbstractContractValidator  i
 	{
 		if(m_InvoiceLine.getM_Product_ID() > 0)
 		{
-			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_InvoiceLine.getM_Product().getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			MProduct m_Product = MProduct.get(m_InvoiceLine.getM_Product_ID());
+			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)
 			{
 				return MAccount.get(m_Invoice.getCtx(),contractProductAcct.getP_TradeDiscountRec_Acct());
