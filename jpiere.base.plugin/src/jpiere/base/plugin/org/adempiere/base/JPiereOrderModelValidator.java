@@ -23,6 +23,7 @@ import org.compiere.model.MMovement;
 import org.compiere.model.MMovementLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MPriceList;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -75,9 +76,11 @@ public class JPiereOrderModelValidator implements ModelValidator {
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_PriceList_ID")))
 		{
 			MOrder order = (MOrder)po;
-			order.setIsSOTrx(order.getC_DocTypeTarget().isSOTrx());
-			order.setIsTaxIncluded(order.getM_PriceList().isTaxIncluded());
-			order.setC_Currency_ID(order.getM_PriceList().getC_Currency_ID());
+			MDocType m_DocType = MDocType.get(order.getC_DocTypeTarget_ID());
+			order.setIsSOTrx(m_DocType.isSOTrx());
+			MPriceList m_PriceList = MPriceList.get(order.getM_PriceList_ID());
+			order.setIsTaxIncluded(m_PriceList.isTaxIncluded());
+			order.setC_Currency_ID(m_PriceList.getC_Currency_ID());
 		}
 
 		return null;
