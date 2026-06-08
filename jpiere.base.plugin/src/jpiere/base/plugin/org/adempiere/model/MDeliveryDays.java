@@ -9,8 +9,10 @@ import java.util.Properties;
 
 import org.compiere.model.I_C_BPartner_Location;
 import org.compiere.model.I_C_Location;
+import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MInOut;
+import org.compiere.model.MLocation;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MSalesRegion;
 import org.compiere.model.MSysConfig;
@@ -83,10 +85,12 @@ public class MDeliveryDays extends X_JP_DeliveryDays {
 		//Get Location
 		I_C_BPartner_Location bpl = null;
 		if(io.getDropShip_Location_ID()==0)
-			bpl = io.getC_BPartner_Location();
-		else
-			bpl = io.getDropShip_Location();
-		I_C_Location location = bpl.getC_Location();
+		{
+			bpl = new MBPartnerLocation(Env.getCtx(), io.getC_BPartner_Location_ID(), io.get_TrxName());
+		}else {
+			bpl = new MBPartnerLocation(Env.getCtx(), io.getDropShip_Location_ID(), io.get_TrxName());
+		}
+		I_C_Location location = MLocation.get(bpl.getC_Location_ID());
 
 		if(bpl.getC_SalesRegion_ID() > 0)
 		{
