@@ -24,7 +24,9 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MRMALine;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -129,9 +131,10 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 			if(taxCalculater != null)
 			{
+                MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), il.get_TrxName());//TODO get from Cache
 				taxAmt = taxCalculater.calculateTax(m_tax, il.getLineNetAmt(), isTaxIncluded //JPIERE-0369
 						, MCurrency.getStdPrecision(po.getCtx(), il.getParent().getC_Currency_ID())
-						, JPiereTaxProvider.getRoundingMode(il.getParent().getC_BPartner_ID(), il.getParent().isSOTrx(), m_tax.getC_TaxProvider()));
+						, JPiereTaxProvider.getRoundingMode(il.getParent().getC_BPartner_ID(), il.getParent().isSOTrx(), m_TaxProvider));
 			}else{
 				taxAmt = m_tax.calculateTax(il.getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(il.getCtx(), il.getParent().getC_Currency_ID()));//JPIERE-0369
 			}
@@ -152,20 +155,22 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 					(po.is_ValueChanged("M_InOutLine_ID") || po.is_ValueChanged("C_OrderLine_ID") || po.is_ValueChanged("M_RMALine_ID")) ) )
 		{
 			MInvoiceLine il = (MInvoiceLine)po;
-
+			MDocType m_invDocType = MDocType.get(il.getParent().getC_DocTypeTarget_ID());
 			//Check Receipt/Shipment
 			if(il.getM_InOutLine_ID() > 0 && !il.getParent().isSOTrx())//PO
 			{
-				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
+				MInOutLine m_ioLine = new MInOutLine(Env.getCtx(), il.getM_InOutLine_ID(), il.get_TrxName());
+				MDocType m_ioDocType = MDocType.get(m_ioLine.getParent().getC_DocType_ID());
+				if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
 				{
-					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(il.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
 					}
-				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
+				}else if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
 
-					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(il.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMS of Doc Base type only.
@@ -174,16 +179,18 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 
 			}else if(il.getM_InOutLine_ID() > 0 && il.getParent().isSOTrx()){//SO
 
-				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
+				MInOutLine m_ioLine = new MInOutLine(Env.getCtx(), il.getM_InOutLine_ID(), il.get_TrxName());
+				MDocType m_ioDocType = MDocType.get(m_ioLine.getParent().getC_DocType_ID());
+				if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
 				{
-					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(il.getCtx(), "JP_ARI_MATCH_MMS_ONLY");//ARI of Doc Base Type can match MMS of Doc Base type only.
 					}
-				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
+				}else if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
 
-					if(!il.getM_InOutLine().getM_InOut().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(il.getCtx(), "JP_ARC_MATCH_MMR_ONLY");//ARI of Doc Base Type can match MMR of Doc Base type only.
@@ -194,14 +201,16 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			//Check PO/SO
 			if(il.getC_OrderLine_ID() > 0 && !il.getParent().isSOTrx())//PO
 			{
-				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
+				if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
 				{
-					if(!il.getC_OrderLine().getC_Order().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+					MOrderLine m_oLine = new MOrderLine(Env.getCtx(), il.getC_OrderLine_ID(), il.get_TrxName());
+					MDocType m_oDocType = MDocType.get(m_oLine.getParent().getC_DocTypeTarget_ID());
+					if(!m_oDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(il.getCtx(), "JP_API_MATCH_POO_ONLY");//API of Doc Base Type can match POO of Doc Base type only.
 					}
-				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
+				}else if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
 
 					//APC of Doc Base Type can not match Purchase Order. Please try to match with RMA.
 					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
@@ -210,14 +219,16 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 				}
 
 			}else if(il.getC_OrderLine_ID() > 0 && il.getParent().isSOTrx()){//SO
-				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
+				if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
 				{
-					if(!il.getC_OrderLine().getC_Order().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
+					MOrderLine m_oLine = new MOrderLine(Env.getCtx(), il.getC_OrderLine_ID(), il.get_TrxName());
+					MDocType m_oDocType = MDocType.get(m_oLine.getParent().getC_DocTypeTarget_ID());
+					if(!m_oDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder))//SOO
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(il.getCtx(), "JP_ARI_MATCH_SOO_ONLY");//ARI of Doc Base Type can match SOO of Doc Base type only.
 					}
-				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
+				}else if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
 
 					//ARC of Doc Base Type can not match Sales Order. Please try to match with RMA.
 					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
@@ -228,15 +239,17 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			//Check Return
 			if(il.getM_RMALine_ID() > 0 && !il.getParent().isSOTrx())//PO
 			{
-				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
+				if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
 				{
 					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 							Msg.getMsg(il.getCtx(), "JP_RMA_MATCH_APC_ONLY");//RMA can match APC of Doc Base type only.
 
-				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
+				}else if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//APC
 
-					if( !(il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder) //POO
-							&& il.getM_RMALine().getM_RMA().getC_DocType().getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
+	                MRMALine m_RMALine = new MRMALine(Env.getCtx(), il.getM_RMALine_ID(), il.get_TrxName());
+	                MDocType m_RMADocType = MDocType.get(m_RMALine.getParent().getC_DocType_ID());
+					if( !(m_RMADocType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder) //POO
+							&& m_RMADocType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
 
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
@@ -245,15 +258,17 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 				}
 			}else if(il.getM_RMALine_ID() > 0 && il.getParent().isSOTrx()){//SO
 
-				if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
+				if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARInvoice))//ARI
 				{
 					return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 							Msg.getMsg(il.getCtx(), "JP_RMA_MATCH_ARC_ONLY");//RMA can match ARC of Doc Base type only.
 
-				}else if(il.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
+				}else if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_ARCreditMemo)){//ARC
 
-					if( !(il.getM_RMALine().getM_RMA().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder) //SOO
-							&& il.getM_RMALine().getM_RMA().getC_DocType().getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
+	                MRMALine m_RMALine = new MRMALine(Env.getCtx(), il.getM_RMALine_ID(), il.get_TrxName());
+	                MDocType m_RMADocType = MDocType.get(m_RMALine.getParent().getC_DocType_ID());
+					if( !(m_RMADocType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder) //SOO
+							&& m_RMADocType.getDocSubTypeSO().equals(MDocType.DOCSUBTYPESO_ReturnMaterial)) )//RM
 					{
 						return Msg.getMsg(il.getCtx(), "JP_Can_Not_Match_Because_DocType");//ARC of Doc Base Type can match POO of Doc Base type only.
 					}
@@ -324,8 +339,9 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			if(pInfo == null && il.getC_OrderLine_ID() > 0)
 			{
 				BigDecimal invoiceQtyInvoiced  = il.getQtyInvoiced();
-				BigDecimal orderQtyInvoiced = il.getC_OrderLine().getQtyInvoiced();
-				BigDecimal qtyOrdered = il.getC_OrderLine().getQtyOrdered();
+				MOrderLine m_OrderLine = new MOrderLine(Env.getCtx(),il.getC_OrderLine_ID(), il.get_TrxName());
+				BigDecimal orderQtyInvoiced = m_OrderLine.getQtyInvoiced();
+				BigDecimal qtyOrdered = m_OrderLine.getQtyOrdered();
 				BigDecimal qtyToInvoice = qtyOrdered.subtract(orderQtyInvoiced);
 				if(qtyOrdered.signum() >= 0)
 				{
@@ -357,8 +373,9 @@ public class JPiereInvoiceLineModelValidator implements ModelValidator {
 			}else if(pInfo == null && il.getM_RMALine_ID() > 0) {
 
 				BigDecimal invoiceQtyInvoiced  = il.getQtyInvoiced();
-				BigDecimal rmaQtyInvoiced = il.getM_RMALine().getQtyInvoiced();
-				BigDecimal qtyRMA = il.getM_RMALine().getQty();
+				MRMALine m_RMALine = new MRMALine(Env.getCtx(), il.getM_RMALine_ID(), il.get_TrxName());
+				BigDecimal rmaQtyInvoiced = m_RMALine.getQtyInvoiced();
+				BigDecimal qtyRMA = m_RMALine.getQty();
 				BigDecimal qtyToInvoice = qtyRMA.subtract(rmaQtyInvoiced);
 
 				if(qtyRMA.signum() >= 0)
