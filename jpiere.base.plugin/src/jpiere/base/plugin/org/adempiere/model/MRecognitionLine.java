@@ -546,17 +546,16 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 			{
 				if (getCharge() != null)	// Charge
 				{
-					stdTax = new MTax (getCtx(),
-							((MTaxCategory) getCharge().getC_TaxCategory()).getDefaultTax().getC_Tax_ID(),
-							get_TrxName());
+					MTaxCategory m_TaxCategory = new MTaxCategory(getCtx(), getCharge().getC_TaxCategory_ID(), get_TrxName());
+					stdTax = new MTax (getCtx(), m_TaxCategory.getDefaultTax().getC_Tax_ID(), get_TrxName());
 				}
-
 			}
 			else	// Product
-				stdTax = new MTax (getCtx(),
-							((MTaxCategory) getProduct().getC_TaxCategory()).getDefaultTax().getC_Tax_ID(),
-							get_TrxName());
-
+			{	
+				MTaxCategory m_TaxCategory = new MTaxCategory(getCtx(), getProduct().getC_TaxCategory_ID(), get_TrxName());
+				stdTax = new MTax (getCtx(), m_TaxCategory.getDefaultTax().getC_Tax_ID(), get_TrxName());
+			}
+			
 			if (stdTax != null)
 			{
 
@@ -1100,9 +1099,10 @@ public class MRecognitionLine extends X_JP_RecognitionLine
 
 				if(taxCalculater != null)
 				{
+			        MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), get_TrxName());//TODO get from Cache
 					taxAmt = taxCalculater.calculateTax(m_tax, getLineNetAmt(), isTaxIncluded //JPIERE-0369
 							, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID())
-							, JPiereTaxProvider.getRoundingMode(getParent().getC_BPartner_ID(), getParent().isSOTrx(), m_tax.getC_TaxProvider()));
+							, JPiereTaxProvider.getRoundingMode(getParent().getC_BPartner_ID(), getParent().isSOTrx(), m_TaxProvider));
 				}else{
 					taxAmt = m_tax.calculateTax(getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID()));//JPIERE-0369
 				}
