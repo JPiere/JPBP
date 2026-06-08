@@ -34,6 +34,7 @@ import org.compiere.model.MCharge;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
@@ -1397,7 +1398,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			}
 
 		}else if(line.getM_Product_ID() > 0){
-			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+			MProduct m_Product = MProduct.get(line.getM_Product_ID());
+			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_Revenue_Acct() > 0)
 			{
 				return MAccount.get(getCtx(),contractProductAcct.getP_Revenue_Acct());
@@ -1428,8 +1430,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 			{
 				return docLine.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
 			}else{
-
-				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+				MProduct m_Product = MProduct.get(line.getM_Product_ID());
+				MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 				if(contractProductAcct != null && contractProductAcct.getP_Expense_Acct() > 0)
 				{
 					return MAccount.get(getCtx(),contractProductAcct.getP_Expense_Acct());
@@ -1446,8 +1448,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	private MAccount getInvoiceTDiscountGrantAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
-
-		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+		MProduct m_Product = MProduct.get(line.getM_Product_ID());
+		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountGrant_Acct() > 0)
 		{
 			return MAccount.get(getCtx(),contractProductAcct.getP_TradeDiscountGrant_Acct());
@@ -1459,8 +1461,8 @@ public class Doc_InvoiceJP extends Doc_Invoice {
 	private MAccount getInvoiceTDiscountRecAccount(DocLine docLine, MContractAcct contractAcct, MAcctSchema as)
 	{
 		MInvoiceLine line = (MInvoiceLine)docLine.getPO();
-
-		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+		MProduct m_Product = MProduct.get(line.getM_Product_ID());
+		MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 		if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)
 		{
 			return MAccount.get(getCtx(),contractProductAcct.getP_TradeDiscountRec_Acct());
