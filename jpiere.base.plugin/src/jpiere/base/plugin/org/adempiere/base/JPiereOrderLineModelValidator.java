@@ -30,6 +30,7 @@ import org.compiere.model.MOrgInfo;
 import org.compiere.model.MProduct;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTax;
+import org.compiere.model.MTaxProvider;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -156,9 +157,10 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 
 			if(taxCalculater != null)
 			{
+                MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), ol.get_TrxName());//TODO get from Cache
 				taxAmt = taxCalculater.calculateTax(m_tax, ol.getLineNetAmt(), isTaxIncluded	//JPIERE-0369
 						, MCurrency.getStdPrecision(po.getCtx(), ol.getParent().getC_Currency_ID())
-						, JPiereTaxProvider.getRoundingMode(ol.getParent().getC_BPartner_ID(), ol.getParent().isSOTrx(), m_tax.getC_TaxProvider()));
+						, JPiereTaxProvider.getRoundingMode(ol.getParent().getC_BPartner_ID(), ol.getParent().isSOTrx(), m_TaxProvider));
 			}else{
 				taxAmt = m_tax.calculateTax(ol.getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(ol.getCtx(), ol.getParent().getC_Currency_ID()));//JPIERE-0369
 			}
@@ -312,7 +314,7 @@ public class JPiereOrderLineModelValidator implements ModelValidator {
 			MOrderLine oLine = (MOrderLine)po;
 
 			//Check Stock Item.
-			if(oLine.getM_Product_ID() == 0 || !(oLine.getM_Product().getProductType().equals(MProduct.PRODUCTTYPE_Item) && oLine.getM_Product().isStocked()) )
+			if(oLine.getM_Product_ID() == 0 || !(MProduct.get(oLine.getM_Product_ID()).getProductType().equals(MProduct.PRODUCTTYPE_Item) && MProduct.get(oLine.getM_Product_ID()).isStocked()) )
 			{
 				oLine.set_ValueNoCheck("JP_Locator_ID", null);
 				oLine.set_ValueNoCheck("JP_LocatorFrom_ID", null);
