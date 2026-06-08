@@ -32,6 +32,7 @@ import org.compiere.model.I_M_MovementLineMA;
 import org.compiere.model.I_M_Production;
 import org.compiere.model.I_M_ProductionLine;
 import org.compiere.model.I_M_ProductionLineMA;
+import org.compiere.model.MAttributeSet;
 import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
@@ -717,7 +718,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 					{
 						if(line.isEndProduct())
 						{
-							I_M_AttributeSet attributeset = product.getM_AttributeSet();
+							I_M_AttributeSet attributeset = MAttributeSet.get(product.getM_AttributeSet_ID());
 							boolean isAutoGenerateLot = false;
 							if (attributeset != null)
 								isAutoGenerateLot = attributeset.isAutoGenerateLot();
@@ -1002,7 +1003,7 @@ public class MPPFact extends X_JP_PP_Fact implements DocAction,DocOptions
 							ppFactLine.setM_ProductionLine_ID(productionLine.get_ValueAsInt(I_M_ProductionLine.COLUMNNAME_M_ProductionLine_ID));
 							if(ppFactLine.isEndProduct())
 							{
-								I_M_AttributeSet attributeset = MProduct.get(ppFactLine.getM_Product_ID()).getM_AttributeSet();
+								I_M_AttributeSet attributeset = MAttributeSet.get(MProduct.get(ppFactLine.getM_Product_ID()).getM_AttributeSet_ID());
 								boolean isAutoGenerateLot = false;
 								if (attributeset != null)
 									isAutoGenerateLot = attributeset.isAutoGenerateLot();
