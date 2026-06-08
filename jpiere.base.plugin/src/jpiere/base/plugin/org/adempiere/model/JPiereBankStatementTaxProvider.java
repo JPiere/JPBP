@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import org.compiere.model.I_C_TaxProvider;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBankStatementLine;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MOrderTax;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MTax;
@@ -61,7 +62,8 @@ public class JPiereBankStatementTaxProvider {
 	}
 
 	public boolean updateBankStatementTax(MTaxProvider provider, MBankStatementLine line) {
-		MBankStatementTax tax = getMBankStatementTax (line, line.getC_Currency().getStdPrecision(), false, line.get_TrxName());
+		MCurrency m_Currency = MCurrency.get(line.getC_Currency_ID());
+		MBankStatementTax tax = getMBankStatementTax (line, m_Currency.getStdPrecision(), false, line.get_TrxName());
 		if (tax != null) {
 			if (!calculateTaxFromBankStatementLine(line,tax))
 				return false;
@@ -99,7 +101,8 @@ public class JPiereBankStatementTaxProvider {
 	}
 
 	private boolean updateBankStatementTax(MBankStatementLine  line, boolean oldTax){
-		MBankStatementTax tax = getMBankStatementTax (line, line.getC_Currency().getStdPrecision(), oldTax, line.get_TrxName());
+		MCurrency m_Currency = MCurrency.get(line.getC_Currency_ID());
+		MBankStatementTax tax = getMBankStatementTax (line, m_Currency.getStdPrecision(), oldTax, line.get_TrxName());
 
 		try{
 			if (!tax.is_new() && !tax.delete(false, tax.get_TrxName()))
@@ -154,9 +157,10 @@ public class JPiereBankStatementTaxProvider {
 		}
 		
 		m_bankStatementTax.setIsSOTrx(isSOTrx);
-
-		RoundingMode roundingMode = JPiereBankStatementTaxProvider.getRoundingMode(line.getC_BPartner_ID(), isSOTrx, tax.getC_TaxProvider());
-		taxAmt = calculateTax(tax, taxBaseAmt, true, line.getC_Currency().getStdPrecision(), roundingMode);
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), line.get_TrxName() );
+		RoundingMode roundingMode = JPiereBankStatementTaxProvider.getRoundingMode(line.getC_BPartner_ID(), isSOTrx, m_TaxProvider);
+		MCurrency m_Currency = MCurrency.get(line.getC_Currency_ID());
+		taxAmt = calculateTax(tax, taxBaseAmt, true, m_Currency.getStdPrecision(), roundingMode);
 		m_bankStatementTax.setTaxAmt(taxAmt);
 		m_bankStatementTax.setTaxBaseAmt (taxBaseAmt.subtract(taxAmt));
 
