@@ -63,18 +63,20 @@ public class JPiereMatchInvModelValidator implements ModelValidator {
 			if(mInv.getM_InOutLine_ID() > 0 && mInv.getC_InvoiceLine_ID() > 0)
 			{
 				MInOutLine iol = new MInOutLine(mInv.getCtx(),mInv.getM_InOutLine_ID(), mInv.get_TrxName());
+				MDocType m_ioDocType = MDocType.get(iol.getParent().getC_DocType_ID());
 				MInvoiceLine invl = new MInvoiceLine(mInv.getCtx(),mInv.getC_InvoiceLine_ID(), mInv.get_TrxName());
+				MDocType m_invDocType = MDocType.get(invl.getParent().getC_DocTypeTarget_ID());
 
-				if(invl.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//AP Invoice
+				if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//AP Invoice
 				{
-					if(!iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
 					{
 						return Msg.getMsg(mInv.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(mInv.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
 					}
-				}else if(invl.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//AP credit Memo
+				}else if(m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo)){//AP credit Memo
 
-					if(!iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 					{
 						return Msg.getMsg(mInv.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(mInv.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
