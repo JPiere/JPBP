@@ -21,6 +21,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPaymentTerm;
+import org.compiere.model.MPriceList;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -105,18 +106,21 @@ public class JPiereInvoiceModelValidator implements ModelValidator {
 				|| (type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("M_PriceList_ID")))
 		{
 			MInvoice invoice = (MInvoice)po;
-			invoice.setIsSOTrx(invoice.getC_DocTypeTarget().isSOTrx());
-			invoice.setIsTaxIncluded(invoice.getM_PriceList().isTaxIncluded());
-			invoice.setC_Currency_ID(invoice.getM_PriceList().getC_Currency_ID());
+			MDocType m_invDocType = MDocType.get(invoice.getC_DocTypeTarget_ID());
+			invoice.setIsSOTrx(m_invDocType.isSOTrx());
+			MPriceList m_PriceList = MPriceList.get(invoice.getM_PriceList_ID());
+			invoice.setIsTaxIncluded(m_PriceList.isTaxIncluded());
+			invoice.setC_Currency_ID(m_PriceList.getC_Currency_ID());
 		}
 
 		//JPIERE-0223
 		if(type == ModelValidator.TYPE_BEFORE_CHANGE && po.is_ValueChanged("C_DocTypeTarget_ID"))
 		{
 			MInvoice invoice = (MInvoice)po;
-			int C_DocTypeTarget_ID = invoice.get_ValueOldAsInt("C_DocTypeTarget_ID");
-			MDocType oldDocType = MDocType.get(po.getCtx(), C_DocTypeTarget_ID);
-			if(!invoice.getC_DocTypeTarget().getDocBaseType().equals(oldDocType.getDocBaseType()))
+			MDocType m_invDocType = MDocType.get(invoice.getC_DocTypeTarget_ID());
+			int oldDocTypeTarget_ID = invoice.get_ValueOldAsInt("C_DocTypeTarget_ID");
+			MDocType oldDocType = MDocType.get(oldDocTypeTarget_ID);
+			if(!m_invDocType.getDocBaseType().equals(oldDocType.getDocBaseType()))
 				return Msg.getMsg(po.getCtx(), "JP_Can_Not_Change_Diff_DocBaseType");//You can not change different Doc Base type.
 		}
 
