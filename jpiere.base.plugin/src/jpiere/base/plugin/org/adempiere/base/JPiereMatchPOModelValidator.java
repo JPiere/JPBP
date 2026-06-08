@@ -62,18 +62,20 @@ public class JPiereMatchPOModelValidator implements ModelValidator {
 			if(matchPO.getM_InOutLine_ID() > 0 && matchPO.getC_OrderLine_ID() > 0)
 			{
 				MInOutLine iol = new MInOutLine(matchPO.getCtx(),matchPO.getM_InOutLine_ID(), matchPO.get_TrxName());
+				MDocType m_ioDocType = MDocType.get(iol.getParent().getC_DocType_ID());
 				MOrderLine ol = new MOrderLine(matchPO.getCtx(),matchPO.getC_OrderLine_ID(), matchPO.get_TrxName());
-
-				if(ol.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+				MDocType m_orderDocType = MDocType.get(ol.getParent().getC_DocTypeTarget_ID());
+				
+				if(m_orderDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
 				{
-					if(!iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))//MMR
 					{
 						return Msg.getMsg(ol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(ol.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
 					}
-				}else if(ol.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)){//SOO
+				}else if(m_orderDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)){//SOO
 
-					if(!iol.getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
+					if(!m_ioDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))//MMS
 					{
 						return Msg.getMsg(ol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(ol.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
@@ -84,17 +86,20 @@ public class JPiereMatchPOModelValidator implements ModelValidator {
 			if(matchPO.getC_InvoiceLine_ID() > 0 && matchPO.getC_OrderLine_ID() > 0)
 			{
 				MInvoiceLine ivl = new MInvoiceLine(matchPO.getCtx(),matchPO.getC_InvoiceLine_ID(), matchPO.get_TrxName());
+				MDocType m_invDocType = MDocType.get(ivl.getParent().getC_DocTypeTarget_ID());
 				MOrderLine ol = new MOrderLine(matchPO.getCtx(),matchPO.getC_OrderLine_ID(), matchPO.get_TrxName());
-				if(ol.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
+				MDocType m_orderDocType = MDocType.get(ol.getParent().getC_DocTypeTarget_ID());
+				
+				if(m_orderDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_PurchaseOrder))//POO
 				{
-					if(!ivl.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
+					if(!m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APInvoice))//API
 					{
 						return Msg.getMsg(ol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(ol.getCtx(), "JP_API_MATCH_MMR_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
 					}
-				}else if(ol.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)){//SOO
+				}else if(m_orderDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_SalesOrder)){//SOO
 
-					if(!ivl.getParent().getC_DocTypeTarget().getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo))//APC
+					if(!m_invDocType.getDocBaseType().equals(MDocType.DOCBASETYPE_APCreditMemo))//APC
 					{
 						return Msg.getMsg(ol.getCtx(), "JP_Can_Not_Match_Because_DocType") +
 								Msg.getMsg(ol.getCtx(), "JP_APC_MATCH_MMS_ONLY");//API of Doc Base Type can match MMR of Doc Base type only.
