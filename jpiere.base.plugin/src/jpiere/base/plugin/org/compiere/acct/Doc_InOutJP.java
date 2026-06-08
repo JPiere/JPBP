@@ -1115,7 +1115,8 @@ public class Doc_InOutJP extends Doc_InOut {
 			}
 
 		}else if(line.getM_Product_ID() > 0){
-			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(line.getM_Product().getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
+			MProduct m_Product = MProduct.get(line.getM_Product_ID());
+			MContractProductAcct contractProductAcct = contractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), as.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_COGS_Acct() > 0)
 			{
 				return MAccount.get(getCtx(),contractProductAcct.getP_COGS_Acct());
