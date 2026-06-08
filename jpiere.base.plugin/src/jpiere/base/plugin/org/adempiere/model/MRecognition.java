@@ -1689,8 +1689,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 							invoice.processIt(DocAction.ACTION_Void);
 
 						}else{
-
-							if(MPeriod.isOpen(Env.getCtx(), invoice.getDateAcct(), invoice.getC_DocType().getDocBaseType(), invoice.getAD_Org_ID()))
+							MDocType m_DocType = MDocType.get(invoice.getC_DocType_ID());
+							if(MPeriod.isOpen(Env.getCtx(), invoice.getDateAcct(), m_DocType.getDocBaseType(), invoice.getAD_Org_ID()))
 							{
 								invoice.processIt(DocAction.ACTION_Reverse_Correct);
 							}else{
@@ -2005,7 +2005,8 @@ public class MRecognition extends X_JP_Recognition implements DocAction,DocOptio
 			invoice.setC_BPartner_Location_ID(getBill_Location_ID());
 			invoice.setAD_User_ID(getBill_User_ID());
 		}
-		invoice.setC_DocTypeTarget_ID(order.getC_DocType().getC_DocTypeInvoice_ID());
+		MDocType m_orderDocType = MDocType.get(order.getC_DocType_ID());
+		invoice.setC_DocTypeTarget_ID(m_orderDocType.getC_DocTypeInvoice_ID());
 		invoice.setAD_Org_ID(getAD_Org_ID());
 		invoice.setDocumentNo(null);
 		invoice.setTotalLines(Env.ZERO);
