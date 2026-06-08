@@ -37,6 +37,7 @@ import org.compiere.model.MInvoiceTax;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
@@ -189,8 +190,8 @@ public class ContractTaxInfoGLJournalDataPatch extends SvrProcess {
 								m_AccountReverse = getT_TaxDue_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 								
 							}else {//仕入請求伝票の仮受消費税の勘定科目の取得
-								
-								if(iTax.getC_Tax().isSalesTax())
+								MTax m_Tax = MTax.get(iTax.getC_Tax_ID());
+								if(m_Tax.isSalesTax())
 								{
 									m_AccountTransfer = getJP_GL_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
 									m_AccountReverse = getT_TaxExpense_Acct(m_Invoice, iTax, m_ContractAcct, m_AcctSchema);
@@ -747,7 +748,8 @@ public class ContractTaxInfoGLJournalDataPatch extends SvrProcess {
 	{
 		if(m_InvoiceLine.getM_Product_ID() > 0)
 		{
-			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_InvoiceLine.getM_Product().getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			MProduct m_Product = MProduct.get(m_InvoiceLine.getM_Product_ID());
+			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountGrant_Acct() > 0)
 			{
 				return MAccount.get(m_Invoice.getCtx(),contractProductAcct.getP_TradeDiscountGrant_Acct());
@@ -822,7 +824,8 @@ public class ContractTaxInfoGLJournalDataPatch extends SvrProcess {
 	{
 		if(m_InvoiceLine.getM_Product_ID() > 0)
 		{
-			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_InvoiceLine.getM_Product().getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
+			MProduct m_Product = MProduct.get(m_InvoiceLine.getM_Product_ID());
+			MContractProductAcct contractProductAcct = m_ContractAcct.getContractProductAcct(m_Product.getM_Product_Category_ID(), m_AcctSchema.getC_AcctSchema_ID(), false);
 			if(contractProductAcct != null && contractProductAcct.getP_TradeDiscountRec_Acct() > 0)
 			{
 				return MAccount.get(m_Invoice.getCtx(),contractProductAcct.getP_TradeDiscountRec_Acct());
