@@ -521,9 +521,10 @@ public class MContractLine extends X_JP_ContractLine {
 
 				if(taxCalculater != null)
 				{
+			        MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), get_TrxName());//TODO get from Cache
 					taxAmt = taxCalculater.calculateTax(m_tax, getLineNetAmt(), isTaxIncluded //JPIERE-0369
 							, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID())
-							, JPiereTaxProvider.getRoundingMode(getParent().getC_BPartner_ID(), getParent().isSOTrx(), m_tax.getC_TaxProvider()));
+							, JPiereTaxProvider.getRoundingMode(getParent().getC_BPartner_ID(), getParent().isSOTrx(), m_TaxProvider));
 				}else{
 					taxAmt = m_tax.calculateTax(getLineNetAmt(), isTaxIncluded, MCurrency.getStdPrecision(getCtx(), getParent().getC_Currency_ID()));//JPIERE-0369
 				}
