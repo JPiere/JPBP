@@ -708,7 +708,7 @@ public class Doc_GLJournalJP extends Doc
 			IJPiereTaxProvider taxCalculater = JPiereUtil.getJPiereTaxProvider(m_tax);
 			if(taxCalculater != null)
 			{
-				MTaxProvider m_TaxProvider= new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), null);
+				MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), m_tax.getC_TaxProvider_ID(), null);//TODO get from Cache
 				reCalculate_TaxAmt = taxCalculater.calculateTax(m_tax, IncludeTaxAmt, true
 						, MCurrency.getStdPrecision(Env.getCtx(), docLine.getC_Currency_ID())
 						, JPiereTaxProvider.getRoundingMode(docLine.getC_BPartner_ID(), JP_SOPOType == "S"? true : false, m_TaxProvider));

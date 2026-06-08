@@ -310,7 +310,8 @@ public interface IJPiereTaxProvider {
 		MTax tax = MTax.get(billTax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(billLine.getParent().getC_BPartner_ID(), billLine.getParent().isSOTrx(), tax.getC_TaxProvider());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(billLine.getParent().getC_BPartner_ID(), billLine.getParent().isSOTrx(), m_TaxProvider);
 
 		String sql = " SELECT COALESCE(SUM(CASE WHEN dt.DocBaseType='APC' THEN it.TaxBaseAmt*-1"
 											+ " WHEN dt.DocBaseType='ARC' THEN it.TaxBaseAmt*-1"
@@ -692,7 +693,8 @@ public interface IJPiereTaxProvider {
 		MTax tax = MTax.get(m_ContractContentTax.getCtx(), m_ContractContentTax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), m_TaxProvider);
 
 		//
 		String sql = "SELECT LineNetAmt FROM JP_ContractLine WHERE JP_ContractContent_ID=? AND C_Tax_ID=?";
@@ -833,8 +835,9 @@ public interface IJPiereTaxProvider {
 		MTax tax = MTax.get(m_GLJournalTax.getCtx(), m_GLJournalTax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getC_BPartner_ID(), JP_SOPOType.equals("S"), tax.getC_TaxProvider());
-		int Precision =MCurrency.getStdPrecision(Env.getCtx(), line.getC_Currency_ID());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getC_BPartner_ID(), JP_SOPOType.equals("S"), m_TaxProvider);
+		int Precision = MCurrency.getStdPrecision(Env.getCtx(), line.getC_Currency_ID());
 		//
 		String sql = null;
 		

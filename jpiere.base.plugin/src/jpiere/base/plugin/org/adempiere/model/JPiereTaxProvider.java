@@ -330,7 +330,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		MTax tax = MTax.get(m_oderTax.getCtx(), m_oderTax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), m_TaxProvider);
 
 		//
 		String sql = "SELECT LineNetAmt FROM C_OrderLine WHERE C_Order_ID=? AND C_Tax_ID=?";
@@ -640,7 +641,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		MTax tax = MTax.get(m_invoiceTax.getCtx(), m_invoiceTax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), m_TaxProvider);
 
 		//
 		String sql = "SELECT il.LineNetAmt, COALESCE(il.JP_TaxAmt,0), i.IsSOTrx "//JPIERE-0369
@@ -963,7 +965,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		MTax tax = MTax.get(m_rmatax.getCtx(), m_rmatax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), m_TaxProvider);
 
 		String sql = "SELECT LineNetAmt FROM M_RMALine WHERE M_RMA_ID=? AND C_Tax_ID=?";
 		PreparedStatement pstmt = null;
@@ -1262,7 +1265,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		MTax tax = MTax.get(m_oderTax.getCtx(), m_oderTax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), m_TaxProvider);
 
 		//
 		String sql = "SELECT LineNetAmt FROM JP_EstimationLine WHERE JP_Estimation_ID=? AND C_Tax_ID=?";
@@ -1576,7 +1580,8 @@ public class JPiereTaxProvider implements ITaxProvider,IJPiereTaxProvider {
 		MTax tax = MTax.get(m_oderTax.getCtx(), m_oderTax.getC_Tax_ID());
 		boolean documentLevel = tax.isDocumentLevel();
 
-		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), tax.getC_TaxProvider());
+		MTaxProvider m_TaxProvider = new MTaxProvider(Env.getCtx(), tax.getC_TaxProvider_ID(), null);//TODO get from Cache
+		RoundingMode roundingMode = JPiereTaxProvider.getRoundingMode(line.getParent().getC_BPartner_ID(), line.getParent().isSOTrx(), m_TaxProvider);
 
 		//
 		String sql = "SELECT LineNetAmt FROM JP_RecognitionLine WHERE JP_Recognition_ID=? AND C_Tax_ID=?";
