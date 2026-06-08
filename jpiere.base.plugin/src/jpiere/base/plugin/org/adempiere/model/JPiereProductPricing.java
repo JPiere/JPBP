@@ -47,6 +47,8 @@ import org.compiere.model.I_C_ProjectLine;
 import org.compiere.model.I_M_RMALine;
 import org.compiere.model.I_M_RequisitionLine;
 import org.compiere.model.MDiscountSchema;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MOrder;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPricing;
@@ -1025,9 +1027,10 @@ public class JPiereProductPricing extends MProductPricing
 		if (qty != null && Env.ZERO.compareTo(qty) != 0)
 			m_Qty = qty;
 
-		I_C_Order order = orderLine.getC_Order();
-		if(order != null)
+		int C_Order_ID = orderLine.getC_Order_ID();
+		if(C_Order_ID > 0)
 		{
+			I_C_Order order = new MOrder(Env.getCtx(),C_Order_ID,trxName);
 			m_isSOTrx = order.isSOTrx();
 		}else {
 
@@ -1050,10 +1053,10 @@ public class JPiereProductPricing extends MProductPricing
 		if (qty != null && Env.ZERO.compareTo(qty) != 0)
 			m_Qty = qty;
 
-
-		I_C_Invoice invoice = invoiceLine.getC_Invoice();
-		if(invoice != null)
+		int C_Invoice_ID =  invoiceLine.getC_Invoice_ID();
+		if(C_Invoice_ID > 0)
 		{
+			I_C_Invoice invoice = new MInvoice(Env.getCtx(), C_Invoice_ID, trxName);
 			m_C_BPartner_ID = invoice.getC_BPartner_ID();
 			m_isSOTrx = invoice.isSOTrx();
 			m_PriceDate = invoice.getDateInvoiced();
