@@ -8,6 +8,7 @@ import java.util.logging.Level;
 
 import org.adempiere.util.Callback;
 import org.adempiere.util.IProcessUI;
+import org.compiere.model.MUOM;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
@@ -430,7 +431,7 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 					contractLine.setJP_DerivativeDocPolicy_InOut(contractLineT.getJP_DerivativeDocPolicy_InOut());
 					if(contractLine.getM_Product_ID() > 0)
 					{
-						contractLine.setMovementQty(contractLineT.getMovementQty().multiply(coefficient).divide(Env.ONE, contractLine.getM_Product().getC_UOM().getStdPrecision(), RoundingMode.HALF_UP ));
+						contractLine.setMovementQty(contractLineT.getMovementQty().multiply(coefficient).divide(Env.ONE, MUOM.get(contractLine.getM_Product().getC_UOM_ID()).getStdPrecision(), RoundingMode.HALF_UP ));
 					}else {
 						contractLine.setMovementQty(contractLineT.getMovementQty().multiply(coefficient).divide(Env.ONE, eLines[i].getC_UOM().getStdPrecision(), RoundingMode.HALF_UP));
 					}
@@ -443,7 +444,7 @@ public class CreateContractfromEstimationAndTemplate extends AbstractCreateContr
 					contractLine.setJP_DerivativeDocPolicy_Inv(contractLineT.getJP_DerivativeDocPolicy_Inv());
 					if(contractLine.getM_Product_ID() > 0)
 					{
-						contractLine.setQtyInvoiced(contractLineT.getQtyInvoiced().multiply(coefficient).divide(Env.ONE, contractLine.getM_Product().getC_UOM().getStdPrecision(), RoundingMode.HALF_UP ));
+						contractLine.setQtyInvoiced(contractLineT.getQtyInvoiced().multiply(coefficient).divide(Env.ONE, MUOM.get(contractLine.getM_Product().getC_UOM_ID()).getStdPrecision(), RoundingMode.HALF_UP ));
 					}else {
 						contractLine.setQtyInvoiced(contractLineT.getQtyInvoiced().multiply(coefficient).divide(Env.ONE, eLines[i].getC_UOM().getStdPrecision(), RoundingMode.HALF_UP));
 					}
