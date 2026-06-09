@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
@@ -171,7 +172,7 @@ public class CreateInvoiceFromRecogManual extends SvrProcess {
 				{
 					int C_Order_ID = recogs[i].getC_Order_ID();
 					MOrder order = new MOrder(getCtx(), C_Order_ID, get_TrxName());
-					invoice = new MInvoice (order, order.getC_DocTypeTarget().getC_DocTypeInvoice_ID(), p_DateInvoiced);
+					invoice = new MInvoice (order, MDocType.get(order.getC_DocTypeTarget_ID()).getC_DocTypeInvoice_ID(), p_DateInvoiced);
 					invoice.setDateAcct(p_DateAcct);
 					invoice.setDocumentNo(null);
 					invoice.setTotalLines(Env.ZERO);
