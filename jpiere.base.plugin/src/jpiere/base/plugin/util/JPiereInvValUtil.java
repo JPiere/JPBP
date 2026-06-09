@@ -17,6 +17,7 @@ import org.compiere.model.I_M_PriceList_Version;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrder;
@@ -379,12 +380,13 @@ public class JPiereInvValUtil {
 
 	static public void copyInfoFromOrderLineToLog(MInvValCalLog log, I_C_OrderLine orderLine)
 	{
+		MOrder order = new MOrder(Env.getCtx(), orderLine.getC_Order_ID(), null);
 		log.setC_OrderLine_ID(orderLine.getC_OrderLine_ID());
 		log.setDateOrdered(orderLine.getDateOrdered());
-		log.setIsTaxIncluded(orderLine.getC_Order().isTaxIncluded());
-		log.setM_PriceList_ID(orderLine.getC_Order().getM_PriceList_ID());
-		log.setC_Currency_ID(orderLine.getC_Order().getC_Currency_ID());
-		log.setC_ConversionType_ID(orderLine.getC_Order().getC_ConversionType_ID());
+		log.setIsTaxIncluded(order.isTaxIncluded());
+		log.setM_PriceList_ID(order.getM_PriceList_ID());
+		log.setC_Currency_ID(order.getC_Currency_ID());
+		log.setC_ConversionType_ID(order.getC_ConversionType_ID());
 		log.setQtyEntered(orderLine.getQtyEntered());
 		log.setC_UOM_ID(orderLine.getC_UOM_ID());
 		log.setQtyOrdered(orderLine.getQtyOrdered());
@@ -399,14 +401,15 @@ public class JPiereInvValUtil {
 
 	static public void copyInfoFromInvoiceLineToLog(MInvValCalLog log, I_C_InvoiceLine invoiceLine)
 	{
-		String docBaseType = invoiceLine.getC_Invoice().getC_DocType().getDocBaseType();
+		MInvoice invoice = new MInvoice(Env.getCtx(), invoiceLine.getC_Invoice_ID(), null);
+		String docBaseType = MDocType.get(invoice.getC_DocType_ID()).getDocBaseType();
 
 		log.setC_InvoiceLine_ID(invoiceLine.getC_InvoiceLine_ID());
-		log.setDateInvoiced(invoiceLine.getC_Invoice().getDateInvoiced());
-		log.setIsTaxIncluded(invoiceLine.getC_Invoice().isTaxIncluded());
-		log.setM_PriceList_ID(invoiceLine.getC_Invoice().getM_PriceList_ID());
-		log.setC_Currency_ID(invoiceLine.getC_Invoice().getC_Currency_ID());
-		log.setC_ConversionType_ID(invoiceLine.getC_Invoice().getC_ConversionType_ID());
+		log.setDateInvoiced(invoice.getDateInvoiced());
+		log.setIsTaxIncluded(invoice.isTaxIncluded());
+		log.setM_PriceList_ID(invoice.getM_PriceList_ID());
+		log.setC_Currency_ID(invoice.getC_Currency_ID());
+		log.setC_ConversionType_ID(invoice.getC_ConversionType_ID());
 		log.setC_UOM_ID(invoiceLine.getC_UOM_ID());
 		log.setC_Tax_ID(invoiceLine.getC_Tax_ID());
 		if(docBaseType.equals(MDocType.DOCBASETYPE_APInvoice))
