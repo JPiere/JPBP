@@ -23,17 +23,17 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
-import org.compiere.model.I_C_InvoiceLine;
-import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MConversionRateUtil;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MProductPrice;
@@ -200,8 +200,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		{
 			/***Check***/
 			//ignore nagative inventory.
-			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
-					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+			if((MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			matchPos = null;
@@ -223,7 +223,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			/***Calculate***/
 			if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))//TODO
 			{
-				I_C_OrderLine orderLine =null;
+				MOrderLine orderLine =null;
 				MOrder order = null;
 				for(int j = 0; j < matchPos.length; j++)
 				{
@@ -231,7 +231,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					if(matchPos[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 						continue;
 
-					orderLine = matchPos[j].getC_OrderLine();
+					orderLine = new MOrderLine(getCtx(), matchPos[j].getC_OrderLine_ID(), get_TrxName());
 
 					if(orderLine.getQtyOrdered().compareTo(Env.ZERO)==0)
 						continue;
@@ -245,8 +245,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 					log.setLine(lineNo * 10);
 					log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-					log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-					log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+					log.setMovementDate(ioLines[i].getParent().getMovementDate());
+					log.setMovementType(ioLines[i].getParent().getMovementType());
 
 					//Set MacthPO Info to Log
 					log.setM_MatchPO_ID(matchPos[j].get_ID());
@@ -260,7 +260,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
 						BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
-								orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+								orderLine.getParent().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
 						if(rate == null)
 						{
 							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
@@ -319,7 +319,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 			}else if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor)){//TODO
 
-				I_C_InvoiceLine invoiceLine =null;
+				MInvoiceLine invoiceLine =null;
 				MInvoice invoice = null;
 				for(int j = 0; j < matchInvs.length; j++)
 				{
@@ -327,7 +327,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					if(matchInvs[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 						continue;
 
-					invoiceLine = matchInvs[j].getC_InvoiceLine();
+					invoiceLine = new MInvoiceLine(getCtx(), matchInvs[j].getC_InvoiceLine_ID(), get_TrxName());
 
 					if(invoiceLine.getQtyInvoiced().compareTo(Env.ZERO)==0)
 						continue;
@@ -341,27 +341,26 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 					log.setLine(lineNo * 10);
 					log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-					log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-					log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+					log.setMovementDate(ioLines[i].getParent().getMovementDate());
+					log.setMovementType(ioLines[i].getParent().getMovementType());
 
 					//Set MacthInv Info to Log
 					log.setM_MatchInv_ID(matchInvs[j].get_ID());
 					log.setQty(matchInvs[j].getQty());
 
 					//Set AP Invoice Info to log
-					invoiceLine = matchInvs[j].getC_InvoiceLine();
 					JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invoiceLine);
 
 					//Set Information to fields that Reference of Fields Group in Window
 					log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
-					if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
+					if(invoiceLine.getParent().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
-						BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
-								invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+						BigDecimal rate =MConversionRate.getRate(invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getParent().getDateOrdered(),
+								invoiceLine.getParent().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
 						if(rate == null)
 						{
 							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
-									invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+									invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
 						}
 						log.setMultiplyRate(rate);
 					}else{
@@ -419,8 +418,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 				log.setLine(lineNo * 10);
 				log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-				log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-				log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+				log.setMovementDate(ioLines[i].getParent().getMovementDate());
+				log.setMovementType(ioLines[i].getParent().getMovementType());
 
 				log.setDescription("Can not Calculate");
 				log.saveEx(get_TrxName());
@@ -526,14 +525,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		{
 			/**Check**/
 			//ignore nagative inventory.
-			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
-					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+			if((MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_PurchaseOrder))//TODO
 			{
 				MMatchPO[] matchPos = JPiereInvValUtil.getMatchPOs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchPO_ID DESC", get_TrxName());
-				I_C_OrderLine orderLine =null;
+				MOrderLine orderLine = null;
 				MOrder order = null;
 				for(int j = 0; j < matchPos.length; j++)
 				{
@@ -541,7 +540,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					if(matchPos[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 						continue;
 
-					orderLine = matchPos[j].getC_OrderLine();
+					orderLine = new MOrderLine(getCtx(), matchPos[j].getC_OrderLine_ID(), get_TrxName());
 
 					if(orderLine.getQtyOrdered().compareTo(Env.ZERO)==0)
 						continue;
@@ -555,8 +554,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 					log.setLine(lineNo * 10);
 					log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-					log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-					log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+					log.setMovementDate(ioLines[i].getParent().getMovementDate());
+					log.setMovementType(ioLines[i].getParent().getMovementType());
 
 
 					//Set MacthPO Info to Log
@@ -571,7 +570,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
 						BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
-								orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+								orderLine.getParent().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
 						if(rate == null)
 						{
 							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
@@ -631,7 +630,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			}else if(m_InvValProfile.getJP_ApplyAmtList().equals(MInvValProfile.JP_APPLYAMTLIST_InvoiceVendor)){//TODO
 
 				MMatchInv[] matchInvs = JPiereInvValUtil.getMatchInvs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchInv_ID DESC", get_TrxName());
-				I_C_InvoiceLine invoiceLine =null;
+				MInvoiceLine invoiceLine = null;
 				MInvoice invoice = null;
 				for(int j = 0; j < matchInvs.length; j++)
 				{
@@ -639,7 +638,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					if(matchInvs[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 						continue;
 
-					invoiceLine = matchInvs[j].getC_InvoiceLine();
+					invoiceLine = new MInvoiceLine(getCtx(), matchInvs[j].getC_InvoiceLine_ID(), get_TrxName());
 
 					if(invoiceLine.getQtyInvoiced().compareTo(Env.ZERO)==0)
 						continue;
@@ -653,27 +652,26 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 					log.setLine(lineNo * 10);
 					log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-					log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-					log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+					log.setMovementDate(ioLines[i].getParent().getMovementDate());
+					log.setMovementType(ioLines[i].getParent().getMovementType());
 
 					//Set MacthInv Info to Log
 					log.setM_MatchInv_ID(matchInvs[j].get_ID());
 					log.setQty(matchInvs[j].getQty());
 
 					//Set AP Invoice Info to Log
-					invoiceLine = matchInvs[j].getC_InvoiceLine();
 					JPiereInvValUtil.copyInfoFromInvoiceLineToLog(log, invoiceLine);
 
 					//Set Information to fields that Reference of Fields Group in Window
 					log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
-					if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
+					if(invoiceLine.getParent().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 					{
-						BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
-								invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+						BigDecimal rate =MConversionRate.getRate(invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getParent().getDateOrdered(),
+								invoiceLine.getParent().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
 						if(rate == null)
 						{
 							throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
-									invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+									invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
 						}
 						log.setMultiplyRate(rate);
 					}else{
@@ -731,8 +729,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 				log.setLine(lineNo * 10);
 				log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-				log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-				log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+				log.setMovementDate(ioLines[i].getParent().getMovementDate());
+				log.setMovementType(ioLines[i].getParent().getMovementType());
 				log.setDescription("Can not Calculate");
 				log.saveEx(get_TrxName());
 				return ;
@@ -838,8 +836,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		{
 			/**Check**/
 			//ignore nagative inventory.
-			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
-					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+			if((MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			MMatchPO[] matchPos = JPiereInvValUtil.getMatchPOs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchPO_ID DESC", get_TrxName());
@@ -848,7 +846,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 			else
 				continue;
 
-			I_C_OrderLine orderLine =null;
+			MOrderLine orderLine =null;
 			MOrder order = null;
 			boolean isBreak = false;
 			for(int j = 0; j < matchPos.length; j++)
@@ -857,7 +855,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				if(matchPos[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 					continue;
 
-				orderLine = matchPos[j].getC_OrderLine();
+				orderLine = new MOrderLine(getCtx(), matchPos[j].getC_OrderLine_ID(), get_TrxName());
 
 				if(orderLine.getQtyOrdered().compareTo(Env.ZERO)==0)
 					continue;
@@ -874,15 +872,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 				log.setLine(lineNo);
 				log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-				log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-				log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+				log.setMovementDate(ioLines[i].getParent().getMovementDate());
+				log.setMovementType(ioLines[i].getParent().getMovementType());
 
 				//Set MacthPO Info to Log
 				log.setM_MatchPO_ID(matchPos[0].get_ID());
 				log.setQty(matchPos[0].getQty());
 
 				//Set Purchase Order Info to Log
-				orderLine = matchPos[0].getC_OrderLine();
 				JPiereInvValUtil.copyInfoFromOrderLineToLog(log, orderLine);
 
 				//Set Information to fields that Reference of Fields Group in Window
@@ -890,7 +887,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 				{
 					BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
-							orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+							orderLine.getParent().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
 					if(rate == null)
 					{
 						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
@@ -969,8 +966,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		{
 			/**Check**/
 			//ignore nagative inventory.
-			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
-					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+			if((MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			MMatchInv[] matchInvs = JPiereInvValUtil.getMatchInvs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchInv_ID DESC", get_TrxName());
@@ -978,7 +975,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				continue;
 
 
-			I_C_InvoiceLine invoiceLine =null;
+			MInvoiceLine invoiceLine =null;
 			MInvoice invoice = null;
 			boolean isBreak = false;
 			for(int j = 0; j < matchInvs.length; j++)
@@ -987,7 +984,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				if(matchInvs[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 					continue;
 
-				invoiceLine = matchInvs[j].getC_InvoiceLine();
+				invoiceLine = new MInvoiceLine(getCtx(), matchInvs[j].getC_InvoiceLine_ID(), get_TrxName());
 
 				if(invoiceLine.getQtyInvoiced().compareTo(Env.ZERO)==0)
 					continue;
@@ -1004,8 +1001,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 				log.setLine(lineNo);
 				log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-				log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-				log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+				log.setMovementDate(ioLines[i].getParent().getMovementDate());
+				log.setMovementType(ioLines[i].getParent().getMovementType());
 
 				//Set MacthINv Info to Log
 				log.setM_MatchInv_ID(matchInvs[j].get_ID());
@@ -1016,14 +1013,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 				//Set Information to fields that Reference of Fields Group in Window
 				log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
-				if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
+				if(invoiceLine.getParent().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 				{
-					BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID()
-							,invoiceLine.getC_Invoice().getDateInvoiced(), invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+					BigDecimal rate =MConversionRate.getRate(invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID()
+							,invoiceLine.getParent().getDateInvoiced(), invoiceLine.getParent().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
 					if(rate == null)
 					{
 						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
-								invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+								invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
 					}
 					log.setMultiplyRate(rate);
 				}else{
@@ -1095,9 +1092,9 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 		for(int i = 0; i < ioLines.length; i++)
 		{
 			/**Check**/
-			//ignore nagative inventory.
-			if((ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
-					|| ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+			//ignore negative inventory.
+			if((MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt) && ioLines[i].getMovementQty().compareTo(Env.ZERO) <= 0)
+					|| MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 				continue;
 
 			matchPos = JPiereInvValUtil.getMatchPOs(getCtx(), ioLines[i].getM_InOutLine_ID()," DateAcct DESC, M_MatchPO_ID DESC", get_TrxName());
@@ -1106,7 +1103,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 
 			/**Calculate**/
-			I_C_OrderLine orderLine =null;
+			MOrderLine orderLine =null;
 			MOrder order = null;
 			for(int j = 0; j < matchPos.length; j++)
 			{
@@ -1114,7 +1111,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				if(matchPos[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 					continue;
 
-				orderLine = matchPos[j].getC_OrderLine();
+				orderLine = new MOrderLine(getCtx(), matchPos[j].getC_OrderLine_ID(), get_TrxName());
 
 				if(orderLine.getQtyOrdered().compareTo(Env.ZERO)==0)
 					continue;
@@ -1128,8 +1125,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 				log.setLine(lineNo * 10);
 				log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-				log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-				log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+				log.setMovementDate(ioLines[i].getParent().getMovementDate());
+				log.setMovementType(ioLines[i].getParent().getMovementType());
 
 
 				//Set MacthPO Info to Log
@@ -1137,7 +1134,6 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setQty(matchPos[j].getQty());
 
 				//Set Purachse Order Info to Log
-				orderLine = matchPos[j].getC_OrderLine();
 				JPiereInvValUtil.copyInfoFromOrderLineToLog(log, orderLine);
 
 				//Set Information to fields that Reference of Fields Group in Window
@@ -1145,7 +1141,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				if(orderLine.getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 				{
 					BigDecimal rate =MConversionRate.getRate(orderLine.getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), orderLine.getDateOrdered(),
-							orderLine.getC_Order().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
+							orderLine.getParent().getC_ConversionType_ID(), orderLine.getAD_Client_ID(), orderLine.getAD_Org_ID());
 					if(rate == null)
 					{
 						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
@@ -1327,8 +1323,8 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 					continue;
 
 
-			/**Calcualte**/
-			I_C_InvoiceLine invoiceLine =null;
+			/**Calculate**/
+			MInvoiceLine invoiceLine =null;
 			MInvoice invoice = null;
 			for(int j = 0; j < matchInvs.length; j++)
 			{
@@ -1336,7 +1332,7 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				if(matchInvs[j].getDateAcct().compareTo(m_InvValCal.getDateValue()) > 0)
 					continue;
 
-				invoiceLine = matchInvs[j].getC_InvoiceLine();
+				invoiceLine = new MInvoiceLine(getCtx(), matchInvs[j].getC_InvoiceLine_ID(), get_TrxName());
 
 				if(invoiceLine.getQtyInvoiced().compareTo(Env.ZERO)==0)
 					continue;
@@ -1350,14 +1346,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 				log.setAD_Org_ID(ioLines[i].getAD_Org_ID());
 				log.setLine(lineNo * 10);
 				log.setM_InOutLine_ID(ioLines[i].getM_InOutLine_ID());
-				log.setMovementDate(ioLines[i].getM_InOut().getMovementDate());
-				log.setMovementType(ioLines[i].getM_InOut().getMovementType());
+				log.setMovementDate(ioLines[i].getParent().getMovementDate());
+				log.setMovementType(ioLines[i].getParent().getMovementType());
 
 				//Set MacthInv Info to Log
 				log.setM_MatchInv_ID(matchInvs[j].get_ID());
-				if(ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
+				if(MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt))
 					log.setQty(matchInvs[j].getQty());
-				else if(ioLines[i].getParent().getC_DocType().getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
+				else if(MDocType.get(ioLines[i].getParent().getC_DocType_ID()).getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery))
 					log.setQty(matchInvs[j].getQty().negate());
 
 				//Set AP Invoice Info to Log
@@ -1365,14 +1361,14 @@ public class DefaultInventoryValuationCalculate extends SvrProcess {
 
 				//Set Information to fields that Reference of Fields Group in Window
 				log.setJP_CurrencyTo_ID(m_InvValCal.getC_Currency_ID());
-				if(invoiceLine.getC_Invoice().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
+				if(invoiceLine.getParent().getC_Currency_ID() != m_InvValCal.getC_Currency_ID())
 				{
-					BigDecimal rate =MConversionRate.getRate(invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getC_Invoice().getDateOrdered(),
-							invoiceLine.getC_Invoice().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
+					BigDecimal rate =MConversionRate.getRate(invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), invoiceLine.getParent().getDateOrdered(),
+							invoiceLine.getParent().getC_ConversionType_ID(), invoiceLine.getAD_Client_ID(), invoiceLine.getAD_Org_ID());
 					if(rate == null)
 					{
 						throw new AdempiereException(Msg.getMsg(getCtx(), MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToBaseCurrency",
-								invoiceLine.getC_Invoice().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
+								invoiceLine.getParent().getC_Currency_ID(), m_InvValCal.getC_Currency_ID(), m_InvValProfile.getC_ConversionType_ID(), m_InvValCal.getDateValue(), get_TrxName())));
 					}
 					log.setMultiplyRate(rate);
 				}else{
