@@ -329,7 +329,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 				}else {
 					
 					throw new Exception(Msg.getElement(getCtx(), MDocType.COLUMNNAME_DocBaseType) 
-											+ " : " + MRefList.getListName(getCtx(), 183, invoice.getC_DocType().getDocBaseType()) 
+											+ " : " + MRefList.getListName(getCtx(), 183, MDocType.get(invoice.getC_DocType_ID()).getDocBaseType()) 
 											+ " " + invoice.getDocumentNo());
 				}
 				
@@ -347,7 +347,7 @@ public class DefaultBankDataCreateDoc extends SvrProcess {
 					payment.setPayAmt(PayAmt);
 				}else {
 					throw new Exception(Msg.getElement(getCtx(), MDocType.COLUMNNAME_DocBaseType) 
-							+ " : " + MRefList.getListName(getCtx(), 183, invoice.getC_DocType().getDocBaseType()) 
+							+ " : " + MRefList.getListName(getCtx(), 183, MDocType.get(invoice.getC_DocType_ID()).getDocBaseType()) 
 							+ " " + invoice.getDocumentNo());
 				}
 				payment.setOverUnderAmt(invoice.getOpenAmt().subtract(payment.getPayAmt()));
