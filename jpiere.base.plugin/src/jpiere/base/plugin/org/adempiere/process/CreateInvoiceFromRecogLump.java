@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.IProcessUI;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
@@ -315,7 +316,7 @@ public class CreateInvoiceFromRecogLump extends SvrProcess {
 					 {
 						 if(!isCreateHeader)
 						 {
-							invoice = new MInvoice (order, order.getC_DocTypeTarget().getC_DocTypeInvoice_ID(), p_DateInvoiced);
+							invoice = new MInvoice (order, MDocType.get(order.getC_DocTypeTarget_ID()).getC_DocTypeInvoice_ID(), p_DateInvoiced);
 							invoice.setDateAcct(p_DateAcct);
 							invoice.setDocumentNo(null);
 							invoice.setTotalLines(Env.ZERO);
