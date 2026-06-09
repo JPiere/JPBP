@@ -17,6 +17,7 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.util.ArrayList;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MLocator;
@@ -113,7 +114,7 @@ public class DefaultContractProcessCreateDerivativeInOutIndirectly extends Abstr
 			inout.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 			inout.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
 			inout.setDocumentNo(""); //Reset Document No
-			inout.setC_DocType_ID(order.getC_DocTypeTarget().getC_DocTypeShipment_ID());
+			inout.setC_DocType_ID(MDocType.get(order.getC_DocTypeTarget_ID()).getC_DocTypeShipment_ID());
 			inout.setMovementDate(getDateAcct());
 			inout.setDateAcct(getDateAcct());
 			if(order.isSOTrx())
