@@ -30,6 +30,8 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAttributeSet;
 import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MCost;
+import org.compiere.model.MCostElement;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInventoryLine;
 import org.compiere.model.MLocator;
@@ -513,7 +515,7 @@ public class JPiereImportInventory extends SvrProcess implements ImportProcess
 				if (!DocumentEngine.processIt(costingDoc, DocAction.ACTION_Complete)) 
 				{
 					StringBuilder msg = new StringBuilder();
-					I_C_DocType docType = costingDoc.getC_DocType();
+					I_C_DocType docType = MDocType.get(costingDoc.getC_DocType_ID());
 					msg.append(Msg.getMsg(getCtx(), "ProcessFailed")).append(": ");
 					if (Env.isBaseLanguage(getCtx(), I_C_DocType.Table_Name))
 						msg.append(docType.getName());
@@ -591,7 +593,7 @@ public class JPiereImportInventory extends SvrProcess implements ImportProcess
 		if (costingDoc == null) {
 			costingDoc = new MInventory(getCtx(), 0, get_TrxName());
 			costingDoc.setC_DocType_ID(p_C_DocType_ID);
-			costingDoc.setCostingMethod(cost.getM_CostElement().getCostingMethod());
+			costingDoc.setCostingMethod(MCostElement.get(cost.getM_CostElement_ID()).getCostingMethod());
 			costingDoc.setAD_Org_ID(imp.getAD_Org_ID());
 			costingDoc.setDocAction(DocAction.ACTION_Complete);
 			costingDoc.saveEx();
