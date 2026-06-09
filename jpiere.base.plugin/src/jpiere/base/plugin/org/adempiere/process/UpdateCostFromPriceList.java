@@ -139,11 +139,11 @@ public class UpdateCostFromPriceList extends SvrProcess {
 	{
 		if(m_InvValProfile.getM_Product_Category_ID() != 0)
 		{
-			if(m_ProductPrice.getM_Product().getM_Product_Category_ID() != m_InvValProfile.getM_Product_Category_ID())
+			if(MProduct.get(m_ProductPrice.getM_Product_ID()).getM_Product_Category_ID() != m_InvValProfile.getM_Product_Category_ID())
 				return ;
 		}
 
-		MProductCategoryAcct m_ProductCategoryAcct = MProductCategoryAcct.get(getCtx(), m_ProductPrice.getM_Product().getM_Product_Category_ID(), C_AcctSchema_ID, get_TrxName());
+		MProductCategoryAcct m_ProductCategoryAcct = MProductCategoryAcct.get(getCtx(), MProduct.get(m_ProductPrice.getM_Product_ID()).getM_Product_Category_ID(), C_AcctSchema_ID, get_TrxName());
 		if(m_ProductCategoryAcct == null)
 		{
 			return ;
