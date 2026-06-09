@@ -17,6 +17,7 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.util.ArrayList;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
@@ -111,8 +112,8 @@ public class DefaultContractProcessCreateDerivativeInvoiceIndirectly extends Abs
 			invoice.setAD_Org_ID(m_ContractContent.getAD_Org_ID());
 			invoice.setAD_OrgTrx_ID(m_ContractContent.getAD_OrgTrx_ID());
 			invoice.setDocumentNo(""); //Reset Document No
-			invoice.setC_DocType_ID(order.getC_DocTypeTarget().getC_DocTypeInvoice_ID());
-			invoice.setC_DocTypeTarget_ID(order.getC_DocTypeTarget().getC_DocTypeInvoice_ID());
+			invoice.setC_DocType_ID(MDocType.get(order.getC_DocTypeTarget_ID()).getC_DocTypeInvoice_ID());
+			invoice.setC_DocTypeTarget_ID(MDocType.get(order.getC_DocTypeTarget_ID()).getC_DocTypeInvoice_ID());
 			invoice.setDateInvoiced(getDateDoc());
 			invoice.setDateAcct(getDateAcct());
 
