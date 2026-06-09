@@ -20,6 +20,7 @@ import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
@@ -109,7 +110,7 @@ public class CreateEstimationFromInOut extends SvrProcess {
 		{
 			MEstimationLine estLine = new MEstimationLine(estimation);
 			PO.copyValues(inoutLines[i], estLine);
-			I_C_OrderLine ol = inoutLines[i].getC_OrderLine();
+			I_C_OrderLine ol = new MOrderLine(getCtx(), inoutLines[i].getC_OrderLine_ID(), get_TrxName());
 			estLine.setAD_Org_ID(ol.getAD_Org_ID());
 			estLine.setM_Warehouse_ID(ol.getM_Warehouse_ID());
 			estLine.setQtyEntered(inoutLines[i].getQtyEntered());
