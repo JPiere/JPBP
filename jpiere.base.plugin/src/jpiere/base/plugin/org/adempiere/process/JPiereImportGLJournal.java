@@ -27,6 +27,7 @@ import org.adempiere.model.ImportValidator;
 import org.adempiere.process.ImportProcess;
 import org.adempiere.util.IProcessUI;
 import org.compiere.model.MAccount;
+import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCalendar;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MJournal;
@@ -2401,7 +2402,7 @@ public class JPiereImportGLJournal extends SvrProcess  implements ImportProcess
 		if(impJournal.getCurrencyRate().compareTo(Env.ZERO) == 0)
 		{
 			BigDecimal currencyRate = Env.ZERO;
-			if(journal.getC_AcctSchema().getC_Currency_ID() == journalLine.getC_Currency_ID())
+			if(MAcctSchema.get(journal.getC_AcctSchema_ID()).getC_Currency_ID() == journalLine.getC_Currency_ID())
 			{
 				currencyRate = Env.ONE;
 
