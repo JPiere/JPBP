@@ -31,6 +31,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWFProcess;
 
 /**
  * JPIERE-7 Update user of WF Activity in a bulk process
@@ -183,7 +184,8 @@ public class WFActivityUserBulkUpdate extends SvrProcess
 				continue;
 			}
 
-			String msg =Msg.getElement(getCtx(), "AD_WF_Process_ID")+" "+Msg.getElement(getCtx(), "TextMsg")+" => "+ activities[i].getAD_WF_Process().getTextMsg();
+            MWFProcess m_WFProcess = new MWFProcess(getCtx(),activities[i].getAD_WF_Process_ID(), get_TrxName());
+			String msg = Msg.getElement(getCtx(), "AD_WF_Process_ID")+" "+Msg.getElement(getCtx(), "TextMsg")+" => "+ m_WFProcess.getTextMsg();
 			addBufferLog(0, null, null, msg, I_AD_WF_Activity.Table_ID, activities[i].get_ID());
 
 			if (processMonitor != null)
