@@ -26,6 +26,7 @@ import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MColumn;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPaymentTerm;
+import org.compiere.model.MProcess;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfo;
@@ -117,7 +118,7 @@ public class DefaultCreateBill implements I_CreateBill{
 		}
 		
 		MColumn m_Column_BillDocAction = MColumn.get(ctx, MBill.Table_Name, MBill.COLUMNNAME_DocAction);
-		p_Bill_WorkFlow_ID = m_Column_BillDocAction.getAD_Process().getAD_Workflow_ID();
+		p_Bill_WorkFlow_ID = MProcess.get(m_Column_BillDocAction.getAD_Process_ID()).getAD_Workflow_ID();
 		
 		if(isCalledInfoWindow)
 		{
