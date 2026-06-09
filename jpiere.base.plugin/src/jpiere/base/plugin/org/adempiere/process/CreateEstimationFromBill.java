@@ -16,9 +16,12 @@ package jpiere.base.plugin.org.adempiere.process;
 import java.util.logging.Level;
 
 import org.compiere.model.MBPartner;
+import org.compiere.model.MInOut;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MPriceList;
 import org.compiere.model.PO;
 import org.compiere.model.X_C_Order;
@@ -220,7 +223,8 @@ public class CreateEstimationFromBill extends SvrProcess {
 
 				if(iLine.getC_OrderLine_ID() > 0)
 				{
-					estLine.setDatePromised(iLine.getC_OrderLine().getDatePromised());
+					MOrderLine oLine = new MOrderLine(getCtx(), iLine.getC_OrderLine_ID(), get_TrxName());
+					estLine.setDatePromised(oLine.getDatePromised());
 					estLine.setLink_OrderLine_ID(iLine.getC_OrderLine_ID());
 				}else{
 					estLine.setDatePromised(estimation.getDatePromised());
@@ -228,9 +232,11 @@ public class CreateEstimationFromBill extends SvrProcess {
 
 				if(iLine.getM_InOutLine_ID() > 0)
 				{
-					estLine.setDateDelivered(iLine.getM_InOutLine().getM_InOut().getMovementDate());
-					String inOutDocInfo = Msg.getElement(getCtx(), "M_InOut_ID", true)+" : " + iLine.getM_InOutLine().getM_InOut().getDocumentNo()
-							+ " - "+Msg.getElement(getCtx(), "Line") + " : " + iLine.getM_InOutLine().getLine();
+					MInOutLine ioLine = new MInOutLine(getCtx(), iLine.getM_InOutLine_ID(), get_TrxName());
+					MInOut m_InOut = ioLine.getParent();
+					estLine.setDateDelivered(m_InOut.getMovementDate());
+					String inOutDocInfo = Msg.getElement(getCtx(), "M_InOut_ID", true)+" : " + m_InOut.getDocumentNo()
+							+ " - "+Msg.getElement(getCtx(), "Line") + " : " + ioLine.getLine();
 					if(Util.isEmpty(estLine.getDescription()))
 						estLine.setDescription(inOutDocInfo);
 					else
