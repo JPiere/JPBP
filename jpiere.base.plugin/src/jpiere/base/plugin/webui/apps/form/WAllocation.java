@@ -71,7 +71,6 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Listhead;
 import org.zkoss.zul.Listheader;
@@ -404,9 +403,9 @@ public class WAllocation extends Allocation
 		row = rows.newRow();
 		if (maxWidth(SMALL_WIDTH-1))
 		{
-			Hbox box = new Hbox();
+			Hlayout box = new Hlayout();
 			box.setWidth("100%");
-			box.setPack("end");
+			box.setStyle("justify-content:flex-end");
 			box.appendChild(differenceLabel.rightAlign());
 			box.appendChild(allocCurrencyLabel.rightAlign());
 			row.appendCellChild(box);
@@ -436,17 +435,17 @@ public class WAllocation extends Allocation
 		if (maxWidth(SMALL_WIDTH-1))
 		{
 			row = rows.newRow();
-			Hbox box = new Hbox();
+			Hlayout box = new Hlayout();
 			box.setWidth("100%");
-			box.setPack("end");
+			box.setStyle("justify-content:flex-end");
 			box.appendChild(allocateButton);
 			box.appendChild(refreshButton);
 			row.appendCellChild(box, 2);
 		}
 		else
 		{
-			Hbox box = new Hbox();
-			box.setPack("end");
+			Hlayout box = new Hlayout();
+			box.setStyle("justify-content:flex-end");
 			box.appendChild(allocateButton);
 			box.appendChild(refreshButton);
 			ZKUpdateUtil.setHflex(box, "1");
