@@ -54,7 +54,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
-import org.zkoss.zul.Hbox;
+import org.zkoss.zul.Hlayout;
 
 /**
  * JPIERE-0091
@@ -239,7 +239,7 @@ public class JPiereCreateFromStatementUI extends JPiereCreateFromStatement imple
 		row.appendChild(tenderTypeField.getComponent());
 
 		row.appendChild(amtFromLabel.rightAlign());
-		Hbox hbox = new Hbox();
+		Hlayout hbox = new Hlayout();
 		hbox.appendChild(amtFromField.getComponent());
 		hbox.appendChild(amtToLabel.rightAlign());
 		hbox.appendChild(amtToField.getComponent());
@@ -250,7 +250,7 @@ public class JPiereCreateFromStatementUI extends JPiereCreateFromStatement imple
 		row.appendChild(bPartnerLookup.getComponent());
 		row.appendChild(dateFromLabel.rightAlign());
 
-		hbox = new Hbox();
+		hbox = new Hlayout();
 		hbox.appendChild(dateFromField.getComponent());
 		hbox.appendChild(dateToLabel.rightAlign());
 		hbox.appendChild(dateToField.getComponent());
