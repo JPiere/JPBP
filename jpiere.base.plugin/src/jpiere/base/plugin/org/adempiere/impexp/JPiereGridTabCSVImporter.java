@@ -55,6 +55,7 @@ import org.compiere.model.MProcess;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRefList;
 import org.compiere.model.MRefTable;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
@@ -914,7 +915,7 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		
 		List<GridField> lsField = new ArrayList<GridField>();		
 		if (tableName.equals(MTable.getTableName(Env.getCtx(), MLocation.Table_ID))){
-			GridWindowVO gWindowVO = Env.getMWindowVO(0,121,0); 
+			GridWindowVO gWindowVO = Env.getMWindowVO(0, MSysConfig.getIntValue("JPIERE_LOCATION_WINDOW_ID", 1000041, Env.getAD_Client_ID(Env.getCtx())) ,0); //JPIERE-0083 Location window of JPiere
 			GridWindow m_mWindow = new GridWindow (gWindowVO);
 			GridTab m_mTab = m_mWindow.getTab(0);
 			m_mWindow.initTab(0);
