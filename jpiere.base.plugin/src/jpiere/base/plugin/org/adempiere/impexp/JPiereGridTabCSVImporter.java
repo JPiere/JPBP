@@ -88,6 +88,7 @@ import org.supercsv.prefs.CsvPreference;
  * 
  * JPIERE-0462 - CSV Import file loader - format of Date
  * JPIERE-0468 - Import Value of List by Translation Name
+ * JPIERE-0656 - Control of Location Special process
  *
  * @author Carlos Ruiz
  * @author Juan David Arboleda 
@@ -449,7 +450,8 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 					throwAdempiereException(Msg.getMsg(Env.getCtx(),"NoChildTab",new Object[] {childTableName}));
 
 				String columnName = detailName;
-				if (columnName.contains(MTable.getTableName(Env.getCtx(), MLocation.Table_ID)) && locationFields==null){
+				if (columnName.contains(MTable.getTableName(Env.getCtx(), MLocation.Table_ID)) && locationFields==null
+						&& MSysConfig.getBooleanValue("JP_IMPORT_LOCATION_SPECIAL_COLUMN", false, Env.getAD_Client_ID(Env.getCtx())) ){//JPIERE-0656
 					locationFields = getSpecialMColumn(header,MTable.getTableName(Env.getCtx(), MLocation.Table_ID),idx);
 					for(GridField sField:locationFields){
 						readProcArray.add(getProccesorFromColumn(sField)); 
@@ -980,7 +982,8 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			String columnName = header.get(i);	
 			Object value = tmpRow.get(i); 	
 			//Validate Address
-			if (!"C_Location".equals(gridTab.getTableName()))
+			if (!"C_Location".equals(gridTab.getTableName()) 
+					&& MSysConfig.getBooleanValue("JP_IMPORT_LOCATION_SPECIAL_COLUMN", false, Env.getAD_Client_ID(Env.getCtx())) )//JPIERE-0656
 			{
 				//Validate Address
 				if(header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)) && !isAddressValidated){
@@ -1195,7 +1198,8 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 			    logMsg = gridTab.setValue(field,setValue);
 			    if(logMsg!=null && logMsg.equals(""))
 			    	logMsg= null;
-			}else if(!"C_Location".equals(gridTab.getTableName()) && header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID))){
+			}else if(!"C_Location".equals(gridTab.getTableName()) && header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID))
+					&& MSysConfig.getBooleanValue("JP_IMPORT_LOCATION_SPECIAL_COLUMN", false, Env.getAD_Client_ID(Env.getCtx())) ) {//JPIERE-0656)
 		    
 				if(address == null){
 				    if(isInsertMode()){
@@ -1540,7 +1544,14 @@ public class JPiereGridTabCSVImporter implements IGridTabImporter
 		//Process columnKeys + Foreign to add restrictions.
 		for (int i = startindx ; i < endindx + 1 ; i++){					  
 		    boolean isKeyColumn = header.get(i).indexOf("/") > 0 && ( header.get(i).endsWith("K") || header.get(i).endsWith("KT"));	
-		    if(isKeyColumn && ("C_Location".equals(gridTab.getTableName()) || !header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID)))){  
+		    if(isKeyColumn //JPIERE-0656  
+		    		&& ( 
+		    			 (("C_Location".equals(gridTab.getTableName()) || !header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID))) 
+		    				&& MSysConfig.getBooleanValue("JP_IMPORT_LOCATION_SPECIAL_COLUMN", false, Env.getAD_Client_ID(Env.getCtx())))
+		    				|| 
+		    			 (!MSysConfig.getBooleanValue("JP_IMPORT_LOCATION_SPECIAL_COLUMN", false, Env.getAD_Client_ID(Env.getCtx()))) 
+		    			) 
+		    	) { //JPIERE-0656  
 			   boolean isForeing = header.get(i).indexOf("[") > 0 && header.get(i).indexOf("]")>0;
 			   boolean isDetail  = header.get(i).indexOf(">") > 0;
 			   columnwithKey = getColumnName(isKeyColumn,isForeing,isDetail,header.get(i));
