@@ -1,0 +1,565 @@
+/******************************************************************************
+ * Product: JPiere                                                            *
+ * Copyright (C) Hideaki Hagiwara (h.hagiwara@oss-erp.co.jp)                  *
+ *                                                                            *
+ * This program is free software, you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY.                          *
+ * See the GNU General Public License for more details.                       *
+ *                                                                            *
+ * JPiere is maintained by OSS ERP Solutions Co., Ltd.                        *
+ * (http://www.oss-erp.co.jp)                                                 *
+ *****************************************************************************/
+package jpiere.base.plugin.org.adempiere.process;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.logging.Level;
+
+import org.adempiere.model.ImportValidator;
+import org.adempiere.process.ImportProcess;
+import org.adempiere.util.IProcessUI;
+import org.compiere.model.ModelValidationEngine;
+import org.compiere.process.ProcessInfoParameter;
+import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
+
+import jpiere.base.plugin.org.adempiere.model.MPhysicalWarehouse;
+import jpiere.base.plugin.org.adempiere.model.X_I_PhysicalWarehouseJP;
+import jpiere.base.plugin.util.JPiereLocationUtil;
+
+/**
+ * 	JPIERE-0657:Import Physical Warehouse
+ *
+ *  @author Hideaki Hagiwara
+ *
+ */
+public class JPiereImportPhysicalWarehouse extends SvrProcess  implements ImportProcess
+{
+	/**	Client to be imported to		*/
+	private int				m_AD_Client_ID = 0;
+
+	private boolean p_deleteOldImported = false;
+
+	/**	Only validate, don't import		*/
+	private boolean			p_IsValidateOnly = false;
+
+	private IProcessUI processMonitor = null;
+
+	/**
+	 *  Prepare - e.g., get Parameters.
+	 */
+	protected void prepare()
+	{
+		ProcessInfoParameter[] para = getParameter();
+		for (int i = 0; i < para.length; i++)
+		{
+			String name = para[i].getParameterName();
+			if (name.equals("DeleteOldImported"))
+				p_deleteOldImported = "Y".equals(para[i].getParameter());
+			else if (name.equals("IsValidateOnly"))
+				p_IsValidateOnly = para[i].getParameterAsBoolean();
+			else
+				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+		}
+
+		m_AD_Client_ID = getProcessInfo().getAD_Client_ID();
+
+	}	//	prepare
+
+	/**
+	 * 	Process
+	 *	@return info
+	 *	@throws Exception
+	 */
+	protected String doIt() throws Exception
+	{
+		processMonitor = Env.getProcessUI(getCtx());
+
+		StringBuilder sql = null;
+		int no = 0;
+		String clientCheck = getWhereClause();
+
+
+		//Delete Old Imported data
+		if (p_deleteOldImported)
+		{
+			sql = new StringBuilder ("DELETE FROM I_PhysicalWarehouseJP ")
+				  .append("WHERE I_IsImported='Y'").append (clientCheck);
+			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
+		}
+
+		//Reset Message
+		sql = new StringBuilder ("UPDATE I_PhysicalWarehouseJP ")
+				.append("SET I_ErrorMsg='' ")
+				.append(" WHERE I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(String.valueOf(no));
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_BEFORE_VALIDATE);
+
+		//Reverse Lookup Surrogate Key
+		reverseLookupJP_PhysicalWarehouse_ID();
+		reverseLookupAD_Org_ID();
+		reverseLookupC_Location_ID();
+		reverseLookupLocationAD_Org_ID();
+
+		ModelValidationEngine.get().fireImportValidate(this, null, null, ImportValidator.TIMING_AFTER_VALIDATE);
+
+		commitEx();
+		if (p_IsValidateOnly)
+		{
+			return "Validated";
+		}
+
+		//
+		sql = new StringBuilder ("SELECT * FROM I_PhysicalWarehouseJP WHERE I_IsImported='N'")
+					.append(clientCheck).append(" ORDER BY Value ");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		int recordsNum = 0;
+		int successNewNum = 0;
+		int successUpdateNum = 0;
+		int failureNewNum = 0;
+		int failureUpdateNum = 0;
+		String records = Msg.getMsg(getCtx(), "JP_NumberOfRecords");
+		String success = Msg.getMsg(getCtx(), "JP_Success");
+		String failure = Msg.getMsg(getCtx(), "JP_Failure");
+		String newRecord = Msg.getMsg(getCtx(), "New");
+		String updateRecord = Msg.getMsg(getCtx(), "Update");
+
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+			rs = pstmt.executeQuery();
+			String preValue = "";
+			MPhysicalWarehouse warehouse = null;
+
+			while (rs.next())
+			{
+				X_I_PhysicalWarehouseJP imp = new X_I_PhysicalWarehouseJP (getCtx (), rs, get_TrxName());
+
+				boolean isNew = true;
+				if(imp.getJP_PhysicalWarehouse_ID()!=0){
+					isNew =false;
+					warehouse = new MPhysicalWarehouse(getCtx (), imp.getJP_PhysicalWarehouse_ID(), get_TrxName());
+				}else{
+
+					if(preValue.equals(imp.getValue()))
+					{
+						isNew = false;
+
+					}else {
+
+						preValue = imp.getValue();
+
+					}
+				}
+
+				if(isNew)//Create
+				{
+					warehouse = new MPhysicalWarehouse(getCtx (), 0, get_TrxName());
+					if(createNewWarehouse(imp, warehouse))
+						successNewNum++;
+					else
+						failureNewNum++;
+
+				}else{//Update
+
+
+					if(updateWarehouse(imp, warehouse))
+						successUpdateNum++;
+					else
+						failureUpdateNum++;
+				}
+
+				commitEx();
+
+				recordsNum++;
+				if (processMonitor != null)
+				{
+					processMonitor.statusUpdate(
+						newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+						+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) "
+						);
+				}
+
+			}//while (rs.next())
+
+		}catch (Exception e){
+			log.log(Level.SEVERE, sql.toString(), e);
+			throw e;
+		}finally{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		return records + recordsNum + " = "	+
+		newRecord + "( "+  success + " : " + successNewNum + "  /  " +  failure + " : " + failureNewNum + " ) + "
+		+ updateRecord + " ( "+  success + " : " + successUpdateNum + "  /  " +  failure + " : " + failureUpdateNum+ " ) ";
+
+	}	//	doIt
+
+	@Override
+	public String getImportTableName() {
+		return X_I_PhysicalWarehouseJP.Table_Name;
+	}
+
+
+	@Override
+	public String getWhereClause() {
+		StringBuilder msgreturn = new StringBuilder(" AND AD_Client_ID=").append(m_AD_Client_ID);
+		return msgreturn.toString();
+	}
+
+	/**
+	 * Reverese Look up  M_Warehouse_ID From Value
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupJP_PhysicalWarehouse_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_PhysicalWarehouse_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverese Look up  M_Warehouse_ID From Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_PhysicalWarehouse_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "Value") ;
+		sql = new StringBuilder ("UPDATE I_PhysicalWarehouseJP i ")
+				.append("SET JP_PhysicalWarehouse_ID=(SELECT JP_PhysicalWarehouse_ID FROM JP_PhysicalWarehouse p")
+				.append(" WHERE i.Value=p.Value AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.JP_PhysicalWarehouse_ID IS NULL AND i.Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+	}
+
+	/**
+	 * Reverse Look up Organization From JP_Org_Value
+	 *
+	 **/
+	private void reverseLookupAD_Org_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverese Look up AD_Org ID From JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Org_Value") ;
+		sql = new StringBuilder ("UPDATE I_PhysicalWarehouseJP i ")
+				.append("SET AD_Org_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append(" WHERE i.JP_Org_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) AND p.IsSummary='N' ) ")
+				.append(" WHERE i.JP_Org_Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_Org_Value
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value");
+		sql = new StringBuilder ("UPDATE I_PhysicalWarehouseJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE AD_Org_ID = 0 AND JP_Org_Value IS NOT NULL AND JP_Org_Value <> '0' ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_Org_ID
+
+
+	/**
+	 * Reverse Loog up C_Location_ID From JP_Location_Label
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupC_Location_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+
+		//Reverse Loog up C_Location_ID From JP_Location_Label
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "C_Location_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_Location_Label") ;
+		sql = new StringBuilder ("UPDATE I_PhysicalWarehouseJP i ")
+				.append("SET C_Location_ID=(SELECT C_Location_ID FROM C_Location p")
+				.append(" WHERE i.JP_Location_Label= p.JP_Location_Label AND p.AD_Client_ID=i.AD_Client_ID) ")
+				.append(" WHERE i.C_Location_ID IS NULL AND JP_Location_Label IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+	}
+
+	/**
+	 * Reverese Look up AD_Org ID From JP_LocationOrg_Value
+	 *
+	 * @throws Exception
+	 */
+	private void reverseLookupLocationAD_Org_ID() throws Exception
+	{
+		StringBuilder sql = new StringBuilder();
+		String msg = new String();
+		int no = 0;
+
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "JP_LocationOrg_Value");
+		if (processMonitor != null)	processMonitor.statusUpdate(msg);
+
+		//Reverese Look up AD_Org ID From JP_LocationOrg_Value
+		msg = Msg.getMsg(getCtx(), "Matching") + " : " + Msg.getElement(getCtx(), "AD_Org_ID")
+		+ " - " + Msg.getMsg(getCtx(), "MatchFrom") + " : " + Msg.getElement(getCtx(), "JP_LocationOrg_Value") ;
+		//Update JP_LocationOrg_ID from JP_LocationOrg_Value
+		sql = new StringBuilder ("UPDATE I_PhysicalWarehouseJP i ")
+				.append("SET JP_LocationOrg_ID=(SELECT AD_Org_ID FROM AD_org p")
+				.append(" WHERE i.JP_LocationOrg_Value=p.Value AND (p.AD_Client_ID=i.AD_Client_ID or p.AD_Client_ID=0) ) ")
+				.append(" WHERE i.JP_LocationOrg_ID IS NULL AND i.JP_LocationOrg_Value IS NOT NULL")
+				.append(" AND i.I_IsImported='N'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + sql );
+		}
+
+		//Invalid JP_LocationOrg_Value
+		msg = Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_LocationOrg_Value");
+		sql = new StringBuilder ("UPDATE I_PhysicalWarehouseJP ")
+			.append("SET I_ErrorMsg='"+ msg + "'")
+			.append(" WHERE JP_LocationOrg_ID = 0 AND JP_LocationOrg_Value IS NOT NULL AND JP_LocationOrg_Value <> '0' ")
+			.append(" AND I_IsImported<>'Y'").append(getWhereClause());
+		try {
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine(msg +"=" + no + ":" + sql);
+		}catch(Exception e) {
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg +" : " + sql );
+		}
+
+		if(no > 0)
+		{
+			commitEx();
+			throw new Exception(Msg.getMsg(getCtx(), "Error") + msg );
+		}
+
+	}//reverseLookupAD_Org_ID
+
+
+	/**
+	 * Create Warehouse
+	 *
+	 * @param impWarehouse
+	 * @param newWarehouse
+	 * @return
+	 */
+	private boolean createNewWarehouse(X_I_PhysicalWarehouseJP impWarehouse, MPhysicalWarehouse newWarehouse)
+	{
+		//Check AD_Org_ID
+		if(impWarehouse.getAD_Org_ID() <= 0)
+		{
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Invalid")+Msg.getElement(getCtx(), "JP_Org_Value"));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Check Mandatory - Value
+		if(Util.isEmpty(impWarehouse.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		//Check Mandatory - Name
+		if(Util.isEmpty(impWarehouse.getName()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Name")};
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, newWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		newWarehouse.setAD_Org_ID(impWarehouse.getAD_Org_ID());
+		newWarehouse.setValue(impWarehouse.getValue());
+		newWarehouse.setName(impWarehouse.getName());
+		if(!Util.isEmpty(impWarehouse.getDescription()))
+			newWarehouse.setDescription(impWarehouse.getDescription());
+
+		//Location
+		if(impWarehouse.getC_Location_ID() > 0)
+		{
+			newWarehouse.setC_Location_ID(impWarehouse.getC_Location_ID());
+
+		}else {
+			int C_Location_ID = JPiereLocationUtil.searchLocationByLabel(getCtx(), impWarehouse.getJP_Location_Label(), get_TrxName());
+			if(C_Location_ID > 0)
+			{
+				;//Nothing to do;
+			}else {
+				C_Location_ID = JPiereLocationUtil.createLocation(
+						getCtx()
+						,impWarehouse.getJP_LocationOrg_ID()
+						,impWarehouse.getJP_Location_Label()
+						,impWarehouse.getComments()
+						,impWarehouse.getCountryCode()
+						,impWarehouse.getPostal()
+						,impWarehouse.getPostal_Add()
+						,impWarehouse.getJP_Region_Name()
+						,impWarehouse.getRegionName()
+						,impWarehouse.getJP_City_Name()
+						,impWarehouse.getCity()
+						,impWarehouse.getAddress1()
+						,impWarehouse.getAddress2()
+						,impWarehouse.getAddress3()
+						,impWarehouse.getAddress4()
+						,impWarehouse.getAddress5()
+						,get_TrxName() );
+			}
+			newWarehouse.setC_Location_ID(C_Location_ID);
+			impWarehouse.setC_Location_ID(C_Location_ID);
+		}
+
+		newWarehouse.setIsActive(impWarehouse.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, newWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			newWarehouse.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveIgnored") + Msg.getElement(getCtx(), "M_Warehouse_ID") +" : " + e.toString());
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		impWarehouse.setJP_PhysicalWarehouse_ID(newWarehouse.getJP_PhysicalWarehouse_ID());
+
+		if(Util.isEmpty(impWarehouse.getI_ErrorMsg()))
+		{
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord"));
+		}else {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "NewRecord")+ " / " +impWarehouse.getI_ErrorMsg());
+		}
+
+		impWarehouse.setI_IsImported(true);
+		impWarehouse.setProcessed(true);
+		impWarehouse.saveEx(get_TrxName());
+		return true;
+	}
+
+	/**
+	 * Update Warehouse
+	 *
+	 * @param impWarehouse
+	 * @param updateWarehouse
+	 * @return
+	 */
+	private boolean updateWarehouse(X_I_PhysicalWarehouseJP impWarehouse, MPhysicalWarehouse updateWarehouse)
+	{
+		//Check Mandatory - Value
+		if(Util.isEmpty(impWarehouse.getValue()))
+		{
+			Object[] objs = new Object[]{Msg.getElement(Env.getCtx(), "Value")};
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(Env.getCtx(),"JP_Mandatory",objs));
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, updateWarehouse, ImportValidator.TIMING_BEFORE_IMPORT);
+
+		if(!Util.isEmpty(impWarehouse.getName()))
+			updateWarehouse.setName(impWarehouse.getName());
+		if(!Util.isEmpty(impWarehouse.getDescription()))
+			updateWarehouse.setDescription(impWarehouse.getDescription());
+
+		//Location
+		if(impWarehouse.getC_Location_ID() > 0)
+		{
+			updateWarehouse.setC_Location_ID(impWarehouse.getC_Location_ID());
+		}else {
+			;//Nothing to do;
+		}
+
+		updateWarehouse.setIsActive(impWarehouse.isI_IsActiveJP());
+
+		ModelValidationEngine.get().fireImportValidate(this, impWarehouse, updateWarehouse, ImportValidator.TIMING_AFTER_IMPORT);
+
+		try {
+			updateWarehouse.saveEx(get_TrxName());
+		}catch (Exception e) {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(),"SaveError") + Msg.getElement(getCtx(), "M_Warehouse_ID")+" :  " + e.toString());
+			impWarehouse.setI_IsImported(false);
+			impWarehouse.setProcessed(false);
+			impWarehouse.saveEx(get_TrxName());
+			return false;
+		}
+
+
+		if(Util.isEmpty(impWarehouse.getI_ErrorMsg()))
+		{
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update"));
+		}else {
+			impWarehouse.setI_ErrorMsg(Msg.getMsg(getCtx(), "Update")+ " / " +impWarehouse.getI_ErrorMsg());
+		}
+
+		impWarehouse.setI_IsImported(true);
+		impWarehouse.setProcessed(true);
+		impWarehouse.saveEx(get_TrxName());
+		return true;
+	}
+
+}	//	Import Physical Warehouse
