@@ -49,7 +49,7 @@ public class JPiereImportCity extends SvrProcess
 			String name = para[i].getParameterName();
 			if (name.equals("DeleteOldImported"))
 				p_deleteOldImported = "Y".equals(para[i].getParameter());
-			if (name.equals("IsMatchNameJP"))
+			else if (name.equals("IsMatchNameJP"))
 				isMatchNameJP = "Y".equals(para[i].getParameter());
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
@@ -65,7 +65,7 @@ public class JPiereImportCity extends SvrProcess
 	{
 		StringBuilder sql = null;
 		int no = 0;
-		StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID=").append(getAD_Client_ID());
+		StringBuilder clientCheck = new StringBuilder(" AND AD_Client_ID = ").append(getAD_Client_ID()).append("::numeric");
 
 
 		//Delete Old Imported data
@@ -136,14 +136,14 @@ public class JPiereImportCity extends SvrProcess
 			sql = new StringBuilder ("UPDATE I_CityJP ")
 			.append("SET C_City_ID = (SELECT C_City_ID FROM C_City")
 			.append(" WHERE C_City.C_Country_ID = I_CityJP.C_Country_ID AND C_City.C_Region_ID = I_CityJP.C_Region_ID  ")
-			.append(" AND C_City.Name = I_CityJP.Name) ")
+			.append(" AND C_City.Name = I_CityJP.Name ORDER BY C_City_ID LIMIT 1 ) ")
 			.append(" WHERE I_IsImported<>'Y'").append(clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 		}else{
 			sql = new StringBuilder ("UPDATE I_CityJP ")
 			.append("SET C_City_ID = (SELECT C_City_ID FROM C_City")
 			.append(" WHERE C_City.C_Country_ID = I_CityJP.C_Country_ID AND C_City.C_Region_ID = I_CityJP.C_Region_ID  ")
-			.append(" AND C_City.AreaCode = I_CityJP.AreaCode) ")
+			.append(" AND C_City.AreaCode = I_CityJP.AreaCode ORDER BY C_City_ID LIMIT 1 ) ")
 			.append(" WHERE I_IsImported<>'Y'").append(clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 		}
@@ -158,12 +158,12 @@ public class JPiereImportCity extends SvrProcess
 			//UPdate時に同じ名称のCityが複数あった場合は一番小さいエリアコードが設定される仕様
 			sql = new StringBuilder("SELECT * FROM C_City WHERE C_Country_ID = " + C_Country_ID)
 								.append(clientCheck)
-								.append("ORDER BY C_Region_ID,Name,AreaCode ");
+								.append(" ORDER BY C_Region_ID,Name,AreaCode ");
 		}else{
 			//UPdate時に同じアリアコードのCityが複数あった場合はが一番小さい名称が設定される仕様
 			sql = new StringBuilder("SELECT * FROM C_City WHERE C_Country_ID = " + C_Country_ID)
 								.append(clientCheck)
-								.append("ORDER BY C_Region_ID,AreaCode,Name ");
+								.append(" ORDER BY C_Region_ID,AreaCode,Name ");
 		}
 
 
