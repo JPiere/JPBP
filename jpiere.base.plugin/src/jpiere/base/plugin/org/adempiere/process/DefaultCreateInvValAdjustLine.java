@@ -58,7 +58,7 @@ public class DefaultCreateInvValAdjustLine extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InvValAdjustLine ")
+		StringBuilder sqlDelete = new StringBuilder ("DELETE FROM JP_InvValAdjustLine ")
 											.append(" WHERE JP_InvValAdjust_ID=").append(m_InvValAdjust.getJP_InvValAdjust_ID());
 		DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
 

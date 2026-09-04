@@ -126,7 +126,7 @@ public class UpdateInventoryValuationPriceList extends SvrProcess {
 				version.setM_DiscountSchema_ID(ivp.getM_DiscountSchema_ID());
 				version.saveEx(get_TrxName());
 
-				StringBuilder sqlDelete = new StringBuilder ("DELETE M_ProductPrice ")
+				StringBuilder sqlDelete = new StringBuilder ("DELETE FROM M_ProductPrice ")
 				.append(" WHERE M_PriceList_Version_ID=").append(version.getM_PriceList_Version_ID())
 				.append(" AND AD_Client_ID=").append(p_AD_Client_ID);
 				DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
@@ -169,7 +169,7 @@ public class UpdateInventoryValuationPriceList extends SvrProcess {
 					version.setM_DiscountSchema_ID(ivp.getM_DiscountSchema_ID());
 					version.saveEx(get_TrxName());
 
-					StringBuilder sqlDelete = new StringBuilder ("DELETE M_ProductPrice ")
+					StringBuilder sqlDelete = new StringBuilder ("DELETE FROM M_ProductPrice ")
 					.append(" WHERE M_PriceList_Version_ID=").append(version.getM_PriceList_Version_ID())
 					.append(" AND AD_Client_ID=").append(p_AD_Client_ID);
 					DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());

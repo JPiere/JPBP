@@ -57,7 +57,7 @@ public class CallInvValCalLineClass extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception
 	{
-		StringBuilder sqlDelete = new StringBuilder ("DELETE JP_InvValCalLine ")
+		StringBuilder sqlDelete = new StringBuilder ("DELETE FROM JP_InvValCalLine ")
 										.append(" WHERE JP_InvValCal_ID=").append(m_InvValCal.getJP_InvValCal_ID());
 		DB.executeUpdateEx(sqlDelete.toString(), get_TrxName());
 
