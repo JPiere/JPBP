@@ -12,6 +12,7 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
+import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 /******************************************************************************
@@ -29,6 +30,7 @@ import org.compiere.model.ModelValidationEngine;
  *****************************************************************************/
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -242,6 +244,36 @@ public class JPiereGLJournalModelValidator implements ModelValidator,FactsValida
 							reverse_glLines[i].saveEx(po.get_TrxName());
 						}
 					}//for
+				}
+			}
+			
+		}else if(timing == ModelValidator.TIMING_BEFORE_VOID) {
+			
+			//Automatically clear tax information when voiding a document.
+			if(po instanceof I_GL_Journal)
+			{
+				MJournal m_GLJournal = (MJournal)po;
+				if (DocAction.STATUS_Drafted.equals(m_GLJournal.getDocStatus()) 
+						|| DocAction.STATUS_Invalid.equals(m_GLJournal.getDocStatus()))
+				{
+					MJournalLine[] lines = m_GLJournal.getLines(false);
+					MJournalLine line = null;
+					for (int i = 0; i < lines.length; i++) 
+					{
+						line = lines[i];
+						if(line.getC_Tax_ID() > 0)
+						{
+							line.setC_Tax_ID(0);
+							line.set_ValueNoCheck("JP_SOPOType",  null);
+							line.set_ValueNoCheck("JP_TaxBaseAmt",  Env.ZERO);
+							line.set_ValueNoCheck("JP_TaxAmt", Env.ZERO);
+							line.saveEx(m_GLJournal.get_TrxName());
+						}
+					}
+				}else {
+					//In MJournal's voidIt() method, any document status other than Drafted or Invalid results in an error. 
+					//However, since the standard error message is not very clear, so I provide a more understandable error message.
+					return Msg.getMsg(m_GLJournal.getCtx(), "JP_CannotVoid") + Msg.getElement(m_GLJournal.getCtx(), MJournal.COLUMNNAME_DocStatus) + " = " + MRefList.getListName(m_GLJournal.getCtx(), 131, m_GLJournal.getDocStatus());
 				}
 			}
 		}
